@@ -10,6 +10,7 @@ Apple Silicon Mac向けに最適化しています。Intel Macでも利用可能
 Windowsやその他プラットフォームは現在未対応です。
 
 ## 使い方
+- [アプリの概要 (外部サイト)](https://tattn.fanbox.cc/posts/3541601)
 - [セットアップ / 初回設定](manual/setup.md)
 - [アバターの読み込み](manual/model.md)
 - [メイン画面の使い方](manual/main.md)
@@ -23,3 +24,5 @@ Windowsやその他プラットフォームは現在未対応です。
 
 ## License
 本リポジトリにあるソースコードはMIT Licenseです。
+
+Twttier: [@vcamapp](https://twitter.com/vcamapp)
