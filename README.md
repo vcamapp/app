@@ -6,6 +6,8 @@ Zoom等のカメラで仮想のアバターを表示できます。カメラを�
 
 [YouTubeでデモ映像を見る](https://www.youtube.com/watch?v=G0wMHRL8dh4&list=PLaR2G7EgeMDXgm84LNC47rS5Isk262JIz)
 
+[for English](https://github.com/vcamapp/app/blob/main/FAQ.md#localization-support)
+
 ## 動作環境
 macOS 11以上 (macOS 12以降推奨)  
 Apple Silicon Mac向けに最適化しています。Intel Macでも利用可能です。  
