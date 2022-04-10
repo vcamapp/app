@@ -1,20 +1,27 @@
 # VCam
+This is an app for macOS that displays an avatar using a virtual camera.
+You can display a virtual avatar on Zoom or Google Meet, or etc. This is useful for reactions in environments where a real camera is unavailable.
+
 仮想カメラを利用してアバターを表示するmacOS向けのアプリです。  
-Zoom等のカメラで仮想のアバターを表示できます。カメラを利用できない環境でリアクションを伝えたい時に便利です。
+Zoom等でカメラとして仮想のアバターを表示できます。カメラを利用できない環境でリアクションを伝えたい時に便利です。
 
 <img width="800px" alt="vcam_demo" src="https://user-images.githubusercontent.com/8188636/156933698-bfc331cc-659f-4f98-84e2-08b164f1400a.png">
 
-[YouTubeでデモ映像を見る](https://www.youtube.com/watch?v=G0wMHRL8dh4&list=PLaR2G7EgeMDXgm84LNC47rS5Isk262JIz)
+[Watch the demo on YouTube / YouTubeでデモ映像を見る](https://www.youtube.com/watch?v=G0wMHRL8dh4&list=PLaR2G7EgeMDXgm84LNC47rS5Isk262JIz)
 
-[for English](https://github.com/vcamapp/app/blob/main/FAQ.md#localization-support)
+[for English](https://www.patreon.com/posts/64958026)
 
 ## 動作環境
+macOS 11 or higher (macOS 12 or higher recommended)  
+Optimized for Apple Silicon Macs; also available for Intel Macs.  
+Windows and other platforms are currently not supported.
+
 macOS 11以上 (macOS 12以降推奨)  
 Apple Silicon Mac向けに最適化しています。Intel Macでも利用可能です。  
 Windowsやその他プラットフォームは現在未対応です。
 
 ## 使い方
-- [アプリの概要 (外部サイト)](https://tattn.fanbox.cc/posts/3541601)
+- [アプリの概要 (日本語)](https://tattn.fanbox.cc/posts/3541601) / [About VCam (en)](https://www.patreon.com/posts/64958026)
 - [セットアップ / 初回設定](manual/setup.md)
 - [アバターの読み込み](manual/model.md)
 - [メイン画面の使い方](manual/main.md)
