@@ -1,14 +1,17 @@
-VCamを応援する
+Support VCam
 ---
 
-VCamの応援ありがとうございます！一つ一つの応援が開発のモチベーションになっています。本当にありがとうございます！
+Thanks for your support of VCam! Each and every support is a motivation for my development. Thank you so much!
 
-ぜひ、SNS等で「#VCam」のハッシュタグをつけて、使っている様子を共有していただけるととても嬉しいです！
+I would be very happy if you could share how you are using VCam on social networking sites, etc. with the hashtag #VCam!
 
-もっと積極的な応援をしてくださる方は、以下からスポンサードが可能です。
+If you would like to give us more active support, you can sponsor this project below.
 
-- [pixivFANBOX](https://tattn.fanbox.cc/plans)
+- [Patreon](https://www.patreon.com/tattn)
 - [GitHub Sponsors](https://github.com/sponsors/tattn)
 - [PayPal](https://www.paypal.com/paypalme/tattn)
-- [amazon.co.jp / Wishlist](https://www.amazon.co.jp/hz/wishlist/ls/3SCV9RDEF2ZWJ)
+
+- for Japanese
+  - [pixivFANBOX](https://tattn.fanbox.cc/plans)
+  - [amazon.co.jp / Wishlist](https://www.amazon.co.jp/hz/wishlist/ls/3SCV9RDEF2ZWJ)
 

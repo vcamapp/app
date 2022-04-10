@@ -1,40 +1,33 @@
+[日本語](README.ja.md)
+
 # VCam
 This is an app for macOS that displays an avatar using a virtual camera.
 You can display a virtual avatar on Zoom or Google Meet, or etc. This is useful for reactions in environments where a real camera is unavailable.
 
-仮想カメラを利用してアバターを表示するmacOS向けのアプリです。  
-Zoom等でカメラとして仮想のアバターを表示できます。カメラを利用できない環境でリアクションを伝えたい時に便利です。
-
 <img width="800px" alt="vcam_demo" src="https://user-images.githubusercontent.com/8188636/156933698-bfc331cc-659f-4f98-84e2-08b164f1400a.png">
 
-[Watch the demo on YouTube / YouTubeでデモ映像を見る](https://www.youtube.com/watch?v=G0wMHRL8dh4&list=PLaR2G7EgeMDXgm84LNC47rS5Isk262JIz)
+[Watch the demo on YouTube](https://www.youtube.com/watch?v=G0wMHRL8dh4&list=PLaR2G7EgeMDXgm84LNC47rS5Isk262JIz)
 
-[for English](https://www.patreon.com/posts/64958026)
-
-## 動作環境
+## Requirements
 macOS 11 or higher (macOS 12 or higher recommended)  
 Optimized for Apple Silicon Macs; also available for Intel Macs.  
 Windows and other platforms are currently not supported.
 
-macOS 11以上 (macOS 12以降推奨)  
-Apple Silicon Mac向けに最適化しています。Intel Macでも利用可能です。  
-Windowsやその他プラットフォームは現在未対応です。
+## Documentations
+- [About VCam](https://www.patreon.com/posts/64958026)
+- [Set up (ja)](manual/ja/setup.md)
+- [Load an avatar (ja)](manual/ja/model.md)
+- [Main display (ja)](manual/ja/main.md)
+- [Settings for Tracking (ja)](manual/ja/tracking.md)
+- [Work with OBS (ja)](manual/ja/OBS.md)
+- [FAQ (ja)](FAQ.md)
+- [Examples of usage (ja)](manual/ja/example.md)
+- [Known issues (ja)](manual/ja/issue.md)
+- [Support VCam](manual/tip.md)
 
-## 使い方
-- [アプリの概要 (日本語)](https://tattn.fanbox.cc/posts/3541601) / [About VCam (en)](https://www.patreon.com/posts/64958026)
-- [セットアップ / 初回設定](manual/setup.md)
-- [アバターの読み込み](manual/model.md)
-- [メイン画面の使い方](manual/main.md)
-- [トラッキングの設定](manual/tracking.md)
-- [OBSと連携する](manual/OBS.md)
-- [よくある質問](FAQ.md)
-- [便利な使い方](manual/example.md)
-- [不具合情報](manual/issue.md)
-- [VCamを応援する](manual/tip.md)
-
-※ドキュメントの更新が追いついていない部分を見つけた方はぜひプルリクエストで修正していただけると嬉しいです。
+*Updates to the document by pull request are welcome!*
 
 ## License
-本リポジトリにあるソースコードはMIT Licenseです。
+The source code in this repository is under the MIT License.
 
 Twttier: [@vcamapp](https://twitter.com/vcamapp)
