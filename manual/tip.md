@@ -3,9 +3,9 @@ Support VCam
 
 Thanks for your support of VCam! Each and every support is a motivation for my development. Thank you so much!
 
-I would be very happy if you could share how you are using VCam on social networking sites, etc. with the hashtag #VCam!
+I'm so happy if you could share how you are using VCam on social networking sites, etc. with the hashtag #VCam
 
-If you would like to give us more active support, you can sponsor this project below.
+If you would like to give me more active support, you can sponsor this project below.
 
 - [Patreon](https://www.patreon.com/tattn)
 - [GitHub Sponsors](https://github.com/sponsors/tattn)
