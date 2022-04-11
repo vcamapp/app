@@ -8,7 +8,8 @@ https://github.com/vcamapp/app/releases
 
 スポンサーの方は以下のページ内のリンクからDLできます。
 
-https://tattn.fanbox.cc/posts/3541601
+日本語: https://tattn.fanbox.cc/posts/3541601  
+English: https://www.patreon.com/posts/64958026
 
 ## 初期設定
 
