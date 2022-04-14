@@ -4,7 +4,7 @@
 ここではこのアプリの使い方の例をご紹介します。ここにない便利な使い方をしている方はぜひ、GitHubのプルリクエストの機能で追記してください。
 
 ## VCamの紹介サイト
-- [Macでも使えるアバターアプリ「VCam」β版がリリース！ Zoom会議にも対応](https://www.moguravr.com/vcam/)
+- [Macでも使えるアバターアプリ「VCam」β版がリリース！ Zoom会議にも対応 - MoguraVR](https://www.moguravr.com/vcam/)
 
 ## Zoomでアバターになる
 
