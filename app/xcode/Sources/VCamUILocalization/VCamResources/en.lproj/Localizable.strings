@@ -1,0 +1,175 @@
+/* 
+  Localizable.strings
+  VCam
+
+  Created by Tatsuya Tanaka on 2022/04/06.
+  
+*/
+
+// MARK: - Common
+
+"default" = "Default";
+"cancel" = "Cancel";
+"image" = "Image";
+"screen" = "Screen";
+"clipboard" = "Clipboard";
+"camera" = "Camera";
+"mic" = "Microphone";
+
+"message" = "Message";
+"seconds" = "s";
+
+// MARK: - Menu
+
+"main" = "Main";
+"message" = "Message";
+"preference" = "Preference";
+"tracking" = "Tracking";
+"screenEffect" = "Screen Effect";
+"recording" = "Recording";
+
+// MARK: - Motion
+
+"motion" = "Motion";
+"hi" = "Hi";
+"bye" = "Bye";
+"jump" = "Jump";
+"cheer" = "Cheer";
+"what" = "What!?";
+"pose" = "Pose";
+"nod" = "Nod";
+"no" = "No";
+"shudder" = "Shudder";
+"run" = "Run";
+"facialExpression" = "Facial Expression";
+
+// MARK: - Emoji
+
+"emoji" = "Emoji";
+"sticker" = "Sticker";
+
+// MARK: - Object
+
+"manageObjects" = "Manage objects";
+"addImage" = "Add an image";
+"addScreenCapture" = "Add a screen";
+"addVideoCapture" = "Add a video capture";
+"deleteSelectedObject" = "Delete the selected object";
+
+"moveInitialPosition" = "Reset position";
+
+// MARK: - Preference
+
+"playIdleMotions" = "Play idle motions";
+"simulateShadows" = "Simulate shadows (Use high power)";
+"optimizeMeshes" = "Optimize meshes (Recommended)";
+"helpMesh" = "Reduce the load on the app by merging meshes, etc. If you have problems viewing the model, turn it off and reload the model.";
+"flipScreen" = "Flip screen";
+"backgroundColor" = "Background color";
+"backgroundImage" = "Background image";
+"pick" = "Pick";
+"lipSyncSensitivity" = "Lip-sync sensitivity (mic)";
+"fpsScreen" = "FPS (screen)";
+"fpsCamera" = "FPS (tracking)";
+
+// MARK: - Tracking
+
+"micOrCamera" = "Mic or Camera";
+"recalibrate" = "Recalibrate";
+"helpCalibrate" = "If the movement is out of sync with the actual movement, press this button while facing forward to the camera and looking at the camera.";
+"useCameraForTracking" = "Use camera for tracking";
+"useEmotionBy %@" = "Use emotion by %@ [β] (Use high power)";
+"isNotFound %@" = "%@ is not found";
+"lipSync" = "Lip-sync";
+"trackEyes" = "Track eyes";
+"eyesHorizontalSensitivity" = "Horizontal sensitivity";
+"eyesVerticalSensitivity" = "Vertical sensitivity";
+"trackHands" = "Track hands [β] ";
+"trackFingers" = "Track fingers [β] ";
+"easeOfOpeningFingers" = "Finger opening sensitivity";
+"easeOfCloseFingers" = "Finger closing sensitivity";
+"easeOfBodyMovement" = "Horizontal sensitivity of body";
+
+// MARK: - Screen effect
+
+"newPreset" = "New preset";
+"preset" = "Preset";
+"save" = "Save";
+"ambientLightIntensity" = "Ambient light intensity";
+"ambientLightColor" = "Ambient light color";
+"cameraExposure" = "Camera Exposure (EV)";
+"colorFilter" = "Color Filter";
+"saturation" = "Saturation";
+"hueShift" = "Hue Shift";
+"contrast" = "Contrast";
+"whiteBalance" = "White balance";
+"colorTemperature" = "Color temperature";
+"tint" = "Tint";
+"bloom" = "Bloom";
+"intensity" = "Intensity";
+"threshold" = "Threshold";
+"softKnee" = "Soft Knee";
+"diffusion" = "Diffusion";
+"anamorphicRatio" = "Anamorphic ratio";
+"color" = "Color";
+"lensFlare" = "Lens flare";
+"lensFlareIntensity" = "Lens flare intensity";
+"vignette" = "Vignette";
+"smoothness" = "Smoothness";
+"roundness" = "Roundness";
+"none" = "None";
+"typeNo %@" = "Type%@";
+
+// MARK: - Permission
+
+"allowFor %@" = "Allow access to %@";
+"openPreference" = "Open preferences";
+
+// MARK: - Recording
+
+"takePhoto" = "Take a photo";
+"timeToTakePhoto" = "Time to take photos";
+"startRecording" = "Start recording";
+"developing" = "Developing...";
+
+// MARK: - Capture
+
+"capturePreference" = "Capture Preference";
+"captureType" = "Capture Type";
+"entireDisplay" = "Entire Display";
+"independentWindow" = "Independent Window";
+"display" = "Display";
+"removeVCamFromCapture" = "Remove VCam from the capture";
+"window" = "Window";
+"videoCaptureDevice" = "Video Capture Device";
+"previewCapture" = "Preview the capture";
+"errorScreenCapturePermission" = "No permisison. Please allow screen recording in the Security & Privacy of the System Preferences.";
+
+// MARK: - Language
+
+"languageOfDevice" = "Language of the device";
+"japanese" = "Japanese";
+"english" = "English";
+
+// MARK: - Application Menu
+
+"uninstallPlugin" = "Uninstall the virtual camera plugin";
+"setUp" = "Set up";
+"aboutApp" = "About VCam";
+"file" = "File";
+"loadVRMFile" = "Load a VRM file";
+"loadOnVRoidHub" = "Load an avatar on VRoid Hub";
+"help" = "Help";
+"anyProblem" = "Any problem?";
+"quitVCam" = "Quit VCam";
+
+"update" = "Update";
+"add" = "Add";
+"installPlugin %@" = "%@ a virtual camera plugin";
+"installOne %@" = "Install %@";
+"success" = "Success";
+"restartAfterInstalling" = "Setup is complete. Please restart Zoom or other clients.";
+"failure" = "Failure";
+"deletePlugin" = "Delete the virtual camera plugin.";
+"deleteOne %@" = "Delete %@";
+"completeUninstalling" = "Uninstallation is complete.";

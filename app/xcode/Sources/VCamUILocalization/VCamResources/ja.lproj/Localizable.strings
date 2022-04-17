@@ -1,0 +1,175 @@
+/* 
+  Localizable.strings
+  VCam
+
+  Created by Tatsuya Tanaka on 2022/04/06.
+  
+*/
+
+// MARK: - Common
+
+"default" = "デフォルト";
+"cancel" = "キャンセル";
+"image" = "画像";
+"screen" = "画面";
+"clipboard" = "クリップボード";
+"camera" = "カメラ";
+"mic" = "マイク";
+
+"message" = "メッセージ";
+"seconds" = "秒";
+
+// MARK: - Menu
+
+"main" = "メイン";
+"message" = "メッセージ";
+"preference" = "設定";
+"tracking" = "トラッキング";
+"screenEffect" = "画面効果";
+"recording" = "撮影";
+
+// MARK: - Motion
+
+"motion" = "モーション";
+"hi" = "こんにちは";
+"bye" = "バイバイ";
+"jump" = "ジャンプ";
+"cheer" = "エイエイオー！";
+"what" = "What!?";
+"pose" = "やったね";
+"nod" = "うんうん";
+"no" = "首を振る";
+"shudder" = "ブルブル";
+"run" = "走る";
+"facialExpression" = "表情";
+
+// MARK: - Emoji
+
+"emoji" = "絵文字";
+"sticker" = "スタンプ";
+
+// MARK: - Object
+
+"manageObjects" = "オブジェクト操作";
+"addImage" = "画像追加";
+"addScreenCapture" = "画面キャプチャ追加";
+"addVideoCapture" = "映像キャプチャ追加";
+"deleteSelectedObject" = "選択中のオブジェクトを削除する";
+
+"moveInitialPosition" = "初期位置に移動";
+
+// MARK: - Preference
+
+"playIdleMotions" = "待機モーションをランダム再生する";
+"simulateShadows" = "影をシミュレーションする (負荷増)";
+"optimizeMeshes" = "モデルのメッシュを最適化する (推奨)";
+"helpMesh" = "メッシュの結合等によりアプリの負荷を大幅に下げられます。モデルの表示に問題がある場合はオフにした後、モデルを再読込してください。";
+"flipScreen" = "画面を左右反転する";
+"backgroundColor" = "背景色";
+"backgroundImage" = "背景画像";
+"pick" = "選択";
+"lipSyncSensitivity" = "リップシンクの感度 (マイク)";
+"fpsScreen" = "FPS (画面の更新頻度)";
+"fpsCamera" = "カメラFPS (トラッキングの更新頻度)";
+
+// MARK: - Tracking
+
+"micOrCamera" = "マイクまたはカメラ";
+"recalibrate" = "再キャリブレーション";
+"helpCalibrate" = "実際の動きとずれている場合は、カメラに対して正面を向いた状態でカメラ目線でこのボタンを押してください";
+"useCameraForTracking" = "カメラでアバターを操作";
+"useEmotionBy %@" = "表情を%@で推定して反映する [β] (負荷増)";
+"isNotFound %@" = "%@が見つかりません";
+"lipSync" = "リップシンク";
+"trackEyes" = "目をトラッキングする";
+"eyesHorizontalSensitivity" = "目の左右の動きの感度";
+"eyesVerticalSensitivity" = "目の上下の動きの感度";
+"trackHands" = "手をトラッキングする [β] ";
+"trackFingers" = "指をトラッキングする [β] ";
+"easeOfOpeningFingers" = "指の開きやすさ";
+"easeOfCloseFingers" = "指の閉じさすさ";
+"easeOfBodyMovement" = "体の左右の動きの大きさ";
+
+// MARK: - Screen effect
+
+"newPreset" = "新しいプリセット";
+"preset" = "プリセット";
+"save" = "上書き保存";
+"ambientLightIntensity" = "環境光の強さ";
+"ambientLightColor" = "環境光の色";
+"cameraExposure" = "カメラの露出 (EV)";
+"colorFilter" = "色フィルタ";
+"saturation" = "彩度";
+"hueShift" = "色相シフト (Hue Shift)";
+"contrast" = "コントラスト";
+"whiteBalance" = "ホワイトバランス";
+"colorTemperature" = "色温度";
+"tint" = "色合い";
+"bloom" = "ブルーム (Bloom)";
+"intensity" = "強さ";
+"threshold" = "閾値 (適用する輝度の最小値)";
+"softKnee" = "柔らかさ (Soft Knee)";
+"diffusion" = "光の拡散";
+"anamorphicRatio" = "歪み (アナモルフィック)";
+"color" = "色";
+"lensFlare" = "レンズフレア";
+"lensFlareIntensity" = "レンズフレアの強さ";
+"vignette" = "ビネット効果";
+"smoothness" = "滑らかさ";
+"roundness" = "丸み";
+"none" = "なし";
+"typeNo %@" = "タイプ%@";
+
+// MARK: - Permission
+
+"allowFor %@" = "%@へのアクセスを許可してください";
+"openPreference" = "設定を開く";
+
+// MARK: - Recording
+
+"takePhoto" = "写真を撮る";
+"timeToTakePhoto" = "撮影までの待ち時間";
+"startRecording" = "録画開始";
+"developing" = "開発中...";
+
+// MARK: - Capture
+
+"capturePreference" = "キャプチャ設定";
+"captureType" = "キャプチャ方法";
+"entireDisplay" = "全画面";
+"independentWindow" = "特定のウィンドウ";
+"display" = "ディスプレイ";
+"removeVCamFromCapture" = "画面キャプチャからこのアプリを除外";
+"window" = "ウィンドウ";
+"videoCaptureDevice" = "映像デバイス";
+"previewCapture" = "映像をプレビューする";
+"errorScreenCapturePermission" = "画面収録の権限がありません。システム環境設定のセキュリティとプライバシーにて画面収録を許可してください。";
+
+// MARK: - Language
+
+"languageOfDevice" = "端末の設定に従う";
+"japanese" = "日本語";
+"english" = "英語";
+
+// MARK: - Application Menu
+
+"uninstallPlugin" = "プラグインのアンインストール";
+"setUp" = "初期設定";
+"aboutApp" = "このアプリについて";
+"file" = "ファイル";
+"loadVRMFile" = "VRMファイルを読み込む";
+"loadOnVRoidHub" = "VRoid Hubからアバターを選ぶ";
+"help" = "ヘルプ";
+"anyProblem" = "困った時は？";
+"quitVCam" = "VCam を終了";
+
+"update" = "更新";
+"add" = "追加";
+"installPlugin %@" = "仮想カメラプラグインを%@します";
+"installOne %@" = "%@が設置されます";
+"success" = "やったね";
+"restartAfterInstalling" = "セットアップが完了しました、Zoom等のクライアントを再起動してください";
+"failure" = "ごめんなさい";
+"deletePlugin" = "仮想カメラプラグインを削除します";
+"deleteOne %@" = "%@が削除されます";
+"completeUninstalling" = "アンインストールが完了しました";
