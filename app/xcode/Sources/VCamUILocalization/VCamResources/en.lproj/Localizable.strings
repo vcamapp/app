@@ -15,8 +15,8 @@
 "clipboard" = "Clipboard";
 "camera" = "Camera";
 "mic" = "Microphone";
-
 "message" = "Message";
+"destinationToSave" = "Destination";
 "seconds" = "s";
 
 // MARK: - Menu
@@ -129,7 +129,9 @@
 
 "takePhoto" = "Take a photo";
 "timeToTakePhoto" = "Time to take photos";
-"startRecording" = "Start recording";
+"startRecording" = "Start recording [β]";
+"stopRecording" = "Stop recording";
+"videoFormat" = "Video Format";
 "developing" = "Developing...";
 
 // MARK: - Capture

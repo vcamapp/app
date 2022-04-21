@@ -68,6 +68,8 @@ public enum L10n {
   public static let deletePlugin = LocalizedString(lookupKey: "deletePlugin")
   /// Delete the selected object
   public static let deleteSelectedObject = LocalizedString(lookupKey: "deleteSelectedObject")
+  /// Destination
+  public static let destinationToSave = LocalizedString(lookupKey: "destinationToSave")
   /// Developing...
   public static let developing = LocalizedString(lookupKey: "developing")
   /// Diffusion
@@ -226,6 +228,8 @@ public enum L10n {
   public static let startRecording = LocalizedString(lookupKey: "startRecording")
   /// Sticker
   public static let sticker = LocalizedString(lookupKey: "sticker")
+  /// Stop recording
+  public static let stopRecording = LocalizedString(lookupKey: "stopRecording")
   /// Success
   public static let success = LocalizedString(lookupKey: "success")
   /// Take a photo
@@ -260,6 +264,8 @@ public enum L10n {
   }
   /// Video Capture Device
   public static let videoCaptureDevice = LocalizedString(lookupKey: "videoCaptureDevice")
+  /// Video Format
+  public static let videoFormat = LocalizedString(lookupKey: "videoFormat")
   /// Vignette
   public static let vignette = LocalizedString(lookupKey: "vignette")
   /// What!?

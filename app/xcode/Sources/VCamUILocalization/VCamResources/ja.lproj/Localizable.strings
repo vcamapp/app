@@ -15,8 +15,8 @@
 "clipboard" = "クリップボード";
 "camera" = "カメラ";
 "mic" = "マイク";
-
 "message" = "メッセージ";
+"destinationToSave" = "保存先";
 "seconds" = "秒";
 
 // MARK: - Menu
@@ -129,7 +129,9 @@
 
 "takePhoto" = "写真を撮る";
 "timeToTakePhoto" = "撮影までの待ち時間";
-"startRecording" = "録画開始";
+"startRecording" = "録画開始 [β]";
+"stopRecording" = "録画停止";
+"videoFormat" = "動画フォーマット";
 "developing" = "開発中...";
 
 // MARK: - Capture
