@@ -20,7 +20,7 @@ Windows and other platforms are currently not supported.
 ## Documentations
 - [About VCam](https://www.patreon.com/posts/64958026)
 - [Set up](manual/en/setup.md)
-- [Load an avatar (ja)](manual/ja/model.md)
+- [Load an avatar](manual/en/model.md)
 - [Main display (ja)](manual/ja/main.md)
 - [Settings for Tracking (ja)](manual/ja/tracking.md)
 - [Work with OBS (ja)](manual/ja/OBS.md)
