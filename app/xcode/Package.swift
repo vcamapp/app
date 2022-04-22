@@ -14,6 +14,6 @@ let package = Package(
             "VCamEntity", "VCamUILocalization",
         ]),
         .target(name: "VCamEntity"),
-        .target(name: "VCamUILocalization", resources: [.process("VCamResources")])
+        .target(name: "VCamUILocalization", resources: [.process("VCamResources")]),
     ]
 )
