@@ -6,39 +6,54 @@
 //
 
 import SwiftUI
+import VCamData
 
-extension AppStorage {
-    init(key: UserDefaults.Key<Bool>) where Value == Bool? {
-        self.init(key.rawValue)
+public extension AppStorage where Value == Bool {
+    init(key: UserDefaults.Key<Value>) {
+        self.init(wrappedValue: key.defaultValue, key.rawValue)
+    }
+
+    init<T: UserDefaultsValue>(key: UserDefaults.Key<T>) where Value == T.EncodeValue {
+        self.init(wrappedValue: key.defaultValue.encodeUserDefaultValue(), key.rawValue)
     }
 }
 
-extension AppStorage {
-    init(key: UserDefaults.Key<Int>) where Value == Int? {
-        self.init(key.rawValue)
+public extension AppStorage where Value == Int {
+    init(key: UserDefaults.Key<Value>) {
+        self.init(wrappedValue: key.defaultValue, key.rawValue)
+    }
+
+    init<T: UserDefaultsValue>(key: UserDefaults.Key<T>) where Value == T.EncodeValue {
+        self.init(wrappedValue: key.defaultValue.encodeUserDefaultValue(), key.rawValue)
     }
 }
 
-extension AppStorage {
-    init(key: UserDefaults.Key<String>) where Value == String? {
-        self.init(key.rawValue)
+public extension AppStorage where Value == String {
+    init(key: UserDefaults.Key<Value>) {
+        self.init(wrappedValue: key.defaultValue, key.rawValue)
+    }
+
+    init<T: UserDefaultsValue>(key: UserDefaults.Key<T>) where Value == T.EncodeValue {
+        self.init(wrappedValue: key.defaultValue.encodeUserDefaultValue(), key.rawValue)
     }
 }
 
-extension AppStorage {
-    init<T: UserDefaultsValue>(key: UserDefaults.Key<T>) where Value == T.EncodeValue?, Value == Bool? {
-        self.init(key.rawValue)
+public extension AppStorage where Value == Double {
+    init(key: UserDefaults.Key<Value>) {
+        self.init(wrappedValue: key.defaultValue, key.rawValue)
+    }
+
+    init<T: UserDefaultsValue>(key: UserDefaults.Key<T>) where Value == T.EncodeValue {
+        self.init(wrappedValue: key.defaultValue.encodeUserDefaultValue(), key.rawValue)
     }
 }
 
-extension AppStorage {
-    init<T: UserDefaultsValue>(key: UserDefaults.Key<T>) where Value == T.EncodeValue?, Value == Int? {
-        self.init(key.rawValue)
+public extension AppStorage where Value == Data {
+    init(key: UserDefaults.Key<Value>) {
+        self.init(wrappedValue: key.defaultValue, key.rawValue)
     }
-}
 
-extension AppStorage {
-    init<T: UserDefaultsValue>(key: UserDefaults.Key<T>) where Value == T.EncodeValue?, Value == String? {
-        self.init(key.rawValue)
+    init<T: UserDefaultsValue>(key: UserDefaults.Key<T>) where Value == T.EncodeValue {
+        self.init(wrappedValue: key.defaultValue.encodeUserDefaultValue(), key.rawValue)
     }
 }

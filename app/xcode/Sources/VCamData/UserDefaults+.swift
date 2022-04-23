@@ -22,13 +22,17 @@ public extension UserDefaultsPrimitiveValue {
 extension Bool: UserDefaultsPrimitiveValue {}
 extension Int: UserDefaultsPrimitiveValue {}
 extension String: UserDefaultsPrimitiveValue {}
-extension CGFloat: UserDefaultsPrimitiveValue {}
+extension Double: UserDefaultsPrimitiveValue {}
 extension Data: UserDefaultsPrimitiveValue {}
+extension Optional: UserDefaultsValue where Wrapped: UserDefaultsValue {
+    public func encodeUserDefaultValue() -> Self { self }
+    public static func decodeUserDefaultValue(_ value: EncodeValue) -> EncodeValue? { value }
+}
 
 
 public extension UserDefaults {
-    func value<T: UserDefaultsValue>(for key: Key<T>) -> T? {
-        object(forKey: key.rawValue) as? T
+    func value<T: UserDefaultsValue>(for key: Key<T>) -> T {
+        object(forKey: key.rawValue) as? T ?? key.defaultValue
     }
 
     func set<T: UserDefaultsValue>(_ value: T, for key: Key<T>) {
@@ -41,24 +45,13 @@ public extension UserDefaults {
 }
 
 public extension UserDefaults {
-    struct Key<Value: UserDefaultsValue>: RawRepresentable, Hashable, Equatable {
+    struct Key<Value: UserDefaultsValue> {
         public let rawValue: String
-        public init(rawValue: String) {
+        public let defaultValue: Value
+
+        public init(_ rawValue: String, default value: Value) {
             self.rawValue = rawValue
+            self.defaultValue = value
         }
-    }
-}
-
-extension UserDefaults.Key: ExpressibleByStringLiteral {
-    public init(stringLiteral value: String) {
-        self.init(rawValue: value)
-    }
-
-    public init(extendedGraphemeClusterLiteral value: String) {
-        self.init(rawValue: value)
-    }
-
-    public init(unicodeScalarLiteral value: String) {
-        self.init(rawValue: value)
     }
 }
