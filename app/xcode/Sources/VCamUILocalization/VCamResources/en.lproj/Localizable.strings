@@ -10,6 +10,7 @@
 
 "default" = "Default";
 "cancel" = "Cancel";
+"close" = "Close";
 "image" = "Image";
 "screen" = "Screen";
 "clipboard" = "Clipboard";
@@ -17,6 +18,8 @@
 "mic" = "Microphone";
 "message" = "Message";
 "destinationToSave" = "Destination";
+"update" = "Update";
+"download" = "Download";
 "seconds" = "s";
 
 // MARK: - Menu
@@ -158,6 +161,7 @@
 "uninstallPlugin" = "Uninstall the virtual camera plugin";
 "setUp" = "Set up";
 "aboutApp" = "About VCam";
+"checkForUpdates" = "Check for Updates...";
 "file" = "File";
 "loadVRMFile" = "Load a VRM file";
 "loadOnVRoidHub" = "Load an avatar on VRoid Hub";
@@ -175,3 +179,13 @@
 "deletePlugin" = "Delete the virtual camera plugin.";
 "deleteOne %@" = "Delete %@";
 "completeUninstalling" = "Uninstallation is complete.";
+
+// MARK: - Updates
+
+"existsNewAppVersion %@" = "A new version %@ is available!";
+"currentVersion %@" = "Current Version: %@";
+"releaseNotes" = "Release Notes:";
+"downloadSupporterVersion" = "Download for Supporters";
+"skipThisVersion" = "Skip This Version";
+"upToDate" = "You're up-to-date!";
+"upToDateMessage %@" = "%@ is currently the latest version";

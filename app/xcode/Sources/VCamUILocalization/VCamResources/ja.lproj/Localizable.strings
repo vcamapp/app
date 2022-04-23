@@ -10,6 +10,7 @@
 
 "default" = "デフォルト";
 "cancel" = "キャンセル";
+"close" = "閉じる";
 "image" = "画像";
 "screen" = "画面";
 "clipboard" = "クリップボード";
@@ -17,6 +18,8 @@
 "mic" = "マイク";
 "message" = "メッセージ";
 "destinationToSave" = "保存先";
+"update" = "アップデート";
+"download" = "ダウンロード";
 "seconds" = "秒";
 
 // MARK: - Menu
@@ -158,6 +161,7 @@
 "uninstallPlugin" = "プラグインのアンインストール";
 "setUp" = "初期設定";
 "aboutApp" = "このアプリについて";
+"checkForUpdates" = "アップデート確認";
 "file" = "ファイル";
 "loadVRMFile" = "VRMファイルを読み込む";
 "loadOnVRoidHub" = "VRoid Hubからアバターを選ぶ";
@@ -175,3 +179,13 @@
 "deletePlugin" = "仮想カメラプラグインを削除します";
 "deleteOne %@" = "%@が削除されます";
 "completeUninstalling" = "アンインストールが完了しました";
+
+// MARK: - Updates
+
+"existsNewAppVersion %@" = "新しいバージョン %@ があります";
+"currentVersion %@" = "現在のバージョン: %@";
+"releaseNotes" = "リリースノート：";
+"downloadSupporterVersion" = "サポーター版のダウンロード";
+"skipThisVersion" = "このバージョンはスキップ";
+"upToDate" = "最新版です";
+"upToDateMessage %@" = "%@ は最新バージョンです。";

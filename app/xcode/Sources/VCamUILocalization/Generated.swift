@@ -44,10 +44,14 @@ public enum L10n {
   public static let capturePreference = LocalizedString(lookupKey: "capturePreference")
   /// Capture Type
   public static let captureType = LocalizedString(lookupKey: "captureType")
+  /// Check for Updates...
+  public static let checkForUpdates = LocalizedString(lookupKey: "checkForUpdates")
   /// Cheer
   public static let cheer = LocalizedString(lookupKey: "cheer")
   /// Clipboard
   public static let clipboard = LocalizedString(lookupKey: "clipboard")
+  /// Close
+  public static let close = LocalizedString(lookupKey: "close")
   /// Color
   public static let color = LocalizedString(lookupKey: "color")
   /// Color Filter
@@ -58,6 +62,10 @@ public enum L10n {
   public static let completeUninstalling = LocalizedString(lookupKey: "completeUninstalling")
   /// Contrast
   public static let contrast = LocalizedString(lookupKey: "contrast")
+  /// Current Version: %@
+  public static func currentVersion(_ p1: Any) -> ArgumentsLocalizedString {
+    ArgumentsLocalizedString("currentVersion %@", "currentVersion \(String(describing: p1))", String(describing: p1))
+  }
   /// Default
   public static let `default` = LocalizedString(lookupKey: "default")
   /// Delete %@
@@ -76,6 +84,10 @@ public enum L10n {
   public static let diffusion = LocalizedString(lookupKey: "diffusion")
   /// Display
   public static let display = LocalizedString(lookupKey: "display")
+  /// Download
+  public static let download = LocalizedString(lookupKey: "download")
+  /// Download for Supporters
+  public static let downloadSupporterVersion = LocalizedString(lookupKey: "downloadSupporterVersion")
   /// Horizontal sensitivity of body
   public static let easeOfBodyMovement = LocalizedString(lookupKey: "easeOfBodyMovement")
   /// Finger closing sensitivity
@@ -90,6 +102,10 @@ public enum L10n {
   public static let entireDisplay = LocalizedString(lookupKey: "entireDisplay")
   /// No permisison. Please allow screen recording in the Security & Privacy of the System Preferences.
   public static let errorScreenCapturePermission = LocalizedString(lookupKey: "errorScreenCapturePermission")
+  /// A new version %@ is available!
+  public static func existsNewAppVersion(_ p1: Any) -> ArgumentsLocalizedString {
+    ArgumentsLocalizedString("existsNewAppVersion %@", "existsNewAppVersion \(String(describing: p1))", String(describing: p1))
+  }
   /// Horizontal sensitivity
   public static let eyesHorizontalSensitivity = LocalizedString(lookupKey: "eyesHorizontalSensitivity")
   /// Vertical sensitivity
@@ -196,6 +212,8 @@ public enum L10n {
   public static let recalibrate = LocalizedString(lookupKey: "recalibrate")
   /// Recording
   public static let recording = LocalizedString(lookupKey: "recording")
+  /// Release Notes:
+  public static let releaseNotes = LocalizedString(lookupKey: "releaseNotes")
   /// Remove VCam from the capture
   public static let removeVCamFromCapture = LocalizedString(lookupKey: "removeVCamFromCapture")
   /// Setup is complete. Please restart Zoom or other clients.
@@ -220,11 +238,13 @@ public enum L10n {
   public static let shudder = LocalizedString(lookupKey: "shudder")
   /// Simulate shadows (Use high power)
   public static let simulateShadows = LocalizedString(lookupKey: "simulateShadows")
+  /// Skip This Version
+  public static let skipThisVersion = LocalizedString(lookupKey: "skipThisVersion")
   /// Smoothness
   public static let smoothness = LocalizedString(lookupKey: "smoothness")
   /// Soft Knee
   public static let softKnee = LocalizedString(lookupKey: "softKnee")
-  /// Start recording
+  /// Start recording [β]
   public static let startRecording = LocalizedString(lookupKey: "startRecording")
   /// Sticker
   public static let sticker = LocalizedString(lookupKey: "sticker")
@@ -256,6 +276,12 @@ public enum L10n {
   public static let uninstallPlugin = LocalizedString(lookupKey: "uninstallPlugin")
   /// Update
   public static let update = LocalizedString(lookupKey: "update")
+  /// You're up-to-date!
+  public static let upToDate = LocalizedString(lookupKey: "upToDate")
+  /// %@ is currently the latest version
+  public static func upToDateMessage(_ p1: Any) -> ArgumentsLocalizedString {
+    ArgumentsLocalizedString("upToDateMessage %@", "upToDateMessage \(String(describing: p1))", String(describing: p1))
+  }
   /// Use camera for tracking
   public static let useCameraForTracking = LocalizedString(lookupKey: "useCameraForTracking")
   /// Use emotion by %@ [β] (Use high power)
@@ -289,9 +315,9 @@ extension L10n {
   }
 
   private static func currentBundle() -> Bundle {
-    let locale = Environment.currentLocale()
+    let locale = LocalizationEnvironment.currentLocale()
     return bundles[locale] ?? {
-      let code = Language(locale: locale).languageCode
+      let code = LanguageList(locale: locale).language.languageCode
       let path = BundleToken.bundle.path(forResource: code, ofType: "lproj")!
       let bundle = Bundle(path: path)!
       bundles[locale] = bundle

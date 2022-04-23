@@ -7,6 +7,9 @@
 
 import Foundation
 
-// Don't use these properties except for internal implementations.
-
-public var VCamUILocalizationBundle: Bundle { Bundle.module }
+public extension Bundle {
+    /// Use only for localization
+    static var localize: Bundle {
+        Bundle.module
+    }
+}
