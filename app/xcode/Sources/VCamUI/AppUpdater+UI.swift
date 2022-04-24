@@ -87,7 +87,7 @@ extension AppUpdater {
 
     @MainActor
     public func presentUpdateAlertIfAvailable() async {
-        guard let release = try? await check(), UserDefaults.standard.value(for: .skipThisVersion) != release.version else {
+        guard let release = try? await check(), UserDefaults.standard.value(for: .skipThisVersion) < release.version else {
             return // already latest or error
         }
         presentWindow(title: L10n.update.text, id: nil, size: .init(width: 600, height: 400)) { window in
