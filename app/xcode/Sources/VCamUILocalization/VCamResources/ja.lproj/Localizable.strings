@@ -92,6 +92,8 @@
 "easeOfOpeningFingers" = "指の開きやすさ";
 "easeOfCloseFingers" = "指の閉じさすさ";
 "easeOfBodyMovement" = "体の左右の動きの大きさ";
+"shoulderRotationWeight" = "肩の回転の大きさ";
+"swivelOffset" = "肘の調整";
 
 // MARK: - Screen effect
 

@@ -234,6 +234,8 @@ public enum L10n {
   public static let seconds = LocalizedString(lookupKey: "seconds")
   /// Set up
   public static let setUp = LocalizedString(lookupKey: "setUp")
+  /// Weight of shoulder rotation
+  public static let shoulderRotationWeight = LocalizedString(lookupKey: "shoulderRotationWeight")
   /// Shudder
   public static let shudder = LocalizedString(lookupKey: "shudder")
   /// Simulate shadows (Use high power)
@@ -252,6 +254,8 @@ public enum L10n {
   public static let stopRecording = LocalizedString(lookupKey: "stopRecording")
   /// Success
   public static let success = LocalizedString(lookupKey: "success")
+  /// Elbow offset
+  public static let swivelOffset = LocalizedString(lookupKey: "swivelOffset")
   /// Take a photo
   public static let takePhoto = LocalizedString(lookupKey: "takePhoto")
   /// Threshold

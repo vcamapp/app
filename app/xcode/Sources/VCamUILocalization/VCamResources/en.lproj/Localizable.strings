@@ -92,6 +92,8 @@
 "easeOfOpeningFingers" = "Finger opening sensitivity";
 "easeOfCloseFingers" = "Finger closing sensitivity";
 "easeOfBodyMovement" = "Horizontal sensitivity of body";
+"shoulderRotationWeight" = "Weight of shoulder rotation";
+"swivelOffset" = "Elbow offset";
 
 // MARK: - Screen effect
 
