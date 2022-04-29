@@ -26,6 +26,8 @@ public enum L10n {
   public static let anamorphicRatio = LocalizedString(lookupKey: "anamorphicRatio")
   /// Any problem?
   public static let anyProblem = LocalizedString(lookupKey: "anyProblem")
+  /// Avatar
+  public static let avatar = LocalizedString(lookupKey: "avatar")
   /// Background color
   public static let backgroundColor = LocalizedString(lookupKey: "backgroundColor")
   /// Background image
@@ -180,7 +182,7 @@ public enum L10n {
   public static let micOrCamera = LocalizedString(lookupKey: "micOrCamera")
   /// Motion
   public static let motion = LocalizedString(lookupKey: "motion")
-  /// Reset position
+  /// Reset
   public static let moveInitialPosition = LocalizedString(lookupKey: "moveInitialPosition")
   /// New preset
   public static let newPreset = LocalizedString(lookupKey: "newPreset")
@@ -190,6 +192,8 @@ public enum L10n {
   public static let nod = LocalizedString(lookupKey: "nod")
   /// None
   public static let `none` = LocalizedString(lookupKey: "none")
+  /// Object
+  public static let object = LocalizedString(lookupKey: "object")
   /// Open preferences
   public static let openPreference = LocalizedString(lookupKey: "openPreference")
   /// Optimize meshes (Recommended)
@@ -228,6 +232,8 @@ public enum L10n {
   public static let save = LocalizedString(lookupKey: "save")
   /// Screen
   public static let screen = LocalizedString(lookupKey: "screen")
+  /// Screen
+  public static let screenCapture = LocalizedString(lookupKey: "screenCapture")
   /// Screen Effect
   public static let screenEffect = LocalizedString(lookupKey: "screenEffect")
   /// s
@@ -292,6 +298,8 @@ public enum L10n {
   public static func useEmotionBy(_ p1: Any) -> ArgumentsLocalizedString {
     ArgumentsLocalizedString("useEmotionBy %@", "useEmotionBy \(String(describing: p1))", String(describing: p1))
   }
+  /// Video Capture
+  public static let videoCapture = LocalizedString(lookupKey: "videoCapture")
   /// Video Capture Device
   public static let videoCaptureDevice = LocalizedString(lookupKey: "videoCaptureDevice")
   /// Video Format

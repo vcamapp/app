@@ -11,6 +11,8 @@
 "default" = "Default";
 "cancel" = "Cancel";
 "close" = "Close";
+"object" = "Object";
+"avatar" = "Avatar";
 "image" = "Image";
 "screen" = "Screen";
 "clipboard" = "Clipboard";
@@ -57,9 +59,11 @@
 "addImage" = "Add an image";
 "addScreenCapture" = "Add a screen";
 "addVideoCapture" = "Add a video capture";
+"screenCapture" = "Screen";
+"videoCapture" = "Video Capture";
 "deleteSelectedObject" = "Delete the selected object";
 
-"moveInitialPosition" = "Reset position";
+"moveInitialPosition" = "Reset";
 
 // MARK: - Preference
 

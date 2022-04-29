@@ -1,4 +1,4 @@
-/* 
+/*
   Localizable.strings
   VCam
 
@@ -11,6 +11,8 @@
 "default" = "デフォルト";
 "cancel" = "キャンセル";
 "close" = "閉じる";
+"object" = "オブジェクト";
+"avatar" = "アバター";
 "image" = "画像";
 "screen" = "画面";
 "clipboard" = "クリップボード";
@@ -57,9 +59,11 @@
 "addImage" = "画像追加";
 "addScreenCapture" = "画面キャプチャ追加";
 "addVideoCapture" = "映像キャプチャ追加";
+"screenCapture" = "画面キャプチャ";
+"videoCapture" = "映像キャプチャ";
 "deleteSelectedObject" = "選択中のオブジェクトを削除する";
 
-"moveInitialPosition" = "初期位置に移動";
+"moveInitialPosition" = "初期位置";
 
 // MARK: - Preference
 
