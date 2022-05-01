@@ -86,6 +86,7 @@
 "helpCalibrate" = "実際の動きとずれている場合は、カメラに対して正面を向いた状態でカメラ目線でこのボタンを押してください";
 "useCameraForTracking" = "カメラでアバターを操作";
 "useEmotionBy %@" = "表情を%@で推定して反映する [β] (負荷増)";
+"useVowelEstimation" = "カメラで母音を推定する [β]";
 "isNotFound %@" = "%@が見つかりません";
 "lipSync" = "リップシンク";
 "trackEyes" = "目をトラッキングする";

@@ -298,6 +298,8 @@ public enum L10n {
   public static func useEmotionBy(_ p1: Any) -> ArgumentsLocalizedString {
     ArgumentsLocalizedString("useEmotionBy %@", "useEmotionBy \(String(describing: p1))", String(describing: p1))
   }
+  /// Use vowel estimation by camera [β]
+  public static let useVowelEstimation = LocalizedString(lookupKey: "useVowelEstimation")
   /// Video Capture
   public static let videoCapture = LocalizedString(lookupKey: "videoCapture")
   /// Video Capture Device

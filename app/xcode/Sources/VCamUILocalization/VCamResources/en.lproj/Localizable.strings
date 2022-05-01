@@ -86,6 +86,7 @@
 "helpCalibrate" = "If the movement is out of sync with the actual movement, press this button while facing forward to the camera and looking at the camera.";
 "useCameraForTracking" = "Use camera for tracking";
 "useEmotionBy %@" = "Use emotion by %@ [β] (Use high power)";
+"useVowelEstimation" = "Use vowel estimation by camera [β]";
 "isNotFound %@" = "%@ is not found";
 "lipSync" = "Lip-sync";
 "trackEyes" = "Track eyes";
