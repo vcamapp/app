@@ -7,14 +7,19 @@ let package = Package(
     defaultLocalization: "en",
     platforms: [.macOS(.v11)],
     products: [
-        .library(name: "VCam", targets: ["VCamUI"]),
+        .library(name: "VCam", targets: ["VCamUI", "VCamAudio", "VCamBridge", "VCamCamera"]),
+        .library(name: "VCamAudio", targets: ["VCamAudio"]),
+        .library(name: "VCamCamera", targets: ["VCamCamera"]),
     ],
     targets: [
         .target(name: "VCamUI", dependencies: [
-            "VCamData", "VCamUILocalization",
+            "VCamData", "VCamLocalization",
         ]),
         .target(name: "VCamData", dependencies: ["VCamEntity"]),
         .target(name: "VCamEntity"),
-        .target(name: "VCamUILocalization", resources: [.process("VCamResources")]),
+        .target(name: "VCamLocalization", resources: [.process("VCamResources")]),
+        .target(name: "VCamAudio"),
+        .target(name: "VCamBridge"),
+        .target(name: "VCamCamera"),
     ]
 )

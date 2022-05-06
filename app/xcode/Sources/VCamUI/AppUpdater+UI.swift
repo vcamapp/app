@@ -7,7 +7,7 @@
 
 import SwiftUI
 import VCamEntity
-import VCamUILocalization
+import VCamLocalization
 
 @available(macOS 12, *)
 struct AppUpdateInformationView: View {

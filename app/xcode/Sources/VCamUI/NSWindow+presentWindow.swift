@@ -7,7 +7,7 @@
 
 import Foundation
 import SwiftUI
-import VCamUILocalization
+import VCamLocalization
 
 public func presentWindow(title: String, id: String?, size: NSSize? = nil, content: (NSWindow) -> NSView) {
     let windowRef = NSWindow()

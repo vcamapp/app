@@ -230,6 +230,8 @@ public enum L10n {
   public static let saturation = LocalizedString(lookupKey: "saturation")
   /// Save
   public static let save = LocalizedString(lookupKey: "save")
+  /// Scene
+  public static let scene = LocalizedString(lookupKey: "scene")
   /// Screen
   public static let screen = LocalizedString(lookupKey: "screen")
   /// Screen
