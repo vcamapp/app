@@ -35,6 +35,7 @@ public extension VCamScene {
     enum ObjectType: Codable {
         case avatar(state: Solid)
         case image(id: String, state: Plane)
+        case wind(state: Solid)
     }
 
     struct Vector: Codable, Equatable {
@@ -47,6 +48,10 @@ public extension VCamScene {
         public var x, y, z: Float
 
         public static let zero = Vector(vector: .zero)
+
+        public var simd3: SIMD3<Float> {
+            .init(x: x, y: y, z: z)
+        }
     }
 
     struct Solid: Codable, Equatable {

@@ -54,6 +54,10 @@
 "emoji" = "絵文字";
 "sticker" = "スタンプ";
 
+// MARK: - Wind
+
+"wind" = "風";
+
 // MARK: - Object
 
 "manageObjects" = "オブジェクト操作";

@@ -314,6 +314,8 @@ public enum L10n {
   public static let what = LocalizedString(lookupKey: "what")
   /// White balance
   public static let whiteBalance = LocalizedString(lookupKey: "whiteBalance")
+  /// Wind
+  public static let wind = LocalizedString(lookupKey: "wind")
   /// Window
   public static let window = LocalizedString(lookupKey: "window")
 }

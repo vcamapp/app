@@ -54,6 +54,10 @@
 "emoji" = "Emoji";
 "sticker" = "Sticker";
 
+// MARK: - Wind
+
+"wind" = "Wind";
+
 // MARK: - Object
 
 "manageObjects" = "Manage objects";
