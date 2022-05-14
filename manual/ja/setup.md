@@ -6,6 +6,10 @@
 
 [https://github.com/vcamapp/app/releases](https://github.com/vcamapp/app/releases)
 
+最新バージョンのdmgをクリックしてください。
+
+<img width="1215" alt="How to download" src="https://user-images.githubusercontent.com/8188636/168423989-b6ce6b72-de41-48b5-921c-3e254a6560dd.png">
+
 スポンサーの方は以下のページ内のリンクからDLできます。
 
 日本語: [https://tattn.fanbox.cc/posts/3541601](https://tattn.fanbox.cc/posts/3541601)  
