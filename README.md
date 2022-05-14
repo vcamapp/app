@@ -18,16 +18,7 @@ Optimized for Apple Silicon Macs; also available for Intel Macs.
 Windows and other platforms are currently not supported.
 
 ## Documentations
-- [About VCam](https://www.patreon.com/posts/64958026)
-- [Set up](manual/en/setup.md)
-- [Load an avatar](manual/en/model.md)
-- [Main display (ja)](manual/ja/main.md)
-- [Settings for Tracking (ja)](manual/ja/tracking.md)
-- [Work with OBS (ja)](manual/ja/OBS.md)
-- [FAQ (ja)](FAQ.md)
-- [Examples of usage (ja)](manual/ja/example.md)
-- [Known issues (ja)](manual/ja/issue.md)
-- [Support VCam](manual/en/tip.md)
+- [Documentations](https://tattn.gitbook.io/vcam)
 
 *Updates to the document by pull request are welcome!*
 

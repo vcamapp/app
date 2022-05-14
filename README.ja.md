@@ -14,16 +14,7 @@ Apple Silicon Mac向けに最適化しています。Intel Macでも利用可能
 Windowsやその他プラットフォームは現在未対応です。
 
 ## 使い方
-- [アプリの概要](https://tattn.fanbox.cc/posts/3541601)
-- [セットアップ / 初回設定](manual/ja/setup.md)
-- [アバターの読み込み](manual/ja/model.md)
-- [メイン画面の使い方](manual/ja/main.md)
-- [トラッキングの設定](manual/ja/tracking.md)
-- [OBSと連携する](manual/ja/OBS.md)
-- [よくある質問](FAQ.md)
-- [便利な使い方](manual/ja/example.md)
-- [不具合情報](manual/ja/issue.md)
-- [VCamを応援する](manual/ja/tip.md)
+- [使い方](https://tattn.gitbook.io/vcam)
 
 ※ドキュメントの更新が追いついていない部分を見つけた方はぜひプルリクエストで修正していただけると嬉しいです。
 

@@ -4,12 +4,12 @@
 ## ダウンロード
 無料のβ版は以下からDLできます。
 
-https://github.com/vcamapp/app/releases
+[https://github.com/vcamapp/app/releases](https://github.com/vcamapp/app/releases)
 
 スポンサーの方は以下のページ内のリンクからDLできます。
 
-日本語: https://tattn.fanbox.cc/posts/3541601  
-English: https://www.patreon.com/posts/64958026
+日本語: [https://tattn.fanbox.cc/posts/3541601](https://tattn.fanbox.cc/posts/3541601)  
+English: [https://www.patreon.com/posts/64958026](https://www.patreon.com/posts/64958026)
 
 ## 初期設定
 
@@ -18,7 +18,7 @@ English: https://www.patreon.com/posts/64958026
 3. プラグインのインストールのアラートが出た場合は、インストールします。
 4. ZoomやOBS等の仮想カメラを利用するアプリを開いて、アバターが表示されるか確認します。
 
-表示されなかった場合は、[FAQ.md](../FAQ.md)を参考にトラブルシューティングをしてください。
+表示されなかった場合は、[よくある質問](../../FAQ.md)を参考にトラブルシューティングをしてください。
 
 ### プラグインを再インストールする
 プラグインのインストールに失敗した場合や仮想カメラが正しく動作しない場合は、メニューにある「初期設定」をクリックし、プラグインを再配置します。
