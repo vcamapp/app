@@ -32,5 +32,5 @@
 * English
   * [FAQ (ja)](FAQ.md)
   * [Known issues (ja)](manual/ja/issue.md)
-  * [Support VCam](manual/tip.md)
+  * [Support VCam](manual/en/tip.md)
 

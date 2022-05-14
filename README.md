@@ -27,7 +27,7 @@ Windows and other platforms are currently not supported.
 - [FAQ (ja)](FAQ.md)
 - [Examples of usage (ja)](manual/ja/example.md)
 - [Known issues (ja)](manual/ja/issue.md)
-- [Support VCam](manual/tip.md)
+- [Support VCam](manual/en/tip.md)
 
 *Updates to the document by pull request are welcome!*
 
