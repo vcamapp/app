@@ -35,6 +35,7 @@ public extension VCamScene {
     enum ObjectType: Codable {
         case avatar(state: Solid)
         case image(id: String, state: Plane)
+        case screen(id: String, state: ScreenCapture)
         case captureDevice(id: String, state: RenderTexture)
         case wind(state: Solid)
     }
@@ -76,10 +77,10 @@ public extension VCamScene {
         }
 
         public init(rect: CGRect) {
-            self.x = Float(rect.minX)
-            self.y = Float(rect.minY)
-            self.width = Float(rect.width)
-            self.height = Float(rect.height)
+            self.x = Float(rect.origin.x)
+            self.y = Float(rect.origin.y)
+            self.width = Float(rect.size.width)
+            self.height = Float(rect.size.height)
         }
 
         public var x: Float      // 0...1
@@ -104,5 +105,23 @@ public extension VCamScene {
         public var height: Float // number of vertical pixels of the rendertexture
         public var region: Plane
         public var crop: Plane
+
+        public var textureSize: CGSize {
+            .init(width: CGFloat(width), height: CGFloat(height))
+        }
+    }
+
+    struct ScreenCapture: Codable {
+        public init(captureType: VCamScene.ScreenCapture.CaptureType, texture: VCamScene.RenderTexture) {
+            self.captureType = captureType
+            self.texture = texture
+        }
+
+        public var captureType: CaptureType
+        public var texture: RenderTexture
+
+        public enum CaptureType: String, Codable {
+            case display, window
+        }
     }
 }
