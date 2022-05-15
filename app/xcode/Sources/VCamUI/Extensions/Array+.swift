@@ -19,5 +19,10 @@ public extension Array where Element: Identifiable {
     mutating func remove(byId id: Element.ID) {
         self = filter { $0.id != id }
     }
+
+    mutating func update(_ element: Element) {
+        guard let index = index(ofId: element.id) else { return }
+        self[index] = element
+    }
 }
 
