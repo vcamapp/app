@@ -58,6 +58,7 @@
 // MARK: - Wind
 
 "wind" = "風";
+"changeWindDirection" = "風の向きを変える (ランダム)";
 
 // MARK: - Object
 
