@@ -92,6 +92,8 @@ public enum L10n {
   public static let download = LocalizedString(lookupKey: "download")
   /// Download for Supporters
   public static let downloadSupporterVersion = LocalizedString(lookupKey: "downloadSupporterVersion")
+  /// Duplicate
+  public static let duplicate = LocalizedString(lookupKey: "duplicate")
   /// Horizontal sensitivity of body
   public static let easeOfBodyMovement = LocalizedString(lookupKey: "easeOfBodyMovement")
   /// Finger closing sensitivity

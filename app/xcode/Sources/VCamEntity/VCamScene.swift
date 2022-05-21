@@ -14,7 +14,7 @@ public struct VCamScene: Codable, Identifiable {
         self.objects = objects
     }
 
-    public let id: Int32
+    public var id: Int32
     public var name: String
     public var objects: [Object]
 }
