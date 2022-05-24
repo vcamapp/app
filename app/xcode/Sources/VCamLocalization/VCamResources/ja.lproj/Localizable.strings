@@ -12,6 +12,8 @@
 "cancel" = "キャンセル";
 "close" = "閉じる";
 "edit" = "編集";
+"pick" = "選択";
+"remove" = "削除";
 "duplicate" = "複製";
 "object" = "オブジェクト";
 "avatar" = "アバター";
@@ -80,12 +82,11 @@
 "optimizeMeshes" = "モデルのメッシュを最適化する (推奨)";
 "helpMesh" = "メッシュの結合等によりアプリの負荷を大幅に下げられます。モデルの表示に問題がある場合はオフにした後、モデルを再読込してください。";
 "flipScreen" = "画面を左右反転する";
-"backgroundColor" = "背景色";
-"backgroundImage" = "背景画像";
-"pick" = "選択";
+"background" = "背景";
 "lipSyncSensitivity" = "リップシンクの感度 (マイク)";
 "fpsScreen" = "FPS (画面の更新頻度)";
 "fpsCamera" = "カメラFPS (トラッキングの更新頻度)";
+"screenResolution" = "画面解像度";
 
 // MARK: - Tracking
 

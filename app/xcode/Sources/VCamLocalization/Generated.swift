@@ -28,10 +28,8 @@ public enum L10n {
   public static let anyProblem = LocalizedString(lookupKey: "anyProblem")
   /// Avatar
   public static let avatar = LocalizedString(lookupKey: "avatar")
-  /// Background color
-  public static let backgroundColor = LocalizedString(lookupKey: "backgroundColor")
-  /// Background image
-  public static let backgroundImage = LocalizedString(lookupKey: "backgroundImage")
+  /// Background
+  public static let background = LocalizedString(lookupKey: "background")
   /// Bloom
   public static let bloom = LocalizedString(lookupKey: "bloom")
   /// Bye
@@ -224,6 +222,8 @@ public enum L10n {
   public static let recording = LocalizedString(lookupKey: "recording")
   /// Release Notes:
   public static let releaseNotes = LocalizedString(lookupKey: "releaseNotes")
+  /// Remove
+  public static let remove = LocalizedString(lookupKey: "remove")
   /// Remove VCam from the capture
   public static let removeVCamFromCapture = LocalizedString(lookupKey: "removeVCamFromCapture")
   /// Setup is complete. Please restart Zoom or other clients.
@@ -244,6 +244,8 @@ public enum L10n {
   public static let screenCapture = LocalizedString(lookupKey: "screenCapture")
   /// Screen Effect
   public static let screenEffect = LocalizedString(lookupKey: "screenEffect")
+  /// Screen resolution
+  public static let screenResolution = LocalizedString(lookupKey: "screenResolution")
   /// s
   public static let seconds = LocalizedString(lookupKey: "seconds")
   /// Set up

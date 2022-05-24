@@ -12,6 +12,8 @@
 "cancel" = "Cancel";
 "close" = "Close";
 "edit" = "Edit";
+"pick" = "Pick";
+"remove" = "Remove";
 "duplicate" = "Duplicate";
 "object" = "Object";
 "avatar" = "Avatar";
@@ -80,12 +82,11 @@
 "optimizeMeshes" = "Optimize meshes (Recommended)";
 "helpMesh" = "Reduce the load on the app by merging meshes, etc. If you have problems viewing the model, turn it off and reload the model.";
 "flipScreen" = "Flip screen";
-"backgroundColor" = "Background color";
-"backgroundImage" = "Background image";
-"pick" = "Pick";
+"background" = "Background";
 "lipSyncSensitivity" = "Lip-sync sensitivity (mic)";
 "fpsScreen" = "FPS (screen)";
 "fpsCamera" = "FPS (tracking)";
+"screenResolution" = "Screen resolution";
 
 // MARK: - Tracking
 
