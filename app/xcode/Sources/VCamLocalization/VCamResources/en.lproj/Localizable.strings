@@ -87,6 +87,8 @@
 "fpsScreen" = "FPS (screen)";
 "fpsCamera" = "FPS (tracking)";
 "screenResolution" = "Screen resolution";
+"asHorizontalVideo" = " - Horizontal";
+"asVerticalVideo" = " - Vertical";
 
 // MARK: - Tracking
 

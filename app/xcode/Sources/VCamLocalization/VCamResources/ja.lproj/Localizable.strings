@@ -87,6 +87,8 @@
 "fpsScreen" = "FPS (画面の更新頻度)";
 "fpsCamera" = "カメラFPS (トラッキングの更新頻度)";
 "screenResolution" = "画面解像度";
+"asHorizontalVideo" = "(横長)";
+"asVerticalVideo" = "(縦長)";
 
 // MARK: - Tracking
 

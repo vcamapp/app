@@ -14,12 +14,9 @@ public enum ScreenResolution: Identifiable, CaseIterable {
     case resolution1080p
     case resolution720p
     case resolution540p
+    case resolutionVertical1080p
 
     public var id: Self { self }
-
-    public var description: String {
-        "\(size.width) x \(size.height)"
-    }
 
     public var size: (width: Int, height: Int) {
         switch self {
@@ -35,11 +32,19 @@ public enum ScreenResolution: Identifiable, CaseIterable {
             return (1280, 720)
         case .resolution540p:
             return (960, 540)
+        case .resolutionVertical1080p:
+            return (1080, 1920)
         }
     }
 
-    public init(height: Int) {
-        for resolution in Self.allCases where resolution.size.height == height {
+    public var isLandscape: Bool {
+        let size = size
+        return size.width > size.height
+    }
+
+    public init(width: Int, height: Int) {
+        for resolution in Self.allCases
+        where resolution.size.width == width && resolution.size.height == height {
             self = resolution
             return
         }

@@ -8,15 +8,17 @@
 import Foundation
 
 public struct VCamScene: Codable, Identifiable {
-    public init(id: Int32, name: String, objects: [VCamScene.Object]) {
+    public init(id: Int32, name: String, objects: [VCamScene.Object], aspectRatio: Float) {
         self.id = id
         self.name = name
         self.objects = objects
+        self.aspectRatio = aspectRatio
     }
 
     public var id: Int32
     public var name: String
     public var objects: [Object]
+    public var aspectRatio: Float?
 }
 
 public extension VCamScene {

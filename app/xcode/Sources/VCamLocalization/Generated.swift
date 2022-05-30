@@ -26,6 +26,10 @@ public enum L10n {
   public static let anamorphicRatio = LocalizedString(lookupKey: "anamorphicRatio")
   /// Any problem?
   public static let anyProblem = LocalizedString(lookupKey: "anyProblem")
+  ///  - Horizontal
+  public static let asHorizontalVideo = LocalizedString(lookupKey: "asHorizontalVideo")
+  ///  - Vertical
+  public static let asVerticalVideo = LocalizedString(lookupKey: "asVerticalVideo")
   /// Avatar
   public static let avatar = LocalizedString(lookupKey: "avatar")
   /// Background
