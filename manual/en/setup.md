@@ -2,15 +2,16 @@ Set up
 ---
 
 ## Download
-The free beta version can be downloaded from https://github.com/vcamapp/app/releases  
+The free beta version can be downloaded from [https://github.com/vcamapp/app/releases](https://github.com/vcamapp/app/releases)
+
 Click the dmg in the latest version.
 
 <img width="1215" alt="How to download" src="https://user-images.githubusercontent.com/8188636/168423989-b6ce6b72-de41-48b5-921c-3e254a6560dd.png">
 
 The supporter version can download from the link in the following page.
 
-English: https://www.patreon.com/posts/64958026  
-Japanese: https://tattn.fanbox.cc/posts/3541601
+English: [https://www.patreon.com/posts/64958026](https://www.patreon.com/posts/64958026)  
+Japanese: [https://tattn.fanbox.cc/posts/3541601](https://tattn.fanbox.cc/posts/3541601)
 
 (The supporter version has no watermark)
 
