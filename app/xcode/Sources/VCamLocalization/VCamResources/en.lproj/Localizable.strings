@@ -65,13 +65,14 @@
 
 // MARK: - Object
 
-"manageObjects" = "Manage objects";
-"addImage" = "Add an image";
-"addScreenCapture" = "Add a screen";
-"addVideoCapture" = "Add a video capture";
+"manageObjects" = "Manage Objects";
+"addImage" = "Add Image";
+"addScreenCapture" = "Add Screen";
+"addVideoCapture" = "Add Video Capture";
+"addWind" = "Add Wind";
 "screenCapture" = "Screen";
 "videoCapture" = "Video Capture";
-"deleteSelectedObject" = "Delete the selected object";
+"deleteSelectedObject" = "Delete Selected Object";
 
 "moveInitialPosition" = "Reset";
 
@@ -176,13 +177,14 @@
 
 // MARK: - Application Menu
 
-"uninstallPlugin" = "Uninstall the virtual camera plugin";
+"uninstallPlugin" = "Uninstall Virtual Camera Plugin";
 "setUp" = "Set up";
 "aboutApp" = "About VCam";
 "checkForUpdates" = "Check for Updates...";
 "file" = "File";
-"loadVRMFile" = "Load a VRM file";
-"loadOnVRoidHub" = "Load an avatar on VRoid Hub";
+"loadVRMFile" = "Load VRM file";
+"loadOnVRoidHub" = "Load Avatar on VRoid Hub";
+"resetAvatarPosition" = "Reset Avatar Position";
 "help" = "Help";
 "anyProblem" = "Any problem?";
 "quitVCam" = "Quit VCam";

@@ -69,6 +69,7 @@
 "addImage" = "画像追加";
 "addScreenCapture" = "画面キャプチャ追加";
 "addVideoCapture" = "映像キャプチャ追加";
+"addWind" = "風を追加";
 "screenCapture" = "画面キャプチャ";
 "videoCapture" = "映像キャプチャ";
 "deleteSelectedObject" = "選択中のオブジェクトを削除する";
@@ -106,7 +107,7 @@
 "trackHands" = "手をトラッキングする [β] ";
 "trackFingers" = "指をトラッキングする [β] ";
 "easeOfOpeningFingers" = "指の開きやすさ";
-"easeOfCloseFingers" = "指の閉じさすさ";
+"easeOfCloseFingers" = "指の閉じやすさ";
 "easeOfBodyMovement" = "体の左右の動きの大きさ";
 "shoulderRotationWeight" = "肩の回転の大きさ";
 "swivelOffset" = "肘の調整";
@@ -183,6 +184,7 @@
 "file" = "ファイル";
 "loadVRMFile" = "VRMファイルを読み込む";
 "loadOnVRoidHub" = "VRoid Hubからアバターを選ぶ";
+"resetAvatarPosition" = "アバターの位置をリセット";
 "help" = "ヘルプ";
 "anyProblem" = "困った時は？";
 "quitVCam" = "VCam を終了";

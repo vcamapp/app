@@ -8,12 +8,14 @@ public enum L10n {
   public static let aboutApp = LocalizedString(lookupKey: "aboutApp")
   /// Add
   public static let add = LocalizedString(lookupKey: "add")
-  /// Add an image
+  /// Add Image
   public static let addImage = LocalizedString(lookupKey: "addImage")
-  /// Add a screen
+  /// Add Screen
   public static let addScreenCapture = LocalizedString(lookupKey: "addScreenCapture")
-  /// Add a video capture
+  /// Add Video Capture
   public static let addVideoCapture = LocalizedString(lookupKey: "addVideoCapture")
+  /// Add Wind
+  public static let addWind = LocalizedString(lookupKey: "addWind")
   /// Allow access to %@
   public static func allowFor(_ p1: Any) -> ArgumentsLocalizedString {
     ArgumentsLocalizedString("allowFor %@", "allowFor \(String(describing: p1))", String(describing: p1))
@@ -80,7 +82,7 @@ public enum L10n {
   }
   /// Delete the virtual camera plugin.
   public static let deletePlugin = LocalizedString(lookupKey: "deletePlugin")
-  /// Delete the selected object
+  /// Delete Selected Object
   public static let deleteSelectedObject = LocalizedString(lookupKey: "deleteSelectedObject")
   /// Destination
   public static let destinationToSave = LocalizedString(lookupKey: "destinationToSave")
@@ -174,13 +176,13 @@ public enum L10n {
   public static let lipSync = LocalizedString(lookupKey: "lipSync")
   /// Lip-sync sensitivity (mic)
   public static let lipSyncSensitivity = LocalizedString(lookupKey: "lipSyncSensitivity")
-  /// Load an avatar on VRoid Hub
+  /// Load Avatar on VRoid Hub
   public static let loadOnVRoidHub = LocalizedString(lookupKey: "loadOnVRoidHub")
-  /// Load a VRM file
+  /// Load VRM file
   public static let loadVRMFile = LocalizedString(lookupKey: "loadVRMFile")
   /// Main
   public static let main = LocalizedString(lookupKey: "main")
-  /// Manage objects
+  /// Manage Objects
   public static let manageObjects = LocalizedString(lookupKey: "manageObjects")
   /// Message
   public static let message = LocalizedString(lookupKey: "message")
@@ -230,6 +232,8 @@ public enum L10n {
   public static let remove = LocalizedString(lookupKey: "remove")
   /// Remove VCam from the capture
   public static let removeVCamFromCapture = LocalizedString(lookupKey: "removeVCamFromCapture")
+  /// Reset Avatar Position
+  public static let resetAvatarPosition = LocalizedString(lookupKey: "resetAvatarPosition")
   /// Setup is complete. Please restart Zoom or other clients.
   public static let restartAfterInstalling = LocalizedString(lookupKey: "restartAfterInstalling")
   /// Roundness
@@ -296,7 +300,7 @@ public enum L10n {
   public static func typeNo(_ p1: Any) -> ArgumentsLocalizedString {
     ArgumentsLocalizedString("typeNo %@", "typeNo \(String(describing: p1))", String(describing: p1))
   }
-  /// Uninstall the virtual camera plugin
+  /// Uninstall Virtual Camera Plugin
   public static let uninstallPlugin = LocalizedString(lookupKey: "uninstallPlugin")
   /// Update
   public static let update = LocalizedString(lookupKey: "update")
