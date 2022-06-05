@@ -83,6 +83,7 @@
 "optimizeMeshes" = "Optimize meshes (Recommended)";
 "helpMesh" = "Reduce the load on the app by merging meshes, etc. If you have problems viewing the model, turn it off and reload the model.";
 "flipScreen" = "Flip screen";
+"addToMacOSMenuBar" = "Add icon in macOS menu bar";
 "background" = "Background";
 "lipSyncSensitivity" = "Lip-sync sensitivity (mic)";
 "fpsScreen" = "FPS (screen)";

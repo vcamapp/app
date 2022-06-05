@@ -83,6 +83,7 @@
 "optimizeMeshes" = "モデルのメッシュを最適化する (推奨)";
 "helpMesh" = "メッシュの結合等によりアプリの負荷を大幅に下げられます。モデルの表示に問題がある場合はオフにした後、モデルを再読込してください。";
 "flipScreen" = "画面を左右反転する";
+"addToMacOSMenuBar" = "macOSのメニューバーに追加する";
 "background" = "背景";
 "lipSyncSensitivity" = "リップシンクの感度 (マイク)";
 "fpsScreen" = "FPS (画面の更新頻度)";

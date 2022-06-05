@@ -12,6 +12,8 @@ public enum L10n {
   public static let addImage = LocalizedString(lookupKey: "addImage")
   /// Add Screen
   public static let addScreenCapture = LocalizedString(lookupKey: "addScreenCapture")
+  /// Add icon in macOS menu bar
+  public static let addToMacOSMenuBar = LocalizedString(lookupKey: "addToMacOSMenuBar")
   /// Add Video Capture
   public static let addVideoCapture = LocalizedString(lookupKey: "addVideoCapture")
   /// Add Wind
