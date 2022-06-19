@@ -36,7 +36,7 @@ public extension VCamScene {
 
     enum ObjectType: Codable {
         case avatar(state: Solid)
-        case image(id: String, state: Plane)
+        case image(id: String, state: Image)
         case screen(id: String, state: ScreenCapture)
         case captureDevice(id: String, state: RenderTexture)
         case wind(state: Solid)
@@ -70,6 +70,26 @@ public extension VCamScene {
         public static let zero = Solid(position: .zero, rotation: .zero)
     }
 
+    struct Image: Codable {
+        public init(x: Float, y: Float, width: Float, height: Float, filter: ImageFilterConfiguration?) {
+            self.x = x
+            self.y = y
+            self.width = width
+            self.height = height
+            self.filter = filter
+        }
+
+        public var x: Float      // 0...1
+        public var y: Float      // 0...1
+        public var width: Float  // 0...1
+        public var height: Float // 0...1
+        public var filter: ImageFilterConfiguration?
+
+        public var rect: CGRect {
+            .init(x: CGFloat(x), y: CGFloat(y), width: CGFloat(width), height: CGFloat(height))
+        }
+    }
+
     struct Plane: Codable {
         public init(x: Float, y: Float, width: Float, height: Float) {
             self.x = x
@@ -96,17 +116,19 @@ public extension VCamScene {
     }
 
     struct RenderTexture: Codable {
-        public init(width: Float, height: Float, region: VCamScene.Plane, crop: VCamScene.Plane) {
+        public init(width: Float, height: Float, region: VCamScene.Plane, crop: VCamScene.Plane, filter: ImageFilterConfiguration?) {
             self.width = width
             self.height = height
             self.region = region
             self.crop = crop
+            self.filter = filter
         }
 
         public var width: Float  // number of horizontal pixels of the rendertexture
         public var height: Float // number of vertical pixels of the rendertexture
         public var region: Plane
         public var crop: Plane
+        public var filter: ImageFilterConfiguration?
 
         public var textureSize: CGSize {
             .init(width: CGFloat(width), height: CGFloat(height))

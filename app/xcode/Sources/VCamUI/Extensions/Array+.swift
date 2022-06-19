@@ -16,6 +16,16 @@ public extension Array where Element: Identifiable {
         first { $0.id == id }
     }
 
+    subscript(id id: Element.ID) -> Element? {
+        get {
+            find(byId: id)
+        }
+        set {
+            guard let index = index(ofId: id), let value = newValue else { return }
+            self[index] = value
+        }
+    }
+
     mutating func remove(byId id: Element.ID) {
         self = filter { $0.id != id }
     }

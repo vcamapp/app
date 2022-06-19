@@ -13,6 +13,7 @@
 "close" = "Close";
 "edit" = "Edit";
 "pick" = "Pick";
+"apply" = "Apply";
 "remove" = "Remove";
 "duplicate" = "Duplicate";
 "object" = "Object";
@@ -27,6 +28,8 @@
 "destinationToSave" = "Destination";
 "update" = "Update";
 "download" = "Download";
+"filter" = "Filter";
+"threshold" = "Threshold";
 "seconds" = "s";
 
 // MARK: - Menu
@@ -130,7 +133,7 @@
 "tint" = "Tint";
 "bloom" = "Bloom";
 "intensity" = "Intensity";
-"threshold" = "Threshold";
+"thresholdScreenEffect" = "Threshold";
 "softKnee" = "Soft Knee";
 "diffusion" = "Diffusion";
 "anamorphicRatio" = "Anamorphic ratio";
@@ -142,6 +145,9 @@
 "roundness" = "Roundness";
 "none" = "None";
 "typeNo %@" = "Type%@";
+
+// MARK: - Filter
+"chromaKeying" = "Chroma Keying";
 
 // MARK: - Permission
 

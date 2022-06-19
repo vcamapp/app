@@ -30,6 +30,8 @@ public enum L10n {
   public static let anamorphicRatio = LocalizedString(lookupKey: "anamorphicRatio")
   /// Any problem?
   public static let anyProblem = LocalizedString(lookupKey: "anyProblem")
+  /// Apply
+  public static let apply = LocalizedString(lookupKey: "apply")
   ///  - Horizontal
   public static let asHorizontalVideo = LocalizedString(lookupKey: "asHorizontalVideo")
   ///  - Vertical
@@ -58,6 +60,8 @@ public enum L10n {
   public static let checkForUpdates = LocalizedString(lookupKey: "checkForUpdates")
   /// Cheer
   public static let cheer = LocalizedString(lookupKey: "cheer")
+  /// Chroma Keying
+  public static let chromaKeying = LocalizedString(lookupKey: "chromaKeying")
   /// Clipboard
   public static let clipboard = LocalizedString(lookupKey: "clipboard")
   /// Close
@@ -130,6 +134,8 @@ public enum L10n {
   public static let failure = LocalizedString(lookupKey: "failure")
   /// File
   public static let file = LocalizedString(lookupKey: "file")
+  /// Filter
+  public static let filter = LocalizedString(lookupKey: "filter")
   /// Flip screen
   public static let flipScreen = LocalizedString(lookupKey: "flipScreen")
   /// FPS (tracking)
@@ -286,6 +292,8 @@ public enum L10n {
   public static let takePhoto = LocalizedString(lookupKey: "takePhoto")
   /// Threshold
   public static let threshold = LocalizedString(lookupKey: "threshold")
+  /// Threshold
+  public static let thresholdScreenEffect = LocalizedString(lookupKey: "thresholdScreenEffect")
   /// Time to take photos
   public static let timeToTakePhoto = LocalizedString(lookupKey: "timeToTakePhoto")
   /// Tint

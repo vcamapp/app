@@ -13,6 +13,7 @@
 "close" = "閉じる";
 "edit" = "編集";
 "pick" = "選択";
+"apply" = "適用";
 "remove" = "削除";
 "duplicate" = "複製";
 "object" = "オブジェクト";
@@ -27,6 +28,8 @@
 "destinationToSave" = "保存先";
 "update" = "アップデート";
 "download" = "ダウンロード";
+"filter" = "フィルタ";
+"threshold" = "しきい値";
 "seconds" = "秒";
 
 // MARK: - Menu
@@ -130,7 +133,7 @@
 "tint" = "色合い";
 "bloom" = "ブルーム (Bloom)";
 "intensity" = "強さ";
-"threshold" = "閾値 (適用する輝度の最小値)";
+"thresholdScreenEffect" = "閾値 (適用する輝度の最小値)";
 "softKnee" = "柔らかさ (Soft Knee)";
 "diffusion" = "光の拡散";
 "anamorphicRatio" = "歪み (アナモルフィック)";
@@ -142,6 +145,9 @@
 "roundness" = "丸み";
 "none" = "なし";
 "typeNo %@" = "タイプ%@";
+
+// MARK: - Filter
+"chromaKeying" = "クロマキー合成";
 
 // MARK: - Permission
 
