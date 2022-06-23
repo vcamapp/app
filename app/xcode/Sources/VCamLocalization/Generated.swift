@@ -16,6 +16,8 @@ public enum L10n {
   public static let addToMacOSMenuBar = LocalizedString(lookupKey: "addToMacOSMenuBar")
   /// Add Video Capture
   public static let addVideoCapture = LocalizedString(lookupKey: "addVideoCapture")
+  /// Add Web
+  public static let addWeb = LocalizedString(lookupKey: "addWeb")
   /// Add Wind
   public static let addWind = LocalizedString(lookupKey: "addWind")
   /// Allow access to %@
@@ -76,10 +78,14 @@ public enum L10n {
   public static let completeUninstalling = LocalizedString(lookupKey: "completeUninstalling")
   /// Contrast
   public static let contrast = LocalizedString(lookupKey: "contrast")
+  /// Copy
+  public static let copy = LocalizedString(lookupKey: "copy")
   /// Current Version: %@
   public static func currentVersion(_ p1: Any) -> ArgumentsLocalizedString {
     ArgumentsLocalizedString("currentVersion %@", "currentVersion \(String(describing: p1))", String(describing: p1))
   }
+  /// Cut
+  public static let cut = LocalizedString(lookupKey: "cut")
   /// Default
   public static let `default` = LocalizedString(lookupKey: "default")
   /// Delete %@
@@ -142,6 +148,8 @@ public enum L10n {
   public static let fpsCamera = LocalizedString(lookupKey: "fpsCamera")
   /// FPS (screen)
   public static let fpsScreen = LocalizedString(lookupKey: "fpsScreen")
+  /// Height
+  public static let height = LocalizedString(lookupKey: "height")
   /// Help
   public static let help = LocalizedString(lookupKey: "help")
   /// If the movement is out of sync with the actual movement, press this button while facing forward to the camera and looking at the camera.
@@ -216,6 +224,8 @@ public enum L10n {
   public static let openPreference = LocalizedString(lookupKey: "openPreference")
   /// Optimize meshes (Recommended)
   public static let optimizeMeshes = LocalizedString(lookupKey: "optimizeMeshes")
+  /// Paste
+  public static let paste = LocalizedString(lookupKey: "paste")
   /// Pick
   public static let pick = LocalizedString(lookupKey: "pick")
   /// Play idle motions
@@ -264,6 +274,8 @@ public enum L10n {
   public static let screenResolution = LocalizedString(lookupKey: "screenResolution")
   /// s
   public static let seconds = LocalizedString(lookupKey: "seconds")
+  /// Select All
+  public static let selectAll = LocalizedString(lookupKey: "selectAll")
   /// Set up
   public static let setUp = LocalizedString(lookupKey: "setUp")
   /// Weight of shoulder rotation
@@ -336,10 +348,14 @@ public enum L10n {
   public static let videoFormat = LocalizedString(lookupKey: "videoFormat")
   /// Vignette
   public static let vignette = LocalizedString(lookupKey: "vignette")
+  /// Web
+  public static let web = LocalizedString(lookupKey: "web")
   /// What!?
   public static let what = LocalizedString(lookupKey: "what")
   /// White balance
   public static let whiteBalance = LocalizedString(lookupKey: "whiteBalance")
+  /// Width
+  public static let width = LocalizedString(lookupKey: "width")
   /// Wind
   public static let wind = LocalizedString(lookupKey: "wind")
   /// Window

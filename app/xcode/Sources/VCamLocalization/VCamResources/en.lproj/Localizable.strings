@@ -24,12 +24,19 @@
 "camera" = "Camera";
 "mic" = "Microphone";
 "scene" = "Scene";
+"web" = "Web";
 "message" = "Message";
 "destinationToSave" = "Destination";
 "update" = "Update";
 "download" = "Download";
 "filter" = "Filter";
 "threshold" = "Threshold";
+"cut" = "Cut";
+"copy" = "Copy";
+"paste" = "Paste";
+"selectAll" = "Select All";
+"width" = "Width";
+"height" = "Height";
 "seconds" = "s";
 
 // MARK: - Menu
@@ -72,6 +79,7 @@
 "addImage" = "Add Image";
 "addScreenCapture" = "Add Screen";
 "addVideoCapture" = "Add Video Capture";
+"addWeb" = "Add Web";
 "addWind" = "Add Wind";
 "screenCapture" = "Screen";
 "videoCapture" = "Video Capture";

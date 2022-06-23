@@ -39,6 +39,7 @@ public extension VCamScene {
         case image(id: String, state: Image)
         case screen(id: String, state: ScreenCapture)
         case captureDevice(id: String, state: RenderTexture)
+        case web(state: Web)
         case wind(state: Solid)
     }
 
@@ -147,5 +148,19 @@ public extension VCamScene {
         public enum CaptureType: String, Codable {
             case display, window
         }
+    }
+
+    struct Web: Codable {
+        public init(url: URL, fps: Int, css: String?, texture: VCamScene.RenderTexture) {
+            self.url = url
+            self.fps = fps
+            self.css = css
+            self.texture = texture
+        }
+
+        public var url: URL
+        public var fps: Int
+        public var css: String?
+        public var texture: RenderTexture
     }
 }

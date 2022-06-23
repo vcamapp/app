@@ -20,6 +20,7 @@
 "avatar" = "アバター";
 "image" = "画像";
 "screen" = "画面";
+"web" = "ウェブ";
 "clipboard" = "クリップボード";
 "camera" = "カメラ";
 "mic" = "マイク";
@@ -30,6 +31,12 @@
 "download" = "ダウンロード";
 "filter" = "フィルタ";
 "threshold" = "しきい値";
+"cut" = "切り取り";
+"copy" = "コピー";
+"paste" = "貼り付け";
+"selectAll" = "すべてを選択";
+"width" = "幅";
+"height" = "高さ";
 "seconds" = "秒";
 
 // MARK: - Menu
@@ -69,9 +76,10 @@
 // MARK: - Object
 
 "manageObjects" = "オブジェクト操作";
-"addImage" = "画像追加";
-"addScreenCapture" = "画面キャプチャ追加";
-"addVideoCapture" = "映像キャプチャ追加";
+"addImage" = "画像を追加";
+"addScreenCapture" = "画面キャプチャを追加";
+"addVideoCapture" = "映像キャプチャを追加";
+"addWeb" = "ウェブを追加";
 "addWind" = "風を追加";
 "screenCapture" = "画面キャプチャ";
 "videoCapture" = "映像キャプチャ";
