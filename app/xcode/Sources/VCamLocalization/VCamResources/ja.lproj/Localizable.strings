@@ -183,6 +183,7 @@
 "videoCaptureDevice" = "映像デバイス";
 "previewCapture" = "映像をプレビューする";
 "errorScreenCapturePermission" = "画面収録の権限がありません。システム環境設定のセキュリティとプライバシーにて画面収録を許可してください。";
+"refreshScreen" = "画面を更新";
 
 // MARK: - Language
 

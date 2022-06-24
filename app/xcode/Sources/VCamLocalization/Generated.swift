@@ -244,6 +244,8 @@ public enum L10n {
   public static let recalibrate = LocalizedString(lookupKey: "recalibrate")
   /// Recording
   public static let recording = LocalizedString(lookupKey: "recording")
+  /// Refresh Screen
+  public static let refreshScreen = LocalizedString(lookupKey: "refreshScreen")
   /// Release Notes:
   public static let releaseNotes = LocalizedString(lookupKey: "releaseNotes")
   /// Remove

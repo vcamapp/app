@@ -183,6 +183,7 @@
 "videoCaptureDevice" = "Video Capture Device";
 "previewCapture" = "Preview the capture";
 "errorScreenCapturePermission" = "No permisison. Please allow screen recording in the Security & Privacy of the System Preferences.";
+"refreshScreen" = "Refresh Screen";
 
 // MARK: - Language
 
