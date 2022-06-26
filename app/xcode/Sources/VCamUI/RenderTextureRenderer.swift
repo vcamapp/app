@@ -10,12 +10,12 @@ import CoreImage
 import AppKit
 
 public protocol RenderTextureRenderer: AnyObject {
-    var size: CGSize { get }
     var cropRect: CGRect { get }
     var filter: ImageFilter? { get set }
 
     func setRenderTexture(updator: @escaping (CIImage) -> Void)
     func snapshot() -> CIImage
+    func updateTextureSizeIfNeeded(imageWidth: CGFloat, imageHeight: CGFloat) -> Bool
 
     func disableRenderTexture()
 
@@ -25,6 +25,10 @@ public protocol RenderTextureRenderer: AnyObject {
 }
 
 public extension RenderTextureRenderer {
+    func updateTextureSizeIfNeeded(imageWidth: CGFloat, imageHeight: CGFloat) -> Bool {
+        false
+    }
+
     func croppedSnapshot() -> NSImage {
         let image = snapshot()
         return cropped(of: image).nsImage()
