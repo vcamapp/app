@@ -11,6 +11,7 @@
 "default" = "デフォルト";
 "cancel" = "キャンセル";
 "close" = "閉じる";
+"done" = "完了";
 "edit" = "編集";
 "pick" = "選択";
 "apply" = "適用";
@@ -84,6 +85,7 @@
 "screenCapture" = "画面キャプチャ";
 "videoCapture" = "映像キャプチャ";
 "deleteSelectedObject" = "選択中のオブジェクトを削除する";
+"interact" = "操作";
 
 "moveInitialPosition" = "初期位置";
 

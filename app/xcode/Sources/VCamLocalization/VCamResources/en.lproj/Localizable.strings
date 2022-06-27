@@ -11,6 +11,7 @@
 "default" = "Default";
 "cancel" = "Cancel";
 "close" = "Close";
+"done" = "Done";
 "edit" = "Edit";
 "pick" = "Pick";
 "apply" = "Apply";
@@ -84,6 +85,7 @@
 "screenCapture" = "Screen";
 "videoCapture" = "Video Capture";
 "deleteSelectedObject" = "Delete Selected Object";
+"interact" = "Interact";
 
 "moveInitialPosition" = "Reset";
 

@@ -104,6 +104,8 @@ public enum L10n {
   public static let diffusion = LocalizedString(lookupKey: "diffusion")
   /// Display
   public static let display = LocalizedString(lookupKey: "display")
+  /// Done
+  public static let done = LocalizedString(lookupKey: "done")
   /// Download
   public static let download = LocalizedString(lookupKey: "download")
   /// Download for Supporters
@@ -174,6 +176,8 @@ public enum L10n {
   }
   /// Intensity
   public static let intensity = LocalizedString(lookupKey: "intensity")
+  /// Interact
+  public static let interact = LocalizedString(lookupKey: "interact")
   /// %@ is not found
   public static func isNotFound(_ p1: Any) -> ArgumentsLocalizedString {
     ArgumentsLocalizedString("isNotFound %@", "isNotFound \(String(describing: p1))", String(describing: p1))

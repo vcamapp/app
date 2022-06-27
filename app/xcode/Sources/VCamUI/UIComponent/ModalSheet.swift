@@ -12,7 +12,7 @@ public struct ModalSheet<Content: View>: View {
         cancelTitle: String = L10n.cancel.text,
         doneTitle: String,
         doneDisabled: Bool = false,
-        cancel: @escaping () -> Void,
+        cancel: (() -> Void)? = nil,
         done: @escaping () -> Void,
         content: @escaping () -> Content
     ) {
@@ -27,7 +27,7 @@ public struct ModalSheet<Content: View>: View {
     var cancelTitle = L10n.cancel.text
     let doneTitle: String
     var doneDisabled = false
-    let cancel: () -> Void
+    let cancel: (() -> Void)?
     let done: () -> Void
     @ViewBuilder let content: () -> Content
 
@@ -40,10 +40,12 @@ public struct ModalSheet<Content: View>: View {
             Spacer()
             HStack {
                 Spacer()
-                Button(cancelTitle) {
-                    cancel()
+                if let cancel = cancel {
+                    Button(cancelTitle) {
+                        cancel()
+                    }
+                    .keyboardShortcut(.cancelAction)
                 }
-                .keyboardShortcut(.cancelAction)
                 Button(doneTitle) {
                     done()
                 }
@@ -52,7 +54,6 @@ public struct ModalSheet<Content: View>: View {
             }
             .padding()
         }
-        .frame(minWidth: 640, minHeight: 480)
         .environment(\.locale, Locale(identifier: locale))
     }
 }
