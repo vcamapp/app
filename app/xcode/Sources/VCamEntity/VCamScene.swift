@@ -151,14 +151,16 @@ public extension VCamScene {
     }
 
     struct Web: Codable {
-        public init(url: URL, fps: Int, css: String?, texture: VCamScene.RenderTexture) {
+        public init(url: URL?, path: Data?, fps: Int, css: String?, texture: VCamScene.RenderTexture) {
             self.url = url
+            self.path = path
             self.fps = fps
             self.css = css
             self.texture = texture
         }
 
-        public var url: URL
+        public var url: URL?
+        public var path: Data?
         public var fps: Int
         public var css: String?
         public var texture: RenderTexture

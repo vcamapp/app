@@ -86,6 +86,7 @@
 "videoCapture" = "映像キャプチャ";
 "deleteSelectedObject" = "選択中のオブジェクトを削除する";
 "interact" = "操作";
+"localFile" = "ローカルファイル";
 
 "moveInitialPosition" = "初期位置";
 

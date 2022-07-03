@@ -86,6 +86,7 @@
 "videoCapture" = "Video Capture";
 "deleteSelectedObject" = "Delete Selected Object";
 "interact" = "Interact";
+"localFile" = "Local File";
 
 "moveInitialPosition" = "Reset";
 

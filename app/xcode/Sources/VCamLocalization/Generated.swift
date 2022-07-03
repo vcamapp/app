@@ -200,6 +200,8 @@ public enum L10n {
   public static let loadOnVRoidHub = LocalizedString(lookupKey: "loadOnVRoidHub")
   /// Load VRM file
   public static let loadVRMFile = LocalizedString(lookupKey: "loadVRMFile")
+  /// Local File
+  public static let localFile = LocalizedString(lookupKey: "localFile")
   /// Main
   public static let main = LocalizedString(lookupKey: "main")
   /// Manage Objects
