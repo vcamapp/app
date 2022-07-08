@@ -36,6 +36,7 @@
 "copy" = "Copy";
 "paste" = "Paste";
 "selectAll" = "Select All";
+"runCode" = "Run";
 "width" = "Width";
 "height" = "Height";
 "seconds" = "s";

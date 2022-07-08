@@ -36,6 +36,7 @@
 "copy" = "コピー";
 "paste" = "貼り付け";
 "selectAll" = "すべてを選択";
+"runCode" = "実行";
 "width" = "幅";
 "height" = "高さ";
 "seconds" = "秒";

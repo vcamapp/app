@@ -266,6 +266,8 @@ public enum L10n {
   public static let roundness = LocalizedString(lookupKey: "roundness")
   /// Run
   public static let run = LocalizedString(lookupKey: "run")
+  /// Run
+  public static let runCode = LocalizedString(lookupKey: "runCode")
   /// Saturation
   public static let saturation = LocalizedString(lookupKey: "saturation")
   /// Save
