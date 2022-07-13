@@ -11,9 +11,13 @@ let package = Package(
         .library(name: "VCamAudio", targets: ["VCamAudio"]),
         .library(name: "VCamCamera", targets: ["VCamCamera"]),
     ],
+    dependencies: [
+        .package(url: "https://github.com/siteline/SwiftUI-Introspect", exact: "0.1.4"),
+    ],
     targets: [
         .target(name: "VCamUI", dependencies: [
             "VCamCamera", "VCamData", "VCamLocalization",
+            .product(name: "Introspect", package: "SwiftUI-Introspect")
         ]),
         .target(name: "VCamData", dependencies: ["VCamEntity"]),
         .target(name: "VCamEntity"),
