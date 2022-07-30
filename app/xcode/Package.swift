@@ -22,7 +22,7 @@ let package = Package(
         .target(name: "VCamData", dependencies: ["VCamEntity"]),
         .target(name: "VCamEntity"),
         .target(name: "VCamLocalization", resources: [.process("VCamResources")]),
-        .target(name: "VCamAudio"),
+        .target(name: "VCamAudio", dependencies: ["VCamEntity"]),
         .target(name: "VCamBridge"),
         .target(name: "VCamCamera", dependencies: ["VCamEntity"]),
     ]
