@@ -1,6 +1,6 @@
 //
 //  VCamSceneMetadata.swift
-//  UniVCam
+//  
 //
 //  Created by Tatsuya Tanaka on 2022/05/08.
 //

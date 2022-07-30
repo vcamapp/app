@@ -1,6 +1,6 @@
 //
 //  ColorEditField.swift
-//  VirtualCameraSample
+//  
 //
 //  Created by Tatsuya Tanaka on 2022/02/22.
 //

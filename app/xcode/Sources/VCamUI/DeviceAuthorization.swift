@@ -1,6 +1,6 @@
 //
 //  DeviceAuthorization.swift
-//  UniVCam
+//  
 //
 //  Created by Tatsuya Tanaka on 2022/06/08.
 //
@@ -74,7 +74,7 @@ public enum DeviceAuthorization {
         alert.messageText = L10n.allowFor(type.name).text
         alert.addButton(withTitle: L10n.openPreference.text)
         alert.addButton(withTitle: L10n.cancel.text)
-        
+
         let response = alert.runModal()
         switch response {
         case .alertFirstButtonReturn:
