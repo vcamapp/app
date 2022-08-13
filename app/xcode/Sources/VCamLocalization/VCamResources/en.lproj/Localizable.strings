@@ -110,7 +110,6 @@
 // MARK: - Tracking
 
 "micOrCamera" = "Mic or Camera";
-"recalibrate" = "Recalibrate";
 "helpCalibrate" = "If the movement is out of sync with the actual movement, press this button while facing forward to the camera and looking at the camera.";
 "useCameraForTracking" = "Use camera for tracking";
 "useEmotionBy %@" = "Use emotion by %@ [β] (Use high power)";
@@ -208,6 +207,9 @@
 "help" = "Help";
 "anyProblem" = "Any problem?";
 "quitVCam" = "Quit VCam";
+
+"editAvatar" = "Edit Avatar";
+"recalibrate" = "Recalibrate";
 
 "update" = "Update";
 "add" = "Add";

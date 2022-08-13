@@ -110,7 +110,6 @@
 // MARK: - Tracking
 
 "micOrCamera" = "マイクまたはカメラ";
-"recalibrate" = "再キャリブレーション";
 "helpCalibrate" = "実際の動きとずれている場合は、カメラに対して正面を向いた状態でカメラ目線でこのボタンを押してください";
 "useCameraForTracking" = "カメラでアバターを操作";
 "useEmotionBy %@" = "表情を%@で推定して反映する [β] (負荷増)";
@@ -208,6 +207,9 @@
 "help" = "ヘルプ";
 "anyProblem" = "困った時は？";
 "quitVCam" = "VCam を終了";
+
+"editAvatar" = "アバターの編集";
+"recalibrate" = "再キャリブレーション";
 
 "update" = "更新";
 "add" = "追加";

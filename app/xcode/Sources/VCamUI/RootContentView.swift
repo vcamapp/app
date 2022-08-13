@@ -23,29 +23,37 @@ public struct RootContentView<VCamUI: View, MenuBottomView: View>: View {
     let interactable: Bool
 
     public var body: some View {
-        HStack {
-            VCamMenu(
-                bottomView: menuBottomView.frame(height: 200)
-            )
-            .onTapGesture {
-                unityView.window?.makeFirstResponder(nil)
-            }
-            .disabled(!interactable)
+        if interactable {
+            HStack {
+                VCamMenu(
+                    bottomView: menuBottomView.frame(height: 200)
+                )
+                .onTapGesture {
+                    unityView.window?.makeFirstResponder(nil)
+                }
+                .disabled(!interactable)
 
-            VSplitView {
-                UnityContainerView(unityView: unityView)
-//                    .help(L10n.helpMouseHover.text)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .aspectRatio(aspectRatio == 0 ? 0.5 : aspectRatio, contentMode: .fit)
-                    .layoutPriority(2)
-                vcamUI
-                    .onTapGesture {
-                        unityView.window?.makeFirstResponder(nil)
-                    }
+                VSplitView {
+                    unityContainer()
+                    vcamUI
+                        .onTapGesture {
+                            unityView.window?.makeFirstResponder(nil)
+                        }
+                }
+                .frame(minHeight: 350)
+                .layoutPriority(1)
             }
-            .frame(minHeight: 350)
-            .layoutPriority(1)
+        } else {
+            unityContainer()
         }
+    }
+
+    func unityContainer() -> some View {
+        UnityContainerView(unityView: unityView)
+//                    .help(L10n.helpMouseHover.text)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .aspectRatio(aspectRatio == 0 ? 0.5 : aspectRatio, contentMode: .fit)
+            .layoutPriority(2)
     }
 }
 
