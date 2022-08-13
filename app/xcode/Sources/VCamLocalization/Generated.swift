@@ -246,6 +246,18 @@ public enum L10n {
   public static let preset = LocalizedString(lookupKey: "preset")
   /// Preview the capture
   public static let previewCapture = LocalizedString(lookupKey: "previewCapture")
+  /// Beautiful
+  public static let qualityBeautiful = LocalizedString(lookupKey: "qualityBeautiful")
+  /// Fantastic
+  public static let qualityFantastic = LocalizedString(lookupKey: "qualityFantastic")
+  /// Fast
+  public static let qualityFast = LocalizedString(lookupKey: "qualityFast")
+  /// Fastest
+  public static let qualityFastest = LocalizedString(lookupKey: "qualityFastest")
+  /// Good
+  public static let qualityGood = LocalizedString(lookupKey: "qualityGood")
+  /// Simple
+  public static let qualitySimple = LocalizedString(lookupKey: "qualitySimple")
   /// Quit VCam
   public static let quitVCam = LocalizedString(lookupKey: "quitVCam")
   /// Recalibrate
@@ -260,6 +272,8 @@ public enum L10n {
   public static let remove = LocalizedString(lookupKey: "remove")
   /// Remove VCam from the capture
   public static let removeVCamFromCapture = LocalizedString(lookupKey: "removeVCamFromCapture")
+  /// Rendering Quality
+  public static let renderingQuality = LocalizedString(lookupKey: "renderingQuality")
   /// Reset Avatar Position
   public static let resetAvatarPosition = LocalizedString(lookupKey: "resetAvatarPosition")
   /// Setup is complete. Please restart Zoom or other clients.

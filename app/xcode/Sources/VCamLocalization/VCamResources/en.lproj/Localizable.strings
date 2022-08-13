@@ -106,6 +106,13 @@
 "screenResolution" = "Screen resolution";
 "asHorizontalVideo" = " - Horizontal";
 "asVerticalVideo" = " - Vertical";
+"renderingQuality" = "Rendering Quality";
+"qualityFastest" = "Fastest";
+"qualityFast" = "Fast";
+"qualitySimple" = "Simple";
+"qualityGood" = "Good";
+"qualityBeautiful" = "Beautiful";
+"qualityFantastic" = "Fantastic";
 
 // MARK: - Tracking
 
