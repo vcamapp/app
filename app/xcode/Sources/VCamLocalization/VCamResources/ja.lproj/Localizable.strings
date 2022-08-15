@@ -30,6 +30,7 @@
 "destinationToSave" = "保存先";
 "update" = "アップデート";
 "download" = "ダウンロード";
+"enable" = "有効";
 "filter" = "フィルタ";
 "threshold" = "しきい値";
 "cut" = "切り取り";

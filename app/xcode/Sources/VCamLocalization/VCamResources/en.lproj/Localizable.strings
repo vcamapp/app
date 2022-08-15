@@ -30,6 +30,7 @@
 "destinationToSave" = "Destination";
 "update" = "Update";
 "download" = "Download";
+"enable" = "Enable";
 "filter" = "Filter";
 "threshold" = "Threshold";
 "cut" = "Cut";

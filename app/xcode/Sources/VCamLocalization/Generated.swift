@@ -124,6 +124,8 @@ public enum L10n {
   public static let editAvatar = LocalizedString(lookupKey: "editAvatar")
   /// Emoji
   public static let emoji = LocalizedString(lookupKey: "emoji")
+  /// Enable
+  public static let enable = LocalizedString(lookupKey: "enable")
   /// English
   public static let english = LocalizedString(lookupKey: "english")
   /// Entire Display
