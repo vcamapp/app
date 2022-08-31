@@ -16,14 +16,15 @@ let package = Package(
     ],
     targets: [
         .target(name: "VCamUI", dependencies: [
-            "VCamCamera", "VCamData", "VCamLocalization",
+            "VCamUIFoundation", "VCamCamera", "VCamData", "VCamLocalization",
             .product(name: "Introspect", package: "SwiftUI-Introspect")
         ]),
+        .target(name: "VCamUIFoundation"),
         .target(name: "VCamData", dependencies: ["VCamEntity"]),
         .target(name: "VCamEntity"),
         .target(name: "VCamLocalization", resources: [.process("VCamResources")]),
         .target(name: "VCamAudio", dependencies: ["VCamEntity"]),
-        .target(name: "VCamBridge"),
+        .target(name: "VCamBridge", dependencies: ["VCamUIFoundation"]),
         .target(name: "VCamCamera", dependencies: ["VCamEntity"]),
     ]
 )
