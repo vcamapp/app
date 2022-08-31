@@ -16,7 +16,7 @@ let package = Package(
     ],
     targets: [
         .target(name: "VCamUI", dependencies: [
-            "VCamUIFoundation", "VCamCamera", "VCamData", "VCamLocalization",
+            "VCamUIFoundation", "VCamCamera", "VCamData", "VCamLocalization", "VCamBridge",
             .product(name: "Introspect", package: "SwiftUI-Introspect")
         ]),
         .target(name: "VCamUIFoundation"),
