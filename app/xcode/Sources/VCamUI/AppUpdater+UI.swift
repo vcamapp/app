@@ -75,8 +75,8 @@ extension AppUpdater {
             alert.messageText = L10n.upToDate.text
             alert.informativeText = L10n.upToDateMessage(Version.current.description).text
             alert.alertStyle = NSAlert.Style.warning
-            alert.addButton(withTitle: "OK")
-            alert.runModal()
+            _ = alert.addButton(withTitle: "OK")
+            _ = alert.runModal()
             return
         }
         presentWindow(title: L10n.update.text, id: nil, size: .init(width: 600, height: 400)) { window in
