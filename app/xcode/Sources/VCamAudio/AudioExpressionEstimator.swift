@@ -21,7 +21,6 @@ public final class AudioExpressionEstimator: NSObject {
     private let inversedFps: Double = 1 / 8
     private let queue = DispatchQueue(label: "com.github.tattn.vcam.queue.audio-expression")
 
-    @available(macOS 12.0, *)
     public func configure(format: AVAudioFormat) {
         averagePowerForChannel0 = 0
         analyzer = SNAudioStreamAnalyzer(format: format)
@@ -77,8 +76,7 @@ public final class AudioExpressionEstimator: NSObject {
 
 extension AudioExpressionEstimator: SNResultsObserving {
     public func request(_ request: SNRequest, didProduce result: SNResult) {
-        guard #available(macOS 12.0, *),
-              let result = result as? SNClassificationResult,
+        guard let result = result as? SNClassificationResult,
               let classification = result.classification(forIdentifier: "laughter") else {
             onUpdate?(.neutral)
             return

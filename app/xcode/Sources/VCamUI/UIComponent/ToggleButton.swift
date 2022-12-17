@@ -23,19 +23,9 @@ public struct ToggleButton: View {
     @Binding private var isOn: Bool
 
     public var body: some View {
-        if #available(macOS 12.0, *) {
-            Toggle(isOn: $isOn) {
-                text
-            }
-            .toggleStyle(.button)
-        } else {
-            Button {
-                $isOn.wrappedValue.toggle()
-            } label: {
-                text
-            }
-            .background(isOn ? Color.accentColor : nil)
-            .cornerRadius(6)
+        Toggle(isOn: $isOn) {
+            text
         }
+        .toggleStyle(.button)
     }
 }

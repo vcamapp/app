@@ -9,7 +9,6 @@ import Foundation
 import VCamEntity
 import AppKit
 
-@available(macOS 12, *)
 public struct AppUpdater {
     public init(repository: AppUpdater.Repository) {
         self.repository = repository
@@ -99,7 +98,6 @@ public struct AppUpdater {
     }
 }
 
-@available(macOS 12, *)
 extension AppUpdater {
     public static var vcam: AppUpdater {
         AppUpdater(repository: .init(owner: "vcamapp", repo: "app"))

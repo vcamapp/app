@@ -21,13 +21,4 @@ public extension View {
                 .keyboardShortcut(.defaultAction)
             )
     }
-
-    @ViewBuilder
-    @inlinable func thinMaterial() -> some View {
-        if #available(macOS 12.0, *) {
-            background(.thinMaterial)
-        } else {
-            background(Color.black.opacity(0.2))
-        }
-    }
 }

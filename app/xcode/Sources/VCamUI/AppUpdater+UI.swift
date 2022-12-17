@@ -9,7 +9,6 @@ import SwiftUI
 import VCamEntity
 import VCamLocalization
 
-@available(macOS 12, *)
 struct AppUpdateInformationView: View {
     let release: AppUpdater.LatestRelease
     let window: NSWindow
@@ -66,7 +65,6 @@ struct AppUpdateInformationView: View {
     }
 }
 
-@available(macOS 12, *)
 extension AppUpdater {
     @MainActor
     public func presentUpdateAlert() async {

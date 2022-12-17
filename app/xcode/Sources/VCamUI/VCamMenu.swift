@@ -74,7 +74,7 @@ public struct VCamMenu<BottomView: View>: View {
         }
         .padding(8)
         .frame(width: 140)
-        .thinMaterial()
+        .background(.thinMaterial)
     }
 }
 
