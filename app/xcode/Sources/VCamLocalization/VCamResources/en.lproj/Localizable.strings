@@ -180,6 +180,7 @@
 "startRecording" = "Start recording [β]";
 "stopRecording" = "Stop recording";
 "videoFormat" = "Video Format";
+"recordDesktopAudio" = "Record desktop audio";
 "developing" = "Developing...";
 
 // MARK: - Capture

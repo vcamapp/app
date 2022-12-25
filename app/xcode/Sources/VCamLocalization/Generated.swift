@@ -264,6 +264,8 @@ public enum L10n {
   public static let quitVCam = LocalizedString(lookupKey: "quitVCam")
   /// Recalibrate
   public static let recalibrate = LocalizedString(lookupKey: "recalibrate")
+  /// Record desktop audio
+  public static let recordDesktopAudio = LocalizedString(lookupKey: "recordDesktopAudio")
   /// Recording
   public static let recording = LocalizedString(lookupKey: "recording")
   /// Refresh Screen

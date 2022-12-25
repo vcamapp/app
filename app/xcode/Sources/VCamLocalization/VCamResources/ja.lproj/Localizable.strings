@@ -180,6 +180,7 @@
 "startRecording" = "録画開始 [β]";
 "stopRecording" = "録画停止";
 "videoFormat" = "動画フォーマット";
+"recordDesktopAudio" = "PCの音声を録音";
 "developing" = "開発中...";
 
 // MARK: - Capture
