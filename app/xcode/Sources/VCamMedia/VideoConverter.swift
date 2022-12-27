@@ -15,14 +15,16 @@ import AVFoundation
 public enum VideoConverter {
     /// Merge audio tracks into a single audio track
     /// - Parameters:
-    ///   - asset: A source file
-    ///   - outputURL: Destination of the output
+    ///   - asset: A source asset which must have a video asset and some audio tracks.
+    ///   - outputURL: Destination of the output.
+    ///   - fileType: The file format of the output.
     ///   - videoOutputSettings: The settings to use for encoding the media you append to the output. Create an output settings dictionary manually, or use AVOutputSettingsAssistant to create preset-based settings.
     ///   - audioOutputSettings: The settings to use for encoding the media you append to the output. Create an output settings dictionary manually, or use AVOutputSettingsAssistant to create preset-based settings.
     @VideoConverterActor
     public static func mergeAudioTracks(
         asset: AVAsset,
         outputURL: URL,
+        fileType: AVFileType,
         videoOutputSettings: [String : Any],
         audioOutputSettings: [String : Any]
     ) async throws {
@@ -36,7 +38,7 @@ public enum VideoConverter {
 
         reader.startReading()
 
-        let assetwriter = try AVAssetWriter(outputURL: outputURL, fileType: .mp4)
+        let assetwriter = try AVAssetWriter(outputURL: outputURL, fileType: fileType)
 
         let videoInput = AVAssetWriterInput(mediaType: .video, outputSettings: nil, sourceFormatHint: try .init(
             videoCodecType: .h264, // required
