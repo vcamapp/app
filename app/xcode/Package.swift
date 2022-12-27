@@ -10,6 +10,8 @@ let package = Package(
         .library(name: "VCam", targets: ["VCamUI", "VCamMedia", "VCamBridge"]),
         .library(name: "VCamMedia", targets: ["VCamMedia"]),
         .library(name: "VCamCamera", targets: ["VCamCamera"]),
+
+        .library(name: "VCamMediaAppExtension", targets: ["VCamMediaAppExtension"])
     ],
     dependencies: [
         .package(url: "https://github.com/siteline/SwiftUI-Introspect", exact: "0.1.4"),
@@ -23,8 +25,10 @@ let package = Package(
         .target(name: "VCamData", dependencies: ["VCamEntity"]),
         .target(name: "VCamEntity"),
         .target(name: "VCamLocalization", resources: [.process("VCamResources")]),
-        .target(name: "VCamMedia", dependencies: ["VCamEntity"]),
+        .target(name: "VCamMedia", dependencies: ["VCamEntity", "VCamMediaAppExtension"]),
         .target(name: "VCamBridge", dependencies: ["VCamUIFoundation"]),
         .target(name: "VCamCamera", dependencies: ["VCamEntity"]),
+
+        .target(name: "VCamMediaAppExtension", dependencies: []),
     ]
 )
