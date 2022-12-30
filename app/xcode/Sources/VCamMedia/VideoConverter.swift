@@ -62,7 +62,10 @@ public enum VideoConverter {
             group.enter()
             group.enter()
 
-            videoInput.requestMediaDataWhenReady(on: .global()) {
+            let videoQueue = DispatchQueue(label: "vcam.mergeAudioTracks.videoQueue")
+            let audioQueue = DispatchQueue(label: "vcam.mergeAudioTracks.audioQueue")
+
+            videoInput.requestMediaDataWhenReady(on: videoQueue) {
                 while videoInput.isReadyForMoreMediaData {
                     guard let buffer = videoOutput.copyNextSampleBuffer() else {
                         videoInput.markAsFinished()
@@ -73,7 +76,7 @@ public enum VideoConverter {
                 }
             }
 
-            audioInput.requestMediaDataWhenReady(on: .global()) {
+            audioInput.requestMediaDataWhenReady(on: audioQueue) {
                 while audioInput.isReadyForMoreMediaData {
                     guard let buffer = audioOutput.copyNextSampleBuffer() else {
                         audioInput.markAsFinished()
