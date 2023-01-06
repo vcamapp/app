@@ -50,6 +50,7 @@
 "tracking" = "トラッキング";
 "screenEffect" = "画面効果";
 "recording" = "撮影";
+"integration" = "連携";
 
 // MARK: - Motion
 
@@ -119,7 +120,6 @@
 
 "micOrCamera" = "マイクまたはカメラ";
 "helpCalibrate" = "実際の動きとずれている場合は、カメラに対して正面を向いた状態でカメラ目線でこのボタンを押してください";
-"useCameraForTracking" = "カメラでアバターを操作";
 "useEmotionBy %@" = "表情を%@で推定して反映する [β] (負荷増)";
 "useVowelEstimation" = "カメラで母音を推定する [β]";
 "isNotFound %@" = "%@が見つかりません";
@@ -127,13 +127,14 @@
 "trackEyes" = "目をトラッキングする";
 "eyesHorizontalSensitivity" = "目の左右の動きの感度";
 "eyesVerticalSensitivity" = "目の上下の動きの感度";
-"trackHands" = "手をトラッキングする [β] ";
-"trackFingers" = "指をトラッキングする [β] ";
 "easeOfOpeningFingers" = "指の開きやすさ";
 "easeOfCloseFingers" = "指の閉じやすさ";
 "easeOfBodyMovement" = "体の左右の動きの大きさ";
 "shoulderRotationWeight" = "肩の回転の大きさ";
 "swivelOffset" = "肘の調整";
+"faceEyeMouth" = "顔・目・口";
+"hand" = "手";
+"finger" = "指";
 
 // MARK: - Screen effect
 
@@ -180,7 +181,8 @@
 "startRecording" = "録画開始 [β]";
 "stopRecording" = "録画停止";
 "videoFormat" = "動画フォーマット";
-"recordDesktopAudio" = "PCの音声を録音";
+"recordDesktopAudio" = "PCの音声を録音 [β]";
+"micSyncOffset" = "マイク音の同期オフセット (ミリ秒)";
 "developing" = "開発中...";
 
 // MARK: - Capture
@@ -196,6 +198,11 @@
 "previewCapture" = "映像をプレビューする";
 "errorScreenCapturePermission" = "画面収録の権限がありません。システム環境設定のセキュリティとプライバシーにて画面収録を許可してください。";
 "refreshScreen" = "画面を更新";
+
+// MARK: - Integration
+"connect" = "接続";
+"connecting" = "接続中";
+"disconnect" = "接続解除";
 
 // MARK: - Language
 

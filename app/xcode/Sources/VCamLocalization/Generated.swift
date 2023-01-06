@@ -76,6 +76,10 @@ public enum L10n {
   public static let colorTemperature = LocalizedString(lookupKey: "colorTemperature")
   /// Uninstallation is complete.
   public static let completeUninstalling = LocalizedString(lookupKey: "completeUninstalling")
+  /// Connect
+  public static let connect = LocalizedString(lookupKey: "connect")
+  /// Connecting
+  public static let connecting = LocalizedString(lookupKey: "connecting")
   /// Contrast
   public static let contrast = LocalizedString(lookupKey: "contrast")
   /// Copy
@@ -102,6 +106,8 @@ public enum L10n {
   public static let developing = LocalizedString(lookupKey: "developing")
   /// Diffusion
   public static let diffusion = LocalizedString(lookupKey: "diffusion")
+  /// Disconnect
+  public static let disconnect = LocalizedString(lookupKey: "disconnect")
   /// Display
   public static let display = LocalizedString(lookupKey: "display")
   /// Done
@@ -140,6 +146,8 @@ public enum L10n {
   public static let eyesHorizontalSensitivity = LocalizedString(lookupKey: "eyesHorizontalSensitivity")
   /// Vertical sensitivity
   public static let eyesVerticalSensitivity = LocalizedString(lookupKey: "eyesVerticalSensitivity")
+  /// Face / Eye / Mouth
+  public static let faceEyeMouth = LocalizedString(lookupKey: "faceEyeMouth")
   /// Facial Expression
   public static let facialExpression = LocalizedString(lookupKey: "facialExpression")
   /// Failure
@@ -148,12 +156,16 @@ public enum L10n {
   public static let file = LocalizedString(lookupKey: "file")
   /// Filter
   public static let filter = LocalizedString(lookupKey: "filter")
+  /// Finger
+  public static let finger = LocalizedString(lookupKey: "finger")
   /// Flip screen
   public static let flipScreen = LocalizedString(lookupKey: "flipScreen")
   /// FPS (tracking)
   public static let fpsCamera = LocalizedString(lookupKey: "fpsCamera")
   /// FPS (screen)
   public static let fpsScreen = LocalizedString(lookupKey: "fpsScreen")
+  /// Hand
+  public static let hand = LocalizedString(lookupKey: "hand")
   /// Height
   public static let height = LocalizedString(lookupKey: "height")
   /// Help
@@ -178,6 +190,8 @@ public enum L10n {
   public static func installPlugin(_ p1: Any) -> ArgumentsLocalizedString {
     ArgumentsLocalizedString("installPlugin %@", "installPlugin \(String(describing: p1))", String(describing: p1))
   }
+  /// Integration
+  public static let integration = LocalizedString(lookupKey: "integration")
   /// Intensity
   public static let intensity = LocalizedString(lookupKey: "intensity")
   /// Interact
@@ -216,6 +230,8 @@ public enum L10n {
   public static let mic = LocalizedString(lookupKey: "mic")
   /// Mic or Camera
   public static let micOrCamera = LocalizedString(lookupKey: "micOrCamera")
+  /// Sync offset for mic [ms]
+  public static let micSyncOffset = LocalizedString(lookupKey: "micSyncOffset")
   /// Motion
   public static let motion = LocalizedString(lookupKey: "motion")
   /// Reset
@@ -264,7 +280,7 @@ public enum L10n {
   public static let quitVCam = LocalizedString(lookupKey: "quitVCam")
   /// Recalibrate
   public static let recalibrate = LocalizedString(lookupKey: "recalibrate")
-  /// Record desktop audio
+  /// Record desktop audio [β]
   public static let recordDesktopAudio = LocalizedString(lookupKey: "recordDesktopAudio")
   /// Recording
   public static let recording = LocalizedString(lookupKey: "recording")
@@ -362,8 +378,6 @@ public enum L10n {
   public static func upToDateMessage(_ p1: Any) -> ArgumentsLocalizedString {
     ArgumentsLocalizedString("upToDateMessage %@", "upToDateMessage \(String(describing: p1))", String(describing: p1))
   }
-  /// Use camera for tracking
-  public static let useCameraForTracking = LocalizedString(lookupKey: "useCameraForTracking")
   /// Use emotion by %@ [β] (Use high power)
   public static func useEmotionBy(_ p1: Any) -> ArgumentsLocalizedString {
     ArgumentsLocalizedString("useEmotionBy %@", "useEmotionBy \(String(describing: p1))", String(describing: p1))

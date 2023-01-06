@@ -50,6 +50,7 @@
 "tracking" = "Tracking";
 "screenEffect" = "Screen Effect";
 "recording" = "Recording";
+"integration" = "Integration";
 
 // MARK: - Motion
 
@@ -119,7 +120,6 @@
 
 "micOrCamera" = "Mic or Camera";
 "helpCalibrate" = "If the movement is out of sync with the actual movement, press this button while facing forward to the camera and looking at the camera.";
-"useCameraForTracking" = "Use camera for tracking";
 "useEmotionBy %@" = "Use emotion by %@ [β] (Use high power)";
 "useVowelEstimation" = "Use vowel estimation by camera [β]";
 "isNotFound %@" = "%@ is not found";
@@ -127,13 +127,14 @@
 "trackEyes" = "Track eyes";
 "eyesHorizontalSensitivity" = "Horizontal sensitivity";
 "eyesVerticalSensitivity" = "Vertical sensitivity";
-"trackHands" = "Track hands [β] ";
-"trackFingers" = "Track fingers [β] ";
 "easeOfOpeningFingers" = "Finger opening sensitivity";
 "easeOfCloseFingers" = "Finger closing sensitivity";
 "easeOfBodyMovement" = "Horizontal sensitivity of body";
 "shoulderRotationWeight" = "Weight of shoulder rotation";
 "swivelOffset" = "Elbow offset";
+"faceEyeMouth" = "Face / Eye / Mouth";
+"hand" = "Hand";
+"finger" = "Finger";
 
 // MARK: - Screen effect
 
@@ -180,7 +181,8 @@
 "startRecording" = "Start recording [β]";
 "stopRecording" = "Stop recording";
 "videoFormat" = "Video Format";
-"recordDesktopAudio" = "Record desktop audio";
+"recordDesktopAudio" = "Record desktop audio [β]";
+"micSyncOffset" = "Sync offset for mic [ms]";
 "developing" = "Developing...";
 
 // MARK: - Capture
@@ -196,6 +198,11 @@
 "previewCapture" = "Preview the capture";
 "errorScreenCapturePermission" = "No permisison. Please allow screen recording in the Security & Privacy of the System Preferences.";
 "refreshScreen" = "Refresh Screen";
+
+// MARK: - Integration
+"connect" = "Connect";
+"connecting" = "Connecting";
+"disconnect" = "Disconnect";
 
 // MARK: - Language
 

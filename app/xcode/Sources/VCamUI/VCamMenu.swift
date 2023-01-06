@@ -13,6 +13,7 @@ public enum VCamMenuItem: Identifiable, CaseIterable {
     case tracking
     case screenEffect
     case recording
+    case integration
     
     public var id: Self { self }
 
@@ -28,6 +29,8 @@ public enum VCamMenuItem: Identifiable, CaseIterable {
             return L10n.screenEffect.key
         case .recording:
             return L10n.recording.key
+        case .integration:
+            return L10n.integration.key
         }
     }
 
@@ -43,6 +46,8 @@ public enum VCamMenuItem: Identifiable, CaseIterable {
             return "sparkles"
         case .recording:
             return "camera.fill"
+        case .integration:
+            return "app.connected.to.app.below.fill"
         }
     }
 }
@@ -64,6 +69,7 @@ public struct VCamMenu<BottomView: View>: View {
                     Logger.log(String(describing: item))
                 } label: {
                     Image(systemName: item.icon)
+                        .frame(width: 16)
                     Text(item.title, bundle: .localize)
                         .font(.callout)
                 }
