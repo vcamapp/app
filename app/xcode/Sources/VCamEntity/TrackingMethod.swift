@@ -8,39 +8,28 @@
 import Foundation
 
 public enum TrackingMethod {
-    public enum Face: String, CaseIterable, Equatable, Identifiable {
+    public enum Face: String, CaseIterable, Equatable, Identifiable, UserDefaultsValue {
         case disabled
         case `default`
+        case vcamMocap
         case iFacialMocap
 
         public var id: Self { self }
     }
 
-    public enum Hand: String, CaseIterable, Equatable, Identifiable {
+    public enum Hand: String, CaseIterable, Equatable, Identifiable, UserDefaultsValue {
         case disabled
         case `default`
+        case vcamMocap
 
         public var id: Self { self }
-
-        public var isTrackingEnabled: Bool {
-            switch self {
-            case .disabled: return false
-            case .default: return true
-            }
-        }
     }
 
-    public enum Finger: String, CaseIterable, Equatable, Identifiable {
+    public enum Finger: String, CaseIterable, Equatable, Identifiable, UserDefaultsValue  {
         case disabled
         case `default`
+        case vcamMocap
 
         public var id: Self { self }
-
-        public var isTrackingEnabled: Bool {
-            switch self {
-            case .disabled: return false
-            case .default: return true
-            }
-        }
     }
 }

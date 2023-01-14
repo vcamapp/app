@@ -9,11 +9,9 @@ import Network
 import Combine
 
 public final class FacialMocapReceiver: ObservableObject {
-    public static let shared = FacialMocapReceiver()
-
     private var listener: NWListener?
     private var connection: NWConnection?
-    private let queue = DispatchQueue(label: "com.github.tattn.vcam.facialmocapreceiver")
+    private static let queue = DispatchQueue(label: "com.github.tattn.vcam.facialmocapreceiver")
 
     @MainActor @Published public private(set) var connectionStatus = ConnectionStatus.disconnected
 
@@ -29,25 +27,27 @@ public final class FacialMocapReceiver: ObservableObject {
         case error(Error)
     }
 
+    public init() {}
+
     @MainActor
     public func connect(ip: String, avatar: Avatar) async throws {
         await stop()
 
         let port = NWEndpoint.Port(integerLiteral: 49983)
 
-        try await startServer(port: port, avatar: avatar) { result in
+        try await startServer(port: port, avatar: avatar) { [weak self] result in
             switch result {
             case .success: ()
             case .cancel, .error:
-                Self.shared.stopAsync()
+                self?.stopAsync()
             }
         }
 
-        requestConnection(ip: ip, port: port) { result in
+        requestConnection(ip: ip, port: port) { [weak self] result in
             switch result {
             case .success: ()
             case .cancel, .error:
-                Self.shared.stopAsync()
+                self?.stopAsync()
             }
         }
     }
@@ -67,24 +67,26 @@ public final class FacialMocapReceiver: ObservableObject {
 
     private func stopAsync() {
         Task {
-            await Self.shared.stop()
+            await self.stop()
         }
     }
+}
 
-    private func receiveData(to avatar: Avatar) {
-        connection?.receive(minimumIncompleteLength: 1, maximumLength: 8192) { content, contentContext, isComplete, error in
+private extension NWConnection {
+    func receiveData(with avatar: Avatar) {
+        receive(minimumIncompleteLength: 1, maximumLength: 8192) { [weak self] content, contentContext, isComplete, error in
             defer {
-                Self.shared.receiveData(to: avatar)
+                self?.receiveData(with: avatar)
             }
 
             guard error == nil,
                   let content,
                   let rawData = String(data: content, encoding: .utf8),
-                  let mocapData = FacialData.FacialMocap(rawData: rawData) else {
+                  let mocapData = FacialMocapData(rawData: rawData) else {
                 return
             }
 
-            avatar.apply(.facialMocap(mocapData))
+            avatar.oniFacialMocapReceived(mocapData)
         }
     }
 }
@@ -109,8 +111,8 @@ extension FacialMocapReceiver {
             default: ()
             }
         }
-        listener.newConnectionHandler = { connection in
-            Self.shared.connection = connection
+        listener.newConnectionHandler = { [weak self] connection in
+            self?.connection = connection
             connection.stateUpdateHandler = { state in
                  Task { @MainActor in
                     switch state {
@@ -118,40 +120,40 @@ extension FacialMocapReceiver {
                     case .waiting(let error):
                         if case .posix(let posixError) = error, posixError == .ECONNREFUSED {
                             try? await Task.sleep(nanoseconds: NSEC_PER_SEC * 2)
-                            try? await Self.shared.startServer(port: port, avatar: avatar, completion: completion)
+                            try? await self?.startServer(port: port, avatar: avatar, completion: completion)
                         }
                     case .ready:
-                        Self.shared.connectionStatus = .connected
-                        Self.shared.receiveData(to: avatar)
+                        self?.connectionStatus = .connected
+                        connection.receiveData(with: avatar)
                     case .cancelled:
-                        Self.shared.stopAsync()
+                        self?.stopAsync()
                     case .failed:
-                        try? await Self.shared.startServer(port: port, avatar: avatar, completion: completion)
+                        try? await self?.startServer(port: port, avatar: avatar, completion: completion)
                     @unknown default: ()
                     }
                 }
             }
 
-            connection.start(queue: Self.shared.queue)
+            connection.start(queue: Self.queue)
         }
-        listener.start(queue: queue)
+        listener.start(queue: Self.queue)
     }
 }
 
 extension FacialMocapReceiver {
     private func requestConnection(ip: String, port: NWEndpoint.Port, completion: @escaping (ReceiverResult) -> Void) {
         func retry(completion: @escaping (ReceiverResult) -> Void) {
-            guard Self.shared.listener != nil else {
+            guard listener != nil else {
                 completion(.cancel)
                 return
             }
-            Self.shared.queue.asyncAfter(deadline: .now() + 2) {
-                Self.shared.requestConnection(ip: ip, port: port, completion: completion)
+            Self.queue.asyncAfter(deadline: .now() + 2) {
+                self.requestConnection(ip: ip, port: port, completion: completion)
             }
         }
 
         let connection = NWConnection(host: NWEndpoint.Host(ip), port: port, using: .udp)
-        connection.stateUpdateHandler = { state in
+        connection.stateUpdateHandler = { [weak self] state in
             switch state {
             case .setup, .preparing: ()
             case .waiting(let error):
@@ -159,7 +161,7 @@ extension FacialMocapReceiver {
                     retry(completion: completion)
                 }
             case .ready:
-                Self.shared.sendStartToken(connection: connection) { error in
+                self?.sendStartToken(connection: connection) { error in
                     if let error {
                         completion(.error(error))
                     } else {
@@ -171,7 +173,7 @@ extension FacialMocapReceiver {
             @unknown default: ()
             }
         }
-        connection.start(queue: Self.shared.queue)
+        connection.start(queue: Self.queue)
     }
 
     private func sendStartToken(connection: NWConnection, completion: @escaping (Error?) -> Void) {

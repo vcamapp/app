@@ -358,10 +358,6 @@ public enum L10n {
   public static let tint = LocalizedString(lookupKey: "tint")
   /// Track eyes
   public static let trackEyes = LocalizedString(lookupKey: "trackEyes")
-  /// Track fingers [β] 
-  public static let trackFingers = LocalizedString(lookupKey: "trackFingers")
-  /// Track hands [β] 
-  public static let trackHands = LocalizedString(lookupKey: "trackHands")
   /// Tracking
   public static let tracking = LocalizedString(lookupKey: "tracking")
   /// Type%@

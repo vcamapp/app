@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import VCamEntity
 import VCamData
 
 public extension AppStorage where Value == Bool {

@@ -1,5 +1,5 @@
 //
-//  FacialDataFacialMocap.swift
+//  TrackingDataFacialMocap.swift
 //  
 //
 //  Created by Tatsuya Tanaka on 2022/12/30.
@@ -8,29 +8,27 @@
 import Foundation
 import simd
 
-public extension FacialData {
-    struct FacialMocap: Equatable {
-        public let blendShapes: [String: Int]
-        public let head: Head
-        public let rightEye: Eye
-        public let leftEye: Eye
+public struct FacialMocapData: Equatable {
+    public let blendShapes: [String: Int]
+    public let head: Head
+    public let rightEye: Eye
+    public let leftEye: Eye
 
-        public struct Head: Equatable {
-            public let rotation: SIMD3<Float>
-            public let translation: SIMD3<Float>
+    public struct Head: Equatable {
+        public let rotation: SIMD3<Float>
+        public let translation: SIMD3<Float>
 
-            public var rotationRadian: SIMD3<Float> {
-                .init(rotation.x * .pi / 180, rotation.y * .pi / 180, rotation.z * .pi / 180)
-            }
+        public var rotationRadian: SIMD3<Float> {
+            .init(rotation.x * .pi / 180, rotation.y * .pi / 180, rotation.z * .pi / 180)
         }
+    }
 
-        public struct Eye: Equatable {
-            public let rotation: SIMD3<Float>
-        }
+    public struct Eye: Equatable {
+        public let rotation: SIMD3<Float>
     }
 }
 
-public extension FacialData.FacialMocap {
+public extension FacialMocapData {
     init?(rawData: String) {
         let blendShapeAndTransformRawData = rawData.components(separatedBy: "=")
         guard blendShapeAndTransformRawData.count == 2 else {

@@ -10,9 +10,10 @@ import Foundation
 public class Avatar {
     public init() {}
 
-    public var onFacialDataReceived: ((FacialData) -> Void) = { _ in }
+    public var onFacialDataReceived: (([Float]) -> Void) = { _ in }
+    public var onHandDataReceived: (([Float]) -> Void) = { _ in }
+    public var onFingerDataReceived: (([Float]) -> Void) = { _ in }
 
-    public func apply(_ data: FacialData) {
-        onFacialDataReceived(data)
-    }
+    public var oniFacialMocapReceived: ((FacialMocapData) -> Void) = { _ in }
+    public var onVCamMotionReceived: ((VCamMotion) -> Void) = { _ in }
 }
