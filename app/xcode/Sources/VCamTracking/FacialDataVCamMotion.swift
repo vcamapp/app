@@ -147,10 +147,8 @@ public extension VCamMotion.Hand {
     }
 
     func lerp(next: Self, t: Float) -> Self {
-        if self == .missing {
+        if self == .missing || next == .missing {
             return next
-        } else if next == .missing {
-            return .missing
         }
         return .init(
             wrist: mix(wrist, next.wrist, t: t),

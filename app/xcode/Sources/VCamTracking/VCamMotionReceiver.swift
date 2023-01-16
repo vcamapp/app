@@ -87,7 +87,8 @@ private extension NWConnection {
             }
 
             guard error == nil,
-                  let content else { // TODO: requires data size validation
+                  let content,
+                  content.count == MemoryLayout<VCamMotion>.size else {
                 return
             }
             let mocapData = VCamMotion(rawData: content)
