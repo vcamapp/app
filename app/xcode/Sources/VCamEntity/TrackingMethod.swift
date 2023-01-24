@@ -15,6 +15,13 @@ public enum TrackingMethod {
         case iFacialMocap
 
         public var id: Self { self }
+
+        public var supportsPerfectSync: Bool {
+            switch self {
+            case .disabled, .default: return false
+            case .vcamMocap, .iFacialMocap: return true
+            }
+        }
     }
 
     public enum Hand: String, CaseIterable, Equatable, Identifiable, UserDefaultsValue {
