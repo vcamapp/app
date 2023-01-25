@@ -203,6 +203,7 @@
 "connect" = "Connect";
 "connecting" = "Connecting";
 "disconnect" = "Disconnect";
+"helpMocopIP" = "The port in the PC connection settings on the mocopi side should be \"12351\".";
 
 // MARK: - Language
 

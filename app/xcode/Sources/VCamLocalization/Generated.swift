@@ -174,6 +174,8 @@ public enum L10n {
   public static let helpCalibrate = LocalizedString(lookupKey: "helpCalibrate")
   /// Reduce the load on the app by merging meshes, etc. If you have problems viewing the model, turn it off and reload the model.
   public static let helpMesh = LocalizedString(lookupKey: "helpMesh")
+  /// mocopi側のPC接続設定でのポートは「12351」にしてください
+  public static let helpMocopIP = LocalizedString(lookupKey: "helpMocopIP")
   /// Hi
   public static let hi = LocalizedString(lookupKey: "hi")
   /// Hue Shift

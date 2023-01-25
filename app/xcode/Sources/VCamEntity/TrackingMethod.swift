@@ -28,6 +28,9 @@ public enum TrackingMethod {
         case disabled
         case `default`
         case vcamMocap
+#if ENABLE_MOCOPI
+        case mocopi
+#endif
 
         public var id: Self { self }
     }

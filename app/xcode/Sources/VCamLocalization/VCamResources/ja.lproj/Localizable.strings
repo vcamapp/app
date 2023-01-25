@@ -203,6 +203,7 @@
 "connect" = "接続";
 "connecting" = "接続中";
 "disconnect" = "接続解除";
+"helpMocopIP" = "mocopi側のPC接続設定でのポートは「12351」にしてください";
 
 // MARK: - Language
 
