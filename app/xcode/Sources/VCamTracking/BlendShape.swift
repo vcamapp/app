@@ -8,6 +8,7 @@
 import Foundation
 
 public struct BlendShape: Equatable {
+    public var lookAtPoint: SIMD2<Float>
     public var browDownLeft: Float
     public var browDownRight: Float
     public var browInnerUp: Float

@@ -18,7 +18,6 @@ class FacialDataFacialMocapTests: XCTestCase {
             rotation: .init(-21.488958, -6.038993, -6.6019735),
             translation: .init(-0.030653415, -0.10287084, -0.6584072)
         ))
-        XCTAssertEqual(decoded.rightEye, .init(rotation: .init(6.0297494, 2.4403017, 0.25649446)))
-        XCTAssertEqual(decoded.leftEye, .init(rotation: .init(6.034903, -1.6660284, -0.17520553)))
+        XCTAssertEqual(decoded.blendShape.lookAtPoint, .init(-0.020375613, 0.46402508))
     }
 }

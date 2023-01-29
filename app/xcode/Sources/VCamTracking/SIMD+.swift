@@ -26,11 +26,34 @@ public extension simd_float4x4 {
     }
 
     var rotation: simd_quatf {
-        var rotation = self
-        rotation.columns.3 = .zero // remove translation
-        var result = simd_quatf(rotation)
-        result.vector = -result.vector // right-handed coordinates to left-handed coordinates
-        return result
+        simd_quatf(self)
+    }
+
+    var axisX: Self {
+        .init(
+            SIMD4(1, 0, 0, 0),
+            SIMD4(0, columns.1.y, columns.2.y, 0),
+            SIMD4(0, columns.1.z, columns.2.z, 0),
+            SIMD4(0, 0, 0, 1)
+        )
+    }
+
+    var axisY: Self {
+        .init(
+            SIMD4(columns.0.x, 0, columns.2.x, 0),
+            SIMD4(0, 1, 0, 0),
+            SIMD4(columns.0.z, 0, columns.2.z, 0),
+            SIMD4(0, 0, 0, 1)
+        )
+    }
+
+    var axisZ: Self {
+        .init(
+            SIMD4(columns.0.x, columns.1.x, 0, 0),
+            SIMD4(columns.0.y, columns.1.y, 0, 0),
+            SIMD4(0, 0, 1, 0),
+            SIMD4(0, 0, 0, 1)
+        )
     }
 }
 
@@ -52,7 +75,7 @@ public extension simd_quatf {
     }
 
     init(_ quat: simd_quatd) {
-      self.init(vector: SIMD4<Float>(Float(quat.vector[0]), Float(quat.vector[1]), Float(quat.vector[2]), Float(quat.vector[3])))
+      self.init(vector: SIMD4(Float(quat.vector[0]), Float(quat.vector[1]), Float(quat.vector[2]), Float(quat.vector[3])))
     }
 }
 

@@ -11,8 +11,6 @@ import simd
 public struct FacialMocapData: Equatable {
     public let blendShape: BlendShape
     public let head: Head
-    public let rightEye: Eye
-    public let leftEye: Eye
 
     public struct Head: Equatable {
         public let rotation: SIMD3<Float>
@@ -21,10 +19,6 @@ public struct FacialMocapData: Equatable {
         public var rotationRadian: SIMD3<Float> {
             .init(rotation.x * .pi / 180, rotation.y * .pi / 180, rotation.z * .pi / 180)
         }
-    }
-
-    public struct Eye: Equatable {
-        public let rotation: SIMD3<Float>
     }
 }
 
@@ -58,7 +52,13 @@ public extension FacialMocapData {
             return nil
         }
 
+        let lookAtPoint = SIMD2(
+            -((transforms[10] + transforms[7]) * 0.5) / 19, // skip 11
+            ((transforms[9] + transforms[6]) * 0.5) / 13 // skip 8
+        ).clamped(lowerBound: -SIMD2.one, upperBound: .one)
+
         blendShape = .init(
+            lookAtPoint: lookAtPoint,
             browDownLeft: blendShapes["browDown_L"] ?? 0,
             browDownRight: blendShapes["browDown_R"] ?? 0,
             browInnerUp: blendShapes["browInnerUp"] ?? 0,
@@ -117,7 +117,5 @@ public extension FacialMocapData {
             rotation: SIMD3(transforms[0...2]),
             translation: SIMD3(transforms[3...5])
         )
-        self.rightEye = .init(rotation: SIMD3(transforms[6...8]))
-        self.leftEye = .init(rotation: SIMD3(transforms[9...11]))
     }
 }

@@ -58,13 +58,6 @@ public extension VCamMotion {
     }
 }
 
-public extension VCamMotion.Head {
-    init(transform: simd_float4x4) {
-        translation = transform.translation
-        rotation = transform.rotation.vector
-    }
-}
-
 extension Data {
     init<T>(valueNoCopy value: inout T) {
         self = Data(bytesNoCopy: &value, count: MemoryLayout<T>.size, deallocator: .none)
