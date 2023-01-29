@@ -19,6 +19,11 @@ public struct VCamMotion: Equatable {
         public var rotation: SIMD4<Float>
     }
     public struct Hands: Equatable {
+        public init(right: VCamMotion.Hand, left: VCamMotion.Hand) {
+            self.right = right
+            self.left = left
+        }
+
         public var right: Hand
         public var left: Hand
     }
@@ -98,5 +103,18 @@ public extension VCamMotion.Hand {
             ringTip: mix(ringTip, next.ringTip, t: t),
             littleTip: mix(littleTip, next.littleTip, t: t)
         )
+    }
+
+    func translated(_ offset: SIMD2<Float>) -> Self {
+        var newValue = self
+        newValue.wrist += offset
+        newValue.thumbCMC += offset
+        newValue.littleMCP += offset
+        newValue.thumbTip += offset
+        newValue.indexTip += offset
+        newValue.middleTip += offset
+        newValue.ringTip += offset
+        newValue.littleTip += offset
+        return newValue
     }
 }
