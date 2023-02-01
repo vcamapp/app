@@ -16,7 +16,7 @@ public struct VCamMotion: Equatable {
 
     public struct Head: Equatable {
         public var translation: SIMD3<Float>
-        public var rotation: SIMD4<Float>
+        public var rotation: simd_quatf
     }
     public struct Hands: Equatable {
         public init(right: VCamMotion.Hand, left: VCamMotion.Hand) {

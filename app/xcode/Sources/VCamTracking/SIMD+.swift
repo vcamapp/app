@@ -58,13 +58,13 @@ public extension simd_float4x4 {
 }
 
 public extension simd_quatf {
-    init(_ eulerAngles: SIMD3<Float>) {
-        let cz = cos(eulerAngles.z * 0.5)
-        let sz = sin(eulerAngles.z * 0.5)
-        let cy = cos(eulerAngles.y * 0.5)
-        let sy = sin(eulerAngles.y * 0.5)
-        let cx = cos(eulerAngles.x * 0.5)
-        let sx = sin(eulerAngles.x * 0.5)
+    init(_ radianAngles: SIMD3<Float>) {
+        let cz = cos(radianAngles.z * 0.5)
+        let sz = sin(radianAngles.z * 0.5)
+        let cy = cos(radianAngles.y * 0.5)
+        let sy = sin(radianAngles.y * 0.5)
+        let cx = cos(radianAngles.x * 0.5)
+        let sx = sin(radianAngles.x * 0.5)
 
         self.init(vector: [
             sx * cy * cz - cx * sy * sz,
@@ -80,13 +80,13 @@ public extension simd_quatf {
 }
 
 extension simd_quatd {
-    init(_ eulerAngles: SIMD3<Double>) {
-        let cz = cos(eulerAngles.z * 0.5)
-        let sz = sin(eulerAngles.z * 0.5)
-        let cy = cos(eulerAngles.y * 0.5)
-        let sy = sin(eulerAngles.y * 0.5)
-        let cx = cos(eulerAngles.x * 0.5)
-        let sx = sin(eulerAngles.x * 0.5)
+    init(_ radianAngles: SIMD3<Double>) {
+        let cz = cos(radianAngles.z * 0.5)
+        let sz = sin(radianAngles.z * 0.5)
+        let cy = cos(radianAngles.y * 0.5)
+        let sy = sin(radianAngles.y * 0.5)
+        let cx = cos(radianAngles.x * 0.5)
+        let sx = sin(radianAngles.x * 0.5)
 
         self.init(vector: [
             sx * cy * cz - cx * sy * sz,

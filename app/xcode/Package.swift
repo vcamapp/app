@@ -23,7 +23,9 @@ let package = Package(
         ]),
         .target(name: "VCamUIFoundation"),
         .target(name: "VCamData", dependencies: ["VCamEntity"]),
-        .target(name: "VCamEntity"),
+        .target(name: "VCamEntity", swiftSettings: [
+//            .define("ENABLE_MOCOPI")
+        ]),
         .target(name: "VCamLocalization", resources: [.process("VCamResources")]),
         .target(name: "VCamMedia", dependencies: ["VCamEntity", "VCamMediaAppExtension"]),
         .target(name: "VCamBridge", dependencies: ["VCamUIFoundation"]),
