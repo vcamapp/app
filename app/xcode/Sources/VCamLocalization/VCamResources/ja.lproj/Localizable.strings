@@ -98,6 +98,7 @@
 "playIdleMotions" = "待機モーションをランダム再生する";
 "simulateShadows" = "影をシミュレーションする (負荷増)";
 "optimizeMeshes" = "モデルのメッシュを最適化する (推奨)";
+"enableAutoConvertingToVRM1" = "VRM0.x系のアバターを1.0系に自動変換する";
 "helpMesh" = "メッシュの結合等によりアプリの負荷を大幅に下げられます。モデルの表示に問題がある場合はオフにした後、モデルを再読込してください。";
 "flipScreen" = "画面を左右反転する";
 "addToMacOSMenuBar" = "macOSのメニューバーに追加する";

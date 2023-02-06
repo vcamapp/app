@@ -98,6 +98,7 @@
 "playIdleMotions" = "Play idle motions";
 "simulateShadows" = "Simulate shadows (Use high power)";
 "optimizeMeshes" = "Optimize meshes (Recommended)";
+"enableAutoConvertingToVRM1" = "Convert VRM 0.x to VRM 1.x";
 "helpMesh" = "Reduce the load on the app by merging meshes, etc. If you have problems viewing the model, turn it off and reload the model.";
 "flipScreen" = "Flip screen";
 "addToMacOSMenuBar" = "Add icon in macOS menu bar";

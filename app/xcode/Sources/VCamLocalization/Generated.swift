@@ -132,6 +132,8 @@ public enum L10n {
   public static let emoji = LocalizedString(lookupKey: "emoji")
   /// Enable
   public static let enable = LocalizedString(lookupKey: "enable")
+  /// Convert VRM 0.x to VRM 1.x
+  public static let enableAutoConvertingToVRM1 = LocalizedString(lookupKey: "enableAutoConvertingToVRM1")
   /// English
   public static let english = LocalizedString(lookupKey: "english")
   /// Entire Display
@@ -174,7 +176,7 @@ public enum L10n {
   public static let helpCalibrate = LocalizedString(lookupKey: "helpCalibrate")
   /// Reduce the load on the app by merging meshes, etc. If you have problems viewing the model, turn it off and reload the model.
   public static let helpMesh = LocalizedString(lookupKey: "helpMesh")
-  /// mocopi側のPC接続設定でのポートは「12351」にしてください
+  /// The port in the PC connection settings on the mocopi side should be "12351".
   public static let helpMocopIP = LocalizedString(lookupKey: "helpMocopIP")
   /// Hi
   public static let hi = LocalizedString(lookupKey: "hi")
