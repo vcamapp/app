@@ -8,18 +8,16 @@
 import SwiftUI
 
 public struct RootContentView<VCamUI: View, MenuBottomView: View>: View {
-    public init(vcamUI: VCamUI, menuBottomView: MenuBottomView, unityView: NSView, aspectRatio: CGFloat, interactable: Bool) {
+    public init(vcamUI: VCamUI, menuBottomView: MenuBottomView, unityView: NSView, interactable: Bool) {
         self.vcamUI = vcamUI
         self.menuBottomView = menuBottomView
         self.unityView = unityView
-        self.aspectRatio = aspectRatio
         self.interactable = interactable
     }
 
     let vcamUI: VCamUI
     let menuBottomView: MenuBottomView
     let unityView: NSView
-    let aspectRatio: CGFloat
     let interactable: Bool
 
     public var body: some View {
@@ -52,7 +50,7 @@ public struct RootContentView<VCamUI: View, MenuBottomView: View>: View {
         UnityContainerView(unityView: unityView)
 //                    .help(L10n.helpMouseHover.text)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .aspectRatio(aspectRatio == 0 ? 0.5 : aspectRatio, contentMode: .fit)
+            .aspectRatio(1280 / 720, contentMode: .fit)
             .layoutPriority(2)
     }
 }
@@ -73,7 +71,6 @@ struct RootContentView_Previews: PreviewProvider {
             vcamUI: Color.red,
             menuBottomView: Color.blue,
             unityView: NSView(),
-            aspectRatio: 1920 / 1080,
             interactable: true
         )
     }

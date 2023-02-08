@@ -35,5 +35,6 @@ let package = Package(
         .target(name: "VCamMediaAppExtension", dependencies: []),
 
         .testTarget(name: "VCamTrackingTests", dependencies: ["VCamTracking"]),
+        .testTarget(name: "VCamMediaAppExtensionTests", dependencies: ["VCamMediaAppExtension"]),
     ]
 )

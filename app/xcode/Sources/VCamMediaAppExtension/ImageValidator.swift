@@ -8,29 +8,30 @@
 import Foundation
 
 public enum ImageValidator {
-    private static let validateIndices = [14, 123, 1234]
-
-    public static var checksumLength: Int { ImageValidator.validateIndices.count }
+    private static let validateMaxIndex = 1234
+    private static let validateIndices = [14, 123, validateMaxIndex]
 
     public static func dataWithChecksum(from data: Data) -> Data {
-        data + validatedData(from: data)
+        let salt = validatedData(from: data)
+        return salt + data + salt// + endData
     }
 
-    private static func validatedData(from data: Data) -> [UInt8] {
-        validateIndices.map { data[$0] }
+    private static func validatedData(from data: Data) -> Data {
+        Data(validateIndices.map { data[data.startIndex + $0] })
     }
 
-    public static func isValid(imageData: Data) -> Bool {
-        if imageData.count <= validateIndices.count {
-            return false
+    public static func inspect(_ data: Data) -> (isStart: Bool, isEnd: Bool, needsMoreData: Bool) {
+        guard data.count > validateMaxIndex + validateIndices.count else {
+            return (false, false, true)
         }
-        return imageData[(imageData.count-validateIndices.count)...] == Data(validateIndices.map { imageData[$0] })
+        
+        let salt = validatedData(from: data[validateIndices.count...])
+        return (data[..<validateIndices.count] == salt,
+                data.suffix(validateIndices.count) == salt,
+                false)
     }
 
-    public static func extractImageData(from imageData: Data) -> Data? {
-        guard isValid(imageData: imageData) else {
-            return nil
-        }
-        return imageData[..<(imageData.count-validateIndices.count)]
+    public static func extractImageData(from imageData: Data) -> Data {
+        imageData[validateIndices.count..<(imageData.count-validateIndices.count)]
     }
 }
