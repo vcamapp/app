@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-public struct RootContentView<VCamUI: View, MenuBottomView: View>: View {
+public struct RootContentView<VCamUI: View, MenuBottomView: View>: View, Equatable {
     public init(vcamUI: VCamUI, menuBottomView: MenuBottomView, unityView: NSView, interactable: Bool) {
         self.vcamUI = vcamUI
         self.menuBottomView = menuBottomView
@@ -32,26 +32,39 @@ public struct RootContentView<VCamUI: View, MenuBottomView: View>: View {
                 .disabled(!interactable)
 
                 VSplitView {
-                    unityContainer()
+                    UnityView(unityView: unityView)
+                        .equatable()
+                        .layoutPriority(1)
                     vcamUI
                         .onTapGesture {
                             unityView.window?.makeFirstResponder(nil)
                         }
                 }
-                .frame(minHeight: 350)
-                .layoutPriority(1)
             }
         } else {
-            unityContainer()
+            UnityView(unityView: unityView)
+                .equatable()
+                .layoutPriority(1)
         }
     }
 
-    func unityContainer() -> some View {
+    public static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.interactable == rhs.interactable
+    }
+}
+
+struct UnityView: View, Equatable {
+    let unityView: NSView
+
+    var body: some View {
         UnityContainerView(unityView: unityView)
 //                    .help(L10n.helpMouseHover.text)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .aspectRatio(1280 / 720, contentMode: .fit)
-            .layoutPriority(2)
+    }
+
+    static func == (lhs: Self, rhs: Self) -> Bool {
+        true
     }
 }
 

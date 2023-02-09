@@ -55,7 +55,7 @@ public struct VCamMotion: Equatable {
 
 public extension VCamMotion {
     init(rawData: Data) {
-        self = rawData.withUnsafeBytes { $0.load(as: Self.self) }
+        self = rawData.load()
     }
 
     mutating func dataNoCopy() -> Data {
@@ -66,6 +66,10 @@ public extension VCamMotion {
 extension Data {
     init<T>(valueNoCopy value: inout T) {
         self = Data(bytesNoCopy: &value, count: MemoryLayout<T>.size, deallocator: .none)
+    }
+
+    func load<T>() -> T {
+        withUnsafeBytes { $0.load(as: T.self) }
     }
 }
 
