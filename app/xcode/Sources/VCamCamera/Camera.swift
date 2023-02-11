@@ -7,8 +7,33 @@
 
 import AVFoundation
 import CoreMediaIO
+import VCamEntity
 
 public enum Camera {
+    private static var cachedDevices: [AVCaptureDevice] = [] {
+        didSet {
+            NotificationCenter.default.post(name: .deviceWasChanged, object: nil)
+        }
+    }
+
+    public static func configure() {
+        let updateCache = {
+            Camera.enableDalDevices()
+            let deviceDiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInWideAngleCamera, .externalUnknown], mediaType: nil, position: .unspecified)
+            cachedDevices = deviceDiscoverySession.devices.filter { $0.uniqueID != "vcam-device" }
+        }
+
+        updateCache()
+
+        NotificationCenter.default.addObserver(forName: .AVCaptureDeviceWasConnected, object: nil, queue: .main) { _ in
+            updateCache()
+        }
+
+        NotificationCenter.default.addObserver(forName: .AVCaptureDeviceWasDisconnected, object: nil, queue: .main) { _ in
+            updateCache()
+        }
+    }
+    
     public static var hasCamera: Bool {
         defaultCaptureDevice != nil
     }
@@ -30,13 +55,15 @@ public enum Camera {
     }
 
     public static func cameras(type: AVMediaType? = .video) -> [AVCaptureDevice] {
-        enableDalDevices()
-        let deviceDiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInWideAngleCamera, .externalUnknown], mediaType: type, position: .unspecified)
-        return deviceDiscoverySession.devices.filter { $0.uniqueID != "vcam-device" }
+        if let type {
+            return cachedDevices.filter { $0.hasMediaType(type) }
+        } else {
+            return cachedDevices
+        }
     }
 
     public static func camera(id: String?) -> AVCaptureDevice? {
-        cameras().first { $0.uniqueID == id }
+        cachedDevices.first { $0.uniqueID == id }
     }
 
     public static func searchHighestResolutionFormat(for device: AVCaptureDevice) -> (format: AVCaptureDevice.Format, resolution: CGSize)? {
