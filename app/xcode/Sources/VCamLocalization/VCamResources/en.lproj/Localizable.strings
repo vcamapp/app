@@ -14,6 +14,7 @@
 "done" = "Done";
 "edit" = "Edit";
 "pick" = "Pick";
+"general" = "General";
 "apply" = "Apply";
 "remove" = "Remove";
 "duplicate" = "Duplicate";
@@ -100,7 +101,7 @@
 "optimizeMeshes" = "Optimize meshes (Recommended)";
 "enableAutoConvertingToVRM1" = "Convert VRM 0.x to VRM 1.x";
 "helpMesh" = "Reduce the load on the app by merging meshes, etc. If you have problems viewing the model, turn it off and reload the model.";
-"flipScreen" = "Flip screen";
+"flipScreen" = "Flip screen of the virtual camera";
 "addToMacOSMenuBar" = "Add icon in macOS menu bar";
 "background" = "Background";
 "lipSyncSensitivity" = "Lip-sync sensitivity (mic)";
@@ -116,13 +117,19 @@
 "qualityGood" = "Good";
 "qualityBeautiful" = "Beautiful";
 "qualityFantastic" = "Fantastic";
+"rendering" = "Rendering";
+"experiment" = "Experiment";
+"experimentDisclaimer" = "These are experimental features and may have bugs.";
+"experimentThanks" = "These features are available for our supporters, thank you for your supporting!";
+"experimentAdvertisement" = "The supporter version of the app can be downloaded from the following link:";
+"enableVSync" = "Enable VSync";
 
 // MARK: - Tracking
 
 "micOrCamera" = "Mic or Camera";
 "helpCalibrate" = "If the movement is out of sync with the actual movement, press this button while facing forward to the camera and looking at the camera.";
 "useEmotionBy %@" = "Use emotion by %@ [β] (Use high power)";
-"useVowelEstimation" = "Use vowel estimation by camera [β]";
+"useVowelEstimation" = "Use vowel estimation by camera";
 "isNotFound %@" = "%@ is not found";
 "lipSync" = "Lip-sync";
 "trackEyes" = "Track eyes";
@@ -225,6 +232,7 @@
 "help" = "Help";
 "anyProblem" = "Any problem?";
 "quitVCam" = "Quit VCam";
+"openVCam" = "Open VCam";
 
 "editAvatar" = "Edit Avatar";
 "recalibrate" = "Recalibrate";

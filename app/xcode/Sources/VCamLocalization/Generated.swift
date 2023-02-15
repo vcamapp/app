@@ -134,6 +134,8 @@ public enum L10n {
   public static let enable = LocalizedString(lookupKey: "enable")
   /// Convert VRM 0.x to VRM 1.x
   public static let enableAutoConvertingToVRM1 = LocalizedString(lookupKey: "enableAutoConvertingToVRM1")
+  /// Enable VSync
+  public static let enableVSync = LocalizedString(lookupKey: "enableVSync")
   /// English
   public static let english = LocalizedString(lookupKey: "english")
   /// Entire Display
@@ -144,6 +146,14 @@ public enum L10n {
   public static func existsNewAppVersion(_ p1: Any) -> ArgumentsLocalizedString {
     ArgumentsLocalizedString("existsNewAppVersion %@", "existsNewAppVersion \(String(describing: p1))", String(describing: p1))
   }
+  /// Experiment
+  public static let experiment = LocalizedString(lookupKey: "experiment")
+  /// The supporter version of the app can be downloaded from the following link:
+  public static let experimentAdvertisement = LocalizedString(lookupKey: "experimentAdvertisement")
+  /// These are experimental features and may have bugs.
+  public static let experimentDisclaimer = LocalizedString(lookupKey: "experimentDisclaimer")
+  /// These features are available for our supporters, thank you for your supporting!
+  public static let experimentThanks = LocalizedString(lookupKey: "experimentThanks")
   /// Horizontal sensitivity
   public static let eyesHorizontalSensitivity = LocalizedString(lookupKey: "eyesHorizontalSensitivity")
   /// Vertical sensitivity
@@ -160,12 +170,14 @@ public enum L10n {
   public static let filter = LocalizedString(lookupKey: "filter")
   /// Finger
   public static let finger = LocalizedString(lookupKey: "finger")
-  /// Flip screen
+  /// Flip screen of the virtual camera
   public static let flipScreen = LocalizedString(lookupKey: "flipScreen")
   /// FPS (tracking)
   public static let fpsCamera = LocalizedString(lookupKey: "fpsCamera")
   /// FPS (screen)
   public static let fpsScreen = LocalizedString(lookupKey: "fpsScreen")
+  /// General
+  public static let general = LocalizedString(lookupKey: "general")
   /// Hand
   public static let hand = LocalizedString(lookupKey: "hand")
   /// Height
@@ -252,6 +264,8 @@ public enum L10n {
   public static let object = LocalizedString(lookupKey: "object")
   /// Open preferences
   public static let openPreference = LocalizedString(lookupKey: "openPreference")
+  /// Open VCam
+  public static let openVCam = LocalizedString(lookupKey: "openVCam")
   /// Optimize meshes (Recommended)
   public static let optimizeMeshes = LocalizedString(lookupKey: "optimizeMeshes")
   /// Paste
@@ -296,6 +310,8 @@ public enum L10n {
   public static let remove = LocalizedString(lookupKey: "remove")
   /// Remove VCam from the capture
   public static let removeVCamFromCapture = LocalizedString(lookupKey: "removeVCamFromCapture")
+  /// Rendering
+  public static let rendering = LocalizedString(lookupKey: "rendering")
   /// Rendering Quality
   public static let renderingQuality = LocalizedString(lookupKey: "renderingQuality")
   /// Reset Avatar Position
@@ -382,7 +398,7 @@ public enum L10n {
   public static func useEmotionBy(_ p1: Any) -> ArgumentsLocalizedString {
     ArgumentsLocalizedString("useEmotionBy %@", "useEmotionBy \(String(describing: p1))", String(describing: p1))
   }
-  /// Use vowel estimation by camera [β]
+  /// Use vowel estimation by camera
   public static let useVowelEstimation = LocalizedString(lookupKey: "useVowelEstimation")
   /// Video Capture
   public static let videoCapture = LocalizedString(lookupKey: "videoCapture")

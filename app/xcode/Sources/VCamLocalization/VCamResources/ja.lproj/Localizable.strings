@@ -14,6 +14,7 @@
 "done" = "完了";
 "edit" = "編集";
 "pick" = "選択";
+"general" = "一般";
 "apply" = "適用";
 "remove" = "削除";
 "duplicate" = "複製";
@@ -100,7 +101,7 @@
 "optimizeMeshes" = "モデルのメッシュを最適化する (推奨)";
 "enableAutoConvertingToVRM1" = "VRM0.x系のアバターを1.0系に自動変換する";
 "helpMesh" = "メッシュの結合等によりアプリの負荷を大幅に下げられます。モデルの表示に問題がある場合はオフにした後、モデルを再読込してください。";
-"flipScreen" = "画面を左右反転する";
+"flipScreen" = "仮想カメラの画面を左右反転する";
 "addToMacOSMenuBar" = "macOSのメニューバーに追加する";
 "background" = "背景";
 "lipSyncSensitivity" = "リップシンクの感度 (マイク)";
@@ -116,13 +117,19 @@
 "qualityGood" = "良品質";
 "qualityBeautiful" = "高品質";
 "qualityFantastic" = "最高品質";
+"rendering" = "レンダリング";
+"experiment" = "実験的な機能";
+"experimentDisclaimer" = "これらは実験的な機能のため、不具合がある可能性があります。";
+"experimentThanks" = "これらの機能はサポーター向けに提供しています。VCamのサポート、ありがとうございます！";
+"experimentAdvertisement" = "これらの機能はサポーター向けに提供しています。サポーター版は以下からDLできます。";
+"enableVSync" = "VSyncを有効にする";
 
 // MARK: - Tracking
 
 "micOrCamera" = "マイクまたはカメラ";
 "helpCalibrate" = "実際の動きとずれている場合は、カメラに対して正面を向いた状態でカメラ目線でこのボタンを押してください";
 "useEmotionBy %@" = "表情を%@で推定して反映する [β] (負荷増)";
-"useVowelEstimation" = "カメラで母音を推定する [β]";
+"useVowelEstimation" = "カメラで母音を推定する";
 "isNotFound %@" = "%@が見つかりません";
 "lipSync" = "リップシンク";
 "trackEyes" = "目をトラッキングする";
@@ -224,7 +231,8 @@
 "resetAvatarPosition" = "アバターの位置をリセット";
 "help" = "ヘルプ";
 "anyProblem" = "困った時は？";
-"quitVCam" = "VCam を終了";
+"quitVCam" = "VCamを終了";
+"openVCam" = "VCamを開く";
 
 "editAvatar" = "アバターの編集";
 "recalibrate" = "再キャリブレーション";

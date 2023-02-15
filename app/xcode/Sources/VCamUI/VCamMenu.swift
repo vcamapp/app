@@ -9,11 +9,8 @@ import SwiftUI
 
 public enum VCamMenuItem: Identifiable, CaseIterable {
     case main
-    case preference
-    case tracking
     case screenEffect
     case recording
-    case integration
     
     public var id: Self { self }
 
@@ -21,16 +18,10 @@ public enum VCamMenuItem: Identifiable, CaseIterable {
         switch self {
         case .main:
             return L10n.main.key
-        case .preference:
-            return L10n.preference.key
-        case .tracking:
-            return L10n.tracking.key
         case .screenEffect:
             return L10n.screenEffect.key
         case .recording:
             return L10n.recording.key
-        case .integration:
-            return L10n.integration.key
         }
     }
 
@@ -38,16 +29,10 @@ public enum VCamMenuItem: Identifiable, CaseIterable {
         switch self {
         case .main:
             return "person.fill"
-        case .preference:
-            return "gearshape.fill"
-        case .tracking:
-            return "face.dashed"
         case .screenEffect:
             return "sparkles"
         case .recording:
             return "camera.fill"
-        case .integration:
-            return "app.connected.to.app.below.fill"
         }
     }
 }

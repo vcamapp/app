@@ -11,9 +11,10 @@ import VCamLocalization
 
 struct AppUpdateInformationView: View {
     let release: AppUpdater.LatestRelease
-    let window: NSWindow
 
     @AppStorage(key: .skipThisVersion) var skipThisVersion
+
+    @Environment(\.nsWindow) var nsWindow
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -35,7 +36,7 @@ struct AppUpdateInformationView: View {
             HStack {
                 Button {
                     skipThisVersion = release.version.description
-                    window.close()
+                    nsWindow?.close()
                 } label: {
                     Text(L10n.skipThisVersion.key, bundle: .localize)
                 }
@@ -62,7 +63,13 @@ struct AppUpdateInformationView: View {
             }
         }
         .padding()
+        .background(.thinMaterial)
+        .frame(width: 600, height: 400)
     }
+}
+
+extension AppUpdateInformationView: MacWindow {
+    static var windowTitle: String { L10n.update.text }
 }
 
 extension AppUpdater {
@@ -77,10 +84,8 @@ extension AppUpdater {
             _ = alert.runModal()
             return
         }
-        presentWindow(title: L10n.update.text, id: nil, size: .init(width: 600, height: 400)) { window in
-            AppUpdateInformationView(release: release, window: window)
-                .background(.thinMaterial)
-        }
+
+        MacWindowManager.shared.open(AppUpdateInformationView(release: release))
     }
 
     @MainActor
@@ -88,9 +93,6 @@ extension AppUpdater {
         guard let release = try? await check(), UserDefaults.standard.value(for: .skipThisVersion) < release.version else {
             return // already latest or error
         }
-        presentWindow(title: L10n.update.text, id: nil, size: .init(width: 600, height: 400)) { window in
-            AppUpdateInformationView(release: release, window: window)
-                .background(.thinMaterial)
-        }
+        MacWindowManager.shared.open(AppUpdateInformationView(release: release))
     }
 }

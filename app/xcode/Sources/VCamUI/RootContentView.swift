@@ -7,24 +7,28 @@
 
 import SwiftUI
 
-public struct RootContentView<VCamUI: View, MenuBottomView: View>: View, Equatable {
-    public init(vcamUI: VCamUI, menuBottomView: MenuBottomView, unityView: NSView, interactable: Bool) {
+public struct RootContentView<VCamUI: View, MenuBottomView: View, Toolbar: View>: View {
+    public init(vcamUI: VCamUI, menuBottomView: MenuBottomView, toolbar: Toolbar, unityView: NSView, interactable: Bool) {
         self.vcamUI = vcamUI
         self.menuBottomView = menuBottomView
+        self.toolbar = toolbar
         self.unityView = unityView
         self.interactable = interactable
     }
 
     let vcamUI: VCamUI
     let menuBottomView: MenuBottomView
+    let toolbar: Toolbar
     let unityView: NSView
     let interactable: Bool
 
+    @State var isPopover = false
+
     public var body: some View {
         if interactable {
-            HStack {
+            HStack(spacing: 0) {
                 VCamMenu(
-                    bottomView: menuBottomView.frame(height: 200)
+                    bottomView: menuBottomView.frame(height: 280)
                 )
                 .onTapGesture {
                     unityView.window?.makeFirstResponder(nil)
@@ -32,9 +36,15 @@ public struct RootContentView<VCamUI: View, MenuBottomView: View>: View, Equatab
                 .disabled(!interactable)
 
                 VSplitView {
-                    UnityView(unityView: unityView)
-                        .equatable()
-                        .layoutPriority(1)
+                    HStack(alignment: .bottom, spacing: 0) {
+                        toolbar
+                        UnityView(unityView: unityView)
+                            .equatable()
+                            .frame(maxWidth: .infinity)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .layoutPriority(1)
+
                     vcamUI
                         .onTapGesture {
                             unityView.window?.makeFirstResponder(nil)
@@ -46,10 +56,6 @@ public struct RootContentView<VCamUI: View, MenuBottomView: View>: View, Equatab
                 .equatable()
                 .layoutPriority(1)
         }
-    }
-
-    public static func == (lhs: Self, rhs: Self) -> Bool {
-        lhs.interactable == rhs.interactable
     }
 }
 
@@ -83,6 +89,7 @@ struct RootContentView_Previews: PreviewProvider {
         RootContentView(
             vcamUI: Color.red,
             menuBottomView: Color.blue,
+            toolbar: Color.yellow,
             unityView: NSView(),
             interactable: true
         )
