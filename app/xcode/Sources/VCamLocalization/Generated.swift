@@ -134,6 +134,8 @@ public enum L10n {
   public static let enable = LocalizedString(lookupKey: "enable")
   /// Convert VRM 0.x to VRM 1.x
   public static let enableAutoConvertingToVRM1 = LocalizedString(lookupKey: "enableAutoConvertingToVRM1")
+  /// Use the new virtual camera (macOS 12.3 and above)
+  public static let enableNewCameraExtension = LocalizedString(lookupKey: "enableNewCameraExtension")
   /// Enable VSync
   public static let enableVSync = LocalizedString(lookupKey: "enableVSync")
   /// English
@@ -198,6 +200,8 @@ public enum L10n {
   public static let image = LocalizedString(lookupKey: "image")
   /// Independent Window
   public static let independentWindow = LocalizedString(lookupKey: "independentWindow")
+  /// Install
+  public static let install = LocalizedString(lookupKey: "install")
   /// Install %@
   public static func installOne(_ p1: Any) -> ArgumentsLocalizedString {
     ArgumentsLocalizedString("installOne %@", "installOne \(String(describing: p1))", String(describing: p1))
@@ -304,6 +308,8 @@ public enum L10n {
   public static let recording = LocalizedString(lookupKey: "recording")
   /// Refresh Screen
   public static let refreshScreen = LocalizedString(lookupKey: "refreshScreen")
+  /// Reinstall
+  public static let reinstall = LocalizedString(lookupKey: "reinstall")
   /// Release Notes:
   public static let releaseNotes = LocalizedString(lookupKey: "releaseNotes")
   /// Remove
@@ -384,6 +390,8 @@ public enum L10n {
   public static func typeNo(_ p1: Any) -> ArgumentsLocalizedString {
     ArgumentsLocalizedString("typeNo %@", "typeNo \(String(describing: p1))", String(describing: p1))
   }
+  /// Uninstall
+  public static let uninstall = LocalizedString(lookupKey: "uninstall")
   /// Uninstall Virtual Camera Plugin
   public static let uninstallPlugin = LocalizedString(lookupKey: "uninstallPlugin")
   /// Update
@@ -408,6 +416,8 @@ public enum L10n {
   public static let videoFormat = LocalizedString(lookupKey: "videoFormat")
   /// Vignette
   public static let vignette = LocalizedString(lookupKey: "vignette")
+  /// Virtual Camera
+  public static let virtualCamera = LocalizedString(lookupKey: "virtualCamera")
   /// Web
   public static let web = LocalizedString(lookupKey: "web")
   /// What!?

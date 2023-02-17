@@ -26,11 +26,15 @@
 "clipboard" = "クリップボード";
 "camera" = "カメラ";
 "mic" = "マイク";
+"virtualCamera" = "仮想カメラ";
 "scene" = "シーン";
 "message" = "メッセージ";
 "destinationToSave" = "保存先";
 "update" = "アップデート";
 "download" = "ダウンロード";
+"install" = "インストール";
+"uninstall" = "アンインストール";
+"reinstall" = "再インストール";
 "enable" = "有効にする";
 "filter" = "フィルタ";
 "threshold" = "しきい値";
@@ -119,10 +123,11 @@
 "qualityFantastic" = "最高品質";
 "rendering" = "レンダリング";
 "experiment" = "実験的な機能";
-"experimentDisclaimer" = "これらは実験的な機能のため、不具合がある可能性があります。";
+"experimentDisclaimer" = "これらは実験的な機能のため、不具合があるかもしれません。";
 "experimentThanks" = "これらの機能はサポーター向けに提供しています。VCamのサポート、ありがとうございます！";
 "experimentAdvertisement" = "これらの機能はサポーター向けに提供しています。サポーター版は以下からDLできます。";
 "enableVSync" = "VSyncを有効にする";
+"enableNewCameraExtension" = "新しい仮想カメラを使用する (macOS 12.3以降)";
 
 // MARK: - Tracking
 
