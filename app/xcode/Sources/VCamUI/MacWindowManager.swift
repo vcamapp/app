@@ -8,6 +8,7 @@
 import AppKit
 import SwiftUI
 import VCamEntity
+import VCamData
 
 public protocol MacWindow: View {
     var windowTitle: String { get }

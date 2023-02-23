@@ -7,6 +7,7 @@
 
 import SwiftUI
 import VCamEntity
+import VCamData
 import VCamLocalization
 
 struct AppUpdateInformationView: View {

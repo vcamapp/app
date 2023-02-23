@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+import VCamData
+import VCamLocalization
 
 public struct ModalSheet<Content: View>: View {
     public init(
