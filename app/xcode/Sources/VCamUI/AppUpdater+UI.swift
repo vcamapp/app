@@ -69,19 +69,14 @@ struct AppUpdateInformationView: View {
 }
 
 extension AppUpdateInformationView: MacWindow {
-    static var windowTitle: String { L10n.update.text }
+    var windowTitle: String { L10n.update.text }
 }
 
 extension AppUpdater {
     @MainActor
     public func presentUpdateAlert() async {
         guard let release = try? await check() else {
-            let alert = NSAlert()
-            alert.messageText = L10n.upToDate.text
-            alert.informativeText = L10n.upToDateMessage(Version.current.description).text
-            alert.alertStyle = NSAlert.Style.warning
-            _ = alert.addButton(withTitle: "OK")
-            _ = alert.runModal()
+        await VCamAlert.showModal(title: L10n.upToDate.text, message: L10n.upToDateMessage(Version.current.description).text, canCancel: false)
             return
         }
 

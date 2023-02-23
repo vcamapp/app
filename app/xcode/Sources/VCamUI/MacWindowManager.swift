@@ -10,7 +10,18 @@ import SwiftUI
 import VCamEntity
 
 public protocol MacWindow: View {
-    static var windowTitle: String { get }
+    var windowTitle: String { get }
+    func configureWindow(_ window: NSWindow) -> NSWindow
+}
+
+public extension MacWindow {
+    var windowStyleMask: NSWindow.StyleMask {
+        [.titled, .closable, .fullSizeContentView]
+    }
+
+    func configureWindow(_ window: NSWindow) -> NSWindow {
+        window
+    }
 }
 
 public final class MacWindowManager {
@@ -25,18 +36,19 @@ public final class MacWindowManager {
             return
         }
 
-        let window = NSWindow(
+        let window = windowView.configureWindow(NSWindow(
             contentRect: .init(origin: .zero, size: .init(width: 1, height: 400)),
             styleMask: [.titled, .closable, .fullSizeContentView],
             backing: .buffered,
             defer: false
-        )
+        ))
+
         window.isReleasedWhenClosed = false
         window.contentView = NSHostingView(
             rootView: WindowContainer(content: windowView)
                 .environment(\.nsWindow, window)
         )
-        window.title = T.windowTitle
+        window.title = windowView.windowTitle
         window.makeKeyAndOrderFront(nil)
         window.center()
         openWindows[id] = window

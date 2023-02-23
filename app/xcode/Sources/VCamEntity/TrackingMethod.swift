@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import VCamDefaults
 
 public enum TrackingMethod {
     public enum Face: String, CaseIterable, Equatable, Identifiable, UserDefaultsValue {

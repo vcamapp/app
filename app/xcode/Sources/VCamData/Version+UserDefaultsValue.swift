@@ -7,6 +7,7 @@
 
 import Foundation
 import VCamEntity
+import VCamDefaults
 
 extension Version: UserDefaultsValue {
     public func encodeUserDefaultValue() -> String {

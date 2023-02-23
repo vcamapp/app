@@ -59,8 +59,8 @@ public enum DeviceAuthorization {
             }
 
         case .denied, .restricted:
-            DispatchQueue.main.async {
-                showAuthorizationError(type: type)
+            Task { @MainActor in
+                await showAuthorizationError(type: type)
                 completion(false)
             }
         @unknown default:
@@ -68,19 +68,12 @@ public enum DeviceAuthorization {
         }
     }
 
-    private static func showAuthorizationError(type: AuthorizationType) {
-        let alert = NSAlert()
-        alert.alertStyle = .warning
-        alert.messageText = L10n.allowFor(type.name).text
-        alert.addButton(withTitle: L10n.openPreference.text)
-        alert.addButton(withTitle: L10n.cancel.text)
-
-        let response = alert.runModal()
-        switch response {
-        case .alertFirstButtonReturn:
+    @MainActor
+    private static func showAuthorizationError(type: AuthorizationType) async {
+        switch await VCamAlert.showModal(title: "", message: L10n.allowFor(type.name).text, canCancel: true, okTitle: L10n.openPreference.text) {
+        case .ok:
             type.openPreference()
-        default:
-            break
+        case .cancel: ()
         }
     }
 }

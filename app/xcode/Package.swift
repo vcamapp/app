@@ -11,7 +11,8 @@ let package = Package(
         .library(name: "VCamMedia", targets: ["VCamMedia"]),
         .library(name: "VCamCamera", targets: ["VCamCamera"]),
 
-        .library(name: "VCamMediaAppExtension", targets: ["VCamMediaAppExtension"])
+        .library(name: "VCamDefaults", targets: ["VCamDefaults"]),
+        .library(name: "VCamMediaAppExtension", targets: ["VCamMediaAppExtension"]),
     ],
     dependencies: [
         .package(url: "https://github.com/siteline/SwiftUI-Introspect", exact: "0.1.4"),
@@ -23,15 +24,17 @@ let package = Package(
         ]),
         .target(name: "VCamUIFoundation"),
         .target(name: "VCamData", dependencies: ["VCamEntity"]),
-        .target(name: "VCamEntity", swiftSettings: [
+        .target(name: "VCamEntity", dependencies: ["VCamDefaults"], swiftSettings: [
 //            .define("ENABLE_MOCOPI")
         ]),
         .target(name: "VCamLocalization", resources: [.process("VCamResources")]),
         .target(name: "VCamMedia", dependencies: ["VCamEntity", "VCamMediaAppExtension"]),
         .target(name: "VCamBridge", dependencies: ["VCamUIFoundation"]),
         .target(name: "VCamCamera", dependencies: ["VCamEntity"]),
-        .target(name: "VCamTracking", dependencies: []),
+        .target(name: "VCamTracking", dependencies: ["VCamLogger"]),
 
+        .target(name: "VCamLogger", dependencies: []),
+        .target(name: "VCamDefaults", dependencies: []),
         .target(name: "VCamMediaAppExtension", dependencies: []),
 
         .testTarget(name: "VCamTrackingTests", dependencies: ["VCamTracking"]),

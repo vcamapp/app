@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import VCamLogger
 
 public enum VCamMenuItem: Identifiable, CaseIterable {
     case main

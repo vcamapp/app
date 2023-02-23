@@ -6,8 +6,7 @@
 //
 
 import SwiftUI
-import VCamEntity
-import VCamData
+import VCamDefaults
 
 public extension AppStorage where Value == Bool {
     init(key: UserDefaults.Key<Value>) {

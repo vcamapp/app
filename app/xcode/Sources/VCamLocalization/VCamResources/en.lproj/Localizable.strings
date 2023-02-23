@@ -96,7 +96,7 @@
 "interact" = "Interact";
 "localFile" = "Local File";
 
-"moveInitialPosition" = "Reset";
+"moveInitialPosition" = "Reset position";
 
 // MARK: - Preference
 

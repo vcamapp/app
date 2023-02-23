@@ -7,6 +7,7 @@
 
 import Network
 import Combine
+import VCamLogger
 
 public final class VCamMotionReceiver {
     private static let queue = DispatchQueue(label: "com.github.tattn.vcam.vcammotionreceiver")
@@ -41,8 +42,12 @@ public final class VCamMotionReceiver {
             listener.stateUpdateHandler = { newState in
                 switch newState {
                 case .failed(let error):
+                    Logger.log(error.localizedDescription)
+                    listener.stateUpdateHandler = nil
                     continuation.resume(throwing: error)
                 case .cancelled:
+                    Logger.log("\(newState)")
+                    listener.stateUpdateHandler = nil
                     continuation.resume(throwing: Error.cancelled)
                 default: ()
                 }

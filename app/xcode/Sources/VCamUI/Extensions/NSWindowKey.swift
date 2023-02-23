@@ -11,7 +11,7 @@ private struct NSWindowKey: EnvironmentKey {
     static let defaultValue: NSWindow? = nil
 }
 
-extension EnvironmentValues {
+public extension EnvironmentValues {
     var nsWindow: NSWindow? {
         get { self[NSWindowKey.self] }
         set { self[NSWindowKey.self] = newValue }

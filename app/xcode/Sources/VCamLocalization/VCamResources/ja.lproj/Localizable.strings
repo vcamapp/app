@@ -96,7 +96,7 @@
 "interact" = "操作";
 "localFile" = "ローカルファイル";
 
-"moveInitialPosition" = "初期位置";
+"moveInitialPosition" = "カメラを初期位置に戻す";
 
 // MARK: - Preference
 

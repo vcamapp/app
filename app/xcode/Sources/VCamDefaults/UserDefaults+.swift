@@ -6,8 +6,6 @@
 //
 
 import Foundation
-import VCamEntity
-
 
 public extension UserDefaults {
     func value<T: UserDefaultsValue>(for key: Key<T>) -> T {

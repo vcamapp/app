@@ -22,8 +22,6 @@ public struct RootContentView<VCamUI: View, MenuBottomView: View, Toolbar: View>
     let unityView: NSView
     let interactable: Bool
 
-    @State var isPopover = false
-
     public var body: some View {
         if interactable {
             HStack(spacing: 0) {

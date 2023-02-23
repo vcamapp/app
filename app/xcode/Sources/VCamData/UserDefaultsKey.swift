@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import VCamDefaults
 import VCamEntity
 
 public extension UserDefaults.Key {
