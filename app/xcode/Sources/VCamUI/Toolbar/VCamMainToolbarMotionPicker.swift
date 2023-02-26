@@ -32,9 +32,11 @@ public struct VCamMainToolbarMotionPicker: View {
     let motionShakeBody: Binding<Bool>
     let motionRun: Binding<Bool>
 
+    @Environment(\.nsWindow) var nsWindow
+
     public var body: some View {
         GroupBox {
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 2), count: 3)) {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 80))], spacing: 2) {
                 button(key: L10n.hi.key, action: motionHello)
                 toggle(key: L10n.bye.key, isOn: motionBye)
                 button(key: L10n.jump.key, action: motionJump)
@@ -49,7 +51,15 @@ public struct VCamMainToolbarMotionPicker: View {
                 }
             }
         }
-        .frame(width: 240)
+        .modifierOnMacWindow { content, _ in
+            ScrollView {
+                content
+            }
+            .padding(.top, 1) // prevent from entering under the title bar.
+            .padding([.leading, .trailing, .bottom], 8)
+            .frame(minWidth: 200, maxWidth: .infinity, minHeight: 80, maxHeight: .infinity)
+            .background(.regularMaterial)
+        }
     }
 
     func button(key: LocalizedStringKey, action: @escaping () -> Void) -> some View {
@@ -73,8 +83,25 @@ public struct VCamMainToolbarMotionPicker: View {
     }
 }
 
+extension VCamMainToolbarMotionPicker: MacWindow {
+    public var windowTitle: String {
+        L10n.motion.text
+    }
+
+    public func configureWindow(_ window: NSWindow) -> NSWindow {
+        window.level = .floating
+        window.styleMask = [.titled, .closable, .resizable, .fullSizeContentView]
+        window.setContentSize(.init(width: 200, height: 200))
+        window.isOpaque = false
+        window.backgroundColor = .clear
+        window.titlebarAppearsTransparent = true
+        return window
+    }
+}
+
 struct VCamMainToolbarMotionPicker_Previews: PreviewProvider {
     static var previews: some View {
         VCamMainToolbarMotionPicker(motionHello: {}, motionBye: .constant(false), motionJump: {}, motionYear: {}, motionWhat: {}, motionWin: {}, motionNod: .constant(false), motionShakeHead: .constant(false), motionShakeBody: .constant(false), motionRun: .constant(false))
+            .frame(width: 240)
     }
 }

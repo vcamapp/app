@@ -19,15 +19,8 @@ public struct VCamMainToolbarEmojiPicker: View {
     @Environment(\.dismiss) var dismiss
     
     public var body: some View {
-        HStack {
-            Button {
-                NotificationCenter.default.post(name: .showEmojiPicker, object: nil)
-                dismiss()
-            } label: {
-                Image(systemName: "face.smiling")
-            }
-
-            LazyVGrid(columns: Array(repeating: GridItem(.fixed(26), spacing: 0), count: 5)) {
+        GroupBox {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 26))]) {
                 ForEach(Self.emojis, id: \.self) { emoji in
                     Button {
                         pickEmoji(emoji)
@@ -50,7 +43,6 @@ public struct VCamMainToolbarEmojiPicker: View {
                     textField.stringValue = ""
                 }
         )
-        .fixedSize()
     }
 
     private func pickEmoji(_ emoji: String) {

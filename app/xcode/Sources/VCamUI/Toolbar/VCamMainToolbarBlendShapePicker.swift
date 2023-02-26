@@ -19,7 +19,7 @@ public struct VCamMainToolbarBlendShapePicker: View {
     public var body: some View {
         ScrollView(.vertical, showsIndicators: true) {
             GroupBox {
-                LazyVGrid(columns: Array(repeating: GridItem(.adaptive(minimum: 80), spacing: 2), count: 3)) {
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 60))]) {
                     ForEach(blendShapes, id: \.self) { blendShape in
                         HoverToggle(text: blendShape, isOn: $selectedBlendShape.map(
                             get: { blendShape == $0 },
@@ -29,7 +29,13 @@ public struct VCamMainToolbarBlendShapePicker: View {
                 }
             }
         }
-        .frame(width: 280, height: 150)
+        .modifierOnMacWindow { content, _ in
+            content
+                .padding(.top, 1) // prevent from entering under the title bar.
+                .padding([.leading, .trailing, .bottom], 8)
+                .frame(minWidth: 200, maxWidth: .infinity, minHeight: 80, maxHeight: .infinity)
+                .background(.regularMaterial)
+        }
     }
 
     struct HoverToggle: View {
@@ -47,6 +53,22 @@ public struct VCamMainToolbarBlendShapePicker: View {
             }
             .buttonStyle(.plain)
         }
+    }
+}
+
+extension VCamMainToolbarBlendShapePicker: MacWindow {
+    public var windowTitle: String {
+        L10n.facialExpression.text
+    }
+
+    public func configureWindow(_ window: NSWindow) -> NSWindow {
+        window.level = .floating
+        window.styleMask = [.titled, .closable, .resizable, .fullSizeContentView]
+        window.setContentSize(.init(width: 200, height: 200))
+        window.isOpaque = false
+        window.backgroundColor = .clear
+        window.titlebarAppearsTransparent = true
+        return window
     }
 }
 

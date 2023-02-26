@@ -6,7 +6,7 @@
 //
 
 import XCTest
-@testable import VCamMediaAppExtension
+@testable import VCamAppExtension
 
 final class ImageValidatorTests: XCTestCase {
     func testEncodeDecode() {

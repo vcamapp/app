@@ -30,6 +30,7 @@ public struct RootContentView<VCamUI: View, MenuBottomView: View, Toolbar: View>
                 )
                 .onTapGesture {
                     unityView.window?.makeFirstResponder(nil)
+                    NotificationCenter.default.post(name: .unfocusObject, object: nil)
                 }
                 .disabled(!interactable)
 
@@ -46,6 +47,7 @@ public struct RootContentView<VCamUI: View, MenuBottomView: View, Toolbar: View>
                     vcamUI
                         .onTapGesture {
                             unityView.window?.makeFirstResponder(nil)
+                            NotificationCenter.default.post(name: .unfocusObject, object: nil)
                         }
                 }
             }

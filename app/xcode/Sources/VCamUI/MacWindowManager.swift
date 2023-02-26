@@ -16,12 +16,29 @@ public protocol MacWindow: View {
 }
 
 public extension MacWindow {
-    var windowStyleMask: NSWindow.StyleMask {
-        [.titled, .closable, .fullSizeContentView]
-    }
-
     func configureWindow(_ window: NSWindow) -> NSWindow {
         window
+    }
+}
+
+public extension View {
+    func modifierOnMacWindow(@ViewBuilder content: @escaping (Self, NSWindow) -> some View) -> some View {
+        MacWindowViewModifier(content: self, modifier: content)
+    }
+}
+
+struct MacWindowViewModifier<Content: View, ModifiedContent: View>: View {
+    let content: Content
+    let modifier: (Content, NSWindow) -> ModifiedContent
+
+    @Environment(\.nsWindow) var nsWindow
+
+    var body: some View {
+        if let nsWindow {
+            modifier(content, nsWindow)
+        } else {
+            content
+        }
     }
 }
 
@@ -37,21 +54,24 @@ public final class MacWindowManager {
             return
         }
 
-        let window = windowView.configureWindow(NSWindow(
-            contentRect: .init(origin: .zero, size: .init(width: 1, height: 400)),
-            styleMask: [.titled, .closable, .fullSizeContentView],
-            backing: .buffered,
-            defer: false
-        ))
+        let window = windowView.configureWindow({
+            let window = NSWindow(
+                contentRect: .init(origin: .zero, size: .init(width: 1, height: 400)),
+                styleMask: [.titled, .closable, .fullSizeContentView],
+                backing: .buffered,
+                defer: false
+            )
 
-        window.isReleasedWhenClosed = false
-        window.contentView = NSHostingView(
-            rootView: WindowContainer(content: windowView)
-                .environment(\.nsWindow, window)
-        )
-        window.title = windowView.windowTitle
+            window.isReleasedWhenClosed = false
+            window.contentView = NSHostingView(
+                rootView: WindowContainer(content: windowView, nsWindow: window)
+            )
+            window.title = windowView.windowTitle
+            window.center()
+            return window
+        }())
+
         window.makeKeyAndOrderFront(nil)
-        window.center()
         openWindows[id] = window
 
         var observation: Any?
@@ -67,11 +87,13 @@ public final class MacWindowManager {
 
 private struct WindowContainer<Content: View>: View {
     let content: Content
+    let nsWindow: NSWindow
 
     @AppStorage(key: .locale) var locale
 
     var body: some View {
         content
             .environment(\.locale, Locale(identifier: locale))
+            .environment(\.nsWindow, nsWindow)
     }
 }

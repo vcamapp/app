@@ -47,10 +47,18 @@ public struct VCamMainToolbar: View {
                 Text("👍")
             }
             .popover(isPresented: $isEmojiPickerPopover) {
-                VCamPopoverContainer(L10n.emoji.key) {
+                VCamPopoverContainerWithButton(L10n.emoji.key) {
+                    Button {
+                        NotificationCenter.default.post(name: .showEmojiPicker, object: nil)
+                        isEmojiPickerPopover = false
+                    } label: {
+                        Image(systemName: "macwindow")
+                    }
+                } content: {
                     emojiPicker
                 }
                 .environment(\.locale, locale)
+                .frame(width: 240)
             }
 
             Item {
@@ -59,10 +67,11 @@ public struct VCamMainToolbar: View {
                 Image(systemName: "figure.wave")
             }
             .popover(isPresented: $isMotionPickerPopover) {
-                VCamPopoverContainer(L10n.motion.key) {
+                VCamPopoverContainerWithWindow(L10n.motion.key) {
                     motionPicker
                 }
                 .environment(\.locale, locale)
+                .frame(width: 240)
             }
 
             Item {
@@ -71,10 +80,11 @@ public struct VCamMainToolbar: View {
                 Image(systemName: "face.smiling")
             }
             .popover(isPresented: $isBlendShapePickerPopover) {
-                VCamPopoverContainer(L10n.facialExpression.key) {
+                VCamPopoverContainerWithWindow(L10n.facialExpression.key) {
                     blendShapePicker
                 }
                 .environment(\.locale, locale)
+                .frame(width: 280, height: 150)
             }
         }
         .frame(maxHeight: .infinity, alignment: .bottom)
