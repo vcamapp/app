@@ -113,8 +113,8 @@ struct VCamMainToolbar_Previews: PreviewProvider {
         VCamMainToolbar(
             photoPicker: VCamMainToolbarPhotoPicker(backgroundColor: .constant(.red), loadBackgroundImage: { _ in }, removeBackgroundImage: {}),
             emojiPicker: VCamMainToolbarEmojiPicker(showEmoji: { _ in }),
-            motionPicker: VCamMainToolbarMotionPicker(motionHello: {}, motionBye: .constant(false), motionJump: {}, motionYear: {}, motionWhat: {}, motionWin: {}, motionNod: .constant(false), motionShakeHead: .constant(false), motionShakeBody: .constant(false), motionRun: .constant(false)),
-            blendShapePicker: VCamMainToolbarBlendShapePicker(blendShapes: [], selectedBlendShape: .constant(nil))
+            motionPicker: VCamMainToolbarMotionPicker(motionHello: {}, motionBye: { .constant(false) }, motionJump: {}, motionYear: {}, motionWhat: {}, motionWin: {}, motionNod: { .constant(false) }, motionShakeHead: { .constant(false) }, motionShakeBody: { .constant(false) }, motionRun: { .constant(false) }),
+            blendShapePicker: VCamMainToolbarBlendShapePicker(blendShapes: [], selectedBlendShape: { .constant(nil) })
         )
     }
 }

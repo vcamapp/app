@@ -128,6 +128,7 @@
 "experimentAdvertisement" = "The supporter version of the app can be downloaded from the following link:";
 "enableVSync" = "Enable VSync";
 "enableNewCameraExtension" = "Use the new virtual camera (macOS 12.3 and above)";
+"noteEnableNewCameraExtension" = "Restart VCam once after installation.";
 
 // MARK: - Tracking
 

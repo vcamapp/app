@@ -128,6 +128,7 @@
 "experimentAdvertisement" = "これらの機能はサポーター向けに提供しています。サポーター版は以下からDLできます。";
 "enableVSync" = "VSyncを有効にする";
 "enableNewCameraExtension" = "新しい仮想カメラを使用する (macOS 12.3以降)";
+"noteEnableNewCameraExtension" = "インストール後は一度VCamを再起動してください";
 
 // MARK: - Tracking
 

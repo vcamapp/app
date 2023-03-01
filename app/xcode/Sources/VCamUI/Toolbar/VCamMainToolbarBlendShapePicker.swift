@@ -8,13 +8,14 @@
 import SwiftUI
 
 public struct VCamMainToolbarBlendShapePicker: View {
-    public init(blendShapes: [String], selectedBlendShape: Binding<String?>) {
+    public init(blendShapes: [String], selectedBlendShape: () -> Binding<String?>) {
         self.blendShapes = blendShapes
-        self._selectedBlendShape = selectedBlendShape
+        self._selectedBlendShape = selectedBlendShape()
     }
 
     let blendShapes: [String]
     @Binding var selectedBlendShape: String?
+    @UniReload private var reload: Void
 
     public var body: some View {
         ScrollView(.vertical, showsIndicators: true) {
@@ -74,6 +75,6 @@ extension VCamMainToolbarBlendShapePicker: MacWindow {
 
 struct VCamMainToolbarBlendShapePicker_Previews: PreviewProvider {
     static var previews: some View {
-        VCamMainToolbarBlendShapePicker(blendShapes: ["natural", "joy"], selectedBlendShape: .constant("joy"))
+        VCamMainToolbarBlendShapePicker(blendShapes: ["natural", "joy"], selectedBlendShape: { .constant("joy") })
     }
 }

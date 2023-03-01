@@ -254,7 +254,7 @@ public enum L10n {
   public static let micSyncOffset = LocalizedString(lookupKey: "micSyncOffset")
   /// Motion
   public static let motion = LocalizedString(lookupKey: "motion")
-  /// Reset
+  /// Reset position
   public static let moveInitialPosition = LocalizedString(lookupKey: "moveInitialPosition")
   /// New preset
   public static let newPreset = LocalizedString(lookupKey: "newPreset")
@@ -264,6 +264,8 @@ public enum L10n {
   public static let nod = LocalizedString(lookupKey: "nod")
   /// None
   public static let `none` = LocalizedString(lookupKey: "none")
+  /// Restart VCam once after installation.
+  public static let noteEnableNewCameraExtension = LocalizedString(lookupKey: "noteEnableNewCameraExtension")
   /// Object
   public static let object = LocalizedString(lookupKey: "object")
   /// Open preferences
