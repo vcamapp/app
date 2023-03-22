@@ -18,3 +18,19 @@ public struct Logger {
         print($0, $1, $2, $3)
     }
 }
+
+public extension Logger {
+    enum Event: String {
+        case installPlugin = "install_plugin"
+        case openVRoidHub = "open_vroidhub"
+        case loadVRMFile = "load_vrmfile"
+    }
+
+    static func log(event: Event) {
+        logEventInternal(event)
+    }
+
+    static var logEventInternal: (Event) -> Void = {
+        print($0)
+    }
+}

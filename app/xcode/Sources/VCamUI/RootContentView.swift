@@ -49,6 +49,7 @@ public struct RootContentView<VCamUI: View, MenuBottomView: View, Toolbar: View>
                             unityView.window?.makeFirstResponder(nil)
                             NotificationCenter.default.post(name: .unfocusObject, object: nil)
                         }
+                        .disabled(!interactable)
                 }
             }
         } else {
