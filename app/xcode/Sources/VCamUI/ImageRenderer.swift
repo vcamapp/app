@@ -8,6 +8,7 @@
 import Foundation
 import CoreImage
 import AppKit
+import VCamEntity
 
 public final class ImageRenderer: RenderTextureRenderer {
     public convenience init(imageURL url: URL, filter: ImageFilter?) {

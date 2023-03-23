@@ -8,6 +8,7 @@
 import AVFoundation
 import CoreImage
 import VCamCamera
+import VCamEntity
 
 public final class CaptureDeviceRenderer {
     private let previewer: CaptureDevicePreviewer

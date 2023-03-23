@@ -36,6 +36,8 @@
 "uninstall" = "アンインストール";
 "reinstall" = "再インストール";
 "enable" = "有効にする";
+"show" = "表示する";
+"hide" = "非表示にする";
 "filter" = "フィルタ";
 "threshold" = "しきい値";
 "cut" = "切り取り";

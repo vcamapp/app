@@ -23,15 +23,17 @@ public struct VCamScene: Codable, Identifiable {
 
 public extension VCamScene {
     struct Object: Codable, Identifiable {
-        public init(id: Int32, name: String, type: VCamScene.ObjectType) {
+        public init(id: Int32, name: String, type: VCamScene.ObjectType, isHidden: Bool) {
             self.id = id
             self.name = name
             self.type = type
+            self.isHidden = isHidden
         }
 
         public let id: Int32
         public var name: String
         public let type: ObjectType
+        public var isHidden: Bool? // [Added 0.9.4]
     }
 
     enum ObjectType: Codable {

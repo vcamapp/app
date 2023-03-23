@@ -194,6 +194,8 @@ public enum L10n {
   public static let helpMocopIP = LocalizedString(lookupKey: "helpMocopIP")
   /// Hi
   public static let hi = LocalizedString(lookupKey: "hi")
+  /// Hide
+  public static let hide = LocalizedString(lookupKey: "hide")
   /// Hue Shift
   public static let hueShift = LocalizedString(lookupKey: "hueShift")
   /// Image
@@ -354,6 +356,8 @@ public enum L10n {
   public static let setUp = LocalizedString(lookupKey: "setUp")
   /// Weight of shoulder rotation
   public static let shoulderRotationWeight = LocalizedString(lookupKey: "shoulderRotationWeight")
+  /// Show
+  public static let show = LocalizedString(lookupKey: "show")
   /// Shudder
   public static let shudder = LocalizedString(lookupKey: "shudder")
   /// Simulate shadows (Use high power)

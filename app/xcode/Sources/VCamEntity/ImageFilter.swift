@@ -6,7 +6,6 @@
 //
 
 import CoreImage.CIFilterBuiltins
-import VCamEntity
 
 public struct ImageFilter {
     public init(configuration: ImageFilterConfiguration) {
@@ -23,8 +22,8 @@ public struct ImageFilter {
     public let configuration: ImageFilterConfiguration
     let filters: [CIFilter]
 
-    func apply(to image: CIImage) -> CIImage {
-        return filters.reduce(into: image) { partialResult, filter in
+    public func apply(to image: CIImage) -> CIImage {
+        filters.reduce(into: image) { partialResult, filter in
             filter.setValue(partialResult, forKey: kCIInputImageKey)
             partialResult = filter.outputImage ?? partialResult
         }

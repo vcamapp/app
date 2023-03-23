@@ -36,6 +36,8 @@
 "uninstall" = "Uninstall";
 "reinstall" = "Reinstall";
 "enable" = "Enable";
+"show" = "Show";
+"hide" = "Hide";
 "filter" = "Filter";
 "threshold" = "Threshold";
 "cut" = "Cut";

@@ -8,6 +8,7 @@
 import Foundation
 import CoreImage
 import AppKit
+import VCamEntity
 
 public protocol RenderTextureRenderer: AnyObject {
     var cropRect: CGRect { get }
