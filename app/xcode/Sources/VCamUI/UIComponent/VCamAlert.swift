@@ -69,7 +69,7 @@ public struct VCamAlert: View {
         }
         .frame(width: 260)
         .fixedSize(horizontal: false, vertical: true)
-        .padding().padding(.vertical, 8)
+        .padding().padding(.bottom, 8)
         .background(.thinMaterial)
         .cornerRadius(16)
     }
@@ -87,11 +87,13 @@ public struct VCamAlert: View {
 
 extension VCamAlert: MacWindow {
     public func configureWindow(_ window: NSWindow) -> NSWindow {
-        window.styleMask = [.closable, .fullSizeContentView, .nonactivatingPanel]
+        window.styleMask = [.titled, .fullSizeContentView, .borderless]
         window.isMovableByWindowBackground = true
+        window.titleVisibility = .hidden
+        window.titlebarAppearsTransparent = true
         window.backgroundColor = NSColor.clear
+        window.isOpaque = false
         window.level = .modalPanel
         return window
     }
 }
-

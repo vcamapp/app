@@ -27,4 +27,16 @@ public extension URL {
     static func scene(sceneId id: Int32) -> URL {
         sceneRoot(sceneId: id).appendingPathComponent("data")
     }
+
+    static var shortcutMetadata: URL {
+        applicationSupportDirectory.appendingPathComponent("shortcuts.json")
+    }
+
+    static var shortcutDirectory: URL {
+        applicationSupportDirectory.appendingPathComponent("shortcuts")
+    }
+
+    static func shortcut(id: UUID) -> URL {
+        shortcutDirectory.appendingPathComponent(id.uuidString)
+    }
 }

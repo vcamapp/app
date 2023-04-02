@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import VCamEntity
 
 public struct VCamMainToolbar: View {
     public init(photoPicker: VCamMainToolbarPhotoPicker, emojiPicker: VCamMainToolbarEmojiPicker, motionPicker: VCamMainToolbarMotionPicker, blendShapePicker: VCamMainToolbarBlendShapePicker) {
@@ -26,6 +27,7 @@ public struct VCamMainToolbar: View {
     @State private var isBlendShapePickerPopover = false
 
     @Environment(\.locale) var locale
+    @OpenEmojiPicker var openEmojiPicker
 
     public var body: some View {
         VStack(spacing: 2) {
@@ -49,10 +51,15 @@ public struct VCamMainToolbar: View {
             .popover(isPresented: $isEmojiPickerPopover) {
                 VCamPopoverContainerWithButton(L10n.emoji.key) {
                     Button {
-                        NotificationCenter.default.post(name: .showEmojiPicker, object: nil)
+                        openEmojiPicker()
                         isEmojiPickerPopover = false
                     } label: {
                         Image(systemName: "macwindow")
+                    }
+                    .emojiPicker(for: openEmojiPicker) { emoji in
+                        Task {
+                            try await VCamEmojiAction(configuration: .init(emoji: emoji))()
+                        }
                     }
                 } content: {
                     emojiPicker
@@ -112,7 +119,7 @@ struct VCamMainToolbar_Previews: PreviewProvider {
     static var previews: some View {
         VCamMainToolbar(
             photoPicker: VCamMainToolbarPhotoPicker(backgroundColor: .constant(.red), loadBackgroundImage: { _ in }, removeBackgroundImage: {}),
-            emojiPicker: VCamMainToolbarEmojiPicker(showEmoji: { _ in }),
+            emojiPicker: VCamMainToolbarEmojiPicker(),
             motionPicker: VCamMainToolbarMotionPicker(motionHello: {}, motionBye: { .constant(false) }, motionJump: {}, motionYear: {}, motionWhat: {}, motionWin: {}, motionNod: { .constant(false) }, motionShakeHead: { .constant(false) }, motionShakeBody: { .constant(false) }, motionRun: { .constant(false) }),
             blendShapePicker: VCamMainToolbarBlendShapePicker(blendShapes: [], selectedBlendShape: { .constant(nil) })
         )

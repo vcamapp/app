@@ -6,6 +6,8 @@ import SwiftUI
 public enum L10n {
   /// About VCam
   public static let aboutApp = LocalizedString(lookupKey: "aboutApp")
+  /// Action
+  public static let action = LocalizedString(lookupKey: "action")
   /// Add
   public static let add = LocalizedString(lookupKey: "add")
   /// Add Image
@@ -46,6 +48,8 @@ public enum L10n {
   public static let bloom = LocalizedString(lookupKey: "bloom")
   /// Bye
   public static let bye = LocalizedString(lookupKey: "bye")
+  /// Calibrate
+  public static let calibrate = LocalizedString(lookupKey: "calibrate")
   /// Camera
   public static let camera = LocalizedString(lookupKey: "camera")
   /// Camera Exposure (EV)
@@ -84,6 +88,8 @@ public enum L10n {
   public static let contrast = LocalizedString(lookupKey: "contrast")
   /// Copy
   public static let copy = LocalizedString(lookupKey: "copy")
+  /// Create Shortcut
+  public static let createShortcut = LocalizedString(lookupKey: "createShortcut")
   /// Current Version: %@
   public static func currentVersion(_ p1: Any) -> ArgumentsLocalizedString {
     ArgumentsLocalizedString("currentVersion %@", "currentVersion \(String(describing: p1))", String(describing: p1))
@@ -222,6 +228,10 @@ public enum L10n {
   public static func isNotFound(_ p1: Any) -> ArgumentsLocalizedString {
     ArgumentsLocalizedString("isNotFound %@", "isNotFound \(String(describing: p1))", String(describing: p1))
   }
+  /// %@ is not set yet.
+  public static func isNotSetYet(_ p1: Any) -> ArgumentsLocalizedString {
+    ArgumentsLocalizedString("isNotSetYet %@", "isNotSetYet \(String(describing: p1))", String(describing: p1))
+  }
   /// Japanese
   public static let japanese = LocalizedString(lookupKey: "japanese")
   /// Jump
@@ -268,6 +278,8 @@ public enum L10n {
   public static let `none` = LocalizedString(lookupKey: "none")
   /// Restart VCam once after installation.
   public static let noteEnableNewCameraExtension = LocalizedString(lookupKey: "noteEnableNewCameraExtension")
+  /// No Title
+  public static let notitle = LocalizedString(lookupKey: "notitle")
   /// Object
   public static let object = LocalizedString(lookupKey: "object")
   /// Open preferences
@@ -284,8 +296,6 @@ public enum L10n {
   public static let playIdleMotions = LocalizedString(lookupKey: "playIdleMotions")
   /// Pose
   public static let pose = LocalizedString(lookupKey: "pose")
-  /// Preference
-  public static let preference = LocalizedString(lookupKey: "preference")
   /// Preset
   public static let preset = LocalizedString(lookupKey: "preset")
   /// Preview the capture
@@ -304,8 +314,6 @@ public enum L10n {
   public static let qualitySimple = LocalizedString(lookupKey: "qualitySimple")
   /// Quit VCam
   public static let quitVCam = LocalizedString(lookupKey: "quitVCam")
-  /// Recalibrate
-  public static let recalibrate = LocalizedString(lookupKey: "recalibrate")
   /// Record desktop audio [β]
   public static let recordDesktopAudio = LocalizedString(lookupKey: "recordDesktopAudio")
   /// Recording
@@ -352,6 +360,8 @@ public enum L10n {
   public static let seconds = LocalizedString(lookupKey: "seconds")
   /// Select All
   public static let selectAll = LocalizedString(lookupKey: "selectAll")
+  /// Settings
+  public static let settings = LocalizedString(lookupKey: "settings")
   /// Set up
   public static let setUp = LocalizedString(lookupKey: "setUp")
   /// Weight of shoulder rotation
@@ -388,6 +398,8 @@ public enum L10n {
   public static let timeToTakePhoto = LocalizedString(lookupKey: "timeToTakePhoto")
   /// Tint
   public static let tint = LocalizedString(lookupKey: "tint")
+  /// Title
+  public static let title = LocalizedString(lookupKey: "title")
   /// Track eyes
   public static let trackEyes = LocalizedString(lookupKey: "trackEyes")
   /// Tracking

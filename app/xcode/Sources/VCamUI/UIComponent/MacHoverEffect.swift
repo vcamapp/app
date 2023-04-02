@@ -8,13 +8,17 @@
 import SwiftUI
 
 public struct HoverEffectButtonViewModifier: ViewModifier {
-    public init() {}
+    public init(padding: CGFloat) {
+        self.padding = padding
+    }
 
-    @State var isHovered = false
+    let padding: CGFloat
+
+    @State private var isHovered = false
 
     public func body(content: Content) -> some View {
         content
-            .padding(4)
+            .padding(padding)
             .background(isHovered ? Color.white.opacity(0.1) : nil)
             .cornerRadius(4)
             .onHover {
@@ -25,7 +29,7 @@ public struct HoverEffectButtonViewModifier: ViewModifier {
 
 public extension View {
     @inlinable
-    func macHoverEffect() -> some View {
-        modifier(HoverEffectButtonViewModifier())
+    func macHoverEffect(padding: CGFloat = 4) -> some View {
+        modifier(HoverEffectButtonViewModifier(padding: padding))
     }
 }

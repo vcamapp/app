@@ -18,6 +18,8 @@
 "apply" = "適用";
 "remove" = "削除";
 "duplicate" = "複製";
+"title" = "タイトル";
+"notitle" = "タイトルなし";
 "object" = "オブジェクト";
 "avatar" = "アバター";
 "image" = "画像";
@@ -53,7 +55,7 @@
 
 "main" = "メイン";
 "message" = "メッセージ";
-"preference" = "設定";
+"settings" = "設定";
 "tracking" = "トラッキング";
 "screenEffect" = "画面効果";
 "recording" = "撮影";
@@ -243,7 +245,7 @@
 "openVCam" = "VCamを開く";
 
 "editAvatar" = "アバターの編集";
-"recalibrate" = "再キャリブレーション";
+"calibrate" = "キャリブレーション";
 
 "update" = "更新";
 "add" = "追加";
@@ -265,3 +267,9 @@
 "skipThisVersion" = "このバージョンはスキップ";
 "upToDate" = "最新版です";
 "upToDateMessage %@" = "%@ は最新バージョンです。";
+
+// MARK: - Shortcut
+
+"createShortcut" = "ショートカット作成";
+"action" = "アクション";
+"isNotSetYet %@" = "%@が設定されていません";

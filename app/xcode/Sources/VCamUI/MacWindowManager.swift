@@ -48,7 +48,7 @@ public final class MacWindowManager {
     private var openWindows: [String: NSWindow] = [:]
 
     public func open<T: MacWindow>(_ windowView: T) {
-        let id = String(describing: T.self)
+        let id = self.id(T.self)
         if let window = openWindows[id] {
             window.makeKeyAndOrderFront(nil)
             return
@@ -82,6 +82,17 @@ public final class MacWindowManager {
                 NotificationCenter.default.removeObserver(observation)
             }
         }
+    }
+
+    public func close<T: MacWindow>(_ window: T.Type) {
+        let id = self.id(T.self)
+        guard let window = openWindows[id] else { return }
+        window.close()
+        openWindows.removeValue(forKey: id)
+    }
+
+    private func id<T: MacWindow>(_ window: T.Type) -> String {
+        String(describing: T.self)
     }
 }
 

@@ -18,6 +18,8 @@
 "apply" = "Apply";
 "remove" = "Remove";
 "duplicate" = "Duplicate";
+"title" = "Title";
+"notitle" = "No Title";
 "object" = "Object";
 "avatar" = "Avatar";
 "image" = "Image";
@@ -53,7 +55,7 @@
 
 "main" = "Main";
 "message" = "Message";
-"preference" = "Preference";
+"settings" = "Settings";
 "tracking" = "Tracking";
 "screenEffect" = "Screen Effect";
 "recording" = "Recording";
@@ -243,7 +245,7 @@
 "openVCam" = "Open VCam";
 
 "editAvatar" = "Edit Avatar";
-"recalibrate" = "Recalibrate";
+"calibrate" = "Calibrate";
 
 "update" = "Update";
 "add" = "Add";
@@ -265,3 +267,9 @@
 "skipThisVersion" = "Skip This Version";
 "upToDate" = "You're up-to-date!";
 "upToDateMessage %@" = "%@ is currently the latest version";
+
+// MARK: - Shortcut
+
+"createShortcut" = "Create Shortcut";
+"action" = "Action";
+"isNotSetYet %@" = "%@ is not set yet.";
