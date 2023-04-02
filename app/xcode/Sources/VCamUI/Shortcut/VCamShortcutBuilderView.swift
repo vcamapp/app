@@ -28,9 +28,23 @@ public struct VCamShortcutBuilderView: View {
                 }
 
                 ForEach($shortcut.configurations) { $configuration in
-                    VCamShortcutBuilderActionItemView(configuration: $configuration) {
-                        shortcut.configurations.remove(byId: configuration.id)
+                    VStack(spacing: 0) {
+                        VCamShortcutBuilderActionItemView(configuration: $configuration) {
+                            shortcut.configurations.remove(byId: configuration.id)
+                        }
+
+                        if shortcut.configurations.last?.id != configuration.id {
+                            Image(systemName: "chevron.compact.down")
+                                .resizable()
+                                .frame(width: 16, height: 8)
+                                .padding(.top, 8)
+                                .opacity(0.5)
+                        }
                     }
+                    .frame(maxWidth: .infinity)
+                }
+                .onMove { offsets, desination in
+                    shortcut.configurations.move(fromOffsets: offsets, toOffset: desination)
                 }
             }
             .layoutPriority(1)
@@ -63,7 +77,7 @@ public struct VCamShortcutBuilderView: View {
             sourceShortcut = newValue
             VCamShortcutManager.shared.update(newValue)
         }
-        .frame(minWidth: 400, minHeight: 200)
+        .frame(minWidth: 460, minHeight: 200)
     }
 
     private func addAction(_ action: some VCamAction) {
@@ -109,6 +123,7 @@ struct VCamShortcutBuilderActionItemView: View {
                 }
 
                 VCamShortcutBuilderActionItemEditView(configuration: $configuration)
+                    .padding(.trailing, 8)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
@@ -119,6 +134,7 @@ struct VCamShortcutBuilderActionItemEditView: View {
     @Binding var configuration: AnyVCamActionConfiguration
 
     @UniState(.cachedBlendShapes) var cachedBlendShapes
+    @UniState(.scenes) var scenes
 
     var body: some View {
         switch configuration {
@@ -128,6 +144,12 @@ struct VCamShortcutBuilderActionItemEditView: View {
             VCamActionEditorPicker(item: .init(configuration, keyPath: \.motion, to: $configuration), items: VCamAvatarMotion.allCases)
         case let .blendShape(configuration):
             VCamActionEditorPicker(item: .init(configuration, keyPath: \.blendShape, to: $configuration), items: cachedBlendShapes)
+        case .wait(configuration: let configuration):
+            VCamActionEditorDurationField(value: .init(configuration, keyPath: \.duration, to: $configuration))
+        case .resetCamera:
+            EmptyView()
+        case .loadScene(configuration: let configuration):
+            VCamActionEditorPicker(item: .init(configuration, keyPath: \.sceneId, to: $configuration), items: scenes, mapValue: \.id)
         }
     }
 }

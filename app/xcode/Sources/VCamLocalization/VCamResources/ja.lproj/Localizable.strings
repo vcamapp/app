@@ -273,3 +273,5 @@
 "createShortcut" = "ショートカット作成";
 "action" = "アクション";
 "isNotSetYet %@" = "%@が設定されていません";
+"wait" = "待機";
+"loadScene" = "シーン読み込み";

@@ -9,7 +9,7 @@ import Foundation
 import VCamEntity
 import struct SwiftUI.Image
 
-public protocol VCamAction: Identifiable<UUID> {
+public protocol VCamAction<Configuration>: Identifiable<UUID> {
     associatedtype Configuration: VCamActionConfiguration
 
     var configuration: Configuration { get set }

@@ -8,7 +8,7 @@
 import SwiftUI
 import VCamEntity
 
-@propertyWrapper @dynamicMemberLookup public struct UniState<Value: Hashable>: DynamicProperty {
+@propertyWrapper @dynamicMemberLookup public struct UniState<Value>: DynamicProperty {
     public init(_ state: CustomState) {
         get = state.get
         set = state.set
@@ -65,8 +65,13 @@ public enum InternalUniState {
     public static var reload: (String, Bool) -> Void = { _, _ in }
 
     public static var cachedBlendShapes = UniState<[String]>.CustomState(get: { [] }, set: { _ in })
+    public static var scenes = UniState<[VCamScene]>.CustomState(get: { [] }, set: { _ in })
 }
 
 public extension UniState<[String]>.CustomState {
     static var cachedBlendShapes: Self { InternalUniState.cachedBlendShapes }
+}
+
+public extension UniState<[VCamScene]>.CustomState {
+    static var scenes: Self { InternalUniState.scenes }
 }

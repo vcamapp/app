@@ -30,12 +30,18 @@ public enum AnyVCamActionConfiguration: VCamActionConfiguration {
     case emoji(configuration: VCamEmojiActionConfiguration)
     case motion(configuration: VCamMotionActionConfiguration)
     case blendShape(configuration: VCamBlendShapeActionConfiguration)
+    case wait(configuration: VCamWaitActionConfiguration)
+    case resetCamera(configuration: VCamResetCameraActionConfiguration)
+    case loadScene(configuration: VCamLoadSceneActionConfiguration)
 
     var configuration: any VCamActionConfiguration {
         switch self {
         case .emoji(let configuration as any VCamActionConfiguration),
                 .motion(let configuration as any VCamActionConfiguration),
-                .blendShape(let configuration as any VCamActionConfiguration):
+                .blendShape(let configuration as any VCamActionConfiguration),
+                .wait(let configuration as any VCamActionConfiguration),
+                .resetCamera(let configuration as any VCamActionConfiguration),
+                .loadScene(let configuration as any VCamActionConfiguration):
             return configuration
         }
     }
@@ -59,4 +65,3 @@ public enum AnyVCamActionConfiguration: VCamActionConfiguration {
         self
     }
 }
-

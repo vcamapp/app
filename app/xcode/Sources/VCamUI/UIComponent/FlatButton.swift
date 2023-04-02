@@ -64,11 +64,13 @@ public struct FlatButtonStyle {
         hasBorder: false
     )
 
-    public static let filled = FlatButtonStyle(
-        hasBorder: false,
-        backgroundColor: .white.opacity(0.05),
-        cornerRadius: 4
-    )
+    public static func filled(color: Color? = nil) -> FlatButtonStyle {
+        FlatButtonStyle(
+            hasBorder: false,
+            backgroundColor: color ?? .white.opacity(0.05),
+            cornerRadius: 4
+        )
+    }
 }
 
 private struct FlatButtonStyleKey: EnvironmentKey {
@@ -94,7 +96,7 @@ struct FlatButton_Previews: PreviewProvider {
         } label: {
             Text("Hello")
         }
-        .flatButtonStyle(.filled)
+        .flatButtonStyle(.filled())
         .padding()
         .previewDisplayName("filled")
     }

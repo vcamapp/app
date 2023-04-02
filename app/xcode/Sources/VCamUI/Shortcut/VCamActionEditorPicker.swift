@@ -7,20 +7,34 @@
 
 import SwiftUI
 
-struct VCamActionEditorPicker<Item: Hashable & CustomStringConvertible>: View {
+struct VCamActionEditorPicker<Item: Hashable, Candidate: CustomStringConvertible>: View {
     @Binding var item: Item
-    let items: [Item]
+    let items: [Candidate]
+    let mapValue: (Candidate) -> Item
 
     var body: some View {
         Picker(selection: $item) {
-            ForEach(items, id: \.self) { item in
-                Text(item.description)
-                    .tag(item)
+            ForEach(items.map(PickerItem.init)) { item in
+                Text(item.value.description)
+                    .tag(mapValue(item.value))
             }
         } label: {
             EmptyView()
         }
     }
+}
+
+extension VCamActionEditorPicker where Item == Candidate {
+    init(item: Binding<Item>, items: [Candidate]) {
+        self._item = item
+        self.items = items
+        mapValue = { $0 }
+    }
+}
+
+private struct PickerItem<Value>: Identifiable {
+    let id = UUID()
+    let value: Value
 }
 
 struct VCamActionEditorPicker_Previews: PreviewProvider {

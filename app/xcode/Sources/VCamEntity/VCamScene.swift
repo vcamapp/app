@@ -21,6 +21,12 @@ public struct VCamScene: Codable, Identifiable {
     public var aspectRatio: Float?
 }
 
+extension VCamScene: CustomStringConvertible {
+    public var description: String {
+        name
+    }
+}
+
 public extension VCamScene {
     struct Object: Codable, Identifiable {
         public init(id: Int32, name: String, type: VCamScene.ObjectType, isHidden: Bool) {

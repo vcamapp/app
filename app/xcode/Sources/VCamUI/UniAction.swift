@@ -60,6 +60,10 @@ public struct InternalUniAction<Arguments> {
     fileprivate let action: (Arguments) -> Void
 }
 
+public extension InternalUniAction<Void> {
+    static var resetCamera = Self.init { _ in }
+}
+
 public extension InternalUniAction<String> {
     static var showEmojiStamp = Self.init { _ in }
     static var setBlendShape = Self.init { _ in }
@@ -67,4 +71,8 @@ public extension InternalUniAction<String> {
 
 public extension InternalUniAction<VCamAvatarMotion> {
     static var triggerMotion = Self.init { _ in }
+}
+
+public extension InternalUniAction<Int32> {
+    static var loadScene = Self.init { _ in }
 }

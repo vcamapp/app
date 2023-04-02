@@ -19,7 +19,13 @@ public final class VCamShortcutManager: ObservableObject {
 
 #if DEBUG
     public init(shortcuts: [VCamShortcut] = []) {
-        self.shortcuts = shortcuts
+        if shortcuts.isEmpty {
+            for shortcut in dataStore.load() {
+                self.shortcuts.append(shortcut)
+            }
+        } else {
+            self.shortcuts = shortcuts
+        }
     }
 #else
     public init(shortcuts test: [VCamShortcut] = []) {

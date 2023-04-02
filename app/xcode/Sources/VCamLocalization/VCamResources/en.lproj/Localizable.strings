@@ -273,3 +273,5 @@
 "createShortcut" = "Create Shortcut";
 "action" = "Action";
 "isNotSetYet %@" = "%@ is not set yet.";
+"wait" = "Wait";
+"loadScene" = "Load Scene";

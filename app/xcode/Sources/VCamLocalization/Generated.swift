@@ -248,6 +248,8 @@ public enum L10n {
   public static let lipSyncSensitivity = LocalizedString(lookupKey: "lipSyncSensitivity")
   /// Load Avatar on VRoid Hub
   public static let loadOnVRoidHub = LocalizedString(lookupKey: "loadOnVRoidHub")
+  /// Load Scene
+  public static let loadScene = LocalizedString(lookupKey: "loadScene")
   /// Load VRM file
   public static let loadVRMFile = LocalizedString(lookupKey: "loadVRMFile")
   /// Local File
@@ -436,6 +438,8 @@ public enum L10n {
   public static let vignette = LocalizedString(lookupKey: "vignette")
   /// Virtual Camera
   public static let virtualCamera = LocalizedString(lookupKey: "virtualCamera")
+  /// Wait
+  public static let wait = LocalizedString(lookupKey: "wait")
   /// Web
   public static let web = LocalizedString(lookupKey: "web")
   /// What!?
