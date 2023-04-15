@@ -275,3 +275,5 @@
 "isNotSetYet %@" = "%@ is not set yet.";
 "wait" = "Wait";
 "loadScene" = "Load Scene";
+"recordingShortcutKey" = "Recording...";
+"recordingShortcutKeyError" = "At least one modifier key must be set.";

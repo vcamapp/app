@@ -275,3 +275,5 @@
 "isNotSetYet %@" = "%@が設定されていません";
 "wait" = "待機";
 "loadScene" = "シーン読み込み";
+"recordingShortcutKey" = "修飾キーと文字を入力してください";
+"recordingShortcutKeyError" = "一つ以上の修飾キーと文字を組み合わせてください";

@@ -320,6 +320,10 @@ public enum L10n {
   public static let recordDesktopAudio = LocalizedString(lookupKey: "recordDesktopAudio")
   /// Recording
   public static let recording = LocalizedString(lookupKey: "recording")
+  /// Recording...
+  public static let recordingShortcutKey = LocalizedString(lookupKey: "recordingShortcutKey")
+  /// At least one modifier key must be set.
+  public static let recordingShortcutKeyError = LocalizedString(lookupKey: "recordingShortcutKeyError")
   /// Refresh Screen
   public static let refreshScreen = LocalizedString(lookupKey: "refreshScreen")
   /// Reinstall
