@@ -1,6 +1,6 @@
 //
 //  VCamShortcut.swift
-//  
+//
 //
 //  Created by Tatsuya Tanaka on 2023/03/24.
 //
@@ -41,6 +41,7 @@ public protocol VCamActionConfiguration: Identifiable<UUID>, Codable, Equatable 
 
 public enum AnyVCamActionConfiguration: VCamActionConfiguration {
     case emoji(configuration: VCamEmojiActionConfiguration)
+    case message(configuration: VCamMessageActionConfiguration)
     case motion(configuration: VCamMotionActionConfiguration)
     case blendShape(configuration: VCamBlendShapeActionConfiguration)
     case wait(configuration: VCamWaitActionConfiguration)
@@ -50,6 +51,7 @@ public enum AnyVCamActionConfiguration: VCamActionConfiguration {
     var configuration: any VCamActionConfiguration {
         switch self {
         case .emoji(let configuration as any VCamActionConfiguration),
+                .message(let configuration as any VCamActionConfiguration),
                 .motion(let configuration as any VCamActionConfiguration),
                 .blendShape(let configuration as any VCamActionConfiguration),
                 .wait(let configuration as any VCamActionConfiguration),

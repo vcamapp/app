@@ -1,6 +1,6 @@
 //
 //  VCamShortcutBuilderView.swift
-//  
+//
 //
 //  Created by Tatsuya Tanaka on 2023/03/24.
 //
@@ -145,6 +145,8 @@ struct VCamShortcutBuilderActionItemEditView: View {
         switch configuration {
         case let .emoji(configuration):
             VCamActionEditorEmojiPicker(emoji: .init(configuration, keyPath: \.emoji, to: $configuration))
+        case let .message(configuration):
+            VCamActionEditorTextField(value: .init(configuration, keyPath: \.message, to: $configuration))
         case let .motion(configuration):
             VCamActionEditorPicker(item: .init(configuration, keyPath: \.motion, to: $configuration), items: VCamAvatarMotion.allCases)
         case let .blendShape(configuration):

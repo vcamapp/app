@@ -1,5 +1,5 @@
 //
-//  VCamActionEditorNumberField.swift
+//  VCamActionEditorDurationField.swift
 //  
 //
 //  Created by Tatsuya Tanaka on 2023/04/02.

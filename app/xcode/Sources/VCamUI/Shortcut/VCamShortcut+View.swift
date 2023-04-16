@@ -1,6 +1,6 @@
 //
 //  VCamShortcut+View.swift
-//  
+//
 //
 //  Created by Tatsuya Tanaka on 2023/04/02.
 //
@@ -44,6 +44,8 @@ extension AnyVCamActionConfiguration {
         switch self {
         case .emoji(let configuration):
             return VCamEmojiAction(configuration: configuration)
+        case .message(let configuration):
+            return VCamMessageAction(configuration: configuration)
         case .motion(let configuration):
             return VCamMotionAction(configuration: configuration)
         case .blendShape(configuration: let configuration):
@@ -60,6 +62,7 @@ extension AnyVCamActionConfiguration {
 
 let allActions: [any VCamAction] = [
     VCamEmojiAction(configuration: .default),
+    VCamMessageAction(configuration: .default),
     VCamMotionAction(configuration: .default),
     VCamBlendShapeAction(configuration: .default),
     VCamWaitAction(configuration: .default),

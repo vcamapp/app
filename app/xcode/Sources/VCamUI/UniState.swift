@@ -64,8 +64,13 @@ import VCamEntity
 public enum InternalUniState {
     public static var reload: (String, Bool) -> Void = { _, _ in }
 
+    public static var message = UniState<String>.CustomState(get: { "" }, set: { _ in })
     public static var cachedBlendShapes = UniState<[String]>.CustomState(get: { [] }, set: { _ in })
     public static var scenes = UniState<[VCamScene]>.CustomState(get: { [] }, set: { _ in })
+}
+
+public extension UniState<String>.CustomState {
+    static var message: Self { InternalUniState.message }
 }
 
 public extension UniState<[String]>.CustomState {
