@@ -14,8 +14,10 @@ struct VCamActionEditorDurationField: View {
         HStack(spacing: 4) {
             TextField("", value: $value, format: .number)
                 .textFieldStyle(.roundedBorder)
+                .multilineTextAlignment(.center)
             Text(L10n.seconds.key, bundle: .localize)
         }
+        .frame(width: 80)
     }
 }
 

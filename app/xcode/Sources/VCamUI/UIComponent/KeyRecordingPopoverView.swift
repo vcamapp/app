@@ -60,7 +60,7 @@ public struct KeyRecordingPopoverView: View {
         .onKeyEvent { event in
             onKeyDown(KeyCombination(modifiers: event.modifierFlags))
         } keyDown: { event in
-            onKeyDown(KeyCombination(key: event.characters ?? "", keyCode: event.keyCode, modifiers: event.modifierFlags))
+            onKeyDown(KeyCombination(key: event.charactersIgnoringModifiers ?? "", keyCode: event.keyCode, modifiers: event.modifierFlags))
         } keyUp: { _ in
             onKeyUp()
         }
@@ -77,7 +77,7 @@ public struct KeyRecordingPopoverView: View {
                     }
                 }
                 if isCompleted {
-                    Text(keys.keyName)
+                    Text(keys.readableKeyName)
                 }
             }
             .font(.body.bold())

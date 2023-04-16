@@ -22,8 +22,13 @@ public struct VCamShortcutBuilderView: View {
         HSplitView {
             List {
                 GroupBox {
-                    TextField(text: $shortcut.title) {
-                        Text(L10n.title.key, bundle: .localize)
+                    HStack(spacing: 0) {
+                        TextField(text: $shortcut.title) {
+                            Text(L10n.title.key, bundle: .localize)
+                        }
+                        .textFieldStyle(.roundedBorder)
+
+                        VCamShortcutKeyField(shortcutKey: $shortcut.shortcutKey)
                     }
                 }
 
@@ -48,7 +53,7 @@ public struct VCamShortcutBuilderView: View {
                 }
             }
             .layoutPriority(1)
-            .frame(minWidth: 200)
+            .frame(minWidth: 280)
 
             VStack(spacing: 0) {
                 Text(L10n.action.key, bundle: .localize)
@@ -77,7 +82,7 @@ public struct VCamShortcutBuilderView: View {
             sourceShortcut = newValue
             VCamShortcutManager.shared.update(newValue)
         }
-        .frame(minWidth: 460, minHeight: 200)
+        .frame(minWidth: 540, minHeight: 200)
     }
 
     private func addAction(_ action: some VCamAction) {

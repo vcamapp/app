@@ -9,22 +9,30 @@ import Foundation
 import class AppKit.NSEvent
 import var Carbon.HIToolbox.Events.kVK_Space
 
-public struct KeyCombination: Equatable {
+public struct KeyCombination: Equatable, CustomStringConvertible {
     public init(key: String = "", keyCode: UInt16 = 0, modifiers: NSEvent.ModifierFlags = []) {
-        self.key = key
+        self.key = key.lowercased()
         self.keyCode = keyCode
         self.modifiers = Modifier.filter(modifiers)
     }
 
-    public var key = ""
-    public var keyCode: UInt16 = 0
-    public var modifiers: NSEvent.ModifierFlags = []
+    public let key: String
+    public let keyCode: UInt16
+    public let modifiers: NSEvent.ModifierFlags
 
     public static let empty = KeyCombination()
 
-    public var keyName: String {
-        switch keyCode {
-        case UInt16(kVK_Space):
+    public var description: String {
+        Modifier.allCases
+            .filter { !modifiers.intersection($0.flag).isEmpty }
+            .map(\.keySymbol)
+            .joined(separator: " + ")
+        + " + \(readableKeyName)"
+    }
+
+    public var readableKeyName: String {
+        switch key {
+        case " ":
             return "Space"
         default:
             return key.uppercased()

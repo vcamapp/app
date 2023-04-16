@@ -17,7 +17,6 @@ public final class VCamShortcutManager: ObservableObject {
 
     private let dataStore = VCamShortcutDataStore()
 
-#if DEBUG
     public init(shortcuts: [VCamShortcut] = []) {
         if shortcuts.isEmpty {
             for shortcut in dataStore.load() {
@@ -27,13 +26,6 @@ public final class VCamShortcutManager: ObservableObject {
             self.shortcuts = shortcuts
         }
     }
-#else
-    public init(shortcuts test: [VCamShortcut] = []) {
-        for shortcut in dataStore.load() {
-            shortcuts.append(shortcut)
-        }
-    }
-#endif
 
     @discardableResult
     public func create() -> VCamShortcut {

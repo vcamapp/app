@@ -370,6 +370,8 @@ public enum L10n {
   public static let settings = LocalizedString(lookupKey: "settings")
   /// Set up
   public static let setUp = LocalizedString(lookupKey: "setUp")
+  /// Shortcut Key
+  public static let shortcutKey = LocalizedString(lookupKey: "shortcutKey")
   /// Weight of shoulder rotation
   public static let shoulderRotationWeight = LocalizedString(lookupKey: "shoulderRotationWeight")
   /// Show

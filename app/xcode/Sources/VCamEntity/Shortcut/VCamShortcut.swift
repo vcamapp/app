@@ -12,9 +12,22 @@ public struct VCamShortcut: Codable, Identifiable, Equatable {
     public var title: String
     public var iconName: String?
     public var configurations: [AnyVCamActionConfiguration]
+    public var shortcutKey: ShortcutKey?
 
     public static func create(id: UUID = UUID(), configurations: [AnyVCamActionConfiguration] = []) -> Self {
         .init(id: id, title: "", configurations: configurations)
+    }
+}
+
+public extension VCamShortcut {
+    struct ShortcutKey: Codable, Equatable {
+        public init(character: String, modifiers: UInt) {
+            self.character = character
+            self.modifiers = modifiers
+        }
+
+        public let character: String
+        public let modifiers: UInt
     }
 }
 

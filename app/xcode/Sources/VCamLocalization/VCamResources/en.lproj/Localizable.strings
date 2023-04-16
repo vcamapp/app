@@ -271,6 +271,7 @@
 // MARK: - Shortcut
 
 "createShortcut" = "Create Shortcut";
+"shortcutKey" = "Shortcut Key";
 "action" = "Action";
 "isNotSetYet %@" = "%@ is not set yet.";
 "wait" = "Wait";
