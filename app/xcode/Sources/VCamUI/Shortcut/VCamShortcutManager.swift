@@ -38,8 +38,6 @@ public final class VCamShortcutManager: ObservableObject {
         guard !shortcuts.contains(where: { $0.id == shortcut.id }) else { return }
         shortcuts.insert(shortcut, at: 0)
 
-        showError(VCamActionError(URL.shortcutMetadata.absoluteString))
-
         do {
             try dataStore.add(shortcut)
         } catch {

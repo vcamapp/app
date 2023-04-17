@@ -47,6 +47,7 @@ public enum AnyVCamActionConfiguration: VCamActionConfiguration {
     case wait(configuration: VCamWaitActionConfiguration)
     case resetCamera(configuration: VCamResetCameraActionConfiguration)
     case loadScene(configuration: VCamLoadSceneActionConfiguration)
+    case appleScript(configuration: VCamAppleScriptActionConfiguration)
 
     var configuration: any VCamActionConfiguration {
         switch self {
@@ -56,7 +57,8 @@ public enum AnyVCamActionConfiguration: VCamActionConfiguration {
                 .blendShape(let configuration as any VCamActionConfiguration),
                 .wait(let configuration as any VCamActionConfiguration),
                 .resetCamera(let configuration as any VCamActionConfiguration),
-                .loadScene(let configuration as any VCamActionConfiguration):
+                .loadScene(let configuration as any VCamActionConfiguration),
+                .appleScript(let configuration as any VCamActionConfiguration):
             return configuration
         }
     }

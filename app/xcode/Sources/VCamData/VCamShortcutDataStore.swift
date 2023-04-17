@@ -16,7 +16,7 @@ public struct VCamShortcutDataStore {
         let metadata = (try? VCamShortcutMetadata.load()) ?? .init()
         return metadata.ids.map {
             do {
-                let url = URL.shortcut(id: $0)
+                let url = URL.shortcutData(id: $0)
                 return try decoder.decode(VCamShortcut.self, from: Data(contentsOf: url))
             } catch {
                 return VCamShortcut.create(id: $0)
@@ -25,12 +25,12 @@ public struct VCamShortcutDataStore {
     }
 
     public func add(_ shortcut: VCamShortcut) throws {
-        try? FileManager.default.createDirectory(at: .shortcutDirectory, withIntermediateDirectories: true)
-
         let encoder = JSONEncoder()
         let data = try encoder.encode(shortcut)
 
-        let url = URL.shortcut(id: shortcut.id)
+        try? FileManager.default.createDirectory(at: .shortcutDirectory(id: shortcut.id), withIntermediateDirectories: true)
+
+        let url = URL.shortcutData(id: shortcut.id)
         try data.write(to: url)
 
         var metadata = try VCamShortcutMetadata.load()
@@ -51,7 +51,7 @@ public struct VCamShortcutDataStore {
     }
 
     public func remove(_ shortcut: VCamShortcut) throws {
-        let url = URL.shortcut(id: shortcut.id)
+        let url = URL.shortcutDirectory(id: shortcut.id)
         try FileManager.default.removeItem(at: url)
 
         var metadata = try VCamShortcutMetadata.load()

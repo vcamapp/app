@@ -22,7 +22,7 @@ public struct VCamBlendShapeAction: VCamAction {
     @UniAction(.setBlendShape) var setBlendShape
 
     @MainActor
-    public func callAsFunction() async throws {
+    public func callAsFunction(context: VCamActionContext) async throws {
         guard !configuration.blendShape.isEmpty else {
             throw VCamActionError(L10n.isNotSetYet(L10n.facialExpression.text).text)
         }

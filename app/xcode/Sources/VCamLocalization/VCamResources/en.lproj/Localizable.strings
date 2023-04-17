@@ -37,6 +37,8 @@
 "install" = "Install";
 "uninstall" = "Uninstall";
 "reinstall" = "Reinstall";
+"openFile" = "Open File";
+"reload" = "Reload";
 "enable" = "Enable";
 "show" = "Show";
 "hide" = "Hide";

@@ -32,11 +32,27 @@ public extension URL {
         applicationSupportDirectory.appendingPathComponent("shortcuts.json")
     }
 
-    static var shortcutDirectory: URL {
+    static var shortcutRootDirectory: URL {
         applicationSupportDirectory.appendingPathComponent("shortcuts")
     }
 
-    static func shortcut(id: UUID) -> URL {
-        shortcutDirectory.appendingPathComponent(id.uuidString)
+    static func shortcutDirectory(id: UUID) -> URL {
+        shortcutRootDirectory.appendingPathComponent(id.uuidString)
+    }
+
+    static func shortcutData(id: UUID) -> URL {
+        shortcutDirectory(id: id).appendingPathComponent("data")
+    }
+
+    static func shortcutResourceDirectory(id: UUID) -> URL {
+        shortcutDirectory(id: id).appendingPathComponent("resources")
+    }
+
+    static func shortcutResourceActionDirectory(id: UUID, actionId: UUID) -> URL {
+        shortcutDirectory(id: id).appendingPathComponent("resources").appendingPathComponent(actionId.uuidString)
+    }
+
+    static func shortcutResource(id: UUID, actionId: UUID, name: String) -> URL {
+        shortcutResourceActionDirectory(id: id, actionId: actionId).appendingPathComponent(name)
     }
 }

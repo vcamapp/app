@@ -22,7 +22,7 @@ public struct VCamResetCameraAction: VCamAction {
     @UniAction(.resetCamera) var resetCamera
 
     @MainActor
-    public func callAsFunction() async throws {
+    public func callAsFunction(context: VCamActionContext) async throws {
         resetCamera()
     }
 }

@@ -22,7 +22,7 @@ public struct VCamLoadSceneAction: VCamAction {
     @UniAction(.loadScene) var loadScene
 
     @MainActor
-    public func callAsFunction() async throws {
+    public func callAsFunction(context: VCamActionContext) async throws {
         loadScene(configuration.sceneId)
     }
 }

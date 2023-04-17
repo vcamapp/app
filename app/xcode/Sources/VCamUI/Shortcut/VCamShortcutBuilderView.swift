@@ -21,20 +21,20 @@ public struct VCamShortcutBuilderView: View {
     public var body: some View {
         HSplitView {
             List {
-                GroupBox {
-                    HStack(spacing: 0) {
-                        TextField(text: $shortcut.title) {
-                            Text(L10n.title.key, bundle: .localize)
-                        }
-                        .textFieldStyle(.roundedBorder)
-
-                        VCamShortcutKeyField(shortcutKey: $shortcut.shortcutKey)
+                HStack(spacing: 0) {
+                    TextField(text: $shortcut.title) {
+                        Text(L10n.title.key, bundle: .localize)
                     }
+                    .textFieldStyle(.roundedBorder)
+
+                    VCamShortcutKeyField(shortcutKey: $shortcut.shortcutKey)
+                        .padding(.trailing, 8)
                 }
 
                 ForEach($shortcut.configurations) { $configuration in
                     VStack(spacing: 0) {
-                        VCamShortcutBuilderActionItemView(configuration: $configuration) {
+                        VCamShortcutBuilderActionItemView(shortcut: shortcut, configuration: $configuration) {
+                            configuration.action().deleteResources(shortcut: shortcut)
                             shortcut.configurations.remove(byId: configuration.id)
                         }
 
@@ -95,6 +95,7 @@ public struct VCamShortcutBuilderView: View {
 }
 
 struct VCamShortcutBuilderActionItemView: View {
+    let shortcut: VCamShortcut
     @Binding var configuration: AnyVCamActionConfiguration
 
     let onDelete: () -> Void
@@ -127,8 +128,8 @@ struct VCamShortcutBuilderActionItemView: View {
                     .buttonStyle(.plain)
                 }
 
-                VCamShortcutBuilderActionItemEditView(configuration: $configuration)
-                    .padding(.trailing, 8)
+                VCamShortcutBuilderActionItemEditView(shortcut: shortcut, configuration: $configuration)
+                    .padding([.horizontal, .bottom], 4)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
@@ -136,6 +137,7 @@ struct VCamShortcutBuilderActionItemView: View {
 }
 
 struct VCamShortcutBuilderActionItemEditView: View {
+    let shortcut: VCamShortcut
     @Binding var configuration: AnyVCamActionConfiguration
 
     @UniState(.cachedBlendShapes) var cachedBlendShapes
@@ -151,12 +153,14 @@ struct VCamShortcutBuilderActionItemEditView: View {
             VCamActionEditorPicker(item: .init(configuration, keyPath: \.motion, to: $configuration), items: VCamAvatarMotion.allCases)
         case let .blendShape(configuration):
             VCamActionEditorPicker(item: .init(configuration, keyPath: \.blendShape, to: $configuration), items: cachedBlendShapes)
-        case .wait(configuration: let configuration):
+        case let .wait(configuration):
             VCamActionEditorDurationField(value: .init(configuration, keyPath: \.duration, to: $configuration))
         case .resetCamera:
             EmptyView()
-        case .loadScene(configuration: let configuration):
+        case let .loadScene(configuration):
             VCamActionEditorPicker(item: .init(configuration, keyPath: \.sceneId, to: $configuration), items: scenes, mapValue: \.id)
+        case let .appleScript(configuration):
+            VCamActionEditorCodeEditor(id: shortcut.id, actionId: configuration.id, name: VCamAppleScriptAction.scriptName)
         }
     }
 }
@@ -192,7 +196,8 @@ extension VCamShortcutBuilderView: MacWindow {
 struct VCamShortcutBuilderView_Previews: PreviewProvider {
     static var previews: some View {
         VCamShortcutBuilderView(shortcut: .constant(.create(configurations: [
-            .emoji(configuration: .default)
+            .emoji(configuration: .default),
+            .appleScript(configuration: .default)
         ])))
     }
 }

@@ -48,14 +48,16 @@ extension AnyVCamActionConfiguration {
             return VCamMessageAction(configuration: configuration)
         case .motion(let configuration):
             return VCamMotionAction(configuration: configuration)
-        case .blendShape(configuration: let configuration):
+        case .blendShape(let configuration):
             return VCamBlendShapeAction(configuration: configuration)
-        case .wait(configuration: let configuration):
+        case .wait(let configuration):
             return VCamWaitAction(configuration: configuration)
-        case .resetCamera(configuration: let configuration):
+        case .resetCamera(let configuration):
             return VCamResetCameraAction(configuration: configuration)
-        case .loadScene(configuration: let configuration):
+        case .loadScene(let configuration):
             return VCamLoadSceneAction(configuration: configuration)
+        case .appleScript(let configuration):
+            return VCamAppleScriptAction(configuration: configuration)
         }
     }
 }
@@ -68,4 +70,5 @@ let allActions: [any VCamAction] = [
     VCamWaitAction(configuration: .default),
     VCamResetCameraAction(configuration: .default),
     VCamLoadSceneAction(configuration: .default),
+    VCamAppleScriptAction(configuration: .default),
 ]

@@ -284,6 +284,8 @@ public enum L10n {
   public static let notitle = LocalizedString(lookupKey: "notitle")
   /// Object
   public static let object = LocalizedString(lookupKey: "object")
+  /// Open File
+  public static let openFile = LocalizedString(lookupKey: "openFile")
   /// Open preferences
   public static let openPreference = LocalizedString(lookupKey: "openPreference")
   /// Open VCam
@@ -330,6 +332,8 @@ public enum L10n {
   public static let reinstall = LocalizedString(lookupKey: "reinstall")
   /// Release Notes:
   public static let releaseNotes = LocalizedString(lookupKey: "releaseNotes")
+  /// Reload
+  public static let reload = LocalizedString(lookupKey: "reload")
   /// Remove
   public static let remove = LocalizedString(lookupKey: "remove")
   /// Remove VCam from the capture

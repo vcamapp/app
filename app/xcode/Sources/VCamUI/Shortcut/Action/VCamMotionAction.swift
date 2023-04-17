@@ -22,7 +22,7 @@ public struct VCamMotionAction: VCamAction {
     @UniAction(.triggerMotion) var triggerMotion
 
     @MainActor
-    public func callAsFunction() async throws {
+    public func callAsFunction(context: VCamActionContext) async throws {
         triggerMotion(configuration.motion)
     }
 }

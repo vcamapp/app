@@ -22,7 +22,7 @@ public struct VCamMessageAction: VCamAction {
     @UniState(.message) private var message
 
     @MainActor
-    public func callAsFunction() async throws {
+    public func callAsFunction(context: VCamActionContext) async throws {
         message = configuration.message
     }
 }

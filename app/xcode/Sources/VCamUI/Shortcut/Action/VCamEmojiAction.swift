@@ -22,7 +22,7 @@ public struct VCamEmojiAction: VCamAction {
     @UniAction(.showEmojiStamp) var showEmojiStamp
 
     @MainActor
-    public func callAsFunction() async throws {
+    public func callAsFunction(context: VCamActionContext) async throws {
         guard !configuration.emoji.isEmpty else {
             throw VCamActionError(L10n.isNotSetYet(L10n.emoji.text).text)
         }

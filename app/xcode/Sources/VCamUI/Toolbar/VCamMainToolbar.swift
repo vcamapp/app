@@ -58,7 +58,7 @@ public struct VCamMainToolbar: View {
                     }
                     .emojiPicker(for: openEmojiPicker) { emoji in
                         Task {
-                            try await VCamEmojiAction(configuration: .init(emoji: emoji))()
+                            try await VCamEmojiAction(configuration: .init(emoji: emoji))(context: .empty)
                         }
                     }
                 } content: {

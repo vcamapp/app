@@ -20,7 +20,7 @@ public struct VCamWaitAction: VCamAction {
     public var icon: Image { Image(systemName: "timer") }
 
     @MainActor
-    public func callAsFunction() async throws {
+    public func callAsFunction(context: VCamActionContext) async throws {
         try await Task.sleep(nanoseconds: UInt64(TimeInterval(NSEC_PER_SEC) * configuration.duration))
     }
 }

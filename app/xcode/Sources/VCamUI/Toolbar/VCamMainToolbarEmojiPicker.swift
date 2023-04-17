@@ -21,7 +21,7 @@ public struct VCamMainToolbarEmojiPicker: View {
                 ForEach(Self.emojis, id: \.self) { emoji in
                     Button {
                         Task { @MainActor in
-                            try await VCamEmojiAction(configuration: .init(emoji: emoji))()
+                            try await VCamEmojiAction(configuration: .init(emoji: emoji))(context: .empty)
                         }
                         dismiss()
                     } label: {

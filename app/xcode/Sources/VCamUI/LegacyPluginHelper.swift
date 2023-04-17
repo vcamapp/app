@@ -35,25 +35,6 @@ public struct LegacyPluginHelper {
         }
     }
 
-    private static func runAppleScript(_ source: String) async throws {
-        return try await withCheckedThrowingContinuation { continuation in
-            DispatchQueue.global().async {
-                let script = NSAppleScript(source: source)!
-                var error: NSDictionary?
-                _ = script.executeAndReturnError(&error).stringValue ?? ""
-
-                if let error {
-                    let message = error[NSAppleScript.errorMessage] as? String ?? ""
-                    let code = error[NSAppleScript.errorNumber] as? Int ?? 0
-                    continuation.resume(with: .failure(NSError(domain: "tattn.vcam", code: 0, userInfo: [NSLocalizedDescriptionKey: "\(message)(\(code))"])))
-                    return
-                }
-
-                continuation.resume()
-            }
-        }
-    }
-
     @MainActor
     public static func installPlugin(isUpdate: Bool) async {
         Logger.log(event: .installPlugin)
@@ -70,7 +51,7 @@ public struct LegacyPluginHelper {
             // Get the necessary permissions for installation by AppleScript
             let rm = "rm -rf \\\"\(pluginPath.path)\\\""
             let cp = "cp -r \\\"\(sourcePluginPath.path)\\\" \\\"\(pluginPath.path)\\\""
-            try await runAppleScript("do shell script \"\(rm) && \(cp)\" with administrator privileges")
+            try await NSAppleScript.execute("do shell script \"\(rm) && \(cp)\" with administrator privileges")
 
             await VCamAlert.showModal(title: L10n.success.text, message: L10n.restartAfterInstalling.text, canCancel: false)
             UserDefaults.standard.set(pluginVersion, for: .pluginVersion)
@@ -88,7 +69,7 @@ public struct LegacyPluginHelper {
         do {
             // Get the necessary permissions for uninstallation by AppleScript
             let rm = "rm -r \\\"\(pluginPath.path)\\\""
-            try await runAppleScript("do shell script \"\(rm)\" with administrator privileges")
+            try await NSAppleScript.execute("do shell script \"\(rm)\" with administrator privileges")
             
             await VCamAlert.showModal(title: L10n.success.text, message: L10n.completeUninstalling.text, canCancel: false)
         } catch {

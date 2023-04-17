@@ -19,11 +19,23 @@ public protocol VCamAction<Configuration>: Identifiable<UUID> {
 
     init(configuration: Configuration)
 
-    func callAsFunction() async throws
+    func callAsFunction(context: VCamActionContext) async throws
+
+    func deleteResources(shortcut: VCamShortcut)
 }
 
 public extension VCamAction {
     var id: UUID {
         configuration.id
     }
+
+    func deleteResources(shortcut: VCamShortcut) {
+        try? FileManager.default.removeItem(at: .shortcutResourceActionDirectory(id: shortcut.id, actionId: id))
+    }
+}
+
+public struct VCamActionContext {
+    public let shortcut: VCamShortcut
+
+    public static let empty = VCamActionContext(shortcut: .create())
 }

@@ -37,6 +37,8 @@
 "install" = "インストール";
 "uninstall" = "アンインストール";
 "reinstall" = "再インストール";
+"openFile" = "ファイルを開く";
+"reload" = "再読み込み";
 "enable" = "有効にする";
 "show" = "表示する";
 "hide" = "非表示にする";
