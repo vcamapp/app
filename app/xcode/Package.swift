@@ -1,4 +1,4 @@
-// swift-tools-version: 5.6
+// swift-tools-version: 5.8
 
 import PackageDescription
 
@@ -41,3 +41,9 @@ let package = Package(
         .testTarget(name: "VCamAppExtensionTests", dependencies: ["VCamAppExtension"]),
     ]
 )
+
+for target in package.targets {
+    target.swiftSettings = (target.swiftSettings ?? []) + [
+        .enableUpcomingFeature("ExistentialAny", .when(configuration: .debug))
+    ]
+}

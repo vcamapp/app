@@ -75,7 +75,7 @@ public final class AudioExpressionEstimator: NSObject {
 }
 
 extension AudioExpressionEstimator: SNResultsObserving {
-    public func request(_ request: SNRequest, didProduce result: SNResult) {
+    public func request(_ request: any SNRequest, didProduce result: any SNResult) {
         guard let result = result as? SNClassificationResult,
               let classification = result.classification(forIdentifier: "laughter") else {
             onUpdate?(.neutral)

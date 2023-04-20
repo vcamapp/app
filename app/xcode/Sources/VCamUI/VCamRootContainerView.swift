@@ -26,7 +26,7 @@ public final class VCamRootContainerView: NSView {
 }
 
 public extension VCamRootContainerView {
-    override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
+    override func draggingEntered(_ sender: any NSDraggingInfo) -> NSDragOperation {
         guard let url = url(for: sender), FileType(url: url) != nil else {
             return [] // NSDragOperationNone
         }
@@ -34,11 +34,11 @@ public extension VCamRootContainerView {
         return .copy
     }
 
-    override func prepareForDragOperation(_ sender: NSDraggingInfo) -> Bool {
+    override func prepareForDragOperation(_ sender: any NSDraggingInfo) -> Bool {
         true
     }
 
-    func url(for info: NSDraggingInfo) -> URL? {
+    func url(for info: any NSDraggingInfo) -> URL? {
         guard let url = NSURL(from: info.draggingPasteboard) as URL? else {
             return nil
         }

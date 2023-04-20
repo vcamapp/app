@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CoreGraphics
 import VCamLocalization
 import simd
 
@@ -56,7 +57,7 @@ public extension SceneObject {
             }
         }
 
-        public var croppableTexture: SceneObjectCroppableTexture? {
+        public var croppableTexture: (any SceneObjectCroppableTexture)? {
             switch self {
             case .avatar, .image, .wind: return nil
             case .screen(let state): return state

@@ -92,7 +92,7 @@ private struct HiddenTextField: NSViewRepresentable {
     }
 
     final class Coordinator: NSObject, NSTextFieldDelegate {
-        var key: NSObjectProtocol?
+        var key: (any NSObjectProtocol)?
 
         func observe(textField: NSTextField) {
             if let key = key {

@@ -13,7 +13,7 @@ enum ChromaKey {
         green targetGreen: Float,
         blue targetBlue: Float,
         threshold: Float
-    ) -> CIFilter & CIColorCube {
+    ) -> any CIFilter & CIColorCube {
         let size = 64
         let buffer = UnsafeMutableBufferPointer<Float>.allocate(capacity: size * size * size * 4)
 
