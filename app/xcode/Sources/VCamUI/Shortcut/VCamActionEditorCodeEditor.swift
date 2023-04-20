@@ -31,16 +31,18 @@ struct VCamActionEditorCodeEditor: View {
             }
             .font(.caption2)
 
-            ScrollView(.vertical) {
-                Text(code)
-                    .font(.caption.monospaced())
-                    .lineLimit(nil)
-                    .padding(8)
-                    .frame(maxWidth: .infinity, minHeight: 60, alignment: .topLeading)
+            if !code.isEmpty {
+                ScrollView(.vertical) {
+                    Text(code)
+                        .font(.caption.monospaced())
+                        .lineLimit(nil)
+                        .padding(8)
+                        .frame(maxWidth: .infinity, minHeight: 60, alignment: .topLeading)
+                }
+                .frame(height: 80)
+                .background()
+                .cornerRadius(8)
             }
-            .frame(height: 80)
-            .background()
-            .cornerRadius(8)
         }
         .onAppear(perform: loadScript)
     }

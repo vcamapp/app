@@ -10,6 +10,9 @@ import VCamEntity
 
 public extension VCamShortcutMetadata {
     static func load() throws -> VCamShortcutMetadata {
+        guard FileManager.default.fileExists(atPath: URL.shortcutMetadata.path) else {
+            return .init()
+        }
         let data = try Data(contentsOf: .shortcutMetadata)
         return try JSONDecoder().decode(VCamShortcutMetadata.self, from: data)
     }
