@@ -37,6 +37,7 @@ let package = Package(
         .target(name: "VCamDefaults", dependencies: []),
         .target(name: "VCamAppExtension", dependencies: []),
 
+        .testTarget(name: "VCamMediaTests", dependencies: ["VCamMedia"]),
         .testTarget(name: "VCamTrackingTests", dependencies: ["VCamTracking"]),
         .testTarget(name: "VCamAppExtensionTests", dependencies: ["VCamAppExtension"]),
     ]
@@ -44,6 +45,7 @@ let package = Package(
 
 for target in package.targets {
     target.swiftSettings = (target.swiftSettings ?? []) + [
-        .enableUpcomingFeature("ExistentialAny", .when(configuration: .debug))
+        .enableUpcomingFeature("ExistentialAny", .when(configuration: .debug)),
+        .enableUpcomingFeature("StrictConcurrency", .when(configuration: .debug)),
     ]
 }
