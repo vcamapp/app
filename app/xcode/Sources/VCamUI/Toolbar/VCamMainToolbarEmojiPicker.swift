@@ -11,27 +11,41 @@ import VCamEntity
 public struct VCamMainToolbarEmojiPicker: View {
     public init() {}
     
-    static let emojis = ["👍", "🎉", "❤️", "🤣", "🥺", "😢", "👏", "🙏", "💪", "🙌", "👀", "✨", "🔥", "💦", "❌", "⭕️", "⁉️", "❓", "⚠️", "💮"]
+    private static let emojis: [Emoji] = ["👍", "🎉", "❤️", "🤣", "🥺", "😢", "👏", "🙏", "💪", "🙌", "👀", "✨", "🔥", "💦", "❌", "⭕️", "⁉️", "❓", "⚠️", "💮"]
 
     @Environment(\.dismiss) var dismiss
     
     public var body: some View {
         GroupBox {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 26))]) {
-                ForEach(Self.emojis, id: \.self) { emoji in
+                ForEach(Self.emojis) { emoji in
                     Button {
                         Task { @MainActor in
-                            try await VCamEmojiAction(configuration: .init(emoji: emoji))(context: .empty)
+                            try await VCamEmojiAction(configuration: .init(emoji: emoji.rawValue))(context: .empty)
                         }
                         dismiss()
                     } label: {
-                        Text(emoji)
+                        Text(emoji.rawValue)
                             .macHoverEffect()
                     }
                     .buttonStyle(.plain)
                 }
             }
         }
+    }
+}
+
+private struct Emoji: RawRepresentable, ExpressibleByStringLiteral, Identifiable {
+    let rawValue: String
+
+    var id: RawValue { rawValue }
+
+    init(rawValue value: String) {
+        rawValue = value
+    }
+
+    init(stringLiteral value: StringLiteralType) {
+        rawValue = value
     }
 }
 

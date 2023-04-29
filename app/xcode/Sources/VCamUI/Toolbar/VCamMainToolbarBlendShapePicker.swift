@@ -21,7 +21,7 @@ public struct VCamMainToolbarBlendShapePicker: View {
         ScrollView(.vertical, showsIndicators: true) {
             GroupBox {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 60))]) {
-                    ForEach(blendShapes, id: \.self) { blendShape in
+                    ForEach(blendShapes) { blendShape in
                         HoverToggle(text: blendShape, isOn: $selectedBlendShape.map(
                             get: { blendShape == $0 },
                             set: { $0 ? blendShape : nil }

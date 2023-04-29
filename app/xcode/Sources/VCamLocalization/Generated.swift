@@ -254,6 +254,8 @@ public enum L10n {
   public static let loadVRMFile = LocalizedString(lookupKey: "loadVRMFile")
   /// Local File
   public static let localFile = LocalizedString(lookupKey: "localFile")
+  /// Lock
+  public static let lock = LocalizedString(lookupKey: "lock")
   /// Main
   public static let main = LocalizedString(lookupKey: "main")
   /// Manage Objects
@@ -424,6 +426,8 @@ public enum L10n {
   public static let uninstall = LocalizedString(lookupKey: "uninstall")
   /// Uninstall Virtual Camera Plugin
   public static let uninstallPlugin = LocalizedString(lookupKey: "uninstallPlugin")
+  /// Unlock
+  public static let unlock = LocalizedString(lookupKey: "unlock")
   /// Update
   public static let update = LocalizedString(lookupKey: "update")
   /// You're up-to-date!

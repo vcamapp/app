@@ -21,3 +21,7 @@ public extension String {
         return image
     }
 }
+
+extension String: Identifiable {
+    public var id: Self { self }
+}

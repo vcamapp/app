@@ -29,17 +29,19 @@ extension VCamScene: CustomStringConvertible {
 
 public extension VCamScene {
     struct Object: Codable, Identifiable {
-        public init(id: Int32, name: String, type: VCamScene.ObjectType, isHidden: Bool) {
+        public init(id: Int32, name: String, type: VCamScene.ObjectType, isHidden: Bool, isLocked: Bool) {
             self.id = id
             self.name = name
             self.type = type
             self.isHidden = isHidden
+            self.isLocked = isLocked
         }
 
         public let id: Int32
         public var name: String
         public let type: ObjectType
         public var isHidden: Bool? // [Added 0.9.4]
+        public var isLocked: Bool? // [Added 0.9.7]
     }
 
     enum ObjectType: Codable {

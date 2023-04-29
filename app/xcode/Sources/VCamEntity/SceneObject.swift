@@ -16,11 +16,12 @@ public protocol SceneObjectCroppableTexture: AnyObject {
 }
 
 public struct SceneObject: Identifiable {
-    public init(id: Int32 = .random(in: 0..<Int32.max), type: ObjectType, name: String? = nil, isHidden: Bool) {
+    public init(id: Int32 = .random(in: 0..<Int32.max), type: ObjectType, name: String? = nil, isHidden: Bool, isLocked: Bool) {
         self.id = id
         self.type = type
         self.name = name ?? type.name
         self.isHidden = isHidden
+        self.isLocked = isLocked
     }
 
     public static let avatarID: Int32 = -123
@@ -29,6 +30,7 @@ public struct SceneObject: Identifiable {
     public let type: ObjectType
     public var name: String
     public var isHidden: Bool
+    public var isLocked: Bool
 }
 
 public extension SceneObject {

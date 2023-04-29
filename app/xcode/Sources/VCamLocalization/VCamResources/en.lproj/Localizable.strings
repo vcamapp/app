@@ -42,6 +42,8 @@
 "enable" = "Enable";
 "show" = "Show";
 "hide" = "Hide";
+"lock" = "Lock";
+"unlock" = "Unlock";
 "filter" = "Filter";
 "threshold" = "Threshold";
 "cut" = "Cut";

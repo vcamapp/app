@@ -11,7 +11,7 @@ import Introspect
 
 public extension List {
     @ViewBuilder
-    func removeBackgroud() -> some View {
+    func removeBackground() -> some View {
         if #available(macOS 13.0, *) {
             scrollContentBackground(.hidden)
         } else {
