@@ -10,17 +10,20 @@ import AVFoundation
 
 public enum FrameRateSelector {
     public static func recommendedFrameRate(targetFPS fps: Float64, supportedFrameRateRanges ranges: [some AVFrameRateRangeProtocol]) -> (minFrameDuration: CMTime?, maxFrameDuration: CMTime?) {
+        guard let range = ranges.first(where: { fps < $0.maxFrameRate }) else {
+            return (ranges.first?.maxFrameDuration, nil)
+        }
+
         var minFrameDuration: CMTime?
         var maxFrameDuration: CMTime?
 
-        if ranges.contains(where: { $0.minFrameRate <= fps && fps <= $0.maxFrameRate }) {
-            minFrameDuration = CMTime(value: 1, timescale: CMTimeScale(fps))
+        if range.minFrameRate <= fps && fps <= range.maxFrameRate {
+            lazy var estimatedMinDuration = CMTime(value: range.minFrameDuration.value, timescale: CMTimeScale(fps) * CMTimeScale(range.minFrameDuration.value))
+            minFrameDuration = fps <= range.maxFrameRate ? estimatedMinDuration : range.maxFrameDuration
         }
 
-        if let maxFPS = ranges.max(by: { $0.maxFrameRate < $1.maxFrameRate })?.maxFrameRate {
-            let minFPS = ranges.min(by: { $0.minFrameRate < $1.minFrameRate })?.minFrameRate ?? fps
-            maxFrameDuration = CMTime(value: 1, timescale: CMTimeScale(min(max(minFPS, fps), maxFPS)))
-        }
+        lazy var estimatedMaxDuration = CMTime(value: range.maxFrameDuration.value, timescale: CMTimeScale(fps) * CMTimeScale(range.maxFrameDuration.value))
+        maxFrameDuration = range.minFrameRate <= fps ? estimatedMaxDuration : range.minFrameDuration
 
         return (minFrameDuration, maxFrameDuration)
     }
@@ -29,6 +32,8 @@ public enum FrameRateSelector {
 public protocol AVFrameRateRangeProtocol {
     var minFrameRate: Float64 { get }
     var maxFrameRate: Float64 { get }
+    var minFrameDuration: CMTime { get }
+    var maxFrameDuration: CMTime { get }
 }
 
 extension AVFrameRateRange: AVFrameRateRangeProtocol {}
