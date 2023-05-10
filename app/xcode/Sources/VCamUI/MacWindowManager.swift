@@ -104,7 +104,7 @@ private struct WindowContainer<Content: View>: View {
 
     var body: some View {
         content
-            .environment(\.locale, Locale(identifier: locale))
+            .environment(\.locale, locale.isEmpty ? .current : Locale(identifier: locale))
             .environment(\.nsWindow, nsWindow)
     }
 }

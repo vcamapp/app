@@ -15,6 +15,10 @@ public struct ImageFilter {
             case let .chromaKey(chromaKey):
                 let color = chromaKey.color
                 return ChromaKey.filter(red: color.red, green: color.green, blue: color.blue, threshold: chromaKey.threshold)
+            case let .blur(blur):
+                let filter = CIFilter.gaussianBlur()
+                filter.radius = blur.radius
+                return filter
             }
         }
     }
@@ -23,9 +27,18 @@ public struct ImageFilter {
     let filters: [CIFilter]
 
     public func apply(to image: CIImage) -> CIImage {
-        filters.reduce(into: image) { partialResult, filter in
-            filter.setValue(partialResult, forKey: kCIInputImageKey)
-            partialResult = filter.outputImage ?? partialResult
+        zip(filters, configuration.filters).reduce(into: image) { partialResult, value in
+            let (ciFilter, filter) = value
+            switch filter.type {
+            case .chromaKey:
+                ciFilter.setValue(partialResult, forKey: kCIInputImageKey)
+                partialResult = ciFilter.outputImage ?? partialResult
+            case .blur(let blur):
+                let k: Float = -3.21
+                let extent = partialResult.extent.insetBy(dx: CGFloat(blur.radius * k), dy: CGFloat(blur.radius * k))
+                ciFilter.setValue(partialResult.clampedToExtent().cropped(to: extent), forKey: kCIInputImageKey)
+                partialResult = ciFilter.outputImage?.cropped(to: partialResult.extent) ?? partialResult
+            }
         }
     }
 }

@@ -26,14 +26,20 @@ public struct ImageFilterConfiguration: Codable {
 
     public enum FilterType: Codable, CaseIterable, Hashable, Equatable {
         case chromaKey(ChromaKey)
+        case blur(Blur)
 
         public static var allCases: [FilterType] = [
-            .chromaKey(.init())
+            .chromaKey(.init()),
+            .blur(.init()),
         ]
 
         public struct ChromaKey: Codable, Hashable {
             public var color: VCamColor = .green
             public var threshold: Float = 0.25
+        }
+
+        public struct Blur: Codable, Hashable {
+            public var radius: Float = 10
         }
     }
 }

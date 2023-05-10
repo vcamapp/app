@@ -56,6 +56,6 @@ public struct ModalSheet<Content: View>: View {
             }
             .padding()
         }
-        .environment(\.locale, Locale(identifier: locale))
+        .environment(\.locale, locale.isEmpty ? .current : Locale(identifier: locale))
     }
 }

@@ -15,6 +15,8 @@ extension ImageFilterConfiguration.FilterType: Identifiable {
         switch self {
         case .chromaKey:
             return L10n.chromaKeying.text
+        case .blur:
+            return L10n.blur.text
         }
     }
 }

@@ -190,6 +190,7 @@
 
 // MARK: - Filter
 "chromaKeying" = "Chroma Keying";
+"blur" = "Blur";
 
 // MARK: - Permission
 

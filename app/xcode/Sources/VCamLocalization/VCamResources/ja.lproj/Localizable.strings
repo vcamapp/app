@@ -190,6 +190,7 @@
 
 // MARK: - Filter
 "chromaKeying" = "クロマキー合成";
+"blur" = "ブラー / ぼかし";
 
 // MARK: - Permission
 

@@ -46,6 +46,8 @@ public enum L10n {
   public static let background = LocalizedString(lookupKey: "background")
   /// Bloom
   public static let bloom = LocalizedString(lookupKey: "bloom")
+  /// Blur
+  public static let blur = LocalizedString(lookupKey: "blur")
   /// Bye
   public static let bye = LocalizedString(lookupKey: "bye")
   /// Calibrate
