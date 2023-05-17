@@ -9,13 +9,18 @@ import CoreMedia
 import AVFoundation
 
 public enum FrameRateSelector {
-    public static func recommendedFrameRate(targetFPS fps: Float64, supportedFrameRateRanges ranges: [some AVFrameRateRangeProtocol]) -> (minFrameDuration: CMTime?, maxFrameDuration: CMTime?) {
-        guard let range = ranges.first(where: { fps < $0.maxFrameRate }) else {
-            return (ranges.first?.maxFrameDuration, nil)
+    public static func recommendedFrameRate(targetFPS fps: Float64, supportedFrameRateRanges ranges: [some AVFrameRateRangeProtocol]) -> (minFrameDuration: CMTime, maxFrameDuration: CMTime) {
+        if ranges.isEmpty {
+            return (.invalid, .invalid)
         }
 
-        var minFrameDuration: CMTime?
-        var maxFrameDuration: CMTime?
+        guard let range = ranges.first(where: { fps < $0.maxFrameRate }) else {
+            let maxFrameDuration = CMTime(value: 1, timescale: CMTimeScale(ranges.max(by: { $0.maxFrameRate < $1.maxFrameRate })?.maxFrameRate ?? fps))
+            return (maxFrameDuration, maxFrameDuration)
+        }
+
+        var minFrameDuration: CMTime = .invalid
+        var maxFrameDuration: CMTime = .invalid
 
         if range.minFrameRate <= fps && fps <= range.maxFrameRate {
             lazy var estimatedMinDuration = CMTime(value: range.minFrameDuration.value, timescale: CMTimeScale(fps) * CMTimeScale(range.minFrameDuration.value))

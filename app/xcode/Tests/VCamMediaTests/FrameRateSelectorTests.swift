@@ -16,18 +16,18 @@ final class FrameRateSelectorTests: XCTestCase {
             maxFrameDuration: CMTime(value: 1000000, timescale: 45000000)
         )
         let result = FrameRateSelector.recommendedFrameRate(targetFPS: 16, supportedFrameRateRanges: [range])
-        XCTAssertNil(result.minFrameDuration)
+        XCTAssertEqual(result.minFrameDuration, .invalid)
         XCTAssertEqual(result.maxFrameDuration, .init(value: 1, timescale: 30))
     }
 
     func testOutOfRangeHigh() throws {
         let range = MockAVFrameRateRange(
-            minFrameDuration: CMTime(value: 1000000, timescale: 30000000),
-            maxFrameDuration: CMTime(value: 1000000, timescale: 45000000)
+            minFrameDuration: CMTime(value: 1000000, timescale: 15000000),
+            maxFrameDuration: CMTime(value: 1000000, timescale: 30000000)
         )
         let result = FrameRateSelector.recommendedFrameRate(targetFPS: 60, supportedFrameRateRanges: [range])
-        XCTAssertEqual(result.minFrameDuration, .init(value: 1, timescale: 45))
-        XCTAssertNil(result.maxFrameDuration)
+        XCTAssertEqual(result.minFrameDuration, .init(value: 1, timescale: 30))
+        XCTAssertEqual(result.maxFrameDuration, .init(value: 1, timescale: 30))
     }
 
     func testInRange() throws {
@@ -42,8 +42,8 @@ final class FrameRateSelectorTests: XCTestCase {
 
     func testEmpty() throws {
         let result = FrameRateSelector.recommendedFrameRate(targetFPS: 45, supportedFrameRateRanges: [] as [MockAVFrameRateRange])
-        XCTAssertNil(result.minFrameDuration)
-        XCTAssertNil(result.maxFrameDuration)
+        XCTAssertEqual(result.minFrameDuration, .invalid)
+        XCTAssertEqual(result.maxFrameDuration, .invalid)
     }
 
     func testNonIntegerFPS() throws {
@@ -52,7 +52,7 @@ final class FrameRateSelectorTests: XCTestCase {
             maxFrameDuration: CMTime(value: 1000000, timescale: 30000030)
         )
         let result = FrameRateSelector.recommendedFrameRate(targetFPS: 30, supportedFrameRateRanges: [range])
-        XCTAssertNil(result.minFrameDuration)
+        XCTAssertEqual(result.minFrameDuration, .invalid)
         XCTAssertEqual(result.maxFrameDuration, range.maxFrameDuration)
     }
 
@@ -62,8 +62,8 @@ final class FrameRateSelectorTests: XCTestCase {
             maxFrameDuration: CMTime(value: 1000000, timescale: 29999970)
         )
         let result = FrameRateSelector.recommendedFrameRate(targetFPS: 30, supportedFrameRateRanges: [range])
-        XCTAssertEqual(result.minFrameDuration, range.minFrameDuration)
-        XCTAssertNil(result.maxFrameDuration)
+        XCTAssertEqual(result.minFrameDuration, .init(value: 1, timescale: CMTimeScale(range.minFrameRate)))
+        XCTAssertEqual(result.maxFrameDuration, .init(value: 1, timescale: CMTimeScale(range.maxFrameRate)))
     }
 
     func testNonIntegerFPS3() throws {
