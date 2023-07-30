@@ -24,7 +24,7 @@ public final class FacialMocapReceiver: ObservableObject {
     enum ReceiverResult {
         case success
         case cancel
-        case error(Error)
+        case error(any Error)
     }
 
     public init() {}
@@ -113,24 +113,25 @@ extension FacialMocapReceiver {
         }
         listener.newConnectionHandler = { [weak self] connection in
             self?.connection = connection
-            connection.stateUpdateHandler = { state in
-                 Task { @MainActor in
-                    switch state {
-                    case .setup, .preparing: ()
-                    case .waiting(let error):
-                        if case .posix(let posixError) = error, posixError == .ECONNREFUSED {
-                            try? await Task.sleep(nanoseconds: NSEC_PER_SEC * 2)
-                            try? await self?.startServer(port: port, avatar: avatar, completion: completion)
-                        }
-                    case .ready:
-                        self?.connectionStatus = .connected
-                        connection.receiveData(with: avatar)
-                    case .cancelled:
-                        self?.stopAsync()
-                    case .failed:
-                        try? await self?.startServer(port: port, avatar: avatar, completion: completion)
-                    @unknown default: ()
-                    }
+            connection.stateUpdateHandler = { [weak self] state in
+                 Task { @MainActor [weak self] in
+                     guard let self else { return }
+                     switch state {
+                     case .setup, .preparing: ()
+                     case .waiting(let error):
+                         if case .posix(let posixError) = error, posixError == .ECONNREFUSED {
+                             try? await Task.sleep(nanoseconds: NSEC_PER_SEC * 2)
+                             try? await self.startServer(port: port, avatar: avatar, completion: completion)
+                         }
+                     case .ready:
+                         self.connectionStatus = .connected
+                         connection.receiveData(with: avatar)
+                     case .cancelled:
+                         self.stopAsync()
+                     case .failed:
+                         try? await self.startServer(port: port, avatar: avatar, completion: completion)
+                     @unknown default: ()
+                     }
                 }
             }
 
@@ -176,7 +177,7 @@ extension FacialMocapReceiver {
         connection.start(queue: Self.queue)
     }
 
-    private func sendStartToken(connection: NWConnection, completion: @escaping (Error?) -> Void) {
+    private func sendStartToken(connection: NWConnection, completion: @escaping ((any Error)?) -> Void) {
         let token = "iFacialMocap_sahuasouryya9218sauhuiayeta91555dy3719|sendDataVersion=v2".data(using: .utf8)
         connection.send(content: token, completion: .contentProcessed { error in
             completion(error)

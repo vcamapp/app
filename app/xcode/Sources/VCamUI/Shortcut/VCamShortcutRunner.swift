@@ -7,11 +7,13 @@
 
 import Foundation
 import VCamEntity
+import VCamLogger
 
 public struct VCamShortcutRunner {
     public static let shared = VCamShortcutRunner()
 
     @MainActor public func run(_ shortcut: VCamShortcut) async {
+        Logger.log("")
         for action in shortcut.configurations.map({ $0.action() }) {
             do {
                 try await action(context: .init(shortcut: shortcut))

@@ -56,7 +56,7 @@ public final class VCamMotionReceiver {
             listener.newConnectionHandler = { [weak self] connection in
                 self?.connection = connection
                 connection.stateUpdateHandler = { [weak self] state in
-                     Task { @MainActor in
+                     Task { @MainActor [weak self] in
                         switch state {
                         case .setup, .preparing, .waiting, .cancelled, .failed: ()
                         case .ready:
