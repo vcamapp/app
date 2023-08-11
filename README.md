@@ -1,14 +1,13 @@
 [日本語](README.ja.md)
 
 # VCam
-macOS app that displays an avatar using a virtual camera.
+A macOS app that shows an avatar using a virtual camera.
 
-You can display a virtual avatar on Zoom or Google Meet, or etc.  
-This is useful for reactions in environments where a real camera is unavailable.
+You can display a virtual avatar on Zoom or Google Meet, or etc.
 
 [https://vcamapp.com/en](https://vcamapp.com/en)
 
-<img width="800px" alt="vcam_demo" src="https://user-images.githubusercontent.com/8188636/163387105-9bda6ab0-c176-406e-b1bc-6a6bcc31350c.png">
+<img width="800px" alt="vcam_demo" src="https://github.com/vcamapp/app/assets/8188636/bf6b5ef9-c6c6-489e-8e47-10bc92cceada">
 
 
 [Watch the demo on YouTube (subtitles available)](https://www.youtube.com/watch?v=G0wMHRL8dh4&list=PLaR2G7EgeMDXgm84LNC47rS5Isk262JIz)
@@ -20,7 +19,7 @@ Optimized for Apple Silicon Macs; also available for Intel Macs.
 Windows and other platforms are currently not supported.
 
 ## Documentations
-- [Documentations](https://tattn.gitbook.io/vcam)
+- [Documentations](https://docs.vcamapp.com)
 
 *Updates to the document by pull request are welcome!*
 
