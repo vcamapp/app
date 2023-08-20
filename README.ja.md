@@ -6,9 +6,8 @@ ZoomやGoogle Meet等でカメラとしてVTuberのように仮想のアバタ�
 
 [https://vcamapp.com](https://vcamapp.com)
 
-<img width="800px" alt="vcam_demo" src="https://github.com/vcamapp/app/assets/8188636/7a521e95-acba-4eb5-b6dc-083db4bf1074">
+[![DEMO](https://github-production-user-asset-6210df.s3.amazonaws.com/8188636/261830133-3486c19a-0625-4a4b-a008-d60c9a3ff52f.png)](https://www.youtube.com/watch?v=5gm7-L174zc)
 
-[YouTubeでデモ映像を見る](https://www.youtube.com/watch?v=G0wMHRL8dh4&list=PLaR2G7EgeMDXgm84LNC47rS5Isk262JIz)
 
 ## 動作環境
 macOS 12以上 (macOS 13以降推奨)  
