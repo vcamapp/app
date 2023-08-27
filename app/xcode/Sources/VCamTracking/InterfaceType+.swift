@@ -14,7 +14,7 @@ public extension NWInterface.InterfaceType {
     private var names: [String] {
         switch self {
         case .wifi:
-            return ["en0"]
+            return ["en0", "en1"]
         case .wiredEthernet:
             return ["en2", "en3", "en4"]
         case .cellular:
