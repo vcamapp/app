@@ -203,10 +203,11 @@
 "timeToTakePhoto" = "Time to take photos";
 "startRecording" = "Start recording [β]";
 "stopRecording" = "Stop recording";
-"videoFormat" = "Video Format";
+"videoFormat" = "Format";
 "recordDesktopAudio" = "Record desktop audio [β]";
 "micSyncOffset" = "Sync offset for mic [ms]";
 "developing" = "Developing...";
+"videoFormatHEVC" = "hevc (alpha)";
 
 // MARK: - Capture
 

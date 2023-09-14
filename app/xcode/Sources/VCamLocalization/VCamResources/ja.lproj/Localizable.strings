@@ -203,10 +203,11 @@
 "timeToTakePhoto" = "撮影までの待ち時間";
 "startRecording" = "録画開始 [β]";
 "stopRecording" = "録画停止";
-"videoFormat" = "動画フォーマット";
+"videoFormat" = "形式";
 "recordDesktopAudio" = "PCの音声を録音 [β]";
 "micSyncOffset" = "マイク音の同期オフセット (ミリ秒)";
 "developing" = "開発中...";
+"videoFormatHEVC" = "hevc (透過)";
 
 // MARK: - Capture
 

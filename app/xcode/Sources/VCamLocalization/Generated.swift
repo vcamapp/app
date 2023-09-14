@@ -448,8 +448,10 @@ public enum L10n {
   public static let videoCapture = LocalizedString(lookupKey: "videoCapture")
   /// Video Capture Device
   public static let videoCaptureDevice = LocalizedString(lookupKey: "videoCaptureDevice")
-  /// Video Format
+  /// Format
   public static let videoFormat = LocalizedString(lookupKey: "videoFormat")
+  /// hevc (alpha)
+  public static let videoFormatHEVC = LocalizedString(lookupKey: "videoFormatHEVC")
   /// Vignette
   public static let vignette = LocalizedString(lookupKey: "vignette")
   /// Virtual Camera

@@ -17,6 +17,8 @@ public extension VideoFormat {
             return .mov
         case .m4v:
             return .m4v
+        case .hevcWithAlpha:
+            return .mov
         }
     }
 }
