@@ -472,12 +472,12 @@ public enum L10n {
 
 extension L10n {
   private static var bundles: [String: Bundle] = [:]
-  fileprivate static func tr(_ table: String, _ key: String, _ args: CVarArg...) -> String {
+  fileprivate static func tr(_ table: String, _ key: String, _ args: any CVarArg...) -> String {
     let bundle = currentBundle()
     return String(format: NSLocalizedString(key, tableName: nil, bundle: bundle, value: key, comment: ""), arguments: args)
   }
 
-  fileprivate static func tr(_ table: String, _ key: String, args: [CVarArg]) -> String {
+  fileprivate static func tr(_ table: String, _ key: String, args: [any CVarArg]) -> String {
     let bundle = currentBundle()
     return String(format: NSLocalizedString(key, tableName: nil, bundle: bundle, value: key, comment: ""), arguments: args)
   }
@@ -507,7 +507,7 @@ public struct LocalizedString {
 }
 
 public struct ArgumentsLocalizedString {
-  internal init(_ lookupKey: String, _ key: LocalizedStringKey, _ arguments: CVarArg...) {
+  internal init(_ lookupKey: String, _ key: LocalizedStringKey, _ arguments: any CVarArg...) {
     self.lookupKey = lookupKey
     self.localizedKey = key
     self.arguments = arguments
@@ -515,7 +515,7 @@ public struct ArgumentsLocalizedString {
 
   internal let lookupKey: String
   internal let localizedKey: LocalizedStringKey
-  internal let arguments: [CVarArg]
+  internal let arguments: [any CVarArg]
 
   public var key: LocalizedStringKey {
     localizedKey

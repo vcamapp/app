@@ -8,7 +8,7 @@
 import Foundation
 
 public struct Logger {
-    public static var error: (Error) -> Void = { print($0) }
+    public static var error: (any Error) -> Void = { print($0) }
 
     public static func log(_ message: String, file: StaticString = #file, function: StaticString = #function, line: Int = #line) {
         logInternal(message, file, function, line)

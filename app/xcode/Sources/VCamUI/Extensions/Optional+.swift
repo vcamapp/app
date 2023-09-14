@@ -9,7 +9,7 @@
 import Foundation
 
 public extension Optional {
-    func orThrow(_ error: @autoclosure () -> Error) throws -> Wrapped {
+    func orThrow(_ error: @autoclosure () -> any Error) throws -> Wrapped {
         guard let value = self else { throw error() }
         return value
     }

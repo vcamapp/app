@@ -74,7 +74,7 @@ public final class VCamShortcutManager: ObservableObject {
         }
     }
 
-    private func showError(_ error: Error) {
+    private func showError(_ error: any Error) {
         MacWindowManager.shared.open(VCamAlert(windowTitle: L10n.failure.text, message: error.localizedDescription, canCancel: false, okTitle: "OK", onOK: {}, onCancel: {}))
     }
 }
