@@ -207,7 +207,7 @@
 "recordDesktopAudio" = "Record desktop audio [β]";
 "micSyncOffset" = "Sync offset for mic [ms]";
 "developing" = "Developing...";
-"videoFormatHEVC" = "hevc (alpha)";
+"videoFormatHEVC" = "hevc (Transparent)";
 
 // MARK: - Capture
 

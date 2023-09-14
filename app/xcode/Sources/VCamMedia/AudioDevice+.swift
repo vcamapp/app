@@ -22,8 +22,10 @@ extension AudioDevice {
         )
 
         var name: CFString?
-        var propsize: UInt32 = UInt32(MemoryLayout<CFString?>.size)
-        let result: OSStatus = AudioObjectGetPropertyData(id, &address, 0, nil, &propsize, &name)
+        var propsize = UInt32(MemoryLayout<CFString?>.size)
+        let result = withUnsafeMutablePointer(to: &name) {
+            AudioObjectGetPropertyData(id, &address, 0, nil, &propsize, $0)
+        }
         if result != 0 {
             return ""
         }
@@ -67,7 +69,9 @@ public extension AudioDevice {
 
         var name: CFString?
         var propsize: UInt32 = UInt32(MemoryLayout<CFString?>.size)
-        let result: OSStatus = AudioObjectGetPropertyData(id, &address, 0, nil, &propsize, &name)
+        let result = withUnsafeMutablePointer(to: &name) {
+            AudioObjectGetPropertyData(id, &address, 0, nil, &propsize, $0)
+        }
         if result != 0 {
             return ""
         }

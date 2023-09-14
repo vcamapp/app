@@ -16,7 +16,7 @@ public enum ImageValidator {
         var width = UInt16(width)
         var height = UInt16(height)
         let salt = validatedData(from: data)
-        return salt + Data(valueNoCopy: &width) + Data(valueNoCopy: &height) + data + salt
+        return salt + Data(valueNoCopy: &width, count: MemoryLayout.size(ofValue: width)) + Data(valueNoCopy: &height, count: MemoryLayout.size(ofValue: height)) + data + salt
     }
 
     private static func validatedData(from data: Data) -> Data {
@@ -46,8 +46,8 @@ public enum ImageValidator {
 }
 
 private extension Data {
-    init<T>(valueNoCopy value: inout T) {
-        self = Data(bytesNoCopy: &value, count: MemoryLayout<T>.size, deallocator: .none)
+    init(valueNoCopy value: UnsafeMutableRawPointer, count: Int) {
+        self = Data(bytesNoCopy: value, count: count, deallocator: .none)
     }
 
     func load<T>(as type: T.Type = T.self) -> T {

@@ -59,13 +59,13 @@ public extension VCamMotion {
     }
 
     mutating func dataNoCopy() -> Data {
-        Data(valueNoCopy: &self)
+        Data(valueNoCopy: &self, count: MemoryLayout<Self>.size)
     }
 }
 
-extension Data {
-    init<T>(valueNoCopy value: inout T) {
-        self = Data(bytesNoCopy: &value, count: MemoryLayout<T>.size, deallocator: .none)
+private extension Data {
+    init(valueNoCopy value: UnsafeMutableRawPointer, count: Int) {
+        self = Data(bytesNoCopy: value, count: count, deallocator: .none)
     }
 
     func load<T>() -> T {
