@@ -7,7 +7,6 @@
 
 import Foundation
 import SwiftUI
-import Introspect
 
 public struct TextFieldListRow<ID: Equatable>: View {
     public init(id: ID, text: Binding<String>, editingId: Binding<ID?>, selectedId: ID?, onCommit: @escaping () -> Void) {
@@ -24,6 +23,8 @@ public struct TextFieldListRow<ID: Equatable>: View {
     let selectedId: ID?
     let onCommit: () -> Void
 
+    @FocusState private var isFocused: Bool
+
     public var body: some View {
         HStack {
             if editingId == id {
@@ -32,8 +33,9 @@ public struct TextFieldListRow<ID: Equatable>: View {
                     onCommit()
                 }
                 .font(.subheadline)
-                .introspectTextField { textField in
-                    textField.becomeFirstResponder()
+                .focused($isFocused)
+                .onAppear {
+                    isFocused = true
                 }
             } else if selectedId == id {
                 Text(text)

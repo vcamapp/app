@@ -1,11 +1,11 @@
-// swift-tools-version: 5.8
+// swift-tools-version: 5.9
 
 import PackageDescription
 
 let package = Package(
     name: "VCam",
     defaultLocalization: "en",
-    platforms: [.macOS(.v12)],
+    platforms: [.macOS(.v13)],
     products: [
         .library(name: "VCam", targets: ["VCamUI", "VCamMedia", "VCamBridge"]),
         .library(name: "VCamMedia", targets: ["VCamMedia"]),
@@ -14,13 +14,9 @@ let package = Package(
         .library(name: "VCamDefaults", targets: ["VCamDefaults"]),
         .library(name: "VCamAppExtension", targets: ["VCamAppExtension"]),
     ],
-    dependencies: [
-        .package(url: "https://github.com/siteline/SwiftUI-Introspect", exact: "0.2.0"),
-    ],
     targets: [
         .target(name: "VCamUI", dependencies: [
             "VCamUIFoundation", "VCamTracking", "VCamCamera", "VCamData", "VCamLocalization", "VCamBridge",
-            .product(name: "Introspect", package: "SwiftUI-Introspect")
         ]),
         .target(name: "VCamUIFoundation"),
         .target(name: "VCamData", dependencies: ["VCamEntity"]),
