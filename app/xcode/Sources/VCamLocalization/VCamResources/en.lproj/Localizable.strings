@@ -144,6 +144,8 @@
 "cameraExtensionAwaitingUserApproval" = "The virtual camera is not allowed. Please allow it from the 'Privacy & Security' section in the settings app.";
 "successToInstallCameraExtension" = "The virtual camera was successfully installed. It's recommended to restart VCam once.";
 "failedToInstallCameraExtension" = "The installation of the virtual camera failed. Please install it from the VCam settings if you want to use it.";
+"seeDocumentation" = "For more information, see this documentation.";
+"docsURLForVirtualCamera" = "https://docs.vcamapp.com/v/en/virtual-camera/virtualcamera";
 
 // MARK: - Tracking
 

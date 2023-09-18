@@ -130,6 +130,8 @@ public enum L10n {
   public static let disconnect = LocalizedString(lookupKey: "disconnect")
   /// Display
   public static let display = LocalizedString(lookupKey: "display")
+  /// https://docs.vcamapp.com/v/en/virtual-camera/virtualcamera
+  public static let docsURLForVirtualCamera = LocalizedString(lookupKey: "docsURLForVirtualCamera")
   /// Done
   public static let done = LocalizedString(lookupKey: "done")
   /// Download
@@ -396,6 +398,8 @@ public enum L10n {
   public static let screenResolution = LocalizedString(lookupKey: "screenResolution")
   /// s
   public static let seconds = LocalizedString(lookupKey: "seconds")
+  /// For more information, see this documentation.
+  public static let seeDocumentation = LocalizedString(lookupKey: "seeDocumentation")
   /// Select All
   public static let selectAll = LocalizedString(lookupKey: "selectAll")
   /// Settings

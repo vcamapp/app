@@ -144,6 +144,8 @@
 "cameraExtensionAwaitingUserApproval" = "仮想カメラが許可されていません。設定アプリの「プライバシーとセキュリティ」から許可してください。";
 "successToInstallCameraExtension" = "仮想カメラのインストールに成功しました。一度VCamを再起動することをおすすめします。";
 "failedToInstallCameraExtension" = "仮想カメラのインストールに失敗しました。利用する場合はVCamの設定からインストールしてください。";
+"seeDocumentation" = "詳細はこちらのページをご覧ください。";
+"docsURLForVirtualCamera" = "https://docs.vcamapp.com/virtual-camera/virtualcamera";
 
 // MARK: - Tracking
 
