@@ -135,8 +135,15 @@
 "experimentThanks" = "These features are available for our supporters, thank you for your supporting!";
 "experimentAdvertisement" = "The supporter version of the app can be downloaded from the following link:";
 "enableVSync" = "Enable VSync";
-"enableNewCameraExtension" = "Use the new virtual camera (macOS 12.3 and above)";
+"installVirtualCamera" = "Install the Virtual Camera";
+"explainAboutInstallingCameraExtension" = "Installing the virtual camera.\nClick on 'Open Security Preferences' and then click 'Allow'.";
 "noteEnableNewCameraExtension" = "Restart VCam once after installation.";
+"cameraExtensionWorking" = "The virtual camera is working.";
+"cameraExtensionNotWorking" = "The virtual camera is NOT working.";
+"pleaseRestartMacToFix" = "Restarting Mac may resolve the issue.";
+"cameraExtensionAwaitingUserApproval" = "The virtual camera is not allowed. Please allow it from the 'Privacy & Security' section in the settings app.";
+"successToInstallCameraExtension" = "The virtual camera was successfully installed. It's recommended to restart VCam once.";
+"failedToInstallCameraExtension" = "The installation of the virtual camera failed. Please install it from the VCam settings if you want to use it.";
 
 // MARK: - Tracking
 
@@ -245,6 +252,7 @@
 "loadVRMFile" = "Load VRM file";
 "loadOnVRoidHub" = "Load Avatar on VRoid Hub";
 "resetAvatarPosition" = "Reset Avatar Position";
+"alwaysOnTop" = "Always on Top";
 "help" = "Help";
 "anyProblem" = "Any problem?";
 "quitVCam" = "Quit VCam";
@@ -273,6 +281,14 @@
 "skipThisVersion" = "Skip This Version";
 "upToDate" = "You're up-to-date!";
 "upToDateMessage %@" = "%@ is currently the latest version";
+
+// MARK: - Migration
+
+"failedToInstallCameraPlugin" = "Failed to install the virtual camera. Please reinstall the virtual camera in VCam settings.";
+"deleteOldDALPlugin" = "Delete the Old Virtual Camera";
+"deleteOldDALPluginMessage" = "The old virtual camera is no longer supported, so it'll be deleted now.";
+"migrateToNewVirtualCamera" = "Migrate to New Virtual Camera";
+"migrateToNewVirtualCameraMessage" = "VCam will migrate to a virtual camera optimized for the latest macOS.\nPlease follow the instructions to delete the old plugin and install the new virtual camera.";
 
 // MARK: - Shortcut
 

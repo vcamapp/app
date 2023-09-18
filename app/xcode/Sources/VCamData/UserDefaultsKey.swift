@@ -15,4 +15,5 @@ public extension UserDefaults.Key {
     static var useVowelEstimation: Key<Bool> { .init("vc_use_vowel_estimation", default: false) }
     static var locale: Key<String> { .init("vc_locale", default: "") }
     static var pluginVersion: Key<String> { .init("vc_plugin_ver", default: "") }
+    static var alwaysOnTopEnabled: Key<Bool> { .init("vc_alwaysontop_enabled", default: false) }
 }

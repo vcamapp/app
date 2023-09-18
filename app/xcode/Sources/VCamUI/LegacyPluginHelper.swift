@@ -21,9 +21,13 @@ public struct LegacyPluginHelper {
         return plist?["CFBundleShortVersionString"] as? String ?? ""
     }
 
+    public static func isPluginInstalled() -> Bool {
+        FileManager.default.fileExists(atPath: pluginPath.path)
+    }
+
     @MainActor
     public static func checkUpdate() async {
-        let pluginInstalled = FileManager.default.fileExists(atPath: pluginPath.path)
+        let pluginInstalled = isPluginInstalled()
         var pluginUpdateNeeded = false
 
         if pluginInstalled {
@@ -62,8 +66,8 @@ public struct LegacyPluginHelper {
     }
 
     @MainActor
-    public static func uninstallPlugin() async {
-        guard await VCamAlert.showModal(title: L10n.deletePlugin.text, message: L10n.deleteOne(pluginPath).text, canCancel: true) == .ok else {
+    public static func uninstallPlugin(canCancel: Bool = true) async {
+        guard await VCamAlert.showModal(title: L10n.deletePlugin.text, message: L10n.deleteOne(pluginPath).text, canCancel: canCancel) == .ok else {
             return
         }
         do {

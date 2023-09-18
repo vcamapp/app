@@ -26,6 +26,8 @@ public enum L10n {
   public static func allowFor(_ p1: Any) -> ArgumentsLocalizedString {
     ArgumentsLocalizedString("allowFor %@", "allowFor \(String(describing: p1))", String(describing: p1))
   }
+  /// Always on Top
+  public static let alwaysOnTop = LocalizedString(lookupKey: "alwaysOnTop")
   /// Ambient light color
   public static let ambientLightColor = LocalizedString(lookupKey: "ambientLightColor")
   /// Ambient light intensity
@@ -56,6 +58,12 @@ public enum L10n {
   public static let camera = LocalizedString(lookupKey: "camera")
   /// Camera Exposure (EV)
   public static let cameraExposure = LocalizedString(lookupKey: "cameraExposure")
+  /// The virtual camera is not allowed. Please allow it from the 'Privacy & Security' section in the settings app.
+  public static let cameraExtensionAwaitingUserApproval = LocalizedString(lookupKey: "cameraExtensionAwaitingUserApproval")
+  /// The virtual camera is NOT working.
+  public static let cameraExtensionNotWorking = LocalizedString(lookupKey: "cameraExtensionNotWorking")
+  /// The virtual camera is working.
+  public static let cameraExtensionWorking = LocalizedString(lookupKey: "cameraExtensionWorking")
   /// Cancel
   public static let cancel = LocalizedString(lookupKey: "cancel")
   /// Capture Preference
@@ -100,6 +108,10 @@ public enum L10n {
   public static let cut = LocalizedString(lookupKey: "cut")
   /// Default
   public static let `default` = LocalizedString(lookupKey: "default")
+  /// Delete the Old Virtual Camera
+  public static let deleteOldDALPlugin = LocalizedString(lookupKey: "deleteOldDALPlugin")
+  /// The old virtual camera is no longer supported, so it'll be deleted now.
+  public static let deleteOldDALPluginMessage = LocalizedString(lookupKey: "deleteOldDALPluginMessage")
   /// Delete %@
   public static func deleteOne(_ p1: Any) -> ArgumentsLocalizedString {
     ArgumentsLocalizedString("deleteOne %@", "deleteOne \(String(describing: p1))", String(describing: p1))
@@ -142,8 +154,6 @@ public enum L10n {
   public static let enable = LocalizedString(lookupKey: "enable")
   /// Convert VRM 0.x to VRM 1.x
   public static let enableAutoConvertingToVRM1 = LocalizedString(lookupKey: "enableAutoConvertingToVRM1")
-  /// Use the new virtual camera (macOS 12.3 and above)
-  public static let enableNewCameraExtension = LocalizedString(lookupKey: "enableNewCameraExtension")
   /// Enable VSync
   public static let enableVSync = LocalizedString(lookupKey: "enableVSync")
   /// English
@@ -164,6 +174,8 @@ public enum L10n {
   public static let experimentDisclaimer = LocalizedString(lookupKey: "experimentDisclaimer")
   /// These features are available for our supporters, thank you for your supporting!
   public static let experimentThanks = LocalizedString(lookupKey: "experimentThanks")
+  /// Installing the virtual camera.\nClick on 'Open Security Preferences' and then click 'Allow'.
+  public static let explainAboutInstallingCameraExtension = LocalizedString(lookupKey: "explainAboutInstallingCameraExtension")
   /// Horizontal sensitivity
   public static let eyesHorizontalSensitivity = LocalizedString(lookupKey: "eyesHorizontalSensitivity")
   /// Vertical sensitivity
@@ -172,6 +184,10 @@ public enum L10n {
   public static let faceEyeMouth = LocalizedString(lookupKey: "faceEyeMouth")
   /// Facial Expression
   public static let facialExpression = LocalizedString(lookupKey: "facialExpression")
+  /// The installation of the virtual camera failed. Please install it from the VCam settings if you want to use it.
+  public static let failedToInstallCameraExtension = LocalizedString(lookupKey: "failedToInstallCameraExtension")
+  /// Failed to install the virtual camera. Please reinstall the virtual camera in VCam settings.
+  public static let failedToInstallCameraPlugin = LocalizedString(lookupKey: "failedToInstallCameraPlugin")
   /// Failure
   public static let failure = LocalizedString(lookupKey: "failure")
   /// File
@@ -220,6 +236,8 @@ public enum L10n {
   public static func installPlugin(_ p1: Any) -> ArgumentsLocalizedString {
     ArgumentsLocalizedString("installPlugin %@", "installPlugin \(String(describing: p1))", String(describing: p1))
   }
+  /// Install the Virtual Camera
+  public static let installVirtualCamera = LocalizedString(lookupKey: "installVirtualCamera")
   /// Integration
   public static let integration = LocalizedString(lookupKey: "integration")
   /// Intensity
@@ -270,6 +288,10 @@ public enum L10n {
   public static let micOrCamera = LocalizedString(lookupKey: "micOrCamera")
   /// Sync offset for mic [ms]
   public static let micSyncOffset = LocalizedString(lookupKey: "micSyncOffset")
+  /// Migrate to New Virtual Camera
+  public static let migrateToNewVirtualCamera = LocalizedString(lookupKey: "migrateToNewVirtualCamera")
+  /// VCam will migrate to a virtual camera optimized for the latest macOS.\nPlease follow the instructions to delete the old plugin and install the new virtual camera.
+  public static let migrateToNewVirtualCameraMessage = LocalizedString(lookupKey: "migrateToNewVirtualCameraMessage")
   /// Motion
   public static let motion = LocalizedString(lookupKey: "motion")
   /// Reset position
@@ -302,6 +324,8 @@ public enum L10n {
   public static let pick = LocalizedString(lookupKey: "pick")
   /// Play idle motions
   public static let playIdleMotions = LocalizedString(lookupKey: "playIdleMotions")
+  /// Restarting Mac may resolve the issue.
+  public static let pleaseRestartMacToFix = LocalizedString(lookupKey: "pleaseRestartMacToFix")
   /// Pose
   public static let pose = LocalizedString(lookupKey: "pose")
   /// Preset
@@ -402,6 +426,8 @@ public enum L10n {
   public static let stopRecording = LocalizedString(lookupKey: "stopRecording")
   /// Success
   public static let success = LocalizedString(lookupKey: "success")
+  /// The virtual camera was successfully installed. It's recommended to restart VCam once.
+  public static let successToInstallCameraExtension = LocalizedString(lookupKey: "successToInstallCameraExtension")
   /// Elbow offset
   public static let swivelOffset = LocalizedString(lookupKey: "swivelOffset")
   /// Take a photo

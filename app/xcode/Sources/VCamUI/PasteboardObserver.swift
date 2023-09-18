@@ -24,6 +24,7 @@ public final class PasteboardObserver: ObservableObject {
     }
 
     public func observe() {
+        timer?.invalidate()
         timer = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { _ in
             if self.lastChangeCount != self.pasteboard.changeCount {
                 self.lastChangeCount = self.pasteboard.changeCount

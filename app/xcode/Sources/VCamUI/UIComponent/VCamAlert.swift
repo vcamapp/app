@@ -27,8 +27,10 @@ public struct VCamAlert: View {
     public static func showModal(title: String, message: String, canCancel: Bool, okTitle: String = "OK") async -> Result {
         return await withCheckedContinuation { continuation in
             let alert = VCamAlert(windowTitle: title, message: message, canCancel: canCancel, okTitle: okTitle) {
+                NSApp.vcamWindow?.becomeMain()
                 continuation.resume(returning: .ok)
             } onCancel: {
+                NSApp.vcamWindow?.becomeMain()
                 continuation.resume(returning: .cancel)
             }
             MacWindowManager.shared.open(alert)
