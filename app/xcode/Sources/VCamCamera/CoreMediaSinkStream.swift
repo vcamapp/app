@@ -25,6 +25,13 @@ public final class CoreMediaSinkStream: NSObject {
     private var queue: CMSimpleQueue?
     private var queuePointer: UnsafeMutablePointer<Unmanaged<CMSimpleQueue>?>?
 
+    private var scntAddress = CMIOObjectPropertyAddress(
+        mSelector: CMIOObjectPropertySelector(FourCharCode("scnt")),
+        mScope: .global,
+        mElement: .main
+    )
+    private var scntDataSize: UInt32 = 0
+
     public static var isInstalled: Bool {
         findCameraExtensionDeviceID() != nil
     }
@@ -38,6 +45,8 @@ public final class CoreMediaSinkStream: NSObject {
         self.deviceId = deviceId
         self.streamId = streamId
         queue = createQueue(deviceId: deviceId, streamId: streamId)
+
+        CMIOObjectGetPropertyDataSize(deviceId, &scntAddress, 0, nil, &scntDataSize)
 
         let status = CMIODeviceStartStream(deviceId, streamId)
         guard status == 0 else {
@@ -74,7 +83,7 @@ public final class CoreMediaSinkStream: NSObject {
     }
 
     func render(_ image: CIImage) {
-        guard let queue else {
+        guard let queue, streamingCount() > 0 else {
             return
         }
         guard queue.fullness < 1 else {
@@ -101,17 +110,23 @@ public final class CoreMediaSinkStream: NSObject {
             return
         }
 
+        CVPixelBufferLockBaseAddress(pixelBuffer, [])
+        defer { CVPixelBufferUnlockBaseAddress(pixelBuffer, []) }
         context.render(image, to: pixelBuffer)
 
-        var timingInfo = CMSampleTimingInfo()
-        timingInfo.presentationTimeStamp = CMClockGetTime(CMClockGetHostTimeClock())
+        let timingInfo = CMSampleTimingInfo(
+            duration: .invalid,
+            presentationTimeStamp: CMClockGetTime(CMClockGetHostTimeClock()),
+            decodeTimeStamp: .invalid
+        )
 
-        guard let sampleBuffer = try? CMSampleBuffer(imageBuffer: pixelBuffer, formatDescription: videoFormatDescription, sampleTiming: timingInfo) else {
-            return
-        }
-
-        let sampleBufferPointer = UnsafeMutableRawPointer(Unmanaged.passRetained(sampleBuffer).toOpaque())
         do {
+            let sampleBuffer = try CMSampleBuffer(
+                imageBuffer: pixelBuffer,
+                formatDescription: videoFormatDescription,
+                sampleTiming: timingInfo
+            )
+            let sampleBufferPointer = UnsafeMutableRawPointer(Unmanaged.passRetained(sampleBuffer).toOpaque())
             try queue.enqueue(sampleBufferPointer)
         } catch {
             print(error)
@@ -121,34 +136,19 @@ public final class CoreMediaSinkStream: NSObject {
     public func streamingCount() -> Int {
         guard let deviceId else { return 0 }
 
-        var dataSize: UInt32 = 0
         var dataUsed: UInt32 = 0
-        var opa = CMIOObjectPropertyAddress(
-            mSelector: CMIOObjectPropertySelector(FourCharCode("scnt")),
-            mScope: .global,
-            mElement: .main
-        )
-
-        guard CMIOObjectHasProperty(deviceId, &opa) else {
-            return 0
-        }
-
-        var status = CMIOObjectGetPropertyDataSize(deviceId, &opa, 0, nil, &dataSize)
         var streamingCount = NSNumber(value: 0)
 
-        status = withUnsafeMutablePointer(to: &streamingCount) {
+        _ = withUnsafeMutablePointer(to: &streamingCount) {
             CMIOObjectGetPropertyData(
                 deviceId,
-                &opa,
+                &scntAddress,
                 0,
                 nil,
-                dataSize,
+                scntDataSize,
                 &dataUsed,
-                $0)
-        }
-
-        guard status == 0 else {
-            return 0
+                $0
+            )
         }
 
         return streamingCount.intValue
@@ -269,7 +269,8 @@ public final class CoreMediaSinkStream: NSObject {
         let attrs: [String: Any] = [
             kCVPixelBufferCGImageCompatibilityKey as String: true,
             kCVPixelBufferCGBitmapContextCompatibilityKey as String: true,
-            kCVPixelBufferIOSurfacePropertiesKey as String: [String: Any]()
+            kCVPixelBufferIOSurfacePropertiesKey as String: [String: Any](),
+            kCVPixelBufferMetalCompatibilityKey as String: true
         ]
         var pixelBuffer: CVPixelBuffer?
         CVPixelBufferCreate(kCFAllocatorDefault,
