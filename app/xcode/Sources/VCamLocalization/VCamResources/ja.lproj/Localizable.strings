@@ -103,6 +103,7 @@
 "deleteSelectedObject" = "選択中のオブジェクトを削除する";
 "interact" = "操作";
 "localFile" = "ローカルファイル";
+"setAsBackground" = "背景に設定する";
 
 "moveInitialPosition" = "カメラを初期位置に戻す";
 

@@ -20,4 +20,5 @@ public extension CMIOObjectPropertySelector {
     static let systemObject = Self.init(kCMIOObjectSystemObject)
     static let hardwarePropertyDevices = Self.init(kCMIOHardwarePropertyDevices)
     static let deviceUID = Self.init(kCMIODevicePropertyDeviceUID)
+    static let devicePropertyStreams = Self.init(kCMIODevicePropertyStreams)
 }

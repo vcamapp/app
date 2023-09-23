@@ -216,9 +216,9 @@ public final class CoreMediaSinkStream: NSObject {
         var dataSize: UInt32 = 0
         var dataUsed: UInt32 = 0
         var opa = CMIOObjectPropertyAddress(
-            mSelector: CMIOObjectPropertySelector(kCMIODevicePropertyStreams),
-            mScope: CMIOObjectPropertyScope(kCMIOObjectPropertyScopeGlobal),
-            mElement: CMIOObjectPropertyElement(kCMIOObjectPropertyElementMain)
+            mSelector: .devicePropertyStreams,
+            mScope: .global,
+            mElement: .main
         )
         CMIOObjectGetPropertyDataSize(deviceId, &opa, 0, nil, &dataSize)
 

@@ -402,6 +402,8 @@ public enum L10n {
   public static let seeDocumentation = LocalizedString(lookupKey: "seeDocumentation")
   /// Select All
   public static let selectAll = LocalizedString(lookupKey: "selectAll")
+  /// Set As Background
+  public static let setAsBackground = LocalizedString(lookupKey: "setAsBackground")
   /// Settings
   public static let settings = LocalizedString(lookupKey: "settings")
   /// Set up

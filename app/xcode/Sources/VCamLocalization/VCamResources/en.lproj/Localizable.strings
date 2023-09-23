@@ -103,6 +103,7 @@
 "deleteSelectedObject" = "Delete Selected Object";
 "interact" = "Interact";
 "localFile" = "Local File";
+"setAsBackground" = "Set As Background";
 
 "moveInitialPosition" = "Reset position";
 
