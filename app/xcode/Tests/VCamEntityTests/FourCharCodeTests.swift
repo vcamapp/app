@@ -6,7 +6,7 @@
 //
 
 import XCTest
-import VCamMedia
+import VCamEntity
 
 final class FourCharCodeTests: XCTestCase {
     func testUnknown() throws {

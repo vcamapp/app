@@ -26,14 +26,15 @@ let package = Package(
         .target(name: "VCamLocalization", resources: [.process("VCamResources")]),
         .target(name: "VCamMedia", dependencies: ["VCamEntity", "VCamAppExtension"]),
         .target(name: "VCamBridge", dependencies: ["VCamUIFoundation"]),
-        .target(name: "VCamCamera", dependencies: ["VCamEntity"]),
+        .target(name: "VCamCamera", dependencies: ["VCamData", "VCamLogger"]),
         .target(name: "VCamTracking", dependencies: ["VCamLogger"]),
 
         .target(name: "VCamLogger", dependencies: []),
         .target(name: "VCamDefaults", dependencies: []),
         .target(name: "VCamAppExtension", dependencies: []),
 
-        .testTarget(name: "VCamMediaTests", dependencies: ["VCamMedia"]),
+        .testTarget(name: "VCamEntityTests", dependencies: ["VCamEntity"]),
+        .testTarget(name: "VCamCameraTests", dependencies: ["VCamCamera"]),
         .testTarget(name: "VCamTrackingTests", dependencies: ["VCamTracking"]),
         .testTarget(name: "VCamAppExtensionTests", dependencies: ["VCamAppExtension"]),
     ]

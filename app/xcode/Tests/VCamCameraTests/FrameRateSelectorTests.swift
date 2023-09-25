@@ -7,7 +7,7 @@
 
 import XCTest
 import CoreMedia
-import VCamMedia
+import VCamCamera
 
 final class FrameRateSelectorTests: XCTestCase {
     func testOutOfRangeLow() throws {
