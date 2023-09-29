@@ -98,6 +98,7 @@ public final class CameraManager: NSObject {
         videoDataOutput.alwaysDiscardsLateVideoFrames = true
 
         // Set it to reduce the load.
+        // see: https://developer.apple.com/documentation/technotes/tn3121-selecting-a-pixel-format-for-an-avcapturevideodataoutput
         // see: https://developer.apple.com/documentation/vision/recognizing_objects_in_live_capture
         videoDataOutput.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_420YpCbCr8BiPlanarFullRange)]
 

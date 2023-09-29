@@ -11,7 +11,7 @@ import AVFoundation
 import VCamEntity
 
 public final class CoreMediaSinkStream: NSObject {
-    private let context = CIContext(options: [.cacheIntermediates: false, .name: "CoreMediaSinkStream"])
+    private let context = CIContext(options: [.cacheIntermediates: false, .name: "CoreMediaSinkStream", .workingFormat: CIFormat.BGRA8])
     private var pixelBuffer: CVPixelBuffer?
     private var videoFormatDescription: CMVideoFormatDescription?
     private var readyToEnqueue = false
