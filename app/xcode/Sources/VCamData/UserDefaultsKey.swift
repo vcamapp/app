@@ -17,4 +17,6 @@ public extension UserDefaults.Key {
     static var locale: Key<String> { .init("vc_locale", default: "") }
     static var pluginVersion: Key<String> { .init("vc_plugin_ver", default: "") }
     static var alwaysOnTopEnabled: Key<Bool> { .init("vc_alwaysontop_enabled", default: false) }
+    static var fingerTrackingOpenIntensity: Key<Double> { .init("vc_ftracking_open_intensity", default: 1) }
+    static var fingerTrackingCloseIntensity: Key<Double> { .init("vc_ftracking_close_intensity", default: 1) }
 }
