@@ -77,6 +77,32 @@ public extension simd_quatf {
     init(_ quat: simd_quatd) {
       self.init(vector: SIMD4(Float(quat.vector[0]), Float(quat.vector[1]), Float(quat.vector[2]), Float(quat.vector[3])))
     }
+
+    func eulerAngles() -> SIMD3<Float> {
+        // https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+        let (x, y, z): (Float, Float, Float)
+        let v = vector
+
+        // roll (x-axis)
+        let sinr_cosp = 2.0 * (v.w * v.x + v.y * v.z)
+        let cosr_cosp = 1.0 - 2.0 * (v.x * v.x + v.y * v.y)
+        x = atan2(sinr_cosp, cosr_cosp)
+
+        // pitch (y-axis)
+        let sinp = 2 * (v.w * v.y - v.z * v.x)
+        if abs(sinp) >= 1 {
+            y = copysign(.pi * 0.5, sinp)
+        } else {
+            y = asin(sinp)
+        }
+
+        // yaw (z-axis)
+        let siny_cosp = 2 * (v.w * v.z + v.x * v.y)
+        let cosy_cosp = 1 - 2 * (v.y * v.y + v.z * v.z)
+        z = atan2(siny_cosp, cosy_cosp)
+
+        return .init(x, y, z) * (180 / .pi)
+    }
 }
 
 extension simd_quatd {
