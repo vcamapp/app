@@ -19,7 +19,7 @@ let package = Package(
             "VCamUIFoundation", "VCamTracking", "VCamCamera", "VCamData", "VCamLocalization", "VCamBridge",
         ]),
         .target(name: "VCamUIFoundation"),
-        .target(name: "VCamData", dependencies: ["VCamEntity"]),
+        .target(name: "VCamData", dependencies: ["VCamBridge", "VCamEntity"]),
         .target(name: "VCamEntity", dependencies: ["VCamDefaults", "VCamLocalization"], swiftSettings: [
             .define("ENABLE_MOCOPI")
         ]),
