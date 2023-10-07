@@ -7,7 +7,7 @@ let package = Package(
     defaultLocalization: "en",
     platforms: [.macOS(.v13)],
     products: [
-        .library(name: "VCam", targets: ["VCamUI", "VCamMedia", "VCamBridge"]),
+        .library(name: "VCam", targets: ["VCamUI", "VCamMedia", "VCamBridge", "VCamWorkaround"]),
         .library(name: "VCamMedia", targets: ["VCamMedia"]),
         .library(name: "VCamCamera", targets: ["VCamCamera"]),
 
@@ -32,6 +32,7 @@ let package = Package(
         .target(name: "VCamLogger", dependencies: []),
         .target(name: "VCamDefaults", dependencies: []),
         .target(name: "VCamAppExtension", dependencies: []),
+        .target(name: "VCamWorkaround", dependencies: []),
 
         .testTarget(name: "VCamEntityTests", dependencies: ["VCamEntity"]),
         .testTarget(name: "VCamCameraTests", dependencies: ["VCamCamera"]),
