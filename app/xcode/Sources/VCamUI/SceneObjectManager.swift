@@ -281,3 +281,12 @@ extension SceneObjectManager {
         }
     }
 }
+
+extension SceneObjectManager {
+    public func addImage(url: URL) {
+        let renderer = ImageRenderer(imageURL: url, filter: nil)
+        let id = RenderTextureManager.shared.add(renderer)
+        let canvasSize = UniBridge.shared.canvasCGSize
+        add(.init(id: id, type: .image(.init(url: url, size: .init(width: renderer.size.width / canvasSize.width, height: renderer.size.height / canvasSize.height), filter: nil)), isHidden: false, isLocked: false))
+    }
+}

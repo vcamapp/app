@@ -24,7 +24,7 @@ let package = Package(
             .define("ENABLE_MOCOPI")
         ]),
         .target(name: "VCamLocalization", resources: [.process("VCamResources")]),
-        .target(name: "VCamMedia", dependencies: ["VCamEntity", "VCamAppExtension"]),
+        .target(name: "VCamMedia", dependencies: ["VCamEntity", "VCamAppExtension", "VCamLogger"]),
         .target(name: "VCamBridge", dependencies: ["VCamUIFoundation"]),
         .target(name: "VCamCamera", dependencies: ["VCamData", "VCamLogger"]),
         .target(name: "VCamTracking", dependencies: ["VCamData", "VCamLogger"]),

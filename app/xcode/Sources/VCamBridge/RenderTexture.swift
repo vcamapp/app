@@ -35,7 +35,7 @@ public final class MainTexture {
     }
 }
 
-func __bridge<T : AnyObject>(_ ptr: UnsafeRawPointer) -> T {
+public func __bridge<T : AnyObject>(_ ptr: UnsafeRawPointer) -> T {
     Unmanaged.fromOpaque(ptr).takeUnretainedValue()
 }
 
