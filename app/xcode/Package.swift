@@ -37,6 +37,7 @@ let package = Package(
         .testTarget(name: "VCamEntityTests", dependencies: ["VCamEntity"]),
         .testTarget(name: "VCamCameraTests", dependencies: ["VCamCamera"]),
         .testTarget(name: "VCamTrackingTests", dependencies: ["VCamTracking"]),
+        .testTarget(name: "VCamBridgeTests", dependencies: ["VCamBridge"]),
         .testTarget(name: "VCamAppExtensionTests", dependencies: ["VCamAppExtension"]),
     ]
 )

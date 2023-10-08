@@ -18,6 +18,7 @@ public final class MainTexture {
     public static let shared = MainTexture()
 
     public private(set) var texture = CIImage(color: .black).cropped(to: .init(x: 0, y: 0, width: 1280, height: 720))
+    public private(set) var mtlTexture: (any MTLTexture)?
 
     public var aspectRatio: Float {
         let size = texture.extent.size
@@ -28,8 +29,9 @@ public final class MainTexture {
         aspectRatio <= 1
     }
 
-    func setTexture(_ texture: CIImage) {
-        self.texture = texture
+    public func setTexture(_ texture: any MTLTexture) {
+        self.mtlTexture = texture
+        self.texture =  CIImage(mtlTexture: texture, options: nil)!
     }
 }
 
@@ -47,8 +49,7 @@ public func uniRegisterMainTexture(imagePointer: UnsafeRawPointer?) {
 #endif
 
 //    let mtlTexture = bridgedMtlTexture.makeTextureView(pixelFormat: .rgba8Unorm_srgb)!
-    let newTexture = CIImage(mtlTexture: bridgedMtlTexture, options: nil)!
-    MainTexture.shared.setTexture(newTexture)
+    MainTexture.shared.setTexture(bridgedMtlTexture)
 }
 
 
