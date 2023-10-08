@@ -19,7 +19,7 @@ public struct VCamBlendShapeAction: VCamAction {
     public var name: String { L10n.facialExpression.text }
     public var icon: Image { Image(systemName: "face.smiling") }
 
-    @UniAction(.setBlendShape) var setBlendShape
+    @UniAction(.currentBlendShape) var setBlendShape
 
     @MainActor
     public func callAsFunction(context: VCamActionContext) async throws {

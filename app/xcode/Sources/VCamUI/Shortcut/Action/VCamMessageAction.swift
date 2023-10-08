@@ -19,7 +19,7 @@ public struct VCamMessageAction: VCamAction {
     public var name: String { L10n.message.text }
     public var icon: Image { Image(systemName: "text.bubble") }
 
-    @UniState(.message) private var message
+    @UniState(.message, name: "message") private var message
 
     @MainActor
     public func callAsFunction(context: VCamActionContext) async throws {

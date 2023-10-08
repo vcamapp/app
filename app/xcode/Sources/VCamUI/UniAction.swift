@@ -7,6 +7,7 @@
 
 import Foundation
 import VCamEntity
+import VCamBridge
 
 @propertyWrapper public struct UniAction<Arguments>: Equatable {
     public init(action: @escaping (Arguments) -> Void) {
@@ -39,40 +40,15 @@ public extension UniAction<Void>.Action {
 }
 
 public extension UniAction<Void> {
-    init(action: @escaping () -> Void) {
-        self.action = { _ in action() }
+    init(_ type: UniBridge.TriggerType) {
+        let mapper = UniBridge.shared.triggerMapper
+        self.init(action: mapper.trigger(type))
     }
 }
 
-// MARK: - Open source later
-
-public extension UniAction {
-    init(_ action: InternalUniAction<Arguments>) {
-        self.action = action.action
+public extension UniAction<String> {
+    init(_ type: UniBridge.StringType) {
+        let mapper = UniBridge.shared.stringMapper
+        self.init(action: mapper.set(type))
     }
-}
-
-public struct InternalUniAction<Arguments> {
-    public init(action: @escaping (Arguments) -> Void) {
-        self.action = action
-    }
-
-    fileprivate let action: (Arguments) -> Void
-}
-
-public extension InternalUniAction<Void> {
-    static var resetCamera = Self.init { _ in }
-}
-
-public extension InternalUniAction<String> {
-    static var showEmojiStamp = Self.init { _ in }
-    static var setBlendShape = Self.init { _ in }
-}
-
-public extension InternalUniAction<VCamAvatarMotion> {
-    static var triggerMotion = Self.init { _ in }
-}
-
-public extension InternalUniAction<Int32> {
-    static var loadScene = Self.init { _ in }
 }

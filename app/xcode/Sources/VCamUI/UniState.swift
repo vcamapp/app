@@ -7,19 +7,13 @@
 
 import SwiftUI
 import VCamEntity
+import VCamBridge
 
 @propertyWrapper @dynamicMemberLookup public struct UniState<Value>: DynamicProperty {
-    public init(_ state: CustomState) {
-        get = state.get
-        set = state.set
-        name = state.name
-        reloadThrottle = state.reloadThrottle
-    }
-
-    private let get: () -> Value
-    private let set: (Value) -> Void
-    private var name = ""
-    private var reloadThrottle = false
+    let get: () -> Value
+    let set: (Value) -> Void
+    var name = ""
+    var reloadThrottle = false
 
     @UniReload private var reload: Void
 
@@ -45,38 +39,44 @@ import VCamEntity
             wrappedValue[keyPath: keyPath] = newValue.wrappedValue
         }
     }
+}
 
-    public struct CustomState {
-        public init(get: @escaping () -> Value, set: @escaping (Value) -> Void, name: String = "", reloadThrottle: Bool = false) {
-            self.get = get
-            self.set = set
-            self.name = name
-            self.reloadThrottle = reloadThrottle
-        }
+public extension UniState {
+    init(binding: Binding<Value>) {
+        self.init(get: { binding.wrappedValue }, set: { binding.wrappedValue = $0 })
+    }
 
-        public var get: () -> Value
-        public var set: (Value) -> Void
-        public var name = ""
-        public var reloadThrottle = false
+    init(_ type: UniBridge.BoolType, name: String, reloadThrottle: Bool = false) where Value == Bool {
+        let mapper = UniBridge.shared.boolMapper
+        self.init(get: { mapper.get(type) }, set: mapper.set(type), name: name, reloadThrottle: reloadThrottle)
+    }
+
+    init(_ type: UniBridge.FloatType, name: String, reloadThrottle: Bool = false) where Value == CGFloat {
+        let mapper = UniBridge.shared.floatMapper
+        self.init(get: { mapper.get(type) }, set: mapper.set(type), name: name, reloadThrottle: reloadThrottle)
+    }
+
+    init(_ type: UniBridge.IntType, name: String, reloadThrottle: Bool = false) where Value == Int32 {
+        let mapper = UniBridge.shared.intMapper
+        self.init(get: { mapper.get(type) }, set: mapper.set(type), name: name, reloadThrottle: reloadThrottle)
+    }
+
+    init(_ type: UniBridge.StringType, name: String, reloadThrottle: Bool = false) where Value == String {
+        let mapper = UniBridge.shared.stringMapper
+        self.init(get: { mapper.get(type) }, set: mapper.set(type), name: name, reloadThrottle: reloadThrottle)
+    }
+
+    init<Element>(_ type: UniBridge.ArrayType, name: String, as: Array<Element>.Type, reloadThrottle: Bool = false) where Value == Array<Element> {
+        let mapper = UniBridge.shared.arrayMapper
+        self.init(get: { mapper.binding(type, size: type.arraySize).wrappedValue }, set: mapper.set(type), name: name, reloadThrottle: reloadThrottle)
+    }
+
+    init(_ type: UniBridge.StructType, name: String, as: Value.Type = Value.self, reloadThrottle: Bool = false) where Value: ValueBindingStructType {
+        let mapper = UniBridge.shared.structMapper
+        self.init(get: { mapper.binding(type).wrappedValue }, set: { mapper.binding(type).wrappedValue = $0 }, name: name, reloadThrottle: reloadThrottle)
     }
 }
 
 public enum InternalUniState {
     public static var reload: (String, Bool) -> Void = { _, _ in }
-
-    public static var message = UniState<String>.CustomState(get: { "" }, set: { _ in })
-    public static var cachedBlendShapes = UniState<[String]>.CustomState(get: { [] }, set: { _ in })
-    public static var scenes = UniState<[VCamScene]>.CustomState(get: { [] }, set: { _ in })
-}
-
-public extension UniState<String>.CustomState {
-    static var message: Self { InternalUniState.message }
-}
-
-public extension UniState<[String]>.CustomState {
-    static var cachedBlendShapes: Self { InternalUniState.cachedBlendShapes }
-}
-
-public extension UniState<[VCamScene]>.CustomState {
-    static var scenes: Self { InternalUniState.scenes }
 }

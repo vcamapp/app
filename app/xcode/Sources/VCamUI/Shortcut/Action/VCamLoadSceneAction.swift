@@ -19,10 +19,8 @@ public struct VCamLoadSceneAction: VCamAction {
     public var name: String { L10n.loadScene.text }
     public var icon: Image { Image(systemName: "square.3.stack.3d.top.fill") }
 
-    @UniAction(.loadScene) var loadScene
-
     @MainActor
     public func callAsFunction(context: VCamActionContext) async throws {
-        loadScene(configuration.sceneId)
+        try? SceneManager.shared.loadScene(id: configuration.sceneId)
     }
 }

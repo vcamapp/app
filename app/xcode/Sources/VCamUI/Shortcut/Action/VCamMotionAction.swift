@@ -8,6 +8,7 @@
 import AppKit
 import VCamEntity
 import VCamLocalization
+import VCamBridge
 import struct SwiftUI.Image
 
 public struct VCamMotionAction: VCamAction {
@@ -19,10 +20,29 @@ public struct VCamMotionAction: VCamAction {
     public var name: String { L10n.motion.text }
     public var icon: Image { Image(systemName: "figure.wave") }
 
-    @UniAction(.triggerMotion) var triggerMotion
-
     @MainActor
     public func callAsFunction(context: VCamActionContext) async throws {
-        triggerMotion(configuration.motion)
+        switch configuration.motion {
+        case .hi:
+            UniBridge.shared.motionHello()
+        case .bye:
+            UniBridge.shared.motionBye.wrappedValue.toggle()
+        case .jump:
+            UniBridge.shared.motionJump()
+        case .cheer:
+            UniBridge.shared.motionYear()
+        case .what:
+            UniBridge.shared.motionWhat()
+        case .pose:
+            UniBridge.shared.motionWin()
+        case .nod:
+            UniBridge.shared.motionNod.wrappedValue.toggle()
+        case .no:
+            UniBridge.shared.motionShakeHead.wrappedValue.toggle()
+        case .shudder:
+            UniBridge.shared.motionShakeBody.wrappedValue.toggle()
+        case .run:
+            UniBridge.shared.motionRun.wrappedValue.toggle()
+        }
     }
 }

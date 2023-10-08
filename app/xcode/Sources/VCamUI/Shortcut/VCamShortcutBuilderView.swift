@@ -8,6 +8,7 @@
 import SwiftUI
 import VCamEntity
 import VCamLocalization
+import VCamBridge
 
 public struct VCamShortcutBuilderView: View {
     public init(shortcut: Binding<VCamShortcut>) {
@@ -140,9 +141,6 @@ struct VCamShortcutBuilderActionItemEditView: View {
     let shortcut: VCamShortcut
     @Binding var configuration: AnyVCamActionConfiguration
 
-    @UniState(.cachedBlendShapes) var cachedBlendShapes
-    @UniState(.scenes) var scenes
-
     var body: some View {
         switch configuration {
         case let .emoji(configuration):
@@ -152,13 +150,13 @@ struct VCamShortcutBuilderActionItemEditView: View {
         case let .motion(configuration):
             VCamActionEditorPicker(item: .init(configuration, keyPath: \.motion, to: $configuration), items: VCamAvatarMotion.allCases)
         case let .blendShape(configuration):
-            VCamActionEditorPicker(item: .init(configuration, keyPath: \.blendShape, to: $configuration), items: cachedBlendShapes)
+            VCamActionEditorPicker(item: .init(configuration, keyPath: \.blendShape, to: $configuration), items: UniBridge.shared.cachedBlendShapes)
         case let .wait(configuration):
             VCamActionEditorDurationField(value: .init(configuration, keyPath: \.duration, to: $configuration))
         case .resetCamera:
             EmptyView()
         case let .loadScene(configuration):
-            VCamActionEditorPicker(item: .init(configuration, keyPath: \.sceneId, to: $configuration), items: scenes, mapValue: \.id)
+            VCamActionEditorPicker(item: .init(configuration, keyPath: \.sceneId, to: $configuration), items: SceneManager.shared.scenes, mapValue: \.id)
         case let .appleScript(configuration):
             VCamActionEditorCodeEditor(id: shortcut.id, actionId: configuration.id, name: VCamAppleScriptAction.scriptName)
         }
