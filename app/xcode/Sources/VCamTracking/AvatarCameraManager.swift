@@ -24,7 +24,7 @@ public final class AvatarCameraManager {
     }
 
     public var isBlinkerUsed: Bool {
-        switch Tracking.shared.faceTrackingMethod() {
+        switch Tracking.shared.faceTrackingMethod {
         case .disabled:
             return true
         case .default, .iFacialMocap, .vcamMocap:

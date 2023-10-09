@@ -11,6 +11,8 @@ import VCamLogger
 public final class AudioManager {
     public init() {}
 
+    public static var isMicrophoneAuthorized: () -> Bool = { false }
+    public static var requestMicrophonePermission: (@escaping ((Bool) -> Void)) -> Void = { _ in }
     public var onUpdateAudioBuffer: ((AVAudioPCMBuffer, AVAudioTime, TimeInterval) -> Void) = { _, _, _ in }
 
     public var isRunning: Bool {
@@ -20,9 +22,9 @@ public final class AudioManager {
     private var audioEngine = AVAudioEngine()
 
     public func startRecording(onStart: @escaping (AVAudioFormat) -> Void) throws {
-        guard DeviceAuthorization.authorizationStatus(for: .mic) else {
+        guard Self.isMicrophoneAuthorized() else {
             Logger.log("requestAuthorization")
-            DeviceAuthorization.requestAuthorization(type: .mic) { [self] authorized in
+            Self.requestMicrophonePermission { [self] authorized in
                 guard authorized else { return }
                 DispatchQueue.main.async { [self] in
                     try? startRecording(onStart: onStart)

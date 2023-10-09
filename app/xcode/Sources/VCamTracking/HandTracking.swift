@@ -30,7 +30,7 @@ public final class HandTracking {
     private var cancellables: Set<AnyCancellable> = []
 
     public var configuration: FingerTrackingConfiguration {
-        (_configuration.open, _configuration.close, Tracking.shared.fingerTrackingMethod() != .disabled)
+        (_configuration.open, _configuration.close, Tracking.shared.fingerTrackingMethod != .disabled)
     }
 
     public init() {

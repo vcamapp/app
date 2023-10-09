@@ -114,7 +114,7 @@ public final class AvatarWebCamera {
     }
 
     private func onLandmarkUpdate(observation: VNFaceObservation, landmarks: VNFaceLandmarks2D) {
-        guard Tracking.shared.faceTrackingMethod() == .default else { return }
+        guard Tracking.shared.faceTrackingMethod == .default else { return }
 
         let pointsInImage = landmarks.allPoints!.pointsInImage(imageSize: cameraManager.captureDeviceResolution)
         let (headPosition, headRotation) = poseEstimator.estimate(pointsInImage: pointsInImage, observation: observation)
@@ -170,7 +170,7 @@ public final class AvatarWebCamera {
         let littleMCPLeft = prevHands[4].appending(left.littleMCP)
         let littleMCPRight = prevHands[5].appending(right.littleMCP)
 
-        if Tracking.shared.handTrackingMethod() == .default {
+        if Tracking.shared.handTrackingMethod == .default {
             Tracking.shared.avatar.onHandDataReceived([
                 wristLeft.x, wristLeft.y, wristRight.x, wristRight.y,
                 thumbCMCLeft.x, thumbCMCLeft.y, thumbCMCRight.x, thumbCMCRight.y,
@@ -178,7 +178,7 @@ public final class AvatarWebCamera {
             ])
         }
 
-        if Tracking.shared.fingerTrackingMethod() == .default {
+        if Tracking.shared.fingerTrackingMethod == .default {
             Tracking.shared.avatar.onFingerDataReceived([
                 prevFingers[0].appending(left.thumbTip),
                 prevFingers[1].appending(left.indexTip),
