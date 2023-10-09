@@ -11,7 +11,6 @@ import Combine
 
 public final class HandTracking {
     public var onHandsUpdate: ((VCamHands) -> Void) = { _ in }
-    public var isFingerTrackingEnabled: () -> Bool = { true }
 
     private lazy var handPoseRequest: VNDetectHumanHandPoseRequest = {
         let request = VNDetectHumanHandPoseRequest { [self] _, _ in
@@ -31,7 +30,7 @@ public final class HandTracking {
     private var cancellables: Set<AnyCancellable> = []
 
     public var configuration: FingerTrackingConfiguration {
-        (_configuration.open, _configuration.close, isFingerTrackingEnabled())
+        (_configuration.open, _configuration.close, Tracking.shared.fingerTrackingMethod() != .disabled)
     }
 
     public init() {
