@@ -28,6 +28,7 @@ public extension UserDefaults.Key {
     static var eyeTrackingOffsetY: Key<Double> { .init("vc_eye_tracking_offset_y", default: -0.2) }
     static var fingerTrackingOpenIntensity: Key<Double> { .init("vc_ftracking_open_intensity", default: 1) }
     static var fingerTrackingCloseIntensity: Key<Double> { .init("vc_ftracking_close_intensity", default: 1) }
+    static var recordMicSyncOffset: Key<Int> { .init("vc_rec_mic_sync_offset", default: -160) }
     static var integrationVCamMocap: Key<Bool> { .init("vc_intg_vcammocap", default: false) }
     static var macOSMicModeEnabled: Key<Bool> { .init("vc_macos_micmode_enabled", default: false) }
 }
