@@ -7,6 +7,7 @@
 
 import AppKit
 import VCamEntity
+import VCamBridge
 import VCamLocalization
 import struct SwiftUI.Image
 

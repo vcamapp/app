@@ -7,7 +7,6 @@
 
 import Foundation
 import VCamEntity
-import VCamBridge
 
 @propertyWrapper public struct UniAction<Arguments>: Equatable {
     public init(action: @escaping (Arguments) -> Void) {

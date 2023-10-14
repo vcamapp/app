@@ -146,7 +146,7 @@ public final class WindowManager: ObservableObject {
         system.dispose()
         isConfigured = false
 
-        if isUnity { // UnityEditor以外では動かさない
+        if isUnity {
             SceneObjectManager.shared.dispose()
             NSApp.vcamWindow?.close()
         } else {

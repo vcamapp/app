@@ -28,3 +28,9 @@ where T.AllCases: RandomAccessCollection {
         }
     }
 }
+
+extension SelectEditField: Equatable {
+    public static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.value == rhs.value && lhs.label == rhs.label
+    }
+}
