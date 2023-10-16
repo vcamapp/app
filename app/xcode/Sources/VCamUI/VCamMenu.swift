@@ -38,13 +38,7 @@ public enum VCamMenuItem: Identifiable, CaseIterable {
     }
 }
 
-public struct VCamMenu<BottomView: View>: View {
-    public init(bottomView: BottomView) {
-        self.bottomView = bottomView
-    }
-
-    let bottomView: BottomView
-
+public struct VCamMenu: View {
     @EnvironmentObject var state: VCamUIState
 
     public var body: some View {
@@ -62,11 +56,59 @@ public struct VCamMenu<BottomView: View>: View {
                 .buttonStyle(VCamMenuButtonStyle(isSelected: item == state.currentMenu))
             }
             Spacer()
-            bottomView
+            MenuBottomView()
+                .frame(height: 280)
         }
         .padding(8)
         .frame(width: 140)
         .background(.thinMaterial)
+    }
+}
+
+private struct MenuBottomView: View {
+    @State private var isScenePopover = false
+
+    @ObservedObject private var recorder = VideoRecorder.shared
+
+    @Environment(\.locale) private var locale
+
+    var body: some View {
+        VStack(spacing: 2) {
+            HStack {
+                Spacer()
+                Button {
+                    MacWindowManager.shared.openSettings()
+                } label: {
+                    Image(systemName: "gearshape.fill")
+                        .macHoverEffect()
+                }
+                .buttonStyle(.plain)
+                .disabled(recorder.isRecording)
+            }
+            .controlSize(.small)
+
+            Divider()
+                .padding(.bottom, 8)
+
+            VCamMainObjectListView()
+                .overlay(alignment: .topTrailing) {
+                    Button {
+                        isScenePopover.toggle()
+                    } label: {
+                        Image(systemName: "square.3.stack.3d.top.fill")
+                            .macHoverEffect()
+                    }
+                    .buttonStyle(.plain)
+                    .popover(isPresented: $isScenePopover) {
+                        VCamPopoverContainerWithWindow(L10n.scene.key) {
+                            VCamSceneListView()
+                        }
+                        .frame(width: 200, height: 240)
+                        .environment(\.locale, locale)
+                    }
+                    .offset(y: -8)
+                }
+        }
     }
 }
 
@@ -87,8 +129,6 @@ private struct VCamMenuButtonStyle: ButtonStyle {
     }
 }
 
-struct VCamMenu_Previews: PreviewProvider {
-    static var previews: some View {
-        VCamMenu(bottomView: Color.red.frame(height: 200))
-    }
+#Preview {
+    VCamMenu()
 }

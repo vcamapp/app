@@ -84,7 +84,11 @@ public final class WindowManager: ObservableObject {
             return
         }
 
-        configureContainerView(containerView, unityView)
+        if WindowManager.shared.isUnity {
+            containerView.addFilledView(RootView(unityView: NSView()))
+        } else {
+            configureContainerView(containerView, unityView)
+        }
         window.contentView = containerView
 
         if WindowManager.shared.isUnity {

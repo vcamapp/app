@@ -1,6 +1,6 @@
 //
-//  RootContentView.swift
-//  
+//  RootView.swift
+//
 //
 //  Created by Tatsuya Tanaka on 2022/06/25.
 //
@@ -8,28 +8,47 @@
 import SwiftUI
 import VCamBridge
 
-public struct RootContentView<MenuBottomView: View>: View {
-    public init(menuBottomView: MenuBottomView, unityView: NSView, interactable: ExternalStateBinding<Bool> = .init(.interactable)) {
-        self.menuBottomView = menuBottomView
+public struct RootView: View {
+    public init(unityView: NSView, interactable: ExternalStateBinding<Bool> = .init(.interactable)) {
+        self.unityView = unityView
+        self.interactable = interactable
+    }
+
+    let unityView: NSView
+
+    @StateObject var state = VCamUIState()
+
+    @AppStorage(key: .locale) var locale
+    private var interactable: ExternalStateBinding<Bool>
+
+    public var body: some View {
+        RootViewContent(unityView: unityView, interactable: interactable)
+            .background(.regularMaterial)
+            .environmentObject(state)
+            .environment(\.locale, locale.isEmpty ? .current : Locale(identifier: locale))
+    }
+}
+
+private struct RootViewContent: View {
+    init(unityView: NSView, interactable: ExternalStateBinding<Bool>) {
         self.unityView = unityView
         self._interactable = interactable
     }
 
-    let menuBottomView: MenuBottomView
     let unityView: NSView
-    @ExternalStateBinding(.interactable) private var interactable
 
-    public var body: some View {
+    @ExternalStateBinding(.interactable) private var interactable
+    @UniReload private var reload: Void
+
+    var body: some View {
         if interactable {
             HStack(spacing: 0) {
-                VCamMenu(
-                    bottomView: menuBottomView.frame(height: 280)
-                )
-                .onTapGesture {
-                    unityView.window?.makeFirstResponder(nil)
-                    NotificationCenter.default.post(name: .unfocusObject, object: nil)
-                }
-                .disabled(!interactable)
+                VCamMenu()
+                    .onTapGesture {
+                        unityView.window?.makeFirstResponder(nil)
+                        NotificationCenter.default.post(name: .unfocusObject, object: nil)
+                    }
+                    .disabled(!interactable)
 
                 VSplitView {
                     HStack(alignment: .bottom, spacing: 0) {
@@ -57,7 +76,7 @@ public struct RootContentView<MenuBottomView: View>: View {
     }
 }
 
-struct UnityView: View, Equatable {
+private struct UnityView: View, Equatable {
     let unityView: NSView
 
     var body: some View {
@@ -70,24 +89,22 @@ struct UnityView: View, Equatable {
     static func == (lhs: Self, rhs: Self) -> Bool {
         true
     }
+
+    private struct UnityContainerView: NSViewRepresentable {
+        let unityView: NSView
+
+        func makeNSView(context: Context) -> some NSView {
+            unityView
+        }
+
+        func updateNSView(_ nsView: NSViewType, context: Context) {
+        }
+    }
 }
 
-private struct UnityContainerView: NSViewRepresentable {
-    let unityView: NSView
-    func makeNSView(context: Context) -> some NSView {
-        unityView
-    }
-
-    func updateNSView(_ nsView: NSViewType, context: Context) {
-    }
-}
-
-struct RootContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        RootContentView(
-            menuBottomView: Color.blue,
-            unityView: NSView(),
-            interactable: .constant(true)
-        )
-    }
+#Preview {
+    RootView(
+        unityView: NSView(),
+        interactable: .constant(true)
+    )
 }

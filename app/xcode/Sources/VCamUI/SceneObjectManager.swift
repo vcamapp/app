@@ -177,6 +177,10 @@ public final class SceneObjectManager: ObservableObject {
         uniUpdateScene()
     }
 
+    public func didChangeObjects() {
+        self.objects = objects
+    }
+
     public func dispose() {
         objects = objects.filter { $0.id == SceneObject.avatarID }
         RenderTextureManager.shared.removeAll()
