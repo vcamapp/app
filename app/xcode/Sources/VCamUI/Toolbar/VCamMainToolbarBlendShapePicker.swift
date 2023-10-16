@@ -6,25 +6,24 @@
 //
 
 import SwiftUI
+import VCamBridge
 
 public struct VCamMainToolbarBlendShapePicker: View {
-    public init(blendShapes: [String], selectedBlendShape: () -> Binding<String?>) {
+    public init(blendShapes: [String] = UniBridge.cachedBlendShapes) {
         self.blendShapes = blendShapes
-        self._selectedBlendShape = selectedBlendShape()
     }
 
     let blendShapes: [String]
-    @Binding var selectedBlendShape: String?
-    @UniReload private var reload: Void
+    @ExternalStateBinding(.currentBlendShape) private var currentBlendShape
 
     public var body: some View {
         ScrollView(.vertical, showsIndicators: true) {
             GroupBox {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 60))]) {
                     ForEach(blendShapes) { blendShape in
-                        HoverToggle(text: blendShape, isOn: $selectedBlendShape.map(
+                        HoverToggle(text: blendShape, isOn: $currentBlendShape.map(
                             get: { blendShape == $0 },
-                            set: { $0 ? blendShape : nil }
+                            set: { $0 ? blendShape : "" }
                         ))
                     }
                 }
@@ -73,8 +72,6 @@ extension VCamMainToolbarBlendShapePicker: MacWindow {
     }
 }
 
-struct VCamMainToolbarBlendShapePicker_Previews: PreviewProvider {
-    static var previews: some View {
-        VCamMainToolbarBlendShapePicker(blendShapes: ["natural", "joy"], selectedBlendShape: { .constant("joy") })
-    }
+#Preview {
+    VCamMainToolbarBlendShapePicker(blendShapes: ["natural", "joy"])
 }

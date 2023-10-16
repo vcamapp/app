@@ -7,13 +7,16 @@
 
 import SwiftUI
 import VCamUIFoundation
+import VCamBridge
 
 public struct VCamMainToolbarBackgroundColorPicker: View {
-    public init(backgroundColor: Binding<Color>) {
-        self._backgroundColor = backgroundColor
+    public init(
+        backgroundColor: ExternalStateBinding<Color> = .init(.backgroundColor)
+    ) {
+        _backgroundColor = backgroundColor
     }
 
-    @Binding var backgroundColor: Color
+    @ExternalStateBinding(.backgroundColor) private var backgroundColor: Color
 
     public var body: some View {
         GroupBox {
@@ -29,8 +32,6 @@ public struct VCamMainToolbarBackgroundColorPicker: View {
     }
 }
 
-struct VCamMainToolbarPhotoPicker_Previews: PreviewProvider {
-    static var previews: some View {
-        VCamMainToolbarBackgroundColorPicker(backgroundColor: .constant(.red))
-    }
+#Preview {
+    VCamMainToolbarBackgroundColorPicker(backgroundColor: .constant(.red))
 }

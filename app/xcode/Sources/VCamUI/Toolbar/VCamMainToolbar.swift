@@ -9,17 +9,7 @@ import SwiftUI
 import VCamEntity
 
 public struct VCamMainToolbar: View {
-    public init(photoPicker: VCamMainToolbarBackgroundColorPicker, emojiPicker: VCamMainToolbarEmojiPicker, motionPicker: VCamMainToolbarMotionPicker, blendShapePicker: VCamMainToolbarBlendShapePicker) {
-        self.photoPicker = photoPicker
-        self.emojiPicker = emojiPicker
-        self.motionPicker = motionPicker
-        self.blendShapePicker = blendShapePicker
-    }
-
-    let photoPicker: VCamMainToolbarBackgroundColorPicker
-    let emojiPicker: VCamMainToolbarEmojiPicker
-    let motionPicker: VCamMainToolbarMotionPicker
-    let blendShapePicker: VCamMainToolbarBlendShapePicker
+    public init() {}
 
     @State private var isPhotoPopover = false
     @State private var isEmojiPickerPopover = false
@@ -38,7 +28,7 @@ public struct VCamMainToolbar: View {
             }
             .popover(isPresented: $isPhotoPopover) {
                 VCamPopoverContainer(L10n.background.key) {
-                    photoPicker
+                    VCamMainToolbarBackgroundColorPicker()
                 }
                 .environment(\.locale, locale)
             }
@@ -62,7 +52,7 @@ public struct VCamMainToolbar: View {
                         }
                     }
                 } content: {
-                    emojiPicker
+                    VCamMainToolbarEmojiPicker()
                 }
                 .environment(\.locale, locale)
                 .frame(width: 240)
@@ -75,7 +65,7 @@ public struct VCamMainToolbar: View {
             }
             .popover(isPresented: $isMotionPickerPopover) {
                 VCamPopoverContainerWithWindow(L10n.motion.key) {
-                    motionPicker
+                    VCamMainToolbarMotionPicker()
                 }
                 .environment(\.locale, locale)
                 .frame(width: 240)
@@ -88,7 +78,7 @@ public struct VCamMainToolbar: View {
             }
             .popover(isPresented: $isBlendShapePickerPopover) {
                 VCamPopoverContainerWithWindow(L10n.facialExpression.key) {
-                    blendShapePicker
+                    VCamMainToolbarBlendShapePicker()
                 }
                 .environment(\.locale, locale)
                 .frame(width: 280, height: 150)
@@ -115,13 +105,6 @@ public struct VCamMainToolbar: View {
     }
 }
 
-struct VCamMainToolbar_Previews: PreviewProvider {
-    static var previews: some View {
-        VCamMainToolbar(
-            photoPicker: VCamMainToolbarBackgroundColorPicker(backgroundColor: .constant(.red)),
-            emojiPicker: VCamMainToolbarEmojiPicker(),
-            motionPicker: VCamMainToolbarMotionPicker(motionHello: {}, motionBye: { .constant(false) }, motionJump: {}, motionYear: {}, motionWhat: {}, motionWin: {}, motionNod: { .constant(false) }, motionShakeHead: { .constant(false) }, motionShakeBody: { .constant(false) }, motionRun: { .constant(false) }),
-            blendShapePicker: VCamMainToolbarBlendShapePicker(blendShapes: [], selectedBlendShape: { .constant(nil) })
-        )
-    }
+#Preview {
+    VCamMainToolbar()
 }

@@ -2,7 +2,11 @@
 import SwiftUI
 public final class UniBridge {
     public static let shared = UniBridge()
+    #if DEBUG
+    public init() {}
+    #else
     private init() {}
+    #endif
     public enum IntType: Int32 {
         case lensFlare = 0
         case facialExpression = 1

@@ -6,21 +6,18 @@
 //
 
 import SwiftUI
+import VCamBridge
 
-public struct RootContentView<VCamUI: View, MenuBottomView: View, Toolbar: View>: View {
-    public init(vcamUI: VCamUI, menuBottomView: MenuBottomView, toolbar: Toolbar, unityView: NSView, interactable: Bool) {
-        self.vcamUI = vcamUI
+public struct RootContentView<MenuBottomView: View>: View {
+    public init(menuBottomView: MenuBottomView, unityView: NSView, interactable: ExternalStateBinding<Bool> = .init(.interactable)) {
         self.menuBottomView = menuBottomView
-        self.toolbar = toolbar
         self.unityView = unityView
-        self.interactable = interactable
+        self._interactable = interactable
     }
 
-    let vcamUI: VCamUI
     let menuBottomView: MenuBottomView
-    let toolbar: Toolbar
     let unityView: NSView
-    let interactable: Bool
+    @ExternalStateBinding(.interactable) private var interactable
 
     public var body: some View {
         if interactable {
@@ -36,7 +33,7 @@ public struct RootContentView<VCamUI: View, MenuBottomView: View, Toolbar: View>
 
                 VSplitView {
                     HStack(alignment: .bottom, spacing: 0) {
-                        toolbar
+                        VCamMainToolbar()
                         UnityView(unityView: unityView)
                             .equatable()
                             .frame(maxWidth: .infinity)
@@ -44,7 +41,7 @@ public struct RootContentView<VCamUI: View, MenuBottomView: View, Toolbar: View>
                     .frame(maxWidth: .infinity)
                     .layoutPriority(1)
 
-                    vcamUI
+                    VCamContentView()
                         .onTapGesture {
                             unityView.window?.makeFirstResponder(nil)
                             NotificationCenter.default.post(name: .unfocusObject, object: nil)
@@ -88,11 +85,9 @@ private struct UnityContainerView: NSViewRepresentable {
 struct RootContentView_Previews: PreviewProvider {
     static var previews: some View {
         RootContentView(
-            vcamUI: Color.red,
             menuBottomView: Color.blue,
-            toolbar: Color.yellow,
             unityView: NSView(),
-            interactable: true
+            interactable: .constant(true)
         )
     }
 }

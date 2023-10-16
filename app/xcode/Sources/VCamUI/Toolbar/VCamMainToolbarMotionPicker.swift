@@ -6,31 +6,21 @@
 //
 
 import SwiftUI
+import VCamBridge
 
 public struct VCamMainToolbarMotionPicker: View {
-    public init(motionHello: @escaping () -> Void, motionBye: @escaping () -> Binding<Bool>, motionJump: @escaping () -> Void, motionYear: @escaping () -> Void, motionWhat: @escaping () -> Void, motionWin: @escaping () -> Void, motionNod: @escaping () -> Binding<Bool>, motionShakeHead: @escaping () -> Binding<Bool>, motionShakeBody: @escaping () -> Binding<Bool>, motionRun: @escaping () -> Binding<Bool>) {
-        self.motionHello = motionHello
-        self.motionBye = motionBye
-        self.motionJump = motionJump
-        self.motionYear = motionYear
-        self.motionWhat = motionWhat
-        self.motionWin = motionWin
-        self.motionNod = motionNod
-        self.motionShakeHead = motionShakeHead
-        self.motionShakeBody = motionShakeBody
-        self.motionRun = motionRun
-    }
+    public init() {}
 
-    let motionHello: () -> Void
-    let motionBye: () -> Binding<Bool>
-    let motionJump: () -> Void
-    let motionYear: () -> Void
-    let motionWhat: () -> Void
-    let motionWin: () -> Void
-    let motionNod: () -> Binding<Bool>
-    let motionShakeHead: () -> Binding<Bool>
-    let motionShakeBody: () -> Binding<Bool>
-    let motionRun: () -> Binding<Bool>
+    @UniAction(.motionHello) var motionHello
+    @ExternalStateBinding(.motionBye) var motionBye
+    @UniAction(.motionJump) var motionJump
+    @UniAction(.motionYear) var motionYear
+    @UniAction(.motionWhat) var motionWhat
+    @UniAction(.motionWin) var motionWin
+    @ExternalStateBinding(.motionNod) var motionNod
+    @ExternalStateBinding(.motionShakeHead) var motionShakeHead
+    @ExternalStateBinding(.motionShakeBody) var motionShakeBody
+    @ExternalStateBinding(.motionRun) var motionRun
 
     @Environment(\.nsWindow) var nsWindow
     @UniReload private var reload: Void
@@ -38,17 +28,17 @@ public struct VCamMainToolbarMotionPicker: View {
     public var body: some View {
         GroupBox {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 80))], spacing: 2) {
-                button(key: L10n.hi.key, action: motionHello)
-                toggle(key: L10n.bye.key, isOn: motionBye())
-                button(key: L10n.jump.key, action: motionJump)
-                button(key: L10n.cheer.key, action: motionYear)
-                button(key: L10n.what.key, action: motionWhat)
+                button(key: L10n.hi.key, action: { motionHello() })
+                toggle(key: L10n.bye.key, isOn: $motionBye.workaround())
+                button(key: L10n.jump.key, action: { motionJump() })
+                button(key: L10n.cheer.key, action: { motionYear() })
+                button(key: L10n.what.key, action: { motionWhat() })
                 Group {
-                    button(key: L10n.pose.key, action: motionWin)
-                    toggle(key: L10n.nod.key, isOn: motionNod())
-                    toggle(key: L10n.no.key, isOn: motionShakeHead())
-                    toggle(key: L10n.shudder.key, isOn: motionShakeBody())
-                    toggle(key: L10n.run.key, isOn: motionRun())
+                    button(key: L10n.pose.key, action: { motionWin() })
+                    toggle(key: L10n.nod.key, isOn: $motionNod.workaround())
+                    toggle(key: L10n.no.key, isOn: $motionShakeHead.workaround())
+                    toggle(key: L10n.shudder.key, isOn: $motionShakeBody.workaround())
+                    toggle(key: L10n.run.key, isOn: $motionRun.workaround())
                 }
             }
         }
@@ -100,9 +90,20 @@ extension VCamMainToolbarMotionPicker: MacWindow {
     }
 }
 
-struct VCamMainToolbarMotionPicker_Previews: PreviewProvider {
-    static var previews: some View {
-        VCamMainToolbarMotionPicker(motionHello: {}, motionBye: { .constant(false) }, motionJump: {}, motionYear: {}, motionWhat: {}, motionWin: {}, motionNod: { .constant(false) }, motionShakeHead: { .constant(false) }, motionShakeBody: { .constant(false) }, motionRun: { .constant(false) })
-            .frame(width: 240)
+private extension Binding {
+    // The state updates with a slight delay, so wait a bit before refreshing the UI
+    func workaround() -> Self {
+        map(get: { $0 }, set: {
+            Task {
+                try? await Task.sleep(nanoseconds: NSEC_PER_MSEC * 300)
+                UniReload.Reloader.shared.objectWillChange.send()
+            }
+            return $0
+        })
     }
+}
+
+#Preview {
+    VCamMainToolbarMotionPicker()
+        .frame(width: 240)
 }

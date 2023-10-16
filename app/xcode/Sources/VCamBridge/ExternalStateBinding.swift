@@ -72,4 +72,8 @@ private var reloaders: [UUID: Reloader] = [:]
             wrappedValue[keyPath: keyPath] = newValue.wrappedValue
         }
     }
+
+    public static func constant(_ value: Value) -> Self {
+        .init(id: UUID(uuidString: "2546C91C-12FB-4BC2-A7C0-F1A7DA7318C0")!, get: { value }, set: { _ in })
+    }
 }
