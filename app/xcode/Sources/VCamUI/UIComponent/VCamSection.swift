@@ -18,28 +18,21 @@ public struct VCamSection<Content: View>: View {
     @State private var isExpanded = false
 
     public var body: some View {
-        // switch to DisclosureGroup?
-        VStack(alignment: .leading, spacing: 0) {
-            HStack {
-                Image(systemName: isExpanded ? "chevron.down" : "chevron.right")
-                    .foregroundColor(.secondary)
-                Text(title, bundle: .localize).bold()
-                Spacer()
+        DisclosureGroup.init(isExpanded: $isExpanded) {
+            VStack(alignment: .leading, spacing: 0) {
+                content
             }
-            .contentShape(Rectangle())
-            .onTapGesture {
-                withAnimation {
-                    isExpanded.toggle()
+            .padding(.top, 8)
+            .padding(.leading)
+        } label: {
+            Text(title, bundle: .localize)
+                .bold()
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    withAnimation {
+                        isExpanded.toggle()
+                    }
                 }
-            }
-            if isExpanded {
-                VStack(alignment: .leading, spacing: 0) {
-                    content
-                }
-                .padding(.top, 8).padding(.leading)
-            } else {
-                Color.clear.frame(height: 8)
-            }
         }
     }
 }
