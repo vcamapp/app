@@ -22,8 +22,6 @@ public final class WindowManager: ObservableObject {
     public fileprivate(set) var isWindowClosed = false
     public var isEnabled = false
 
-    public var configureContainerView: (VCamRootContainerView, NSView) -> Void = { _, _ in }
-
     private var containerView = VCamRootContainerView()
     private var statusItem: NSStatusItem?
 
@@ -84,11 +82,16 @@ public final class WindowManager: ObservableObject {
             return
         }
 
-        if WindowManager.shared.isUnity {
-            containerView.addFilledView(RootView(unityView: NSView()))
-        } else {
-            configureContainerView(containerView, unityView)
-        }
+        containerView.addFilledView(RootView(unityView: {
+            if WindowManager.shared.isUnity {
+                return NSView()
+            } else {
+                NSLayoutConstraint.deactivate(unityView.constraints)
+                unityView.removeFromSuperview()
+                unityView.translatesAutoresizingMaskIntoConstraints = false
+                return unityView
+            }
+        }()))
         window.contentView = containerView
 
         if WindowManager.shared.isUnity {

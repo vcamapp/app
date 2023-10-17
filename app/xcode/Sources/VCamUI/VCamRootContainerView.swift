@@ -13,6 +13,7 @@ public final class VCamRootContainerView: NSView {
     public override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
         registerForDraggedTypes([.fileURL])
+        setAccessibilityIdentifier("VCamRootContainerView")
     }
 
     public required init?(coder: NSCoder) {

@@ -13,6 +13,8 @@ let package = Package(
 
         .library(name: "VCamDefaults", targets: ["VCamDefaults"]),
         .library(name: "VCamAppExtension", targets: ["VCamAppExtension"]),
+
+        .library(name: "VCamStub", targets: ["VCamStub"]),
     ],
     targets: [
         .target(name: "VCamUI", dependencies: [
@@ -35,6 +37,8 @@ let package = Package(
         .target(name: "VCamDefaults", dependencies: []),
         .target(name: "VCamAppExtension", dependencies: []),
         .target(name: "VCamWorkaround", dependencies: []),
+
+        .target(name: "VCamStub", dependencies: ["VCamUI"]),
 
         .testTarget(name: "VCamEntityTests", dependencies: ["VCamEntity"]),
         .testTarget(name: "VCamTrackingTests", dependencies: ["VCamTracking"]),
