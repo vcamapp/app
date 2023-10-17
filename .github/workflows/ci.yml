@@ -12,10 +12,18 @@ env:
   DEVELOPER_DIR: /Applications/Xcode_15.0.app
 
 jobs:
-  build:
+  build-package:
     runs-on: macOS-13
 
     steps:
       - uses: actions/checkout@main
       - name: Test
         run: cd app/xcode && swift test
+
+  build-ui-preview:
+    runs-on: macOS-13
+
+    steps:
+      - uses: actions/checkout@main
+      - name: Build
+        run: cd app/xcode/App && xcodebuild -project VCam.xcodeproj -scheme VCamUIPreview -derivedDataPath /tmp/build clean build
