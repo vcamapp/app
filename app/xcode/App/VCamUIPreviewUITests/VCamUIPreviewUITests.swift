@@ -30,7 +30,7 @@ final class VCamUIPreviewUITests: XCTestCase {
         }
 
         XCTContext.runActivity(named: "Check VCamUI") { _ in
-            XCTAssertTrue(app.buttons["Main"].exists)
+            XCTAssertTrue(app.buttons[L10n.main.text].exists)
         }
     }
 }

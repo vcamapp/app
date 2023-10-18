@@ -30,8 +30,18 @@ jobs:
 
   test-ui-preview:
     runs-on: macOS-13
+    permissions:
+      checks: write
 
     steps:
       - uses: actions/checkout@main
-      - name: Build
+      - name: UI test
         run: set -o pipefail && make test-ui-preview | xcpretty
+
+      - name: Archive xcresult
+        uses: actions/upload-artifact@v3
+        with:
+          name: xcresults-uitest
+          path: /tmp/*.xcresult
+          if-no-files-found: error
+
