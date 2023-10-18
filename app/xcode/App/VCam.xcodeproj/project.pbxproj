@@ -14,7 +14,20 @@
 		061238752ADE9C6D00B67618 /* xcode in Resources */ = {isa = PBXBuildFile; fileRef = 061238742ADE9C6D00B67618 /* xcode */; };
 		061238782ADE9CEE00B67618 /* VCam in Frameworks */ = {isa = PBXBuildFile; productRef = 061238772ADE9CEE00B67618 /* VCam */; };
 		06EC61182ADEE7A900D2A5C9 /* VCamStub in Frameworks */ = {isa = PBXBuildFile; productRef = 06EC61172ADEE7A900D2A5C9 /* VCamStub */; };
+		06EC61202AE016C300D2A5C9 /* VCamUIPreviewUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06EC611F2AE016C300D2A5C9 /* VCamUIPreviewUITests.swift */; };
+		06EC61222AE016C300D2A5C9 /* VCamUIPreviewUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06EC61212AE016C300D2A5C9 /* VCamUIPreviewUITestsLaunchTests.swift */; };
+		06EC61292AE0296600D2A5C9 /* VCamLocalization in Frameworks */ = {isa = PBXBuildFile; productRef = 06EC61282AE0296600D2A5C9 /* VCamLocalization */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		06EC61232AE016C300D2A5C9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0612385A2ADE9A8300B67618 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 061238612ADE9A8300B67618;
+			remoteInfo = VCamUIPreview;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		061238622ADE9A8300B67618 /* VCamUIPreview.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VCamUIPreview.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -24,6 +37,9 @@
 		0612386C2ADE9A8400B67618 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		0612386E2ADE9A8400B67618 /* VCamUIPreview.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = VCamUIPreview.entitlements; sourceTree = "<group>"; };
 		061238742ADE9C6D00B67618 /* xcode */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = xcode; path = ..; sourceTree = "<group>"; };
+		06EC611D2AE016C300D2A5C9 /* VCamUIPreviewUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VCamUIPreviewUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		06EC611F2AE016C300D2A5C9 /* VCamUIPreviewUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VCamUIPreviewUITests.swift; sourceTree = "<group>"; };
+		06EC61212AE016C300D2A5C9 /* VCamUIPreviewUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VCamUIPreviewUITestsLaunchTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -36,6 +52,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		06EC611A2AE016C300D2A5C9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				06EC61292AE0296600D2A5C9 /* VCamLocalization in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -44,6 +68,7 @@
 			children = (
 				061238742ADE9C6D00B67618 /* xcode */,
 				061238642ADE9A8300B67618 /* VCamUIPreview */,
+				06EC611E2AE016C300D2A5C9 /* VCamUIPreviewUITests */,
 				061238632ADE9A8300B67618 /* Products */,
 				061238762ADE9CEE00B67618 /* Frameworks */,
 			);
@@ -53,6 +78,7 @@
 			isa = PBXGroup;
 			children = (
 				061238622ADE9A8300B67618 /* VCamUIPreview.app */,
+				06EC611D2AE016C300D2A5C9 /* VCamUIPreviewUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -84,6 +110,15 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		06EC611E2AE016C300D2A5C9 /* VCamUIPreviewUITests */ = {
+			isa = PBXGroup;
+			children = (
+				06EC611F2AE016C300D2A5C9 /* VCamUIPreviewUITests.swift */,
+				06EC61212AE016C300D2A5C9 /* VCamUIPreviewUITestsLaunchTests.swift */,
+			);
+			path = VCamUIPreviewUITests;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -108,6 +143,27 @@
 			productReference = 061238622ADE9A8300B67618 /* VCamUIPreview.app */;
 			productType = "com.apple.product-type.application";
 		};
+		06EC611C2AE016C300D2A5C9 /* VCamUIPreviewUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 06EC61272AE016C300D2A5C9 /* Build configuration list for PBXNativeTarget "VCamUIPreviewUITests" */;
+			buildPhases = (
+				06EC61192AE016C300D2A5C9 /* Sources */,
+				06EC611A2AE016C300D2A5C9 /* Frameworks */,
+				06EC611B2AE016C300D2A5C9 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				06EC61242AE016C300D2A5C9 /* PBXTargetDependency */,
+			);
+			name = VCamUIPreviewUITests;
+			packageProductDependencies = (
+				06EC61282AE0296600D2A5C9 /* VCamLocalization */,
+			);
+			productName = VCamUIPreviewUITests;
+			productReference = 06EC611D2AE016C300D2A5C9 /* VCamUIPreviewUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -120,6 +176,10 @@
 				TargetAttributes = {
 					061238612ADE9A8300B67618 = {
 						CreatedOnToolsVersion = 15.0;
+					};
+					06EC611C2AE016C300D2A5C9 = {
+						CreatedOnToolsVersion = 15.0;
+						TestTargetID = 061238612ADE9A8300B67618;
 					};
 				};
 			};
@@ -137,6 +197,7 @@
 			projectRoot = "";
 			targets = (
 				061238612ADE9A8300B67618 /* VCamUIPreview */,
+				06EC611C2AE016C300D2A5C9 /* VCamUIPreviewUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -152,6 +213,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		06EC611B2AE016C300D2A5C9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -164,7 +232,24 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		06EC61192AE016C300D2A5C9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				06EC61222AE016C300D2A5C9 /* VCamUIPreviewUITestsLaunchTests.swift in Sources */,
+				06EC61202AE016C300D2A5C9 /* VCamUIPreviewUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		06EC61242AE016C300D2A5C9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 061238612ADE9A8300B67618 /* VCamUIPreview */;
+			targetProxy = 06EC61232AE016C300D2A5C9 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		0612386F2ADE9A8400B67618 /* Debug */ = {
@@ -343,6 +428,40 @@
 			};
 			name = Release;
 		};
+		06EC61252AE016C300D2A5C9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.vcamapp.example.VCamUIPreviewUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = VCamUIPreview;
+			};
+			name = Debug;
+		};
+		06EC61262AE016C300D2A5C9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.vcamapp.example.VCamUIPreviewUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = VCamUIPreview;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -364,6 +483,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		06EC61272AE016C300D2A5C9 /* Build configuration list for PBXNativeTarget "VCamUIPreviewUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				06EC61252AE016C300D2A5C9 /* Debug */,
+				06EC61262AE016C300D2A5C9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -374,6 +502,10 @@
 		06EC61172ADEE7A900D2A5C9 /* VCamStub */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = VCamStub;
+		};
+		06EC61282AE0296600D2A5C9 /* VCamLocalization */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = VCamLocalization;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

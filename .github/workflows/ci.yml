@@ -28,3 +28,10 @@ jobs:
       - name: Build
         run: set -o pipefail && make build-ui-preview | xcpretty
 
+  test-ui-preview:
+    runs-on: macOS-13
+
+    steps:
+      - uses: actions/checkout@main
+      - name: Build
+        run: set -o pipefail && make test-ui-preview | xcpretty
