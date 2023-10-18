@@ -22,11 +22,10 @@ final class VCamUIPreviewUITests: XCTestCase {
         let app = XCUIApplication()
         app.launch()
 
-        XCTContext.runActivity(named: "Close the alert about the virtual camera if needed") { _ in
-            if app.staticTexts[L10n.installVirtualCamera.text].exists {
-                app.buttons["OK"].click()
-                app.buttons["OK"].click()
-            }
+        // Close the alert about the virtual camera if needed"
+        if app.staticTexts[L10n.installVirtualCamera.text].exists {
+            app.buttons["OK"].click()
+            app.buttons["OK"].click()
         }
 
         XCTContext.runActivity(named: "Check VCamUI") { _ in

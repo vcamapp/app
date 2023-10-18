@@ -15,7 +15,7 @@
 		061238782ADE9CEE00B67618 /* VCam in Frameworks */ = {isa = PBXBuildFile; productRef = 061238772ADE9CEE00B67618 /* VCam */; };
 		06EC61182ADEE7A900D2A5C9 /* VCamStub in Frameworks */ = {isa = PBXBuildFile; productRef = 06EC61172ADEE7A900D2A5C9 /* VCamStub */; };
 		06EC61202AE016C300D2A5C9 /* VCamUIPreviewUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06EC611F2AE016C300D2A5C9 /* VCamUIPreviewUITests.swift */; };
-		06EC61222AE016C300D2A5C9 /* VCamUIPreviewUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06EC61212AE016C300D2A5C9 /* VCamUIPreviewUITestsLaunchTests.swift */; };
+		06EC61222AE016C300D2A5C9 /* LaunchScreenshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06EC61212AE016C300D2A5C9 /* LaunchScreenshotTests.swift */; };
 		06EC61292AE0296600D2A5C9 /* VCamLocalization in Frameworks */ = {isa = PBXBuildFile; productRef = 06EC61282AE0296600D2A5C9 /* VCamLocalization */; };
 /* End PBXBuildFile section */
 
@@ -39,7 +39,7 @@
 		061238742ADE9C6D00B67618 /* xcode */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = xcode; path = ..; sourceTree = "<group>"; };
 		06EC611D2AE016C300D2A5C9 /* VCamUIPreviewUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VCamUIPreviewUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		06EC611F2AE016C300D2A5C9 /* VCamUIPreviewUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VCamUIPreviewUITests.swift; sourceTree = "<group>"; };
-		06EC61212AE016C300D2A5C9 /* VCamUIPreviewUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VCamUIPreviewUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		06EC61212AE016C300D2A5C9 /* LaunchScreenshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchScreenshotTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -114,7 +114,7 @@
 			isa = PBXGroup;
 			children = (
 				06EC611F2AE016C300D2A5C9 /* VCamUIPreviewUITests.swift */,
-				06EC61212AE016C300D2A5C9 /* VCamUIPreviewUITestsLaunchTests.swift */,
+				06EC61212AE016C300D2A5C9 /* LaunchScreenshotTests.swift */,
 			);
 			path = VCamUIPreviewUITests;
 			sourceTree = "<group>";
@@ -236,7 +236,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				06EC61222AE016C300D2A5C9 /* VCamUIPreviewUITestsLaunchTests.swift in Sources */,
+				06EC61222AE016C300D2A5C9 /* LaunchScreenshotTests.swift in Sources */,
 				06EC61202AE016C300D2A5C9 /* VCamUIPreviewUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

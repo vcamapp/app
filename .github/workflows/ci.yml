@@ -30,8 +30,6 @@ jobs:
 
   test-ui-preview:
     runs-on: macOS-13
-    permissions:
-      checks: write
 
     steps:
       - uses: actions/checkout@main
@@ -40,8 +38,9 @@ jobs:
 
       - name: Archive xcresult
         uses: actions/upload-artifact@v3
+        if: success() || failure()
         with:
-          name: xcresults-uitest
+          name: xcresult-uitest
           path: /tmp/*.xcresult
           if-no-files-found: error
 
