@@ -10,7 +10,7 @@ ZoomやGoogle Meet等でカメラとしてVTuberのように仮想のアバタ�
 
 
 ## 動作環境
-macOS 12以上 (macOS 13以降推奨)  
+macOS 13以上 (macOS 14以降推奨)  
 Apple Silicon Mac向けに最適化しています。Intel Macでも利用可能です。  
 Windowsやその他プラットフォームは現在未対応です。
 
