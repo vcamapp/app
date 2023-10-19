@@ -11,6 +11,12 @@ public struct ExternalState<Value: Hashable> {
     let id: UUID
     let get: () -> Value
     let set: (Value) -> Void
+
+    public init(id: UUID, get: @escaping () -> Value, set: @escaping (Value) -> Void) {
+        self.id = id
+        self.get = get
+        self.set = set
+    }
 }
 
 extension ExternalState {
