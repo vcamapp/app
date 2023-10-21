@@ -15,15 +15,15 @@ import VCamLogger
 @_cdecl("uniOnVCamSystemStart")
 public func uniOnVCamSystemStart() {
     Logger.log("uniOnVCamSystemStart")
-    WindowManager.shared.system.isUniVCamSystemEnabled = true
-    WindowManager.shared.system.startSystem()
+    VCamSystem.shared.isUniVCamSystemEnabled = true
+    VCamSystem.shared.startSystem()
     UniReload.Reloader.shared.objectWillChange.send()
 }
 
 @_cdecl("uniOnVCamSystemDestroy")
 public func uniOnVCamSystemDestroy() {
     Logger.log("uniOnVCamSystemDestroy")
-    WindowManager.shared.system.isUniVCamSystemEnabled = false
+    VCamSystem.shared.isUniVCamSystemEnabled = false
     UniReload.Reloader.shared.objectWillChange.send()
 }
 
@@ -43,20 +43,30 @@ public func uniUseAutoConvertVRM1() -> Bool {
 @_cdecl("uniDisposeWindow")
 public func uniDisposeWindow() {
     Logger.log("")
-    WindowManager.shared.dispose()
+    VCamSystem.shared.windowManager.dispose()
 }
 
 @_cdecl("uniHideWindow")
 public func uniHideWindow() {
     Logger.log("")
-    WindowManager.shared.hide()
+    VCamSystem.shared.windowManager.hide()
 }
 
 @_cdecl("uniReloadUI")
 public func uniReloadUI() {
-    guard WindowManager.shared.isConfigured,
-          WindowManager.shared.system.isUniVCamSystemEnabled else { return }
+    guard VCamSystem.shared.windowManager.isConfigured,
+          VCamSystem.shared.isUniVCamSystemEnabled else { return }
     UniReload.Reloader.shared.objectWillChange.send()
+}
+
+@_cdecl("uniUpdateRenderFrame")
+public func uniUpdateRenderFrame() {
+    guard VCamSystem.shared.windowManager.isConfigured else { return }
+    VirtualCameraManager.shared.sendImageToVirtualCamera(
+        with: MainTexture.shared.texture
+    )
+
+    VideoRecorder.shared.renderFrame(MainTexture.shared.texture)
 }
 
 @_cdecl("uniRegisterString")

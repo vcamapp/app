@@ -34,20 +34,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @MainActor
     private func configureApp() async {
         VCamUIPreviewStub.stub()
+        VCamSystem.shared.configure()
 
         // TODO: Refactor
-
-        await Migration.migrate()
-        WindowManager.shared.setUpView()
-
-        Camera.configure()
-        AudioDevice.configure()
         try? SceneManager.shared.loadCurrentScene()
-
         Tracking.shared.configure()
 
-        WindowManager.shared.system.isUniVCamSystemEnabled = true
-
-        VirtualCameraManager.shared.startCameraExtension()
+        VCamSystem.shared.isUniVCamSystemEnabled = true
     }
 }

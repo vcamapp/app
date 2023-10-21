@@ -16,7 +16,6 @@ public struct VCamSettingTrackingView: View {
     public init() {}
 
     @AppStorage(key: .cameraFps) private var cameraFps
-    @AppStorage(key: .moveXIntensity) private var moveXIntensity
     @AppStorage(key: .eyeTrackingIntensityX) private var eyeTrackingIntensityX
     @AppStorage(key: .eyeTrackingIntensityY) private var eyeTrackingIntensityY
     @AppStorage(key: .useVowelEstimation) private var useVowelEstimation
@@ -59,7 +58,6 @@ public struct VCamSettingTrackingView: View {
 
             GroupBox {
                 Form {
-                    ValueEditField(L10n.easeOfBodyMovement.key, value: $moveXIntensity.map(), type: .slider(0.1...3))
                     ValueEditField(L10n.shoulderRotationWeight.key, value: $shoulderRotationWeight, type: .slider(0.0...1))
                     ValueEditField(L10n.swivelOffset.key, value: $swivelOffset, type: .slider(0.0...30))
                 }

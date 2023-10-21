@@ -61,7 +61,7 @@ public final class CoreMediaSinkStream: NSObject {
                 size: .init(width: 1280, height: 720)
             ).ciImage!
 
-            VirtualCameraManager.shared.sendImageToVirtualCamera(with: debugImage, useHMirror: false)
+            VirtualCameraManager.shared.sendImageToVirtualCamera(with: debugImage)
         }
 #endif
 

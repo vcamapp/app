@@ -10,14 +10,20 @@ import VCamAppExtension
 import VCamBridge
 import VCamTracking
 import VCamLogger
+import VCamCamera
+import VCamEntity
+import VCamWorkaround
 
 public final class VCamSystem {
+    public static let shared = VCamSystem()
+
+    public let windowManager = WindowManager()
     public let pasteboardObserver = PasteboardObserver()
 
     public private(set) var isStarted = false
     public var isUniVCamSystemEnabled = false
 
-    init() {
+    private init() {
         ExtensionNotificationCenter.default.setObserver(for: .startCameraExtensionStream) { [weak self] in
             self?.startSystem()
         }
@@ -25,7 +31,27 @@ public final class VCamSystem {
         ExtensionNotificationCenter.default.setObserver(for: .stopAllCameraExtensionStreams) { [weak self] in
             self?.stopSystem()
         }
+
+        Workaround.fixColorPickerOpacity_macOS14()
+        windowManager.setUpWindow()
+
+        Task { @MainActor in
+            if !windowManager.isUnity {
+                await AppUpdater.vcam.presentUpdateAlertIfAvailable()
+            }
+
+            await Migration.migrate()
+            windowManager.setUpView()
+            AppMenu.shared.configure()
+
+            Camera.configure()
+            AudioDevice.configure()
+
+            VirtualCameraManager.shared.startCameraExtension()
+        }
     }
+
+    public func configure() {}
 
     public func startSystem() {
         Logger.log("\(isStarted)")
@@ -39,8 +65,8 @@ public final class VCamSystem {
     }
 
     public func stopSystem() {
-        Logger.log("\(isStarted), \(WindowManager.shared.isWindowClosed)")
-        guard isStarted, WindowManager.shared.isWindowClosed else { return }
+        Logger.log("\(isStarted), \(windowManager.isWindowClosed)")
+        guard isStarted, windowManager.isWindowClosed else { return }
         isStarted = false
         Tracking.shared.stop()
         AvatarAudioManager.shared.stop(usage: .all)

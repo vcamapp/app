@@ -11,11 +11,8 @@ import VCamCamera
 import VCamBridge
 
 public final class WindowManager: ObservableObject {
-    public static let shared = WindowManager()
-
     @Published public private(set) var size = NSSize(width: 1280, height: 720)
 
-    public let system = VCamSystem()
     public let isUnity = Bundle.main.bundlePath.hasSuffix("Unity.app")
 
     public private(set) var isConfigured = false
@@ -39,7 +36,7 @@ public final class WindowManager: ObservableObject {
 
         NotificationCenter.default.addObserver(forName: NSApplication.didBecomeActiveNotification, object: nil, queue: .main) { _ in
             // Display the window when launching the app while it's stored in the menu bar.
-            WindowManager.shared.unhide()
+            VCamSystem.shared.windowManager.unhide()
         }
     }
 
@@ -78,12 +75,12 @@ public final class WindowManager: ObservableObject {
             isConfigured = true
         }
 
-        guard !WindowManager.shared.isConfigured, containerView.subviews.isEmpty, let window = NSApp.vcamWindow, let unityView = window.contentView else {
+        guard !isConfigured, containerView.subviews.isEmpty, let window = NSApp.vcamWindow, let unityView = window.contentView else {
             return
         }
 
         containerView.addFilledView(RootView(unityView: {
-            if WindowManager.shared.isUnity {
+            if isUnity {
                 return NSView()
             } else {
                 NSLayoutConstraint.deactivate(unityView.constraints)
@@ -94,11 +91,11 @@ public final class WindowManager: ObservableObject {
         }()))
         window.contentView = containerView
 
-        if WindowManager.shared.isUnity {
+        if isUnity {
             window.setContentSize(containerView.fittingSize)
         } else {
-            WindowManager.shared.setupMenuBar()
-            WindowManager.shared.setAlwaysOnTopEnabled(UserDefaults.standard.value(for: .alwaysOnTopEnabled))
+            setupMenuBar()
+            setAlwaysOnTopEnabled(UserDefaults.standard.value(for: .alwaysOnTopEnabled))
         }
     }
 
@@ -135,7 +132,7 @@ public final class WindowManager: ObservableObject {
         NSApp.vcamWindow?.setIsVisible(false)
         NSApp.setActivationPolicy(.accessory)
         if VirtualCameraManager.shared.sinkStream.streamingCount() == 0 {
-            system.stopSystem()
+            VCamSystem.shared.stopSystem()
         }
     }
 
@@ -145,12 +142,12 @@ public final class WindowManager: ObservableObject {
         NSApp.setActivationPolicy(.regular)
         NSApp.vcamWindow?.setIsVisible(true)
         NSApp.activate(ignoringOtherApps: true)
-        system.startSystem()
+        VCamSystem.shared.startSystem()
     }
 
     public func dispose() {
         Logger.log("")
-        system.dispose()
+        VCamSystem.shared.dispose()
         isConfigured = false
 
         if isUnity {

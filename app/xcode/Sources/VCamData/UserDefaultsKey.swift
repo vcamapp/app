@@ -27,7 +27,6 @@ public extension UserDefaults.Key {
     static var trackingMethodFace: Key<TrackingMethod.Face> { .init("vc_tracking_method_face", default: .default) }
     static var trackingMethodHand: Key<TrackingMethod.Hand> { .init("vc_tracking_method_hand", default: .default) }
     static var trackingMethodFinger: Key<TrackingMethod.Finger> { .init("vc_tracking_method_finger", default: .default) }
-    static var moveXIntensity: Key<Double> { .init("vc_move_x_intensity", default: 1) }
     static var eyeTrackingOffsetY: Key<Double> { .init("vc_eye_tracking_offset_y", default: -0.2) }
     static var eyeTrackingIntensityX: Key<Double> { .init("vc_eye_tracking_intensity_x", default: 6) }
     static var eyeTrackingIntensityY: Key<Double> { .init("vc_eye_tracking_intensity_y", default: 3) }

@@ -43,7 +43,7 @@ public struct VCamSettingGeneralView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .onChange(of: useAddToMacOSMenuBar) { newValue in
-            WindowManager.shared.isMacOSMenubarVisible = newValue
+            VCamSystem.shared.windowManager.isMacOSMenubarVisible = newValue
         }
 
         GroupBox {

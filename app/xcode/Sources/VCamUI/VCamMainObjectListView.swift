@@ -66,7 +66,7 @@ public struct VCamMainObjectListView: View {
 }
 
 private struct VCamMainObjectListAddButton: View {
-    @ObservedObject private var pasteboard = WindowManager.shared.system.pasteboardObserver
+    @ObservedObject private var pasteboard = VCamSystem.shared.pasteboardObserver
 
     var body: some View {
         let objectManager = SceneObjectManager.shared

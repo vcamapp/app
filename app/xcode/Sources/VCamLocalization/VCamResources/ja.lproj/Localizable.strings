@@ -161,7 +161,6 @@
 "eyesVerticalSensitivity" = "目の上下の動きの感度";
 "easeOfOpeningFingers" = "指の開きやすさ";
 "easeOfCloseFingers" = "指の閉じやすさ";
-"easeOfBodyMovement" = "体の左右の動きの大きさ";
 "shoulderRotationWeight" = "肩の回転の大きさ";
 "swivelOffset" = "肘の調整";
 "faceEyeMouth" = "顔・目・口";

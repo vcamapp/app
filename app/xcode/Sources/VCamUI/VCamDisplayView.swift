@@ -20,7 +20,7 @@ public struct VCamDisplayView: View {
     @UniAction(.addDisplayParameter) private var addDisplayParameter
     @UniAction(.deleteDisplayParameter) private var deleteDisplayParameter
 
-    @ObservedObject private var windowManager = WindowManager.shared
+    @ObservedObject private var windowManager = VCamSystem.shared.windowManager
 
     public var body: some View {
         VStack {
@@ -71,7 +71,7 @@ private struct VCamDisplayParameterView: View {
     @ExternalStateBinding(.lensFlare) private var lensFlare
     @ExternalStateBinding(.vignetteColor) private var vignetteColor: Color
 
-    @ObservedObject private var windowManager = WindowManager.shared
+    @ObservedObject private var windowManager = VCamSystem.shared.windowManager
 
     var body: some View {
         let minHeight = windowManager.size.height * 0.4
