@@ -37,7 +37,13 @@ public final class VCamSystem {
 
         Task { @MainActor in
             if !windowManager.isUnity {
+#if DEBUG
+                if !ProcessInfo.processInfo.arguments.contains("UITesting") {
+                    await AppUpdater.vcam.presentUpdateAlertIfAvailable()
+                }
+#else
                 await AppUpdater.vcam.presentUpdateAlertIfAvailable()
+#endif
             }
 
             await Migration.migrate()

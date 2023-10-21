@@ -84,6 +84,7 @@ private struct MenuBottomView: View {
                 }
                 .buttonStyle(.plain)
                 .disabled(recorder.isRecording)
+                .accessibilityIdentifier("btn_settings")
             }
             .controlSize(.small)
 
@@ -126,6 +127,7 @@ private struct VCamMenuButtonStyle: ButtonStyle {
         )
         .cornerRadius(6.0)
         .contentShape(Rectangle())
+        .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : [.isButton])
     }
 }
 
