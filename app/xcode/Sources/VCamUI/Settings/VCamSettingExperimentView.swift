@@ -8,5 +8,7 @@
 import SwiftUI
 
 public enum VCamSettingExperimentView {
-    public static var make: () -> AnyView = { fatalError() }
+    public static var make: () -> AnyView = {
+        AnyView(EmptyView())
+    }
 }

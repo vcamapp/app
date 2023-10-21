@@ -13,10 +13,12 @@
 		0612386D2ADE9A8400B67618 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0612386C2ADE9A8400B67618 /* Preview Assets.xcassets */; };
 		061238752ADE9C6D00B67618 /* xcode in Resources */ = {isa = PBXBuildFile; fileRef = 061238742ADE9C6D00B67618 /* xcode */; };
 		061238782ADE9CEE00B67618 /* VCam in Frameworks */ = {isa = PBXBuildFile; productRef = 061238772ADE9CEE00B67618 /* VCam */; };
+		06A72E8B2AE4305D000D0B25 /* XCUIApplication+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06A72E8A2AE4305D000D0B25 /* XCUIApplication+.swift */; };
+		06A72E8D2AE4359E000D0B25 /* VCam in Frameworks */ = {isa = PBXBuildFile; productRef = 06A72E8C2AE4359E000D0B25 /* VCam */; };
+		06A72E8F2AE45073000D0B25 /* XCUIElementQuery+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06A72E8E2AE45073000D0B25 /* XCUIElementQuery+.swift */; };
 		06EC61182ADEE7A900D2A5C9 /* VCamStub in Frameworks */ = {isa = PBXBuildFile; productRef = 06EC61172ADEE7A900D2A5C9 /* VCamStub */; };
 		06EC61202AE016C300D2A5C9 /* VCamUIPreviewUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06EC611F2AE016C300D2A5C9 /* VCamUIPreviewUITests.swift */; };
 		06EC61222AE016C300D2A5C9 /* LaunchScreenshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06EC61212AE016C300D2A5C9 /* LaunchScreenshotTests.swift */; };
-		06EC61292AE0296600D2A5C9 /* VCamLocalization in Frameworks */ = {isa = PBXBuildFile; productRef = 06EC61282AE0296600D2A5C9 /* VCamLocalization */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -37,6 +39,8 @@
 		0612386C2ADE9A8400B67618 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		0612386E2ADE9A8400B67618 /* VCamUIPreview.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = VCamUIPreview.entitlements; sourceTree = "<group>"; };
 		061238742ADE9C6D00B67618 /* xcode */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = xcode; path = ..; sourceTree = "<group>"; };
+		06A72E8A2AE4305D000D0B25 /* XCUIApplication+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "XCUIApplication+.swift"; sourceTree = "<group>"; };
+		06A72E8E2AE45073000D0B25 /* XCUIElementQuery+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "XCUIElementQuery+.swift"; sourceTree = "<group>"; };
 		06EC611D2AE016C300D2A5C9 /* VCamUIPreviewUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VCamUIPreviewUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		06EC611F2AE016C300D2A5C9 /* VCamUIPreviewUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VCamUIPreviewUITests.swift; sourceTree = "<group>"; };
 		06EC61212AE016C300D2A5C9 /* LaunchScreenshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchScreenshotTests.swift; sourceTree = "<group>"; };
@@ -56,7 +60,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				06EC61292AE0296600D2A5C9 /* VCamLocalization in Frameworks */,
+				06A72E8D2AE4359E000D0B25 /* VCam in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -115,6 +119,8 @@
 			children = (
 				06EC611F2AE016C300D2A5C9 /* VCamUIPreviewUITests.swift */,
 				06EC61212AE016C300D2A5C9 /* LaunchScreenshotTests.swift */,
+				06A72E8A2AE4305D000D0B25 /* XCUIApplication+.swift */,
+				06A72E8E2AE45073000D0B25 /* XCUIElementQuery+.swift */,
 			);
 			path = VCamUIPreviewUITests;
 			sourceTree = "<group>";
@@ -158,7 +164,7 @@
 			);
 			name = VCamUIPreviewUITests;
 			packageProductDependencies = (
-				06EC61282AE0296600D2A5C9 /* VCamLocalization */,
+				06A72E8C2AE4359E000D0B25 /* VCam */,
 			);
 			productName = VCamUIPreviewUITests;
 			productReference = 06EC611D2AE016C300D2A5C9 /* VCamUIPreviewUITests.xctest */;
@@ -237,6 +243,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				06EC61222AE016C300D2A5C9 /* LaunchScreenshotTests.swift in Sources */,
+				06A72E8B2AE4305D000D0B25 /* XCUIApplication+.swift in Sources */,
+				06A72E8F2AE45073000D0B25 /* XCUIElementQuery+.swift in Sources */,
 				06EC61202AE016C300D2A5C9 /* VCamUIPreviewUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -499,13 +507,13 @@
 			isa = XCSwiftPackageProductDependency;
 			productName = VCam;
 		};
+		06A72E8C2AE4359E000D0B25 /* VCam */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = VCam;
+		};
 		06EC61172ADEE7A900D2A5C9 /* VCamStub */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = VCamStub;
-		};
-		06EC61282AE0296600D2A5C9 /* VCamLocalization */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = VCamLocalization;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
