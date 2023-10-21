@@ -8,6 +8,7 @@
 import AppKit
 import VCamEntity
 import VCamLocalization
+import VCamBridge
 import struct SwiftUI.Image
 
 public struct VCamMessageAction: VCamAction {
@@ -19,10 +20,8 @@ public struct VCamMessageAction: VCamAction {
     public var name: String { L10n.message.text }
     public var icon: Image { Image(systemName: "text.bubble") }
 
-    @UniState(.message, name: "message") private var message
-
     @MainActor
     public func callAsFunction(context: VCamActionContext) async throws {
-        message = configuration.message
+        UniBridge.shared.message.wrappedValue = configuration.message
     }
 }

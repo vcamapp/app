@@ -9,11 +9,12 @@ import SwiftUI
 import VCamEntity
 import VCamCamera
 import VCamTracking
+import VCamBridge
 
 public struct VCamMainView: View {
     public init() {}
     
-    @UniState(.message, name: "message") private var message
+    @ExternalStateBinding(.message) private var message
 
     @State private var isCameraExtensionDisallow = false
 
