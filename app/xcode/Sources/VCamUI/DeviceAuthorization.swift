@@ -55,7 +55,9 @@ public enum DeviceAuthorization {
 
         case .notDetermined:
             AVCaptureDevice.requestAccess(for: type.mediaType) { _ in
-                requestAuthorization(type: type, completion: completion)
+                Task { @MainActor in
+                    requestAuthorization(type: type, completion: completion)
+                }
             }
 
         case .denied, .restricted:

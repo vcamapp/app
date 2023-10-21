@@ -77,7 +77,7 @@ private struct MenuBottomView: View {
             HStack {
                 Spacer()
                 Button {
-                    MacWindowManager.shared.openSettings()
+                    MacWindowManager.shared.open(VCamSettingView())
                 } label: {
                     Image(systemName: "gearshape.fill")
                         .macHoverEffect()

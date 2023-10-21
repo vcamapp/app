@@ -13,8 +13,6 @@ import VCamCamera
 import AppKit
 
 public struct Migration {
-    public static var openVirtualCameraPreference: () -> Void = {}
-
     public static func migrate() async {
         let previousVersion = UserDefaults.standard.value(for: .previousVersion)
 
@@ -99,7 +97,7 @@ extension Migration {
         }
 
         if !isNewCameraInstalled {
-            openVirtualCameraPreference()
+            MacWindowManager.shared.open(VCamSettingView(tab: .virtualCamera))
         }
     }
 

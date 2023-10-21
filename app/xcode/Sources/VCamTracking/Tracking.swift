@@ -23,12 +23,12 @@ public func uniSupportsPerfectSync() -> Bool {
     Tracking.shared.faceTrackingMethod.supportsPerfectSync
 }
 
-public final class Tracking {
+public final class Tracking: ObservableObject {
     public static let shared = Tracking()
 
-    public private(set) var faceTrackingMethod = TrackingMethod.Face.default
-    public private(set) var handTrackingMethod = TrackingMethod.Hand.default
-    public private(set) var fingerTrackingMethod = TrackingMethod.Finger.default
+    @Published public private(set) var faceTrackingMethod = TrackingMethod.Face.default
+    @Published public private(set) var handTrackingMethod = TrackingMethod.Hand.default
+    @Published public private(set) var fingerTrackingMethod = TrackingMethod.Finger.default
 
     public private(set) var useEyeTracking = false
     public private(set) var useVowelEstimation = false

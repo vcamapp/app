@@ -22,11 +22,13 @@ let package = Package(
             "VCamUIFoundation", "VCamTracking", "VCamCamera", "VCamData", "VCamLocalization", "VCamBridge",
         ], resources: [
             .process("Resources"),
+        ], swiftSettings: [
+            .define("ENABLE_MOCOPI"),
         ]),
         .target(name: "VCamUIFoundation"),
         .target(name: "VCamData", dependencies: ["VCamBridge", "VCamEntity"]),
         .target(name: "VCamEntity", dependencies: ["VCamDefaults", "VCamLocalization"], swiftSettings: [
-            .define("ENABLE_MOCOPI")
+            .define("ENABLE_MOCOPI"),
         ]),
         .target(name: "VCamLocalization", resources: [.process("VCamResources")]),
         .target(name: "VCamMedia", dependencies: ["VCamEntity", "VCamAppExtension", "VCamLogger"]),

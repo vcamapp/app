@@ -47,9 +47,6 @@ public final class MacWindowManager {
 
     private var openWindows: [String: NSWindow] = [:]
 
-    public var openSettings = {}
-    public var openSettingsVirtualCamera = {}
-
     public func open<T: MacWindow>(_ windowView: T) {
         let id = self.id(T.self)
         if let window = openWindows[id] {

@@ -21,7 +21,7 @@ public struct VCamMainView: View {
         VStack(alignment: .leading) {
             if isCameraExtensionDisallow {
                 Button {
-                    MacWindowManager.shared.openSettingsVirtualCamera()
+                    MacWindowManager.shared.open(VCamSettingView(tab: .virtualCamera))
                 } label: {
                     Image(systemName: "exclamationmark.triangle")
                     Text(L10n.cameraExtensionAwaitingUserApproval.key, bundle: .localize)

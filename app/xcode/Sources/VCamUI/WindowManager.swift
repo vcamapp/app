@@ -171,6 +171,6 @@ public final class WindowManager: ObservableObject {
     }
 
     @objc private func openPreferences() {
-        MacWindowManager.shared.openSettings()
+        MacWindowManager.shared.open(VCamSettingView())
     }
 }
