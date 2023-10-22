@@ -57,7 +57,11 @@ public final class VCamSystem {
         }
     }
 
-    public func configure() {}
+    public func configure() {
+        guard windowManager.isUnity else { return }
+        windowManager.setUpWindow()
+        windowManager.setUpView()
+    }
 
     public func startSystem() {
         Logger.log("\(isStarted)")

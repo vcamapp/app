@@ -6,30 +6,37 @@
 //
 
 import simd
+import struct CoreGraphics.CGPoint
 
-public extension SIMD3 where Scalar == Float {
+public extension SIMD2<Float> {
+    @inlinable init(_ point: CGPoint) {
+        self = .init(Float(point.x), Float(point.y))
+    }
+}
+
+public extension SIMD3<Float> {
     static let axisX = SIMD3(1, 0, 0)
     static let axisY = SIMD3(0, 1, 0)
     static let axisZ = SIMD3(0, 0, 1)
 }
 
-public extension SIMD3 where Scalar == Double {
+public extension SIMD3<Double> {
     static let axisX = SIMD3(1, 0, 0)
     static let axisY = SIMD3(0, 1, 0)
     static let axisZ = SIMD3(0, 0, 1)
 }
 
 public extension simd_float4x4 {
-    var translation: SIMD3<Float> {
+    @inlinable var translation: SIMD3<Float> {
         let p = columns.3
         return .init(p.x, p.y, p.z)
     }
 
-    var rotation: simd_quatf {
+    @inlinable var rotation: simd_quatf {
         simd_quatf(self)
     }
 
-    var axisX: Self {
+    @inlinable var axisX: Self {
         .init(
             SIMD4(1, 0, 0, 0),
             SIMD4(0, columns.1.y, columns.2.y, 0),
@@ -38,7 +45,7 @@ public extension simd_float4x4 {
         )
     }
 
-    var axisY: Self {
+    @inlinable var axisY: Self {
         .init(
             SIMD4(columns.0.x, 0, columns.2.x, 0),
             SIMD4(0, 1, 0, 0),
@@ -47,7 +54,7 @@ public extension simd_float4x4 {
         )
     }
 
-    var axisZ: Self {
+    @inlinable var axisZ: Self {
         .init(
             SIMD4(columns.0.x, columns.1.x, 0, 0),
             SIMD4(columns.0.y, columns.1.y, 0, 0),
@@ -58,7 +65,7 @@ public extension simd_float4x4 {
 }
 
 public extension simd_quatf {
-    init(_ radianAngles: SIMD3<Float>) {
+    @inlinable init(_ radianAngles: SIMD3<Float>) {
         let cz = cos(radianAngles.z * 0.5)
         let sz = sin(radianAngles.z * 0.5)
         let cy = cos(radianAngles.y * 0.5)
@@ -74,11 +81,11 @@ public extension simd_quatf {
         ])
     }
 
-    init(_ quat: simd_quatd) {
+    @inlinable init(_ quat: simd_quatd) {
       self.init(vector: SIMD4(Float(quat.vector[0]), Float(quat.vector[1]), Float(quat.vector[2]), Float(quat.vector[3])))
     }
 
-    func eulerAngles() -> SIMD3<Float> {
+    @inlinable func eulerAngles() -> SIMD3<Float> {
         // https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
         let (x, y, z): (Float, Float, Float)
         let v = vector
@@ -102,23 +109,5 @@ public extension simd_quatf {
         z = atan2(siny_cosp, cosy_cosp)
 
         return .init(x, y, z) * (180 / .pi)
-    }
-}
-
-extension simd_quatd {
-    init(_ radianAngles: SIMD3<Double>) {
-        let cz = cos(radianAngles.z * 0.5)
-        let sz = sin(radianAngles.z * 0.5)
-        let cy = cos(radianAngles.y * 0.5)
-        let sy = sin(radianAngles.y * 0.5)
-        let cx = cos(radianAngles.x * 0.5)
-        let sx = sin(radianAngles.x * 0.5)
-
-        self.init(vector: [
-            sx * cy * cz - cx * sy * sz,
-            cx * sy * cz + sx * cy * sz,
-            cx * cy * sz - sx * sy * cz,
-            cx * cy * cz + sx * sy * sz,
-        ])
     }
 }

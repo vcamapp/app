@@ -18,6 +18,8 @@ public struct VCamMainObjectListView: View {
 
     @State private var editingId: Int32?
 
+    @UniReload private var reload: Void // reload when object is selected
+
     var selectedIdBinding: Binding<Int32?> {
         $objectSelected.map(get: { $0 == -1 ? nil : $0 }, set: { $0 ?? -1 })
     }

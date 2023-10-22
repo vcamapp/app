@@ -140,8 +140,6 @@ public enum L10n {
   public static let downloadSupporterVersion = LocalizedString(lookupKey: "downloadSupporterVersion")
   /// Duplicate
   public static let duplicate = LocalizedString(lookupKey: "duplicate")
-  /// Horizontal sensitivity of body
-  public static let easeOfBodyMovement = LocalizedString(lookupKey: "easeOfBodyMovement")
   /// Finger closing sensitivity
   public static let easeOfCloseFingers = LocalizedString(lookupKey: "easeOfCloseFingers")
   /// Finger opening sensitivity
@@ -300,6 +298,8 @@ public enum L10n {
   public static let moveInitialPosition = LocalizedString(lookupKey: "moveInitialPosition")
   /// New preset
   public static let newPreset = LocalizedString(lookupKey: "newPreset")
+  /// New Tracking System
+  public static let newTrackingSystem = LocalizedString(lookupKey: "newTrackingSystem")
   /// No
   public static let no = LocalizedString(lookupKey: "no")
   /// Nod

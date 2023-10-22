@@ -136,6 +136,7 @@
 "experimentThanks" = "これらの機能はサポーター向けに提供しています。VCamのサポート、ありがとうございます！";
 "experimentAdvertisement" = "これらの機能はサポーター向けに提供しています。サポーター版は以下からDLできます。";
 "enableVSync" = "VSyncを有効にする";
+"newTrackingSystem" = "新しいトラッキングシステム";
 "installVirtualCamera" = "仮想カメラのインストール";
 "explainAboutInstallingCameraExtension" = "仮想カメラをインストールします。\n「システム設定を開く」をクリックして、「許可」をクリックしてください。";
 "noteEnableNewCameraExtension" = "インストール後は一度VCamを再起動してください";

@@ -60,11 +60,14 @@ public struct RevisedMovingAverage<Value: RevisedMovingAverageValue> {
 public enum RevisedMovingAverageWeight {
     case four
     case six
+    case custom(count: Int, weight: Float)
 
     var weights: [Float] {
         switch self {
-        case .four: return Self.weights4
-        case .six: return Self.weights6
+        case .four: Self.weights4
+        case .six: Self.weights6
+        case let .custom(count, weight):
+            Self.calculateWeight(count: count, weight: weight)
         }
     }
 

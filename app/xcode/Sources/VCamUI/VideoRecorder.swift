@@ -39,7 +39,7 @@ public final class VideoRecorder: ObservableObject {
     private let expectedFormat = AVAudioFormat(standardFormatWithSampleRate: 48000, channels: 1)!
     private var systemAudioRecorder: (any ScreenRecorderProtocol)?
 
-#if PREVIEW
+#if DEBUG
     private var debugTimer: Timer?
 #endif
 
@@ -110,7 +110,7 @@ public final class VideoRecorder: ObservableObject {
             }
         }
 
-#if PREVIEW
+#if DEBUG
         debugTimer = Timer.scheduledTimer(withTimeInterval: 1 / 30, repeats: true) { _ in
             let debugImage = NSImage(color: .red, size: CGSize(width: 1920, height: 1080)).ciImage!
             Self.shared.renderFrame(debugImage)
@@ -122,7 +122,7 @@ public final class VideoRecorder: ObservableObject {
 
     public func stop() {
         Logger.log("")
-#if PREVIEW
+#if DEBUG
         debugTimer?.invalidate()
         debugTimer = nil
 #endif
@@ -179,7 +179,7 @@ public final class VideoRecorder: ObservableObject {
         frameCount += 1
     }
 
-    func renderAudioFrame(_ pcmBuffer: AVAudioPCMBuffer, time: AVAudioTime, latency: TimeInterval, device: AudioDevice?) {
+    public func renderAudioFrame(_ pcmBuffer: AVAudioPCMBuffer, time: AVAudioTime, latency: TimeInterval, device: AudioDevice?) {
         guard isRecording, frameCount > 0 else { return }
 
         if sampleCount <= 0 {

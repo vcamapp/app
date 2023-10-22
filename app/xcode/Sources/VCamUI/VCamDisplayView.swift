@@ -16,10 +16,6 @@ public struct VCamDisplayView: View {
     @ExternalStateBinding(.usePostEffect) private var usePostEffect
     @ExternalStateBinding(.currentDisplayParameterPreset) private var preset
 
-    @UniAction(.saveDisplayParameter) private var saveDisplayParameter
-    @UniAction(.addDisplayParameter) private var addDisplayParameter
-    @UniAction(.deleteDisplayParameter) private var deleteDisplayParameter
-
     @ObservedObject private var windowManager = VCamSystem.shared.windowManager
 
     public var body: some View {
@@ -36,17 +32,17 @@ public struct VCamDisplayView: View {
                         TextField("", text: $preset.description)
                             .frame(width: 120)
                         Button {
-                            saveDisplayParameter()
+                            UniBridge.shared.saveDisplayParameter()
                         } label: {
                             Text(L10n.save.key, bundle: .module)
                         }
                         Button {
-                            addDisplayParameter()
+                            UniBridge.shared.addDisplayParameter()
                         } label: {
                             Image(systemName: "plus")
                         }
                         Button {
-                            deleteDisplayParameter()
+                            UniBridge.shared.deleteDisplayParameter()
                         } label: {
                             Image(systemName: "trash")
                                 .foregroundColor(.red)

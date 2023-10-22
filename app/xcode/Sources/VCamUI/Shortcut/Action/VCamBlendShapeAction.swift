@@ -20,14 +20,12 @@ public struct VCamBlendShapeAction: VCamAction {
     public var name: String { L10n.facialExpression.text }
     public var icon: Image { Image(systemName: "face.smiling") }
 
-    @UniAction(.currentBlendShape) var setBlendShape
-
     @MainActor
     public func callAsFunction(context: VCamActionContext) async throws {
         guard !configuration.blendShape.isEmpty else {
             throw VCamActionError(L10n.isNotSetYet(L10n.facialExpression.text).text)
         }
 
-        setBlendShape(configuration.blendShape)
+        UniBridge.shared.currentBlendShape.wrappedValue = configuration.blendShape
     }
 }

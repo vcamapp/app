@@ -1,4 +1,5 @@
-all: test-package build-ui-preview test-ui-preview
+all: build test-ui-preview
+build: test-package build-ui-preview
 
 test-package:
 	cd app/xcode && swift test

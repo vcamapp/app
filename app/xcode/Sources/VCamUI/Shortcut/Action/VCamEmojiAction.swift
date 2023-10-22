@@ -20,8 +20,6 @@ public struct VCamEmojiAction: VCamAction {
     public var name: String { L10n.emoji.text }
     public var icon: Image { Image(systemName: "smiley") }
 
-    @UniAction(.showEmojiStamp) var showEmojiStamp
-
     @MainActor
     public func callAsFunction(context: VCamActionContext) async throws {
         guard !configuration.emoji.isEmpty else {
@@ -30,6 +28,6 @@ public struct VCamEmojiAction: VCamAction {
         let url = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("vcam_emoji.png")
         try configuration.emoji.drawImage().writeAsPNG(to: url)
 
-        showEmojiStamp(url.path)
+        UniBridge.shared.showEmojiStamp(url.path)
     }
 }

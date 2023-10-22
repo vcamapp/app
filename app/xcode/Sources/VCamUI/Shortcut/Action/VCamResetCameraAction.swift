@@ -20,10 +20,8 @@ public struct VCamResetCameraAction: VCamAction {
     public var name: String { L10n.resetAvatarPosition.text }
     public var icon: Image { Image(systemName: "arrow.triangle.2.circlepath.camera.fill") }
 
-    @UniAction(.resetCamera) var resetCamera
-
     @MainActor
     public func callAsFunction(context: VCamActionContext) async throws {
-        resetCamera()
+        UniBridge.shared.resetCamera()
     }
 }

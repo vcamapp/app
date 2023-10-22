@@ -23,8 +23,8 @@ public final class AppMenu: NSObject {
     private override init() {
         let mainMenu: NSMenu
         if VCamSystem.shared.windowManager.isUnity {
-            menu = NSApp.mainMenu!
-            mainMenu = menu.items[0].submenu!
+            menu = Self.makeSubMenu(menu: NSApp.mainMenu!, title: "VCamMenu", items: [])
+            mainMenu = NSApp.mainMenu!.items[0].submenu!
         } else {
             menu = NSMenu()
             mainMenu = Self.makeSubMenu(menu: menu, title: "VCam", items: [])
@@ -53,6 +53,7 @@ public final class AppMenu: NSObject {
     @discardableResult
     public static func makeSubMenu(menu: NSMenu, title: String, items: [NSMenuItem]) -> NSMenu {
         let rootItem = NSMenuItem()
+        rootItem.title = title
         menu.addItem(rootItem)
         let subMenu = NSMenu(title: title)
         rootItem.submenu = subMenu

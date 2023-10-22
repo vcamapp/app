@@ -19,7 +19,7 @@ public final class WindowManager: ObservableObject {
     public fileprivate(set) var isWindowClosed = false
     public var isEnabled = false
 
-    private var containerView = VCamRootContainerView()
+    private let containerView = VCamRootContainerView()
     private var statusItem: NSStatusItem?
 
     public var isMacOSMenubarVisible: Bool {
@@ -43,11 +43,8 @@ public final class WindowManager: ObservableObject {
     public func setUpWindow() {
         Logger.log("")
 
-        guard let window = NSApp.mainOrFirstWindow else {
-            return
-        }
-
-        if isUnity {
+        if isUnity, !NSApp.windows.map(\.title).contains("VCam") {
+            uniDebugLog("WindowManager.setUpWindow()")
             let windowRef = NSWindow()
             windowRef.title = "VCam"
             windowRef.styleMask = [.titled, .closable, .resizable]
@@ -56,7 +53,7 @@ public final class WindowManager: ObservableObject {
             windowRef.isReleasedWhenClosed = false
             windowRef.setFrameAutosaveName("UnityPlayerVCamUI")
             windowRef.makeKeyAndOrderFront(nil)
-        } else {
+        } else if let window = NSApp.mainOrFirstWindow {
             window.appearance = NSAppearance(named: .darkAqua)
             window.title = "VCam"
             window.titlebarAppearsTransparent = true
@@ -92,6 +89,7 @@ public final class WindowManager: ObservableObject {
         window.contentView = containerView
 
         if isUnity {
+            uniDebugLog("WindowManager.setUpView()")
             window.setContentSize(containerView.fittingSize)
         } else {
             setupMenuBar()
@@ -149,8 +147,10 @@ public final class WindowManager: ObservableObject {
         Logger.log("")
         VCamSystem.shared.dispose()
         isConfigured = false
+        containerView.subviews.forEach { $0.removeFromSuperview() } // for Unity
 
         if isUnity {
+            uniDebugLog("WindowManager.dispose()")
             SceneObjectManager.shared.dispose()
             NSApp.vcamWindow?.close()
         } else {

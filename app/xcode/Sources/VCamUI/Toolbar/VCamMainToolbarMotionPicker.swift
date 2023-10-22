@@ -11,12 +11,7 @@ import VCamBridge
 public struct VCamMainToolbarMotionPicker: View {
     public init() {}
 
-    @UniAction(.motionHello) var motionHello
     @ExternalStateBinding(.motionBye) var motionBye
-    @UniAction(.motionJump) var motionJump
-    @UniAction(.motionYear) var motionYear
-    @UniAction(.motionWhat) var motionWhat
-    @UniAction(.motionWin) var motionWin
     @ExternalStateBinding(.motionNod) var motionNod
     @ExternalStateBinding(.motionShakeHead) var motionShakeHead
     @ExternalStateBinding(.motionShakeBody) var motionShakeBody
@@ -28,13 +23,13 @@ public struct VCamMainToolbarMotionPicker: View {
     public var body: some View {
         GroupBox {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 80))], spacing: 2) {
-                button(key: L10n.hi.key, action: { motionHello() })
+                button(key: L10n.hi.key, action: UniBridge.shared.motionHello)
                 toggle(key: L10n.bye.key, isOn: $motionBye.workaround())
-                button(key: L10n.jump.key, action: { motionJump() })
-                button(key: L10n.cheer.key, action: { motionYear() })
-                button(key: L10n.what.key, action: { motionWhat() })
+                button(key: L10n.jump.key, action: UniBridge.shared.motionJump)
+                button(key: L10n.cheer.key, action: UniBridge.shared.motionYear)
+                button(key: L10n.what.key, action: UniBridge.shared.motionWhat)
                 Group {
-                    button(key: L10n.pose.key, action: { motionWin() })
+                    button(key: L10n.pose.key, action: UniBridge.shared.motionWin)
                     toggle(key: L10n.nod.key, isOn: $motionNod.workaround())
                     toggle(key: L10n.no.key, isOn: $motionShakeHead.workaround())
                     toggle(key: L10n.shudder.key, isOn: $motionShakeBody.workaround())

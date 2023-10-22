@@ -2,11 +2,7 @@
 import SwiftUI
 public final class UniBridge {
     public static let shared = UniBridge()
-    #if DEBUG
-    public init() {}
-    #else
     private init() {}
-    #endif
     public enum IntType: Int32 {
         case lensFlare = 0
         case facialExpression = 1
@@ -74,17 +70,18 @@ public final class UniBridge {
         case useCombineMesh = 3
         case useAddToMacOSMenuBar = 4
         case useVSync = 5
-        case useHandTracking = 6
-        case useBlinker = 7
-        case useFullTracking = 8
-        case lipSyncWebCam = 9
-        case interactable = 10
-        case hasPerfectSyncBlendShape = 11
-        case motionBye = 12
-        case motionNod = 13
-        case motionShakeBody = 14
-        case motionShakeHead = 15
-        case motionRun = 16
+        case useNewTracking = 6
+        case useHandTracking = 7
+        case useBlinker = 8
+        case useFullTracking = 9
+        case lipSyncWebCam = 10
+        case interactable = 11
+        case hasPerfectSyncBlendShape = 12
+        case motionBye = 13
+        case motionNod = 14
+        case motionShakeBody = 15
+        case motionShakeHead = 16
+        case motionRun = 17
     }
     public let boolMapper = ValueBinding<Bool, BoolType>()
     public var useAutoMode: Binding<Bool> { boolMapper.binding(.useAutoMode) }
@@ -93,6 +90,7 @@ public final class UniBridge {
     public var useCombineMesh: Binding<Bool> { boolMapper.binding(.useCombineMesh) }
     public var useAddToMacOSMenuBar: Binding<Bool> { boolMapper.binding(.useAddToMacOSMenuBar) }
     public var useVSync: Binding<Bool> { boolMapper.binding(.useVSync) }
+    public var useNewTracking: Binding<Bool> { boolMapper.binding(.useNewTracking) }
     public private(set) lazy var useHandTracking = boolMapper.set(.useHandTracking)
     public private(set) lazy var useBlinker = boolMapper.set(.useBlinker)
     public private(set) lazy var useFullTracking = boolMapper.set(.useFullTracking)
