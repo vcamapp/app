@@ -42,11 +42,8 @@ public final class FaceTracker {
     }
 }
 
-private extension VNImageBasedRequest {
-    private static let expectedRegionOfInterest = CGRect(x: 0.1, y: 0.2, width: 0.8, height: 0.7)
-    
+private extension VNImageBasedRequest {    
     func configureForPerformance() {
-        regionOfInterest = Self.expectedRegionOfInterest
         preferBackgroundProcessing = true
     }
 }

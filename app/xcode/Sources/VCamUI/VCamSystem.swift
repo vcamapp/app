@@ -5,7 +5,7 @@
 //  Created by Tatsuya Tanaka on 2023/02/25.
 //
 
-import Foundation
+import AppKit
 import VCamAppExtension
 import VCamBridge
 import VCamTracking
@@ -21,7 +21,11 @@ public final class VCamSystem {
     public let pasteboardObserver = PasteboardObserver()
 
     public private(set) var isStarted = false
-    public var isUniVCamSystemEnabled = false
+    public var isUniVCamSystemEnabled = false {
+        didSet {
+            NSApp.vcamWindow?.backgroundColor = isUniVCamSystemEnabled ? .clear : .windowBackgroundColor
+        }
+    }
 
     private init() {
         ExtensionNotificationCenter.default.setObserver(for: .startCameraExtensionStream) { [weak self] in

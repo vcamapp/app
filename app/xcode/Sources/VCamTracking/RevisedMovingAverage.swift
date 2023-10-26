@@ -22,6 +22,7 @@ extension SIMD4<Float>: RevisedMovingAverageValue {}
 public struct RevisedMovingAverage<Value: RevisedMovingAverageValue> {
     private let weights: [Float]
     private var previousValues: [Value]
+    private let count: Int
 
     private var latestValueIndex: Int
     private let valueRange: Range<Int>
@@ -32,7 +33,8 @@ public struct RevisedMovingAverage<Value: RevisedMovingAverageValue> {
 
     public init(weight: RevisedMovingAverageWeight) {
         weights = weight.weights
-        previousValues = Array(repeating: .zero, count: weights.count)
+        count = weights.count
+        previousValues = Array(repeating: .zero, count: count)
         latestValueIndex = previousValues.count - 1
         valueRange = 0..<previousValues.count
     }
@@ -40,15 +42,12 @@ public struct RevisedMovingAverage<Value: RevisedMovingAverageValue> {
     public mutating func appending(_ newValue: Value) -> Value {
         // https://www.jstage.jst.go.jp/article/kakoronbunshu1975/24/4/24_4_686/_pdf
 
-        let nextValueIndex = (latestValueIndex + 1) % previousValues.count
-        defer {
-            latestValueIndex = nextValueIndex
-        }
-
+        let nextValueIndex = (latestValueIndex + 1) % count
         previousValues[latestValueIndex] = newValue
+        latestValueIndex = nextValueIndex
 
         return valueRange.reduce(Value.zero) { partialResult, index in
-            partialResult + previousValues[(nextValueIndex + index) % previousValues.count] * weights[index]
+            partialResult + previousValues[(nextValueIndex + index) % count] * weights[index]
         }
     }
 

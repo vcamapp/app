@@ -298,8 +298,6 @@ public enum L10n {
   public static let moveInitialPosition = LocalizedString(lookupKey: "moveInitialPosition")
   /// New preset
   public static let newPreset = LocalizedString(lookupKey: "newPreset")
-  /// New Tracking System
-  public static let newTrackingSystem = LocalizedString(lookupKey: "newTrackingSystem")
   /// No
   public static let no = LocalizedString(lookupKey: "no")
   /// Nod
@@ -476,6 +474,8 @@ public enum L10n {
   }
   /// Use vowel estimation by camera
   public static let useVowelEstimation = LocalizedString(lookupKey: "useVowelEstimation")
+  /// VCam Tracking 2.0 (New Tracking System)
+  public static let vcamTrackingV2 = LocalizedString(lookupKey: "vcamTrackingV2")
   /// Video Capture
   public static let videoCapture = LocalizedString(lookupKey: "videoCapture")
   /// Video Capture Device

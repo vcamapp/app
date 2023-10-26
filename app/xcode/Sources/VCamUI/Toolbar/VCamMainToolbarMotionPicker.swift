@@ -89,10 +89,7 @@ private extension Binding {
     // The state updates with a slight delay, so wait a bit before refreshing the UI
     func workaround() -> Self {
         map(get: { $0 }, set: {
-            Task {
-                try? await Task.sleep(nanoseconds: NSEC_PER_MSEC * 300)
-                UniReload.Reloader.shared.objectWillChange.send()
-            }
+            UniReload.Reloader.shared.objectWillChange.send()
             return $0
         })
     }

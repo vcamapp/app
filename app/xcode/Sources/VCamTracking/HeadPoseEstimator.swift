@@ -17,7 +17,7 @@ public protocol HeadPoseEstimator {
 public final class VisionHeadPoseEstimator: HeadPoseEstimator {
     private var size = CGSize(width: 1024, height: 512)
     private var prevPos = SIMD3<Float>(repeating: 0)
-    private var prevPitchYawRoll = RevisedMovingAverage<SIMD3<Float>>(weight: .custom(count: 9, weight: 60))
+    private var prevPitchYawRoll = RevisedMovingAverage<SIMD3<Float>>(weight: .custom(count: 12, weight: 60))
 
     public init() {}
 

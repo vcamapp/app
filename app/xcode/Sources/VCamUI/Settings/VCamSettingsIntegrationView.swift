@@ -46,7 +46,7 @@ public struct VCamSettingsIntegrationView: View {
                         if newValue {
                             try await Tracking.shared.vcamMotionReceiver.start(avatar: Tracking.shared.avatar)
                         } else {
-                            await Tracking.shared.vcamMotionReceiver.stop()
+                            Tracking.shared.vcamMotionReceiver.stop()
                         }
                     }
                 }

@@ -136,7 +136,7 @@
 "experimentThanks" = "These features are available for our supporters, thank you for your supporting!";
 "experimentAdvertisement" = "The supporter version of the app can be downloaded from the following link:";
 "enableVSync" = "Enable VSync";
-"newTrackingSystem" = "New Tracking System";
+"vcamTrackingV2" = "VCam Tracking 2.0 (New Tracking System)";
 "installVirtualCamera" = "Install the Virtual Camera";
 "explainAboutInstallingCameraExtension" = "Installing the virtual camera.\nClick on 'Open Security Preferences' and then click 'Allow'.";
 "noteEnableNewCameraExtension" = "Restart VCam once after installation.";

@@ -31,6 +31,8 @@ public final class VCamMotionReceiver {
     @MainActor
     public func start(avatar: Avatar) async throws {
         Logger.log("")
+        stop()
+
         connectionStatus = .connecting
         let parameters = NWParameters.udp
         parameters.allowLocalEndpointReuse = true
@@ -74,7 +76,7 @@ public final class VCamMotionReceiver {
     }
 
     @MainActor
-    public func stop() async {
+    public func stop() {
         guard let listener = listener else { return }
         listener.cancel()
         self.listener = nil
