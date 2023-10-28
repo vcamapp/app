@@ -6,11 +6,12 @@
 //
 
 import Foundation
+import simd
 import VCamEntity
 
 public enum VowelEstimator {
-    public static func estimate(visionFeatures p: [CGPoint]) -> Vowel {
-        let mouthWide = (p[34].x - p[26].x) / (p[65].x - p[69].x)
+    public static func estimate(_ landmarks: VisionLandmarks) -> Vowel {
+        let mouthWide = simd_fast_distance(landmarks.rightMouth, landmarks.leftMouth) / simd_fast_distance(landmarks.rightJaw, landmarks.leftJaw)
         if mouthWide < 0.6 { // Judge 'u' based on the ratio of jaw width to mouth width
             return .u
         } else if mouthWide >= 0.8 {

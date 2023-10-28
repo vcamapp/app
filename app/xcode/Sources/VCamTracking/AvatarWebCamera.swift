@@ -95,6 +95,7 @@ public final class AvatarWebCamera {
 
     public func resetCalibration() {
         UserDefaults.standard.set(CGFloat(-facialEstimator.prevRawEyeballY()), for: .eyeTrackingOffsetY)
+        poseEstimator.calibrate()
     }
 
     private func didOutput(sampleBuffer: CMSampleBuffer) {
@@ -113,16 +114,16 @@ public final class AvatarWebCamera {
         }
     }
 
-    private func onLandmarkUpdate(observation: VNFaceObservation, landmarks: VNFaceLandmarks2D) {
+    private func onLandmarkUpdate(observation: VNFaceObservation, vnLandmarks: VNFaceLandmarks2D) {
         guard Tracking.shared.faceTrackingMethod == .default else { return }
 
-        let pointsInImage = landmarks.allPoints!.pointsInImage(imageSize: cameraManager.captureDeviceResolution)
-        let (headPosition, headRotation) = poseEstimator.estimate(pointsInImage: pointsInImage, observation: observation)
-        let facial = facialEstimator.estimate(pointsInImage)
+        let landmarks = VisionLandmarks(landmarks: vnLandmarks, imageSize: cameraManager.captureDeviceResolution)
+        let (headPosition, headRotation) = poseEstimator.estimate(landmarks, observation: observation)
+        let facial = facialEstimator.estimate(landmarks)
 
         if isEmotionEnabled {
             if facialExpressionCounter > 4 {
-                let facialExp = facialExpressionEstimator.estimate(landmarks)
+                let facialExp = facialExpressionEstimator.estimate(vnLandmarks)
                 DispatchQueue.main.async {
                     UniBridge.shared.facialExpression(facialExp.rawValue)
                 }
@@ -138,8 +139,8 @@ public final class AvatarWebCamera {
             facial.distanceOfRightEyeHeight,
             facial.distanceOfNoseHeight,
             facial.distanceOfMouthHeight,
-            facial.eyeballX,
-            facial.eyeballY,
+            facial.eyeball.x,
+            facial.eyeball.y,
             Float(facial.vowel.rawValue)
         )
         Tracking.shared.avatar.onFacialDataReceived(values)
