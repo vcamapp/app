@@ -75,13 +75,12 @@ public final class UniBridge {
         case useBlinker = 8
         case useFullTracking = 9
         case lipSyncWebCam = 10
-        case interactable = 11
-        case hasPerfectSyncBlendShape = 12
-        case motionBye = 13
-        case motionNod = 14
-        case motionShakeBody = 15
-        case motionShakeHead = 16
-        case motionRun = 17
+        case hasPerfectSyncBlendShape = 11
+        case motionBye = 12
+        case motionNod = 13
+        case motionShakeBody = 14
+        case motionShakeHead = 15
+        case motionRun = 16
     }
     public let boolMapper = ValueBinding<Bool, BoolType>()
     public var useAutoMode: Binding<Bool> { boolMapper.binding(.useAutoMode) }
@@ -95,7 +94,6 @@ public final class UniBridge {
     public private(set) lazy var useBlinker = boolMapper.set(.useBlinker)
     public private(set) lazy var useFullTracking = boolMapper.set(.useFullTracking)
     public var lipSyncWebCam: Binding<Bool> { boolMapper.binding(.lipSyncWebCam) }
-    public var interactable: Bool { boolMapper.get(.interactable) }
     public var hasPerfectSyncBlendShape: Bool { boolMapper.get(.hasPerfectSyncBlendShape) }
     public var motionBye: Binding<Bool> { boolMapper.binding(.motionBye) }
     public var motionNod: Binding<Bool> { boolMapper.binding(.motionNod) }

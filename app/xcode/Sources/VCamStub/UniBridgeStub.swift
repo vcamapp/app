@@ -11,7 +11,7 @@ import VCamBridge
 public final class UniBridgeStub {
     public static let shared = UniBridgeStub()
 
-    private var boolTypes: [UniBridge.BoolType: Bool] = [.interactable: true, .hasPerfectSyncBlendShape: true, .useAddToMacOSMenuBar: true]
+    private var boolTypes: [UniBridge.BoolType: Bool] = [.hasPerfectSyncBlendShape: true, .useAddToMacOSMenuBar: true]
     private var intTypes: [UniBridge.IntType: Int32] = [:]
     private var floatTypes: [UniBridge.FloatType: CGFloat] = [:]
     private var stringTypes: [UniBridge.StringType: String] = [

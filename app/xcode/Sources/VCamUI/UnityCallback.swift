@@ -18,6 +18,7 @@ public func uniOnVCamSystemStart() {
     VCamSystem.shared.isUniVCamSystemEnabled = true
     VCamSystem.shared.startSystem()
     Tracking.shared.configure()
+    VCamUIState.shared.interactable = true
     UniReload.Reloader.shared.objectWillChange.send()
 }
 
@@ -25,6 +26,7 @@ public func uniOnVCamSystemStart() {
 public func uniOnVCamSystemDestroy() {
     Logger.log("uniOnVCamSystemDestroy")
     VCamSystem.shared.isUniVCamSystemEnabled = false
+    VCamUIState.shared.interactable = false
     Tracking.shared.stop()
     UniReload.Reloader.shared.objectWillChange.send()
 }

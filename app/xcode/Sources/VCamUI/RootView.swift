@@ -9,46 +9,40 @@ import SwiftUI
 import VCamBridge
 
 public struct RootView: View {
-    public init(unityView: NSView, interactable: ExternalStateBinding<Bool> = .init(.interactable)) {
-        self.unityView = unityView
-        self.interactable = interactable
-    }
-
     let unityView: NSView
 
-    @StateObject var state = VCamUIState()
+    @ObservedObject var state: VCamUIState = .shared
 
     @AppStorage(key: .locale) var locale
-    private var interactable: ExternalStateBinding<Bool>
 
     public var body: some View {
-        RootViewContent(unityView: unityView, interactable: interactable)
+        RootViewContent(unityView: unityView, uiState: state)
             .background(.regularMaterial)
             .environmentObject(state)
             .environment(\.locale, locale.isEmpty ? .current : Locale(identifier: locale))
     }
 }
 
-private struct RootViewContent: View {
-    init(unityView: NSView, interactable: ExternalStateBinding<Bool>) {
+extension RootView {
+    public init(unityView: NSView) {
         self.unityView = unityView
-        self._interactable = interactable
     }
+}
 
+private struct RootViewContent: View {
     let unityView: NSView
 
-    @ExternalStateBinding(.interactable) private var interactable
-    @UniReload private var reload: Void
+    @ObservedObject var uiState: VCamUIState
 
     var body: some View {
-        if interactable {
+        if uiState.interactable {
             HStack(spacing: 0) {
                 VCamMenu()
                     .onTapGesture {
                         unityView.window?.makeFirstResponder(nil)
                         NotificationCenter.default.post(name: .unfocusObject, object: nil)
                     }
-                    .disabled(!interactable)
+                    .disabled(!uiState.interactable)
 
                 VSplitView {
                     HStack(alignment: .bottom, spacing: 0) {
@@ -65,7 +59,7 @@ private struct RootViewContent: View {
                             unityView.window?.makeFirstResponder(nil)
                             NotificationCenter.default.post(name: .unfocusObject, object: nil)
                         }
-                        .disabled(!interactable)
+                        .disabled(!uiState.interactable)
                 }
             }
         } else {
@@ -105,6 +99,6 @@ private struct UnityView: View, Equatable {
 #Preview {
     RootView(
         unityView: NSView(),
-        interactable: .constant(true)
+        state: VCamUIState(interactable: true)
     )
 }
