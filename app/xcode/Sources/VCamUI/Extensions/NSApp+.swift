@@ -14,6 +14,8 @@ public extension NSApplication {
     }
 
     var vcamWindow: NSWindow? {
-        windows.first { $0.title == "VCam" }
+        Self._vcamWindow
     }
+
+    private static var _vcamWindow = NSApp.windows.first { $0.title == "VCam" } // for Unity
 }

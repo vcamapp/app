@@ -163,9 +163,8 @@ public final class AvatarWebCamera {
             prevHands[1].setValues(.init(right.wrist.x * 0.5, right.wrist.y))
         }
 
-        // A real human finds it tedious to move their hands, so make it exaggerate the movement a bit (also helps to avoid the issue of accuracy dropping at the edges of the camera's field of view)
-        let wristLeft = prevHands[0].appending(min(left.wrist * 1.1, 1))
-        let wristRight = prevHands[1].appending(min(right.wrist * 1.1, 1))
+        let wristLeft = prevHands[0].appending(left.wrist)
+        let wristRight = prevHands[1].appending(right.wrist)
         let thumbCMCLeft = prevHands[2].appending(left.thumbCMC)
         let thumbCMCRight = prevHands[3].appending(right.thumbCMC)
         let littleMCPLeft = prevHands[4].appending(left.littleMCP)

@@ -147,12 +147,11 @@ public final class WindowManager: ObservableObject {
         Logger.log("")
         VCamSystem.shared.dispose()
         isConfigured = false
-        containerView.subviews.forEach { $0.removeFromSuperview() } // for Unity
 
         if isUnity {
             uniDebugLog("WindowManager.dispose()")
             SceneObjectManager.shared.dispose()
-            NSApp.vcamWindow?.close()
+            NSApp.vcamWindow?.orderOut(nil)
         } else {
             NSApp.stop(nil)
         }

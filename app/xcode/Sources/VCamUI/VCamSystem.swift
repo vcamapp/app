@@ -63,8 +63,7 @@ public final class VCamSystem {
 
     public func configure() {
         guard windowManager.isUnity else { return }
-        windowManager.setUpWindow()
-        windowManager.setUpView()
+        NSApp.vcamWindow?.orderFront(nil)
     }
 
     public func startSystem() {

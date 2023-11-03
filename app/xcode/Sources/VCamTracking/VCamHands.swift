@@ -168,12 +168,16 @@ public extension VCamHands.Hand {
         
         // Originally, the origin is the bottom right, with the top left being positive (opposite of a mirror)
         // Convert to a coordinate system where the center of the body is the origin and left-right is the positive direction (0.0 to 1.0)
-        let wrist = SIMD2(
-            x: isRight ? (1 - hand.wrist.x) * 2 - 1 : hand.wrist.x * 2 - 1,
-            y: hand.wrist.y
-        )
-        let thumbCMC = hand.thumbCMC
-        let littleMCP = hand.littleMCP
+        let wrist: SIMD2<Float>, thumbCMC: SIMD2<Float>, littleMCP: SIMD2<Float>
+        if isRight {
+            wrist = SIMD2(x: 1 - hand.wrist.x * 2, y: hand.wrist.y)
+            thumbCMC = SIMD2(x: 1 - hand.thumbCMC.x * 2, y: hand.thumbCMC.y)
+            littleMCP = SIMD2(x: 1 - hand.littleMCP.x * 2, y: hand.littleMCP.y)
+        } else {
+            wrist = SIMD2(x: hand.wrist.x * 2 - 1, y: hand.wrist.y)
+            thumbCMC = SIMD2(x: hand.thumbCMC.x * 2 - 1, y: hand.thumbCMC.y)
+            littleMCP = SIMD2(x: hand.littleMCP.x * 2 - 1, y: hand.littleMCP.y)
+        }
 
         guard config.isFingerEnabled else {
             self.init(wrist: wrist, thumbCMC: thumbCMC, littleMCP: littleMCP, thumbTip: 0.7, indexTip: 0.7, middleTip: 0.7, ringTip: 0.7, littleTip: 0.7)
