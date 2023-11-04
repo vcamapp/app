@@ -44,7 +44,7 @@ public struct VCamSettingsIntegrationView: View {
                 .onChange(of: integrationVCamMocap) { newValue in
                     Task {
                         if newValue {
-                            try await Tracking.shared.vcamMotionReceiver.start(avatar: Tracking.shared.avatar)
+                            try await Tracking.shared.startVCamMotionReceiver()
                         } else {
                             Tracking.shared.vcamMotionReceiver.stop()
                         }
@@ -60,7 +60,7 @@ public struct VCamSettingsIntegrationView: View {
                     Button {
                         Task {
                             if facialMocapReceiver.connectionStatus == .disconnected {
-                                try await Tracking.shared.iFacialMocapReceiver.connect(ip: integrationFacialMocapIp, avatar: Tracking.shared.avatar)
+                                try await Tracking.shared.iFacialMocapReceiver.connect(ip: integrationFacialMocapIp)
                             } else {
                                 await Tracking.shared.iFacialMocapReceiver.stop()
                             }

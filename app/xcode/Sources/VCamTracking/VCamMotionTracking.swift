@@ -9,19 +9,17 @@ import Foundation
 import VCamBridge
 import VCamData
 
-public final class VCamMotionTracking {
-    private var lastHands = VCamHands(left: .missing, right: .missing)
-
-    public func onVCamMotionReceived(_ data: VCamMotion) {
-        if Tracking.shared.faceTrackingMethod == .vcamMocap {
+public struct VCamMotionTracking {
+    public func onVCamMotionReceived(_ data: VCamMotion, tracking: Tracking) {
+        if tracking.faceTrackingMethod == .vcamMocap {
             if UniBridge.shared.hasPerfectSyncBlendShape {
-                UniBridge.shared.receivePerfectSync(data.perfectSync(useEyeTracking: Tracking.shared.useEyeTracking))
+                UniBridge.shared.receivePerfectSync(data.perfectSync(useEyeTracking: tracking.useEyeTracking))
             } else {
-                UniBridge.shared.receiveVCamBlendShape(data.vcamHeadTransform(useEyeTracking: Tracking.shared.useEyeTracking, useVowelEstimation: Tracking.shared.useVowelEstimation))
+                UniBridge.shared.receiveVCamBlendShape(data.vcamHeadTransform(useEyeTracking: tracking.useEyeTracking, useVowelEstimation: tracking.useVowelEstimation))
             }
         }
 
-        let config = Tracking.shared.avatarCameraManager.finterConfiguration
+        let config = tracking.avatarCameraManager.finterConfiguration
 
         let hands = VCamHands(
             left: .init(hand: data.hands.left, isRight: false, configuration: config),
@@ -34,28 +32,16 @@ public final class VCamMotionTracking {
         if hands.left == nil {
             // When the track is lost or started, eliminate the effects of linearInterpolate and move directly to the initial position
             hand[0] = VCamHands.Hand.missing.wrist.x
-            lastHands.left = hands.left
-        } else if lastHands.left == nil {
-            // Minimize hand warping as much as possible (ideally, want to interpolate from a stationary pose)
-            hand[0] *= 0.1
-            hand[1] *= 0.1
-            lastHands.left = hands.left
         }
         if hands.right == nil {
             hand[2] = VCamHands.Hand.missing.wrist.x
-            lastHands.right = hands.right
-        } else if lastHands.right == nil {
-            hand[2] *= 0.1
-            hand[3] *= 0.1
-            lastHands.right = hands.right
         }
-        lastHands = hands
 
-        if Tracking.shared.handTrackingMethod == .vcamMocap {
+        if tracking.handTrackingMethod == .vcamMocap {
             UniBridge.shared.hands(hand)
         }
 
-        if Tracking.shared.fingerTrackingMethod == .vcamMocap {
+        if tracking.fingerTrackingMethod == .vcamMocap {
             UniBridge.shared.fingers(finger)
         }
     }
@@ -68,7 +54,7 @@ private extension VCamMotion {
         let rotation = head.rotation.eulerAngles()
 
         return [
-            -head.translation.x, head.translation.y, head.translation.z,
+            -head.translation.x, /*head.translation.y*/0, /*head.translation.z*/0,
              rotation.x, -rotation.y, -rotation.z,
              blendShape.eyeBlinkLeft,
              blendShape.eyeBlinkRight,
@@ -83,7 +69,7 @@ private extension VCamMotion {
         let rotation = head.rotation.vector
 
         return [
-            -head.translation.x, head.translation.y, head.translation.z,
+            -head.translation.x, /*head.translation.y*/0, /*head.translation.z*/0,
              rotation.x, -rotation.y, -rotation.z, rotation.w,
              blendShape.lookAtPoint.x, blendShape.lookAtPoint.y,
              blendShape.browDownLeft,

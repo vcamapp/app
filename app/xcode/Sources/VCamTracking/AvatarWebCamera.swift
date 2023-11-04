@@ -143,7 +143,7 @@ public final class AvatarWebCamera {
             facial.eyeball.y,
             Float(facial.vowel.rawValue)
         )
-        Tracking.shared.avatar.onFacialDataReceived(values)
+        UniBridge.shared.headTransform(values)
     }
 
     private func onHandsUpdate(_ hands: VCamHands) {
@@ -153,14 +153,21 @@ public final class AvatarWebCamera {
         if hands.left == nil {
             // When the track is lost or started, eliminate the effects of linearInterpolate and move directly to the initial position
             prevHands[0].setValues(-.one)
+            prevHands[2].setValues(-.one)
+            prevHands[4].setValues(-.one)
         } else if prevHands[0].latestValue.x == -1 {
-            // Minimize hand warping as much as possible (ideally, want to interpolate from a stationary pose)
-            prevHands[0].setValues(.init(left.wrist.x * 0.5, left.wrist.y))
+            prevHands[0].setValues(left.wrist)
+            prevHands[2].setValues(left.thumbCMC)
+            prevHands[4].setValues(left.littleMCP)
         }
         if hands.right == nil {
             prevHands[1].setValues(-.one)
+            prevHands[3].setValues(-.one)
+            prevHands[5].setValues(-.one)
         } else if prevHands[1].latestValue.x  == -1{
-            prevHands[1].setValues(.init(right.wrist.x * 0.5, right.wrist.y))
+            prevHands[1].setValues(right.wrist)
+            prevHands[3].setValues(right.thumbCMC)
+            prevHands[5].setValues(right.littleMCP)
         }
 
         let wristLeft = prevHands[0].appending(left.wrist)
@@ -171,7 +178,7 @@ public final class AvatarWebCamera {
         let littleMCPRight = prevHands[5].appending(right.littleMCP)
 
         if Tracking.shared.handTrackingMethod == .default {
-            Tracking.shared.avatar.onHandDataReceived([
+            UniBridge.shared.hands([
                 wristLeft.x, wristLeft.y, wristRight.x, wristRight.y,
                 thumbCMCLeft.x, thumbCMCLeft.y, thumbCMCRight.x, thumbCMCRight.y,
                 littleMCPLeft.x, littleMCPLeft.y, littleMCPRight.x, littleMCPRight.y
@@ -179,7 +186,7 @@ public final class AvatarWebCamera {
         }
 
         if Tracking.shared.fingerTrackingMethod == .default {
-            Tracking.shared.avatar.onFingerDataReceived([
+            UniBridge.shared.fingers([
                 prevFingers[0].appending(left.thumbTip),
                 prevFingers[1].appending(left.indexTip),
                 prevFingers[2].appending(left.middleTip),

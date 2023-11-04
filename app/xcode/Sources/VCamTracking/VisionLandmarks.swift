@@ -62,7 +62,5 @@ public struct VisionLandmarks {
         leftJaw = SIMD2(p[69])
 
         noseHeight = simd_fast_distance(noseTop, noseBottom)
-
-        print(landmarks.allPoints!.precisionEstimatesPerPoint![46], landmarks.allPoints!.precisionEstimatesPerPoint![52])
     }
 }

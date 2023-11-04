@@ -7,13 +7,17 @@
 
 import Network
 import Combine
+import VCamBridge
+import Accelerate
 
 public final class FacialMocapReceiver: ObservableObject {
     private var listener: NWListener?
     private var connection: NWConnection?
+    private var facialMocapLastValues: [Float] = Array(repeating: 0, count: 12)
     private static let queue = DispatchQueue(label: "com.github.tattn.vcam.facialmocapreceiver")
 
     @MainActor @Published public private(set) var connectionStatus = ConnectionStatus.disconnected
+
 
     public enum ConnectionStatus {
         case disconnected
@@ -30,12 +34,12 @@ public final class FacialMocapReceiver: ObservableObject {
     public init() {}
 
     @MainActor
-    public func connect(ip: String, avatar: Avatar) async throws {
+    public func connect(ip: String) async throws {
         await stop()
 
         let port = NWEndpoint.Port(integerLiteral: 49983)
 
-        try await startServer(port: port, avatar: avatar) { [weak self] result in
+        try await startServer(port: port) { [weak self] result in
             switch result {
             case .success: ()
             case .cancel, .error:
@@ -70,13 +74,23 @@ public final class FacialMocapReceiver: ObservableObject {
             await self.stop()
         }
     }
+
+    private func oniFacialMocapReceived(_ data: FacialMocapData) {
+        guard Tracking.shared.faceTrackingMethod == .iFacialMocap else { return }
+        if UniBridge.shared.hasPerfectSyncBlendShape {
+            UniBridge.shared.receivePerfectSync(data.perfectSync(useEyeTracking: Tracking.shared.useEyeTracking))
+        } else {
+            facialMocapLastValues = vDSP.linearInterpolate(facialMocapLastValues, data.vcamHeadTransform(useEyeTracking: Tracking.shared.useEyeTracking), using: 0.5)
+            UniBridge.shared.receiveVCamBlendShape(facialMocapLastValues)
+        }
+    }
 }
 
 private extension NWConnection {
-    func receiveData(with avatar: Avatar) {
+    func receiveData(with oniFacialMocapReceived: @escaping (FacialMocapData) -> Void) {
         receive(minimumIncompleteLength: 1, maximumLength: 8192) { [weak self] content, contentContext, isComplete, error in
             defer {
-                self?.receiveData(with: avatar)
+                self?.receiveData(with: oniFacialMocapReceived)
             }
 
             guard error == nil,
@@ -86,14 +100,14 @@ private extension NWConnection {
                 return
             }
 
-            avatar.oniFacialMocapReceived(mocapData)
+            oniFacialMocapReceived(mocapData)
         }
     }
 }
 
 extension FacialMocapReceiver {
     @MainActor
-    private func startServer(port: NWEndpoint.Port, avatar: Avatar, completion: @escaping (ReceiverResult) -> Void) async throws {
+    private func startServer(port: NWEndpoint.Port, completion: @escaping (ReceiverResult) -> Void) async throws {
         connectionStatus = .connecting
 
         let parameters = NWParameters.udp
@@ -121,15 +135,15 @@ extension FacialMocapReceiver {
                      case .waiting(let error):
                          if case .posix(let posixError) = error, posixError == .ECONNREFUSED {
                              try? await Task.sleep(nanoseconds: NSEC_PER_SEC * 2)
-                             try? await self.startServer(port: port, avatar: avatar, completion: completion)
+                             try? await self.startServer(port: port, completion: completion)
                          }
                      case .ready:
                          self.connectionStatus = .connected
-                         connection.receiveData(with: avatar)
+                         connection.receiveData(with: self.oniFacialMocapReceived)
                      case .cancelled:
                          self.stopAsync()
                      case .failed:
-                         try? await self.startServer(port: port, avatar: avatar, completion: completion)
+                         try? await self.startServer(port: port, completion: completion)
                      @unknown default: ()
                      }
                 }

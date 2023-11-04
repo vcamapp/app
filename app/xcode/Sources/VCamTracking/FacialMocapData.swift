@@ -119,3 +119,83 @@ public extension FacialMocapData {
         )
     }
 }
+
+extension FacialMocapData {
+    func vcamHeadTransform(useEyeTracking: Bool) -> [Float] {
+        let vowel = VowelEstimator.estimate(blendShape: blendShape)
+
+        return [
+            -head.translation.x, /*head.translation.y*/0, /*head.translation.z*/0,
+             head.rotation.x, -head.rotation.y, -head.rotation.z,
+             blendShape.eyeBlinkLeft,
+             blendShape.eyeBlinkRight,
+             blendShape.jawOpen,
+             useEyeTracking ? (blendShape.eyeLookInLeft - blendShape.eyeLookOutLeft) : 0,
+             useEyeTracking ? (blendShape.eyeLookUpLeft - blendShape.eyeLookDownLeft) : 0,
+             Float(vowel.rawValue)
+        ]
+    }
+
+    func perfectSync(useEyeTracking: Bool) -> [Float] {
+        let rawRotation = head.rotationRadian
+        let rotation = simd_quatf(.init(rawRotation.x, -rawRotation.y, -rawRotation.z)).vector
+
+        return [
+            -head.translation.x, /*head.translation.y*/0, /*head.translation.z*/0,
+             rotation.x, rotation.y, rotation.z, rotation.w,
+             blendShape.lookAtPoint.x, blendShape.lookAtPoint.y,
+             blendShape.browDownLeft,
+             blendShape.browDownRight,
+             blendShape.browInnerUp,
+             blendShape.browOuterUpLeft,
+             blendShape.browOuterUpRight,
+             blendShape.cheekPuff,
+             blendShape.cheekSquintLeft,
+             blendShape.cheekSquintRight,
+             blendShape.eyeBlinkLeft,
+             blendShape.eyeBlinkRight,
+             useEyeTracking ? blendShape.eyeLookDownLeft : 0,
+             useEyeTracking ? blendShape.eyeLookDownRight : 0,
+             useEyeTracking ? blendShape.eyeLookInLeft : 0,
+             useEyeTracking ? blendShape.eyeLookInRight : 0,
+             useEyeTracking ? blendShape.eyeLookOutLeft : 0,
+             useEyeTracking ? blendShape.eyeLookOutRight : 0,
+             useEyeTracking ? blendShape.eyeLookUpLeft : 0,
+             useEyeTracking ? blendShape.eyeLookUpRight : 0,
+             useEyeTracking ? blendShape.eyeSquintLeft : 0,
+             useEyeTracking ? blendShape.eyeSquintRight : 0,
+             useEyeTracking ? blendShape.eyeWideLeft : 0,
+             useEyeTracking ? blendShape.eyeWideRight : 0,
+             blendShape.jawForward,
+             blendShape.jawLeft,
+             blendShape.jawOpen,
+             blendShape.jawRight,
+             blendShape.mouthClose,
+             blendShape.mouthDimpleLeft,
+             blendShape.mouthDimpleRight,
+             blendShape.mouthFrownLeft,
+             blendShape.mouthFrownRight,
+             blendShape.mouthFunnel,
+             blendShape.mouthLeft,
+             blendShape.mouthLowerDownLeft,
+             blendShape.mouthLowerDownRight,
+             blendShape.mouthPressLeft,
+             blendShape.mouthPressRight,
+             blendShape.mouthPucker,
+             blendShape.mouthRight,
+             blendShape.mouthRollLower,
+             blendShape.mouthRollUpper,
+             blendShape.mouthShrugLower,
+             blendShape.mouthShrugUpper,
+             blendShape.mouthSmileLeft,
+             blendShape.mouthSmileRight,
+             blendShape.mouthStretchLeft,
+             blendShape.mouthStretchRight,
+             blendShape.mouthUpperUpLeft,
+             blendShape.mouthUpperUpRight,
+             blendShape.noseSneerLeft,
+             blendShape.noseSneerRight,
+             blendShape.tongueOut
+        ]
+    }
+}

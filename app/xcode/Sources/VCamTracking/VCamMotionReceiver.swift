@@ -29,9 +29,9 @@ public final class VCamMotionReceiver {
     public init() {}
 
     @MainActor
-    public func start(avatar: Avatar) async throws {
-        Logger.log("")
-        stop()
+    public func start(with tracking: VCamMotionTracking) async throws {
+        Logger.log("\(listener == nil)")
+        guard listener == nil else { return }
 
         connectionStatus = .connecting
         let parameters = NWParameters.udp
@@ -41,17 +41,21 @@ public final class VCamMotionReceiver {
         listener.service = .init(type: "_vcammocap._udp", domain: "local")
         self.listener = listener
 
-        return try await withCheckedThrowingContinuation { continuation in
+        return try await withCheckedThrowingContinuation { [weak self] continuation in
             listener.stateUpdateHandler = { newState in
                 switch newState {
                 case .failed(let error):
                     Logger.log(error.localizedDescription)
-                    listener.stateUpdateHandler = nil
                     continuation.resume(throwing: error)
+                    Task { @MainActor in
+                        self?.stop()
+                    }
                 case .cancelled:
                     Logger.log("\(newState)")
-                    listener.stateUpdateHandler = nil
                     continuation.resume(throwing: Error.cancelled)
+                    Task { @MainActor in
+                        self?.stop()
+                    }
                 default: ()
                 }
             }
@@ -63,7 +67,7 @@ public final class VCamMotionReceiver {
                         case .setup, .preparing, .waiting, .cancelled, .failed: ()
                         case .ready:
                             self?.connectionStatus = .connected
-                            connection.receiveData(with: avatar)
+                            connection.receiveData(with: tracking.onVCamMotionReceived)
                         @unknown default: ()
                         }
                     }
@@ -88,10 +92,10 @@ public final class VCamMotionReceiver {
 }
 
 private extension NWConnection {
-    func receiveData(with avatar: Avatar) {
+    func receiveData(with onVCamMotionReceived: @escaping (VCamMotion, Tracking) -> Void) {
         receive(minimumIncompleteLength: 1, maximumLength: 8192) { [weak self] content, contentContext, isComplete, error in
             defer {
-                self?.receiveData(with: avatar)
+                self?.receiveData(with: onVCamMotionReceived)
             }
 
             guard error == nil,
@@ -100,7 +104,7 @@ private extension NWConnection {
                 return
             }
             let mocapData = VCamMotion(rawData: content)
-            avatar.onVCamMotionReceived(mocapData)
+            onVCamMotionReceived(mocapData, .shared)
         }
     }
 }
