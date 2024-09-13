@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension FourCharCode: ExpressibleByStringLiteral {
+extension FourCharCode: @retroactive ExpressibleByStringLiteral {
     public init(stringLiteral value: StringLiteralType) {
         var code: FourCharCode = 0
         if value.count == 4, value.utf8.count == 4 {

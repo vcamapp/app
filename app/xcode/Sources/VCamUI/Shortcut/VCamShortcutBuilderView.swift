@@ -150,7 +150,7 @@ struct VCamShortcutBuilderActionItemEditView: View {
         case let .motion(configuration):
             VCamActionEditorPicker(item: .init(configuration, keyPath: \.motion, to: $configuration), items: VCamAvatarMotion.allCases)
         case let .blendShape(configuration):
-            VCamActionEditorPicker(item: .init(configuration, keyPath: \.blendShape, to: $configuration), items: UniBridge.shared.cachedBlendShapes)
+            VCamActionEditorPicker(item: .init(configuration, keyPath: \.blendShape, to: $configuration), items: UniBridge.shared.cachedBlendShapes.map(\.name))
         case let .wait(configuration):
             VCamActionEditorDurationField(value: .init(configuration, keyPath: \.duration, to: $configuration))
         case .resetCamera:

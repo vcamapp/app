@@ -209,10 +209,12 @@ private struct FilterSceneObjectButton: View {
     let filter: (ImageFilter) -> Void
     var body: some View {
         Button {
-            let image = RenderTextureManager.shared.drawer(id: object.id)?.croppedSnapshot() ?? .init()
-            showImageFilterView(image: image, configuration: configuration) { filter in
-                RenderTextureManager.shared.drawer(id: object.id)?.filter = filter
-                self.filter(filter)
+            Task { @MainActor in
+                let image = await RenderTextureManager.shared.drawer(id: object.id)?.croppedSnapshot() ?? .init()
+                showImageFilterView(image: image, configuration: configuration) { filter in
+                    RenderTextureManager.shared.drawer(id: object.id)?.filter = filter
+                    self.filter(filter)
+                }
             }
         } label: {
             Image(systemName: "wand.and.stars")

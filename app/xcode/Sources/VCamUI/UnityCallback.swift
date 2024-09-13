@@ -11,6 +11,7 @@ import VCamBridge
 import VCamCamera
 import VCamTracking
 import VCamLogger
+import VCamEntity
 
 @_cdecl("uniOnVCamSystemStart")
 public func uniOnVCamSystemStart() {
@@ -37,6 +38,7 @@ public func uniOnApplyCaptureSystem() {
     Tracking.shared.updateLipSyncIfNeeded()
 
     UniBridge.cachedBlendShapes = UniBridge.shared.blendShapes.components(separatedBy: ",")
+        .map { VCamEntity.BlendShape(name: $0) }
 }
 
 @_cdecl("uniUseAutoConvertVRM1")

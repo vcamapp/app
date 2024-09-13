@@ -7,7 +7,7 @@
 
 import AVFoundation
 
-extension AVCaptureDevice: Identifiable {
+extension AVCaptureDevice: @retroactive Identifiable {
     public var id: String {
         self.uniqueID
     }

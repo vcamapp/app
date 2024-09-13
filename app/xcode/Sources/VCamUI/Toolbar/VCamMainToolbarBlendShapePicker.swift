@@ -7,13 +7,14 @@
 
 import SwiftUI
 import VCamBridge
+import VCamEntity
 
 public struct VCamMainToolbarBlendShapePicker: View {
-    public init(blendShapes: [String] = UniBridge.cachedBlendShapes) {
+    public init(blendShapes: [BlendShape] = UniBridge.cachedBlendShapes) {
         self.blendShapes = blendShapes
     }
 
-    let blendShapes: [String]
+    let blendShapes: [BlendShape]
     @ExternalStateBinding(.currentBlendShape) private var currentBlendShape
 
     public var body: some View {
@@ -21,9 +22,9 @@ public struct VCamMainToolbarBlendShapePicker: View {
             GroupBox {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 60))]) {
                     ForEach(blendShapes) { blendShape in
-                        HoverToggle(text: blendShape, isOn: $currentBlendShape.map(
-                            get: { blendShape == $0 },
-                            set: { $0 ? blendShape : "" }
+                        HoverToggle(text: blendShape.name, isOn: $currentBlendShape.map(
+                            get: { blendShape.name == $0 },
+                            set: { $0 ? blendShape.name : "" }
                         ))
                     }
                 }
@@ -73,5 +74,5 @@ extension VCamMainToolbarBlendShapePicker: MacWindow {
 }
 
 #Preview {
-    VCamMainToolbarBlendShapePicker(blendShapes: ["natural", "joy"])
+    VCamMainToolbarBlendShapePicker(blendShapes: ["natural", "joy"].map { BlendShape(name: $0) })
 }

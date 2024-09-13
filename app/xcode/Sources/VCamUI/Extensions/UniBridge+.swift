@@ -17,8 +17,8 @@ extension UniBridge {
         return .init(width: CGFloat(size[0]), height: CGFloat(size[1]))
     }
 
-    public static var cachedBlendShapes: [String] = []
-    public var cachedBlendShapes: [String] {
+    public static var cachedBlendShapes: [BlendShape] = []
+    public var cachedBlendShapes: [BlendShape] {
         Self.cachedBlendShapes
     }
 }

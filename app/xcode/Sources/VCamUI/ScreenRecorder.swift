@@ -364,9 +364,8 @@ extension ScreenRecorder: RenderTextureRenderer {
         }
     }
 
-    @MainActor
-    public func snapshot() -> CIImage {
-        guard let frame = latestFrame else { return .init() }
+    public func snapshot() async -> CIImage {
+        guard let frame = await latestFrame else { return .init() }
         return frame.croppedCIImage
     }
 
@@ -440,13 +439,13 @@ public extension ScreenRecorder {
     }
 }
 
-extension SCDisplay: Identifiable {
+extension SCDisplay: @retroactive Identifiable {
     public var id: String {
         return String(CGDisplaySerialNumber(displayID))
     }
 }
 
-extension SCWindow: Identifiable  {
+extension SCWindow: @retroactive Identifiable  {
     public var id: String {
         guard let infoList = CGWindowListCopyWindowInfo(.optionIncludingWindow, windowID) as? [NSDictionary],
               let info = infoList.first,

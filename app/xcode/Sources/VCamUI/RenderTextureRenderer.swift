@@ -15,7 +15,7 @@ public protocol RenderTextureRenderer: AnyObject {
     var filter: ImageFilter? { get set }
 
     func setRenderTexture(updator: @escaping (CIImage) -> Void)
-    func snapshot() -> CIImage
+    func snapshot() async -> CIImage
     func updateTextureSizeIfNeeded(imageWidth: CGFloat, imageHeight: CGFloat) -> Bool
 
     func disableRenderTexture()
@@ -30,8 +30,8 @@ public extension RenderTextureRenderer {
         false
     }
 
-    func croppedSnapshot() -> NSImage {
-        let image = snapshot()
+    func croppedSnapshot() async -> NSImage {
+        let image = await snapshot()
         return cropped(of: image).nsImage()
     }
 
