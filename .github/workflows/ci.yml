@@ -9,11 +9,11 @@ on:
   workflow_dispatch:
 
 env:
-  DEVELOPER_DIR: /Applications/Xcode_15.0.app
+  DEVELOPER_DIR: /Applications/Xcode_16_beta_6.app
 
 jobs:
   build-package:
-    runs-on: macOS-13
+    runs-on: macOS-14
 
     steps:
       - uses: actions/checkout@main
@@ -21,7 +21,7 @@ jobs:
         run: set -o pipefail && make test-package | xcpretty
 
   build-ui-preview:
-    runs-on: macOS-13
+    runs-on: macOS-14
 
     steps:
       - uses: actions/checkout@main
@@ -29,7 +29,7 @@ jobs:
         run: set -o pipefail && make build-ui-preview | xcpretty
 
   test-ui-preview:
-    runs-on: macOS-13
+    runs-on: macOS-14
 
     steps:
       - uses: actions/checkout@main
