@@ -156,7 +156,7 @@ public final class CoreMediaSinkStream: NSObject {
 
     private static func findCameraExtensionDeviceID() -> CMIOObjectID? {
         let extDevice = AVCaptureDevice.DiscoverySession(
-            deviceTypes: [.externalUnknown],
+            deviceTypes: [.external],
             mediaType: .video,
             position: .unspecified
         ).devices.first { $0.localizedName.contains("CameraExtension") }

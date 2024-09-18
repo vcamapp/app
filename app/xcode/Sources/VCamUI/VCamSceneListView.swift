@@ -36,8 +36,8 @@ public struct VCamSceneListView: View {
                 .onMove { source, destination in
                     sceneManager.move(fromOffsets: source, toOffset: destination)
                 }
-                .onChange(of: selectedId) {
-                    guard let newId = $0 else {
+                .onChange(of: selectedId) { _, newValue in
+                    guard let newId = newValue else {
                         selectedId = sceneManager.currentSceneId
                         return
                     }
@@ -46,8 +46,8 @@ public struct VCamSceneListView: View {
                     }
                     selectedId = newId
                 }
-                .onChange(of: sceneManager.currentSceneId) {
-                    selectedId = $0
+                .onChange(of: sceneManager.currentSceneId) { _, newValue in
+                    selectedId = newValue
                 }
                 .onAppear {
                     selectedId = sceneManager.currentSceneId

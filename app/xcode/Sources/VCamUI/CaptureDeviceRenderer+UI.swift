@@ -62,7 +62,7 @@ private struct CaptureDeviceSelectView: View {
                                 .onAppear {
                                     cropPreviewWidth = proxy.size.width
                                 }
-                                .onChange(of: preview.size) { _ in
+                                .onChange(of: preview.size) { _, _ in
                                     cropPreviewWidth = proxy.size.width
                                 }
                         })
@@ -70,7 +70,7 @@ private struct CaptureDeviceSelectView: View {
             }
         }
         .frame(minWidth: 640, minHeight: 480)
-        .onChange(of: captureDevice) { _ in
+        .onChange(of: captureDevice) { _, _ in
             previewer?.stop()
             previewer?.didOutput = nil
             startPreview()

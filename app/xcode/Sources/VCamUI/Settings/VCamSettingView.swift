@@ -108,7 +108,7 @@ public struct VCamSettingView: View {
             .frame(minWidth: 440)
         }
         .padding([.top, .trailing], 8)
-        .onChange(of: tab) { newValue in
+        .onChange(of: tab) { _, newValue in
             if newValue == nil {
                 tab = tab
             }

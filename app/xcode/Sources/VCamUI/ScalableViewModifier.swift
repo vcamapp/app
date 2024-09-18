@@ -98,19 +98,19 @@ public struct ScalableViewModifier: ViewModifier {
                 .onAppear {
                     initializeRect(size: size)
                 }
-                .onChange(of: size) { size in
+                .onChange(of: size) { _, size in
                     initializeRect(size: size)
                 }
-                .onChange(of: topOffset) { _ in
+                .onChange(of: topOffset) { _, _ in
                     updateRect()
                 }
-                .onChange(of: bottomOffset) { _ in
+                .onChange(of: bottomOffset) { _, _ in
                     updateRect()
                 }
-                .onChange(of: leadingOffset) { _ in
+                .onChange(of: leadingOffset) { _, _ in
                     updateRect()
                 }
-                .onChange(of: trailingOffset) { _ in
+                .onChange(of: trailingOffset) { _, _ in
                     updateRect()
                 }
         }
@@ -221,7 +221,7 @@ private struct ScalableViewModifierDemoView: View {
         Color.red
             .overlay(Color.blue.modifier(CropViewModifier(rect: $rect)))
             .padding()
-            .onChange(of: rect) { newValue in
+            .onChange(of: rect) { _, newValue in
                 print(rect)
             }
     }

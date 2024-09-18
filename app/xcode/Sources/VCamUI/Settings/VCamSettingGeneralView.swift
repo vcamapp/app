@@ -42,7 +42,7 @@ public struct VCamSettingGeneralView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .onChange(of: useAddToMacOSMenuBar) { newValue in
+        .onChange(of: useAddToMacOSMenuBar) { _, newValue in
             VCamSystem.shared.windowManager.isMacOSMenubarVisible = newValue
         }
 

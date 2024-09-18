@@ -79,7 +79,7 @@ public struct VCamShortcutBuilderView: View {
             }
             .frame(minWidth: 180)
         }
-        .onChange(of: shortcut) { newValue in
+        .onChange(of: shortcut) { _, newValue in
             sourceShortcut = newValue
             VCamShortcutManager.shared.update(newValue)
         }

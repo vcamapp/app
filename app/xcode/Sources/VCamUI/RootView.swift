@@ -70,18 +70,14 @@ private struct RootViewContent: View {
     }
 }
 
-private struct UnityView: View, Equatable {
+private struct UnityView: View {
     let unityView: NSView
 
     var body: some View {
         UnityContainerView(unityView: unityView)
-//                    .help(L10n.helpMouseHover.text)
+        //                    .help(L10n.helpMouseHover.text)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .aspectRatio(1280 / 720, contentMode: .fit)
-    }
-
-    static func == (lhs: Self, rhs: Self) -> Bool {
-        true
     }
 
     private struct UnityContainerView: NSViewRepresentable {
@@ -93,6 +89,12 @@ private struct UnityView: View, Equatable {
 
         func updateNSView(_ nsView: NSViewType, context: Context) {
         }
+    }
+}
+
+extension UnityView: Equatable {
+    static func == (lhs: Self, rhs: Self) -> Bool {
+        true
     }
 }
 

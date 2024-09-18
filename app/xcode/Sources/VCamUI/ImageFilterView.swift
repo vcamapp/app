@@ -41,7 +41,7 @@ public struct ImageFilterView: View {
             filters = configuration?.filters ?? []
             updatePreview()
         }
-        .onChange(of: filters) { newValue in
+        .onChange(of: filters) { _, newValue in
             updatePreview()
         }
     }

@@ -1,11 +1,11 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 6.0
 
 import PackageDescription
 
 let package = Package(
     name: "VCam",
     defaultLocalization: "en",
-    platforms: [.macOS(.v13)],
+    platforms: [.macOS(.v14)],
     products: [
         .library(name: "VCam", targets: ["VCamUI", "VCamMedia", "VCamBridge", "VCamWorkaround"]),
         .library(name: "VCamMedia", targets: ["VCamMedia"]),
@@ -48,12 +48,12 @@ let package = Package(
         .testTarget(name: "VCamCameraTests", dependencies: ["VCamCamera"]),
         .testTarget(name: "VCamBridgeTests", dependencies: ["VCamBridge"]),
         .testTarget(name: "VCamAppExtensionTests", dependencies: ["VCamAppExtension"]),
-    ]
+    ],
+    swiftLanguageModes: [.v5]
 )
 
 for target in package.targets {
     target.swiftSettings = (target.swiftSettings ?? []) + [
         .enableUpcomingFeature("ExistentialAny", .when(configuration: .debug)),
-        .enableUpcomingFeature("StrictConcurrency", .when(configuration: .debug)),
     ]
 }

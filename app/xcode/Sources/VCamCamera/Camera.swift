@@ -19,7 +19,7 @@ public enum Camera {
     public static func configure() {
         let updateCache = {
             Camera.enableDalDevices()
-            let deviceDiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInWideAngleCamera, .externalUnknown], mediaType: nil, position: .unspecified)
+            let deviceDiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInWideAngleCamera, .external], mediaType: nil, position: .unspecified)
             cachedDevices = deviceDiscoverySession.devices.filter { $0.uniqueID != "vcam-device" }
         }
 
@@ -40,7 +40,7 @@ public enum Camera {
 
     public static var defaultCaptureDevice: AVCaptureDevice? {
         AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInWideAngleCamera], mediaType: .video, position: .unspecified).devices.first ??
-        AVCaptureDevice.DiscoverySession(deviceTypes: [.externalUnknown], mediaType: .video, position: .unspecified).devices.first
+        AVCaptureDevice.DiscoverySession(deviceTypes: [.external], mediaType: .video, position: .unspecified).devices.first
     }
 
     public static func enableDalDevices() {
