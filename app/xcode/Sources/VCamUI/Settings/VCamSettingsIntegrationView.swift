@@ -41,7 +41,7 @@ public struct VCamSettingsIntegrationView: View {
                 Toggle(isOn: $integrationVCamMocap) {
                     Text(L10n.enable.key, bundle: .localize)
                 }
-                .onChange(of: integrationVCamMocap) { newValue in
+                .onChange(of: integrationVCamMocap) { _, newValue in
                     Task {
                         if newValue {
                             try await Tracking.shared.startVCamMotionReceiver()
@@ -92,7 +92,7 @@ private struct MocopiSettingView: View {
             }
         }
         .help(L10n.helpMocopIP.text)
-        .onChange(of: integrationMocopi) { newValue in
+        .onChange(of: integrationMocopi) { _, newValue in
             useFullTracking = newValue
             Tracking.shared.setHandTrackingMethod(.mocopi)
         }

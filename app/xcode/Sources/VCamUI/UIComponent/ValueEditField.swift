@@ -35,7 +35,7 @@ public struct ValueEditField: View {
                         .font(.caption2)
                         .fontWeight(.thin)
                         .foregroundColor(.secondary)
-                        .onChange(of: value) { newValue in
+                        .onChange(of: value) { _, newValue in
                             debounceTask?.cancel()
                             debounceTask = Task {
                                 do {

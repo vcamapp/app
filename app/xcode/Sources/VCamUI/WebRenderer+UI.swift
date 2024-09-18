@@ -104,7 +104,7 @@ public struct WebRendererPreferenceView: View {
             guard let resource = resource else { return }
             refreshScreen(resource: resource)
         }
-        .onChange(of: resource) { newValue in
+        .onChange(of: resource) { _, newValue in
             guard let resource = newValue else { return }
             refreshScreen(resource: resource)
         }
@@ -220,7 +220,7 @@ public struct WebRendererPreferenceView: View {
         .onReceive(previewObserver) { image in
             preview = image
         }
-        .onChange(of: css) { newValue in
+        .onChange(of: css) { _, newValue in
             renderer?.css = newValue
         }
     }
