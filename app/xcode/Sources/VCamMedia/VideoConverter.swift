@@ -39,25 +39,26 @@ public enum VideoConverter {
         reader.startReading()
 
         let assetwriter = try AVAssetWriter(outputURL: outputURL, fileType: fileType)
-
-        let videoInput = AVAssetWriterInput(mediaType: .video, outputSettings: nil, sourceFormatHint: try .init(
+        let formatHint = try CMFormatDescription(
             videoCodecType: .h264, // required
             width: videoOutputSettings[AVVideoWidthKey] as! Int, // required
             height: videoOutputSettings[AVVideoHeightKey] as! Int  // required
-        ))
-        let audioInput = AVAssetWriterInput(mediaType: .audio, outputSettings: audioOutputSettings)
-
-        videoInput.expectsMediaDataInRealTime = false
-        audioInput.expectsMediaDataInRealTime = false
-
-        assetwriter.shouldOptimizeForNetworkUse = true
-        assetwriter.add(videoInput)
-        assetwriter.add(audioInput)
-
-        assetwriter.startWriting()
-        assetwriter.startSession(atSourceTime: .zero)
+        )
 
         await withCheckedContinuation { continuation in
+            let videoInput = AVAssetWriterInput(mediaType: .video, outputSettings: nil, sourceFormatHint: formatHint)
+            let audioInput = AVAssetWriterInput(mediaType: .audio, outputSettings: audioOutputSettings)
+
+            videoInput.expectsMediaDataInRealTime = false
+            audioInput.expectsMediaDataInRealTime = false
+
+            assetwriter.shouldOptimizeForNetworkUse = true
+            assetwriter.add(videoInput)
+            assetwriter.add(audioInput)
+
+            assetwriter.startWriting()
+            assetwriter.startSession(atSourceTime: .zero)
+
             let group = DispatchGroup()
             group.enter()
             group.enter()
@@ -65,7 +66,7 @@ public enum VideoConverter {
             let videoQueue = DispatchQueue(label: "vcam.mergeAudioTracks.videoQueue")
             let audioQueue = DispatchQueue(label: "vcam.mergeAudioTracks.audioQueue")
 
-            videoInput.requestMediaDataWhenReady(on: videoQueue) {
+            videoInput.requestMediaDataWhenReadySending(on: videoQueue) {
                 while videoInput.isReadyForMoreMediaData {
                     guard let buffer = videoOutput.copyNextSampleBuffer() else {
                         videoInput.markAsFinished()
@@ -76,7 +77,7 @@ public enum VideoConverter {
                 }
             }
 
-            audioInput.requestMediaDataWhenReady(on: audioQueue) {
+            audioInput.requestMediaDataWhenReadySending(on: audioQueue) {
                 while audioInput.isReadyForMoreMediaData {
                     guard let buffer = audioOutput.copyNextSampleBuffer() else {
                         audioInput.markAsFinished()
@@ -93,5 +94,11 @@ public enum VideoConverter {
         }
 
         await assetwriter.finishWriting()
+    }
+}
+
+extension AVAssetWriterInput {
+    func requestMediaDataWhenReadySending(on queue: dispatch_queue_t, using block: sending @escaping () -> Void) {
+        requestMediaDataWhenReady(on: queue, using: block)
     }
 }

@@ -52,6 +52,7 @@ public struct VCamShortcutBuilderView: View {
                 .onMove { offsets, desination in
                     shortcut.configurations.move(fromOffsets: offsets, toOffset: desination)
                 }
+                .listRowSeparator(.hidden)
             }
             .layoutPriority(1)
             .frame(minWidth: 280)
@@ -75,6 +76,7 @@ public struct VCamShortcutBuilderView: View {
                     .padding(4)
                     .background(.regularMaterial)
                     .cornerRadius(4)
+                    .listRowSeparator(.hidden)
                 }
             }
             .frame(minWidth: 180)

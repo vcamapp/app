@@ -19,6 +19,7 @@ public struct VCamSettingView: View {
         case virtualCamera
         case integration
         case experiment
+        case vcam
 
         public var id: Self { self }
 
@@ -36,6 +37,8 @@ public struct VCamSettingView: View {
                 L10n.integration.key
             case .experiment:
                 L10n.experiment.key
+            case .vcam:
+                "VCam"
             }
         }
 
@@ -57,6 +60,8 @@ public struct VCamSettingView: View {
                 Image(systemName: "app.connected.to.app.below.fill")
             case .experiment:
                 Image(systemName: "exclamationmark.triangle.fill")
+            case .vcam:
+                Image(systemName: "info.circle.fill")
             }
         }
     }
@@ -100,6 +105,8 @@ public struct VCamSettingView: View {
                     VCamSettingsIntegrationView()
                 case .experiment:
                     VCamSettingExperimentView.make()
+                case .vcam:
+                    VCamSettingVCamView.make()
                 case nil:
                     Text("🥹")
                 }

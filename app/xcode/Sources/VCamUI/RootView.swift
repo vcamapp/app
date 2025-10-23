@@ -43,8 +43,16 @@ private struct RootViewContent: View {
                         NotificationCenter.default.post(name: .unfocusObject, object: nil)
                     }
                     .disabled(!uiState.interactable)
+                    .modifier { view in
+                        if #available(macOS 26.0, *) {
+                            view.gesture(WindowDragGesture())
+                        } else {
+                            // Disable gesture because of conflict in non-Liquid Glass environment
+                            view
+                        }
+                    }
 
-                VSplitView {
+                VStack(spacing: 0) {
                     HStack(alignment: .bottom, spacing: 0) {
                         VCamMainToolbar()
                         UnityView(unityView: unityView)
@@ -92,6 +100,17 @@ private struct UnityView: View {
     }
 }
 
+extension View {
+    @ViewBuilder
+    func glassEffectRegular(in shape: some Shape) -> some View {
+        if #available(macOS 26, *) {
+            glassEffect(.regular, in: shape)
+        } else {
+            self
+        }
+    }
+}
+
 extension UnityView: Equatable {
     static func == (lhs: Self, rhs: Self) -> Bool {
         true
@@ -100,7 +119,20 @@ extension UnityView: Equatable {
 
 #Preview {
     RootView(
-        unityView: NSView(),
+        unityView: PreviewUnityView(),
         state: VCamUIState(interactable: true)
     )
+}
+
+private class PreviewUnityView: NSView {
+    override init(frame frameRect: NSRect) {
+        super.init(frame: frameRect)
+        wantsLayer = true
+        layer?.backgroundColor = NSColor.red.withAlphaComponent(0.5).cgColor
+        layer?.masksToBounds = true
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 }

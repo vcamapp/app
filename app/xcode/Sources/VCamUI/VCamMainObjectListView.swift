@@ -54,6 +54,7 @@ public struct VCamMainObjectListView: View {
                 .onMove { source, destination in
                     objectManager.move(fromOffsets: source, toOffset: destination)
                 }
+                .listRowSeparator(.hidden)
             }
             .scrollContentBackground(.hidden)
 
@@ -434,4 +435,8 @@ private struct EditSceneObjectViewModifier: ViewModifier {
         uniUpdateScene()
         SceneObjectManager.shared.didChangeObjects() // Reflect the state when resetting the filter
     }
+}
+
+#Preview {
+    VCamMainObjectListView()
 }

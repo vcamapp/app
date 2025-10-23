@@ -148,6 +148,9 @@
 "failedToInstallCameraExtension" = "The installation of the virtual camera failed. Please install it from the VCam settings if you want to use it.";
 "seeDocumentation" = "For more information, see this documentation.";
 "docsURLForVirtualCamera" = "https://docs.vcamapp.com/v/en/virtual-camera/virtualcamera";
+"officialWebsite" = "Official Website";
+"supportVCamMessage" = "If you’d like to support the ongoing improvement of this app, your support would mean a lot!";
+"supportDeveloperLabel" = "Support Developer";
 
 // MARK: - Tracking
 

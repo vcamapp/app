@@ -20,8 +20,16 @@ public struct ColorEditField: View {
     public var body: some View {
         ColorPicker(selection: $value) {
             Text(label, bundle: .localize).bold()
+                .lineLimit(1)
 #if !DEBUG
-                .offset(x: 0, y: 16) // Workaround for release build
+                .modifier { view in
+                    // Workaround for release build
+                    if #available(macOS 26.0, *) {
+                        view.offset(x: 0, y: -8)
+                    } else {
+                        view
+                    }
+                }
 #endif
         }
     }
@@ -31,4 +39,10 @@ extension ColorEditField: Equatable {
     public static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.value == rhs.value && lhs.label == rhs.label
     }
+}
+
+
+#Preview {
+    @Previewable @State var color: Color = .red
+    ColorEditField("Preview Color", value: $color)
 }

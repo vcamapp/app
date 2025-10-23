@@ -8,8 +8,6 @@
 import AppKit
 import CoreImage
 
-extension NSImage : @unchecked @retroactive Sendable {}
-
 public extension NSImage {
     convenience init(color: NSColor, size: NSSize) {
         self.init(size: size)

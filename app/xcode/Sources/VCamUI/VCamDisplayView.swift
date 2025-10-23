@@ -29,6 +29,7 @@ public struct VCamDisplayView: View {
                 GroupBox {
                     HStack {
                         SelectEditField(L10n.preset.key, value: $preset)
+                        Spacer()
                         TextField("", text: $preset.description)
                             .frame(width: 120)
                         Button {
@@ -125,4 +126,5 @@ private struct VCamDisplayParameterView: View {
 
 #Preview {
     VCamDisplayView()
+        .environment(\.locale, Locale(identifier: "ja"))
 }

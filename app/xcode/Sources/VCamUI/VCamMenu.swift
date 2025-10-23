@@ -89,6 +89,7 @@ private struct MenuBottomView: View {
             .controlSize(.small)
 
             Divider()
+                .opacity(0.3)
                 .padding(.bottom, 8)
 
             VCamMainObjectListView()

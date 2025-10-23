@@ -54,6 +54,7 @@ public struct VCamSettingGeneralView: View {
                     }
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 }

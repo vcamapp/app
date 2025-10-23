@@ -1,4 +1,4 @@
-// swift-tools-version: 6.0
+// swift-tools-version: 6.2
 
 import PackageDescription
 
@@ -7,7 +7,7 @@ let package = Package(
     defaultLocalization: "en",
     platforms: [.macOS(.v14)],
     products: [
-        .library(name: "VCam", targets: ["VCamUI", "VCamMedia", "VCamBridge", "VCamWorkaround"]),
+        .library(name: "VCam", targets: ["VCamUI", "VCamMedia", "VCamBridge"]),
         .library(name: "VCamMedia", targets: ["VCamMedia"]),
         .library(name: "VCamCamera", targets: ["VCamCamera"]),
 
@@ -19,7 +19,7 @@ let package = Package(
     ],
     targets: [
         .target(name: "VCamUI", dependencies: [
-            "VCamUIFoundation", "VCamTracking", "VCamCamera", "VCamData", "VCamLocalization", "VCamBridge",
+            "VCamUIFoundation", "VCamTracking", "VCamCamera", "VCamData", "VCamLocalization", "VCamBridge", "VCamWorkaround",
         ], resources: [
             .process("Resources"),
         ], swiftSettings: [

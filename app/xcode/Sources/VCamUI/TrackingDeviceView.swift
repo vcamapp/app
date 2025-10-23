@@ -61,6 +61,7 @@ public struct TrackingDeviceView: View {
                 }
                 .disabled(Tracking.shared.micLipSyncDisabled)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
         .onReceive(NotificationCenter.default.publisher(for: .deviceWasChanged)) { _ in
             // Refresh device list
@@ -99,4 +100,8 @@ private extension ExternalState {
             Tracking.shared.setLipSyncType($0)
         }
     }
+}
+
+#Preview {
+    TrackingDeviceView()
 }

@@ -310,6 +310,8 @@ public enum L10n {
   public static let notitle = LocalizedString(lookupKey: "notitle")
   /// Object
   public static let object = LocalizedString(lookupKey: "object")
+  /// Official Website
+  public static let officialWebsite = LocalizedString(lookupKey: "officialWebsite")
   /// Open File
   public static let openFile = LocalizedString(lookupKey: "openFile")
   /// Open preferences
@@ -432,6 +434,10 @@ public enum L10n {
   public static let success = LocalizedString(lookupKey: "success")
   /// The virtual camera was successfully installed. It's recommended to restart VCam once.
   public static let successToInstallCameraExtension = LocalizedString(lookupKey: "successToInstallCameraExtension")
+  /// Support Developer
+  public static let supportDeveloperLabel = LocalizedString(lookupKey: "supportDeveloperLabel")
+  /// If you’d like to support the ongoing improvement of this app, your support would mean a lot!
+  public static let supportVCamMessage = LocalizedString(lookupKey: "supportVCamMessage")
   /// Elbow offset
   public static let swivelOffset = LocalizedString(lookupKey: "swivelOffset")
   /// Take a photo

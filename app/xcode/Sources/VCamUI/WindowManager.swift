@@ -30,7 +30,9 @@ public final class WindowManager: ObservableObject {
     init() {
         NotificationCenter.default.addObserver(forName: NSWindow.didResizeNotification, object: nil, queue: .main) { _ in
             if let size = NSApp.mainWindow?.contentView?.frame.size {
-                self.size = size
+                DispatchQueue.main.async {
+                    self.size = size
+                }
             }
         }
 
@@ -57,8 +59,15 @@ public final class WindowManager: ObservableObject {
             window.appearance = NSAppearance(named: .darkAqua)
             window.title = "VCam"
             window.titlebarAppearsTransparent = true
+//            window.isMovableByWindowBackground = true
             window.backgroundColor = .clear
-            window.styleMask.insert(.fullSizeContentView)
+            window.styleMask = [
+                .titled,
+                .closable,
+                .miniaturizable,
+                .resizable,
+                .fullSizeContentView,
+            ]
             window.titleVisibility = .visible
             window.minSize = .init(width: 800, height: 450)
             window.contentAspectRatio = NSSize(width: 1280, height: 720)
