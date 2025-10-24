@@ -30,13 +30,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             UserDefaults.standard.removePersistentDomain(forName: Bundle.main.bundleIdentifier!)
         }
 
-        Task {
-            await configureApp()
-        }
+        configureApp()
     }
 
-    @MainActor
-    private func configureApp() async {
+    private func configureApp() {
         VCamUIPreviewStub.stub()
         VCamSystem.shared.configure()
 
