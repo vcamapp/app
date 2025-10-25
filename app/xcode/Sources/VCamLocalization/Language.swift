@@ -22,9 +22,9 @@ public enum LanguageList: String, CaseIterable, Equatable, Identifiable {
         case .default:
             return L10n.languageOfDevice.text
         case .japanese:
-            return L10n.japanese.text
+            return "日本語"
         case .english:
-            return L10n.english.text
+            return "English"
         }
     }
 

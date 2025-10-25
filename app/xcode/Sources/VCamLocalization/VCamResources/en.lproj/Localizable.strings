@@ -245,8 +245,6 @@
 // MARK: - Language
 
 "languageOfDevice" = "Language of the device";
-"japanese" = "Japanese";
-"english" = "English";
 
 // MARK: - Application Menu
 

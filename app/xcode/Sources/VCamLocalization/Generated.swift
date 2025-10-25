@@ -156,8 +156,6 @@ public enum L10n {
   public static let enableAutoConvertingToVRM1 = LocalizedString(lookupKey: "enableAutoConvertingToVRM1")
   /// Enable VSync
   public static let enableVSync = LocalizedString(lookupKey: "enableVSync")
-  /// English
-  public static let english = LocalizedString(lookupKey: "english")
   /// Entire Display
   public static let entireDisplay = LocalizedString(lookupKey: "entireDisplay")
   /// No permisison. Please allow screen recording in the Security & Privacy of the System Preferences.
@@ -252,8 +250,6 @@ public enum L10n {
   public static func isNotSetYet(_ p1: Any) -> ArgumentsLocalizedString {
     ArgumentsLocalizedString("isNotSetYet %@", "isNotSetYet \(String(describing: p1))", String(describing: p1))
   }
-  /// Japanese
-  public static let japanese = LocalizedString(lookupKey: "japanese")
   /// Jump
   public static let jump = LocalizedString(lookupKey: "jump")
   /// Language of the device

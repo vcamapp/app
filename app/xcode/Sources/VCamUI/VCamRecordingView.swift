@@ -58,7 +58,7 @@ public struct VCamRecordingView: View {
 
     private var takePhotoView: some View {
         GroupBox {
-            HStack {
+            VStack {
                 Button {
                     takeScreenshot()
                 } label: {
@@ -68,6 +68,7 @@ public struct VCamRecordingView: View {
                     }
                 }
                 .controlSize(.large)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 Form {
                     VStack(alignment: .leading) {
                         Stepper(value: $screenshotWaitTime,
@@ -85,12 +86,13 @@ public struct VCamRecordingView: View {
             }
             .frame(maxHeight: .infinity, alignment: .top)
         }
+        .fixedSize()
     }
 
     private var recordVideoView: some View {
         GroupBox {
             VStack {
-                HStack(alignment: .top) {
+                HStack {
                     Button {
                         if recorder.isRecording {
                             recorder.stop()
@@ -117,19 +119,15 @@ public struct VCamRecordingView: View {
                         }
                     }
                     .controlSize(.large)
-                    Form {
-                        VStack(alignment: .trailing) {
-                            Picker(selection: $recordingVideoFormat) {
-                                ForEach(VideoFormat.allCases) { format in
-                                    Text(format.name).tag(format.rawValue)
-                                }
-                            } label: {
-                                Text(L10n.videoFormat.key, bundle: .localize)
-                            }
+                    Spacer()
+                    Picker(selection: $recordingVideoFormat) {
+                        ForEach(VideoFormat.allCases) { format in
+                            Text(format.name).tag(format.rawValue)
                         }
-                        .disabled(recorder.isRecording)
+                    } label: {
+                        Text(L10n.videoFormat.key, bundle: .localize)
                     }
-                    .padding(.leading)
+                    .disabled(recorder.isRecording)
                 }
                 GroupBox {
                     HStack(spacing: 16) {
