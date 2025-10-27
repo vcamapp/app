@@ -21,8 +21,8 @@ public struct VCamSettingGeneralView: View {
     @ExternalStateBinding(.useAddToMacOSMenuBar) private var useAddToMacOSMenuBar: Bool
 
     public var body: some View {
-        GroupBox {
-            Form {
+        Form {
+            Section {
                 Toggle(isOn: $useAutoMode) {
                     Text(L10n.playIdleMotions.key, bundle: .localize)
                 }
@@ -40,21 +40,18 @@ public struct VCamSettingGeneralView: View {
                     Text(L10n.addToMacOSMenuBar.key, bundle: .localize)
                 }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-        }
-        .onChange(of: useAddToMacOSMenuBar) { _, newValue in
-            VCamSystem.shared.windowManager.isMacOSMenubarVisible = newValue
-        }
 
-        GroupBox {
-            Form {
+            Section {
                 Picker("Language / 言語", selection: $locale.map(get: LanguageList.init(locale:), set: \.rawValue)) {
                     ForEach(LanguageList.allCases) { lang in
                         Text(lang.name).tag(lang.rawValue)
                     }
                 }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .formStyle(.grouped)
+        .onChange(of: useAddToMacOSMenuBar) { _, newValue in
+            VCamSystem.shared.windowManager.isMacOSMenubarVisible = newValue
         }
     }
 }

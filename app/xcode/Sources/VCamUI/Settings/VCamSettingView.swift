@@ -91,7 +91,7 @@ public struct VCamSettingView: View {
             .listStyle(.sidebar)
             .frame(width: 140)
 
-            VStack {
+            Group {
                 switch tab {
                 case .general:
                     VCamSettingGeneralView()
@@ -110,11 +110,9 @@ public struct VCamSettingView: View {
                 case nil:
                     Text("🥹")
                 }
-                Spacer()
             }
-            .frame(minWidth: 440)
+            .frame(minWidth: 440, maxHeight: .infinity, alignment: .top)
         }
-        .padding([.top, .trailing], 8)
         .onChange(of: tab) { _, newValue in
             if newValue == nil {
                 tab = tab

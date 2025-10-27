@@ -19,22 +19,24 @@ public struct VCamSettingVirtualCameraView: View {
     @State private var task: Task<Void, Never>?
 
     public var body: some View {
-        GroupBox {
-            HStack {
-                Image(systemName: "info.circle")
-                Text(isCameraExtensionStarting ? L10n.cameraExtensionWorking.key : L10n.cameraExtensionNotWorking.key, bundle: .localize)
-            }
-            .frame(maxWidth: .infinity)
+        Form {
+            Section {
+                VStack {
+                    HStack {
+                        Image(systemName: "info.circle")
+                        Text(isCameraExtensionStarting ? L10n.cameraExtensionWorking.key : L10n.cameraExtensionNotWorking.key, bundle: .localize)
+                    }
+                    .frame(maxWidth: .infinity)
 
-            if !isCameraExtensionStarting, isCameraExtensionInstalled {
-                Text(L10n.pleaseRestartMacToFix.key, bundle: .localize)
-                    .font(.footnote)
-                    .opacity(0.5)
+                    if !isCameraExtensionStarting, isCameraExtensionInstalled {
+                        Text(L10n.pleaseRestartMacToFix.key, bundle: .localize)
+                            .font(.footnote)
+                            .opacity(0.5)
+                    }
+                }
             }
-        }
 
-        if isAwaitingUserApproval {
-            GroupBox {
+            if isAwaitingUserApproval {
                 HStack {
                     Image(systemName: "exclamationmark.triangle")
                     Link(destination: URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy")!) {
@@ -43,70 +45,75 @@ public struct VCamSettingVirtualCameraView: View {
                 }
                 .frame(maxWidth: .infinity)
             }
-        }
 
-        GroupBox {
-            HStack {
-                if isCameraExtensionInstalled {
-                    Button {
-                        task?.cancel()
-                        task = Task {
-                            do {
-                                try await uninstallExtension(isAlertShown: false)
-                                try await installExtension()
-                            } catch {
-                                await VCamAlert.showModal(title: L10n.failure.text, message: error.localizedDescription, canCancel: false)
+            Section {
+                VStack {
+                    HStack {
+                        if isCameraExtensionInstalled {
+                            Button {
+                                task?.cancel()
+                                task = Task {
+                                    do {
+                                        try await uninstallExtension(isAlertShown: false)
+                                        try await installExtension()
+                                    } catch {
+                                        await VCamAlert.showModal(title: L10n.failure.text, message: error.localizedDescription, canCancel: false)
+                                    }
+                                }
+                            } label: {
+                                Text(L10n.reinstall.key, bundle: .localize)
+                            }
+                            
+                            Button {
+                                task?.cancel()
+                                task = Task {
+                                    do {
+                                        try await uninstallExtension(isAlertShown: true)
+                                    } catch {
+                                        await VCamAlert.showModal(title: L10n.failure.text, message: error.localizedDescription, canCancel: false)
+                                    }
+                                }
+                            } label: {
+                                Text(L10n.uninstall.key, bundle: .localize)
+                            }
+                        } else {
+                            Button {
+                                task?.cancel()
+                                task = Task {
+                                    do {
+                                        try await installExtension()
+                                    } catch {
+                                        await VCamAlert.showModal(title: L10n.failure.text, message: error.localizedDescription, canCancel: false)
+                                    }
+                                }
+                            } label: {
+                                Text(L10n.install.key, bundle: .localize)
                             }
                         }
-                    } label: {
-                        Text(L10n.reinstall.key, bundle: .localize)
                     }
-
-                    Button {
-                        task?.cancel()
-                        task = Task {
-                            do {
-                                try await uninstallExtension(isAlertShown: true)
-                            } catch {
-                                await VCamAlert.showModal(title: L10n.failure.text, message: error.localizedDescription, canCancel: false)
-                            }
-                        }
-                    } label: {
-                        Text(L10n.uninstall.key, bundle: .localize)
-                    }
-                } else {
-                    Button {
-                        task?.cancel()
-                        task = Task {
-                            do {
-                                try await installExtension()
-                            } catch {
-                                await VCamAlert.showModal(title: L10n.failure.text, message: error.localizedDescription, canCancel: false)
-                            }
-                        }
-                    } label: {
-                        Text(L10n.install.key, bundle: .localize)
-                    }
+                    .frame(maxWidth: .infinity)
+                    
+                    Text(L10n.noteEnableNewCameraExtension.key, bundle: .localize)
+                        .font(.footnote)
+                        .opacity(0.5)
                 }
             }
-            .frame(maxWidth: .infinity)
 
-            Text(L10n.noteEnableNewCameraExtension.key, bundle: .localize)
-                .font(.footnote)
-                .opacity(0.5)
-        }
-
-        Link(destination: URL(string: L10n.docsURLForVirtualCamera.text)!) {
-            Text(L10n.seeDocumentation.key, bundle: .localize)
-                .font(.footnote)
-        }
-        .task {
-            isCameraExtensionInstalled = CoreMediaSinkStream.isInstalled
-            isCameraExtensionStarting = VirtualCameraManager.shared.sinkStream.isStarting
-            if let property = try? await CameraExtension().extensionProperties() {
-                isAwaitingUserApproval = property.isAwaitingUserApproval
+            Section {
+                Link(destination: URL(string: L10n.docsURLForVirtualCamera.text)!) {
+                    Text(L10n.seeDocumentation.key, bundle: .localize)
+                        .font(.footnote)
+                }
+            }
+            .task {
+                isCameraExtensionInstalled = CoreMediaSinkStream.isInstalled
+                isCameraExtensionStarting = VirtualCameraManager.shared.sinkStream.isStarting
+                if let property = try? await CameraExtension().extensionProperties() {
+                    isAwaitingUserApproval = property.isAwaitingUserApproval
+                }
             }
         }
+        .formStyle(.grouped)
     }
 }
 

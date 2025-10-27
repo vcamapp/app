@@ -19,31 +19,28 @@ public struct VCamSettingRenderingView: View {
     @ExternalStateBinding(.useVSync) private var useVSync
 
     public var body: some View {
-        VStack {
-            GroupBox {
-                Form {
-                    Picker(selection: $typedScreenResolution) {
-                        ForEach(ScreenResolution.allCases) {
-                            Text($0.description)
-                                .tag($0)
-                        }
-                    } label: {
-                        Text(L10n.screenResolution.key, bundle: .localize)
-                    }
-                    Picker(selection: $qualityLevel) {
-                        ForEach(QualityLevel.allCases) {
-                            Text($0.localizedName, bundle: .localize)
-                                .tag($0.rawValue)
-                        }
-                    } label: {
-                        Text(L10n.renderingQuality.key, bundle: .localize)
-                    }
-
-                    ValueEditField(L10n.fpsScreen.key, value: $fps, type: .slider(10...60))
-                        .disabled(useVSync)
+        Form {
+            Picker(selection: $typedScreenResolution) {
+                ForEach(ScreenResolution.allCases) {
+                    Text($0.description)
+                        .tag($0)
                 }
+            } label: {
+                Text(L10n.screenResolution.key, bundle: .localize)
             }
+            Picker(selection: $qualityLevel) {
+                ForEach(QualityLevel.allCases) {
+                    Text($0.localizedName, bundle: .localize)
+                        .tag($0.rawValue)
+                }
+            } label: {
+                Text(L10n.renderingQuality.key, bundle: .localize)
+            }
+
+            ValueEditField(L10n.fpsScreen.key, value: $fps, type: .slider(10...60))
+                .disabled(useVSync)
         }
+        .formStyle(.grouped)
     }
 }
 

@@ -20,48 +20,57 @@ public struct VCamTrackingView: View {
 #endif
 
     public var body: some View {
-        GroupBox {
-            HStack {
-                GroupBox {
-                    Picker("", selection: faceTrackingMethod) {
-                        ForEach(TrackingMethod.Face.allCases) { method in
-                            Text(method.name, bundle: .localize)
-                        }
+        HStack {
+            VStack(spacing: 8) {
+                Text(L10n.faceEyeMouth.key, bundle: .localize)
+                    .bold()
+                Picker(selection: faceTrackingMethod) {
+                    ForEach(TrackingMethod.Face.allCases) { method in
+                        Text(method.name, bundle: .localize)
                     }
-                    .frame(width: 128)
                 } label: {
                     Text(L10n.faceEyeMouth.key, bundle: .localize)
                 }
+                .labelsHidden()
+                .frame(maxWidth: .infinity, alignment: .trailing)
+            }
 
-                Spacer()
+            Divider()
 
-                GroupBox {
-                    Picker("", selection: handTrackingMethod) {
-                        ForEach(TrackingMethod.Hand.allCases) { method in
-                            Text(method.name, bundle: .localize)
-                        }
+            VStack(spacing: 8) {
+                Text(L10n.hand.key, bundle: .localize)
+                    .bold()
+                Picker(selection: handTrackingMethod) {
+                    ForEach(TrackingMethod.Hand.allCases) { method in
+                        Text(method.name, bundle: .localize)
                     }
-                    .frame(width: 128)
                 } label: {
                     Text(L10n.hand.key, bundle: .localize)
                 }
+                .labelsHidden()
+                .frame(maxWidth: .infinity, alignment: .trailing)
+            }
 #if ENABLE_MOCOPI
-                .disabled(integrationMocopi)
+            .disabled(integrationMocopi)
+            .opacity(integrationMocopi ? 0.5 : 1.0)
 #endif
-                Spacer()
+            Divider()
 
-                GroupBox {
-                    Picker("", selection: fingerTrackingMethod) {
-                        ForEach(TrackingMethod.Finger.allCases) { method in
-                            Text(method.name, bundle: .localize)
-                        }
+            VStack(spacing: 8) {
+                Text(L10n.finger.key, bundle: .localize)
+                    .bold()
+                Picker(selection: fingerTrackingMethod) {
+                    ForEach(TrackingMethod.Finger.allCases) { method in
+                        Text(method.name, bundle: .localize)
                     }
-                    .frame(width: 128)
                 } label: {
                     Text(L10n.finger.key, bundle: .localize)
                 }
-                .disabled(Tracking.shared.handTrackingMethod == .disabled)
+                .labelsHidden()
+                .frame(maxWidth: .infinity, alignment: .trailing)
             }
+            .disabled(Tracking.shared.handTrackingMethod == .disabled)
+            .opacity(Tracking.shared.handTrackingMethod == .disabled ? 0.5 : 1.0)
         }
     }
 
@@ -122,4 +131,8 @@ extension TrackingMethod.Finger {
         case .vcamMocap: return "VCamMocap"
         }
     }
+}
+
+#Preview {
+    VCamTrackingView()
 }

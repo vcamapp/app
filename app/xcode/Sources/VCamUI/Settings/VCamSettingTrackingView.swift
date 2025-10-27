@@ -33,58 +33,51 @@ public struct VCamSettingTrackingView: View {
     @StateObject private var toggleWorkaround = ToggleWorkaround()
 
     public var body: some View {
-        VStack {
-            VCamTrackingView()
-            TrackingDeviceView()
-
-            GroupBox {
-                VStack(alignment: .leading) {
-                    Toggle(isOn: $useVowelEstimation) {
-                        Text(L10n.useVowelEstimation.key, bundle: .localize)
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
+        Form {
+            Section {
+                VCamTrackingView()
+            }
+            Section {
+                TrackingDeviceView()
             }
 
-            GroupBox {
-                Form {
-                    ValueEditField(L10n.lipSyncSensitivity.key, value: $lipSyncMicIntensity, type: .slider(0.1...3))
-                    ValueEditField(L10n.fpsCamera.key, value: $cameraFps.map(), type: .slider(1...60) { isEditing in
-                        guard !isEditing else { return }
-                        Tracking.shared.avatarCameraManager.setFPS(cameraFps)
-                    })
-                }
+            Toggle(isOn: $useVowelEstimation) {
+                Text(L10n.useVowelEstimation.key, bundle: .localize)
             }
 
-            GroupBox {
-                Form {
-                    ValueEditField(L10n.shoulderRotationWeight.key, value: $shoulderRotationWeight, type: .slider(0.0...1))
-                    ValueEditField(L10n.swivelOffset.key, value: $swivelOffset, type: .slider(0.0...30))
-                }
+            Section {
+                ValueEditField(L10n.lipSyncSensitivity.key, value: $lipSyncMicIntensity, type: .slider(0.1...3))
+                ValueEditField(L10n.fpsCamera.key, value: $cameraFps.map(), type: .slider(1...60) { isEditing in
+                    guard !isEditing else { return }
+                    Tracking.shared.avatarCameraManager.setFPS(cameraFps)
+                })
+            }
+
+            Section {
+                ValueEditField(L10n.shoulderRotationWeight.key, value: $shoulderRotationWeight, type: .slider(0.0...1))
+                ValueEditField(L10n.swivelOffset.key, value: $swivelOffset, type: .slider(0.0...30))
             }
 #if ENABLE_MOCOPI
             .disabled(integrationMocopi)
+            .opacity(integrationMocopi ? 0.5 : 1.0)
 #endif
-            GroupBox {
-                VStack(alignment: .leading) {
-                    Toggle(isOn: $useEyeTracking) {
-                        Text(L10n.trackEyes.key, bundle: .localize)
-                    }
-                    Group {
-                        ValueEditField(L10n.eyesHorizontalSensitivity.key, value: $eyeTrackingIntensityX.map(), type: .slider(0...10))
-                        ValueEditField(L10n.eyesVerticalSensitivity.key, value: $eyeTrackingIntensityY.map(), type: .slider(0...10))
-                    }
-                    .disabled(!useEyeTracking)
+            Section {
+                Toggle(isOn: $useEyeTracking) {
+                    Text(L10n.trackEyes.key, bundle: .localize)
                 }
+                Group {
+                    ValueEditField(L10n.eyesHorizontalSensitivity.key, value: $eyeTrackingIntensityX.map(), type: .slider(0...10))
+                    ValueEditField(L10n.eyesVerticalSensitivity.key, value: $eyeTrackingIntensityY.map(), type: .slider(0...10))
+                }
+                .disabled(!useEyeTracking)
+                .opacity(useEyeTracking ? 1.0 : 0.5)
             }
-            GroupBox {
-                VStack {
-                    ValueEditField(L10n.easeOfOpeningFingers.key, value: $fingerTrackingOpenIntensity.map(), type: .slider(0.1...3))
-                    ValueEditField(L10n.easeOfCloseFingers.key, value: $fingerTrackingCloseIntensity.map(), type: .slider(0.1...3))
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
+            Section {
+                ValueEditField(L10n.easeOfOpeningFingers.key, value: $fingerTrackingOpenIntensity.map(), type: .slider(0.1...3))
+                ValueEditField(L10n.easeOfCloseFingers.key, value: $fingerTrackingCloseIntensity.map(), type: .slider(0.1...3))
             }
         }
+        .formStyle(.grouped)
         .onAppear {
             toggleWorkaround.run()
         }

@@ -28,7 +28,7 @@ public struct ValueEditField: View {
     public var body: some View {
         HStack(spacing: 2) {
             HStack(spacing: 2) {
-                Text(label, bundle: .localize).bold()
+                Text(label, bundle: .localize)
                 if !valueHidden {
                     Text("[\(valueText)]")
                         .lineLimit(1)

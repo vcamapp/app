@@ -28,7 +28,7 @@ public struct VCamSettingsIntegrationView: View {
     }
 
     public var body: some View {
-        VStack {
+        Form {
             if let ipAddress = NWInterface.InterfaceType.wiredEthernet.ipv4 ?? NWInterface.InterfaceType.wifi.ipv4 {
                 FeatureView(title: "Info.") {
                     HStack {
@@ -55,7 +55,6 @@ public struct VCamSettingsIntegrationView: View {
                 HStack {
                     TextField("IP", text: $integrationFacialMocapIp)
                         .textFieldStyle(.roundedBorder)
-                        .frame(width: 128)
 
                     Button {
                         Task {
@@ -75,7 +74,7 @@ public struct VCamSettingsIntegrationView: View {
             MocopiSettingView()
 #endif
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .formStyle(.grouped)
     }
 }
 
@@ -111,11 +110,11 @@ private extension VCamSettingsIntegrationView {
         let content: Content
 
         var body: some View {
-            GroupBox {
-                GroupBox(title) {
-                    content
-                        .frame(maxWidth: .infinity)
-                }
+            Section {
+                content
+                    .frame(maxWidth: .infinity)
+            } header: {
+                Text(title)
             }
         }
     }

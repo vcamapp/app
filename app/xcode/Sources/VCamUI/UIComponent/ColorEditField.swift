@@ -21,16 +21,13 @@ public struct ColorEditField: View {
         ColorPicker(selection: $value) {
             Text(label, bundle: .localize).bold()
                 .lineLimit(1)
-#if !DEBUG
                 .modifier { view in
-                    // Workaround for release build
                     if #available(macOS 26.0, *) {
                         view.offset(x: 0, y: -8)
                     } else {
                         view
                     }
                 }
-#endif
         }
     }
 }
