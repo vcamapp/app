@@ -14,33 +14,34 @@ import VCamMedia
 import VCamTracking
 import VCamLogger
 
-public final class VideoRecorder: ObservableObject {
+@Observable
+public final class VideoRecorder {
     public static let shared = VideoRecorder()
 
-    @Published public private(set) var isRecording = false
+    public private(set) var isRecording = false
 
-    private var assetwriter: AVAssetWriter?
-    private var assetVideoWriterAdaptor: AVAssetWriterInputPixelBufferAdaptor?
-    private var assetAudioWriterInput: AVAssetWriterInput?
-    private var assetPCAudioWriterInput: AVAssetWriterInput?
+    @ObservationIgnored private var assetwriter: AVAssetWriter?
+    @ObservationIgnored private var assetVideoWriterAdaptor: AVAssetWriterInputPixelBufferAdaptor?
+    @ObservationIgnored private var assetAudioWriterInput: AVAssetWriterInput?
+    @ObservationIgnored private var assetPCAudioWriterInput: AVAssetWriterInput?
 
-    private var frameCount: Int64 = 0
-    private var startDate = Date()
-    private var sampleCount = CMTimeValue(0)
-    private var pcSampleCount = CMTimeValue(0)
-    private var baseHostTime = mach_absolute_time()
-    private var pixelBuffer: CVPixelBuffer?
+    @ObservationIgnored private var frameCount: Int64 = 0
+    @ObservationIgnored private var startDate = Date()
+    @ObservationIgnored private var sampleCount = CMTimeValue(0)
+    @ObservationIgnored private var pcSampleCount = CMTimeValue(0)
+    @ObservationIgnored private var baseHostTime = mach_absolute_time()
+    @ObservationIgnored private var pixelBuffer: CVPixelBuffer?
     private let context = CIContext(options: [.cacheIntermediates: false, .name: "VideoRecorder"])
-    private var outputFile: AVAudioFile!
-    private var outputURL: URL!
-    private var temporaryOutputURL: URL!
+    @ObservationIgnored private var outputFile: AVAudioFile!
+    @ObservationIgnored private var outputURL: URL!
+    @ObservationIgnored private var temporaryOutputURL: URL!
 
-    private var converter: AudioConverter?
+    @ObservationIgnored private var converter: AudioConverter?
     private let expectedFormat = AVAudioFormat(standardFormatWithSampleRate: 48000, channels: 1)!
-    private var systemAudioRecorder: (any ScreenRecorderProtocol)?
+    @ObservationIgnored private var systemAudioRecorder: (any ScreenRecorderProtocol)?
 
 #if DEBUG
-    private var debugTimer: Timer?
+    @ObservationIgnored private var debugTimer: Timer?
 #endif
 
     public func start(with outputDirectory: URL, name: String, format: VideoFormat, screenResolution: ScreenResolution, capturesSystemAudio: Bool) throws {

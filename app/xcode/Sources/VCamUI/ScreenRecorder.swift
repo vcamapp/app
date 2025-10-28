@@ -14,7 +14,8 @@ public protocol ScreenRecorderProtocol: AnyObject {
     @MainActor func stopCapture() async
 }
 
-public final class ScreenRecorder: NSObject, ObservableObject, ScreenRecorderProtocol {
+@Observable
+public final class ScreenRecorder: NSObject, ScreenRecorderProtocol {
     public enum CaptureType {
         case independentWindow
         case display
@@ -86,10 +87,10 @@ public final class ScreenRecorder: NSObject, ObservableObject, ScreenRecorderPro
         }
     }
 
-    private var didVideoOutput: ((CapturedFrame) -> Void)?
-    private var didAudioOutput: ((CMSampleBuffer) -> Void)?
+    @ObservationIgnored private var didVideoOutput: ((CapturedFrame) -> Void)?
+    @ObservationIgnored private var didAudioOutput: ((CMSampleBuffer) -> Void)?
 
-    public var size: CGSize {
+    @ObservationIgnored public var size: CGSize {
         guard let config = captureConfig else {
             return .init(width: 1024, height: 640)
         }
@@ -104,18 +105,18 @@ public final class ScreenRecorder: NSObject, ObservableObject, ScreenRecorderPro
         return .init(width: 1024, height: 640)
     }
 
-    public var cropRect = CGRect(x: 0, y: 0, width: 1024, height: 640)
+    @ObservationIgnored public var cropRect = CGRect(x: 0, y: 0, width: 1024, height: 640)
 
-    public var filter: ImageFilter?
+    @ObservationIgnored public var filter: ImageFilter?
 
-    @MainActor @Published private(set) var latestFrame: CapturedFrame?
-    @MainActor @Published private(set) var error: (any Error)?
-    @MainActor @Published private(set) var isRecording = false
+    @MainActor private(set) var latestFrame: CapturedFrame?
+    @MainActor private(set) var error: (any Error)?
+    @MainActor private(set) var isRecording = false
 
-    public private(set) var captureConfig: CaptureConfiguration?
-    private var stream: SCStream?
-    private var cpuStartTime = mach_absolute_time()
-    private var mediaStartTime = CACurrentMediaTime()
+    @ObservationIgnored public private(set) var captureConfig: CaptureConfiguration?
+    @ObservationIgnored private var stream: SCStream?
+    @ObservationIgnored private var cpuStartTime = mach_absolute_time()
+    @ObservationIgnored private var mediaStartTime = CACurrentMediaTime()
     private let videoSampleBufferQueue = DispatchQueue(label: "com.github.tattn.vcam.queue.screenrecorder.video")
     private let audioSampleBufferQueue = DispatchQueue(label: "com.github.tattn.vcam.queue.screenrecorder.audio")
 

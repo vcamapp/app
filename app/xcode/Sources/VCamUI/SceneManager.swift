@@ -29,20 +29,21 @@ public func uniUpdateScene() {
     }
 }
 
-public final class SceneManager: ObservableObject {
+@Observable
+public final class SceneManager {
     public static let shared = SceneManager()
 
-    @Published public private(set) var currentSceneId: Int32
+    public private(set) var currentSceneId: Int32
 
-    var currentScene: VCamScene {
+    @ObservationIgnored var currentScene: VCamScene {
         get throws {
             try scenes.find(byId: currentSceneId).orThrow(NSError.vcam(message: "invalid scene id: \(currentSceneId)"))
         }
     }
 
-    @Published public var scenes: [VCamScene]
-    private var landScapeScenes: [VCamScene]
-    private var portraitScenes: [VCamScene]
+    public var scenes: [VCamScene]
+    @ObservationIgnored private var landScapeScenes: [VCamScene]
+    @ObservationIgnored private var portraitScenes: [VCamScene]
 
     private init() {
         let newSceneId = Int32.random(in: 0..<Int32.max)

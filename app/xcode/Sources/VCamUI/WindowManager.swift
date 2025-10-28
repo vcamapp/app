@@ -10,19 +10,20 @@ import VCamLogger
 import VCamCamera
 import VCamBridge
 
-public final class WindowManager: ObservableObject {
-    @Published public private(set) var size = NSSize(width: 1280, height: 720)
+@Observable
+public final class WindowManager {
+    public private(set) var size = NSSize(width: 1280, height: 720)
 
     public let isUnity = Bundle.main.bundlePath.hasSuffix("Unity.app")
 
-    public private(set) var isConfigured = false
-    public fileprivate(set) var isWindowClosed = false
-    public var isEnabled = false
+    @ObservationIgnored public private(set) var isConfigured = false
+    @ObservationIgnored public fileprivate(set) var isWindowClosed = false
+    @ObservationIgnored public var isEnabled = false
 
     private let containerView = VCamRootContainerView()
-    private var statusItem: NSStatusItem?
+    @ObservationIgnored private var statusItem: NSStatusItem?
 
-    public var isMacOSMenubarVisible: Bool {
+    @ObservationIgnored public var isMacOSMenubarVisible: Bool {
         get { statusItem?.isVisible ?? false }
         set { statusItem?.isVisible = newValue }
     }

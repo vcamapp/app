@@ -7,13 +7,14 @@
 
 import SwiftUI
 
-public final class VCamUIState: ObservableObject {
+@Observable
+public final class VCamUIState {
     public static let shared = VCamUIState()
 
     public init(interactable: Bool = true) {
         self.interactable = interactable
     }
 
-    @Published public var currentMenu = VCamMenuItem.main
-    @Published public var interactable: Bool
+    public var currentMenu = VCamMenuItem.main
+    public var interactable: Bool
 }

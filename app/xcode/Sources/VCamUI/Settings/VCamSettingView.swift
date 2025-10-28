@@ -68,7 +68,7 @@ public struct VCamSettingView: View {
 
     @State var tab: Tab?
 
-    @ObservedObject private var recorder = VideoRecorder.shared
+    @Bindable private var recorder = VideoRecorder.shared
 
     @AppStorage(key: .locale) var locale
 

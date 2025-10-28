@@ -30,8 +30,6 @@ public struct VCamSettingTrackingView: View {
     @ExternalStateBinding(.shoulderRotationWeight) private var shoulderRotationWeight
     @ExternalStateBinding(.swivelOffset) private var swivelOffset
 
-    @StateObject private var toggleWorkaround = ToggleWorkaround()
-
     public var body: some View {
         Form {
             Section {
@@ -78,16 +76,6 @@ public struct VCamSettingTrackingView: View {
             }
         }
         .formStyle(.grouped)
-        .onAppear {
-            toggleWorkaround.run()
-        }
-    }
-}
-
-private final class ToggleWorkaround: ObservableObject {
-    // Workaround: The UI fails to refresh when using checkbox-style toggle, requiring a one-time rebuild of the UI for updates to take effect.
-    func run() {
-        objectWillChange.send()
     }
 }
 

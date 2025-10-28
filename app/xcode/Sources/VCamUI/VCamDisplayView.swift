@@ -16,7 +16,7 @@ public struct VCamDisplayView: View {
     @ExternalStateBinding(.usePostEffect) private var usePostEffect
     @ExternalStateBinding(.currentDisplayParameterPreset) private var preset
 
-    @ObservedObject private var windowManager = VCamSystem.shared.windowManager
+    @UniReload private var reload: Void
 
     public var body: some View {
         VStack {
@@ -28,14 +28,23 @@ public struct VCamDisplayView: View {
                 }
                 GroupBox {
                     HStack {
-                        SelectEditField(L10n.preset.key, value: $preset)
-                        Spacer()
-                        TextField("", text: $preset.description)
-                            .frame(width: 120)
+                        Picker(selection: $preset) {
+                            ForEach(FilterParameterPreset.allCases) { item in
+                                Text(item.description)
+                                    .frame(minWidth: 120, alignment: .leading)
+                                    .tag(item)
+                            }
+                        } label: {
+                            Text(L10n.preset.key, bundle: .localize)
+                        }
+                        TextField(text: $preset.description) {
+                            Text(L10n.newPreset.key, bundle: .localize)
+                        }
+                        .frame(minWidth: 120)
                         Button {
                             UniBridge.shared.saveDisplayParameter()
                         } label: {
-                            Text(L10n.save.key, bundle: .module)
+                            Text(L10n.save.key, bundle: .localize)
                         }
                         Button {
                             UniBridge.shared.addDisplayParameter()
@@ -68,7 +77,7 @@ private struct VCamDisplayParameterView: View {
     @ExternalStateBinding(.lensFlare) private var lensFlare
     @ExternalStateBinding(.vignetteColor) private var vignetteColor: Color
 
-    @ObservedObject private var windowManager = VCamSystem.shared.windowManager
+    @Bindable private var windowManager = VCamSystem.shared.windowManager
 
     var body: some View {
         let minHeight = windowManager.size.height * 0.4
@@ -102,7 +111,14 @@ private struct VCamDisplayParameterView: View {
                                 UniFloatEditField(L10n.diffusion.key, type: .bloomDiffusion, range: 1...10)
                                 UniFloatEditField(L10n.anamorphicRatio.key, type: .bloomAnamorphicRatio, range: -1...1)
                                 ColorEditField(L10n.color.key, value: $bloomColor)
-                                SelectEditField(L10n.lensFlare.key, value: $lensFlare.map(get: LensFlare.initOrNone, set: { $0.rawValue }))
+                                Picker(selection: $lensFlare.map(get: LensFlare.initOrNone, set: { $0.rawValue })) {
+                                    ForEach(LensFlare.allCases) { item in
+                                        Text(item.description)
+                                            .tag(item)
+                                    }
+                                } label: {
+                                    Text(L10n.lensFlare.key, bundle: .localize)
+                                }
                                 UniFloatEditField(L10n.lensFlareIntensity.key, type: .bloomLensFlareIntensity, range: 0...50)
                             }
                         }

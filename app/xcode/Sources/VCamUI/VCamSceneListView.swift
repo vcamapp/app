@@ -13,7 +13,7 @@ import VCamLogger
 public struct VCamSceneListView: View {
     public init() {}
 
-    @ObservedObject private var sceneManager = SceneManager.shared
+    @Bindable private var sceneManager = SceneManager.shared
 
     @State private var editingId: Int32?
     @State private var selectedId: Int32?

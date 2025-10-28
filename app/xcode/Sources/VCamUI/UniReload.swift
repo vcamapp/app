@@ -18,5 +18,9 @@ import SwiftUI
 
     public final class Reloader: ObservableObject {
         public static let shared = Reloader()
+
+        public func reload() {
+            objectWillChange.send()
+        }
     }
 }

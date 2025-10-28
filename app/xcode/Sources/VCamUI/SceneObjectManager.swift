@@ -50,10 +50,11 @@ public func uniUpdateObjectImage(id: Int32, px: Float, py: Float, sx: Float, sy:
     uniUpdateScene()
 }
 
-public final class SceneObjectManager: ObservableObject {
+@Observable
+public final class SceneObjectManager {
     public static let shared = SceneObjectManager()
 
-    @Published public var objects: [SceneObject] = VCamSceneDataStore.defaultObjects
+    public var objects: [SceneObject] = VCamSceneDataStore.defaultObjects
 
     public func add(_ object: SceneObject) {
         Logger.log("")

@@ -39,7 +39,7 @@ public enum VCamMenuItem: Identifiable, CaseIterable {
 }
 
 public struct VCamMenu: View {
-    @EnvironmentObject var state: VCamUIState
+    @Environment(VCamUIState.self) var state
 
     public var body: some View {
         VStack(spacing: 0) {
@@ -68,7 +68,7 @@ public struct VCamMenu: View {
 private struct MenuBottomView: View {
     @State private var isScenePopover = false
 
-    @ObservedObject private var recorder = VideoRecorder.shared
+    @Bindable private var recorder = VideoRecorder.shared
 
     @Environment(\.locale) private var locale
 

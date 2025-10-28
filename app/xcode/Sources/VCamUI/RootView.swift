@@ -11,14 +11,14 @@ import VCamBridge
 public struct RootView: View {
     let unityView: NSView
 
-    @ObservedObject var state: VCamUIState = .shared
+    @Bindable var state: VCamUIState = .shared
 
     @AppStorage(key: .locale) var locale
 
     public var body: some View {
-        RootViewContent(unityView: unityView, uiState: state)
+        RootViewContent(unityView: unityView)
             .background(.regularMaterial)
-            .environmentObject(state)
+            .environment(state)
             .environment(\.locale, locale.isEmpty ? .current : Locale(identifier: locale))
     }
 }
@@ -32,17 +32,17 @@ extension RootView {
 private struct RootViewContent: View {
     let unityView: NSView
 
-    @ObservedObject var uiState: VCamUIState
+    @Environment(VCamUIState.self) var state
 
     var body: some View {
-        if uiState.interactable {
+        if state.interactable {
             HStack(spacing: 0) {
                 VCamMenu()
                     .onTapGesture {
                         unityView.window?.makeFirstResponder(nil)
                         NotificationCenter.default.post(name: .unfocusObject, object: nil)
                     }
-                    .disabled(!uiState.interactable)
+                    .disabled(!state.interactable)
                     .modifier { view in
                         if #available(macOS 26.0, *) {
                             view.gesture(WindowDragGesture())
@@ -67,7 +67,7 @@ private struct RootViewContent: View {
                             unityView.window?.makeFirstResponder(nil)
                             NotificationCenter.default.post(name: .unfocusObject, object: nil)
                         }
-                        .disabled(!uiState.interactable)
+                        .disabled(!state.interactable)
                 }
             }
         } else {

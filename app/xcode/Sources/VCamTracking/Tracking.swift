@@ -23,22 +23,23 @@ public func uniSupportsPerfectSync() -> Bool {
     Tracking.shared.faceTrackingMethod.supportsPerfectSync
 }
 
-public final class Tracking: ObservableObject {
+@Observable
+public final class Tracking {
     public static let shared = Tracking()
 
-    @Published public private(set) var faceTrackingMethod = TrackingMethod.Face.default
-    @Published public private(set) var handTrackingMethod = TrackingMethod.Hand.default
-    @Published public private(set) var fingerTrackingMethod = TrackingMethod.Finger.default
+    public private(set) var faceTrackingMethod = TrackingMethod.Face.default
+    public private(set) var handTrackingMethod = TrackingMethod.Hand.default
+    public private(set) var fingerTrackingMethod = TrackingMethod.Finger.default
 
-    public private(set) var useEyeTracking = false
-    public private(set) var useVowelEstimation = false
+    @ObservationIgnored public private(set) var useEyeTracking = false
+    @ObservationIgnored public private(set) var useVowelEstimation = false
 
     public let avatarCameraManager = AvatarCameraManager()
     public let iFacialMocapReceiver = FacialMocapReceiver()
     public let vcamMotionReceiver = VCamMotionReceiver()
 
     private let vcamMotionTracking = VCamMotionTracking()
-    private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
 
     public init() {
         UserDefaults.standard.publisher(for: \.vc_use_eye_tracking, options: [.initial, .new])

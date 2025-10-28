@@ -9,10 +9,10 @@ import Foundation
 import VCamEntity
 import VCamData
 
-public final class VCamShortcutManager: ObservableObject {
+@Observable
+public final class VCamShortcutManager {
     public static let shared = VCamShortcutManager()
 
-    @Published
     public var shortcuts: [VCamShortcut] = []
 
     private let dataStore = VCamShortcutDataStore()

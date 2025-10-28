@@ -7,13 +7,14 @@
 
 import AppKit
 
-public final class PasteboardObserver: ObservableObject {
-    private var timer: Timer?
-    private var lastChangeCount: Int = 0
+@Observable
+public final class PasteboardObserver {
+    @ObservationIgnored private var timer: Timer?
+    @ObservationIgnored private var lastChangeCount: Int = 0
 
     private let pasteboard: NSPasteboard = .general
 
-    @Published public private(set) var imageURL: URL?
+    public private(set) var imageURL: URL?
 
     public init() {
         observe()

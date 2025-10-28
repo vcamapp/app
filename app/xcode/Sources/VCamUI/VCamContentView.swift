@@ -11,7 +11,7 @@ import SwiftUI
 public struct VCamContentView: View {
     public init() {}
     
-    @EnvironmentObject var state: VCamUIState
+    @Environment(VCamUIState.self) var state
 
     public var body: some View {
         content()

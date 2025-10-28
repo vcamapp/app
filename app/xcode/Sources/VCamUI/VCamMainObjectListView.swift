@@ -14,7 +14,7 @@ public struct VCamMainObjectListView: View {
     public init() {}
 
     @ExternalStateBinding(.objectSelected) private var objectSelected
-    @ObservedObject private var objectManager = SceneObjectManager.shared
+    @Bindable private var objectManager = SceneObjectManager.shared
 
     @State private var editingId: Int32?
 
@@ -69,7 +69,7 @@ public struct VCamMainObjectListView: View {
 }
 
 private struct VCamMainObjectListAddButton: View {
-    @ObservedObject private var pasteboard = VCamSystem.shared.pasteboardObserver
+    @Bindable private var pasteboard = VCamSystem.shared.pasteboardObserver
 
     var body: some View {
         let objectManager = SceneObjectManager.shared
@@ -137,7 +137,7 @@ private struct VCamMainObjectListAddButton: View {
 private struct VCamMainObjectListBottomBar: View {
     let selectedId: Int32?
 
-    @ObservedObject private var objectManager = SceneObjectManager.shared
+    @Bindable private var objectManager = SceneObjectManager.shared
 
     var body: some View {
         HStack {
@@ -273,8 +273,6 @@ private struct LockSceneObjectButton: View {
 
 private struct EditSceneObjectViewModifier: ViewModifier {
     let object: SceneObject
-
-    @ObservedObject private var __ = SceneObjectManager.shared // observe changes
 
     func body(content: Content) -> some View {
         let renderTextureManager = RenderTextureManager.shared

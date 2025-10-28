@@ -89,7 +89,7 @@ private extension Binding {
     // The state updates with a slight delay, so wait a bit before refreshing the UI
     func workaround() -> Self {
         map(get: { $0 }, set: {
-            UniReload.Reloader.shared.objectWillChange.send()
+            UniReload.Reloader.shared.reload()
             return $0
         })
     }

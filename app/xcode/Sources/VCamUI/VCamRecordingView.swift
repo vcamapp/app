@@ -15,7 +15,7 @@ public struct VCamRecordingView: View {
     public init() {}
 
     @ExternalStateBinding(.typedScreenResolution) private var typedScreenResolution
-    @ObservedObject private var recorder = VideoRecorder.shared
+    @Bindable private var recorder = VideoRecorder.shared
     @State private var restWaitTime: CGFloat = 0
     @State private var screenshotDestinationString = ""
 

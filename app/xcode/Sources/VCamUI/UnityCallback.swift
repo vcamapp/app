@@ -20,7 +20,7 @@ public func uniOnVCamSystemStart() {
     VCamSystem.shared.startSystem()
     Tracking.shared.configure()
     VCamUIState.shared.interactable = true
-    UniReload.Reloader.shared.objectWillChange.send()
+    UniReload.Reloader.shared.reload()
 }
 
 @_cdecl("uniOnVCamSystemDestroy")
@@ -29,7 +29,7 @@ public func uniOnVCamSystemDestroy() {
     VCamSystem.shared.isUniVCamSystemEnabled = false
     VCamUIState.shared.interactable = false
     Tracking.shared.stop()
-    UniReload.Reloader.shared.objectWillChange.send()
+    UniReload.Reloader.shared.reload()
 }
 
 @_cdecl("uniOnApplyCaptureSystem")
@@ -62,7 +62,7 @@ public func uniHideWindow() {
 public func uniReloadUI() {
     guard VCamSystem.shared.windowManager.isConfigured,
           VCamSystem.shared.isUniVCamSystemEnabled else { return }
-    UniReload.Reloader.shared.objectWillChange.send()
+    UniReload.Reloader.shared.reload()
 }
 
 @_cdecl("uniUpdateRenderFrame")

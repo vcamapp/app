@@ -17,7 +17,7 @@ public struct VCamSettingsIntegrationView: View {
     @AppStorage(key: .integrationFacialMocapIp) private var integrationFacialMocapIp
     @AppStorage(key: .integrationVCamMocap) private var integrationVCamMocap
 
-    @ObservedObject private var facialMocapReceiver = Tracking.shared.iFacialMocapReceiver
+    @Bindable private var facialMocapReceiver = Tracking.shared.iFacialMocapReceiver
 
     private var facialMocapConnectTitle: LocalizedStringKey {
         switch facialMocapReceiver.connectionStatus {

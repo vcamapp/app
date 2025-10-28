@@ -20,7 +20,7 @@ public func showScreenRecorderPreferenceView(capture: @escaping (ScreenRecorder)
 }
 
 public struct ScreenRecorderPreferenceView: View {
-    @StateObject private var screenRecorder = ScreenRecorder()
+    @State private var screenRecorder = ScreenRecorder()
     @State private var availableContent: SCShareableContent?
     @State private var captureConfig = ScreenRecorder.CaptureConfiguration()
     @State private var error: (any Error)?

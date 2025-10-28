@@ -10,13 +10,14 @@ import Combine
 import VCamBridge
 import Accelerate
 
-public final class FacialMocapReceiver: ObservableObject {
-    private var listener: NWListener?
-    private var connection: NWConnection?
-    private var facialMocapLastValues: [Float] = Array(repeating: 0, count: 12)
+@Observable
+public final class FacialMocapReceiver {
+    @ObservationIgnored private var listener: NWListener?
+    @ObservationIgnored private var connection: NWConnection?
+    @ObservationIgnored private var facialMocapLastValues: [Float] = Array(repeating: 0, count: 12)
     private static let queue = DispatchQueue(label: "com.github.tattn.vcam.facialmocapreceiver")
 
-    @MainActor @Published public private(set) var connectionStatus = ConnectionStatus.disconnected
+    @MainActor public private(set) var connectionStatus = ConnectionStatus.disconnected
 
 
     public enum ConnectionStatus {

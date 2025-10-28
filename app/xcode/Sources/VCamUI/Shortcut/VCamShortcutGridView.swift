@@ -17,7 +17,7 @@ public struct VCamShortcutGridView: View {
     @State private var dragging: VCamShortcut?
     @State private var runningShortcut: VCamShortcut?
 
-    @ObservedObject var shortcutManager = VCamShortcutManager.shared
+    @Bindable var shortcutManager = VCamShortcutManager.shared
 
     public var body: some View {
         GroupBox {

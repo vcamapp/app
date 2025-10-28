@@ -13,8 +13,8 @@ import VCamTracking
 public struct VCamTrackingView: View {
     public init() {}
 
-    @ObservedObject private var tracking = Tracking.shared
-    @ObservedObject private var recorder = VideoRecorder.shared
+    @Bindable private var tracking = Tracking.shared
+    @Bindable private var recorder = VideoRecorder.shared
 #if ENABLE_MOCOPI
     @AppStorage(key: .integrationMocopi) private var integrationMocopi
 #endif
