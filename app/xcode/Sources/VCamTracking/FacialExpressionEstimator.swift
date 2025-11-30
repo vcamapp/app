@@ -13,15 +13,15 @@ public struct FacialExpressionEstimator {
 
     public static var create: () -> FacialExpressionEstimator = {
         .init(
-            estimate: { _ in
+            estimate: { _, _ in
                 .neutral
             }
         )
     }
 
-    public init(estimate: @escaping (VNFaceLandmarks2D) -> FacialExpression) {
+    public init(estimate: @escaping (VNFaceLandmarks2D, VNFaceObservation) -> FacialExpression) {
         self.estimate = estimate
     }
 
-    public private(set) var estimate: (_ landmark: VNFaceLandmarks2D) -> FacialExpression
+    public private(set) var estimate: (_ landmark: VNFaceLandmarks2D, _ observation: VNFaceObservation) -> FacialExpression
 }

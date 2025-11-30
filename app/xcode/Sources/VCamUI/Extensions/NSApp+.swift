@@ -17,5 +17,5 @@ public extension NSApplication {
         Self._vcamWindow
     }
 
-    private static var _vcamWindow = NSApp.windows.first { $0.title == "VCam" } // for Unity
+    private static var _vcamWindow = NSApp.windows.first { $0.title.hasPrefix("VCam") && !$0.title.contains("Unity") } // for Unity
 }

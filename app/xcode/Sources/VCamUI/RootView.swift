@@ -20,6 +20,7 @@ public struct RootView: View {
             .background(.regularMaterial)
             .environment(state)
             .environment(\.locale, locale.isEmpty ? .current : Locale(identifier: locale))
+            .rootView()
     }
 }
 

@@ -123,7 +123,7 @@ public final class AvatarWebCamera {
 
         if isEmotionEnabled {
             if facialExpressionCounter > 4 {
-                let facialExp = facialExpressionEstimator.estimate(vnLandmarks)
+                let facialExp = facialExpressionEstimator.estimate(vnLandmarks, observation)
                 DispatchQueue.main.async {
                     UniBridge.shared.facialExpression(facialExp.rawValue)
                 }
