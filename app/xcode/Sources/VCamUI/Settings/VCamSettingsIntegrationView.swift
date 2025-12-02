@@ -70,8 +70,10 @@ public struct VCamSettingsIntegrationView: View {
                 }
             }
 
+#if FEATURE_3
 #if ENABLE_MOCOPI
             MocopiSettingView()
+#endif
 #endif
         }
         .formStyle(.grouped)

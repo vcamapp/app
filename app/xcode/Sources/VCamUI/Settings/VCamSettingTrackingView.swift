@@ -51,6 +51,7 @@ public struct VCamSettingTrackingView: View {
                 })
             }
 
+#if FEATURE_3
             Section {
                 ValueEditField(L10n.shoulderRotationWeight.key, value: $shoulderRotationWeight, type: .slider(0.0...1))
                 ValueEditField(L10n.swivelOffset.key, value: $swivelOffset, type: .slider(0.0...30))
@@ -58,6 +59,7 @@ public struct VCamSettingTrackingView: View {
 #if ENABLE_MOCOPI
             .disabled(integrationMocopi)
             .opacity(integrationMocopi ? 0.5 : 1.0)
+#endif
 #endif
             Section {
                 Toggle(isOn: $useEyeTracking) {
@@ -70,10 +72,12 @@ public struct VCamSettingTrackingView: View {
                 .disabled(!useEyeTracking)
                 .opacity(useEyeTracking ? 1.0 : 0.5)
             }
+#if FEATURE_3
             Section {
                 ValueEditField(L10n.easeOfOpeningFingers.key, value: $fingerTrackingOpenIntensity.map(), type: .slider(0.1...3))
                 ValueEditField(L10n.easeOfCloseFingers.key, value: $fingerTrackingCloseIntensity.map(), type: .slider(0.1...3))
             }
+#endif
         }
         .formStyle(.grouped)
     }

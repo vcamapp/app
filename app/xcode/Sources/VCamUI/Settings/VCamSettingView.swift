@@ -66,7 +66,7 @@ public struct VCamSettingView: View {
         }
     }
 
-    @State var tab: Tab?
+    @State var tab: Tab = .general
 
     @Bindable private var recorder = VideoRecorder.shared
 
@@ -78,14 +78,12 @@ public struct VCamSettingView: View {
 
     public var body: some View {
         HStack {
-            List(selection: $tab) {
-                ForEach(Tab.allCases) { tab in
-                    Label {
-                        Text(tab.title, bundle: .localize)
-                            .font(.callout)
-                    } icon: {
-                        tab.icon
-                    }
+            List(Tab.allCases, selection: $tab) { tab in
+                Label {
+                    Text(tab.title, bundle: .localize)
+                        .font(.callout)
+                } icon: {
+                    tab.icon
                 }
             }
             .listStyle(.sidebar)
@@ -107,16 +105,9 @@ public struct VCamSettingView: View {
                     VCamSettingExperimentView.make()
                 case .vcam:
                     VCamSettingVCamView.make()
-                case nil:
-                    Text("🥹")
                 }
             }
             .frame(minWidth: 440, maxHeight: .infinity, alignment: .top)
-        }
-        .onChange(of: tab) { _, newValue in
-            if newValue == nil {
-                tab = tab
-            }
         }
         .environment(\.locale, locale.isEmpty ? .current : Locale(identifier: locale))
         .disabled(recorder.isRecording)

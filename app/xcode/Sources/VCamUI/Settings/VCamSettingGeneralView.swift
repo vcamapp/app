@@ -23,6 +23,7 @@ public struct VCamSettingGeneralView: View {
     public var body: some View {
         Form {
             Section {
+#if FEATURE_3
                 Toggle(isOn: $useAutoMode) {
                     Text(L10n.playIdleMotions.key, bundle: .localize)
                 }
@@ -33,6 +34,7 @@ public struct VCamSettingGeneralView: View {
                 Toggle(isOn: $useAutoConvertVRM1) {
                     Text(L10n.enableAutoConvertingToVRM1.key, bundle: .localize)
                 }
+#endif
                 Toggle(isOn: $useHMirror) {
                     Text(L10n.flipScreen.key, bundle: .localize)
                 }
