@@ -24,6 +24,7 @@ let package = Package(
             .process("Resources"),
         ], swiftSettings: [
             .define("ENABLE_MOCOPI"),
+            .define("FEATURE_3"),
         ]),
         .target(name: "VCamUIFoundation"),
         .target(name: "VCamData", dependencies: ["VCamBridge", "VCamEntity"]),

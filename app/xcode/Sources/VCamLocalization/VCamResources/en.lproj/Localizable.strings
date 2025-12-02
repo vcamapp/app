@@ -1,9 +1,9 @@
-/* 
+/*
   Localizable.strings
   VCam
 
   Created by Tatsuya Tanaka on 2022/04/06.
-  
+
 */
 
 // MARK: - Common
@@ -139,13 +139,12 @@
 "vcamTrackingV2" = "VCam Tracking 2.0 (New Tracking System)";
 "installVirtualCamera" = "Install the Virtual Camera";
 "explainAboutInstallingCameraExtension" = "Installing the virtual camera.\nClick on 'Open Security Preferences' and then click 'Allow'.";
-"noteEnableNewCameraExtension" = "Restart VCam once after installation.";
+"noteEnableNewCameraExtension" = "Restart this app once after installation.";
 "cameraExtensionWorking" = "The virtual camera is working.";
 "cameraExtensionNotWorking" = "The virtual camera is NOT working.";
 "pleaseRestartMacToFix" = "Restarting Mac may resolve the issue.";
 "cameraExtensionAwaitingUserApproval" = "The virtual camera is not allowed. Please allow it from the 'Privacy & Security' section in the settings app.";
-"successToInstallCameraExtension" = "The virtual camera was successfully installed. It's recommended to restart VCam once.";
-"failedToInstallCameraExtension" = "The installation of the virtual camera failed. Please install it from the VCam settings if you want to use it.";
+"failedToInstallCameraExtension" = "The installation of the virtual camera failed. Please install it from this app’s settings if you want to use it.";
 "seeDocumentation" = "For more information, see this documentation.";
 "docsURLForVirtualCamera" = "https://docs.vcamapp.com/v/en/virtual-camera/virtualcamera";
 "officialWebsite" = "Official Website";
@@ -229,7 +228,7 @@
 "entireDisplay" = "Entire Display";
 "independentWindow" = "Independent Window";
 "display" = "Display";
-"removeVCamFromCapture" = "Remove VCam from the capture";
+"removeVCamFromCapture" = "Remove this app from the capture";
 "window" = "Window";
 "videoCaptureDevice" = "Video Capture Device";
 "previewCapture" = "Preview the capture";
@@ -250,7 +249,7 @@
 
 "uninstallPlugin" = "Uninstall Virtual Camera Plugin";
 "setUp" = "Set up";
-"aboutApp" = "About VCam";
+"aboutApp" = "About %@";
 "checkForUpdates" = "Check for Updates...";
 "file" = "File";
 "loadVRMFile" = "Load VRM file";
@@ -258,9 +257,9 @@
 "resetAvatarPosition" = "Reset Avatar Position";
 "alwaysOnTop" = "Always on Top";
 "help" = "Help";
-"anyProblem" = "Any problem?";
-"quitVCam" = "Quit VCam";
-"openVCam" = "Open VCam";
+"viewDocumentation" = "View Documentation";
+"quitVCam" = "Quit %@";
+"openVCam" = "Open %@";
 
 "editAvatar" = "Edit Avatar";
 "calibrate" = "Calibrate";
@@ -288,11 +287,11 @@
 
 // MARK: - Migration
 
-"failedToInstallCameraPlugin" = "Failed to install the virtual camera. Please reinstall the virtual camera in VCam settings.";
+"failedToInstallCameraPlugin" = "Failed to install the virtual camera. Please reinstall the virtual camera in this app’s settings.";
 "deleteOldDALPlugin" = "Delete the Old Virtual Camera";
 "deleteOldDALPluginMessage" = "The old virtual camera is no longer supported, so it'll be deleted now.";
 "migrateToNewVirtualCamera" = "Migrate to New Virtual Camera";
-"migrateToNewVirtualCameraMessage" = "VCam will migrate to a virtual camera optimized for the latest macOS.\nPlease follow the instructions to delete the old plugin and install the new virtual camera.";
+"migrateToNewVirtualCameraMessage" = "This app will migrate to a virtual camera optimized for the latest macOS.\nPlease follow the instructions to delete the old plugin and install the new virtual camera.";
 
 // MARK: - Shortcut
 

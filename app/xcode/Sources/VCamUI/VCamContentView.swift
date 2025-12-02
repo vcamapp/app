@@ -25,8 +25,10 @@ public struct VCamContentView: View {
         switch state.currentMenu {
         case .main:
             VCamMainView()
+#if FEATURE_3
         case .screenEffect:
             VCamDisplayView()
+#endif
         case .recording:
             VCamRecordingView()
         }

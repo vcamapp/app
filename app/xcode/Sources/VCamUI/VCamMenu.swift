@@ -10,7 +10,9 @@ import VCamLogger
 
 public enum VCamMenuItem: Identifiable, CaseIterable {
     case main
+#if FEATURE_3
     case screenEffect
+#endif
     case recording
     
     public var id: Self { self }
@@ -19,8 +21,10 @@ public enum VCamMenuItem: Identifiable, CaseIterable {
         switch self {
         case .main:
             return L10n.main.key
+#if FEATURE_3
         case .screenEffect:
             return L10n.screenEffect.key
+#endif
         case .recording:
             return L10n.recording.key
         }
@@ -30,8 +34,10 @@ public enum VCamMenuItem: Identifiable, CaseIterable {
         switch self {
         case .main:
             return "person.fill"
+#if FEATURE_3
         case .screenEffect:
             return "sparkles"
+#endif
         case .recording:
             return "camera.fill"
         }

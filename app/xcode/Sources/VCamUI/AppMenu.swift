@@ -27,7 +27,7 @@ public final class AppMenu: NSObject {
             mainMenu = NSApp.mainMenu!.items[0].submenu!
         } else {
             menu = NSMenu()
-            mainMenu = Self.makeSubMenu(menu: menu, title: "VCam", items: [])
+            mainMenu = Self.makeSubMenu(menu: menu, title: Bundle.main.displayName, items: [])
             NSApp.mainMenu = menu
         }
 
@@ -37,7 +37,9 @@ public final class AppMenu: NSObject {
         setupFileMenu(subMenu: menu)
         setupEditMenu(subMenu: menu)
         setupObjectMenu(subMenu: menu)
+#if FEATURE_3
         setupAvatarMenu(subMenu: menu)
+#endif
         setupWindowMenu(subMenu: menu)
         setupHelpMenu(subMenu: menu)
     }
@@ -74,7 +76,7 @@ public final class AppMenu: NSObject {
 // MARK: - Main
 private extension AppMenu {
     private func setupMainMenu(subMenu: NSMenu) {
-        let quitItem = makeMenuItem(title: L10n.quitVCam.text, action: #selector(quit), keyEquivalent: "q")
+        let quitItem = makeMenuItem(title: L10n.quitVCam(Bundle.main.displayName).text, action: #selector(quit), keyEquivalent: "q")
         subMenu.items.insert(quitItem, at: 0)
         subMenu.items.insert(.separator(), at: 0)
         let updateItem = makeMenuItem(title: L10n.checkForUpdates.text, action: #selector(checkUpdates))
@@ -82,7 +84,7 @@ private extension AppMenu {
         subMenu.items.insert(.separator(), at: 0)
         let preferenceItem = makeMenuItem(title: L10n.settings.text, action: #selector(openPreferences), keyEquivalent: ",")
         subMenu.items.insert(preferenceItem, at: 0)
-        let aboutItem = makeMenuItem(title: L10n.aboutApp.text, action: #selector(about))
+        let aboutItem = makeMenuItem(title: L10n.aboutApp(Bundle.main.displayName).text, action: #selector(about))
         subMenu.items.insert(aboutItem, at: 0)
     }
 
@@ -109,10 +111,15 @@ private extension AppMenu {
 // MARK: - File
 private extension AppMenu {
     private func setupFileMenu(subMenu: NSMenu) {
-        Self.makeSubMenu(menu: subMenu, title: L10n.file.text, items: [
+#if FEATURE_3
+        let items: [NSMenuItem] = [
             makeMenuItem(title: L10n.loadVRMFile.text, action: #selector(loadVRM)),
             makeMenuItem(title: L10n.loadOnVRoidHub.text, action: #selector(openVRoidHub)),
-        ])
+        ]
+#else
+        let items: [NSMenuItem] = []
+#endif
+        Self.makeSubMenu(menu: subMenu, title: L10n.file.text, items: items)
     }
 
     @objc private func loadVRM() {
@@ -132,7 +139,8 @@ private extension AppMenu {
 // MARK: - Object
 private extension AppMenu {
     private func setupObjectMenu(subMenu: NSMenu) {
-        Self.makeSubMenu(menu: subMenu, title: L10n.object.text, items: [
+#if FEATURE_3
+        let items: [NSMenuItem] = [
             makeMenuItem(title: L10n.resetAvatarPosition.text, action: #selector(resetAvatarPosition)),
             .separator(),
             makeMenuItem(title: L10n.addImage.text, action: #selector(addImage)),
@@ -141,7 +149,18 @@ private extension AppMenu {
             makeMenuItem(title: L10n.addWeb.text, action: #selector(addWeb)),
             .separator(),
             makeMenuItem(title: L10n.addWind.text, action: #selector(addWind)),
-        ])
+        ]
+#else
+        let items: [NSMenuItem] = [
+            makeMenuItem(title: L10n.resetAvatarPosition.text, action: #selector(resetAvatarPosition)),
+            .separator(),
+            makeMenuItem(title: L10n.addImage.text, action: #selector(addImage)),
+            makeMenuItem(title: L10n.addScreenCapture.text, action: #selector(addScreenCapture)),
+            makeMenuItem(title: L10n.addVideoCapture.text, action: #selector(addVideoCapture)),
+            makeMenuItem(title: L10n.addWeb.text, action: #selector(addWeb)),
+        ]
+#endif
+        Self.makeSubMenu(menu: subMenu, title: L10n.object.text, items: items)
     }
 
     @objc private func resetAvatarPosition() {
@@ -218,12 +237,12 @@ private extension AppMenu {
 private extension AppMenu {
     private func setupHelpMenu(subMenu: NSMenu) {
         Self.makeSubMenu(menu: subMenu, title: L10n.help.text, items: [
-            makeMenuItem(title: L10n.anyProblem.text, action: #selector(help)),
+            makeMenuItem(title: L10n.viewDocumentation.text, action: #selector(help)),
         ])
     }
 
     @objc private func help() {
-        let url = URL(string: "https://tattn.gitbook.io/vcam/sono-others/sono/faq")!
+        let url = URL(string: "https://docs.vcamapp.com/")!
         NSWorkspace.shared.open(url)
     }
 }

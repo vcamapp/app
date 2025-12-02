@@ -112,14 +112,14 @@ public final class WindowManager {
         self.statusItem = statusItem
         statusItem.button?.image = Bundle.module.image(forResource: "StatusItemIcon")
         let menu = NSMenu()
-        let unhideMenu = NSMenuItem(title: "\(L10n.openVCam.text)...", action: #selector(unhide), keyEquivalent: "")
+        let unhideMenu = NSMenuItem(title: "\(L10n.openVCam(Bundle.main.displayName).text)...", action: #selector(unhide), keyEquivalent: "")
         unhideMenu.target = self
         menu.addItem(unhideMenu)
         let preferenceMenu = NSMenuItem(title: "\(L10n.settings.text)...", action: #selector(openPreferences), keyEquivalent: "")
         preferenceMenu.target = self
         menu.addItem(preferenceMenu)
         menu.addItem(NSMenuItem.separator())
-        let quitMenu = NSMenuItem(title: L10n.quitVCam.text, action: #selector(quit), keyEquivalent: "q")
+        let quitMenu = NSMenuItem(title: L10n.quitVCam(Bundle.main.displayName).text, action: #selector(quit), keyEquivalent: "q")
         quitMenu.target = self
         menu.addItem(quitMenu)
 

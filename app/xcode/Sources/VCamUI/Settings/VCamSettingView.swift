@@ -120,6 +120,7 @@ public struct VCamSettingView: View {
         }
         .environment(\.locale, locale.isEmpty ? .current : Locale(identifier: locale))
         .disabled(recorder.isRecording)
+        .rootView()
     }
 }
 

@@ -3,7 +3,7 @@
   VCam
 
   Created by Tatsuya Tanaka on 2022/04/06.
-  
+
 */
 
 // MARK: - Common
@@ -133,19 +133,18 @@
 "rendering" = "レンダリング";
 "experiment" = "実験的な機能";
 "experimentDisclaimer" = "これらは実験的な機能のため、不具合があるかもしれません。";
-"experimentThanks" = "これらの機能はサポーター向けに提供しています。VCamのサポート、ありがとうございます！";
+"experimentThanks" = "これらの機能はサポーター向けに提供しています。応援ありがとうございます！";
 "experimentAdvertisement" = "これらの機能はサポーター向けに提供しています。サポーター版は以下からDLできます。";
 "enableVSync" = "VSyncを有効にする";
 "vcamTrackingV2" = "VCamトラッキング2.0 (新しいトラッキングシステム)";
 "installVirtualCamera" = "仮想カメラのインストール";
 "explainAboutInstallingCameraExtension" = "仮想カメラをインストールします。\n「システム設定を開く」をクリックして、「許可」をクリックしてください。";
-"noteEnableNewCameraExtension" = "インストール後は一度VCamを再起動してください";
+"noteEnableNewCameraExtension" = "インストール後はアプリを一度再起動してください";
 "cameraExtensionWorking" = "仮想カメラは動作しています。";
 "cameraExtensionNotWorking" = "仮想カメラは動作していません。";
 "pleaseRestartMacToFix" = "Macを再起動すると不具合が改善される場合があります。";
 "cameraExtensionAwaitingUserApproval" = "仮想カメラが許可されていません。設定アプリの「プライバシーとセキュリティ」から許可してください。";
-"successToInstallCameraExtension" = "仮想カメラのインストールに成功しました。一度VCamを再起動することをおすすめします。";
-"failedToInstallCameraExtension" = "仮想カメラのインストールに失敗しました。利用する場合はVCamの設定からインストールしてください。";
+"failedToInstallCameraExtension" = "仮想カメラのインストールに失敗しました。利用する場合はこのアプリの設定からインストールしてください。";
 "seeDocumentation" = "詳細はこちらのページをご覧ください。";
 "docsURLForVirtualCamera" = "https://docs.vcamapp.com/virtual-camera/virtualcamera";
 "officialWebsite" = "公式サイト";
@@ -258,9 +257,9 @@
 "resetAvatarPosition" = "アバターの位置をリセット";
 "alwaysOnTop" = "ウィンドウを常に最前面にする";
 "help" = "ヘルプ";
-"anyProblem" = "困った時は？";
-"quitVCam" = "VCamを終了";
-"openVCam" = "VCamを開く";
+"viewDocumentation" = "使い方を見る";
+"quitVCam" = "%@を終了";
+"openVCam" = "%@を開く";
 
 "editAvatar" = "アバターの編集";
 "calibrate" = "キャリブレーション";
@@ -288,7 +287,7 @@
 
 // MARK: - Migration
 
-"failedToInstallCameraPlugin" = "仮想カメラのインストールに失敗しました。VCamの設定で仮想カメラを再インストールしてください。";
+"failedToInstallCameraPlugin" = "仮想カメラのインストールに失敗しました。このアプリの設定で仮想カメラを再インストールしてください。";
 "deleteOldDALPlugin" = "古い仮想カメラの削除";
 "deleteOldDALPluginMessage" = "古い仮想カメラはサポート終了となりましたので、削除します。";
 "migrateToNewVirtualCamera" = "新しい仮想カメラへの移行";

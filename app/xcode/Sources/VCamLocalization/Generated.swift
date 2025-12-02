@@ -4,8 +4,10 @@ import SwiftUI
 
 
 public enum L10n {
-  /// About VCam
-  public static let aboutApp = LocalizedString(lookupKey: "aboutApp")
+  /// About %@
+  public static func aboutApp(_ p1: Any) -> ArgumentsLocalizedString {
+    ArgumentsLocalizedString("aboutApp", "aboutApp \(String(describing: p1))", String(describing: p1))
+  }
   /// Action
   public static let action = LocalizedString(lookupKey: "action")
   /// Add
@@ -34,8 +36,6 @@ public enum L10n {
   public static let ambientLightIntensity = LocalizedString(lookupKey: "ambientLightIntensity")
   /// Anamorphic ratio
   public static let anamorphicRatio = LocalizedString(lookupKey: "anamorphicRatio")
-  /// Any problem?
-  public static let anyProblem = LocalizedString(lookupKey: "anyProblem")
   /// Apply
   public static let apply = LocalizedString(lookupKey: "apply")
   ///  - Horizontal
@@ -182,9 +182,9 @@ public enum L10n {
   public static let faceEyeMouth = LocalizedString(lookupKey: "faceEyeMouth")
   /// Facial Expression
   public static let facialExpression = LocalizedString(lookupKey: "facialExpression")
-  /// The installation of the virtual camera failed. Please install it from the VCam settings if you want to use it.
+  /// The installation of the virtual camera failed. Please install it from this app’s settings if you want to use it.
   public static let failedToInstallCameraExtension = LocalizedString(lookupKey: "failedToInstallCameraExtension")
-  /// Failed to install the virtual camera. Please reinstall the virtual camera in VCam settings.
+  /// Failed to install the virtual camera. Please reinstall the virtual camera in this app’s settings.
   public static let failedToInstallCameraPlugin = LocalizedString(lookupKey: "failedToInstallCameraPlugin")
   /// Failure
   public static let failure = LocalizedString(lookupKey: "failure")
@@ -286,7 +286,7 @@ public enum L10n {
   public static let micSyncOffset = LocalizedString(lookupKey: "micSyncOffset")
   /// Migrate to New Virtual Camera
   public static let migrateToNewVirtualCamera = LocalizedString(lookupKey: "migrateToNewVirtualCamera")
-  /// VCam will migrate to a virtual camera optimized for the latest macOS.\nPlease follow the instructions to delete the old plugin and install the new virtual camera.
+  /// This app will migrate to a virtual camera optimized for the latest macOS.\nPlease follow the instructions to delete the old plugin and install the new virtual camera.
   public static let migrateToNewVirtualCameraMessage = LocalizedString(lookupKey: "migrateToNewVirtualCameraMessage")
   /// Motion
   public static let motion = LocalizedString(lookupKey: "motion")
@@ -300,7 +300,7 @@ public enum L10n {
   public static let nod = LocalizedString(lookupKey: "nod")
   /// None
   public static let `none` = LocalizedString(lookupKey: "none")
-  /// Restart VCam once after installation.
+  /// Restart this app once after installation.
   public static let noteEnableNewCameraExtension = LocalizedString(lookupKey: "noteEnableNewCameraExtension")
   /// No Title
   public static let notitle = LocalizedString(lookupKey: "notitle")
@@ -312,8 +312,10 @@ public enum L10n {
   public static let openFile = LocalizedString(lookupKey: "openFile")
   /// Open preferences
   public static let openPreference = LocalizedString(lookupKey: "openPreference")
-  /// Open VCam
-  public static let openVCam = LocalizedString(lookupKey: "openVCam")
+  /// Open %@
+  public static func openVCam(_ p1: Any) -> ArgumentsLocalizedString {
+    ArgumentsLocalizedString("openVCam", "openVCam \(String(describing: p1))", String(describing: p1))
+  }
   /// Optimize meshes (Recommended)
   public static let optimizeMeshes = LocalizedString(lookupKey: "optimizeMeshes")
   /// Paste
@@ -342,8 +344,10 @@ public enum L10n {
   public static let qualityGood = LocalizedString(lookupKey: "qualityGood")
   /// Simple
   public static let qualitySimple = LocalizedString(lookupKey: "qualitySimple")
-  /// Quit VCam
-  public static let quitVCam = LocalizedString(lookupKey: "quitVCam")
+  /// Quit %@
+  public static func quitVCam(_ p1: Any) -> ArgumentsLocalizedString {
+    ArgumentsLocalizedString("quitVCam", "quitVCam \(String(describing: p1))", String(describing: p1))
+  }
   /// Record desktop audio [β]
   public static let recordDesktopAudio = LocalizedString(lookupKey: "recordDesktopAudio")
   /// Recording
@@ -362,7 +366,7 @@ public enum L10n {
   public static let reload = LocalizedString(lookupKey: "reload")
   /// Remove
   public static let remove = LocalizedString(lookupKey: "remove")
-  /// Remove VCam from the capture
+  /// Remove this app from the capture
   public static let removeVCamFromCapture = LocalizedString(lookupKey: "removeVCamFromCapture")
   /// Rendering
   public static let rendering = LocalizedString(lookupKey: "rendering")
@@ -428,8 +432,6 @@ public enum L10n {
   public static let stopRecording = LocalizedString(lookupKey: "stopRecording")
   /// Success
   public static let success = LocalizedString(lookupKey: "success")
-  /// The virtual camera was successfully installed. It's recommended to restart VCam once.
-  public static let successToInstallCameraExtension = LocalizedString(lookupKey: "successToInstallCameraExtension")
   /// Support Developer
   public static let supportDeveloperLabel = LocalizedString(lookupKey: "supportDeveloperLabel")
   /// If you’d like to support the ongoing improvement of this app, your support would mean a lot!
@@ -486,6 +488,8 @@ public enum L10n {
   public static let videoFormat = LocalizedString(lookupKey: "videoFormat")
   /// hevc (Transparent)
   public static let videoFormatHEVC = LocalizedString(lookupKey: "videoFormatHEVC")
+  /// View Documentation
+  public static let viewDocumentation = LocalizedString(lookupKey: "viewDocumentation")
   /// Vignette
   public static let vignette = LocalizedString(lookupKey: "vignette")
   /// Virtual Camera

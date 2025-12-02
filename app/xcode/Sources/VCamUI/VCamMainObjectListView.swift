@@ -116,6 +116,7 @@ private struct VCamMainObjectListAddButton: View {
                 Text(L10n.web.key, bundle: .localize)
             }
 
+#if FEATURE_3
             Divider()
 
             Button {
@@ -124,6 +125,7 @@ private struct VCamMainObjectListAddButton: View {
                 Image(systemName: "wind")
                 Text(L10n.wind.key, bundle: .localize)
             }
+#endif
         } label: {
             Image(systemName: "plus")
         }
