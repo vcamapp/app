@@ -9,7 +9,7 @@ import AppKit
 import VCamEntity
 import VCamLocalization
 import VCamBridge
-import struct SwiftUI.Image
+import SwiftUI
 
 public struct VCamMotionAction: VCamAction {
     public init(configuration: VCamMotionActionConfiguration) {
@@ -22,27 +22,10 @@ public struct VCamMotionAction: VCamAction {
 
     @MainActor
     public func callAsFunction(context: VCamActionContext) async throws {
-        switch configuration.motion {
-        case .hi:
-            UniBridge.shared.motionHello()
-        case .bye:
-            UniBridge.shared.motionBye.wrappedValue.toggle()
-        case .jump:
-            UniBridge.shared.motionJump()
-        case .cheer:
-            UniBridge.shared.motionYear()
-        case .what:
-            UniBridge.shared.motionWhat()
-        case .pose:
-            UniBridge.shared.motionWin()
-        case .nod:
-            UniBridge.shared.motionNod.wrappedValue.toggle()
-        case .no:
-            UniBridge.shared.motionShakeHead.wrappedValue.toggle()
-        case .shudder:
-            UniBridge.shared.motionShakeBody.wrappedValue.toggle()
-        case .run:
-            UniBridge.shared.motionRun.wrappedValue.toggle()
+        if UniState.shared.isMotionPlaying[.init(name: configuration.motion.rawValue), default: false] {
+            UniBridge.stopMotion(name: configuration.motion.rawValue)
+        } else {
+            UniBridge.playMotion(name: configuration.motion.rawValue, isLoop: true)
         }
     }
 }

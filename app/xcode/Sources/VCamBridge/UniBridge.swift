@@ -76,11 +76,6 @@ public final class UniBridge {
         case useFullTracking = 9
         case lipSyncWebCam = 10
         case hasPerfectSyncBlendShape = 11
-        case motionBye = 12
-        case motionNod = 13
-        case motionShakeBody = 14
-        case motionShakeHead = 15
-        case motionRun = 16
     }
     public let boolMapper = ValueBinding<Bool, BoolType>()
     public var useAutoMode: Binding<Bool> { boolMapper.binding(.useAutoMode) }
@@ -95,11 +90,6 @@ public final class UniBridge {
     public private(set) lazy var useFullTracking = boolMapper.set(.useFullTracking)
     public var lipSyncWebCam: Binding<Bool> { boolMapper.binding(.lipSyncWebCam) }
     public var hasPerfectSyncBlendShape: Bool { boolMapper.get(.hasPerfectSyncBlendShape) }
-    public var motionBye: Binding<Bool> { boolMapper.binding(.motionBye) }
-    public var motionNod: Binding<Bool> { boolMapper.binding(.motionNod) }
-    public var motionShakeBody: Binding<Bool> { boolMapper.binding(.motionShakeBody) }
-    public var motionShakeHead: Binding<Bool> { boolMapper.binding(.motionShakeHead) }
-    public var motionRun: Binding<Bool> { boolMapper.binding(.motionRun) }
 
     public enum StringType: Int32 {
         case message = 0
@@ -110,6 +100,7 @@ public final class UniBridge {
         case showEmojiStamp = 5
         case blendShapes = 6
         case currentBlendShape = 7
+        case motions = 8
     }
     public let stringMapper = ValueBinding<String, StringType>()
     public var message: Binding<String> { stringMapper.binding(.message) }
@@ -120,34 +111,25 @@ public final class UniBridge {
     public private(set) lazy var showEmojiStamp = stringMapper.set(.showEmojiStamp)
     public var blendShapes: String { stringMapper.get(.blendShapes) }
     public var currentBlendShape: Binding<String> { stringMapper.binding(.currentBlendShape) }
+    public var motions: String { stringMapper.get(.motions) }
 
     public enum TriggerType: Int32 {
         case openVRoidHub = 0
         case resetCamera = 1
-        case motionJump = 2
-        case motionWhat = 3
-        case motionHello = 4
-        case motionYear = 5
-        case motionWin = 6
-        case applyDisplayParameter = 7
-        case saveDisplayParameter = 8
-        case addDisplayParameter = 9
-        case deleteDisplayParameter = 10
-        case deleteObject = 11
-        case resetAllObjects = 12
-        case editAvatar = 13
-        case pauseApp = 14
-        case resumeApp = 15
-        case quitApp = 16
+        case applyDisplayParameter = 2
+        case saveDisplayParameter = 3
+        case addDisplayParameter = 4
+        case deleteDisplayParameter = 5
+        case deleteObject = 6
+        case resetAllObjects = 7
+        case editAvatar = 8
+        case pauseApp = 9
+        case resumeApp = 10
+        case quitApp = 11
     }
     public let triggerMapper = ValueBinding<Void, TriggerType>()
     public private(set) lazy var openVRoidHub = triggerMapper.trigger(.openVRoidHub)
     public private(set) lazy var resetCamera = triggerMapper.trigger(.resetCamera)
-    public private(set) lazy var motionJump = triggerMapper.trigger(.motionJump)
-    public private(set) lazy var motionWhat = triggerMapper.trigger(.motionWhat)
-    public private(set) lazy var motionHello = triggerMapper.trigger(.motionHello)
-    public private(set) lazy var motionYear = triggerMapper.trigger(.motionYear)
-    public private(set) lazy var motionWin = triggerMapper.trigger(.motionWin)
     public private(set) lazy var applyDisplayParameter = triggerMapper.trigger(.applyDisplayParameter)
     public private(set) lazy var saveDisplayParameter = triggerMapper.trigger(.saveDisplayParameter)
     public private(set) lazy var addDisplayParameter = triggerMapper.trigger(.addDisplayParameter)

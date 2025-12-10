@@ -21,4 +21,9 @@ extension UniBridge {
     public var cachedBlendShapes: [BlendShape] {
         Self.cachedBlendShapes
     }
+
+    public static var cachedMotions: [Motion] = []
+    public var cachedMotions: [Motion] {
+        Self.cachedMotions
+    }
 }

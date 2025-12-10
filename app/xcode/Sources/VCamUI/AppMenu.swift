@@ -117,7 +117,9 @@ private extension AppMenu {
             makeMenuItem(title: L10n.loadOnVRoidHub.text, action: #selector(openVRoidHub)),
         ]
 #else
-        let items: [NSMenuItem] = []
+        let items: [NSMenuItem] = [
+            makeMenuItem(title: L10n.loadModelFile.text, action: #selector(loadModel)),
+        ]
 #endif
         Self.makeSubMenu(menu: subMenu, title: L10n.file.text, items: items)
     }
@@ -133,6 +135,13 @@ private extension AppMenu {
         Logger.log(event: .openVRoidHub)
         Logger.log("")
         UniBridge.shared.openVRoidHub()
+    }
+
+    @objc private func loadModel() {
+        Logger.log(event: .loadModelFile)
+        Logger.log("")
+        guard let url = FileUtility.pickDirectory(canCreateDirectories: false) else { return }
+        UniBridge.shared.loadModel(url.path)
     }
 }
 

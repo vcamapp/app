@@ -12,6 +12,7 @@ public struct RootView: View {
     let unityView: NSView
 
     @Bindable var state: VCamUIState = .shared
+    @Bindable var uniState: UniState = .shared
 
     @AppStorage(key: .locale) var locale
 
@@ -19,6 +20,7 @@ public struct RootView: View {
         RootViewContent(unityView: unityView)
             .background(.regularMaterial)
             .environment(state)
+            .environment(uniState)
             .environment(\.locale, locale.isEmpty ? .current : Locale(identifier: locale))
             .rootView()
     }

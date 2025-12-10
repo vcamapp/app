@@ -254,6 +254,7 @@
 "file" = "ファイル";
 "loadVRMFile" = "VRMファイルを読み込む";
 "loadOnVRoidHub" = "VRoid Hubからアバターを選ぶ";
+"loadModelFile" = "モデルを読み込む";
 "resetAvatarPosition" = "アバターの位置をリセット";
 "alwaysOnTop" = "ウィンドウを常に最前面にする";
 "help" = "ヘルプ";

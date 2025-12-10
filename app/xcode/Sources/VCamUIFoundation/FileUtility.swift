@@ -29,11 +29,11 @@ public enum FileUtility {
         }
     }
 
-    public static func pickDirectory() -> URL? {
+    public static func pickDirectory(canCreateDirectories: Bool = true) -> URL? {
         let openPanel = NSOpenPanel()
         openPanel.allowsMultipleSelection = false
         openPanel.canChooseDirectories = true
-        openPanel.canCreateDirectories = true
+        openPanel.canCreateDirectories = canCreateDirectories
         openPanel.canChooseFiles = false
         openPanel.runModal()
         return openPanel.url

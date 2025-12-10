@@ -252,8 +252,9 @@
 "aboutApp" = "About %@";
 "checkForUpdates" = "Check for Updates...";
 "file" = "File";
-"loadVRMFile" = "Load VRM file";
+"loadVRMFile" = "Load VRM File";
 "loadOnVRoidHub" = "Load Avatar on VRoid Hub";
+"loadModelFile" = "Load Model File";
 "resetAvatarPosition" = "Reset Avatar Position";
 "alwaysOnTop" = "Always on Top";
 "help" = "Help";

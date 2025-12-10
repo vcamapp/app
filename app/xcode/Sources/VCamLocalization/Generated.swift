@@ -262,11 +262,13 @@ public enum L10n {
   public static let lipSync = LocalizedString(lookupKey: "lipSync")
   /// Lip-sync sensitivity (mic)
   public static let lipSyncSensitivity = LocalizedString(lookupKey: "lipSyncSensitivity")
+  /// Load Model File
+  public static let loadModelFile = LocalizedString(lookupKey: "loadModelFile")
   /// Load Avatar on VRoid Hub
   public static let loadOnVRoidHub = LocalizedString(lookupKey: "loadOnVRoidHub")
   /// Load Scene
   public static let loadScene = LocalizedString(lookupKey: "loadScene")
-  /// Load VRM file
+  /// Load VRM File
   public static let loadVRMFile = LocalizedString(lookupKey: "loadVRMFile")
   /// Local File
   public static let localFile = LocalizedString(lookupKey: "localFile")

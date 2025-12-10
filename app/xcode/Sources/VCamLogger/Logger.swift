@@ -24,6 +24,7 @@ public extension Logger {
         case installPlugin = "install_plugin"
         case openVRoidHub = "open_vroidhub"
         case loadVRMFile = "load_vrmfile"
+        case loadModelFile = "load_modelfile"
     }
 
     static func log(event: Event) {

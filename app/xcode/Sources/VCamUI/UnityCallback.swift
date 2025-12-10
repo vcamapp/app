@@ -39,6 +39,8 @@ public func uniOnApplyCaptureSystem() {
 
     UniBridge.cachedBlendShapes = UniBridge.shared.blendShapes.components(separatedBy: ",")
         .map { VCamEntity.BlendShape(name: $0) }
+    UniBridge.cachedMotions = UniBridge.shared.motions.components(separatedBy: ",")
+        .map { VCamEntity.Motion(name: $0) }
 }
 
 @_cdecl("uniUseAutoConvertVRM1")
