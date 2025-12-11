@@ -174,6 +174,8 @@ public enum L10n {
   public static let experimentThanks = LocalizedString(lookupKey: "experimentThanks")
   /// Installing the virtual camera.\nClick on 'Open Security Preferences' and then click 'Allow'.
   public static let explainAboutInstallingCameraExtension = LocalizedString(lookupKey: "explainAboutInstallingCameraExtension")
+  /// The virtual camera will be reinstalled for the update
+  public static let explainAboutReinstallingCameraExtension = LocalizedString(lookupKey: "explainAboutReinstallingCameraExtension")
   /// Horizontal sensitivity
   public static let eyesHorizontalSensitivity = LocalizedString(lookupKey: "eyesHorizontalSensitivity")
   /// Vertical sensitivity

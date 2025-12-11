@@ -138,6 +138,7 @@
 "enableVSync" = "Enable VSync";
 "vcamTrackingV2" = "VCam Tracking 2.0 (New Tracking System)";
 "installVirtualCamera" = "Install the Virtual Camera";
+"explainAboutReinstallingCameraExtension" = "The virtual camera will be reinstalled for the update";
 "explainAboutInstallingCameraExtension" = "Installing the virtual camera.\nClick on 'Open Security Preferences' and then click 'Allow'.";
 "noteEnableNewCameraExtension" = "Restart this app once after installation.";
 "cameraExtensionWorking" = "The virtual camera is working.";

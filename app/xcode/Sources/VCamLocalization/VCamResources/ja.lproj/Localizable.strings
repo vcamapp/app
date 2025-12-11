@@ -138,6 +138,7 @@
 "enableVSync" = "VSyncを有効にする";
 "vcamTrackingV2" = "VCamトラッキング2.0 (新しいトラッキングシステム)";
 "installVirtualCamera" = "仮想カメラのインストール";
+"explainAboutReinstallingCameraExtension" = "仮想カメラの更新のため、仮想カメラの再インストールを行います";
 "explainAboutInstallingCameraExtension" = "仮想カメラをインストールします。\n「システム設定を開く」をクリックして、「許可」をクリックしてください。";
 "noteEnableNewCameraExtension" = "インストール後はアプリを一度再起動してください";
 "cameraExtensionWorking" = "仮想カメラは動作しています。";

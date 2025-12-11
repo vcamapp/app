@@ -20,6 +20,7 @@ public struct Migration {
             try await migrationFirst(previousVersion: previousVersion)
             try migration095(previousVersion: previousVersion)
             try await migration0110(previousVersion: previousVersion)
+            try await migration0131(previousVersion: previousVersion)
         } catch {
             Logger.error(error)
         }
@@ -35,7 +36,7 @@ extension Migration {
         Task {
             do {
                 if CoreMediaSinkStream.isInstalled {
-                    NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy")!)
+                    NSWorkspace.shared.open(.cameraExtension)
                 }
                 try await CameraExtension().installExtension()
                 _ = await VirtualCameraManager.shared.installAndStartCameraExtension()
@@ -101,15 +102,31 @@ extension Migration {
         }
     }
 
-    private static func installCameraExtension() async {
-        do {
-            try await CameraExtension().installExtensionIfNotInstalled()
-        } catch {
+    @MainActor
+    static func migration0131(previousVersion: String) async throws {        
+        let version = previousVersion.components(separatedBy: ".").compactMap(Int.init)
+        guard version.count == 3 else { return }
+        
+        // If updated from a version prior to 0.13.1
+        if version[0] == 0 && (version[1] < 13 || (version[1] == 13 && version[2] < 1)) {
+            Logger.log("Migrating to 0.13.1 from \(previousVersion)")
+
             await VCamAlert.showModal(
-                title: L10n.failure.text,
-                message: L10n.failedToInstallCameraPlugin.text,
+                title: L10n.update.text,
+                message: L10n.explainAboutReinstallingCameraExtension.text,
                 canCancel: false
             )
+
+            do {
+                try? await CameraExtension().uninstallExtension()
+                NSWorkspace.shared.open(.cameraExtension)
+                try await CameraExtension().installExtension()
+                _ = await VirtualCameraManager.shared.installAndStartCameraExtension()
+                await VCamAlert.showModal(title: L10n.success.text, message: L10n.restartAfterInstalling.text, canCancel: false)
+            } catch {
+                await VCamAlert.showModal(title: L10n.failure.text, message: L10n.failedToInstallCameraExtension.text, canCancel: false)
+                Logger.error(error)
+            }
         }
     }
 }
