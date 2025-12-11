@@ -58,7 +58,7 @@ public enum L10n {
   public static let camera = LocalizedString(lookupKey: "camera")
   /// Camera Exposure (EV)
   public static let cameraExposure = LocalizedString(lookupKey: "cameraExposure")
-  /// The virtual camera is not allowed. Please allow it from the 'Privacy & Security' section in the settings app.
+  /// The virtual camera is not allowed. Please allow it from the 'Login Items & Extensions' of 'General' section in the settings app.
   public static let cameraExtensionAwaitingUserApproval = LocalizedString(lookupKey: "cameraExtensionAwaitingUserApproval")
   /// The virtual camera is NOT working.
   public static let cameraExtensionNotWorking = LocalizedString(lookupKey: "cameraExtensionNotWorking")
@@ -376,6 +376,8 @@ public enum L10n {
   public static let renderingQuality = LocalizedString(lookupKey: "renderingQuality")
   /// Reset Avatar Position
   public static let resetAvatarPosition = LocalizedString(lookupKey: "resetAvatarPosition")
+  /// Reset Window Size
+  public static let resetWindowSize = LocalizedString(lookupKey: "resetWindowSize")
   /// Setup is complete. Please restart Zoom or other clients.
   public static let restartAfterInstalling = LocalizedString(lookupKey: "restartAfterInstalling")
   /// Roundness

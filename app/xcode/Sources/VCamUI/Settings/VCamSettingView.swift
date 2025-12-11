@@ -87,7 +87,7 @@ public struct VCamSettingView: View {
                 }
             }
             .listStyle(.sidebar)
-            .frame(width: 140)
+            .frame(width: 150)
 
             Group {
                 switch tab {
@@ -107,7 +107,7 @@ public struct VCamSettingView: View {
                     VCamSettingVCamView.make()
                 }
             }
-            .frame(minWidth: 440, maxHeight: .infinity, alignment: .top)
+            .frame(minWidth: 450, maxHeight: .infinity, alignment: .top)
         }
         .environment(\.locale, locale.isEmpty ? .current : Locale(identifier: locale))
         .disabled(recorder.isRecording)

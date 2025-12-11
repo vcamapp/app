@@ -69,6 +69,7 @@ public final class WindowManager {
                 .resizable,
                 .fullSizeContentView,
             ]
+            window.collectionBehavior = [.fullScreenNone]
             window.titleVisibility = .visible
             window.minSize = .init(width: 800, height: 450)
             window.contentAspectRatio = NSSize(width: 1280, height: 720)
@@ -170,6 +171,13 @@ public final class WindowManager {
     public func setAlwaysOnTopEnabled(_ enabled: Bool) {
         UserDefaults.standard.set(enabled, for: .alwaysOnTopEnabled)
         NSApp.vcamWindow?.level = enabled ? .floating : .normal
+    }
+
+    public func resetWindowSize() {
+        guard let window = NSApp.vcamWindow else { return }
+        let defaultSize = window.minSize
+        window.setContentSize(defaultSize)
+        size = defaultSize
     }
 
     @objc public func quit() {

@@ -39,7 +39,7 @@ public struct VCamSettingVirtualCameraView: View {
             if isAwaitingUserApproval {
                 HStack {
                     Image(systemName: "exclamationmark.triangle")
-                    Link(destination: URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy")!) {
+                    Link(destination: .cameraExtension) {
                         Text(L10n.cameraExtensionAwaitingUserApproval.key, bundle: .localize)
                     }
                 }
@@ -120,7 +120,7 @@ public struct VCamSettingVirtualCameraView: View {
 extension VCamSettingVirtualCameraView {
     @MainActor
     private func installExtension() async throws {
-        NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy")!)
+        NSWorkspace.shared.open(.cameraExtension)
         try await CameraExtension().installExtension()
         isCameraExtensionInstalled = true
         isCameraExtensionStarting = await VirtualCameraManager.shared.installAndStartCameraExtension()
@@ -134,6 +134,16 @@ extension VCamSettingVirtualCameraView {
         isCameraExtensionStarting = await VirtualCameraManager.shared.installAndStartCameraExtension()
         if isAlertShown {
             await VCamAlert.showModal(title: L10n.success.text, message: L10n.completeUninstalling.text, canCancel: false)
+        }
+    }
+}
+
+private extension URL {
+    static var cameraExtension: URL {
+        if #available(macOS 15, *) {
+            return URL(string: "x-apple.systempreferences:com.apple.ExtensionsPreferences?extensionPointIdentifier=com.apple.system_extension.cmio.extension-point")!
+        } else {
+            return URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy")!
         }
     }
 }

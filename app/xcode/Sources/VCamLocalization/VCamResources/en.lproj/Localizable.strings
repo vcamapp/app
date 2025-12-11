@@ -143,7 +143,7 @@
 "cameraExtensionWorking" = "The virtual camera is working.";
 "cameraExtensionNotWorking" = "The virtual camera is NOT working.";
 "pleaseRestartMacToFix" = "Restarting Mac may resolve the issue.";
-"cameraExtensionAwaitingUserApproval" = "The virtual camera is not allowed. Please allow it from the 'Privacy & Security' section in the settings app.";
+"cameraExtensionAwaitingUserApproval" = "The virtual camera is not allowed. Please allow it from the 'Login Items & Extensions' of 'General' section in the settings app.";
 "failedToInstallCameraExtension" = "The installation of the virtual camera failed. Please install it from this app’s settings if you want to use it.";
 "seeDocumentation" = "For more information, see this documentation.";
 "docsURLForVirtualCamera" = "https://docs.vcamapp.com/v/en/virtual-camera/virtualcamera";
@@ -257,6 +257,7 @@
 "loadModelFile" = "Load Model File";
 "resetAvatarPosition" = "Reset Avatar Position";
 "alwaysOnTop" = "Always on Top";
+"resetWindowSize" = "Reset Window Size";
 "help" = "Help";
 "viewDocumentation" = "View Documentation";
 "quitVCam" = "Quit %@";

@@ -232,6 +232,8 @@ private extension AppMenu {
         alwaysOnTop.state = UserDefaults.standard.value(for: .alwaysOnTopEnabled) ? .on : .off
         Self.makeSubMenu(menu: subMenu, title: L10n.window.text, items: [
             alwaysOnTop,
+            .separator(),
+            makeMenuItem(title: L10n.resetWindowSize.text, action: #selector(resetWindowSize)),
         ])
     }
 
@@ -239,6 +241,10 @@ private extension AppMenu {
         let enabled = !UserDefaults.standard.value(for: .alwaysOnTopEnabled)
         VCamSystem.shared.windowManager.setAlwaysOnTopEnabled(enabled)
         sender.state = enabled ? .on : .off
+    }
+
+    @objc private func resetWindowSize() {
+        VCamSystem.shared.windowManager.resetWindowSize()
     }
 }
 
