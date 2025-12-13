@@ -26,6 +26,6 @@ public struct VCamBlendShapeAction: VCamAction {
             throw VCamActionError(L10n.isNotSetYet(L10n.facialExpression.text).text)
         }
 
-        UniBridge.shared.currentBlendShape.wrappedValue = configuration.blendShape
+        UniBridge.applyExpression(name: configuration.blendShape)
     }
 }

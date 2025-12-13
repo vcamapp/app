@@ -16,14 +16,4 @@ extension UniBridge {
         guard size.count == 2 else { return .init(width: 1920, height: 1280) } // an empty array after disposal
         return .init(width: CGFloat(size[0]), height: CGFloat(size[1]))
     }
-
-    public static var cachedBlendShapes: [BlendShape] = []
-    public var cachedBlendShapes: [BlendShape] {
-        Self.cachedBlendShapes
-    }
-
-    public static var cachedMotions: [Motion] = []
-    public var cachedMotions: [Motion] {
-        Self.cachedMotions
-    }
 }

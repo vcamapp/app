@@ -98,9 +98,6 @@ public final class UniBridge {
         case currentDisplayParameter = 3
         case allDisplayParameterPresets = 4
         case showEmojiStamp = 5
-        case blendShapes = 6
-        case currentBlendShape = 7
-        case motions = 8
     }
     public let stringMapper = ValueBinding<String, StringType>()
     public var message: Binding<String> { stringMapper.binding(.message) }
@@ -109,9 +106,6 @@ public final class UniBridge {
     public var currentDisplayParameter: Binding<String> { stringMapper.binding(.currentDisplayParameter) }
     public var allDisplayParameterPresets: String { stringMapper.get(.allDisplayParameterPresets) }
     public private(set) lazy var showEmojiStamp = stringMapper.set(.showEmojiStamp)
-    public var blendShapes: String { stringMapper.get(.blendShapes) }
-    public var currentBlendShape: Binding<String> { stringMapper.binding(.currentBlendShape) }
-    public var motions: String { stringMapper.get(.motions) }
 
     public enum TriggerType: Int32 {
         case openVRoidHub = 0

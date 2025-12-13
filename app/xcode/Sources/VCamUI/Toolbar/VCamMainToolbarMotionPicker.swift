@@ -18,7 +18,7 @@ public struct VCamMainToolbarMotionPicker: View {
     public var body: some View {
         GroupBox {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 80))], spacing: 2) {
-                ForEach(UniBridge.cachedMotions) { motion in
+                ForEach(uniState.motions) { motion in
                     HStack(spacing: 2) {
                         let isLoopOn = Binding<Bool>(
                             get: { state.modelConfiguration.isMotionLoopEnabled[motion, default: false] },
@@ -28,20 +28,18 @@ public struct VCamMainToolbarMotionPicker: View {
                         )
 
                         let isPlaying = uniState.isMotionPlaying[motion, default: false]
-                        Button {
-                            if isPlaying {
-                                UniBridge.stopMotion(name: motion.name)
-                            } else {
-                                UniBridge.playMotion(name: motion.name, isLoop: isLoopOn.wrappedValue)
+                        VCamMainToolbarButton(
+                            isSelected: isPlaying,
+                            action: {
+                                if isPlaying {
+                                    UniBridge.stopMotion(name: motion.name)
+                                } else {
+                                    UniBridge.playMotion(name: motion.name, isLoop: isLoopOn.wrappedValue)
+                                }
                             }
-                        } label: {
+                        ) {
                             Text(.init(motion.name), bundle: .localize)
-                                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                                .macHoverEffect()
-                                .background(isPlaying ? Color.accentColor.opacity(0.3) : nil)
-                                .cornerRadius(4)
                         }
-                        .buttonStyle(.plain)
 
 #if !FEATURE_3
                         Toggle(isOn: isLoopOn) {
@@ -87,17 +85,20 @@ extension VCamMainToolbarMotionPicker: MacWindow {
 #if DEBUG
 
 #Preview {
-    let _ = {
-        let motions: [String] = ["hi", "bye", "jump", "foo"]
-        UniBridge.cachedMotions = motions.map { .init(name: $0) }
-    }()
-
     VCamMainToolbarMotionPicker()
         .frame(width: 240)
         .environment(VCamUIState())
-        .environment(UniState(isMotionPlaying: [
-            .init(name: "hi"): true
-        ]))
+        .environment(UniState(
+            motions: [
+                .init(name: "hi"),
+                .init(name: "bye"),
+                .init(name: "jump"),
+                .init(name: "foo"),
+            ],
+            isMotionPlaying: [
+                .init(name: "hi"): true
+            ]
+        ))
 }
 
 #endif

@@ -16,8 +16,6 @@ public final class UniBridgeStub {
     private var floatTypes: [UniBridge.FloatType: CGFloat] = [:]
     private var stringTypes: [UniBridge.StringType: String] = [
         .allDisplayParameterPresets: "0@Test1,1@Test2",
-        .blendShapes: "A,I,U,E,O,Angry,Fun,Joy,Sorrow,Surprised,AAAAAAAA,BBBBBBBB,CCCCCC,DDDDDD,EEEE,FFFFFFF,GGGGGGG",
-        .motions: "Idle,Walk,Run,Jump",
     ]
     private lazy var arrayTypes: [UniBridge.ArrayType: UnsafeMutableRawPointer] = [
         .canvasSize: canvasSize.withUnsafeMutableBufferPointer { pointer in

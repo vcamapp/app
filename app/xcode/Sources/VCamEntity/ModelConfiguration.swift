@@ -10,5 +10,5 @@ import Foundation
 public struct ModelConfiguration: Sendable {
     public init() {}
 
-    public var isMotionLoopEnabled: [Motion: Bool] = [:]
+    public var isMotionLoopEnabled: [Avatar.Motion: Bool] = [:]
 }

@@ -16,7 +16,10 @@ public struct HoverEffectButtonViewModifier: ViewModifier {
 
     @State private var isHovered = false
 
+    @Environment(\.isEnabled) private var isEnabled
+
     public func body(content: Content) -> some View {
+        let isHovered = isEnabled ? isHovered : false
         content
             .padding(padding)
             .background(isHovered ? Color.white.opacity(0.1) : nil)

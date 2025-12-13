@@ -11,6 +11,7 @@ import Foundation
 public enum UniBridgeMethodId: Int32 {
     case playMotion = 0
     case stopMotion = 1
+    case applyExpression = 2
 }
 
 // MARK: - Payload Structures
@@ -46,6 +47,12 @@ public extension UniBridge {
     static func stopMotion(name: String) {
         name.withCString { namePtr in
             methodCallback(.stopMotion, UnsafeMutableRawPointer(mutating: namePtr), nil)
+        }
+    }
+
+    static func applyExpression(name: String) {
+        name.withCString { namePtr in
+            methodCallback(.applyExpression, UnsafeMutableRawPointer(mutating: namePtr), nil)
         }
     }
 }

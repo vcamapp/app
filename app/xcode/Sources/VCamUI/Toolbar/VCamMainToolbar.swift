@@ -16,6 +16,7 @@ public struct VCamMainToolbar: View {
     @State private var isMotionPickerPopover = false
     @State private var isBlendShapePickerPopover = false
 
+    @Environment(UniState.self) var uniState
     @Environment(\.locale) var locale
     @OpenEmojiPicker var openEmojiPicker
 
@@ -78,11 +79,12 @@ public struct VCamMainToolbar: View {
             }
             .popover(isPresented: $isBlendShapePickerPopover) {
                 VCamPopoverContainerWithWindow(L10n.facialExpression.key) {
-                    VCamMainToolbarBlendShapePicker()
+                    VCamMainToolbarExpressionPicker()
                 }
                 .environment(\.locale, locale)
                 .frame(width: 280, height: 150)
             }
+            .disabled(uniState.expressions.isEmpty)
         }
         .frame(maxHeight: .infinity, alignment: .bottom)
         .background(.thinMaterial)
