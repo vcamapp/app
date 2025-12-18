@@ -54,7 +54,7 @@ public struct VCamAlert: View {
                 }
                 .buttonStyle(.plain)
                 .background(Color.accentColor)
-                .cornerRadius(6)
+                .cornerRadiusConcentric(6)
 
                 if canCancel {
                     Button(action: cancel) {
@@ -65,7 +65,7 @@ public struct VCamAlert: View {
                     }
                     .buttonStyle(.plain)
                     .background(Color(NSColor.unemphasizedSelectedContentBackgroundColor))
-                    .cornerRadius(6)
+                    .cornerRadiusConcentric(6)
                 }
             }
         }
@@ -73,7 +73,7 @@ public struct VCamAlert: View {
         .fixedSize(horizontal: false, vertical: true)
         .padding().padding(.bottom, 8)
         .background(.thinMaterial)
-        .cornerRadius(16)
+        .cornerRadiusConcentric(16)
     }
 
     func cancel() {

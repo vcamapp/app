@@ -4,6 +4,8 @@ import SwiftUI
 
 
 public enum L10n {
+  /// Default
+  public static let expautoDefault = LocalizedString(lookupKey: "_expauto_default_")
   /// About %@
   public static func aboutApp(_ p1: Any) -> ArgumentsLocalizedString {
     ArgumentsLocalizedString("aboutApp", "aboutApp \(String(describing: p1))", String(describing: p1))
@@ -308,6 +310,8 @@ public enum L10n {
   public static let noteEnableNewCameraExtension = LocalizedString(lookupKey: "noteEnableNewCameraExtension")
   /// No Title
   public static let notitle = LocalizedString(lookupKey: "notitle")
+  /// Not Supported
+  public static let notSupported = LocalizedString(lookupKey: "notSupported")
   /// Object
   public static let object = LocalizedString(lookupKey: "object")
   /// Official Website

@@ -40,19 +40,7 @@ public struct VCamMainToolbar: View {
                 Text("👍")
             }
             .popover(isPresented: $isEmojiPickerPopover) {
-                VCamPopoverContainerWithButton(L10n.emoji.key) {
-                    Button {
-                        openEmojiPicker()
-                        isEmojiPickerPopover = false
-                    } label: {
-                        Image(systemName: "macwindow")
-                    }
-                    .emojiPicker(for: openEmojiPicker) { emoji in
-                        Task {
-                            try await VCamEmojiAction(configuration: .init(emoji: emoji))(context: .empty)
-                        }
-                    }
-                } content: {
+                VCamPopoverContainer(L10n.emoji.key) {
                     VCamMainToolbarEmojiPicker()
                 }
                 .environment(\.locale, locale)
@@ -109,4 +97,5 @@ public struct VCamMainToolbar: View {
 
 #Preview {
     VCamMainToolbar()
+        .environment(UniState())
 }

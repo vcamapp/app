@@ -54,6 +54,7 @@
 "width" = "幅";
 "height" = "高さ";
 "seconds" = "秒";
+"notSupported" = "サポートされていません";
 
 // MARK: - Menu
 
@@ -79,6 +80,9 @@
 "shudder" = "ブルブル";
 "run" = "走る";
 "facialExpression" = "表情";
+
+// MARK: - Expression
+"_expauto_default_" = "デフォルト";
 
 // MARK: - Emoji
 

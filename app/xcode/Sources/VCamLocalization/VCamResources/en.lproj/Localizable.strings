@@ -54,6 +54,7 @@
 "width" = "Width";
 "height" = "Height";
 "seconds" = "s";
+"notSupported" = "Not Supported";
 
 // MARK: - Menu
 
@@ -79,6 +80,9 @@
 "shudder" = "Shudder";
 "run" = "Run";
 "facialExpression" = "Facial Expression";
+
+// MARK: - Expression
+"_expauto_default_" = "Default";
 
 // MARK: - Emoji
 

@@ -23,7 +23,7 @@ public struct HoverEffectButtonViewModifier: ViewModifier {
         content
             .padding(padding)
             .background(isHovered ? Color.white.opacity(0.1) : nil)
-            .cornerRadius(4)
+            .cornerRadiusConcentric(4)
             .onHover {
                 self.isHovered = $0
             }

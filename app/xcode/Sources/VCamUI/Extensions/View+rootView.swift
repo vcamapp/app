@@ -16,7 +16,12 @@ public struct RootViewInjectionModifier: ViewModifier {
 }
 
 extension View {
-    public func rootView() -> some View {
+    public func rootView(
+        state: VCamUIState = .shared,
+        uniState: UniState = .shared
+    ) -> some View {
         modifier(RootViewInjectionModifier())
+            .environment(state)
+            .environment(uniState)
     }
 }

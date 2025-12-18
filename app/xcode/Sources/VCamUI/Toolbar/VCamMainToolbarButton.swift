@@ -18,7 +18,7 @@ struct VCamMainToolbarButton: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .macHoverEffect()
                 .background(isSelected ? Color.accentColor.opacity(0.3) : nil)
-                .cornerRadius(4)
+                .cornerRadiusConcentric(4)
         }
         .buttonStyle(.plain)
     }

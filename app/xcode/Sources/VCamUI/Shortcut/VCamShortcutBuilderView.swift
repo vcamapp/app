@@ -75,7 +75,7 @@ public struct VCamShortcutBuilderView: View {
                     .buttonStyle(.plain)
                     .padding(4)
                     .background(.regularMaterial)
-                    .cornerRadius(4)
+                    .cornerRadiusConcentric(4)
                     .listRowSeparator(.hidden)
                 }
             }

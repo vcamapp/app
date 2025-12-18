@@ -18,9 +18,12 @@ public struct Migration {
 
         do {
             try await migrationFirst(previousVersion: previousVersion)
+
+#if FEATURE_3
             try migration095(previousVersion: previousVersion)
             try await migration0110(previousVersion: previousVersion)
             try await migration0131(previousVersion: previousVersion)
+#endif
         } catch {
             Logger.error(error)
         }

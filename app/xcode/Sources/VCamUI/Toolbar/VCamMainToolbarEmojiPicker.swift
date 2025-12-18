@@ -11,8 +11,9 @@ import VCamEntity
 public struct VCamMainToolbarEmojiPicker: View {
     public init() {}
     
-    private static let emojis: [Emoji] = ["👍", "🎉", "❤️", "🤣", "🥺", "😢", "👏", "🙏", "💪", "🙌", "👀", "✨", "🔥", "💦", "❌", "⭕️", "⁉️", "❓", "⚠️", "💮"]
+    private static let emojis: [Emoji] = ["👍", "🎉", "❤️", "💕", "😍", "🤣", "😂", "😊", "🥺", "😢", "😭", "😎", "🤔", "👏", "🙏", "💪", "🙌", "🫶", "👀", "✨", "🔥", "❌", "⭕️", "‼️", "⁉️", "❓", "⚠️", "💸", "💯"]
 
+    @OpenEmojiPicker var openEmojiPicker
     @Environment(\.dismiss) var dismiss
     
     public var body: some View {
@@ -20,9 +21,7 @@ public struct VCamMainToolbarEmojiPicker: View {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 26))]) {
                 ForEach(Self.emojis) { emoji in
                     Button {
-                        Task { @MainActor in
-                            try await VCamEmojiAction(configuration: .init(emoji: emoji.rawValue))(context: .empty)
-                        }
+                        sendEmoji(emoji.rawValue)
                         dismiss()
                     } label: {
                         Text(emoji.rawValue)
@@ -30,7 +29,24 @@ public struct VCamMainToolbarEmojiPicker: View {
                     }
                     .buttonStyle(.plain)
                 }
+
+                Button {
+                    openEmojiPicker()
+                } label: {
+                    Image(systemName: "face.smiling")
+                        .macHoverEffect()
+                }
+                .buttonStyle(.plain)
+                .emojiPicker(for: openEmojiPicker) { emoji in
+                    sendEmoji(emoji)
+                }
             }
+        }
+    }
+
+    private func sendEmoji(_ emoji: String) {
+        Task {
+            try await VCamEmojiAction(configuration: .init(emoji: emoji))(context: .empty)
         }
     }
 }
@@ -49,9 +65,7 @@ private struct Emoji: RawRepresentable, ExpressibleByStringLiteral, Identifiable
     }
 }
 
-struct VCamMainToolbarEmojiPicker_Previews: PreviewProvider {
-    static var previews: some View {
-        VCamMainToolbarEmojiPicker()
-            .fixedSize()
-    }
+#Preview {
+    VCamMainToolbarEmojiPicker()
+        .frame(width: 240)
 }

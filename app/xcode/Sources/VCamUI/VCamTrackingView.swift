@@ -40,6 +40,7 @@ public struct VCamTrackingView: View {
             VStack(spacing: 8) {
                 Text(L10n.hand.key, bundle: .localize)
                     .bold()
+#if FEATURE_3
                 Picker(selection: handTrackingMethod) {
                     ForEach(TrackingMethod.Hand.allCases) { method in
                         Text(method.name, bundle: .localize)
@@ -49,6 +50,10 @@ public struct VCamTrackingView: View {
                 }
                 .labelsHidden()
                 .frame(maxWidth: .infinity, alignment: .trailing)
+#else
+                Text(L10n.notSupported.key, bundle: .localize)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+#endif
             }
 #if ENABLE_MOCOPI
             .disabled(integrationMocopi)
@@ -59,6 +64,8 @@ public struct VCamTrackingView: View {
             VStack(spacing: 8) {
                 Text(L10n.finger.key, bundle: .localize)
                     .bold()
+
+#if FEATURE_3
                 Picker(selection: fingerTrackingMethod) {
                     ForEach(TrackingMethod.Finger.allCases) { method in
                         Text(method.name, bundle: .localize)
@@ -68,6 +75,10 @@ public struct VCamTrackingView: View {
                 }
                 .labelsHidden()
                 .frame(maxWidth: .infinity, alignment: .trailing)
+#else
+                Text(L10n.notSupported.key, bundle: .localize)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+#endif
             }
             .disabled(Tracking.shared.handTrackingMethod == .disabled)
             .opacity(Tracking.shared.handTrackingMethod == .disabled ? 0.5 : 1.0)

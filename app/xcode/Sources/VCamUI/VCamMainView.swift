@@ -31,16 +31,33 @@ public struct VCamMainView: View {
                 .frame(maxWidth: .infinity, alignment: .trailing)
             }
 
+            let calibrateButton = FlatButton {
+                Tracking.shared.resetCalibration()
+            } label: {
+                Text(L10n.calibrate.key, bundle: .localize)
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+            }
+            .flatButtonStyle(.label)
+            .help(L10n.helpCalibrate.text)
+
             HStack {
-                SelectAllTextField(placeholder: L10n.message.text, text: $message)
-                FlatButton {
-                    Tracking.shared.resetCalibration()
-                } label: {
-                    Text(L10n.calibrate.key, bundle: .localize)
-                        .font(.callout)
+                if #available(macOS 26.0, *) {
+                    GroupBox {
+                        SelectAllTextField(placeholder: L10n.message.text, text: $message)
+                            .padding(.horizontal, 8)
+                    }
+
+                    GroupBox {
+                        calibrateButton
+                            .controlSize(.mini)
+                            .padding(.vertical, -1.5)
+                    }
+                } else {
+                    SelectAllTextField(placeholder: L10n.message.text, text: $message)
+
+                    calibrateButton
                 }
-                .flatButtonStyle(.label)
-                .help(L10n.helpCalibrate.text)
             }
 
             VCamShortcutGridView()

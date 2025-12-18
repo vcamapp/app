@@ -67,6 +67,7 @@ public final class MacWindowManager {
             window.isReleasedWhenClosed = false
             window.contentView = NSHostingView(
                 rootView: WindowContainer(content: windowView, nsWindow: window)
+                    .rootView()
             )
             window.title = windowView.windowTitle
             window.center()

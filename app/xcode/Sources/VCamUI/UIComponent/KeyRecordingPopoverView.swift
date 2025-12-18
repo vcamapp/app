@@ -89,7 +89,7 @@ public struct KeyRecordingPopoverView: View {
                     Color.clear.background()
                 }
             }
-            .cornerRadius(4)
+            .cornerRadiusConcentric(4)
         }
     }
 

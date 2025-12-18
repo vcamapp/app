@@ -2,7 +2,7 @@ all: build test-ui-preview
 build: test-package build-ui-preview
 
 test-package:
-	cd app/xcode && swift test
+	cd app/xcode && swift test -Xswiftc -DCI_TESTING
 
 build-ui-preview:
 	cd app/xcode/App && xcodebuild -project VCam.xcodeproj -scheme VCamUIPreview -derivedDataPath /tmp/build clean build

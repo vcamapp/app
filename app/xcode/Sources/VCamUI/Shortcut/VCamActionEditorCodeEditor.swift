@@ -41,7 +41,7 @@ struct VCamActionEditorCodeEditor: View {
                 }
                 .frame(height: 80)
                 .background()
-                .cornerRadius(8)
+                .cornerRadiusConcentric(8)
             }
         }
         .onAppear(perform: loadScript)

@@ -30,16 +30,21 @@ public enum VCamMenuItem: Identifiable, CaseIterable {
         }
     }
 
-    public var icon: String {
+    public var icon: Image {
         switch self {
         case .main:
-            return "person.fill"
+#if CI_TESTING
+            Image("symbolIcon")
+#else
+            Image(.symbolIcon)
+                .resizable()
+#endif
 #if FEATURE_3
         case .screenEffect:
-            return "sparkles"
+            Image(systemName: "sparkles")
 #endif
         case .recording:
-            return "camera.fill"
+            Image(systemName: "camera.fill")
         }
     }
 }
@@ -54,7 +59,8 @@ public struct VCamMenu: View {
                     state.currentMenu = item
                     Logger.log(String(describing: item))
                 } label: {
-                    Image(systemName: item.icon)
+                    item.icon
+                        .scaledToFit()
                         .frame(width: 16)
                     Text(item.title, bundle: .localize)
                         .font(.callout)
@@ -130,9 +136,9 @@ private struct VCamMenuButtonStyle: ButtonStyle {
         .padding(8)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
-            isSelected ? Color.accentColor : Color.clear
+            isSelected ? Color.accentColor.brightness(-0.1) : Color.clear.brightness(0)
         )
-        .cornerRadius(6.0)
+        .cornerRadiusConcentric(6)
         .contentShape(Rectangle())
         .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : [.isButton])
     }

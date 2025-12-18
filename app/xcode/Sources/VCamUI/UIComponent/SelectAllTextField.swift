@@ -18,7 +18,7 @@ public struct SelectAllTextField: NSViewRepresentable {
     let placeholder: String
     @Binding var text: String
 
-    public func makeNSView(context: Context) -> _SelectAllTextField {
+    public func makeNSView(context: Context) -> NSView {
         let view = _SelectAllTextField()
         view.stringValue = text
         view.placeholderString = placeholder
@@ -27,10 +27,20 @@ public struct SelectAllTextField: NSViewRepresentable {
         view.textDidChange = { newValue in
             text = newValue
         }
-        return view
+
+        if #available(macOS 26.0, *) {
+            view.isBezeled = false
+            view.backgroundColor = .clear
+            view.drawsBackground = true
+            view.isBordered = false
+            view.focusRingType = .none
+            return view
+        } else {
+            return view
+        }
     }
 
-    public func updateNSView(_ textField: _SelectAllTextField, context: Context) {
+    public func updateNSView(_ textField: NSView, context: Context) {
     }
 }
 

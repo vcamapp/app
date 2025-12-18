@@ -10,25 +10,24 @@ import VCamBridge
 
 public struct RootView: View {
     let unityView: NSView
-
-    @Bindable var state: VCamUIState = .shared
-    @Bindable var uniState: UniState = .shared
+    let state: VCamUIState
+    let uniState: UniState
 
     @AppStorage(key: .locale) var locale
 
     public var body: some View {
         RootViewContent(unityView: unityView)
             .background(.regularMaterial)
-            .environment(state)
-            .environment(uniState)
             .environment(\.locale, locale.isEmpty ? .current : Locale(identifier: locale))
-            .rootView()
+            .rootView(state: state, uniState: uniState)
     }
 }
 
 extension RootView {
     public init(unityView: NSView) {
         self.unityView = unityView
+        self.state = .shared
+        self.uniState = .shared
     }
 }
 
@@ -123,7 +122,8 @@ extension UnityView: Equatable {
 #Preview {
     RootView(
         unityView: PreviewUnityView(),
-        state: VCamUIState(interactable: true)
+        state: VCamUIState(interactable: true),
+        uniState: UniState()
     )
 }
 
