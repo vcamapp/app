@@ -25,8 +25,10 @@ public extension UserDefaults.Key {
     static var pluginVersion: Key<String> { .init("vc_plugin_ver", default: "") }
     static var alwaysOnTopEnabled: Key<Bool> { .init("vc_alwaysontop_enabled", default: false) }
     static var trackingMethodFace: Key<TrackingMethod.Face> { .init("vc_tracking_method_face", default: .default) }
+#if FEATURE_3
     static var trackingMethodHand: Key<TrackingMethod.Hand> { .init("vc_tracking_method_hand", default: .default) }
     static var trackingMethodFinger: Key<TrackingMethod.Finger> { .init("vc_tracking_method_finger", default: .default) }
+#endif
     static var eyeTrackingOffsetY: Key<Double> { .init("vc_eye_tracking_offset_y", default: -0.2) }
     static var eyeTrackingIntensityX: Key<Double> { .init("vc_eye_tracking_intensity_x", default: 6) }
     static var eyeTrackingIntensityY: Key<Double> { .init("vc_eye_tracking_intensity_y", default: 3) }

@@ -28,8 +28,13 @@ public final class Tracking {
     public static let shared = Tracking()
 
     public private(set) var faceTrackingMethod = TrackingMethod.Face.default
+#if FEATURE_3
     public private(set) var handTrackingMethod = TrackingMethod.Hand.default
     public private(set) var fingerTrackingMethod = TrackingMethod.Finger.default
+#else
+    public private(set) var handTrackingMethod = TrackingMethod.Hand.disabled
+    public private(set) var fingerTrackingMethod = TrackingMethod.Finger.disabled
+#endif
 
     @ObservationIgnored public private(set) var useEyeTracking = false
     @ObservationIgnored public private(set) var useVowelEstimation = false
@@ -52,8 +57,13 @@ public final class Tracking {
 
     public func configure() {
         setFaceTrackingMethod(UserDefaults.standard.value(for: .trackingMethodFace))
+#if FEATURE_3
         setHandTrackingMethod(UserDefaults.standard.value(for: .trackingMethodHand))
         setFingerTrackingMethod(UserDefaults.standard.value(for: .trackingMethodFinger))
+#else
+        setHandTrackingMethod(.disabled)
+        setFingerTrackingMethod(.disabled)
+#endif
 
         if UserDefaults.standard.value(for: .integrationVCamMocap) {
             Task {
@@ -93,7 +103,9 @@ public final class Tracking {
 
     public func setHandTrackingMethod(_ method: TrackingMethod.Hand) {
         handTrackingMethod = method
+#if FEATURE_3
         UserDefaults.standard.set(method, for: .trackingMethodHand)
+#endif
 
         if handTrackingMethod == .default {
             Tracking.shared.avatarCameraManager.setWebCamUsage(Tracking.shared.avatarCameraManager.webCameraUsage.union(.handTracking))
@@ -104,7 +116,9 @@ public final class Tracking {
 
     public func setFingerTrackingMethod(_ method: TrackingMethod.Finger) {
         fingerTrackingMethod = method
+#if FEATURE_3
         UserDefaults.standard.set(method, for: .trackingMethodFinger)
+#endif
 
         if fingerTrackingMethod == .default {
             Tracking.shared.avatarCameraManager.setWebCamUsage(Tracking.shared.avatarCameraManager.webCameraUsage.union(.fingerTracking))

@@ -49,7 +49,7 @@ public final class WindowManager {
         if isUnity, !NSApp.windows.map(\.title).contains("VCam") {
             uniDebugLog("WindowManager.setUpWindow()")
             let windowRef = NSWindow()
-            windowRef.title = "VCam"
+            windowRef.title = isUnity ? "VCam" : Bundle.main.displayName
             windowRef.styleMask = [.titled, .closable, .resizable]
             windowRef.backingType = .buffered
             windowRef.level = .floating
@@ -58,7 +58,7 @@ public final class WindowManager {
             windowRef.makeKeyAndOrderFront(nil)
         } else if let window = NSApp.mainOrFirstWindow {
             window.appearance = NSAppearance(named: .darkAqua)
-            window.title = "VCam"
+            window.title = Bundle.main.displayName
             window.titlebarAppearsTransparent = true
 //            window.isMovableByWindowBackground = true
             window.backgroundColor = .clear

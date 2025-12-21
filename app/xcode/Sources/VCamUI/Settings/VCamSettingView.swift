@@ -38,7 +38,7 @@ public struct VCamSettingView: View {
             case .experiment:
                 L10n.experiment.key
             case .vcam:
-                "VCam"
+                LocalizedStringKey(Bundle.main.displayName)
             }
         }
 
