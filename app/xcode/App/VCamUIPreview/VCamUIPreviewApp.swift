@@ -15,25 +15,20 @@ import VCamStub
 
 @main
 struct VCamUIPreviewApp: App {
-    @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
-
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .onAppear {
+                    configureApp()
+                }
         }
     }
-}
 
-final class AppDelegate: NSObject, NSApplicationDelegate {
-    func applicationDidFinishLaunching(_ notification: Notification) {
+    private func configureApp() {
         if ProcessInfo.processInfo.arguments.contains("UITesting") {
             UserDefaults.standard.removePersistentDomain(forName: Bundle.main.bundleIdentifier!)
         }
 
-        configureApp()
-    }
-
-    private func configureApp() {
         VCamUIPreviewStub.stub()
         VCamSystem.shared.configure()
 

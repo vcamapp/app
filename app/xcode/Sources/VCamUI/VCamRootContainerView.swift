@@ -29,7 +29,18 @@ public final class VCamRootContainerView: NSView {
 
 public extension VCamRootContainerView {
     override func draggingEntered(_ sender: any NSDraggingInfo) -> NSDragOperation {
-        guard let url = url(for: sender), FileType(url: url) != nil else {
+        guard let url = url(for: sender) else {
+            return [] // NSDragOperationNone
+        }
+
+#if !FEATURE_3
+        var isDirectory: ObjCBool = false
+        if FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory), isDirectory.boolValue {
+            return .copy
+        }
+#endif
+
+        guard FileType(url: url) != nil else {
             return [] // NSDragOperationNone
         }
 
@@ -41,9 +52,22 @@ public extension VCamRootContainerView {
     }
 
     override func performDragOperation(_ sender: any NSDraggingInfo) -> Bool {
-        guard let url = url(for: sender), let type = FileType(url: url) else {
+        guard let url = url(for: sender) else {
             return false
         }
+        
+#if !FEATURE_3
+        var isDirectory: ObjCBool = false
+        if FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory), isDirectory.boolValue {
+            UniBridge.shared.loadModel(url.path)
+            return true
+        }
+#endif
+
+        guard let type = FileType(url: url) else {
+            return false
+        }
+        
         switch type {
         case .vrm:
             UniBridge.shared.loadVRM(url.path)

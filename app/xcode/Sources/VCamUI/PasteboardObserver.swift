@@ -9,6 +9,8 @@ import AppKit
 
 @Observable
 public final class PasteboardObserver {
+    public static let shared = PasteboardObserver()
+
     @ObservationIgnored private var timer: Timer?
     @ObservationIgnored private var lastChangeCount: Int = 0
 
@@ -16,7 +18,7 @@ public final class PasteboardObserver {
 
     public private(set) var imageURL: URL?
 
-    public init() {
+    private init() {
         observe()
     }
 

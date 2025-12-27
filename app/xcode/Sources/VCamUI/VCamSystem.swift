@@ -18,7 +18,6 @@ public final class VCamSystem {
     public static let shared = VCamSystem()
 
     public let windowManager = WindowManager()
-    public let pasteboardObserver = PasteboardObserver()
 
     public private(set) var isStarted = false
     public var isUniVCamSystemEnabled = false {
@@ -38,21 +37,15 @@ public final class VCamSystem {
 
         Workaround.fixColorPickerOpacity_macOS14()
         windowManager.setUpWindow()
+        windowManager.setUpView()
+        AppMenu.shared.configure()
+
+        if !UniBridge.isUnity {
+            AppUpdater.vcam.presentUpdateAlertIfAvailable()
+        }
 
         Task { @MainActor in
-            if !windowManager.isUnity {
-#if DEBUG
-                if !ProcessInfo.processInfo.arguments.contains("UITesting") {
-                    await AppUpdater.vcam.presentUpdateAlertIfAvailable()
-                }
-#else
-                await AppUpdater.vcam.presentUpdateAlertIfAvailable()
-#endif
-            }
-
             await Migration.migrate()
-            windowManager.setUpView()
-            AppMenu.shared.configure()
 
             Camera.configure()
             AudioDevice.configure()
@@ -62,7 +55,7 @@ public final class VCamSystem {
     }
 
     public func configure() {
-        guard windowManager.isUnity else { return }
+        guard UniBridge.isUnity else { return }
         NSApp.vcamWindow?.orderFront(nil)
     }
 
@@ -73,7 +66,7 @@ public final class VCamSystem {
         Tracking.shared.configure()
         AvatarAudioManager.shared.startIfNeeded()
         RenderTextureManager.shared.resume()
-        pasteboardObserver.observe()
+        PasteboardObserver.shared.observe()
         UniBridge.shared.resumeApp()
     }
 
@@ -85,7 +78,7 @@ public final class VCamSystem {
         AvatarAudioManager.shared.stop(usage: .all)
         VideoRecorder.shared.stop()
         RenderTextureManager.shared.pause()
-        pasteboardObserver.dispose()
+        PasteboardObserver.shared.dispose()
         UniBridge.shared.pauseApp()
     }
 
@@ -95,7 +88,7 @@ public final class VCamSystem {
         AvatarAudioManager.shared.stop(usage: .all)
         VideoRecorder.shared.stop()
         RenderTextureManager.shared.pause()
-        pasteboardObserver.dispose()
+        PasteboardObserver.shared.dispose()
         UniBridge.shared.reset()
     }
 }

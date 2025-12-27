@@ -13,11 +13,21 @@ public struct RootView: View {
     let state: VCamUIState
     let uniState: UniState
 
+    @State private var isLaunchScreenPresented = true
     @AppStorage(key: .locale) var locale
 
     public var body: some View {
         RootViewContent(unityView: unityView)
             .background(.regularMaterial)
+            .overlay {
+                if isLaunchScreenPresented {
+                    LaunchScreen {
+                        withAnimation(.easeOut(duration: 0.2)) {
+                            isLaunchScreenPresented = false
+                        }
+                    }
+                }
+            }
             .environment(\.locale, locale.isEmpty ? .current : Locale(identifier: locale))
             .rootView(state: state, uniState: uniState)
     }

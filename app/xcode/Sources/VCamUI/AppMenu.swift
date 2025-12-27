@@ -22,7 +22,7 @@ public final class AppMenu: NSObject {
 
     private override init() {
         let mainMenu: NSMenu
-        if VCamSystem.shared.windowManager.isUnity {
+        if UniBridge.isUnity {
             menu = Self.makeSubMenu(menu: NSApp.mainMenu!, title: "VCamMenu", items: [])
             mainMenu = NSApp.mainMenu!.items[0].submenu!
         } else {

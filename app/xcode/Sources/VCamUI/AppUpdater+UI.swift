@@ -84,11 +84,17 @@ extension AppUpdater {
         MacWindowManager.shared.open(AppUpdateInformationView(release: release))
     }
 
-    @MainActor
-    public func presentUpdateAlertIfAvailable() async {
-        guard let release = try? await check(), UserDefaults.standard.value(for: .skipThisVersion) < release.version else {
-            return // already latest or error
+    public func presentUpdateAlertIfAvailable() {
+#if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("UITesting") {
+            return
         }
-        MacWindowManager.shared.open(AppUpdateInformationView(release: release))
+#endif
+        Task { @MainActor in
+            guard let release = try? await check(), UserDefaults.standard.value(for: .skipThisVersion) < release.version else {
+                return // already latest or error
+            }
+            MacWindowManager.shared.open(AppUpdateInformationView(release: release))
+        }
     }
 }

@@ -69,7 +69,7 @@ public struct VCamMainObjectListView: View {
 }
 
 private struct VCamMainObjectListAddButton: View {
-    @Bindable private var pasteboard = VCamSystem.shared.pasteboardObserver
+    @Bindable private var pasteboard = PasteboardObserver.shared
 
     var body: some View {
         let objectManager = SceneObjectManager.shared

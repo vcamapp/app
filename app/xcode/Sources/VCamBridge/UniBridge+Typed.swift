@@ -35,6 +35,8 @@ public func uniBridgeRegister(_ callback: @escaping @convention(c) (Int32, Unsaf
 }
 
 public extension UniBridge {
+    static let isUnity = Bundle.main.bundlePath.hasSuffix("Unity.app")
+
     static func playMotion(name: String, isLoop: Bool) {
         name.withCString { namePtr in
             var payload = PlayMotionPayload(stringPtr: namePtr, boolValue: isLoop)

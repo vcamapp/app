@@ -14,8 +14,6 @@ import VCamBridge
 public final class WindowManager {
     public private(set) var size = NSSize(width: 1280, height: 720)
 
-    public let isUnity = Bundle.main.bundlePath.hasSuffix("Unity.app")
-
     @ObservationIgnored public private(set) var isConfigured = false
     @ObservationIgnored public fileprivate(set) var isWindowClosed = false
     @ObservationIgnored public var isEnabled = false
@@ -46,10 +44,10 @@ public final class WindowManager {
     public func setUpWindow() {
         Logger.log("")
 
-        if isUnity, !NSApp.windows.map(\.title).contains("VCam") {
+        if UniBridge.isUnity {
             uniDebugLog("WindowManager.setUpWindow()")
             let windowRef = NSWindow()
-            windowRef.title = isUnity ? "VCam" : Bundle.main.displayName
+            windowRef.title = UniBridge.isUnity ? "VCam" : Bundle.main.displayName
             windowRef.styleMask = [.titled, .closable, .resizable]
             windowRef.backingType = .buffered
             windowRef.level = .floating
@@ -88,7 +86,7 @@ public final class WindowManager {
         }
 
         containerView.addFilledView(RootView(unityView: {
-            if isUnity {
+            if UniBridge.isUnity {
                 return NSView()
             } else {
                 NSLayoutConstraint.deactivate(unityView.constraints)
@@ -99,7 +97,7 @@ public final class WindowManager {
         }()))
         window.contentView = containerView
 
-        if isUnity {
+        if UniBridge.isUnity {
             uniDebugLog("WindowManager.setUpView()")
             window.setContentSize(containerView.fittingSize)
         } else {
@@ -159,7 +157,7 @@ public final class WindowManager {
         VCamSystem.shared.dispose()
         isConfigured = false
 
-        if isUnity {
+        if UniBridge.isUnity {
             uniDebugLog("WindowManager.dispose()")
             SceneObjectManager.shared.dispose()
             NSApp.vcamWindow?.orderOut(nil)
