@@ -81,7 +81,7 @@ extension CameraExtension: OSSystemExtensionRequestDelegate {
         if let property = properties.first {
             continuation.resume(returning: property)
         } else {
-            continuation.resume(throwing: NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to get the propeties"]))
+            continuation.resume(throwing: NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to get the properties"]))
         }
     }
 
