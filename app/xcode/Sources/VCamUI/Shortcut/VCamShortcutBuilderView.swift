@@ -49,8 +49,8 @@ public struct VCamShortcutBuilderView: View {
                     }
                     .frame(maxWidth: .infinity)
                 }
-                .onMove { offsets, desination in
-                    shortcut.configurations.move(fromOffsets: offsets, toOffset: desination)
+                .onMove { offsets, destination in
+                    shortcut.configurations.move(fromOffsets: offsets, toOffset: destination)
                 }
                 .listRowSeparator(.hidden)
             }

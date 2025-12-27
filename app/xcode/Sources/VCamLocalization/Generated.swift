@@ -160,7 +160,7 @@ public enum L10n {
   public static let enableVSync = LocalizedString(lookupKey: "enableVSync")
   /// Entire Display
   public static let entireDisplay = LocalizedString(lookupKey: "entireDisplay")
-  /// No permisison. Please allow screen recording in the Security & Privacy of the System Preferences.
+  /// No permission. Please allow screen recording in the Security & Privacy of the System Preferences.
   public static let errorScreenCapturePermission = LocalizedString(lookupKey: "errorScreenCapturePermission")
   /// A new version %@ is available!
   public static func existsNewAppVersion(_ p1: Any) -> ArgumentsLocalizedString {
