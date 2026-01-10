@@ -44,6 +44,16 @@ public struct Keychain {
         try saveData(Data(value.utf8), rawKey: key.rawValue)
     }
 
+    public func save<Value: Codable>(_ value: Value, forKey key: Key<Value>) throws(KeychainError) {
+        let encoder = JSONEncoder()
+        do {
+            let data = try encoder.encode(value)
+            try saveData(data, rawKey: key.rawValue)
+        } catch {
+            throw .invalidData
+        }
+    }
+
     public func save(_ data: Data, forKey key: Key<Data>) throws(KeychainError) {
         try saveData(data, rawKey: key.rawValue)
     }
@@ -57,7 +67,7 @@ public struct Keychain {
             kSecAttrAccount as String: rawKey,
             kSecAttrAccessGroup as String: accessGroup,
             kSecValueData as String: data,
-            kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
+            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
             kSecUseDataProtectionKeychain as String: true,
         ]
 
@@ -72,6 +82,16 @@ public struct Keychain {
     public func loadString(forKey key: Key<String>) throws(KeychainError) -> String {
         let data = try loadData(rawKey: key.rawValue)
         return String(decoding: data, as: UTF8.self)
+    }
+
+    public func load<Value: Codable>(forKey key: Key<Value>) throws(KeychainError) -> Value {
+        let data = try loadData(rawKey: key.rawValue)
+        let decoder = JSONDecoder()
+        do {
+            return try decoder.decode(Value.self, from: data)
+        } catch {
+            throw .invalidData
+        }
     }
 
     public func load(forKey key: Key<Data>) throws(KeychainError) -> Data {

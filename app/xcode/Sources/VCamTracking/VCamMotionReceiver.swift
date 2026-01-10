@@ -37,7 +37,11 @@ public final class VCamMotionReceiver {
         let parameters = NWParameters.udp
         parameters.allowLocalEndpointReuse = true
 
+#if FEATURE_3
         let listener = try NWListener(using: parameters, on: 34962)
+#else
+        let listener = try NWListener(using: parameters, on: 34963)
+#endif
         listener.service = .init(type: "_vcammocap._udp", domain: "local")
         self.listener = listener
 

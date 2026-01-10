@@ -99,7 +99,13 @@ public struct AppUpdater {
 }
 
 extension AppUpdater {
+#if FEATURE_3
     public static var vcam: AppUpdater {
         AppUpdater(repository: .init(owner: "vcamapp", repo: "app"))
     }
+#else
+    public static var vcam: AppUpdater {
+        AppUpdater(repository: .init(owner: "vcamapp", repo: "app2d"))
+    }
+#endif
 }

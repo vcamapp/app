@@ -8,9 +8,9 @@
 import Foundation
 
 public struct LocalizationEnvironment {
-    public static var currentLocale: () -> String = { "" }
+    public static var currentLocaleIdentifier: () -> String = { "" }
 
     public static var language: Language {
-        LanguageList(locale: currentLocale()).language
+        LanguageList(locale: currentLocaleIdentifier()).language
     }
 }

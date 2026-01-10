@@ -7,8 +7,8 @@
 
 import Foundation
 
-@_cdecl("uniHandleDeeplink")
-public func uniHandleDeeplink(_ url: UnsafePointer<CChar>) {
+@_cdecl("uniHandleDeepLink")
+public func uniHandleDeepLink(_ url: UnsafePointer<CChar>) {
     let urlString = String(cString: url)
     DeeplinkHandler.handleURL(URL(string: urlString)!)
 }

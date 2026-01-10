@@ -38,7 +38,11 @@ public final class FacialMocapReceiver {
     public func connect(ip: String) async throws {
         await stop()
 
+#if FEATURE_3
         let port = NWEndpoint.Port(integerLiteral: 49983)
+#else
+        let port = NWEndpoint.Port(integerLiteral: 49984)
+#endif
 
         try await startServer(port: port) { [weak self] result in
             switch result {

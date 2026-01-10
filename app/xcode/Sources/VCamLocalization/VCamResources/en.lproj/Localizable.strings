@@ -246,6 +246,27 @@
 "disconnect" = "Disconnect";
 "helpMocopIP" = "The port in the PC connection settings on the mocopi side should be \"12351\".";
 
+// MARK: - License
+"license" = "License";
+"licenseCheckIfAlreadyAcquired" = "If you have already acquired a commercial license, please verify your license. [Check License Status...](vcam2d://auth/checkLicense)";
+"accountManagement" = "Account Management...";
+"manageAccountAndSubscription" = "Manage Account and Subscription";
+"signOut" = "Sign Out";
+"confirmSignOut" = "Are you sure you want to sign out?";
+"checkingLicense" = "Checking License...";
+"commercialLicenseNotActive" = "Commercial license is not active.";
+"commercialLicenseRequired" = "A commercial license is required for commercial use.";
+"commercialLicenseActive" = "Commercial license is active.";
+"expiryDate" = "Expiry Date: ";
+"pleaseReauthenticate" = "Please reauthenticate.";
+"licenseExpired" = "Your license has expired.";
+"acquireLicense" = "Acquire License...";
+"reauthenticate" = "Reauthenticate...";
+"signOutFailed" = "Failed to sign out: ";
+"licenseStatusChanged" = "License Status Changed";
+"licenseNoLongerActive" = "Your license is no longer active.";
+"licenseNowActive" = "Your license is now active.";
+
 // MARK: - Language
 
 "languageOfDevice" = "Language of the device";
@@ -310,3 +331,8 @@
 "loadScene" = "Load Scene";
 "recordingShortcutKey" = "Recording...";
 "recordingShortcutKeyError" = "At least one modifier key must be set.";
+
+// MARK: - Authentication
+
+"authenticationError" = "Authentication Error";
+"pleaseRestartAppAndTryAgain" = "Please restart the app and try again.";

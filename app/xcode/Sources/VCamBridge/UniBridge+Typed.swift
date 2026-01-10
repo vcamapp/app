@@ -8,10 +8,16 @@
 import Foundation
 
 // MARK: - Method ID Enum
-public enum UniBridgeMethodId: Int32 {
-    case playMotion = 0
-    case stopMotion = 1
-    case applyExpression = 2
+public struct UniBridgeMethodId: RawRepresentable {
+    static let playMotion = Self.init(rawValue: 0)
+    static let stopMotion = Self.init(rawValue: 1)
+    static let applyExpression = Self.init(rawValue: 2)
+
+    public let rawValue: Int32
+
+    public init(rawValue: Int32) {
+        self.rawValue = rawValue
+    }
 }
 
 // MARK: - Payload Structures

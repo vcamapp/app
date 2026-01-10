@@ -19,6 +19,9 @@ public struct VCamSettingView: View {
         case virtualCamera
         case integration
         case experiment
+#if ENABLE_ACCOUNT
+        case account
+#endif
         case vcam
 
         public var id: Self { self }
@@ -37,6 +40,10 @@ public struct VCamSettingView: View {
                 L10n.integration.key
             case .experiment:
                 L10n.experiment.key
+#if ENABLE_ACCOUNT
+            case .account:
+                L10n.license.key
+#endif
             case .vcam:
                 LocalizedStringKey(Bundle.main.displayName)
             }
@@ -60,6 +67,10 @@ public struct VCamSettingView: View {
                 Image(systemName: "app.connected.to.app.below.fill")
             case .experiment:
                 Image(systemName: "exclamationmark.triangle.fill")
+#if ENABLE_ACCOUNT
+            case .account:
+                Image(systemName: "checkmark.seal.fill")
+#endif
             case .vcam:
                 Image(systemName: "info.circle.fill")
             }
@@ -103,11 +114,15 @@ public struct VCamSettingView: View {
                     VCamSettingsIntegrationView()
                 case .experiment:
                     VCamSettingExperimentView.make()
+#if ENABLE_ACCOUNT
+                case .account:
+                    VCamSettingLicenseView()
+#endif
                 case .vcam:
                     VCamSettingVCamView.make()
                 }
             }
-            .frame(minWidth: 450, maxHeight: .infinity, alignment: .top)
+            .frame(minWidth: 500, maxHeight: .infinity, alignment: .top)
         }
         .environment(\.locale, locale.isEmpty ? .current : Locale(identifier: locale))
         .disabled(recorder.isRecording)

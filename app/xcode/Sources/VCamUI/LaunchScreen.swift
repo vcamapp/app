@@ -11,18 +11,15 @@ public struct LaunchScreen: View {
     public static var content: () -> AnyView = {
         AnyView(Image("AppIcon", bundle: .main).resizable().scaledToFit().frame(height: 120))
     }
+    public static var duration = Duration.seconds(1.0)
 
     let onDismiss: () -> Void
 
     public var body: some View {
-        ZStack {
-            Color.white
-
-            Self.content()
-        }
-        .task {
-            try? await Task.sleep(for: .seconds(1.0))
-            onDismiss()
-        }
+        Self.content()
+            .task {
+                try? await Task.sleep(for: Self.duration)
+                onDismiss()
+            }
     }
 }

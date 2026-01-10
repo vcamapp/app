@@ -246,6 +246,27 @@
 "disconnect" = "接続解除";
 "helpMocopIP" = "mocopi側のPC接続設定でのポートは「12351」にしてください";
 
+// MARK: - License
+"license" = "ライセンス";
+"licenseCheckIfAlreadyAcquired" = "すでに商用利用ライセンスを取得している場合は、ライセンスの状態を確認してください。 [ライセンスの状態を確認する...](vcam2d://auth/checkLicense)";
+"accountManagement" = "アカウント管理...";
+"manageAccountAndSubscription" = "アカウントとサブスクリプションの管理";
+"signOut" = "ログアウト";
+"confirmSignOut" = "ログアウトしても良いですか?";
+"checkingLicense" = "ライセンスの確認中...";
+"commercialLicenseNotActive" = "商用利用ライセンスが有効ではありません。";
+"commercialLicenseRequired" = "商用利用にはライセンスの取得が必要です。";
+"commercialLicenseActive" = "商用利用ライセンスが有効です。";
+"expiryDate" = "有効期限: ";
+"pleaseReauthenticate" = "再認証してください。";
+"licenseExpired" = "ライセンスの有効期限が切れています。";
+"acquireLicense" = "ライセンスを取得する...";
+"reauthenticate" = "再認証する...";
+"signOutFailed" = "ログアウトに失敗しました: ";
+"licenseStatusChanged" = "ライセンス状態の変更";
+"licenseNoLongerActive" = "ライセンスが有効ではなくなりました。";
+"licenseNowActive" = "ライセンスが有効になりました。";
+
 // MARK: - Language
 
 "languageOfDevice" = "端末の設定に従う";
@@ -310,3 +331,8 @@
 "loadScene" = "シーン読み込み";
 "recordingShortcutKey" = "修飾キーと文字を入力してください";
 "recordingShortcutKeyError" = "一つ以上の修飾キーと文字を組み合わせてください";
+
+// MARK: - Authentication
+
+"authenticationError" = "認証エラー";
+"pleaseRestartAppAndTryAgain" = "アプリを再起動してもう一度お試しください。";

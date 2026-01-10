@@ -10,6 +10,10 @@ public enum L10n {
   public static func aboutApp(_ p1: Any) -> ArgumentsLocalizedString {
     ArgumentsLocalizedString("aboutApp", "aboutApp \(String(describing: p1))", String(describing: p1))
   }
+  /// Account Management...
+  public static let accountManagement = LocalizedString(lookupKey: "accountManagement")
+  /// Acquire License...
+  public static let acquireLicense = LocalizedString(lookupKey: "acquireLicense")
   /// Action
   public static let action = LocalizedString(lookupKey: "action")
   /// Add
@@ -44,6 +48,8 @@ public enum L10n {
   public static let asHorizontalVideo = LocalizedString(lookupKey: "asHorizontalVideo")
   ///  - Vertical
   public static let asVerticalVideo = LocalizedString(lookupKey: "asVerticalVideo")
+  /// Authentication Error
+  public static let authenticationError = LocalizedString(lookupKey: "authenticationError")
   /// Avatar
   public static let avatar = LocalizedString(lookupKey: "avatar")
   /// Background
@@ -76,6 +82,8 @@ public enum L10n {
   public static let changeWindDirection = LocalizedString(lookupKey: "changeWindDirection")
   /// Check for Updates...
   public static let checkForUpdates = LocalizedString(lookupKey: "checkForUpdates")
+  /// Checking License...
+  public static let checkingLicense = LocalizedString(lookupKey: "checkingLicense")
   /// Cheer
   public static let cheer = LocalizedString(lookupKey: "cheer")
   /// Chroma Keying
@@ -90,8 +98,16 @@ public enum L10n {
   public static let colorFilter = LocalizedString(lookupKey: "colorFilter")
   /// Color temperature
   public static let colorTemperature = LocalizedString(lookupKey: "colorTemperature")
+  /// Commercial license is active.
+  public static let commercialLicenseActive = LocalizedString(lookupKey: "commercialLicenseActive")
+  /// Commercial license is not active.
+  public static let commercialLicenseNotActive = LocalizedString(lookupKey: "commercialLicenseNotActive")
+  /// A commercial license is required for commercial use.
+  public static let commercialLicenseRequired = LocalizedString(lookupKey: "commercialLicenseRequired")
   /// Uninstallation is complete.
   public static let completeUninstalling = LocalizedString(lookupKey: "completeUninstalling")
+  /// Are you sure you want to sign out?
+  public static let confirmSignOut = LocalizedString(lookupKey: "confirmSignOut")
   /// Connect
   public static let connect = LocalizedString(lookupKey: "connect")
   /// Connecting
@@ -174,6 +190,8 @@ public enum L10n {
   public static let experimentDisclaimer = LocalizedString(lookupKey: "experimentDisclaimer")
   /// These features are available for our supporters, thank you for your supporting!
   public static let experimentThanks = LocalizedString(lookupKey: "experimentThanks")
+  /// Expiry Date: 
+  public static let expiryDate = LocalizedString(lookupKey: "expiryDate")
   /// Installing the virtual camera.\nClick on 'Open Security Preferences' and then click 'Allow'.
   public static let explainAboutInstallingCameraExtension = LocalizedString(lookupKey: "explainAboutInstallingCameraExtension")
   /// The virtual camera will be reinstalled for the update
@@ -262,6 +280,18 @@ public enum L10n {
   public static let lensFlare = LocalizedString(lookupKey: "lensFlare")
   /// Lens flare intensity
   public static let lensFlareIntensity = LocalizedString(lookupKey: "lensFlareIntensity")
+  /// License
+  public static let license = LocalizedString(lookupKey: "license")
+  /// If you have already acquired a commercial license, please verify your license. [Check License Status...](vcam2d://auth/checkLicense)
+  public static let licenseCheckIfAlreadyAcquired = LocalizedString(lookupKey: "licenseCheckIfAlreadyAcquired")
+  /// Your license has expired.
+  public static let licenseExpired = LocalizedString(lookupKey: "licenseExpired")
+  /// Your license is no longer active.
+  public static let licenseNoLongerActive = LocalizedString(lookupKey: "licenseNoLongerActive")
+  /// Your license is now active.
+  public static let licenseNowActive = LocalizedString(lookupKey: "licenseNowActive")
+  /// License Status Changed
+  public static let licenseStatusChanged = LocalizedString(lookupKey: "licenseStatusChanged")
   /// Lip-sync
   public static let lipSync = LocalizedString(lookupKey: "lipSync")
   /// Lip-sync sensitivity (mic)
@@ -280,6 +310,8 @@ public enum L10n {
   public static let lock = LocalizedString(lookupKey: "lock")
   /// Main
   public static let main = LocalizedString(lookupKey: "main")
+  /// Manage Account and Subscription
+  public static let manageAccountAndSubscription = LocalizedString(lookupKey: "manageAccountAndSubscription")
   /// Manage Objects
   public static let manageObjects = LocalizedString(lookupKey: "manageObjects")
   /// Message
@@ -332,6 +364,10 @@ public enum L10n {
   public static let pick = LocalizedString(lookupKey: "pick")
   /// Play idle motions
   public static let playIdleMotions = LocalizedString(lookupKey: "playIdleMotions")
+  /// Please reauthenticate.
+  public static let pleaseReauthenticate = LocalizedString(lookupKey: "pleaseReauthenticate")
+  /// Please restart the app and try again.
+  public static let pleaseRestartAppAndTryAgain = LocalizedString(lookupKey: "pleaseRestartAppAndTryAgain")
   /// Restarting Mac may resolve the issue.
   public static let pleaseRestartMacToFix = LocalizedString(lookupKey: "pleaseRestartMacToFix")
   /// Pose
@@ -356,6 +392,8 @@ public enum L10n {
   public static func quitVCam(_ p1: Any) -> ArgumentsLocalizedString {
     ArgumentsLocalizedString("quitVCam", "quitVCam \(String(describing: p1))", String(describing: p1))
   }
+  /// Reauthenticate...
+  public static let reauthenticate = LocalizedString(lookupKey: "reauthenticate")
   /// Record desktop audio [β]
   public static let recordDesktopAudio = LocalizedString(lookupKey: "recordDesktopAudio")
   /// Recording
@@ -426,6 +464,10 @@ public enum L10n {
   public static let show = LocalizedString(lookupKey: "show")
   /// Shudder
   public static let shudder = LocalizedString(lookupKey: "shudder")
+  /// Sign Out
+  public static let signOut = LocalizedString(lookupKey: "signOut")
+  /// Failed to sign out: 
+  public static let signOutFailed = LocalizedString(lookupKey: "signOutFailed")
   /// Simulate shadows (Use high power)
   public static let simulateShadows = LocalizedString(lookupKey: "simulateShadows")
   /// Skip This Version
@@ -533,7 +575,7 @@ extension L10n {
   }
 
   private static func currentBundle() -> Bundle {
-    let locale = LocalizationEnvironment.currentLocale()
+    let locale = LocalizationEnvironment.currentLocaleIdentifier()
     return bundles[locale] ?? {
       let code = LanguageList(locale: locale).language.languageCode
       let path = BundleToken.bundle.path(forResource: code, ofType: "lproj")!
