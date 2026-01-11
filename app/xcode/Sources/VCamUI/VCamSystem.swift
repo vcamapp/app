@@ -44,11 +44,11 @@ public final class VCamSystem {
             AppUpdater.vcam.presentUpdateAlertIfAvailable()
         }
 
+        Camera.configure()
+        AudioDevice.configure()
+
         Task { @MainActor in
             await Migration.migrate()
-
-            Camera.configure()
-            AudioDevice.configure()
 
             VirtualCameraManager.shared.startCameraExtension()
         }
