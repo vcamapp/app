@@ -135,15 +135,14 @@ public final class AvatarWebCamera {
         let values = [Float](
             arrayLiteral: headPosition.x, headPosition.y, headPosition.z,
             headRotation.x, headRotation.y, headRotation.z,
-            facial.distanceOfLeftEyeHeight,
-            facial.distanceOfRightEyeHeight,
-            facial.distanceOfNoseHeight,
-            facial.distanceOfMouthHeight,
+            facial.blendShapeLeftEye,
+            facial.blendShapeRightEye,
+            facial.blendShapeMouthOpen,
             facial.eyeball.x,
             facial.eyeball.y,
             Float(facial.vowel.rawValue)
         )
-        UniBridge.shared.headTransform(values)
+        UniBridge.shared.receiveVCamBlendShape(values)
     }
 
     private func onHandsUpdate(_ hands: VCamHands) {

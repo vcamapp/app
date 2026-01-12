@@ -137,12 +137,9 @@ extension FacialMocapData {
     }
 
     func perfectSync(useEyeTracking: Bool) -> [Float] {
-        let rawRotation = head.rotationRadian
-        let rotation = simd_quatf(.init(rawRotation.x, -rawRotation.y, -rawRotation.z)).vector
-
         return [
             -head.translation.x, /*head.translation.y*/0, /*head.translation.z*/0,
-             rotation.x, rotation.y, rotation.z, rotation.w,
+             head.rotation.x, -head.rotation.y, -head.rotation.z,
              blendShape.lookAtPoint.x, blendShape.lookAtPoint.y,
              blendShape.browDownLeft,
              blendShape.browDownRight,

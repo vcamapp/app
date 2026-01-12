@@ -150,27 +150,25 @@ public final class UniBridge {
     public var vignetteColor: Binding<Color> { structMapper.binding(.vignetteColor) }
 
     public enum ArrayType: Int32 {
-        case headTransform = 0
-        case hands = 1
-        case fingers = 2
-        case receiveVCamBlendShape = 3
-        case receivePerfectSync = 4
-        case addRenderTexture = 5
-        case updateRenderTexture = 6
-        case updateObjectOrder = 7
-        case setObjectActive = 8
-        case setObjectLocked = 9
-        case objectAvatarTransform = 10
-        case addWind = 11
-        case canvasSize = 12
-        case screenResolution = 13
+        case hands = 0
+        case fingers = 1
+        case receiveVCamBlendShape = 2
+        case receivePerfectSync = 3
+        case addRenderTexture = 4
+        case updateRenderTexture = 5
+        case updateObjectOrder = 6
+        case setObjectActive = 7
+        case setObjectLocked = 8
+        case objectAvatarTransform = 9
+        case addWind = 10
+        case canvasSize = 11
+        case screenResolution = 12
         public var arraySize: Int {
             switch self {
-            case .headTransform: return 13
             case .hands: return 12
             case .fingers: return 10
             case .receiveVCamBlendShape: return 12
-            case .receivePerfectSync: return 61
+            case .receivePerfectSync: return 60
             case .addRenderTexture: return 8
             case .updateRenderTexture: return 3
             case .updateObjectOrder: return 99
@@ -184,7 +182,6 @@ public final class UniBridge {
         }
     }
     public let arrayMapper = ValueBinding<UnsafeMutableRawPointer, ArrayType>()
-    public private(set) lazy var headTransform = arrayMapper.set(.headTransform, type: [Float].self)
     public private(set) lazy var hands = arrayMapper.set(.hands, type: [Float].self)
     public private(set) lazy var fingers = arrayMapper.set(.fingers, type: [Float].self)
     public private(set) lazy var receiveVCamBlendShape = arrayMapper.set(.receiveVCamBlendShape, type: [Float].self)

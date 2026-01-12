@@ -9,18 +9,16 @@ import Foundation
 import VCamEntity
 
 public struct Facial {
-    public let distanceOfLeftEyeHeight: Float
-    public let distanceOfRightEyeHeight: Float
-    public let distanceOfNoseHeight: Float
-    public let distanceOfMouthHeight: Float
+    public let blendShapeLeftEye: Float
+    public let blendShapeRightEye: Float
+    public let blendShapeMouthOpen: Float
     public let vowel: Vowel
     public let eyeball: SIMD2<Float>
 
-    public init(distanceOfLeftEyeHeight: Float, distanceOfRightEyeHeight: Float, distanceOfNoseHeight: Float, distanceOfMouthHeight: Float, vowel: Vowel, eyeball: SIMD2<Float>) {
-        self.distanceOfLeftEyeHeight = distanceOfLeftEyeHeight
-        self.distanceOfRightEyeHeight = distanceOfRightEyeHeight
-        self.distanceOfNoseHeight = distanceOfNoseHeight
-        self.distanceOfMouthHeight = distanceOfMouthHeight
+    public init(blendShapeLeftEye: Float, blendShapeRightEye: Float, blendShapeMouthOpen: Float, vowel: Vowel, eyeball: SIMD2<Float>) {
+        self.blendShapeLeftEye = blendShapeLeftEye
+        self.blendShapeRightEye = blendShapeRightEye
+        self.blendShapeMouthOpen = blendShapeMouthOpen
         self.vowel = vowel
         self.eyeball = eyeball
     }
@@ -33,7 +31,7 @@ public struct FacialEstimator {
         .init(
             prevRawEyeballY: { 0 },
             estimate: { _ in
-                Facial(distanceOfLeftEyeHeight: 0, distanceOfRightEyeHeight: 0, distanceOfNoseHeight: 0, distanceOfMouthHeight: 0, vowel: .a, eyeball: .zero)
+                Facial(blendShapeLeftEye: 0, blendShapeRightEye: 0, blendShapeMouthOpen: 0, vowel: .a, eyeball: .zero)
             }
         )
     }
