@@ -71,6 +71,11 @@ public final class Tracking {
             }
         }
     }
+    
+    private func configureTrackingMapping() {
+        let mode: TrackingMode = faceTrackingMethod.supportsPerfectSync ? .perfectSync : .blendShape
+        TrackingMappingConfigurator.configure(mode: mode)
+    }
 
     public func stop() {
         avatarCameraManager.stop()
@@ -99,6 +104,7 @@ public final class Tracking {
         Tracking.shared.avatarCameraManager.setWebCamUsage(usage)
 
         updateLipSyncIfNeeded()
+        configureTrackingMapping()
     }
 
     public func setHandTrackingMethod(_ method: TrackingMethod.Hand) {
