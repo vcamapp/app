@@ -7,6 +7,9 @@
 
 import Foundation
 import VCamEntity
+#if DEBUG
+import VCamBridge
+#endif
 
 @Observable
 public final class UniState {
@@ -15,15 +18,20 @@ public final class UniState {
     public init() {}
 
 #if DEBUG
-    public init(
+    public static func preview(
         motions: [Avatar.Motion] = [],
         isMotionPlaying: [Avatar.Motion: Bool] = [:],
         expressions: [Avatar.Expression] = [],
-        currentExpressionIndex: Int? = nil
-    ) {
-        self.isMotionPlaying = isMotionPlaying
-        self.expressions = expressions
-        self.currentExpressionIndex = currentExpressionIndex
+        currentExpressionIndex: Int? = nil,
+        blendShapeNames: [String] = TrackingMappingEntry.defaultMappings(for: .blendShape).map(\.input.key)
+    ) -> UniState {
+        let state = UniState()
+        state.motions = motions
+        state.isMotionPlaying = isMotionPlaying
+        state.expressions = expressions
+        state.currentExpressionIndex = currentExpressionIndex
+        state.blendShapeNames = blendShapeNames
+        return state
     }
 #endif
 
@@ -31,6 +39,7 @@ public final class UniState {
     public fileprivate(set) var isMotionPlaying: [Avatar.Motion: Bool] = [:]
     public fileprivate(set) var expressions: [Avatar.Expression] = []
     public fileprivate(set) var currentExpressionIndex: Int?
+    public fileprivate(set) var blendShapeNames: [String] = []
 }
 
 @_cdecl("uniStateSetMotions")
@@ -61,4 +70,13 @@ public func uniStateSetExpressions(_ expressionsPtr: UnsafePointer<UnsafePointer
 @_cdecl("uniStateSetCurrentExpressionIndex")
 public func uniStateSetCurrentExpressionIndex(_ index: Int32) {
     UniState.shared.currentExpressionIndex = index >= 0 ? Int(index) : nil
+}
+
+@_cdecl("uniStateSetBlendShapeNames")
+public func uniStateSetBlendShapeNames(_ namesPtr: UnsafePointer<UnsafePointer<CChar>?>, _ count: Int32) {
+    let names: [String] = (0..<Int(count)).compactMap { index in
+        guard let cString = namesPtr.advanced(by: index).pointee else { return nil }
+        return String(cString: cString)
+    }
+    UniState.shared.blendShapeNames = names
 }

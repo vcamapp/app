@@ -41,25 +41,11 @@ public struct TrackingMappingPayload {
     public var mode: Int32
     public var index: Int32
     public var inputKeyPtr: UnsafePointer<CChar>?
-    public var targetKeyPtr: UnsafePointer<CChar>?
-    public var multiplier: Float
-    public var offset: Float
-}
-
-public struct TrackingMappingEntry: Codable, Identifiable {
-    public let id: UUID
-    public var inputKey: String
-    public var targetKey: String
-    public var multiplier: Float
-    public var offset: Float
-
-    public init(id: UUID = UUID(), inputKey: String, targetKey: String, multiplier: Float = 1.0, offset: Float = 0.0) {
-        self.id = id
-        self.inputKey = inputKey
-        self.targetKey = targetKey
-        self.multiplier = multiplier
-        self.offset = offset
-    }
+    public var outputKeyPtr: UnsafePointer<CChar>?
+    public var inputRangeMin: Float
+    public var inputRangeMax: Float
+    public var outputRangeMin: Float
+    public var outputRangeMax: Float
 }
 
 // MARK: - Bridge Callback
@@ -100,16 +86,18 @@ public extension UniBridge {
         }
     }
 
-    static func addTrackingMapping(mode: TrackingMode, inputKey: String, targetKey: String, multiplier: Float = 1.0, offset: Float = 0.0) {
+    static func addTrackingMapping(mode: TrackingMode, inputKey: String, outputKey: String, inputRangeMin: Float, inputRangeMax: Float, outputRangeMin: Float, outputRangeMax: Float) {
         inputKey.withCString { inputKeyPtr in
-            targetKey.withCString { targetKeyPtr in
+            outputKey.withCString { outputKeyPtr in
                 var payload = TrackingMappingPayload(
                     mode: mode.rawValue,
                     index: 0,
                     inputKeyPtr: inputKeyPtr,
-                    targetKeyPtr: targetKeyPtr,
-                    multiplier: multiplier,
-                    offset: offset
+                    outputKeyPtr: outputKeyPtr,
+                    inputRangeMin: inputRangeMin,
+                    inputRangeMax: inputRangeMax,
+                    outputRangeMin: outputRangeMin,
+                    outputRangeMax: outputRangeMax
                 )
                 withUnsafeMutablePointer(to: &payload) { payloadPtr in
                     methodCallback(.addTrackingMapping, payloadPtr, nil)
@@ -118,16 +106,18 @@ public extension UniBridge {
         }
     }
 
-    static func updateTrackingMapping(mode: TrackingMode, at index: Int, inputKey: String, targetKey: String, multiplier: Float, offset: Float) {
+    static func updateTrackingMapping(mode: TrackingMode, at index: Int, inputKey: String, outputKey: String, inputRangeMin: Float, inputRangeMax: Float, outputRangeMin: Float, outputRangeMax: Float) {
         inputKey.withCString { inputKeyPtr in
-            targetKey.withCString { targetKeyPtr in
+            outputKey.withCString { outputKeyPtr in
                 var payload = TrackingMappingPayload(
                     mode: mode.rawValue,
                     index: Int32(index),
                     inputKeyPtr: inputKeyPtr,
-                    targetKeyPtr: targetKeyPtr,
-                    multiplier: multiplier,
-                    offset: offset
+                    outputKeyPtr: outputKeyPtr,
+                    inputRangeMin: inputRangeMin,
+                    inputRangeMax: inputRangeMax,
+                    outputRangeMin: outputRangeMin,
+                    outputRangeMax: outputRangeMax
                 )
                 withUnsafeMutablePointer(to: &payload) { payloadPtr in
                     methodCallback(.updateTrackingMapping, payloadPtr, nil)
@@ -141,9 +131,11 @@ public extension UniBridge {
             mode: mode.rawValue,
             index: Int32(index),
             inputKeyPtr: nil,
-            targetKeyPtr: nil,
-            multiplier: 0,
-            offset: 0
+            outputKeyPtr: nil,
+            inputRangeMin: 0,
+            inputRangeMax: 0,
+            outputRangeMin: 0,
+            outputRangeMax: 0
         )
         withUnsafeMutablePointer(to: &payload) { payloadPtr in
             methodCallback(.deleteTrackingMapping, payloadPtr, nil)

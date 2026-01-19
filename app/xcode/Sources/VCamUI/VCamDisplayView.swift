@@ -55,7 +55,7 @@ public struct VCamDisplayView: View {
                             UniBridge.shared.deleteDisplayParameter()
                         } label: {
                             Image(systemName: "trash")
-                                .foregroundColor(.red)
+                                .foregroundStyle(.red)
                         }
                     }
                 }

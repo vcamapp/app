@@ -39,6 +39,11 @@ public final class Tracking {
     @ObservationIgnored public private(set) var useEyeTracking = false
     @ObservationIgnored public private(set) var useVowelEstimation = false
 
+    public var mappings: [[TrackingMappingEntry]] = [
+        TrackingMappingEntry.defaultMappings(for: .blendShape),
+        TrackingMappingEntry.defaultMappings(for: .perfectSync)
+    ]
+
     public let avatarCameraManager = AvatarCameraManager()
     public let iFacialMocapReceiver = FacialMocapReceiver()
     public let vcamMotionReceiver = VCamMotionReceiver()
@@ -56,6 +61,11 @@ public final class Tracking {
     }
 
     public func configure() {
+        mappings = [
+            TrackingMappingEntry.defaultMappings(for: .blendShape),
+            TrackingMappingEntry.defaultMappings(for: .perfectSync)
+        ]
+
         setFaceTrackingMethod(UserDefaults.standard.value(for: .trackingMethodFace))
 #if FEATURE_3
         setHandTrackingMethod(UserDefaults.standard.value(for: .trackingMethodHand))
@@ -71,10 +81,42 @@ public final class Tracking {
             }
         }
     }
-    
-    private func configureTrackingMapping() {
-        let mode: TrackingMode = faceTrackingMethod.supportsPerfectSync ? .perfectSync : .blendShape
-        TrackingMappingConfigurator.configure(mode: mode)
+
+    public func addMapping(_ entry: TrackingMappingEntry, for mode: TrackingMode) {
+        mappings[Int(mode.rawValue)].append(entry)
+        applyMappingsToUnity(for: mode)
+    }
+
+    public func updateMapping(at index: Int, for mode: TrackingMode) {
+        applyMappingsToUnity(for: mode)
+    }
+
+    public func deleteMapping(at index: Int, for mode: TrackingMode) {
+        mappings[Int(mode.rawValue)].remove(at: index)
+        applyMappingsToUnity(for: mode)
+    }
+
+    public func resetMappings(for mode: TrackingMode) {
+        mappings[Int(mode.rawValue)] = TrackingMappingEntry.defaultMappings(for: mode)
+        applyMappingsToUnity(for: mode)
+    }
+
+    private func applyMappingsToUnity(for mode: TrackingMode) {
+        UniBridge.clearTrackingMapping(mode: mode)
+        for mapping in mappings[Int(mode.rawValue)] where mapping.isEnabled {
+            UniBridge.addTrackingMapping(
+                mode: mode,
+                inputKey: mapping.input.key,
+                outputKey: mapping.outputKey.key,
+                inputRangeMin: mapping.input.rangeMin,
+                inputRangeMax: mapping.input.rangeMax,
+                outputRangeMin: mapping.outputKey.rangeMin,
+                outputRangeMax: mapping.outputKey.rangeMax
+            )
+        }
+        if mode == .blendShape {
+            UniBridge.addTrackingMapping(mode: mode, inputKey: "_vowel", outputKey: "_vowel", inputRangeMin: 0, inputRangeMax: 4, outputRangeMin: 0, outputRangeMax: 4)
+        }
     }
 
     public func stop() {
@@ -104,7 +146,9 @@ public final class Tracking {
         Tracking.shared.avatarCameraManager.setWebCamUsage(usage)
 
         updateLipSyncIfNeeded()
-        configureTrackingMapping()
+
+        let mode: TrackingMode = method.supportsPerfectSync ? .perfectSync : .blendShape
+        applyMappingsToUnity(for: mode)
     }
 
     public func setHandTrackingMethod(_ method: TrackingMethod.Hand) {

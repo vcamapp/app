@@ -60,7 +60,7 @@ extension VCamMainToolbarExpressionPicker: MacWindow {
 #Preview {
     VCamMainToolbarExpressionPicker()
         .frame(minWidth: 200)
-        .environment(UniState(
+        .environment(UniState.preview(
             expressions: [
                 .init(name: "A"),
                 .init(name: "I"),

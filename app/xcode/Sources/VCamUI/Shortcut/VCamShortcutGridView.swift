@@ -80,7 +80,7 @@ public struct VCamShortcutGridView: View {
                     VCamShortcutManager.shared.remove(shortcut)
                 } label: {
                     Image(systemName: "trash")
-                    Text(L10n.remove.key, bundle: .localize)
+                    Text(L10n.delete.key, bundle: .localize)
                 }
             }
             .onDragMove(item: shortcut, items: $shortcutManager.shortcuts, dragging: $dragging, onMove: shortcutManager.move)

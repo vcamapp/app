@@ -51,10 +51,10 @@ public struct KeyRecordingPopoverView: View {
             if let helpMessage {
                 Text(helpMessage, bundle: .localize)
                     .fixedSize()
-                    .foregroundColor(isError ? .red : nil)
+                    .foregroundStyle(isError ? .red : .init(.labelColor))
             }
         }
-        .foregroundColor(isCompleted ? .blue : nil)
+        .foregroundStyle(isCompleted ? .blue : .init(.labelColor))
         .padding()
         .animation(.default, value: isError)
         .onKeyEvent { event in

@@ -127,7 +127,7 @@ private struct DeleteSceneButton: View {
             SceneManager.shared.remove(byId: scene.id)
         } label: {
             Image(systemName: "trash")
-            Text(L10n.remove.key, bundle: .localize)
+            Text(L10n.delete.key, bundle: .localize)
         }
     }
 }

@@ -87,7 +87,7 @@ public struct ScreenRecorderPreferenceView: View {
 
             if let error = screenRecorder.error {
                 Text(error.localizedDescription)
-                    .foregroundColor(.red)
+                    .foregroundStyle(.red)
             }
 
             if let error = error {
@@ -98,7 +98,7 @@ public struct ScreenRecorderPreferenceView: View {
                         Text(error.localizedDescription)
                     }
                 }
-                .foregroundColor(.red)
+                .foregroundStyle(.red)
             }
 
             if let frame = screenRecorder.latestFrame {

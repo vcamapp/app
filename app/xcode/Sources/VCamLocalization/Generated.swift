@@ -126,6 +126,8 @@ public enum L10n {
   public static let cut = LocalizedString(lookupKey: "cut")
   /// Default
   public static let `default` = LocalizedString(lookupKey: "default")
+  /// Delete
+  public static let delete = LocalizedString(lookupKey: "delete")
   /// Delete the Old Virtual Camera
   public static let deleteOldDALPlugin = LocalizedString(lookupKey: "deleteOldDALPlugin")
   /// The old virtual camera is no longer supported, so it'll be deleted now.
@@ -338,6 +340,8 @@ public enum L10n {
   public static let nod = LocalizedString(lookupKey: "nod")
   /// None
   public static let `none` = LocalizedString(lookupKey: "none")
+  /// Normal
+  public static let normal = LocalizedString(lookupKey: "normal")
   /// Restart this app once after installation.
   public static let noteEnableNewCameraExtension = LocalizedString(lookupKey: "noteEnableNewCameraExtension")
   /// No Title
@@ -410,16 +414,18 @@ public enum L10n {
   public static let releaseNotes = LocalizedString(lookupKey: "releaseNotes")
   /// Reload
   public static let reload = LocalizedString(lookupKey: "reload")
-  /// Remove
-  public static let remove = LocalizedString(lookupKey: "remove")
   /// Remove this app from the capture
   public static let removeVCamFromCapture = LocalizedString(lookupKey: "removeVCamFromCapture")
   /// Rendering
   public static let rendering = LocalizedString(lookupKey: "rendering")
   /// Rendering Quality
   public static let renderingQuality = LocalizedString(lookupKey: "renderingQuality")
+  /// Reset All to Default
+  public static let resetAllToDefault = LocalizedString(lookupKey: "resetAllToDefault")
   /// Reset Avatar Position
   public static let resetAvatarPosition = LocalizedString(lookupKey: "resetAvatarPosition")
+  /// Reset to Default
+  public static let resetToDefault = LocalizedString(lookupKey: "resetToDefault")
   /// Reset Window Size
   public static let resetWindowSize = LocalizedString(lookupKey: "resetWindowSize")
   /// Setup is complete. Please restart Zoom or other clients.
@@ -587,7 +593,11 @@ extension L10n {
 }
 
 public struct LocalizedString {
-  internal let lookupKey: String
+  let lookupKey: String
+
+  public init(lookupKey: String) {
+    self.lookupKey = lookupKey
+  }
 
   public var key: LocalizedStringKey {
     LocalizedStringKey(lookupKey)

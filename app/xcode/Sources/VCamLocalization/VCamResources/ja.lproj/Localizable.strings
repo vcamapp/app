@@ -15,8 +15,9 @@
 "edit" = "編集";
 "pick" = "選択";
 "general" = "一般";
+"normal" = "通常";
 "apply" = "適用";
-"remove" = "削除";
+"delete" = "削除";
 "duplicate" = "複製";
 "title" = "タイトル";
 "notitle" = "タイトルなし";
@@ -55,6 +56,8 @@
 "height" = "高さ";
 "seconds" = "秒";
 "notSupported" = "サポートされていません";
+"resetAllToDefault" = "すべてを初期値に戻す";
+"resetToDefault" = "初期値に戻す";
 
 // MARK: - Menu
 

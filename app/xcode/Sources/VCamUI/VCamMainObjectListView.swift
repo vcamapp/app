@@ -235,7 +235,7 @@ private struct DeleteSceneObjectButton: View {
             SceneObjectManager.shared.remove(byId: object.id)
         } label: {
             Image(systemName: "trash")
-            Text(L10n.remove.key, bundle: .localize)
+            Text(L10n.delete.key, bundle: .localize)
         }
         .disabled(object.isLocked)
     }

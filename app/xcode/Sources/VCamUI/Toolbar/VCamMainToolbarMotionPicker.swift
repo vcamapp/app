@@ -88,7 +88,7 @@ extension VCamMainToolbarMotionPicker: MacWindow {
     VCamMainToolbarMotionPicker()
         .frame(width: 240)
         .environment(VCamUIState())
-        .environment(UniState(
+        .environment(UniState.preview(
             motions: [
                 .init(name: "hi"),
                 .init(name: "bye"),

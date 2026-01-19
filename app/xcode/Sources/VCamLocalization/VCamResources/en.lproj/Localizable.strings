@@ -15,8 +15,9 @@
 "edit" = "Edit";
 "pick" = "Pick";
 "general" = "General";
+"normal" = "Normal";
 "apply" = "Apply";
-"remove" = "Remove";
+"delete" = "Delete";
 "duplicate" = "Duplicate";
 "title" = "Title";
 "notitle" = "No Title";
@@ -55,6 +56,8 @@
 "height" = "Height";
 "seconds" = "s";
 "notSupported" = "Not Supported";
+"resetAllToDefault" = "Reset All to Default";
+"resetToDefault" = "Reset to Default";
 
 // MARK: - Menu
 
