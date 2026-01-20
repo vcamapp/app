@@ -168,6 +168,10 @@ public enum L10n {
   public static let edit = LocalizedString(lookupKey: "edit")
   /// Edit Avatar
   public static let editAvatar = LocalizedString(lookupKey: "editAvatar")
+  /// Edit Output Bounds
+  public static let editOutputBounds = LocalizedString(lookupKey: "editOutputBounds")
+  /// Set the minimum and maximum values for the output range.
+  public static let editOutputBoundsMessage = LocalizedString(lookupKey: "editOutputBoundsMessage")
   /// Emoji
   public static let emoji = LocalizedString(lookupKey: "emoji")
   /// Enable
@@ -316,6 +320,8 @@ public enum L10n {
   public static let manageAccountAndSubscription = LocalizedString(lookupKey: "manageAccountAndSubscription")
   /// Manage Objects
   public static let manageObjects = LocalizedString(lookupKey: "manageObjects")
+  /// Maximum
+  public static let maximum = LocalizedString(lookupKey: "maximum")
   /// Message
   public static let message = LocalizedString(lookupKey: "message")
   /// Microphone
@@ -328,6 +334,8 @@ public enum L10n {
   public static let migrateToNewVirtualCamera = LocalizedString(lookupKey: "migrateToNewVirtualCamera")
   /// This app will migrate to a virtual camera optimized for the latest macOS.\nPlease follow the instructions to delete the old plugin and install the new virtual camera.
   public static let migrateToNewVirtualCameraMessage = LocalizedString(lookupKey: "migrateToNewVirtualCameraMessage")
+  /// Minimum
+  public static let minimum = LocalizedString(lookupKey: "minimum")
   /// Motion
   public static let motion = LocalizedString(lookupKey: "motion")
   /// Reset position
@@ -352,6 +360,8 @@ public enum L10n {
   public static let object = LocalizedString(lookupKey: "object")
   /// Official Website
   public static let officialWebsite = LocalizedString(lookupKey: "officialWebsite")
+  /// OK
+  public static let ok = LocalizedString(lookupKey: "ok")
   /// Open File
   public static let openFile = LocalizedString(lookupKey: "openFile")
   /// Open preferences
@@ -512,6 +522,36 @@ public enum L10n {
   public static let trackEyes = LocalizedString(lookupKey: "trackEyes")
   /// Tracking
   public static let tracking = LocalizedString(lookupKey: "tracking")
+  /// Blink Left
+  public static let trackingInputBlinkL = LocalizedString(lookupKey: "trackingInput__blinkL")
+  /// Blink Right
+  public static let trackingInputBlinkR = LocalizedString(lookupKey: "trackingInput__blinkR")
+  /// Eye Movement X
+  public static let trackingInputEyeX = LocalizedString(lookupKey: "trackingInput__eyeX")
+  /// Eye Movement Y
+  public static let trackingInputEyeY = LocalizedString(lookupKey: "trackingInput__eyeY")
+  /// Head Rotation X
+  public static let trackingInputHeadX = LocalizedString(lookupKey: "trackingInput__headX")
+  /// Head Rotation Y
+  public static let trackingInputHeadY = LocalizedString(lookupKey: "trackingInput__headY")
+  /// Head Rotation Z
+  public static let trackingInputHeadZ = LocalizedString(lookupKey: "trackingInput__headZ")
+  /// Mouth
+  public static let trackingInputMouth = LocalizedString(lookupKey: "trackingInput__mouth")
+  /// Position X
+  public static let trackingInputPosX = LocalizedString(lookupKey: "trackingInput__posX")
+  /// Position Y
+  public static let trackingInputPosY = LocalizedString(lookupKey: "trackingInput__posY")
+  /// Position Z
+  public static let trackingInputPosZ = LocalizedString(lookupKey: "trackingInput__posZ")
+  /// Vowel
+  public static let trackingInputVowel = LocalizedString(lookupKey: "trackingInput__vowel")
+  /// Tracking Mapping
+  public static let trackingMapping = LocalizedString(lookupKey: "trackingMapping")
+  /// Save feature will be added in a future update.
+  public static let trackingMappingSaveComingSoon = LocalizedString(lookupKey: "trackingMappingSaveComingSoon")
+  /// Tracking Mode
+  public static let trackingMode = LocalizedString(lookupKey: "trackingMode")
   /// Type%@
   public static func typeNo(_ p1: Any) -> ArgumentsLocalizedString {
     ArgumentsLocalizedString("typeNo %@", "typeNo \(String(describing: p1))", String(describing: p1))
@@ -590,14 +630,14 @@ extension L10n {
       return bundle
     }()
   }
+
+  public static func key(_ name: String) -> LocalizedString {
+    LocalizedString(lookupKey: name)
+  }
 }
 
 public struct LocalizedString {
   let lookupKey: String
-
-  public init(lookupKey: String) {
-    self.lookupKey = lookupKey
-  }
 
   public var key: LocalizedStringKey {
     LocalizedStringKey(lookupKey)

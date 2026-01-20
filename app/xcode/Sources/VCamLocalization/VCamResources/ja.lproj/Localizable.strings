@@ -8,6 +8,7 @@
 
 // MARK: - Common
 
+"ok" = "OK";
 "default" = "デフォルト";
 "cancel" = "キャンセル";
 "close" = "閉じる";
@@ -339,3 +340,25 @@
 
 "authenticationError" = "認証エラー";
 "pleaseRestartAppAndTryAgain" = "アプリを再起動してもう一度お試しください。";
+
+// MARK: - Tracking Mapping
+
+"trackingMapping" = "トラッキングマッピング";
+"trackingMode" = "トラッキングモード";
+"trackingMappingSaveComingSoon" = "設定の保存機能は今後追加されます";
+"trackingInput__posX" = "位置 X";
+"trackingInput__posY" = "位置 Y";
+"trackingInput__posZ" = "位置 Z";
+"trackingInput__headX" = "頭の回転 X";
+"trackingInput__headY" = "頭の回転 Y";
+"trackingInput__headZ" = "頭の回転 Z";
+"trackingInput__eyeX" = "目の動き X";
+"trackingInput__eyeY" = "目の動き Y";
+"trackingInput__blinkL" = "まばたき 左";
+"trackingInput__blinkR" = "まばたき 右";
+"trackingInput__mouth" = "口";
+"trackingInput__vowel" = "母音";
+"editOutputBounds" = "出力範囲を編集";
+"editOutputBoundsMessage" = "出力範囲の最小値と最大値を設定します。";
+"minimum" = "最小値";
+"maximum" = "最大値";

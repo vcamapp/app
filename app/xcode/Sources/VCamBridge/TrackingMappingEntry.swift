@@ -89,7 +89,7 @@ public extension TrackingMappingEntry.Key {
     var id: String { key }
     var nameKey: LocalizedStringKey {
         if isVCamKey {
-            LocalizedString(lookupKey: "trackingInput_\(key)").key
+            L10n.key("trackingInput_\(key)").key
         } else {
             "\(key)"
         }
@@ -155,8 +155,8 @@ public extension TrackingMappingEntry.InputKey {
     static let headZ = Self(key: "_headZ", bounds: -90...90)
     static let eyeX = Self(key: "_eyeX", bounds: -1...1)
     static let eyeY = Self(key: "_eyeY", bounds: -1...1)
-    static let blinkL = Self(key: "_blinkL", bounds: 0...1)
-    static let blinkR = Self(key: "_blinkR", bounds: 0...1)
+    static let blinkL = Self(key: "_blinkL", bounds: 0...1, rangeMin: 0.02, rangeMax: 0.98)
+    static let blinkR = Self(key: "_blinkR", bounds: 0...1, rangeMin: 0.02, rangeMax: 0.98)
     static let mouth = Self(key: "_mouth", bounds: 0...1)
 
     // ARKit BlendShapes
@@ -292,16 +292,7 @@ public extension TrackingMappingEntry {
         .eyeX, .eyeY
     ]
 #else
-    private static let live2DPerfectSyncKeyDefinitions: [InputKey] = [
-        .posX, .posY, .posZ,
-        .headX, .headY, .headZ,
-        .eyeX, .eyeY,
-        .eyeBlinkLeft, .eyeBlinkRight,
-        .jawOpen,
-        .mouthFunnel, .mouthPucker,
-        .mouthSmileLeft, .mouthSmileRight,
-        .mouthFrownLeft, .mouthFrownRight
-    ]
+    private static let live2DPerfectSyncKeyDefinitions: [InputKey] = live2DBlendShapeKeyDefinitions
 
     private static let live2DBlendShapeKeyDefinitions: [InputKey] = [
         .posX, .posY, .posZ,

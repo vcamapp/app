@@ -8,6 +8,7 @@
 
 // MARK: - Common
 
+"ok" = "OK";
 "default" = "Default";
 "cancel" = "Cancel";
 "close" = "Close";
@@ -339,3 +340,25 @@
 
 "authenticationError" = "Authentication Error";
 "pleaseRestartAppAndTryAgain" = "Please restart the app and try again.";
+
+// MARK: - Tracking Mapping
+
+"trackingMapping" = "Tracking Mapping";
+"trackingMode" = "Tracking Mode";
+"trackingMappingSaveComingSoon" = "Save feature will be added in a future update.";
+"trackingInput__posX" = "Position X";
+"trackingInput__posY" = "Position Y";
+"trackingInput__posZ" = "Position Z";
+"trackingInput__headX" = "Head Rotation X";
+"trackingInput__headY" = "Head Rotation Y";
+"trackingInput__headZ" = "Head Rotation Z";
+"trackingInput__eyeX" = "Eye Movement X";
+"trackingInput__eyeY" = "Eye Movement Y";
+"trackingInput__blinkL" = "Blink Left";
+"trackingInput__blinkR" = "Blink Right";
+"trackingInput__mouth" = "Mouth";
+"trackingInput__vowel" = "Vowel";
+"editOutputBounds" = "Edit Output Bounds";
+"editOutputBoundsMessage" = "Set the minimum and maximum values for the output range.";
+"minimum" = "Minimum";
+"maximum" = "Maximum";
