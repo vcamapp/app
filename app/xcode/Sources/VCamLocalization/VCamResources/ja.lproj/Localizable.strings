@@ -343,7 +343,7 @@
 
 // MARK: - Tracking Mapping
 
-"trackingMapping" = "トラッキングマッピング";
+"trackingAdjustment" = "トラッキング調整";
 "trackingMode" = "トラッキングモード";
 "trackingMappingSaveComingSoon" = "設定の保存機能は今後追加されます";
 "trackingInput__posX" = "位置 X";

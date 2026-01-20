@@ -522,6 +522,8 @@ public enum L10n {
   public static let trackEyes = LocalizedString(lookupKey: "trackEyes")
   /// Tracking
   public static let tracking = LocalizedString(lookupKey: "tracking")
+  /// Tracking Adjustment
+  public static let trackingAdjustment = LocalizedString(lookupKey: "trackingAdjustment")
   /// Blink Left
   public static let trackingInputBlinkL = LocalizedString(lookupKey: "trackingInput__blinkL")
   /// Blink Right
@@ -546,8 +548,6 @@ public enum L10n {
   public static let trackingInputPosZ = LocalizedString(lookupKey: "trackingInput__posZ")
   /// Vowel
   public static let trackingInputVowel = LocalizedString(lookupKey: "trackingInput__vowel")
-  /// Tracking Mapping
-  public static let trackingMapping = LocalizedString(lookupKey: "trackingMapping")
   /// Save feature will be added in a future update.
   public static let trackingMappingSaveComingSoon = LocalizedString(lookupKey: "trackingMappingSaveComingSoon")
   /// Tracking Mode

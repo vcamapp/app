@@ -87,7 +87,9 @@ private extension ExternalState {
             $0.map(AvatarAudioManager.shared.setAudioDevice)
         }
     }
+}
 
+extension ExternalState {
     static var currentLipSync: ExternalState<LipSyncType> {
         .init(id: currentLipSyncId) {
             UniBridge.shared.lipSyncWebCam.wrappedValue ? .camera : .mic

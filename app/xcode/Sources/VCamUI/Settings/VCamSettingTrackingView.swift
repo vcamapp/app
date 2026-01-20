@@ -29,6 +29,7 @@ public struct VCamSettingTrackingView: View {
     @ExternalStateBinding(.lipSyncMicIntensity) private var lipSyncMicIntensity
     @ExternalStateBinding(.shoulderRotationWeight) private var shoulderRotationWeight
     @ExternalStateBinding(.swivelOffset) private var swivelOffset
+    @ExternalStateBinding(.currentLipSync) private var currentLipSync
 
     public var body: some View {
         Form {
@@ -44,7 +45,9 @@ public struct VCamSettingTrackingView: View {
             }
 
             Section {
-                ValueEditField(L10n.lipSyncSensitivity.key, value: $lipSyncMicIntensity, type: .slider(0.1...3))
+                if currentLipSync == .mic {
+                    ValueEditField(L10n.lipSyncSensitivity.key, value: $lipSyncMicIntensity, type: .slider(0.1...3))
+                }
                 ValueEditField(L10n.fpsCamera.key, value: $cameraFps.map(), type: .slider(1...60) { isEditing in
                     guard !isEditing else { return }
                     Tracking.shared.avatarCameraManager.setFPS(cameraFps)

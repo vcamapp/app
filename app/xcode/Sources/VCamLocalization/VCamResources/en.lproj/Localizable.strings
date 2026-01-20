@@ -343,7 +343,7 @@
 
 // MARK: - Tracking Mapping
 
-"trackingMapping" = "Tracking Mapping";
+"trackingAdjustment" = "Tracking Adjustment";
 "trackingMode" = "Tracking Mode";
 "trackingMappingSaveComingSoon" = "Save feature will be added in a future update.";
 "trackingInput__posX" = "Position X";

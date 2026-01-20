@@ -98,7 +98,7 @@ public struct VCamSettingTrackingMappingEditorView: View {
 
 extension VCamSettingTrackingMappingEditorView: MacWindow {
     public var windowTitle: String {
-        L10n.trackingMapping.text
+        L10n.trackingAdjustment.text
     }
 
     public func configureWindow(_ window: NSWindow) -> NSWindow {
