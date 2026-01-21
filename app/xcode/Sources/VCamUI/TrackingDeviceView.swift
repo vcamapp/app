@@ -14,14 +14,23 @@ import VCamEntity
 
 public struct TrackingDeviceView: View {
     public init() {}
-    
-    @ExternalStateBinding(.captureDevice) private var captureDevice
-    @ExternalStateBinding(.audioDevice) private var audioDevice
-    @ExternalStateBinding(.currentLipSync) private var currentLipSync
+
+    @Environment(UniState.self) private var uniState
+
+    @State private var captureDevice: AVCaptureDevice? = Tracking.shared.avatarCameraManager.currentCaptureDevice
+    @State private var audioDevice: AudioDevice? = AvatarAudioManager.shared.currentInputDevice
 
     public var body: some View {
-        if Camera.hasCamera {
-            Picker(selection: $captureDevice) {
+        @Bindable var state = uniState
+
+        if Camera.hasCamera, let currentDevice = captureDevice {
+            Picker(selection: Binding(
+                get: { currentDevice },
+                set: { newDevice in
+                    captureDevice = newDevice
+                    Tracking.shared.avatarCameraManager.setCaptureDevice(id: newDevice.uniqueID)
+                }
+            )) {
                 ForEach(Camera.cameras()) { device in
                     Text(device.localizedName).tag(device)
                 }
@@ -36,7 +45,13 @@ public struct TrackingDeviceView: View {
             }
         }
         if let firstDevice = AudioDevice.devices().first {
-            Picker(selection: $audioDevice.map(get: { $0 ?? firstDevice }, set: { $0 })) {
+            Picker(selection: Binding(
+                get: { audioDevice ?? firstDevice },
+                set: { newDevice in
+                    audioDevice = newDevice
+                    AvatarAudioManager.shared.setAudioDevice(newDevice)
+                }
+            )) {
                 ForEach(AudioDevice.devices()) { device in
                     Text(device.name()).tag(device)
                 }
@@ -50,7 +65,13 @@ public struct TrackingDeviceView: View {
                 Text(L10n.mic.key, bundle: .localize)
             }
         }
-        Picker(selection: $currentLipSync) {
+        Picker(selection: Binding(
+            get: { uniState.currentLipSync },
+            set: { newValue in
+                state.currentLipSync = newValue
+                Tracking.shared.setLipSyncType(newValue)
+            }
+        )) {
             ForEach(LipSyncType.allCases) { type in
                 Text(type.name, bundle: .localize).tag(type)
             }
@@ -60,41 +81,8 @@ public struct TrackingDeviceView: View {
         .disabled(Tracking.shared.micLipSyncDisabled)
         .onReceive(NotificationCenter.default.publisher(for: .deviceWasChanged)) { _ in
             // Refresh device list
-            self.captureDevice = captureDevice
-            self.audioDevice = audioDevice
-            self.currentLipSync = currentLipSync
-        }
-    }
-}
-
-private let captureDeviceId = UUID()
-private let audioDeviceId = UUID()
-private let currentLipSyncId = UUID()
-
-private extension ExternalState {
-    static var captureDevice: ExternalState<AVCaptureDevice> {
-        .init(id: captureDeviceId) {
-            Tracking.shared.avatarCameraManager.currentCaptureDevice!
-        } set: {
-            Tracking.shared.avatarCameraManager.setCaptureDevice(id: $0.uniqueID)
-        }
-    }
-
-    static var audioDevice: ExternalState<AudioDevice?> {
-        .init(id: audioDeviceId) {
-            AvatarAudioManager.shared.currentInputDevice
-        } set: {
-            $0.map(AvatarAudioManager.shared.setAudioDevice)
-        }
-    }
-}
-
-extension ExternalState {
-    static var currentLipSync: ExternalState<LipSyncType> {
-        .init(id: currentLipSyncId) {
-            UniBridge.shared.lipSyncWebCam.wrappedValue ? .camera : .mic
-        } set: {
-            Tracking.shared.setLipSyncType($0)
+            captureDevice = Tracking.shared.avatarCameraManager.currentCaptureDevice
+            audioDevice = AvatarAudioManager.shared.currentInputDevice
         }
     }
 }

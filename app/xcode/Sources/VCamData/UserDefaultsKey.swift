@@ -44,4 +44,5 @@ public extension UserDefaults.Key {
     static var integrationMocopi: Key<Bool> { .init("vc_intg_mocopi", default: false) }
 
     static var macOSMicModeEnabled: Key<Bool> { .init("vc_macos_micmode_enabled", default: false) }
+    static var useAddToMacOSMenuBar: Key<Bool> { .init("vc_use_add_to_macos_menubar", default: true) }
 }

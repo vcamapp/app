@@ -7,24 +7,21 @@
 
 import SwiftUI
 import VCamUIFoundation
-import VCamBridge
 
 public struct VCamMainToolbarBackgroundColorPicker: View {
-    public init(
-        backgroundColor: ExternalStateBinding<Color> = .init(.backgroundColor)
-    ) {
-        _backgroundColor = backgroundColor
-    }
+    public init() {}
 
-    @ExternalStateBinding(.backgroundColor) private var backgroundColor: Color
+    @Environment(UniState.self) private var uniState
 
     public var body: some View {
+        @Bindable var state = uniState
+
         GroupBox {
             Form {
                 HStack {
                     Text(L10n.color.key, bundle: .localize)
                         .fixedSize(horizontal: true, vertical: false)
-                    ColorEditField(L10n.color.key, value: $backgroundColor)
+                    ColorEditField(L10n.color.key, value: $state.backgroundColor)
                         .labelsHidden()
                 }
             }
@@ -32,6 +29,11 @@ public struct VCamMainToolbarBackgroundColorPicker: View {
     }
 }
 
+#if DEBUG
+
 #Preview {
-    VCamMainToolbarBackgroundColorPicker(backgroundColor: .constant(.red))
+    VCamMainToolbarBackgroundColorPicker()
+        .environment(UniState.preview(backgroundColor: .red))
 }
+
+#endif

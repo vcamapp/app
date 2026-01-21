@@ -16,6 +16,7 @@ import VCamEntity
 @_cdecl("uniOnVCamSystemStart")
 public func uniOnVCamSystemStart() {
     Logger.log("uniOnVCamSystemStart")
+    UniState.shared.initializeFromUnity()
     VCamSystem.shared.isUniVCamSystemEnabled = true
     VCamSystem.shared.startSystem()
     Tracking.shared.configure()

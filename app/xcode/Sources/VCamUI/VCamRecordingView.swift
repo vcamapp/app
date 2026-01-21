@@ -14,7 +14,7 @@ import VCamBridge
 public struct VCamRecordingView: View {
     public init() {}
 
-    @ExternalStateBinding(.typedScreenResolution) private var typedScreenResolution
+    @Environment(UniState.self) private var uniState
     @Bindable private var recorder = VideoRecorder.shared
     @State private var restWaitTime: CGFloat = 0
     @State private var screenshotDestinationString = ""
@@ -105,7 +105,7 @@ public struct VCamRecordingView: View {
                                     with: destination,
                                     name: "vcam_\(Date().yyyyMMddHHmmss)",
                                     format: format,
-                                    screenResolution: typedScreenResolution,
+                                    screenResolution: uniState.typedScreenResolution,
                                     capturesSystemAudio: recordSystemSound
                                 )
                             } catch {

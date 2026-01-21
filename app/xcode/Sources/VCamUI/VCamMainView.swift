@@ -9,16 +9,17 @@ import SwiftUI
 import VCamEntity
 import VCamCamera
 import VCamTracking
-import VCamBridge
 
 public struct VCamMainView: View {
     public init() {}
-    
-    @ExternalStateBinding(.message) private var message
+
+    @Environment(UniState.self) private var uniState
 
     @State private var isCameraExtensionDisallow = false
 
     public var body: some View {
+        @Bindable var state = uniState
+
         VStack(alignment: .leading) {
             if isCameraExtensionDisallow {
                 Button {
@@ -44,7 +45,7 @@ public struct VCamMainView: View {
             HStack {
                 if #available(macOS 26.0, *) {
                     GroupBox {
-                        SelectAllTextField(placeholder: L10n.message.text, text: $message)
+                        SelectAllTextField(placeholder: L10n.message.text, text: $state.message)
                             .padding(.horizontal, 8)
                     }
 
@@ -54,7 +55,7 @@ public struct VCamMainView: View {
                             .padding(.vertical, -1.5)
                     }
                 } else {
-                    SelectAllTextField(placeholder: L10n.message.text, text: $message)
+                    SelectAllTextField(placeholder: L10n.message.text, text: $state.message)
 
                     calibrateButton
                 }

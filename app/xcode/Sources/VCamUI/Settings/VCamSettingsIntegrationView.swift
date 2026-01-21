@@ -84,8 +84,6 @@ public struct VCamSettingsIntegrationView: View {
 private struct MocopiSettingView: View {
     @AppStorage(key: .integrationMocopi) private var integrationMocopi
 
-    @ExternalStateBinding(.useFullTracking) private var useFullTracking
-
     var body: some View {
         VCamSettingsIntegrationView.FeatureView(title: "mocopi") {
             Toggle(isOn: $integrationMocopi) {
@@ -94,7 +92,7 @@ private struct MocopiSettingView: View {
         }
         .help(L10n.helpMocopIP.text)
         .onChange(of: integrationMocopi) { _, newValue in
-            useFullTracking = newValue
+            UniBridge.shared.useFullTracking(newValue)
             Tracking.shared.setHandTrackingMethod(.mocopi)
         }
     }

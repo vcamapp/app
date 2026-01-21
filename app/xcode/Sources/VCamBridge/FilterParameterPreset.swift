@@ -34,16 +34,3 @@ extension FilterParameterPreset {
         }
     }
 }
-
-private let currentFilterParameterPresetId = UUID()
-
-public extension ExternalState {
-    static var currentDisplayParameterPreset: ExternalState<FilterParameterPreset> {
-        .init(id: currentFilterParameterPresetId) {
-            FilterParameterPreset(string: UniBridge.shared.currentDisplayParameter.wrappedValue)
-        } set: {
-            UniBridge.shared.currentDisplayParameter.wrappedValue = "\($0.id)@\($0.description)"
-            UniBridge.shared.applyDisplayParameter()
-        }
-    }
-}

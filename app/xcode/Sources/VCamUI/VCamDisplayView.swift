@@ -11,24 +11,24 @@ import VCamBridge
 
 public struct VCamDisplayView: View {
     public init() {}
-    
-    @ExternalStateBinding(.currentDisplayParameter) private var currentDisplayParameter
-    @ExternalStateBinding(.usePostEffect) private var usePostEffect
-    @ExternalStateBinding(.currentDisplayParameterPreset) private var preset
+
+    @Environment(UniState.self) private var uniState
 
     @UniReload private var reload: Void
 
     public var body: some View {
+        @Bindable var state = uniState
+
         VStack {
             HStack {
                 GroupBox {
-                    Toggle(isOn: $usePostEffect) {
+                    Toggle(isOn: $state.usePostEffect) {
                         Text(L10n.enable.key, bundle: .localize)
                     }
                 }
                 GroupBox {
                     HStack {
-                        Picker(selection: $preset) {
+                        Picker(selection: $state.currentDisplayParameterPreset) {
                             ForEach(FilterParameterPreset.allCases) { item in
                                 Text(item.description)
                                     .frame(minWidth: 120, alignment: .leading)
@@ -37,7 +37,7 @@ public struct VCamDisplayView: View {
                         } label: {
                             Text(L10n.preset.key, bundle: .localize)
                         }
-                        TextField(text: $preset.description) {
+                        TextField(text: $state.currentDisplayParameterPreset.description) {
                             Text(L10n.newPreset.key, bundle: .localize)
                         }
                         .frame(minWidth: 120)
@@ -59,59 +59,57 @@ public struct VCamDisplayView: View {
                         }
                     }
                 }
-                .disabled(!usePostEffect)
-                .opacity(usePostEffect ? 1 : 0.5)
+                .disabled(!uniState.usePostEffect)
+                .opacity(uniState.usePostEffect ? 1 : 0.5)
             }
 
             VCamDisplayParameterView()
-                .disabled(!usePostEffect)
-                .opacity(usePostEffect ? 1 : 0.5)
+                .disabled(!uniState.usePostEffect)
+                .opacity(uniState.usePostEffect ? 1 : 0.5)
         }
     }
 }
 
 private struct VCamDisplayParameterView: View {
-    @ExternalStateBinding(.environmentLightColor) private var environmentLightColor: Color
-    @ExternalStateBinding(.colorFilter) private var colorFilter: Color
-    @ExternalStateBinding(.bloomColor) private var bloomColor: Color
-    @ExternalStateBinding(.lensFlare) private var lensFlare
-    @ExternalStateBinding(.vignetteColor) private var vignetteColor: Color
+    @Environment(UniState.self) private var uniState
 
     @Bindable private var windowManager = VCamSystem.shared.windowManager
 
     var body: some View {
+        @Bindable var state = uniState
+
         let minHeight = windowManager.size.height * 0.4
         ScrollView {
             GroupBox {
                 HStack {
                     VStack(alignment: .leading) {
                         Form {
-                            UniFloatEditField(L10n.ambientLightIntensity.key, type: .light, range: 0...2)
-                            ColorEditField(L10n.ambientLightColor.key, value: $environmentLightColor)
-                            UniFloatEditField(L10n.cameraExposure.key, type: .postExposure, range: -2...6)
-                            ColorEditField(L10n.colorFilter.key, value: $colorFilter)
-                            UniFloatEditField(L10n.saturation.key, type: .saturation, format: "%.0f", range: -100...100)
-                            UniFloatEditField(L10n.hueShift.key, type: .hueShift, format: "%.0f", range: -180...180)
-                            UniFloatEditField(L10n.contrast.key, type: .contrast, format: "%.0f", range: -100...100)
+                            ValueEditField(L10n.ambientLightIntensity.key, value: $state.light, format: "%.1f", type: .slider(0...2))
+                            ColorEditField(L10n.ambientLightColor.key, value: $state.environmentLightColor)
+                            ValueEditField(L10n.cameraExposure.key, value: $state.postExposure, format: "%.1f", type: .slider(-2...6))
+                            ColorEditField(L10n.colorFilter.key, value: $state.colorFilter)
+                            ValueEditField(L10n.saturation.key, value: $state.saturation, format: "%.0f", type: .slider(-100...100))
+                            ValueEditField(L10n.hueShift.key, value: $state.hueShift, format: "%.0f", type: .slider(-180...180))
+                            ValueEditField(L10n.contrast.key, value: $state.contrast, format: "%.0f", type: .slider(-100...100))
                             Spacer()
                         }
                     }
                     VStack(alignment: .leading) {
                         VCamSection(L10n.whiteBalance.key) {
                             Form {
-                                UniFloatEditField(L10n.colorTemperature.key, type: .whiteBalanceTemperature, format: "%.0f", range: -100...100)
-                                UniFloatEditField(L10n.tint.key, type: .whiteBalanceTint, format: "%.0f", range: -100...100)
+                                ValueEditField(L10n.colorTemperature.key, value: $state.whiteBalanceTemperature, format: "%.0f", type: .slider(-100...100))
+                                ValueEditField(L10n.tint.key, value: $state.whiteBalanceTint, format: "%.0f", type: .slider(-100...100))
                             }
                         }
                         VCamSection(L10n.bloom.key) {
                             Form {
-                                UniFloatEditField(L10n.intensity.key, type: .bloomIntensity, range: 0...60)
-                                UniFloatEditField(L10n.thresholdScreenEffect.key, type: .bloomThreshold, range: 0...2)
-                                UniFloatEditField(L10n.softKnee.key, type: .bloomSoftKnee, range: 0...1)
-                                UniFloatEditField(L10n.diffusion.key, type: .bloomDiffusion, range: 1...10)
-                                UniFloatEditField(L10n.anamorphicRatio.key, type: .bloomAnamorphicRatio, range: -1...1)
-                                ColorEditField(L10n.color.key, value: $bloomColor)
-                                Picker(selection: $lensFlare.map(get: LensFlare.initOrNone, set: { $0.rawValue })) {
+                                ValueEditField(L10n.intensity.key, value: $state.bloomIntensity, format: "%.1f", type: .slider(0...60))
+                                ValueEditField(L10n.thresholdScreenEffect.key, value: $state.bloomThreshold, format: "%.1f", type: .slider(0...2))
+                                ValueEditField(L10n.softKnee.key, value: $state.bloomSoftKnee, format: "%.1f", type: .slider(0...1))
+                                ValueEditField(L10n.diffusion.key, value: $state.bloomDiffusion, format: "%.1f", type: .slider(1...10))
+                                ValueEditField(L10n.anamorphicRatio.key, value: $state.bloomAnamorphicRatio, format: "%.1f", type: .slider(-1...1))
+                                ColorEditField(L10n.color.key, value: $state.bloomColor)
+                                Picker(selection: $state.lensFlare.map(get: LensFlare.initOrNone, set: { $0.rawValue })) {
                                     ForEach(LensFlare.allCases) { item in
                                         Text(item.description)
                                             .tag(item)
@@ -119,15 +117,15 @@ private struct VCamDisplayParameterView: View {
                                 } label: {
                                     Text(L10n.lensFlare.key, bundle: .localize)
                                 }
-                                UniFloatEditField(L10n.lensFlareIntensity.key, type: .bloomLensFlareIntensity, range: 0...50)
+                                ValueEditField(L10n.lensFlareIntensity.key, value: $state.bloomLensFlareIntensity, format: "%.1f", type: .slider(0...50))
                             }
                         }
                         VCamSection(L10n.vignette.key) {
                             Form {
-                                UniFloatEditField(L10n.intensity.key, type: .vignetteIntensity, range: 0...1)
-                                ColorEditField(L10n.color.key, value: $vignetteColor)
-                                UniFloatEditField(L10n.smoothness.key, type: .vignetteSmoothness, range: 0...1)
-                                UniFloatEditField(L10n.roundness.key, type: .vignetteRoundness, range: 0...1)
+                                ValueEditField(L10n.intensity.key, value: $state.vignetteIntensity, format: "%.1f", type: .slider(0...1))
+                                ColorEditField(L10n.color.key, value: $state.vignetteColor)
+                                ValueEditField(L10n.smoothness.key, value: $state.vignetteSmoothness, format: "%.1f", type: .slider(0...1))
+                                ValueEditField(L10n.roundness.key, value: $state.vignetteRoundness, format: "%.1f", type: .slider(0...1))
                             }
                         }
                         Spacer()

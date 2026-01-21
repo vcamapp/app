@@ -7,20 +7,18 @@
 
 import SwiftUI
 import VCamEntity
-import VCamBridge
 import VCamLocalization
 
 public struct VCamSettingRenderingView: View {
     public init() {}
-    
-    @ExternalStateBinding(.typedScreenResolution) private var typedScreenResolution
-    @ExternalStateBinding(.qualityLevel) private var qualityLevel
-    @ExternalStateBinding(.fps) private var fps
-    @ExternalStateBinding(.useVSync) private var useVSync
+
+    @Environment(UniState.self) private var uniState
 
     public var body: some View {
+        @Bindable var state = uniState
+
         Form {
-            Picker(selection: $typedScreenResolution) {
+            Picker(selection: $state.typedScreenResolution) {
                 ForEach(ScreenResolution.allCases) {
                     Text($0.description)
                         .tag($0)
@@ -28,7 +26,7 @@ public struct VCamSettingRenderingView: View {
             } label: {
                 Text(L10n.screenResolution.key, bundle: .localize)
             }
-            Picker(selection: $qualityLevel) {
+            Picker(selection: $state.qualityLevel) {
                 ForEach(QualityLevel.allCases) {
                     Text($0.localizedName, bundle: .localize)
                         .tag($0.rawValue)
@@ -37,8 +35,8 @@ public struct VCamSettingRenderingView: View {
                 Text(L10n.renderingQuality.key, bundle: .localize)
             }
 
-            ValueEditField(L10n.fpsScreen.key, value: $fps, type: .slider(10...60))
-                .disabled(useVSync)
+            ValueEditField(L10n.fpsScreen.key, value: $state.fps, type: .slider(10...60))
+                .disabled(uniState.useVSync)
         }
         .formStyle(.grouped)
     }

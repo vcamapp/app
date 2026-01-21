@@ -11,23 +11,21 @@ import VCamBridge
 public struct UniFloatEditField: View {
     public init(_ label: LocalizedStringKey, type: UniBridge.FloatType, format: String = "%.1f", range: ClosedRange<CGFloat>) {
         self.label = label
-        _value = ExternalStateBinding(type)
+        self.type = type
         self.format = format
         self.range = range
     }
 
     private let label: LocalizedStringKey
-    @ExternalStateBinding private var value: CGFloat
+    private let type: UniBridge.FloatType
     private let format: String
     private let range: ClosedRange<CGFloat>
 
-    public var body: some View {
-        ValueEditField(label, value: $value, format: format, type: .slider(range))
+    private var binding: Binding<CGFloat> {
+        UniBridge.shared.floatMapper.binding(type)
     }
-}
 
-extension UniFloatEditField: Equatable {
-    public static func == (lhs: Self, rhs: Self) -> Bool {
-        lhs.value == rhs.value && lhs.range == rhs.range && lhs.label == rhs.label
+    public var body: some View {
+        ValueEditField(label, value: binding, format: format, type: .slider(range))
     }
 }

@@ -82,7 +82,7 @@ public final class UniBridge {
     public var useShadow: Binding<Bool> { boolMapper.binding(.useShadow) }
     public var usePostEffect: Binding<Bool> { boolMapper.binding(.usePostEffect) }
     public var useCombineMesh: Binding<Bool> { boolMapper.binding(.useCombineMesh) }
-    public var useAddToMacOSMenuBar: Binding<Bool> { boolMapper.binding(.useAddToMacOSMenuBar) }
+    public private(set) lazy var useAddToMacOSMenuBar = boolMapper.set(.useAddToMacOSMenuBar)
     public var useVSync: Binding<Bool> { boolMapper.binding(.useVSync) }
     public var useNewTracking: Binding<Bool> { boolMapper.binding(.useNewTracking) }
     public private(set) lazy var useHandTracking = boolMapper.set(.useHandTracking)

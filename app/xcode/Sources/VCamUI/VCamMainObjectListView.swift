@@ -13,7 +13,7 @@ import VCamBridge
 public struct VCamMainObjectListView: View {
     public init() {}
 
-    @ExternalStateBinding(.objectSelected) private var objectSelected
+    @Environment(UniState.self) private var uniState
     @Bindable private var objectManager = SceneObjectManager.shared
 
     @State private var editingId: Int32?
@@ -21,7 +21,8 @@ public struct VCamMainObjectListView: View {
     @UniReload private var reload: Void // reload when object is selected
 
     var selectedIdBinding: Binding<Int32?> {
-        $objectSelected.map(get: { $0 == -1 ? nil : $0 }, set: { $0 ?? -1 })
+        @Bindable var state = uniState
+        return $state.objectSelected.map(get: { $0 == -1 ? nil : $0 }, set: { $0 ?? -1 })
     }
 
     public var body: some View {

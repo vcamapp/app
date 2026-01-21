@@ -10,7 +10,6 @@ import AVFoundation
 import VCamEntity
 import VCamCamera
 import VCamTracking
-import VCamBridge
 
 public struct VCamSettingTrackingView: View {
     public init() {}
@@ -26,12 +25,11 @@ public struct VCamSettingTrackingView: View {
     @AppStorage(key: .integrationMocopi) private var integrationMocopi
 #endif
 
-    @ExternalStateBinding(.lipSyncMicIntensity) private var lipSyncMicIntensity
-    @ExternalStateBinding(.shoulderRotationWeight) private var shoulderRotationWeight
-    @ExternalStateBinding(.swivelOffset) private var swivelOffset
-    @ExternalStateBinding(.currentLipSync) private var currentLipSync
+    @Environment(UniState.self) private var uniState
 
     public var body: some View {
+        @Bindable var state = uniState
+
         Form {
             Section {
                 VCamTrackingView()
@@ -45,8 +43,8 @@ public struct VCamSettingTrackingView: View {
             }
 
             Section {
-                if currentLipSync == .mic {
-                    ValueEditField(L10n.lipSyncSensitivity.key, value: $lipSyncMicIntensity, type: .slider(0.1...3))
+                if uniState.currentLipSync == .mic {
+                    ValueEditField(L10n.lipSyncSensitivity.key, value: $state.lipSyncMicIntensity, type: .slider(0.1...3))
                 }
                 ValueEditField(L10n.fpsCamera.key, value: $cameraFps.map(), type: .slider(1...60) { isEditing in
                     guard !isEditing else { return }
@@ -56,8 +54,8 @@ public struct VCamSettingTrackingView: View {
 
 #if FEATURE_3
             Section {
-                ValueEditField(L10n.shoulderRotationWeight.key, value: $shoulderRotationWeight, type: .slider(0.0...1))
-                ValueEditField(L10n.swivelOffset.key, value: $swivelOffset, type: .slider(0.0...30))
+                ValueEditField(L10n.shoulderRotationWeight.key, value: $state.shoulderRotationWeight, type: .slider(0.0...1))
+                ValueEditField(L10n.swivelOffset.key, value: $state.swivelOffset, type: .slider(0.0...30))
             }
 #if ENABLE_MOCOPI
             .disabled(integrationMocopi)

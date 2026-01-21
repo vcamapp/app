@@ -130,7 +130,7 @@ public final class WindowManager {
 
         statusItem.menu = menu
 
-        statusItem.isVisible = UniBridge.shared.useAddToMacOSMenuBar.wrappedValue
+        statusItem.isVisible = UniState.shared.useAddToMacOSMenuBar
     }
 
     @objc public func hide() {

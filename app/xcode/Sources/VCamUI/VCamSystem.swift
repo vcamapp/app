@@ -35,6 +35,7 @@ public final class VCamSystem {
             self?.stopSystem()
         }
 
+        UniState.shared.initializeToUnity()
         Workaround.fixColorPickerOpacity_macOS14()
         windowManager.setUpWindow()
         windowManager.setUpView()

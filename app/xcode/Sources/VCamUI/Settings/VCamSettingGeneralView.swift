@@ -7,7 +7,6 @@
 
 import SwiftUI
 import VCamLocalization
-import VCamBridge
 
 public struct VCamSettingGeneralView: View {
     public init() {}
@@ -16,18 +15,18 @@ public struct VCamSettingGeneralView: View {
     @AppStorage(key: .useAutoConvertVRM1) var useAutoConvertVRM1
     @AppStorage(key: .locale) var locale
 
-    @ExternalStateBinding(.useAutoMode) private var useAutoMode: Bool
-    @ExternalStateBinding(.useCombineMesh) private var useCombineMesh: Bool
-    @ExternalStateBinding(.useAddToMacOSMenuBar) private var useAddToMacOSMenuBar: Bool
+    @Environment(UniState.self) private var uniState
 
     public var body: some View {
+        @Bindable var state = uniState
+
         Form {
             Section {
 #if FEATURE_3
-                Toggle(isOn: $useAutoMode) {
+                Toggle(isOn: $state.useAutoMode) {
                     Text(L10n.playIdleMotions.key, bundle: .localize)
                 }
-                Toggle(isOn: $useCombineMesh) {
+                Toggle(isOn: $state.useCombineMesh) {
                     Text(L10n.optimizeMeshes.key, bundle: .localize)
                 }
                 .help(L10n.helpMesh.text)
@@ -38,7 +37,7 @@ public struct VCamSettingGeneralView: View {
                 Toggle(isOn: $useHMirror) {
                     Text(L10n.flipScreen.key, bundle: .localize)
                 }
-                Toggle(isOn: $useAddToMacOSMenuBar) {
+                Toggle(isOn: $state.useAddToMacOSMenuBar) {
                     Text(L10n.addToMacOSMenuBar.key, bundle: .localize)
                 }
             }
@@ -52,7 +51,7 @@ public struct VCamSettingGeneralView: View {
             }
         }
         .formStyle(.grouped)
-        .onChange(of: useAddToMacOSMenuBar) { _, newValue in
+        .onChange(of: uniState.useAddToMacOSMenuBar) { _, newValue in
             VCamSystem.shared.windowManager.isMacOSMenubarVisible = newValue
         }
     }
