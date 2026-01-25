@@ -1,5 +1,3 @@
-[日本語](README.ja.md)
-
 # VCam
 A macOS app that shows an avatar using a virtual camera.
 
@@ -21,6 +19,6 @@ Windows and other platforms are currently not supported.
 *Updates to the document by pull request are welcome!*
 
 ## License
-The source code in this repository is under the MIT License.
+The source code in this repository is under the MIT License. For the Terms of Use, please refer to the official website.
 
-Twttier: [@vcamapp](https://twitter.com/vcamapp)
+X (Twttier): [@vcamapp](https://x.com/vcamapp)

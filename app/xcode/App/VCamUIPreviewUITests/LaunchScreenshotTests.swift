@@ -17,7 +17,7 @@ final class LaunchScreenshotTests: XCTestCase {
 
     override func setUpWithError() throws {
         continueAfterFailure = false
-        LocalizationEnvironment.currentLocale = { "en_US" }
+        LocalizationEnvironment.currentLocaleIdentifier = { "en_US" }
     }
 
     func testLaunch() throws {

@@ -56,6 +56,30 @@ public struct RevisedMovingAverage<Value: RevisedMovingAverageValue> {
     }
 }
 
+public extension RevisedMovingAverage where Value == Float {
+    mutating func appending(_ newValue: Float) -> Float {
+        let nextValueIndex = (latestValueIndex + 1) % count
+        previousValues[latestValueIndex] = newValue
+        latestValueIndex = nextValueIndex
+
+        let headCount = count - nextValueIndex
+        var result: Float = 0
+        previousValues.withUnsafeBufferPointer { values in
+            weights.withUnsafeBufferPointer { weights in
+                guard let valuesBase = values.baseAddress,
+                      let weightsBase = weights.baseAddress else { return }
+                vDSP_dotpr(valuesBase.advanced(by: nextValueIndex), 1, weightsBase, 1, &result, vDSP_Length(headCount))
+                if nextValueIndex > 0 {
+                    var tailResult: Float = 0
+                    vDSP_dotpr(valuesBase, 1, weightsBase.advanced(by: headCount), 1, &tailResult, vDSP_Length(nextValueIndex))
+                    result += tailResult
+                }
+            }
+        }
+        return result
+    }
+}
+
 public enum RevisedMovingAverageWeight {
     case four
     case six
@@ -83,4 +107,3 @@ public enum RevisedMovingAverageWeight {
         }
     }
 }
-

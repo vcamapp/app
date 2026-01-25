@@ -8,6 +8,7 @@
 import SwiftUI
 import AppKit
 import VCamBridge
+import VCamData
 import VCamLocalization
 import VCamTracking
 
@@ -23,7 +24,8 @@ public struct VCamSettingTrackingMappingEditorView: View {
                 if store.isInitialized {
                     VCamSettingMappingTableView(
                         store: store,
-                        hasBlendShapeNames: !uniState.blendShapeNames.isEmpty
+                        hasBlendShapeNames: !uniState.blendShapeNames.isEmpty,
+                        mappingsRevision: store.mappingsRevision
                     )
                 } else {
                     ProgressView()
@@ -117,6 +119,7 @@ extension VCamSettingTrackingMappingEditorView: MacWindow {
 @Observable
 final class MappingDataStore {
     var selectedMode: TrackingMode = .blendShape
+    var mappingsRevision = 0
     private(set) var isInitialized = false
 
     private var inputKeyCaches: [TrackingMode: KeyCache<TrackingMappingEntry.InputKey>] = [:]
@@ -184,11 +187,15 @@ final class MappingDataStore {
 
     func addMapping() {
         tracking.addMapping(.init(input: .posX, outputKey: .empty), for: selectedMode)
+        mappingsRevision &+= 1
     }
 
     func deleteMapping(at indices: IndexSet) {
         for index in indices.sorted(by: >) {
             tracking.deleteMapping(at: index, for: selectedMode)
+        }
+        if !indices.isEmpty {
+            mappingsRevision &+= 1
         }
     }
 
@@ -197,10 +204,14 @@ final class MappingDataStore {
             tracking.mappings[Int(selectedMode.rawValue)][index].resetToDefault()
             tracking.updateMapping(at: index, for: selectedMode)
         }
+        if !indices.isEmpty {
+            mappingsRevision &+= 1
+        }
     }
 
     func resetAllMappings() {
         tracking.resetMappings(for: selectedMode)
+        mappingsRevision &+= 1
     }
 }
 

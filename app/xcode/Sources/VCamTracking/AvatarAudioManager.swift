@@ -41,7 +41,7 @@ public final class AvatarAudioManager: NSObject {
     }
 
     public func startIfNeeded() {
-        guard !UniBridge.shared.lipSyncWebCam.wrappedValue else { return }
+        guard !UniState.shared.lipSyncWebCam else { return }
         AvatarAudioManager.shared.start(usage: .lipSync)
     }
 
@@ -81,7 +81,7 @@ public final class AvatarAudioManager: NSObject {
         setEmotionEnabled(UserDefaults.standard.value(for: .useEmotion))
         audioExpressionEstimator.onAudioLevelUpdate = { level in
             Task { @MainActor in
-                UniBridge.shared.micAudioLevel.wrappedValue = CGFloat(level)
+                UniBridge.shared.micAudioLevel(CGFloat(level))
             }
         }
         audioManager.onUpdateAudioBuffer = { buffer, time, latency in

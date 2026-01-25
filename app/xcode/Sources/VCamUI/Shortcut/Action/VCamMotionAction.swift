@@ -9,6 +9,7 @@ import AppKit
 import VCamEntity
 import VCamLocalization
 import VCamBridge
+import VCamData
 import SwiftUI
 
 public struct VCamMotionAction: VCamAction {

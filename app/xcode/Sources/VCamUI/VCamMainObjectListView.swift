@@ -9,6 +9,7 @@ import SwiftUI
 import VCamUIFoundation
 import VCamEntity
 import VCamBridge
+import VCamData
 
 public struct VCamMainObjectListView: View {
     public init() {}
@@ -17,8 +18,6 @@ public struct VCamMainObjectListView: View {
     @Bindable private var objectManager = SceneObjectManager.shared
 
     @State private var editingId: Int32?
-
-    @UniReload private var reload: Void // reload when object is selected
 
     var selectedIdBinding: Binding<Int32?> {
         @Bindable var state = uniState

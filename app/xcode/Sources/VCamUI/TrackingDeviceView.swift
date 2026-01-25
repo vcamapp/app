@@ -11,6 +11,7 @@ import VCamTracking
 import VCamBridge
 import VCamCamera
 import VCamEntity
+import VCamData
 
 public struct TrackingDeviceView: View {
     public init() {}

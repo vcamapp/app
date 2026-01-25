@@ -15,10 +15,20 @@ public final class FacialMocapReceiver {
     @ObservationIgnored private var listener: NWListener?
     @ObservationIgnored private var connection: NWConnection?
     @ObservationIgnored private var facialMocapLastValues: [Float] = Array(repeating: 0, count: 12)
+    @ObservationIgnored private var blendShapeResampler: TrackingResampler
+    @ObservationIgnored private var perfectSyncResampler: TrackingResampler
+    @ObservationIgnored private var smoothingBox: SmoothingBox
     private static let queue = DispatchQueue(label: "com.github.tattn.vcam.facialmocapreceiver")
 
     @MainActor public private(set) var connectionStatus = ConnectionStatus.disconnected
 
+    private final class SmoothingBox {
+        var smoothing: TrackingSmoothing
+
+        init(_ smoothing: TrackingSmoothing) {
+            self.smoothing = smoothing
+        }
+    }
 
     public enum ConnectionStatus {
         case disconnected
@@ -32,7 +42,21 @@ public final class FacialMocapReceiver {
         case error(any Error)
     }
 
-    public init() {}
+    public init(smoothing: TrackingSmoothing) {
+        let smoothingBox = SmoothingBox(smoothing)
+        self.smoothingBox = smoothingBox
+        let settingsProvider = {
+            smoothingBox.smoothing.settings()
+        }
+
+        blendShapeResampler = TrackingResampler(label: "facial-mocap-blendshape", settingsProvider: settingsProvider) { values in
+            UniBridge.shared.receiveVCamBlendShape(values)
+        }
+
+        perfectSyncResampler = TrackingResampler(label: "facial-mocap-perfectsync", settingsProvider: settingsProvider) { values in
+            UniBridge.shared.receivePerfectSync(values)
+        }
+    }
 
     @MainActor
     public func connect(ip: String) async throws {
@@ -63,15 +87,25 @@ public final class FacialMocapReceiver {
 
     @MainActor
     public func stop() async {
-        guard let listener = listener else { return }
-        listener.stateUpdateHandler = nil
-        listener.newConnectionHandler = nil
-        listener.cancel()
-        self.listener = nil
+        if let listener = listener {
+            listener.stateUpdateHandler = nil
+            listener.newConnectionHandler = nil
+            listener.cancel()
+            self.listener = nil
+        }
 
         connection?.cancel()
         connection = nil
         connectionStatus = .disconnected
+
+        stopResamplers()
+    }
+
+    func updateSmoothing(_ smoothing: TrackingSmoothing) {
+        smoothingBox.smoothing = smoothing
+        if !smoothing.isEnabled {
+            stopResamplers()
+        }
     }
 
     private func stopAsync() {
@@ -82,12 +116,34 @@ public final class FacialMocapReceiver {
 
     private func oniFacialMocapReceived(_ data: FacialMocapData) {
         guard Tracking.shared.faceTrackingMethod == .iFacialMocap else { return }
+
+        let smoothingEnabled = smoothingBox.smoothing.isEnabled
         if UniBridge.shared.hasPerfectSyncBlendShape {
-            UniBridge.shared.receivePerfectSync(data.perfectSync(useEyeTracking: Tracking.shared.useEyeTracking))
+            let perfectSync = data.perfectSync(useEyeTracking: Tracking.shared.useEyeTracking)
+            if smoothingEnabled {
+                perfectSyncResampler.push(perfectSync)
+            } else {
+                UniBridge.shared.receivePerfectSync(perfectSync)
+            }
         } else {
-            facialMocapLastValues = vDSP.linearInterpolate(facialMocapLastValues, data.vcamHeadTransform(useEyeTracking: Tracking.shared.useEyeTracking), using: 0.5)
-            UniBridge.shared.receiveVCamBlendShape(facialMocapLastValues)
+            let blendShape = data.vcamHeadTransform(useEyeTracking: Tracking.shared.useEyeTracking)
+            facialMocapLastValues = vDSP.linearInterpolate(
+                facialMocapLastValues,
+                blendShape,
+                using: 0.5
+            )
+
+            if smoothingEnabled {
+                blendShapeResampler.push(facialMocapLastValues)
+            } else {
+                UniBridge.shared.receiveVCamBlendShape(facialMocapLastValues)
+            }
         }
+    }
+
+    func stopResamplers() {
+        blendShapeResampler.stop()
+        perfectSyncResampler.stop()
     }
 }
 

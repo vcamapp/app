@@ -11,11 +11,13 @@ import VCamBridge
 import VCamTracking
 import VCamLogger
 import VCamCamera
+import VCamData
 import VCamEntity
 import VCamWorkaround
 
 public final class VCamSystem {
     public static let shared = VCamSystem()
+    public static var initializeToUnity: (() -> Void)?
 
     public let windowManager = WindowManager()
 
@@ -36,6 +38,7 @@ public final class VCamSystem {
         }
 
         UniState.shared.initializeToUnity()
+        Self.initializeToUnity?()
         Workaround.fixColorPickerOpacity_macOS14()
         windowManager.setUpWindow()
         windowManager.setUpView()

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import VCamData
 
 public struct RootViewInjectionModifier: ViewModifier {
     public static var inject: (AnyView) -> AnyView = { $0 }

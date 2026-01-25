@@ -336,6 +336,10 @@ public enum L10n {
   public static let migrateToNewVirtualCameraMessage = LocalizedString(lookupKey: "migrateToNewVirtualCameraMessage")
   /// Minimum
   public static let minimum = LocalizedString(lookupKey: "minimum")
+  /// Network Interpolation
+  public static let mocapNetworkInterpolation = LocalizedString(lookupKey: "mocapNetworkInterpolation")
+  /// Reduces jitter from packet drops (adds latency). Applies to VCamMocap and iFacialMocap. 
+  public static let mocapNetworkInterpolationHelp = LocalizedString(lookupKey: "mocapNetworkInterpolationHelp")
   /// Motion
   public static let motion = LocalizedString(lookupKey: "motion")
   /// Reset position
@@ -548,10 +552,16 @@ public enum L10n {
   public static let trackingInputPosZ = LocalizedString(lookupKey: "trackingInput__posZ")
   /// Vowel
   public static let trackingInputVowel = LocalizedString(lookupKey: "trackingInput__vowel")
+  /// Input
+  public static let trackingMappingInput = LocalizedString(lookupKey: "trackingMappingInput")
+  /// Output
+  public static let trackingMappingOutput = LocalizedString(lookupKey: "trackingMappingOutput")
   /// Save feature will be added in a future update.
   public static let trackingMappingSaveComingSoon = LocalizedString(lookupKey: "trackingMappingSaveComingSoon")
   /// Tracking Mode
   public static let trackingMode = LocalizedString(lookupKey: "trackingMode")
+  /// Smoothing
+  public static let trackingSmoothing = LocalizedString(lookupKey: "trackingSmoothing")
   /// Type%@
   public static func typeNo(_ p1: Any) -> ArgumentsLocalizedString {
     ArgumentsLocalizedString("typeNo %@", "typeNo \(String(describing: p1))", String(describing: p1))

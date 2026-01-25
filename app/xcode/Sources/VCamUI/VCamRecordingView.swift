@@ -105,7 +105,7 @@ public struct VCamRecordingView: View {
                                     with: destination,
                                     name: "vcam_\(Date().yyyyMMddHHmmss)",
                                     format: format,
-                                    screenResolution: uniState.typedScreenResolution,
+                                    screenResolution: uniState.screenResolution,
                                     capturesSystemAudio: recordSystemSound
                                 )
                             } catch {
@@ -135,7 +135,7 @@ public struct VCamRecordingView: View {
                             Text(L10n.recordDesktopAudio.key, bundle: .localize)
                         }
                         Divider()
-                        ValueEditField(L10n.micSyncOffset.key, value: $recordMicSyncOffset.map(), valueHidden: true, type: .stepper)
+                        ValueEditField.emptyValueLabel(L10n.micSyncOffset.key, value: $recordMicSyncOffset.map(), type: .stepper)
                             .disabled(!recordSystemSound)
                             .opacity(recordSystemSound ? 1 : 0.5)
                     }
@@ -217,4 +217,3 @@ extension VCamRecordingView {
 #Preview {
     VCamRecordingView()
 }
-

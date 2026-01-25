@@ -22,15 +22,10 @@ let package = Package(
             "VCamUIFoundation", "VCamTracking", "VCamCamera", "VCamData", "VCamLocalization", "VCamBridge", "VCamWorkaround",
         ], resources: [
             .process("Resources"),
-        ], swiftSettings: [
-            .define("ENABLE_MOCOPI"),
-            .define("FEATURE_3"),
         ]),
         .target(name: "VCamUIFoundation"),
         .target(name: "VCamData", dependencies: ["VCamBridge", "VCamEntity"]),
-        .target(name: "VCamEntity", dependencies: ["VCamDefaults", "VCamLocalization"], swiftSettings: [
-            .define("ENABLE_MOCOPI"),
-        ]),
+        .target(name: "VCamEntity", dependencies: ["VCamDefaults", "VCamLocalization"]),
         .target(name: "VCamLocalization", resources: [.process("VCamResources")]),
         .target(name: "VCamMedia", dependencies: ["VCamEntity", "VCamAppExtension", "VCamLogger"]),
         .target(name: "VCamBridge", dependencies: ["VCamEntity", "VCamUIFoundation", "VCamLocalization"]),
@@ -56,5 +51,7 @@ let package = Package(
 for target in package.targets {
     target.swiftSettings = (target.swiftSettings ?? []) + [
         .enableUpcomingFeature("ExistentialAny", .when(configuration: .debug)),
+        .define("ENABLE_MOCOPI"),
+        .define("FEATURE_3"),
     ]
 }

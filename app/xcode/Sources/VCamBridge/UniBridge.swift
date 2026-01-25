@@ -10,10 +10,10 @@ public final class UniBridge {
         case qualityLevel = 3
     }
     public let intMapper = ValueBinding<Int32, IntType>()
-    public var lensFlare: Binding<Int32> { intMapper.binding(.lensFlare) }
+    public private(set) lazy var lensFlare = intMapper.set(.lensFlare)
     public private(set) lazy var facialExpression = intMapper.set(.facialExpression)
     public var objectSelected: Binding<Int32> { intMapper.binding(.objectSelected) }
-    public var qualityLevel: Binding<Int32> { intMapper.binding(.qualityLevel) }
+    public private(set) lazy var qualityLevel = intMapper.set(.qualityLevel)
 
     public enum FloatType: Int32 {
         case camera = 0
@@ -38,30 +38,32 @@ public final class UniBridge {
         case fps = 19
         case shoulderRotationWeight = 20
         case swivelOffset = 21
+        case trackingSmoothing = 22
     }
     public let floatMapper = ValueBinding<CGFloat, FloatType>()
-    public var camera: Binding<CGFloat> { floatMapper.binding(.camera) }
-    public var light: Binding<CGFloat> { floatMapper.binding(.light) }
-    public var postExposure: Binding<CGFloat> { floatMapper.binding(.postExposure) }
-    public var whiteBalanceTemperature: Binding<CGFloat> { floatMapper.binding(.whiteBalanceTemperature) }
-    public var whiteBalanceTint: Binding<CGFloat> { floatMapper.binding(.whiteBalanceTint) }
-    public var saturation: Binding<CGFloat> { floatMapper.binding(.saturation) }
-    public var hueShift: Binding<CGFloat> { floatMapper.binding(.hueShift) }
-    public var contrast: Binding<CGFloat> { floatMapper.binding(.contrast) }
-    public var bloomIntensity: Binding<CGFloat> { floatMapper.binding(.bloomIntensity) }
-    public var bloomThreshold: Binding<CGFloat> { floatMapper.binding(.bloomThreshold) }
-    public var bloomSoftKnee: Binding<CGFloat> { floatMapper.binding(.bloomSoftKnee) }
-    public var bloomDiffusion: Binding<CGFloat> { floatMapper.binding(.bloomDiffusion) }
-    public var bloomAnamorphicRatio: Binding<CGFloat> { floatMapper.binding(.bloomAnamorphicRatio) }
-    public var bloomLensFlareIntensity: Binding<CGFloat> { floatMapper.binding(.bloomLensFlareIntensity) }
-    public var vignetteIntensity: Binding<CGFloat> { floatMapper.binding(.vignetteIntensity) }
-    public var vignetteSmoothness: Binding<CGFloat> { floatMapper.binding(.vignetteSmoothness) }
-    public var vignetteRoundness: Binding<CGFloat> { floatMapper.binding(.vignetteRoundness) }
-    public var lipSyncMicIntensity: Binding<CGFloat> { floatMapper.binding(.lipSyncMicIntensity) }
-    public var micAudioLevel: Binding<CGFloat> { floatMapper.binding(.micAudioLevel) }
-    public var fps: Binding<CGFloat> { floatMapper.binding(.fps) }
-    public var shoulderRotationWeight: Binding<CGFloat> { floatMapper.binding(.shoulderRotationWeight) }
-    public var swivelOffset: Binding<CGFloat> { floatMapper.binding(.swivelOffset) }
+    public private(set) lazy var camera = floatMapper.set(.camera)
+    public private(set) lazy var light = floatMapper.set(.light)
+    public private(set) lazy var postExposure = floatMapper.set(.postExposure)
+    public private(set) lazy var whiteBalanceTemperature = floatMapper.set(.whiteBalanceTemperature)
+    public private(set) lazy var whiteBalanceTint = floatMapper.set(.whiteBalanceTint)
+    public private(set) lazy var saturation = floatMapper.set(.saturation)
+    public private(set) lazy var hueShift = floatMapper.set(.hueShift)
+    public private(set) lazy var contrast = floatMapper.set(.contrast)
+    public private(set) lazy var bloomIntensity = floatMapper.set(.bloomIntensity)
+    public private(set) lazy var bloomThreshold = floatMapper.set(.bloomThreshold)
+    public private(set) lazy var bloomSoftKnee = floatMapper.set(.bloomSoftKnee)
+    public private(set) lazy var bloomDiffusion = floatMapper.set(.bloomDiffusion)
+    public private(set) lazy var bloomAnamorphicRatio = floatMapper.set(.bloomAnamorphicRatio)
+    public private(set) lazy var bloomLensFlareIntensity = floatMapper.set(.bloomLensFlareIntensity)
+    public private(set) lazy var vignetteIntensity = floatMapper.set(.vignetteIntensity)
+    public private(set) lazy var vignetteSmoothness = floatMapper.set(.vignetteSmoothness)
+    public private(set) lazy var vignetteRoundness = floatMapper.set(.vignetteRoundness)
+    public private(set) lazy var lipSyncMicIntensity = floatMapper.set(.lipSyncMicIntensity)
+    public private(set) lazy var micAudioLevel = floatMapper.set(.micAudioLevel)
+    public private(set) lazy var fps = floatMapper.set(.fps)
+    public private(set) lazy var shoulderRotationWeight = floatMapper.set(.shoulderRotationWeight)
+    public private(set) lazy var swivelOffset = floatMapper.set(.swivelOffset)
+    public private(set) lazy var trackingSmoothing = floatMapper.set(.trackingSmoothing)
 
     public enum BoolType: Int32 {
         case useAutoMode = 0
@@ -71,63 +73,49 @@ public final class UniBridge {
         case useAddToMacOSMenuBar = 4
         case useVSync = 5
         case useNewTracking = 6
-        case useHandTracking = 7
-        case useBlinker = 8
-        case useFullTracking = 9
-        case lipSyncWebCam = 10
-        case hasPerfectSyncBlendShape = 11
+        case useBlinker = 7
+        case useFullTracking = 8
+        case lipSyncWebCam = 9
+        case hasPerfectSyncBlendShape = 10
     }
     public let boolMapper = ValueBinding<Bool, BoolType>()
-    public var useAutoMode: Binding<Bool> { boolMapper.binding(.useAutoMode) }
-    public var useShadow: Binding<Bool> { boolMapper.binding(.useShadow) }
-    public var usePostEffect: Binding<Bool> { boolMapper.binding(.usePostEffect) }
-    public var useCombineMesh: Binding<Bool> { boolMapper.binding(.useCombineMesh) }
+    public private(set) lazy var useAutoMode = boolMapper.set(.useAutoMode)
+    public private(set) lazy var useShadow = boolMapper.set(.useShadow)
+    public private(set) lazy var usePostEffect = boolMapper.set(.usePostEffect)
+    public private(set) lazy var useCombineMesh = boolMapper.set(.useCombineMesh)
     public private(set) lazy var useAddToMacOSMenuBar = boolMapper.set(.useAddToMacOSMenuBar)
-    public var useVSync: Binding<Bool> { boolMapper.binding(.useVSync) }
-    public var useNewTracking: Binding<Bool> { boolMapper.binding(.useNewTracking) }
-    public private(set) lazy var useHandTracking = boolMapper.set(.useHandTracking)
+    public private(set) lazy var useVSync = boolMapper.set(.useVSync)
+    public private(set) lazy var useNewTracking = boolMapper.set(.useNewTracking)
     public private(set) lazy var useBlinker = boolMapper.set(.useBlinker)
     public private(set) lazy var useFullTracking = boolMapper.set(.useFullTracking)
-    public var lipSyncWebCam: Binding<Bool> { boolMapper.binding(.lipSyncWebCam) }
+    public private(set) lazy var lipSyncWebCam = boolMapper.set(.lipSyncWebCam)
     public var hasPerfectSyncBlendShape: Bool { boolMapper.get(.hasPerfectSyncBlendShape) }
 
     public enum StringType: Int32 {
         case message = 0
         case loadVRM = 1
         case loadModel = 2
-        case currentDisplayParameter = 3
-        case allDisplayParameterPresets = 4
-        case showEmojiStamp = 5
+        case showEmojiStamp = 3
     }
     public let stringMapper = ValueBinding<String, StringType>()
-    public var message: Binding<String> { stringMapper.binding(.message) }
+    public private(set) lazy var message = stringMapper.set(.message)
     public private(set) lazy var loadVRM = stringMapper.set(.loadVRM)
     public private(set) lazy var loadModel = stringMapper.set(.loadModel)
-    public var currentDisplayParameter: Binding<String> { stringMapper.binding(.currentDisplayParameter) }
-    public var allDisplayParameterPresets: String { stringMapper.get(.allDisplayParameterPresets) }
     public private(set) lazy var showEmojiStamp = stringMapper.set(.showEmojiStamp)
 
     public enum TriggerType: Int32 {
         case openVRoidHub = 0
         case resetCamera = 1
-        case applyDisplayParameter = 2
-        case saveDisplayParameter = 3
-        case addDisplayParameter = 4
-        case deleteDisplayParameter = 5
-        case deleteObject = 6
-        case resetAllObjects = 7
-        case editAvatar = 8
-        case pauseApp = 9
-        case resumeApp = 10
-        case quitApp = 11
+        case deleteObject = 2
+        case resetAllObjects = 3
+        case editAvatar = 4
+        case pauseApp = 5
+        case resumeApp = 6
+        case quitApp = 7
     }
     public let triggerMapper = ValueBinding<Void, TriggerType>()
     public private(set) lazy var openVRoidHub = triggerMapper.trigger(.openVRoidHub)
     public private(set) lazy var resetCamera = triggerMapper.trigger(.resetCamera)
-    public private(set) lazy var applyDisplayParameter = triggerMapper.trigger(.applyDisplayParameter)
-    public private(set) lazy var saveDisplayParameter = triggerMapper.trigger(.saveDisplayParameter)
-    public private(set) lazy var addDisplayParameter = triggerMapper.trigger(.addDisplayParameter)
-    public private(set) lazy var deleteDisplayParameter = triggerMapper.trigger(.deleteDisplayParameter)
     public private(set) lazy var deleteObject = triggerMapper.trigger(.deleteObject)
     public private(set) lazy var resetAllObjects = triggerMapper.trigger(.resetAllObjects)
     public private(set) lazy var editAvatar = triggerMapper.trigger(.editAvatar)
@@ -143,11 +131,11 @@ public final class UniBridge {
         case vignetteColor = 4
     }
     public let structMapper = ValueBinding<UnsafeMutableRawPointer, StructType>()
-    public var backgroundColor: Binding<Color> { structMapper.binding(.backgroundColor) }
-    public var environmentLightColor: Binding<Color> { structMapper.binding(.environmentLightColor) }
-    public var colorFilter: Binding<Color> { structMapper.binding(.colorFilter) }
-    public var bloomColor: Binding<Color> { structMapper.binding(.bloomColor) }
-    public var vignetteColor: Binding<Color> { structMapper.binding(.vignetteColor) }
+    public private(set) lazy var backgroundColor = structMapper.set(.backgroundColor, type: Color.self)
+    public private(set) lazy var environmentLightColor = structMapper.set(.environmentLightColor, type: Color.self)
+    public private(set) lazy var colorFilter = structMapper.set(.colorFilter, type: Color.self)
+    public private(set) lazy var bloomColor = structMapper.set(.bloomColor, type: Color.self)
+    public private(set) lazy var vignetteColor = structMapper.set(.vignetteColor, type: Color.self)
 
     public enum ArrayType: Int32 {
         case hands = 0
@@ -162,7 +150,6 @@ public final class UniBridge {
         case objectAvatarTransform = 9
         case addWind = 10
         case canvasSize = 11
-        case screenResolution = 12
         public var arraySize: Int {
             switch self {
             case .hands: return 12
@@ -177,7 +164,6 @@ public final class UniBridge {
             case .objectAvatarTransform: return 6
             case .addWind: return 4
             case .canvasSize: return 2
-            case .screenResolution: return 2
             }
         }
     }
@@ -194,6 +180,5 @@ public final class UniBridge {
     public private(set) lazy var objectAvatarTransform = arrayMapper.set(.objectAvatarTransform, type: [Float].self)
     public private(set) lazy var addWind = arrayMapper.set(.addWind, type: [Int32].self)
     public var canvasSize: [Float] { arrayMapper.get(.canvasSize, size: 2) }
-    public var screenResolution: Binding<[Int32]> { arrayMapper.binding(.screenResolution, size: 2) }
 
 }

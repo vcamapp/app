@@ -45,19 +45,35 @@ public final class Tracking {
     ]
 
     public let avatarCameraManager = AvatarCameraManager()
-    public let iFacialMocapReceiver = FacialMocapReceiver()
+    public let iFacialMocapReceiver: FacialMocapReceiver
     public let vcamMotionReceiver = VCamMotionReceiver()
 
-    private let vcamMotionTracking = VCamMotionTracking()
+    private let vcamMotionTracking: VCamMotionTracking
     @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
 
     public init() {
+        let smoothing = TrackingSmoothing(value: UserDefaults.standard.value(for: .mocapNetworkInterpolation))
+        iFacialMocapReceiver = FacialMocapReceiver(smoothing: smoothing)
+        vcamMotionTracking = VCamMotionTracking(smoothing: smoothing)
+
         UserDefaults.standard.publisher(for: \.vc_use_eye_tracking, options: [.initial, .new])
             .sink { [unowned self] in useEyeTracking = $0 }
             .store(in: &cancellables)
         UserDefaults.standard.publisher(for: \.vc_use_vowel_estimation, options: [.initial, .new])
             .sink { [unowned self] in useVowelEstimation = $0 }
             .store(in: &cancellables)
+        UserDefaults.standard.publisher(for: \.vc_mocap_network_interpolation, options: [.initial, .new])
+            .removeDuplicates()
+            .sink { [unowned self] value in
+                let smoothing = TrackingSmoothing(value: value)
+                vcamMotionTracking.updateSmoothing(smoothing)
+                iFacialMocapReceiver.updateSmoothing(smoothing)
+            }
+            .store(in: &cancellables)
+    }
+
+    public func syncPerfectSyncAvailability() {
+        stopFaceResamplers()
     }
 
     public func configure() {
@@ -128,6 +144,9 @@ public final class Tracking {
     }
 
     public func setFaceTrackingMethod(_ method: TrackingMethod.Face) {
+        if faceTrackingMethod != method {
+            stopFaceResamplers()
+        }
         faceTrackingMethod = method
         UserDefaults.standard.set(method, for: .trackingMethodFace)
 
@@ -139,7 +158,7 @@ public final class Tracking {
         case .default:
             usage.insert(.faceTracking)
 
-            if UniBridge.shared.lipSyncWebCam.wrappedValue {
+            if UniState.shared.lipSyncWebCam {
                 usage.insert(.lipTracking)
             }
         }
@@ -152,6 +171,9 @@ public final class Tracking {
     }
 
     public func setHandTrackingMethod(_ method: TrackingMethod.Hand) {
+        if handTrackingMethod != method {
+            vcamMotionTracking.stopHandResampling()
+        }
         handTrackingMethod = method
 #if FEATURE_3
         UserDefaults.standard.set(method, for: .trackingMethodHand)
@@ -165,6 +187,9 @@ public final class Tracking {
     }
 
     public func setFingerTrackingMethod(_ method: TrackingMethod.Finger) {
+        if fingerTrackingMethod != method {
+            vcamMotionTracking.stopFingerResampling()
+        }
         fingerTrackingMethod = method
 #if FEATURE_3
         UserDefaults.standard.set(method, for: .trackingMethodFinger)
@@ -179,7 +204,7 @@ public final class Tracking {
 
     public func setLipSyncType(_ type: LipSyncType) {
         let useCamera = type == .camera
-        UniBridge.shared.lipSyncWebCam.wrappedValue = useCamera
+        UniState.shared.lipSyncWebCam = useCamera
         if useCamera {
             AvatarAudioManager.shared.stop(usage: .lipSync)
             Tracking.shared.avatarCameraManager.setWebCamUsage(Tracking.shared.avatarCameraManager.webCameraUsage.union(.lipTracking))
@@ -203,9 +228,15 @@ public final class Tracking {
     public func startVCamMotionReceiver() async throws {
         try await vcamMotionReceiver.start(with: vcamMotionTracking)
     }
+
+    private func stopFaceResamplers() {
+        vcamMotionTracking.stopFaceResampling()
+        iFacialMocapReceiver.stopResamplers()
+    }
 }
 
 private extension UserDefaults {
     @objc dynamic var vc_use_eye_tracking: Bool { value(for: .useEyeTracking) }
     @objc dynamic var vc_use_vowel_estimation: Bool { value(for: .useVowelEstimation) }
+    @objc dynamic var vc_mocap_network_interpolation: Double { value(for: .mocapNetworkInterpolation) }
 }

@@ -48,6 +48,14 @@ public final class SceneManager {
     private init() {
         let newSceneId = Int32.random(in: 0..<Int32.max)
 
+        NotificationCenter.default.addObserver(
+            forName: .aspectRatioDidChange,
+            object: nil,
+            queue: .main
+        ) { _ in
+            SceneManager.shared.changeAspectRatio()
+        }
+
         do {
             var metadata = try VCamSceneMetadata.load()
             metadata = try VCamSceneDataStore.clean(metadata: metadata)

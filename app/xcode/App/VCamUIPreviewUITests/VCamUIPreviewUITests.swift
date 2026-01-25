@@ -12,7 +12,7 @@ final class VCamUIPreviewUITests: XCTestCase {
 
     override func setUpWithError() throws {
         continueAfterFailure = false
-        LocalizationEnvironment.currentLocale = { "en_US" }
+        LocalizationEnvironment.currentLocaleIdentifier = { "en_US" }
     }
 
     override func tearDownWithError() throws {

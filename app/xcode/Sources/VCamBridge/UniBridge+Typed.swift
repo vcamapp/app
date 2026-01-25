@@ -18,6 +18,8 @@ public struct UniBridgeMethodId: RawRepresentable {
     static let deleteTrackingMapping = Self.init(rawValue: 13)
     static let clearTrackingMapping = Self.init(rawValue: 14)
 
+    static let setScreenResolution = Self.init(rawValue: 20)
+
     public let rawValue: Int32
 
     public init(rawValue: Int32) {
@@ -46,6 +48,16 @@ public struct TrackingMappingPayload {
     public var inputRangeMax: Float
     public var outputRangeMin: Float
     public var outputRangeMax: Float
+}
+
+public struct ScreenResolutionPayload: Equatable {
+    public var width: Int32
+    public var height: Int32
+
+    public init(width: Int32, height: Int32) {
+        self.width = width
+        self.height = height
+    }
 }
 
 // MARK: - Bridge Callback
@@ -145,5 +157,12 @@ public extension UniBridge {
     static func clearTrackingMapping(mode: TrackingMode) {
         let modePtr = UnsafeMutableRawPointer(bitPattern: Int(mode.rawValue))
         methodCallback(.clearTrackingMapping, modePtr, nil)
+    }
+
+    static func setScreenResolution(width: Int32, height: Int32) {
+        var payload = ScreenResolutionPayload(width: width, height: height)
+        withUnsafeMutablePointer(to: &payload) { payloadPtr in
+            methodCallback(.setScreenResolution, payloadPtr, nil)
+        }
     }
 }

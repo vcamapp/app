@@ -16,12 +16,13 @@ import VCamEntity
 @_cdecl("uniOnVCamSystemStart")
 public func uniOnVCamSystemStart() {
     Logger.log("uniOnVCamSystemStart")
+    UniState.shared.initializeToUnity()
+    VCamSystem.initializeToUnity?()
     UniState.shared.initializeFromUnity()
     VCamSystem.shared.isUniVCamSystemEnabled = true
     VCamSystem.shared.startSystem()
     Tracking.shared.configure()
     VCamUIState.shared.interactable = true
-    UniReload.Reloader.shared.reload()
 }
 
 @_cdecl("uniOnVCamSystemDestroy")
@@ -30,13 +31,13 @@ public func uniOnVCamSystemDestroy() {
     VCamSystem.shared.isUniVCamSystemEnabled = false
     VCamUIState.shared.interactable = false
     Tracking.shared.stop()
-    UniReload.Reloader.shared.reload()
 }
 
 @_cdecl("uniOnApplyCaptureSystem")
 public func uniOnApplyCaptureSystem() {
     UniBridge.shared.useFullTracking(UserDefaults.standard.value(for: .integrationMocopi))
     Tracking.shared.updateLipSyncIfNeeded()
+    Tracking.shared.syncPerfectSyncAvailability()
 }
 
 @_cdecl("uniUseAutoConvertVRM1")
@@ -54,13 +55,6 @@ public func uniDisposeWindow() {
 public func uniHideWindow() {
     Logger.log("")
     VCamSystem.shared.windowManager.hide()
-}
-
-@_cdecl("uniReloadUI")
-public func uniReloadUI() {
-    guard VCamSystem.shared.windowManager.isConfigured,
-          VCamSystem.shared.isUniVCamSystemEnabled else { return }
-    UniReload.Reloader.shared.reload()
 }
 
 @_cdecl("uniUpdateRenderFrame")

@@ -9,6 +9,7 @@ import SwiftUI
 import VCamTracking
 import VCamBridge
 import VCamLocalization
+import VCamData
 import Network
 
 public struct VCamSettingsIntegrationView: View {
@@ -16,6 +17,7 @@ public struct VCamSettingsIntegrationView: View {
 
     @AppStorage(key: .integrationFacialMocapIp) private var integrationFacialMocapIp
     @AppStorage(key: .integrationVCamMocap) private var integrationVCamMocap
+    @AppStorage(key: .mocapNetworkInterpolation) private var mocapNetworkInterpolation
 
     @Bindable private var facialMocapReceiver = Tracking.shared.iFacialMocapReceiver
 
@@ -68,6 +70,14 @@ public struct VCamSettingsIntegrationView: View {
                         Text(facialMocapConnectTitle, bundle: .localize)
                     }
                 }
+            }
+            Section {
+                ValueEditField(L10n.mocapNetworkInterpolation.key, value: $mocapNetworkInterpolation.map(), type: .slider(0...1.0)) {
+                    Text($0, format: .percent.precision(.fractionLength(2)))
+                }
+                Text(L10n.mocapNetworkInterpolationHelp.key, bundle: .localize)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
             }
 
 #if FEATURE_3

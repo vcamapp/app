@@ -17,10 +17,10 @@ public final class AppKitMinMaxSlider: NSView, NSTextFieldDelegate {
 
     var minValue: Float = 0
     var maxValue: Float = 1
-    let min: Float
-    let max: Float
+    private(set) var min: Float
+    private(set) var max: Float
     private let step: Float
-    private let onEditingEnded: ((Float, Float) -> Void)?
+    private var onEditingEnded: ((Float, Float) -> Void)?
 
     private var isMinKnobDragging = false
     private var isMaxKnobDragging = false
@@ -32,21 +32,24 @@ public final class AppKitMinMaxSlider: NSView, NSTextFieldDelegate {
 
     private var currentMinTextFieldValue: Float?
     private var currentMaxTextFieldValue: Float?
+    private var lastLayoutWidth: CGFloat = 0
+    private var lastLayoutMinValue: Float = .nan
+    private var lastLayoutMaxValue: Float = .nan
+    private var lastLayoutMinBound: Float = .nan
+    private var lastLayoutMaxBound: Float = .nan
 
     init(
         minValue: Float,
         maxValue: Float,
         min: Float = 0,
         max: Float = 1,
-        step: Float = 0.01,
-        onEditingEnded: ((Float, Float) -> Void)? = nil
+        step: Float = 0.01
     ) {
         self.minValue = minValue
         self.maxValue = maxValue
         self.min = min
         self.max = max
         self.step = step
-        self.onEditingEnded = onEditingEnded
 
         trackView = NSView()
         trackView.wantsLayer = true
@@ -99,6 +102,8 @@ public final class AppKitMinMaxSlider: NSView, NSTextFieldDelegate {
         activeTrackWidthConstraint = activeTrackView.widthAnchor.constraint(equalToConstant: 0)
 
         super.init(frame: .zero)
+        setContentHuggingPriority(.defaultLow, for: .horizontal)
+        setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         setupLayout()
         setupGestures()
 
@@ -259,32 +264,70 @@ public final class AppKitMinMaxSlider: NSView, NSTextFieldDelegate {
     }
 
     private func updateLayout() {
-        guard bounds.width > 0 else { return }
-        let width = Float(bounds.width)
+        let width = bounds.width
+        guard width > 0 else { return }
         let range = max - min
-        let minOffset = ((minValue - min) / range) * width
-        let maxOffset = ((maxValue - min) / range) * width
+        guard range > 0 else { return }
+
+        if width == lastLayoutWidth,
+           minValue == lastLayoutMinValue,
+           maxValue == lastLayoutMaxValue,
+           min == lastLayoutMinBound,
+           max == lastLayoutMaxBound {
+            return
+        }
+
+        let widthValue = Float(width)
+        let minOffset = ((minValue - min) / range) * widthValue
+        let maxOffset = ((maxValue - min) / range) * widthValue
         let activeWidth = maxOffset - minOffset
 
-        minTextField.stringValue = String(format: "%.2f", minValue)
-        maxTextField.stringValue = String(format: "%.2f", maxValue)
+        if minValue != lastLayoutMinValue {
+            minTextField.stringValue = String(format: "%.2f", minValue)
+        }
+        if maxValue != lastLayoutMaxValue {
+            maxTextField.stringValue = String(format: "%.2f", maxValue)
+        }
 
         let knobHalfWidth: CGFloat = 2
         minKnobCenterXConstraint.constant = CGFloat(minOffset) + knobHalfWidth
         maxKnobCenterXConstraint.constant = CGFloat(maxOffset) - knobHalfWidth
         activeTrackLeadingConstraint.constant = CGFloat(minOffset) + knobHalfWidth
         activeTrackWidthConstraint.constant = CGFloat(activeWidth) - knobHalfWidth * 2
+
+        lastLayoutWidth = width
+        lastLayoutMinValue = minValue
+        lastLayoutMaxValue = maxValue
+        lastLayoutMinBound = min
+        lastLayoutMaxBound = max
+    }
+
+    func update(minValue: Float, maxValue: Float, min: Float? = nil, max: Float? = nil) {
+        if let min {
+            self.min = min
+        }
+        if let max {
+            self.max = max
+        }
+
+        let clampedMin = Swift.max(self.min, Swift.min(minValue, maxValue))
+        let clampedMax = Swift.min(self.max, Swift.max(maxValue, clampedMin))
+        self.minValue = clampedMin
+        self.maxValue = clampedMax
+        updateLayout()
     }
 
     func update(minValue: Float, maxValue: Float) {
-        self.minValue = minValue
-        self.maxValue = maxValue
-        updateLayout()
+        update(minValue: minValue, maxValue: maxValue, min: nil, max: nil)
     }
 
     public override func layout() {
         super.layout()
         updateLayout()
+    }
+
+    func setOnEditingEnded(_ handler: @escaping (Float, Float) -> Void) {
+        onEditingEnded = handler
     }
 }
 
@@ -301,14 +344,36 @@ extension AppKitMinMaxSlider {
     public func controlTextDidEndEditing(_ obj: Notification) {
         guard let textField = obj.object as? NSTextField else { return }
 
-        if textField == minTextField, let newValue = Float(textField.stringValue) {
-            let clampedValue = Swift.max(min, Swift.min(newValue, maxValue))
+        if textField == minTextField {
+            guard let newValue = parseValue(textField.stringValue) else {
+                if let fallback = currentMinTextFieldValue {
+                    minValue = fallback
+                    minTextField.stringValue = formatValue(minValue)
+                    updateLayout()
+                }
+                currentMinTextFieldValue = nil
+                currentMaxTextFieldValue = nil
+                return
+            }
+            let clampedValue = Swift.min(Swift.max(newValue, min), maxValue)
             minValue = clampedValue
+            minTextField.stringValue = formatValue(minValue)
             updateLayout()
             onEditingEnded?(minValue, maxValue)
-        } else if textField == maxTextField, let newValue = Float(textField.stringValue) {
+        } else if textField == maxTextField {
+            guard let newValue = parseValue(textField.stringValue) else {
+                if let fallback = currentMaxTextFieldValue {
+                    maxValue = fallback
+                    maxTextField.stringValue = formatValue(maxValue)
+                    updateLayout()
+                }
+                currentMinTextFieldValue = nil
+                currentMaxTextFieldValue = nil
+                return
+            }
             let clampedValue = Swift.max(minValue, Swift.min(newValue, max))
             maxValue = clampedValue
+            maxTextField.stringValue = formatValue(maxValue)
             updateLayout()
             onEditingEnded?(minValue, maxValue)
         }
@@ -318,20 +383,35 @@ extension AppKitMinMaxSlider {
     }
 
     public func controlTextDidChange(_ obj: Notification) {
-        guard let textField = obj.object as? NSTextField else { return }
+    }
 
-        if textField == minTextField, let newValue = Float(textField.stringValue) {
-            let clampedValue = Swift.max(min, Swift.min(newValue, maxValue))
-            if clampedValue != minValue {
-                minValue = clampedValue
-                updateLayout()
-            }
-        } else if textField == maxTextField, let newValue = Float(textField.stringValue) {
-            let clampedValue = Swift.max(minValue, Swift.min(newValue, max))
-            if clampedValue != maxValue {
-                maxValue = clampedValue
-                updateLayout()
+    private func parseValue(_ text: String) -> Float? {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+        let characters = Array(trimmed)
+        var lastSeparatorIndex: Int?
+        for (index, character) in characters.enumerated() {
+            if character == "." || character == "," {
+                lastSeparatorIndex = index
             }
         }
+
+        var normalized = ""
+        normalized.reserveCapacity(characters.count)
+        for (index, character) in characters.enumerated() {
+            if character.isWholeNumber || character == "-" || character == "+" {
+                normalized.append(character)
+                continue
+            }
+            if (character == "." || character == ",") && index == lastSeparatorIndex {
+                normalized.append(".")
+            }
+        }
+
+        return Float(normalized)
+    }
+
+    private func formatValue(_ value: Float) -> String {
+        String(format: "%.2f", value)
     }
 }

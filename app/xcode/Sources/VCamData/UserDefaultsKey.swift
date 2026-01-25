@@ -42,7 +42,27 @@ public extension UserDefaults.Key {
     static var integrationVCamMocap: Key<Bool> { .init("vc_intg_vcammocap", default: false) }
     static var integrationFacialMocapIp: Key<String> { .init("vc_intg_facialmocap_ip", default: "192.168.0.1") }
     static var integrationMocopi: Key<Bool> { .init("vc_intg_mocopi", default: false) }
+    static var mocapNetworkInterpolation: Key<Double> { .init("vc_mocap_network_interpolation", default: 0.3) }
 
     static var macOSMicModeEnabled: Key<Bool> { .init("vc_macos_micmode_enabled", default: false) }
     static var useAddToMacOSMenuBar: Key<Bool> { .init("vc_use_add_to_macos_menubar", default: true) }
+
+    static var renderingQuality: Key<Int> { .init("vc_rendering_quality", default: 5) }
+    static var lipSyncType: Key<Int> { .init("vc_lipsync_type", default: 1) }
+    static var vSyncCount: Key<Int> { .init("vc_vsync_count", default: 0) }
+    static var lipSyncMicIntensity: Key<Double> { .init("vc_lipsync_mic_intensity", default: 1.0) }
+    static var fps: Key<Double> { .init("vc_fps", default: 60.0) }
+    static var message: Key<String> { .init("vc_message", default: "") }
+    static var backgroundColor: Key<String> { .init("vc_bg_color", default: "C6E7FFFF") }
+    static var screenResolutionWidth: Key<Int> { .init("vc_screenresolution_width", default: 1920) }
+    static var screenResolutionHeight: Key<Int> { .init("vc_screenresolution_height", default: 1080) }
+#if FEATURE_3
+    static var displayParameterId: Key<String?> { .init("vc_display_parameter_id", default: nil) }
+    static var useAutoMode: Key<Bool> { .init("vc_use_automode", default: false) }
+    static var usePostEffect: Key<Bool> { .init("vc_use_posteffect", default: false) }
+    static var useCombineMesh: Key<Bool> { .init("vc_use_combine_mesh", default: true) }
+    static var shoulderRotationWeight: Key<Double> { .init("vc_shoulder_rotation_weight", default: 1.0) }
+    static var swivelOffset: Key<Double> { .init("vc_swivel_offset", default: 0.0) }
+    static var trackingSmoothing: Key<Double> { .init("vc_tracking_smoothing", default: 0.1) }
+#endif
 }

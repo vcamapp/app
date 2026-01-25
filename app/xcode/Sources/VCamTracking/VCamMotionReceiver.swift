@@ -13,6 +13,7 @@ public final class VCamMotionReceiver {
     private static let queue = DispatchQueue(label: "com.github.tattn.vcam.vcammotionreceiver")
     private var listener: NWListener?
     private var connection: NWConnection?
+    private weak var tracking: VCamMotionTracking?
 
     @MainActor @Published public private(set) var connectionStatus = ConnectionStatus.disconnected
 
@@ -33,6 +34,7 @@ public final class VCamMotionReceiver {
         Logger.log("\(listener == nil)")
         guard listener == nil else { return }
 
+        self.tracking = tracking
         connectionStatus = .connecting
         let parameters = NWParameters.udp
         parameters.allowLocalEndpointReuse = true
@@ -85,13 +87,15 @@ public final class VCamMotionReceiver {
 
     @MainActor
     public func stop() {
-        guard let listener = listener else { return }
-        listener.cancel()
-        self.listener = nil
+        if let listener = listener {
+            listener.cancel()
+            self.listener = nil
+        }
 
         connection?.cancel()
         connection = nil
         connectionStatus = .disconnected
+        tracking?.stop()
     }
 }
 

@@ -10,9 +10,14 @@ import AppKit
 import VCamBridge
 import VCamLocalization
 
+private enum MappingTableSection {
+    case main
+}
+
 struct VCamSettingMappingTableView: NSViewRepresentable {
     var store: MappingDataStore
     let hasBlendShapeNames: Bool
+    let mappingsRevision: Int
 
     func makeNSView(context: Context) -> NSScrollView {
         let scrollView = NSScrollView()
@@ -21,7 +26,7 @@ struct VCamSettingMappingTableView: NSViewRepresentable {
         scrollView.autohidesScrollers = true
         scrollView.borderType = .noBorder
 
-        let tableView = NSTableView()
+        let tableView = MappingTableView()
         tableView.style = .inset
         tableView.usesAlternatingRowBackgroundColors = true
         tableView.allowsMultipleSelection = true
@@ -36,7 +41,7 @@ struct VCamSettingMappingTableView: NSViewRepresentable {
         tableView.addTableColumn(enabledColumn)
 
         let inputColumn = NSTableColumn(identifier: .input)
-        inputColumn.title = "Input"
+        inputColumn.title = L10n.trackingMappingInput.text
         inputColumn.width = 280
         inputColumn.minWidth = 200
         tableView.addTableColumn(inputColumn)
@@ -49,32 +54,42 @@ struct VCamSettingMappingTableView: NSViewRepresentable {
         tableView.addTableColumn(arrowColumn)
 
         let outputColumn = NSTableColumn(identifier: .output)
-        outputColumn.title = "Output"
+        outputColumn.title = L10n.trackingMappingOutput.text
         outputColumn.width = 280
         outputColumn.minWidth = 200
         tableView.addTableColumn(outputColumn)
 
         tableView.columnAutoresizingStyle = .uniformColumnAutoresizingStyle
         tableView.delegate = context.coordinator
-        tableView.dataSource = context.coordinator
 
         let menu = NSMenu()
-        menu.addItem(withTitle: L10n.resetToDefault.text, action: #selector(Coordinator.resetToDefault(_:)), keyEquivalent: "")
+        menu.autoenablesItems = true
+
+        let editBoundsItem = NSMenuItem(title: L10n.editOutputBounds.text, action: #selector(Coordinator.editOutputBounds(_:)), keyEquivalent: "")
+        editBoundsItem.target = context.coordinator
+        menu.addItem(editBoundsItem)
+
         menu.addItem(.separator())
+
+        let resetItem = NSMenuItem(title: L10n.resetToDefault.text, action: #selector(Coordinator.resetToDefault(_:)), keyEquivalent: "")
+        resetItem.target = context.coordinator
+        menu.addItem(resetItem)
+
+        menu.addItem(.separator())
+
         let deleteItem = NSMenuItem(title: L10n.delete.text, action: #selector(Coordinator.deleteSelected(_:)), keyEquivalent: "")
+        deleteItem.target = context.coordinator
         menu.addItem(deleteItem)
         tableView.menu = menu
 
-        context.coordinator.tableView = tableView
+        context.coordinator.configureTableView(tableView)
 
         scrollView.documentView = tableView
         return scrollView
     }
 
     func updateNSView(_ scrollView: NSScrollView, context: Context) {
-        context.coordinator.store = store
-        context.coordinator.hasBlendShapeNames = hasBlendShapeNames
-        context.coordinator.tableView?.reloadData()
+        context.coordinator.update(store: store, hasBlendShapeNames: hasBlendShapeNames)
     }
 
     func makeCoordinator() -> Coordinator {
@@ -82,140 +97,350 @@ struct VCamSettingMappingTableView: NSViewRepresentable {
     }
 
     @MainActor
-    final class Coordinator: NSObject, NSTableViewDelegate, NSTableViewDataSource {
+    final class Coordinator: NSObject, NSTableViewDelegate, NSUserInterfaceValidations {
         var store: MappingDataStore
         var hasBlendShapeNames: Bool
         weak var tableView: NSTableView?
+
+        private var dataSource: NSTableViewDiffableDataSource<MappingTableSection, UUID>?
+        private var itemIndexByID: [UUID: Int] = [:]
+        private var lastItemIDs: [UUID] = []
+        private var lastInputKeyIDs: [String] = []
+        private var lastOutputKeyIDs: [String] = []
+        private var lastHasBlendShapeNames = false
+        private var lastMappingsRevision = 0
+        private var inputKeyTitles: [String] = []
+        private var outputKeyTitles: [String] = []
 
         init(store: MappingDataStore, hasBlendShapeNames: Bool) {
             self.store = store
             self.hasBlendShapeNames = hasBlendShapeNames
         }
 
-        func numberOfRows(in tableView: NSTableView) -> Int {
-            store.mappings.count
+        func configureTableView(_ tableView: NSTableView) {
+            self.tableView = tableView
+            let dataSource = NSTableViewDiffableDataSource<MappingTableSection, UUID>(tableView: tableView) { [weak self] tableView, tableColumn, row, itemID in
+                guard let self else { return NSView() }
+                let index = self.itemIndexByID[itemID] ?? row
+                guard index >= 0, index < self.store.mappings.count else { return NSView() }
+                let entry = self.store.mappings[index]
+                return self.makeCell(tableView: tableView, columnID: tableColumn.identifier, entry: entry, row: index) ?? NSView()
+            }
+            self.dataSource = dataSource
+            tableView.dataSource = dataSource
+            applySnapshot()
         }
 
-        func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
-            guard let columnID = tableColumn?.identifier else { return nil }
-            let entry = store.mappings[row]
+        func update(store: MappingDataStore, hasBlendShapeNames: Bool) {
+            self.store = store
+            self.hasBlendShapeNames = hasBlendShapeNames
+            applySnapshot()
+        }
 
+        private func applySnapshot() {
+            guard let tableView, let dataSource else { return }
+
+            let itemIDs = store.mappings.map(\.id)
+            itemIndexByID = Dictionary(uniqueKeysWithValues: itemIDs.enumerated().map { ($0.element, $0.offset) })
+
+            let inputKeyIDs = store.inputKeys.map(\.key)
+            let outputKeyIDs = store.outputKeys.map(\.key)
+
+            let inputKeysChanged = inputKeyIDs != lastInputKeyIDs
+            let outputKeysChanged = outputKeyIDs != lastOutputKeyIDs
+            let itemIDsChanged = itemIDs != lastItemIDs
+            let hasBlendShapeChanged = hasBlendShapeNames != lastHasBlendShapeNames
+            let revisionChanged = store.mappingsRevision != lastMappingsRevision
+            let needsInitialSnapshot = dataSource.snapshot().sectionIdentifiers.isEmpty
+
+            if inputKeysChanged {
+                inputKeyTitles = store.inputKeys.map { key in
+                    key.isVCamKey ? L10n.key("trackingInput_\(key.key)").text : key.key
+                }
+            }
+
+            if outputKeysChanged {
+                outputKeyTitles = store.outputKeys.map { key in
+                    key.isVCamKey ? L10n.key("trackingInput_\(key.key)").text : key.key
+                }
+            }
+
+            if itemIDsChanged || needsInitialSnapshot {
+                var snapshot = NSDiffableDataSourceSnapshot<MappingTableSection, UUID>()
+                snapshot.appendSections([.main])
+                snapshot.appendItems(itemIDs, toSection: .main)
+                dataSource.apply(snapshot, animatingDifferences: false)
+            }
+
+            if hasBlendShapeChanged {
+                tableView.reloadData()
+            } else if inputKeysChanged || outputKeysChanged || (revisionChanged && !itemIDsChanged) {
+                reloadVisibleRows()
+            }
+
+            lastItemIDs = itemIDs
+            lastInputKeyIDs = inputKeyIDs
+            lastOutputKeyIDs = outputKeyIDs
+            lastHasBlendShapeNames = hasBlendShapeNames
+            lastMappingsRevision = store.mappingsRevision
+        }
+
+        private func reloadVisibleRows() {
+            guard let tableView else { return }
+            let visibleRange = tableView.rows(in: tableView.visibleRect)
+            guard visibleRange.length > 0 else { return }
+            let start = visibleRange.location
+            let end = visibleRange.location + visibleRange.length
+            let rows = IndexSet(integersIn: start..<end)
+            let columns = IndexSet(integersIn: 0..<tableView.tableColumns.count)
+            tableView.reloadData(forRowIndexes: rows, columnIndexes: columns)
+        }
+
+        private func reloadRow(_ row: Int) {
+            guard let tableView else { return }
+            guard row >= 0, row < tableView.numberOfRows else { return }
+            let columns = IndexSet(integersIn: 0..<tableView.tableColumns.count)
+            tableView.reloadData(forRowIndexes: IndexSet(integer: row), columnIndexes: columns)
+        }
+
+        private func makeCell(tableView: NSTableView, columnID: NSUserInterfaceItemIdentifier, entry: TrackingMappingEntry, row: Int) -> NSView? {
             switch columnID {
             case .enabled:
-                return makeCheckbox(isEnabled: entry.isEnabled, row: row)
+                let cell = makeCheckboxCell(in: tableView)
+                cell.configure(isEnabled: entry.isEnabled, row: row) { [weak self] row, state in
+                    self?.toggleEnabled(row: row, state: state)
+                }
+                return cell
             case .input:
-                return makeInputCell(entry: entry, row: row, isEnabled: entry.isEnabled)
+                let cell = makeInputCell(in: tableView)
+                cell.configure(
+                    entry: entry,
+                    row: row,
+                    isEnabled: entry.isEnabled,
+                    inputKeys: store.inputKeys,
+                    inputKeyTitles: inputKeyTitles,
+                    onInputKeyChanged: { [weak self] row, newKey in
+                        self?.inputKeyChanged(row: row, key: newKey)
+                    },
+                    onRangeChanged: { [weak self] row, min, max in
+                        self?.updateInputRange(row: row, min: min, max: max)
+                    }
+                )
+                return cell
             case .arrow:
-                return makeArrowCell(isEnabled: entry.isEnabled)
+                let cell = makeArrowCell(in: tableView)
+                cell.configure(isEnabled: entry.isEnabled)
+                return cell
             case .output:
-                return makeOutputCell(entry: entry, row: row, isEnabled: entry.isEnabled)
+                let cell = makeOutputCell(in: tableView)
+                cell.configure(
+                    entry: entry,
+                    row: row,
+                    isEnabled: entry.isEnabled,
+                    outputKeys: store.outputKeys,
+                    outputKeyTitles: outputKeyTitles,
+                    onOutputKeyChanged: { [weak self] row, newKey in
+                        self?.outputKeyChanged(row: row, key: newKey)
+                    },
+                    onOutputTextChanged: { [weak self] row, newText in
+                        self?.outputTextChanged(row: row, text: newText)
+                    },
+                    onRangeChanged: { [weak self] row, min, max in
+                        self?.updateOutputRange(row: row, min: min, max: max)
+                    }
+                )
+                return cell
             default:
                 return nil
             }
         }
 
-        private func makeCheckbox(isEnabled: Bool, row: Int) -> NSView {
-            let cell = CheckboxCell(isEnabled: isEnabled, row: row, onToggle: { [weak self] in
-                self?.toggleEnabled(row: row, state: !isEnabled)
-            })
+        private func makeCheckboxCell(in tableView: NSTableView) -> CheckboxCell {
+            if let cell = tableView.makeView(withIdentifier: .checkboxCell, owner: self) as? CheckboxCell {
+                return cell
+            }
+            let cell = CheckboxCell()
+            cell.identifier = .checkboxCell
             return cell
         }
 
-        private func makeInputCell(entry: TrackingMappingEntry, row: Int, isEnabled: Bool) -> NSView {
-            let cell = InputCell(
-                entry: entry,
-                row: row,
-                isEnabled: isEnabled,
-                inputKeys: store.inputKeys,
-                onInputKeyChanged: { [weak self] newKey in
-                    self?.inputKeyChanged(row: row, key: newKey)
-                },
-                onRangeChanged: { [weak self] min, max in
-                    self?.updateInputRange(row: row, min: min, max: max)
-                }
-            )
+        private func makeInputCell(in tableView: NSTableView) -> InputCell {
+            if let cell = tableView.makeView(withIdentifier: .inputCell, owner: self) as? InputCell {
+                return cell
+            }
+            let cell = InputCell()
+            cell.identifier = .inputCell
             return cell
         }
 
-        private func makeArrowCell(isEnabled: Bool) -> NSView {
-            let cell = ArrowCell(isEnabled: isEnabled)
+        private func makeArrowCell(in tableView: NSTableView) -> ArrowCell {
+            if let cell = tableView.makeView(withIdentifier: .arrowCell, owner: self) as? ArrowCell {
+                return cell
+            }
+            let cell = ArrowCell()
+            cell.identifier = .arrowCell
             return cell
         }
 
-        private func makeOutputCell(entry: TrackingMappingEntry, row: Int, isEnabled: Bool) -> NSView {
-            let cell = OutputCell(
-                entry: entry,
-                row: row,
-                isEnabled: isEnabled,
-                hasBlendShapeNames: hasBlendShapeNames,
-                outputKeys: store.outputKeys,
-                onOutputKeyChanged: { [weak self] newKey in
-                    self?.outputKeyChanged(row: row, key: newKey)
-                },
-                onOutputTextChanged: { [weak self] newText in
-                    self?.outputTextChanged(row: row, text: newText)
-                },
-                onRangeChanged: { [weak self] min, max in
-                    self?.updateOutputRange(row: row, min: min, max: max)
-                },
-                onBoundsChanged: { [weak self] min, max in
-                    self?.updateOutputBounds(row: row, min: min, max: max)
-                }
-            )
+        private func makeOutputCell(in tableView: NSTableView) -> OutputCell {
+            let identifier: NSUserInterfaceItemIdentifier = hasBlendShapeNames ? .outputPopupCell : .outputTextCell
+            if let cell = tableView.makeView(withIdentifier: identifier, owner: self) as? OutputCell {
+                return cell
+            }
+            let cell = OutputCell(hasBlendShapeNames: hasBlendShapeNames)
+            cell.identifier = identifier
             return cell
         }
 
         private func toggleEnabled(row: Int, state: Bool) {
+            guard row >= 0, row < store.mappings.count else { return }
             store.mappings[row].isEnabled = state
             store.updateMapping(at: row)
-            tableView?.reloadData(forRowIndexes: IndexSet(integer: row), columnIndexes: IndexSet(0..<4))
+            reloadRow(row)
         }
 
         private func inputKeyChanged(row: Int, key: TrackingMappingEntry.InputKey) {
+            guard row >= 0, row < store.mappings.count else { return }
             store.mappings[row].input = key
             store.updateMapping(at: row)
-            tableView?.reloadData(forRowIndexes: IndexSet(integer: row), columnIndexes: IndexSet(integer: 1))
+            reloadRow(row)
         }
-        
+
         private func updateInputRange(row: Int, min: Float, max: Float) {
+            guard row >= 0, row < store.mappings.count else { return }
             store.mappings[row].input.rangeMin = min
             store.mappings[row].input.rangeMax = max
             store.updateMapping(at: row)
         }
-        
+
         private func outputKeyChanged(row: Int, key: TrackingMappingEntry.OutputKey) {
+            guard row >= 0, row < store.mappings.count else { return }
             store.mappings[row].outputKey = key
             store.updateMapping(at: row)
-            tableView?.reloadData(forRowIndexes: IndexSet(integer: row), columnIndexes: IndexSet(integer: 3))
+            reloadRow(row)
         }
 
         private func outputTextChanged(row: Int, text: String) {
+            guard row >= 0, row < store.mappings.count else { return }
             store.mappings[row].outputKey.key = text
             store.updateMapping(at: row)
         }
-        
+
         private func updateOutputRange(row: Int, min: Float, max: Float) {
+            guard row >= 0, row < store.mappings.count else { return }
             store.mappings[row].outputKey.rangeMin = min
             store.mappings[row].outputKey.rangeMax = max
             store.updateMapping(at: row)
         }
-        
+
         private func updateOutputBounds(row: Int, min: Float, max: Float) {
+            guard row >= 0, row < store.mappings.count else { return }
             store.mappings[row].outputKey.bounds = min...max
+            var clampedMin = Swift.max(store.mappings[row].outputKey.rangeMin, min)
+            var clampedMax = Swift.min(store.mappings[row].outputKey.rangeMax, max)
+            if clampedMin > clampedMax {
+                clampedMin = min
+                clampedMax = max
+            }
+            store.mappings[row].outputKey.rangeMin = clampedMin
+            store.mappings[row].outputKey.rangeMax = clampedMax
             store.updateMapping(at: row)
-            tableView?.reloadData(forRowIndexes: IndexSet(integer: row), columnIndexes: IndexSet(integer: 3))
+            reloadRow(row)
         }
 
         @objc func resetToDefault(_ sender: Any?) {
             guard let tableView else { return }
             store.resetToDefault(at: tableView.selectedRowIndexes)
-            tableView.reloadData()
+            let columns = IndexSet(integersIn: 0..<tableView.tableColumns.count)
+            tableView.reloadData(forRowIndexes: tableView.selectedRowIndexes, columnIndexes: columns)
         }
 
         @objc func deleteSelected(_ sender: Any?) {
             guard let tableView else { return }
             store.deleteMapping(at: tableView.selectedRowIndexes)
-            tableView.reloadData()
+            applySnapshot()
+        }
+
+        func validateUserInterfaceItem(_ item: NSValidatedUserInterfaceItem) -> Bool {
+            guard let tableView else { return false }
+            let selectedCount = tableView.selectedRowIndexes.count
+
+            switch item.action {
+            case #selector(editOutputBounds(_:)):
+                return selectedCount == 1
+            case #selector(resetToDefault(_:)), #selector(deleteSelected(_:)):
+                return selectedCount > 0
+            default:
+                return true
+            }
+        }
+
+        @objc func editOutputBounds(_ sender: Any?) {
+            guard let tableView else { return }
+            let selected = tableView.selectedRowIndexes
+            guard selected.count == 1, let row = selected.first else { return }
+            guard row >= 0, row < store.mappings.count else { return }
+
+            let entry = store.mappings[row]
+            let alert = NSAlert()
+            alert.messageText = L10n.editOutputBounds.text
+            alert.informativeText = L10n.editOutputBoundsMessage.text
+            alert.addButton(withTitle: L10n.ok.text)
+            alert.addButton(withTitle: L10n.cancel.text)
+
+            let minField = NSTextField(string: String(format: "%.2f", entry.outputKey.bounds.lowerBound))
+            minField.placeholderString = L10n.minimum.text
+            let maxField = NSTextField(string: String(format: "%.2f", entry.outputKey.bounds.upperBound))
+            maxField.placeholderString = L10n.maximum.text
+            minField.translatesAutoresizingMaskIntoConstraints = false
+            maxField.translatesAutoresizingMaskIntoConstraints = false
+
+            let stackView = NSStackView(views: [minField, maxField])
+            stackView.orientation = .vertical
+            stackView.spacing = 8
+            stackView.frame = NSRect(x: 0, y: 0, width: 200, height: 60)
+            alert.accessoryView = stackView
+
+            NSLayoutConstraint.activate([
+                minField.widthAnchor.constraint(equalToConstant: 160),
+                maxField.widthAnchor.constraint(equalToConstant: 160)
+            ])
+
+            let response = alert.runModal()
+            if response == .alertFirstButtonReturn {
+                guard let min = parseFloat(minField.stringValue),
+                      let max = parseFloat(maxField.stringValue),
+                      min < max else {
+                    return
+                }
+                updateOutputBounds(row: row, min: min, max: max)
+            }
+        }
+
+        private func parseFloat(_ text: String) -> Float? {
+            let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !trimmed.isEmpty else { return nil }
+            let characters = Array(trimmed)
+            var lastSeparatorIndex: Int?
+            for (index, character) in characters.enumerated() {
+                if character == "." || character == "," {
+                    lastSeparatorIndex = index
+                }
+            }
+
+            var normalized = ""
+            normalized.reserveCapacity(characters.count)
+            for (index, character) in characters.enumerated() {
+                if character.isWholeNumber || character == "-" || character == "+" {
+                    normalized.append(character)
+                    continue
+                }
+                if (character == "." || character == ",") && index == lastSeparatorIndex {
+                    normalized.append(".")
+                }
+            }
+
+            return Float(normalized)
         }
     }
 }
@@ -225,17 +450,35 @@ private extension NSUserInterfaceItemIdentifier {
     static let input = NSUserInterfaceItemIdentifier("input")
     static let arrow = NSUserInterfaceItemIdentifier("arrow")
     static let output = NSUserInterfaceItemIdentifier("output")
+    static let checkboxCell = NSUserInterfaceItemIdentifier("checkboxCell")
+    static let inputCell = NSUserInterfaceItemIdentifier("inputCell")
+    static let arrowCell = NSUserInterfaceItemIdentifier("arrowCell")
+    static let outputPopupCell = NSUserInterfaceItemIdentifier("outputPopupCell")
+    static let outputTextCell = NSUserInterfaceItemIdentifier("outputTextCell")
+}
+
+private final class MappingTableView: NSTableView {
+    override func menu(for event: NSEvent) -> NSMenu? {
+        let location = convert(event.locationInWindow, from: nil)
+        let row = row(at: location)
+        if row >= 0 {
+            if !selectedRowIndexes.contains(row) {
+                selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
+            }
+        } else {
+            deselectAll(nil)
+        }
+        return super.menu(for: event)
+    }
 }
 
 private final class CheckboxCell: NSView {
     private let checkbox: NSButton
-    private let onToggle: () -> Void
+    private var row: Int = 0
+    private var onToggle: ((Int, Bool) -> Void)?
 
-    init(isEnabled: Bool, row: Int, onToggle: @escaping () -> Void) {
-        self.onToggle = onToggle
+    init() {
         checkbox = NSButton(checkboxWithTitle: "", target: nil, action: nil)
-        checkbox.state = isEnabled ? .on : .off
-
         super.init(frame: .zero)
         checkbox.translatesAutoresizingMaskIntoConstraints = false
         addSubview(checkbox)
@@ -252,17 +495,19 @@ private final class CheckboxCell: NSView {
     }
 
     @objc private func checkboxToggled() {
-        onToggle()
+        onToggle?(row, checkbox.state == .on)
     }
 
-    func update(isEnabled: Bool) {
+    func configure(isEnabled: Bool, row: Int, onToggle: @escaping (Int, Bool) -> Void) {
+        self.row = row
+        self.onToggle = onToggle
         checkbox.state = isEnabled ? .on : .off
     }
 }
 private final class ArrowCell: NSView {
     private let imageView: NSImageView
 
-    init(isEnabled: Bool) {
+    init() {
         imageView = NSImageView()
         if let image = NSImage(systemSymbolName: "arrow.right", accessibilityDescription: nil) {
             imageView.image = image
@@ -278,14 +523,13 @@ private final class ArrowCell: NSView {
             imageView.widthAnchor.constraint(equalToConstant: 16),
             imageView.heightAnchor.constraint(equalToConstant: 16)
         ])
-        imageView.alphaValue = isEnabled ? 1.0 : 0.5
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func update(isEnabled: Bool) {
+    func configure(isEnabled: Bool) {
         imageView.alphaValue = isEnabled ? 1.0 : 0.5
     }
 }
@@ -295,22 +539,13 @@ private final class InputCell: NSView {
     private let popupButton: NSPopUpButton
     private let slider: AppKitMinMaxSlider
 
-    private let onInputKeyChanged: (TrackingMappingEntry.InputKey) -> Void
-    private let onRangeChanged: (Float, Float) -> Void
-    private let inputKeys: [TrackingMappingEntry.InputKey]
+    private var onInputKeyChanged: ((Int, TrackingMappingEntry.InputKey) -> Void)?
+    private var onRangeChanged: ((Int, Float, Float) -> Void)?
+    private var inputKeys: [TrackingMappingEntry.InputKey] = []
+    private var inputKeyIDs: [String] = []
+    private var row: Int = 0
 
-    init(
-        entry: TrackingMappingEntry,
-        row: Int,
-        isEnabled: Bool,
-        inputKeys: [TrackingMappingEntry.InputKey],
-        onInputKeyChanged: @escaping (TrackingMappingEntry.InputKey) -> Void,
-        onRangeChanged: @escaping (Float, Float) -> Void
-    ) {
-        self.onInputKeyChanged = onInputKeyChanged
-        self.onRangeChanged = onRangeChanged
-        self.inputKeys = inputKeys
-
+    init() {
         iconView = NSImageView()
         if let image = NSImage(systemSymbolName: "camera", accessibilityDescription: nil) {
             iconView.image = image
@@ -319,28 +554,23 @@ private final class InputCell: NSView {
 
         popupButton = NSPopUpButton(frame: .zero, pullsDown: false)
         slider = AppKitMinMaxSlider(
-            minValue: entry.input.rangeMin,
-            maxValue: entry.input.rangeMax,
-            min: entry.input.bounds.lowerBound,
-            max: entry.input.bounds.upperBound
-        ) { min, max in
-            onRangeChanged(min, max)
-        }
+            minValue: 0,
+            maxValue: 1,
+            min: -1,
+            max: 1
+        )
 
         super.init(frame: .zero)
 
         popupButton.target = self
         popupButton.action = #selector(popupButtonChanged)
 
-        popupButton.addItems(withTitles: inputKeys.map { key in
-            key.isVCamKey ? L10n.key("trackingInput_\(key.key)").text : key.key
-        })
-        if let index = inputKeys.firstIndex(where: { $0.key == entry.input.key }) {
-            popupButton.selectItem(at: index)
+        slider.setOnEditingEnded { [weak self] min, max in
+            guard let self else { return }
+            self.onRangeChanged?(self.row, min, max)
         }
 
         setupLayout()
-        alphaValue = isEnabled ? 1.0 : 0.5
     }
 
     required init?(coder: NSCoder) {
@@ -373,14 +603,46 @@ private final class InputCell: NSView {
     @objc private func popupButtonChanged() {
         let selectedIndex = popupButton.indexOfSelectedItem
         guard selectedIndex >= 0, selectedIndex < inputKeys.count else { return }
-        onInputKeyChanged(inputKeys[selectedIndex])
+        onInputKeyChanged?(row, inputKeys[selectedIndex])
     }
 
-    func update(entry: TrackingMappingEntry, isEnabled: Bool) {
+    func configure(
+        entry: TrackingMappingEntry,
+        row: Int,
+        isEnabled: Bool,
+        inputKeys: [TrackingMappingEntry.InputKey],
+        inputKeyTitles: [String],
+        onInputKeyChanged: @escaping (Int, TrackingMappingEntry.InputKey) -> Void,
+        onRangeChanged: @escaping (Int, Float, Float) -> Void
+    ) {
+        self.row = row
+        self.onInputKeyChanged = onInputKeyChanged
+        self.onRangeChanged = onRangeChanged
+
+        let newKeyIDs = inputKeys.map(\.key)
+        let titles = inputKeyTitles.count == inputKeys.count ? inputKeyTitles : inputKeys.map { key in
+            key.isVCamKey ? L10n.key("trackingInput_\(key.key)").text : key.key
+        }
+
+        if newKeyIDs != inputKeyIDs {
+            inputKeyIDs = newKeyIDs
+            self.inputKeys = inputKeys
+            popupButton.removeAllItems()
+            popupButton.addItems(withTitles: titles)
+        } else {
+            self.inputKeys = inputKeys
+        }
+
         if let index = inputKeys.firstIndex(where: { $0.key == entry.input.key }) {
             popupButton.selectItem(at: index)
         }
-        slider.update(minValue: entry.input.rangeMin, maxValue: entry.input.rangeMax)
+
+        slider.update(
+            minValue: entry.input.rangeMin,
+            maxValue: entry.input.rangeMax,
+            min: entry.input.bounds.lowerBound,
+            max: entry.input.bounds.upperBound
+        )
         alphaValue = isEnabled ? 1.0 : 0.5
     }
 }
@@ -391,29 +653,17 @@ private final class OutputCell: NSView {
     private let textField: NSTextField?
     private let slider: AppKitMinMaxSlider
 
-    private let onOutputKeyChanged: (TrackingMappingEntry.OutputKey) -> Void
-    private let onOutputTextChanged: (String) -> Void
-    private let onRangeChanged: (Float, Float) -> Void
-    private let onBoundsChanged: (Float, Float) -> Void
-    private let outputKeys: [TrackingMappingEntry.OutputKey]
+    private var onOutputKeyChanged: ((Int, TrackingMappingEntry.OutputKey) -> Void)?
+    private var onOutputTextChanged: ((Int, String) -> Void)?
+    private var onRangeChanged: ((Int, Float, Float) -> Void)?
+    private var outputKeys: [TrackingMappingEntry.OutputKey] = []
+    private var outputKeyIDs: [String] = []
     private let hasBlendShapeNames: Bool
+    private var row: Int = 0
 
     init(
-        entry: TrackingMappingEntry,
-        row: Int,
-        isEnabled: Bool,
-        hasBlendShapeNames: Bool,
-        outputKeys: [TrackingMappingEntry.OutputKey],
-        onOutputKeyChanged: @escaping (TrackingMappingEntry.OutputKey) -> Void,
-        onOutputTextChanged: @escaping (String) -> Void,
-        onRangeChanged: @escaping (Float, Float) -> Void,
-        onBoundsChanged: @escaping (Float, Float) -> Void
+        hasBlendShapeNames: Bool
     ) {
-        self.onOutputKeyChanged = onOutputKeyChanged
-        self.onOutputTextChanged = onOutputTextChanged
-        self.onRangeChanged = onRangeChanged
-        self.onBoundsChanged = onBoundsChanged
-        self.outputKeys = outputKeys
         self.hasBlendShapeNames = hasBlendShapeNames
 
         iconView = NSImageView()
@@ -428,30 +678,26 @@ private final class OutputCell: NSView {
         } else {
             popupButton = nil
             textField = NSTextField(frame: .zero)
-            textField?.stringValue = entry.outputKey.key
             textField?.bezelStyle = .roundedBezel
         }
 
         slider = AppKitMinMaxSlider(
-            minValue: entry.outputKey.rangeMin,
-            maxValue: entry.outputKey.rangeMax,
-            min: entry.outputKey.bounds.lowerBound,
-            max: entry.outputKey.bounds.upperBound
-        ) { min, max in
-            onRangeChanged(min, max)
-        }
+            minValue: 0,
+            maxValue: 1,
+            min: -1,
+            max: 1
+        )
 
         super.init(frame: .zero)
 
         if hasBlendShapeNames, let popupButton {
             popupButton.target = self
             popupButton.action = #selector(popupButtonChanged)
-            popupButton.addItems(withTitles: outputKeys.map { key in
-                key.isVCamKey ? L10n.key("trackingInput_\(key.key)").text : key.key
-            })
-            if let index = outputKeys.firstIndex(where: { $0.key == entry.outputKey.key }) {
-                popupButton.selectItem(at: index)
-            }
+        }
+
+        slider.setOnEditingEnded { [weak self] min, max in
+            guard let self else { return }
+            self.onRangeChanged?(self.row, min, max)
         }
 
         if let textField {
@@ -459,7 +705,6 @@ private final class OutputCell: NSView {
         }
 
         setupLayout()
-        alphaValue = isEnabled ? 1.0 : 0.5
     }
 
     required init?(coder: NSCoder) {
@@ -509,58 +754,55 @@ private final class OutputCell: NSView {
         ])
     }
 
-    override func rightMouseDown(with event: NSEvent) {
-        let menu = NSMenu()
-        let editItem = NSMenuItem(title: L10n.editOutputBounds.text, action: #selector(showBoundsEditor), keyEquivalent: "")
-        editItem.target = self
-        menu.addItem(editItem)
-        menu.popUp(positioning: nil, at: convert(event.locationInWindow, from: nil), in: self)
-    }
-
-    @objc private func showBoundsEditor() {
-        let alert = NSAlert()
-        alert.messageText = L10n.editOutputBounds.text
-        alert.informativeText = L10n.editOutputBoundsMessage.text
-        alert.addButton(withTitle: L10n.ok.text)
-        alert.addButton(withTitle: L10n.cancel.text)
-
-        let minField = NSTextField(frame: NSRect(x: 0, y: 0, width: 200, height: 24))
-        minField.placeholderString = L10n.minimum.text
-        minField.stringValue = String(format: "%.2f", slider.minValue)
-
-        let maxField = NSTextField(frame: NSRect(x: 0, y: 0, width: 200, height: 24))
-        maxField.placeholderString = L10n.maximum.text
-        maxField.stringValue = String(format: "%.2f", slider.maxValue)
-
-        let stackView = NSStackView(views: [minField, maxField])
-        stackView.orientation = .vertical
-        stackView.spacing = 8
-        stackView.frame = NSRect(x: 0, y: 0, width: 200, height: 60)
-        alert.accessoryView = stackView
-
-        let response = alert.runModal()
-        if response == .alertFirstButtonReturn {
-            if let min = Float(minField.stringValue), let max = Float(maxField.stringValue), min < max {
-                onBoundsChanged(min, max)
-            }
-        }
-    }
-
     @objc private func popupButtonChanged() {
         if let selectedIndex = popupButton?.indexOfSelectedItem, selectedIndex >= 0, selectedIndex < outputKeys.count {
-            onOutputKeyChanged(outputKeys[selectedIndex])
+            onOutputKeyChanged?(row, outputKeys[selectedIndex])
         }
     }
 
-    func update(entry: TrackingMappingEntry, isEnabled: Bool) {
+    func configure(
+        entry: TrackingMappingEntry,
+        row: Int,
+        isEnabled: Bool,
+        outputKeys: [TrackingMappingEntry.OutputKey],
+        outputKeyTitles: [String],
+        onOutputKeyChanged: @escaping (Int, TrackingMappingEntry.OutputKey) -> Void,
+        onOutputTextChanged: @escaping (Int, String) -> Void,
+        onRangeChanged: @escaping (Int, Float, Float) -> Void
+    ) {
+        self.row = row
+        self.onOutputKeyChanged = onOutputKeyChanged
+        self.onOutputTextChanged = onOutputTextChanged
+        self.onRangeChanged = onRangeChanged
+
         if hasBlendShapeNames, let popupButton {
+            let newKeyIDs = outputKeys.map(\.key)
+            let titles = outputKeyTitles.count == outputKeys.count ? outputKeyTitles : outputKeys.map { key in
+                key.isVCamKey ? L10n.key("trackingInput_\(key.key)").text : key.key
+            }
+
+            if newKeyIDs != outputKeyIDs {
+                outputKeyIDs = newKeyIDs
+                self.outputKeys = outputKeys
+                popupButton.removeAllItems()
+                popupButton.addItems(withTitles: titles)
+            } else {
+                self.outputKeys = outputKeys
+            }
+
             if let index = outputKeys.firstIndex(where: { $0.key == entry.outputKey.key }) {
                 popupButton.selectItem(at: index)
             }
         } else if let textField, textField.currentEditor() == nil {
             textField.stringValue = entry.outputKey.key
         }
-        slider.update(minValue: entry.outputKey.rangeMin, maxValue: entry.outputKey.rangeMax)
+
+        slider.update(
+            minValue: entry.outputKey.rangeMin,
+            maxValue: entry.outputKey.rangeMax,
+            min: entry.outputKey.bounds.lowerBound,
+            max: entry.outputKey.bounds.upperBound
+        )
         alphaValue = isEnabled ? 1.0 : 0.5
     }
 }
@@ -568,6 +810,6 @@ private final class OutputCell: NSView {
 extension OutputCell: NSTextFieldDelegate {
     func controlTextDidChange(_ obj: Notification) {
         guard let textField = obj.object as? NSTextField else { return }
-        onOutputTextChanged(textField.stringValue)
+        onOutputTextChanged?(row, textField.stringValue)
     }
 }

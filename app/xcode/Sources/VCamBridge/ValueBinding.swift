@@ -65,6 +65,20 @@ extension ValueBinding where Value == UnsafeMutableRawPointer {
         }
     }
 
+    @inlinable public func get<T: ValueBindingStructType>(_ kind: Kind, type: T.Type = T.self) -> T {
+        guard let value = getValue?(kind), UInt(bitPattern: value) != 0 else {
+            return T.defaultValue
+        }
+        return T.get(value)
+    }
+
+    @inlinable public func set<T: ValueBindingStructType>(_ kind: Kind, type: T.Type = T.self) -> (T) -> Void {
+        { [weak self] in
+            let ptr = $0.set() // Keep the pointer alive until memory is received
+            self?.setValue(kind, ptr.pointer)
+        }
+    }
+
     @inlinable public func binding<T: BridgeArrayType>(_ kind: Kind, size: Int, type: T.Type = T.self, onGet: @escaping (T) -> Void = { _ in }, onSet: @escaping (T) -> Void = { _ in }) -> Binding<T> {
         .init { [weak self] in
             guard let retrievedValue: T = self?.get(kind, size: size) else {

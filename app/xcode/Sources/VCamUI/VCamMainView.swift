@@ -9,6 +9,7 @@ import SwiftUI
 import VCamEntity
 import VCamCamera
 import VCamTracking
+import VCamData
 
 public struct VCamMainView: View {
     public init() {}

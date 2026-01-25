@@ -8,6 +8,7 @@
 import SwiftUI
 import VCamBridge
 import VCamEntity
+import VCamData
 
 public struct VCamMainToolbarExpressionPicker: View {
     public init() {}

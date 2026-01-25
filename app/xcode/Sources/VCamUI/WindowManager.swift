@@ -9,6 +9,7 @@ import AppKit
 import VCamLogger
 import VCamCamera
 import VCamBridge
+import VCamData
 
 @Observable
 public final class WindowManager {

@@ -175,6 +175,9 @@
 "easeOfCloseFingers" = "指の閉じやすさ";
 "shoulderRotationWeight" = "肩の回転の大きさ";
 "swivelOffset" = "肘の調整";
+"trackingSmoothing" = "動きの滑らかさ (スムージング)";
+"mocapNetworkInterpolation" = "通信補間";
+"mocapNetworkInterpolationHelp" = "通信途切れのカクつきを緩和します（遅延が増えます）。VCamMocapとiFacialMocapに適用されます。";
 "faceEyeMouth" = "顔・目・口";
 "hand" = "手";
 "finger" = "指";
@@ -358,6 +361,8 @@
 "trackingInput__blinkR" = "まばたき 右";
 "trackingInput__mouth" = "口";
 "trackingInput__vowel" = "母音";
+"trackingMappingInput" = "入力";
+"trackingMappingOutput" = "出力";
 "editOutputBounds" = "出力範囲を編集";
 "editOutputBoundsMessage" = "出力範囲の最小値と最大値を設定します。";
 "minimum" = "最小値";

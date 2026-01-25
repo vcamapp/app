@@ -1,55 +1,42 @@
 //
-//  ValueLabel.swift
-//  
+//  ValueEditField.swift
+//
 //
 //  Created by Tatsuya Tanaka on 2022/02/22.
 //
 
 import SwiftUI
 
-public struct ValueEditField: View {
-    public init(_ label: LocalizedStringKey, value: Binding<CGFloat>, valueHidden: Bool = false, format: String = "%.1f", type: EditType) {
+public struct ValueEditField<ValueLabel: View>: View {
+    public init(
+        _ label: LocalizedStringKey,
+        value: Binding<CGFloat>,
+        type: EditType,
+        @ViewBuilder valueLabel: @escaping (CGFloat) -> ValueLabel
+    ) {
         self.label = label
         self._value = value
-        self.valueHidden = valueHidden
-        self.format = format
         self.type = type
+        self.valueLabel = valueLabel
     }
 
     let label: LocalizedStringKey
     @Binding var value: CGFloat
-    let valueHidden: Bool
-    let format: String
     let type: EditType
-
-    @State private var valueText = ""
-    @State private var debounceTask: Task<Void, Never>?
+    let valueLabel: (CGFloat) -> ValueLabel
 
     public var body: some View {
         HStack(spacing: 2) {
-            HStack(spacing: 2) {
+            HStack(spacing: 4) {
                 Text(label, bundle: .localize)
-                if !valueHidden {
-                    Text("[\(valueText)]")
-                        .lineLimit(1)
-                        .font(.caption2)
-                        .fontWeight(.thin)
-                        .foregroundStyle(.secondary)
-                        .onChange(of: value) { _, newValue in
-                            debounceTask?.cancel()
-                            debounceTask = Task {
-                                do {
-                                    try await Task.sleep(nanoseconds: NSEC_PER_MSEC * 100)
-                                } catch {
-                                    return
-                                }
-                                valueText = .init(format: format, newValue)
-                            }
-                        }
-                }
+                valueLabel(value)
+                    .lineLimit(1)
+                    .font(.caption2)
+                    .fontWeight(.thin)
+                    .foregroundStyle(.secondary)
             }
             .layoutPriority(1)
-            
+
             switch type {
             case let .slider(range, onEditingChanged):
                 Slider(value: $value, in: range, onEditingChanged: onEditingChanged)
@@ -57,9 +44,6 @@ public struct ValueEditField: View {
                 TextField("", value: $value, formatter: NumberFormatter())
                     .textFieldStyle(.roundedBorder)
             }
-        }
-        .onAppear {
-            valueText = .init(format: format, value)
         }
     }
 
@@ -77,12 +61,38 @@ public struct ValueEditField: View {
     }
 }
 
-extension ValueEditField: Equatable {
-    public static func == (lhs: Self, rhs: Self) -> Bool {
-        lhs.value == rhs.value &&
-        lhs.valueHidden == rhs.valueHidden &&
-        lhs.format == rhs.format &&
-        lhs.type == rhs.type &&
-        lhs.label == rhs.label
+extension ValueEditField where ValueLabel == Text {
+    public init<F>(
+        _ label: LocalizedStringKey,
+        value: Binding<CGFloat>,
+        type: EditType,
+        format: F
+    ) where F : FormatStyle, F.FormatOutput == String, F.FormatInput == CGFloat {
+        self.label = label
+        self._value = value
+        self.type = type
+        self.valueLabel = { Text($0, format: format) }
+    }
+
+    public init(
+        _ label: LocalizedStringKey,
+        value: Binding<CGFloat>,
+        type: EditType,
+        precision: FloatingPointFormatStyle<CGFloat>.Configuration.Precision = .fractionLength(1)
+    ) {
+        self.label = label
+        self._value = value
+        self.type = type
+        self.valueLabel = { Text($0, format: .number.precision(precision)) }
+    }
+}
+
+extension ValueEditField where ValueLabel == EmptyView {
+    static func emptyValueLabel(
+        _ label: LocalizedStringKey,
+        value: Binding<CGFloat>,
+        type: EditType
+    ) -> Self {
+        .init(label, value: value, type: type, valueLabel: { _ in EmptyView() })
     }
 }

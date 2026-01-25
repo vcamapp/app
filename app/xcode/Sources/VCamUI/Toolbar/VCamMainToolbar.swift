@@ -7,6 +7,7 @@
 
 import SwiftUI
 import VCamEntity
+import VCamData
 
 public struct VCamMainToolbar: View {
     public init() {}

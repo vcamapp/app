@@ -175,6 +175,9 @@
 "easeOfCloseFingers" = "Finger closing sensitivity";
 "shoulderRotationWeight" = "Weight of shoulder rotation";
 "swivelOffset" = "Elbow offset";
+"trackingSmoothing" = "Smoothing";
+"mocapNetworkInterpolation" = "Network Interpolation";
+"mocapNetworkInterpolationHelp" = "Reduces jitter from packet drops (adds latency). Applies to VCamMocap and iFacialMocap. ";
 "faceEyeMouth" = "Face / Eye / Mouth";
 "hand" = "Hand";
 "finger" = "Finger";
@@ -358,6 +361,8 @@
 "trackingInput__blinkR" = "Blink Right";
 "trackingInput__mouth" = "Mouth";
 "trackingInput__vowel" = "Vowel";
+"trackingMappingInput" = "Input";
+"trackingMappingOutput" = "Output";
 "editOutputBounds" = "Edit Output Bounds";
 "editOutputBoundsMessage" = "Set the minimum and maximum values for the output range.";
 "minimum" = "Minimum";

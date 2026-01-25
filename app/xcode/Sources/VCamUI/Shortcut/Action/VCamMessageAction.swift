@@ -9,6 +9,7 @@ import AppKit
 import VCamEntity
 import VCamLocalization
 import VCamBridge
+import VCamData
 import struct SwiftUI.Image
 
 public struct VCamMessageAction: VCamAction {
@@ -22,6 +23,6 @@ public struct VCamMessageAction: VCamAction {
 
     @MainActor
     public func callAsFunction(context: VCamActionContext) async throws {
-        UniBridge.shared.message.wrappedValue = configuration.message
+        UniState.shared.message = configuration.message
     }
 }

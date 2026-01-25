@@ -10,6 +10,7 @@ import AVFoundation
 import VCamEntity
 import VCamCamera
 import VCamTracking
+import VCamData
 
 public struct VCamSettingTrackingView: View {
     public init() {}
@@ -46,8 +47,8 @@ public struct VCamSettingTrackingView: View {
                 if uniState.currentLipSync == .mic {
                     ValueEditField(L10n.lipSyncSensitivity.key, value: $state.lipSyncMicIntensity, type: .slider(0.1...3))
                 }
-                ValueEditField(L10n.fpsCamera.key, value: $cameraFps.map(), type: .slider(1...60) { isEditing in
-                    guard !isEditing else { return }
+                ValueEditField(L10n.fpsCamera.key, value: $cameraFps.map(), type: .slider(1...60) {
+                    guard !$0 else { return }
                     Tracking.shared.avatarCameraManager.setFPS(cameraFps)
                 })
             }
@@ -62,6 +63,11 @@ public struct VCamSettingTrackingView: View {
             .opacity(integrationMocopi ? 0.5 : 1.0)
 #endif
 #endif
+            Section {
+                ValueEditField(L10n.trackingSmoothing.key, value: $state.trackingSmoothing, type: .slider(0...0.9)) {
+                    Text($0, format: .percent.precision(.fractionLength(2)))
+                }
+            }
             Section {
                 Toggle(isOn: $useEyeTracking) {
                     Text(L10n.trackEyes.key, bundle: .localize)
@@ -84,6 +90,11 @@ public struct VCamSettingTrackingView: View {
     }
 }
 
+#if DEBUG
+
 #Preview {
     VCamSettingTrackingView()
+        .environment(UniState.preview())
 }
+
+#endif

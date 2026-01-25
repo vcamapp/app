@@ -9,6 +9,7 @@ import SwiftUI
 import VCamEntity
 import VCamLocalization
 import VCamBridge
+import VCamData
 
 public struct VCamShortcutBuilderView: View {
     public init(shortcut: Binding<VCamShortcut>) {

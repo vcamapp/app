@@ -8,6 +8,7 @@
 import SwiftUI
 import VCamEntity
 import VCamLocalization
+import VCamData
 
 public struct VCamSettingRenderingView: View {
     public init() {}
@@ -18,7 +19,7 @@ public struct VCamSettingRenderingView: View {
         @Bindable var state = uniState
 
         Form {
-            Picker(selection: $state.typedScreenResolution) {
+            Picker(selection: $state.screenResolution) {
                 ForEach(ScreenResolution.allCases) {
                     Text($0.description)
                         .tag($0)

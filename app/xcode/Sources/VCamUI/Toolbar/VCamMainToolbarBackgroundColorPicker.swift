@@ -7,6 +7,7 @@
 
 import SwiftUI
 import VCamUIFoundation
+import VCamData
 
 public struct VCamMainToolbarBackgroundColorPicker: View {
     public init() {}

@@ -31,7 +31,7 @@ public final class MainTexture {
 
     public func setTexture(_ texture: any MTLTexture) {
         self.mtlTexture = texture
-        self.texture =  CIImage(mtlTexture: texture, options: nil)!
+        self.texture = CIImage(mtlTexture: texture, options: nil)!
     }
 }
 

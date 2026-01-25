@@ -7,6 +7,7 @@
 
 import SwiftUI
 import VCamLocalization
+import VCamData
 
 public struct VCamSettingGeneralView: View {
     public init() {}
