@@ -141,6 +141,10 @@ public final class UniState {
     @ObservationIgnored @UniStateValue(\.__lipSyncMicIntensity, persist: .lipSyncMicIntensity, bridge: .lipSyncMicIntensity)
     public var lipSyncMicIntensity: CGFloat
 
+    var __trackingSmoothing = CGFloat(UserDefaults.standard.value(for: .trackingSmoothing))
+    @ObservationIgnored @UniStateValue(\.__trackingSmoothing, persist: .trackingSmoothing, bridge: .trackingSmoothing)
+    public var trackingSmoothing: CGFloat
+
 #if FEATURE_3
     private var __shoulderRotationWeight = CGFloat(UserDefaults.standard.value(for: .shoulderRotationWeight))
     @ObservationIgnored @UniStateValue(\.__shoulderRotationWeight, persist: .shoulderRotationWeight, bridge: .shoulderRotationWeight)
@@ -149,10 +153,6 @@ public final class UniState {
     private var __swivelOffset = CGFloat(UserDefaults.standard.value(for: .swivelOffset))
     @ObservationIgnored @UniStateValue(\.__swivelOffset, persist: .swivelOffset, bridge: .swivelOffset)
     public var swivelOffset: CGFloat
-
-    var __trackingSmoothing = CGFloat(UserDefaults.standard.value(for: .trackingSmoothing))
-    @ObservationIgnored @UniStateValue(\.__trackingSmoothing, persist: .trackingSmoothing, bridge: .trackingSmoothing)
-    public var trackingSmoothing: CGFloat
 
     private var __light: CGFloat = 1
     @ObservationIgnored @UniStateValue(\.__light, bridge: .light)
@@ -318,10 +318,10 @@ public final class UniState {
         bridge.boolMapper.setValue(.lipSyncWebCam, __lipSyncWebCam)
         bridge.floatMapper.setValue(.fps, __fps)
         bridge.floatMapper.setValue(.lipSyncMicIntensity, __lipSyncMicIntensity)
+        bridge.floatMapper.setValue(.trackingSmoothing, __trackingSmoothing)
 #if FEATURE_3
         bridge.floatMapper.setValue(.shoulderRotationWeight, __shoulderRotationWeight)
         bridge.floatMapper.setValue(.swivelOffset, __swivelOffset)
-        bridge.floatMapper.setValue(.trackingSmoothing, __trackingSmoothing)
 #endif
         bridge.intMapper.setValue(.qualityLevel, __qualityLevel)
         bridge.stringMapper.setValue(.message, __message)

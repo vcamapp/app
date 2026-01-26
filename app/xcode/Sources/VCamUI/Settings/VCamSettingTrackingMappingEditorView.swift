@@ -36,7 +36,7 @@ public struct VCamSettingTrackingMappingEditorView: View {
             }
         }
         .task {
-            store.initialize(blendShapeNames: uniState.blendShapeNames)
+            store.initialize(blendShapeNames: uniState.blendShapeNames, hasPerfectSync: uniState.hasPerfectSyncBlendShape)
         }
         .onChange(of: uniState.blendShapeNames) { _, newValue in
             store.updateBlendShapeNames(newValue)
@@ -51,12 +51,18 @@ public struct VCamSettingTrackingMappingEditorView: View {
             }
 
 #if FEATURE_3
-            ToolbarItem(placement: .automatic) {
-                Picker(L10n.trackingMode.text, selection: $store.selectedMode) {
-                    Text(L10n.normal.key, bundle: .localize).tag(TrackingMode.blendShape)
-                    Text(verbatim: "iPhone").tag(TrackingMode.perfectSync)
+            if uniState.hasPerfectSyncBlendShape {
+                ToolbarItem(placement: .automatic) {
+                    Picker(L10n.trackingMode.text, selection: $store.selectedMode) {
+                        Text(L10n.normal.key, bundle: .localize).tag(TrackingMode.blendShape)
+                        Text(verbatim: "iPhone").tag(TrackingMode.perfectSync)
+                    }
+                    .pickerStyle(.segmented)
                 }
-                .pickerStyle(.segmented)
+            } else {
+                if #available(macOS 26.0, *) {
+                    ToolbarSpacer(.fixed)
+                }
             }
 #else
             if #available(macOS 26.0, *) {
@@ -144,16 +150,19 @@ final class MappingDataStore {
         set { tracking.mappings[Int(selectedMode.rawValue)] = newValue }
     }
 
-    func initialize(blendShapeNames: [String]) {
+    func initialize(blendShapeNames: [String], hasPerfectSync: Bool) {
         guard !isInitialized else { return }
 
-        Task.detached { [blendShapeNames] in
+        Task.detached { [blendShapeNames, hasPerfectSync] in
             let outputKeys = blendShapeNames.map { TrackingMappingEntry.OutputKey(key: $0) }
             let outputCache = KeyCache(keys: outputKeys)
 
             var inputCaches: [TrackingMode: KeyCache<TrackingMappingEntry.InputKey>] = [:]
 #if FEATURE_3
-            let modes: [TrackingMode] = [.blendShape, .perfectSync]
+            var modes: [TrackingMode] = [.blendShape]
+            if hasPerfectSync {
+                modes.append(.perfectSync)
+            }
 #else
             let modes: [TrackingMode] = [.blendShape]
 #endif

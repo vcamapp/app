@@ -41,7 +41,7 @@ public final class Tracking {
 
     public var mappings: [[TrackingMappingEntry]] = [
         TrackingMappingEntry.defaultMappings(for: .blendShape),
-        TrackingMappingEntry.defaultMappings(for: .perfectSync)
+        []
     ]
 
     public let avatarCameraManager = AvatarCameraManager()
@@ -74,12 +74,19 @@ public final class Tracking {
 
     public func syncPerfectSyncAvailability() {
         stopFaceResamplers()
+        if UniBridge.shared.hasPerfectSyncBlendShape {
+            if mappings[Int(TrackingMode.perfectSync.rawValue)].isEmpty {
+                mappings[Int(TrackingMode.perfectSync.rawValue)] = TrackingMappingEntry.defaultMappings(for: .perfectSync)
+            }
+        } else {
+            mappings[Int(TrackingMode.perfectSync.rawValue)] = []
+        }
     }
 
     public func configure() {
         mappings = [
             TrackingMappingEntry.defaultMappings(for: .blendShape),
-            TrackingMappingEntry.defaultMappings(for: .perfectSync)
+            UniBridge.shared.hasPerfectSyncBlendShape ? TrackingMappingEntry.defaultMappings(for: .perfectSync) : []
         ]
 
         setFaceTrackingMethod(UserDefaults.standard.value(for: .trackingMethodFace))
@@ -113,6 +120,9 @@ public final class Tracking {
     }
 
     public func resetMappings(for mode: TrackingMode) {
+        if mode == .perfectSync, !UniBridge.shared.hasPerfectSyncBlendShape {
+            return
+        }
         mappings[Int(mode.rawValue)] = TrackingMappingEntry.defaultMappings(for: mode)
         applyMappingsToUnity(for: mode)
     }

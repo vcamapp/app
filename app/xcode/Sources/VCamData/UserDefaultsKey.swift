@@ -42,7 +42,7 @@ public extension UserDefaults.Key {
     static var integrationVCamMocap: Key<Bool> { .init("vc_intg_vcammocap", default: false) }
     static var integrationFacialMocapIp: Key<String> { .init("vc_intg_facialmocap_ip", default: "192.168.0.1") }
     static var integrationMocopi: Key<Bool> { .init("vc_intg_mocopi", default: false) }
-    static var mocapNetworkInterpolation: Key<Double> { .init("vc_mocap_network_interpolation", default: 0.3) }
+    static var mocapNetworkInterpolation: Key<Double> { .init("vc_mocap_network_interpolation", default: 1.0) }
 
     static var macOSMicModeEnabled: Key<Bool> { .init("vc_macos_micmode_enabled", default: false) }
     static var useAddToMacOSMenuBar: Key<Bool> { .init("vc_use_add_to_macos_menubar", default: true) }
@@ -56,6 +56,7 @@ public extension UserDefaults.Key {
     static var backgroundColor: Key<String> { .init("vc_bg_color", default: "C6E7FFFF") }
     static var screenResolutionWidth: Key<Int> { .init("vc_screenresolution_width", default: 1920) }
     static var screenResolutionHeight: Key<Int> { .init("vc_screenresolution_height", default: 1080) }
+    static var trackingSmoothing: Key<Double> { .init("vc_tracking_smoothing", default: 0.0) }
 #if FEATURE_3
     static var displayParameterId: Key<String?> { .init("vc_display_parameter_id", default: nil) }
     static var useAutoMode: Key<Bool> { .init("vc_use_automode", default: false) }
@@ -63,6 +64,5 @@ public extension UserDefaults.Key {
     static var useCombineMesh: Key<Bool> { .init("vc_use_combine_mesh", default: true) }
     static var shoulderRotationWeight: Key<Double> { .init("vc_shoulder_rotation_weight", default: 1.0) }
     static var swivelOffset: Key<Double> { .init("vc_swivel_offset", default: 0.0) }
-    static var trackingSmoothing: Key<Double> { .init("vc_tracking_smoothing", default: 0.1) }
 #endif
 }

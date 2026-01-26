@@ -151,5 +151,5 @@ fastlane/test_output
 
 iOSInjectionProject/
 
-app/xcode/Sources/VCamUI/Internal
-
+.codex
+.claude
