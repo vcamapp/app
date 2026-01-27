@@ -1,10 +1,3 @@
-//
-//  DisplayParameter.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2022/03/22.
-//
-
 import Foundation
 import SwiftUI
 import AppKit
@@ -125,7 +118,7 @@ public final class DisplayParameterPresets {
             let file = DisplayParameterPresetsFile(parameters: parameters)
             let data = try JSONEncoder().encode(file)
             let directory = Self.fileURL.deletingLastPathComponent()
-            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+            try FileManager.default.createDirectoryIfNeeded(at: directory)
             try data.write(to: Self.fileURL)
         } catch {
             print("Failed to save display parameters: \(error)")

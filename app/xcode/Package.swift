@@ -17,6 +17,9 @@ let package = Package(
 
         .library(name: "VCamStub", targets: ["VCamStub"]),
     ],
+    dependencies: [
+        .package(url: "https://github.com/tattn/VRMKit", branch: "main"),
+    ],
     targets: [
         .target(name: "VCamUI", dependencies: [
             "VCamUIFoundation", "VCamTracking", "VCamCamera", "VCamData", "VCamLocalization", "VCamBridge", "VCamWorkaround",
@@ -48,10 +51,31 @@ let package = Package(
     swiftLanguageModes: [.v5]
 )
 
+let isThree = true
+
 for target in package.targets {
-    target.swiftSettings = (target.swiftSettings ?? []) + [
+    var swiftSettings = (target.swiftSettings ?? []) + [
         .enableUpcomingFeature("ExistentialAny", .when(configuration: .debug)),
         .define("ENABLE_MOCOPI"),
-        .define("FEATURE_3"),
     ]
+
+    if isThree {
+        swiftSettings.append(contentsOf: [
+            .define("FEATURE_3"),
+        ])
+    } else {
+        swiftSettings.append(contentsOf: [
+            .define("ENABLE_ACCOUNT"),
+        ])
+    }
+
+    target.swiftSettings = swiftSettings
+}
+
+if isThree {
+    if let vcamDataTarget = package.targets.first(where: { $0.name == "VCamData" }) {
+        vcamDataTarget.dependencies.append(contentsOf: [
+            .product(name: "VRMKit", package: "VRMKit"),
+        ])
+    }
 }

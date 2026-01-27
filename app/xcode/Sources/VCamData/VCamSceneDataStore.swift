@@ -1,10 +1,3 @@
-//
-//  VCamSceneDataStore.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2023/03/29.
-//
-
 import Foundation
 import VCamEntity
 import VCamLocalization
@@ -32,7 +25,7 @@ public struct VCamSceneDataStore {
     }
 
     public func save(_ scene: VCamScene) throws {
-        try? FileManager.default.createDirectory(at: sceneRootURL, withIntermediateDirectories: true)
+        try? FileManager.default.createDirectoryIfNeeded(at: sceneRootURL)
 
         let url = sceneURL
         let encoder = JSONEncoder()
@@ -50,7 +43,7 @@ public struct VCamSceneDataStore {
             destination = dataURL(id: newUUID)
             uniDebugLog(destination.path)
 
-            try? FileManager.default.createDirectory(at: sceneRootURL, withIntermediateDirectories: true)
+            try? FileManager.default.createDirectoryIfNeeded(at: sceneRootURL)
             do {
                 try FileManager.default.copyItem(at: url, to: destination)
             } catch {

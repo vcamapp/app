@@ -1,10 +1,3 @@
-//
-//  VCamActionEditorCodeEditor.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2023/04/16.
-//
-
 import SwiftUI
 import VCamEntity
 
@@ -49,7 +42,7 @@ struct VCamActionEditorCodeEditor: View {
 
     private func openScript() {
         if !FileManager.default.fileExists(atPath: url.path) {
-            try? FileManager.default.createDirectory(at: .shortcutResourceActionDirectory(id: id, actionId: actionId), withIntermediateDirectories: true)
+            try? FileManager.default.createDirectoryIfNeeded(at: .shortcutResourceActionDirectory(id: id, actionId: actionId))
             try? "".write(to: url, atomically: true, encoding: .utf8)
         }
         NSWorkspace.shared.open(url)

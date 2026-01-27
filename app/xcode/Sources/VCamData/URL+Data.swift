@@ -1,23 +1,16 @@
-//
-//  URL+Data.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/05/08.
-//
-
 import Foundation
 
 public extension URL {
-    static var applicationSupportDirectory: URL {
-        FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!.appendingPathComponent(Bundle.main.bundleIdentifier!)
+    static var applicationSupportDirectoryWithBundleID: URL {
+        URL.applicationSupportDirectory.appendingPathComponent(Bundle.main.bundleIdentifier!)
     }
 
     static var sceneMetadata: URL {
-        applicationSupportDirectory.appendingPathComponent("scenes.json")
+        applicationSupportDirectoryWithBundleID.appendingPathComponent("scenes.json")
     }
 
     static var scenesDirectory: URL {
-        applicationSupportDirectory.appendingPathComponent("scenes")
+        applicationSupportDirectoryWithBundleID.appendingPathComponent("scenes")
     }
 
     static func sceneRoot(sceneId id: Int32) -> URL {
@@ -29,11 +22,11 @@ public extension URL {
     }
 
     static var shortcutMetadata: URL {
-        applicationSupportDirectory.appendingPathComponent("shortcuts.json")
+        applicationSupportDirectoryWithBundleID.appendingPathComponent("shortcuts.json")
     }
 
     static var shortcutRootDirectory: URL {
-        applicationSupportDirectory.appendingPathComponent("shortcuts")
+        applicationSupportDirectoryWithBundleID.appendingPathComponent("shortcuts")
     }
 
     static func shortcutDirectory(id: UUID) -> URL {

@@ -1,10 +1,3 @@
-//
-//  VCamShortcutDataStore.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2023/03/29.
-//
-
 import Foundation
 import VCamEntity
 
@@ -28,7 +21,7 @@ public struct VCamShortcutDataStore {
         let encoder = JSONEncoder()
         let data = try encoder.encode(shortcut)
 
-        try? FileManager.default.createDirectory(at: .shortcutDirectory(id: shortcut.id), withIntermediateDirectories: true)
+        try? FileManager.default.createDirectoryIfNeeded(at: .shortcutDirectory(id: shortcut.id))
 
         let url = URL.shortcutData(id: shortcut.id)
         try data.write(to: url)
