@@ -1,10 +1,3 @@
-//
-//  Migration.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2022/03/13.
-//
-
 import Foundation
 import VCamData
 import VCamEntity
@@ -18,12 +11,20 @@ public struct Migration {
 
         do {
             try await migrationFirst(previousVersion: previousVersion)
+        } catch {
+            Logger.error(error)
+        }
 
+        let version = previousVersion.components(separatedBy: ".").compactMap(Int.init)
+        guard version.count == 3 else { return }
+
+        do {
 #if FEATURE_3
-            try migration095(previousVersion: previousVersion)
-            try await migration0110(previousVersion: previousVersion)
-            try await migration0131(previousVersion: previousVersion)
+            try migration095(version: version)
+            try await migration0110(version: version)
+            try await migration0131(version: version)
 #endif
+            try await migration0141(version: version)
         } catch {
             Logger.error(error)
         }
@@ -50,8 +51,8 @@ extension Migration {
         }
     }
 
-    static func migration095(previousVersion: String) throws {
-        guard previousVersion == "0.9.4" else { return } // only for 0.9.4
+    static func migration095(version: [Int]) throws {
+        guard version == [0, 9, 4] else { return } // only for 0.9.4
         Logger.log("")
 
         var metadata = try VCamShortcutMetadata.load()
@@ -60,13 +61,13 @@ extension Migration {
         let temporaryDirectoryURL = URL(fileURLWithPath: NSTemporaryDirectory())
         for id in metadata.ids {
             let url = URL.shortcutDirectory(id: id)
-            let temporaryURL = temporaryDirectoryURL.appendingPathComponent(id.uuidString)
+            let temporaryURL = temporaryDirectoryURL.appending(path: id.uuidString)
             do {
                 try FileManager.default.moveItem(at: url, to: temporaryURL)
-                try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+                try FileManager.default.createDirectoryIfNeeded(at: url)
                 try FileManager.default.moveItem(at: temporaryURL, to: .shortcutData(id: id))
 
-                try FileManager.default.createDirectory(at: .shortcutResourceDirectory(id: id), withIntermediateDirectories: true)
+                try FileManager.default.createDirectoryIfNeeded(at: .shortcutResourceDirectory(id: id))
             } catch {
                 Logger.error(error)
             }
@@ -77,13 +78,12 @@ extension Migration {
     }
 
     @MainActor
-    static func migration0110(previousVersion: String) async throws {
+    static func migration0110(version: [Int]) async throws {
         guard LegacyPluginHelper.isPluginInstalled() else {
             return
         }
 
-        let version = previousVersion.components(separatedBy: ".").compactMap(Int.init)
-        guard version.count == 3, version[0] == 0, version[1] < 12 else {
+        guard version[0] == 0, version[1] < 12 else {
             return
         }
         Logger.log("")
@@ -106,30 +106,48 @@ extension Migration {
     }
 
     @MainActor
-    static func migration0131(previousVersion: String) async throws {        
-        let version = previousVersion.components(separatedBy: ".").compactMap(Int.init)
-        guard version.count == 3 else { return }
-        
+    static func migration0131(version: [Int]) async throws {
         // If updated from a version prior to 0.13.1
-        if version[0] == 0 && (version[1] < 13 || (version[1] == 13 && version[2] < 1)) {
-            Logger.log("Migrating to 0.13.1 from \(previousVersion)")
+        guard version[0] == 0 && (version[1] < 13 || (version[1] == 13 && version[2] < 1)) else { return }
+        Logger.log("Migrating to 0.13.1 from \(version.map(String.init).joined(separator: "."))")
 
-            await VCamAlert.showModal(
-                title: L10n.update.text,
-                message: L10n.explainAboutReinstallingCameraExtension.text,
-                canCancel: false
-            )
+        await VCamAlert.showModal(
+            title: L10n.update.text,
+            message: L10n.explainAboutReinstallingCameraExtension.text,
+            canCancel: false
+        )
 
-            do {
-                try? await CameraExtension().uninstallExtension()
-                NSWorkspace.shared.open(.cameraExtension)
-                try await CameraExtension().installExtension()
-                _ = await VirtualCameraManager.shared.installAndStartCameraExtension()
-                await VCamAlert.showModal(title: L10n.success.text, message: L10n.restartAfterInstalling.text, canCancel: false)
-            } catch {
-                await VCamAlert.showModal(title: L10n.failure.text, message: L10n.failedToInstallCameraExtension.text, canCancel: false)
-                Logger.error(error)
-            }
+        do {
+            try? await CameraExtension().uninstallExtension()
+            NSWorkspace.shared.open(.cameraExtension)
+            try await CameraExtension().installExtension()
+            _ = await VirtualCameraManager.shared.installAndStartCameraExtension()
+            await VCamAlert.showModal(title: L10n.success.text, message: L10n.restartAfterInstalling.text, canCancel: false)
+        } catch {
+            await VCamAlert.showModal(title: L10n.failure.text, message: L10n.failedToInstallCameraExtension.text, canCancel: false)
+            Logger.error(error)
+        }
+    }
+
+    static func migration0141(version: [Int]) async throws {
+#if FEATURE_3
+        // If updated from a version prior to 0.14.1
+        guard version[0] == 0 && (version[1] < 14 || (version[1] == 14 && version[2] < 1)) else { return }
+        let oldPath = URL.applicationSupportDirectory.appending(path: "tattn/VCam/prev/model.vrm")
+#else
+        // If updated from a version prior to 0.0.3
+        guard version[0] == 0 && version[1] == 0 && version[2] < 3 else { return }
+        let oldPath = URL.applicationSupportDirectory.appending(path: "Unlypt/VCam2D/prev/model")
+#endif
+        Logger.log("Migrating models from \(version.map(String.init).joined(separator: "."))")
+
+        guard FileManager.default.fileExists(atPath: oldPath.path) else { return }
+
+        do {
+            let model = try await ModelManager.shared.saveModel(from: oldPath)
+            Logger.log("Migrated model to: \(model.name)")
+        } catch {
+            Logger.error(error)
         }
     }
 }

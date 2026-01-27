@@ -20,6 +20,7 @@
 "apply" = "適用";
 "delete" = "削除";
 "duplicate" = "複製";
+"rename" = "名前を変更";
 "title" = "タイトル";
 "notitle" = "タイトルなし";
 "object" = "オブジェクト";
@@ -369,3 +370,11 @@
 "editOutputBoundsMessage" = "出力範囲の最小値と最大値を設定します。";
 "minimum" = "最小値";
 "maximum" = "最大値";
+
+// MARK: - Model List
+
+"modelList" = "モデル一覧";
+"noModelsFound" = "モデルが見つかりません";
+"loadModel" = "読み込む";
+"confirmDeleteModel %@" = "「%@」を削除してもよろしいですか？";
+"modelMissing" = "見つかりません";

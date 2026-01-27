@@ -2,50 +2,50 @@ import Foundation
 
 public extension URL {
     static var applicationSupportDirectoryWithBundleID: URL {
-        URL.applicationSupportDirectory.appendingPathComponent(Bundle.main.bundleIdentifier!)
+        URL.applicationSupportDirectory.appending(path: Bundle.main.bundleIdentifier!)
     }
 
     static var sceneMetadata: URL {
-        applicationSupportDirectoryWithBundleID.appendingPathComponent("scenes.json")
+        applicationSupportDirectoryWithBundleID.appending(path: "scenes.json")
     }
 
     static var scenesDirectory: URL {
-        applicationSupportDirectoryWithBundleID.appendingPathComponent("scenes")
+        applicationSupportDirectoryWithBundleID.appending(path: "scenes")
     }
 
     static func sceneRoot(sceneId id: Int32) -> URL {
-        scenesDirectory.appendingPathComponent("\(id)")
+        scenesDirectory.appending(path: "\(id)")
     }
 
     static func scene(sceneId id: Int32) -> URL {
-        sceneRoot(sceneId: id).appendingPathComponent("data")
+        sceneRoot(sceneId: id).appending(path: "data")
     }
 
     static var shortcutMetadata: URL {
-        applicationSupportDirectoryWithBundleID.appendingPathComponent("shortcuts.json")
+        applicationSupportDirectoryWithBundleID.appending(path: "shortcuts.json")
     }
 
     static var shortcutRootDirectory: URL {
-        applicationSupportDirectoryWithBundleID.appendingPathComponent("shortcuts")
+        applicationSupportDirectoryWithBundleID.appending(path: "shortcuts")
     }
 
     static func shortcutDirectory(id: UUID) -> URL {
-        shortcutRootDirectory.appendingPathComponent(id.uuidString)
+        shortcutRootDirectory.appending(path: id.uuidString)
     }
 
     static func shortcutData(id: UUID) -> URL {
-        shortcutDirectory(id: id).appendingPathComponent("data")
+        shortcutDirectory(id: id).appending(path: "data")
     }
 
     static func shortcutResourceDirectory(id: UUID) -> URL {
-        shortcutDirectory(id: id).appendingPathComponent("resources")
+        shortcutDirectory(id: id).appending(path: "resources")
     }
 
     static func shortcutResourceActionDirectory(id: UUID, actionId: UUID) -> URL {
-        shortcutDirectory(id: id).appendingPathComponent("resources").appendingPathComponent(actionId.uuidString)
+        shortcutDirectory(id: id).appending(path: "resources").appending(path: actionId.uuidString)
     }
 
     static func shortcutResource(id: UUID, actionId: UUID, name: String) -> URL {
-        shortcutResourceActionDirectory(id: id, actionId: actionId).appendingPathComponent(name)
+        shortcutResourceActionDirectory(id: id, actionId: actionId).appending(path: name)
     }
 }

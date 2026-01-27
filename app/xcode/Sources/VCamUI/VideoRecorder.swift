@@ -46,8 +46,8 @@ public final class VideoRecorder {
 
     public func start(with outputDirectory: URL, name: String, format: VideoFormat, screenResolution: ScreenResolution, capturesSystemAudio: Bool) throws {
         Logger.log("")
-        temporaryOutputURL = outputDirectory.appendingPathComponent("\(name)_tmp.\(format.extension)")
-        outputURL = outputDirectory.appendingPathComponent("\(name).\(format.extension)")
+        temporaryOutputURL = outputDirectory.appending(path: "\(name)_tmp.\(format.extension)")
+        outputURL = outputDirectory.appending(path: "\(name).\(format.extension)")
 
         let assetwriter = try AVAssetWriter(outputURL: temporaryOutputURL, fileType: format.fileType)
         let outputSettings = screenResolution.videoOutputSettings(format: format)

@@ -1,10 +1,3 @@
-//
-//  AppMenu.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2022/02/07.
-//
-
 import Foundation
 import AppKit
 import VCamUIFoundation
@@ -129,6 +122,7 @@ private extension AppMenu {
         Logger.log("")
         guard let url = FileUtility.openFile(type: .vrm) else { return }
         UniBridge.shared.loadVRM(url.path)
+        saveModel(url: url)
     }
 
     @objc private func openVRoidHub() {
@@ -142,6 +136,13 @@ private extension AppMenu {
         Logger.log("")
         guard let url = FileUtility.pickDirectory(canCreateDirectories: false) else { return }
         UniBridge.shared.loadModel(url.path)
+        saveModel(url: url)
+    }
+
+    private func saveModel(url: URL) {
+        Task {
+            _ = try await ModelManager.shared.saveModel(from: url)
+        }
     }
 }
 
@@ -209,10 +210,16 @@ private extension AppMenu {
 private extension AppMenu {
     private func setupAvatarMenu(subMenu: NSMenu) {
         Self.makeSubMenu(menu: subMenu, title: L10n.avatar.text, items: [
+            makeMenuItem(title: L10n.modelList.text, action: #selector(openModelList)),
             makeMenuItem(title: L10n.editAvatar.text, action: #selector(editAvatar)),
             .separator(),
             makeMenuItem(title: L10n.calibrate.text, action: #selector(resetCalibration)),
         ])
+    }
+
+    @objc private func openModelList() {
+        Logger.log("")
+        MacWindowManager.shared.open(ModelListView())
     }
 
     @objc private func editAvatar() {

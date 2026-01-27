@@ -51,7 +51,7 @@ public final class PasteboardObserver {
         let objectsToPaste = pasteboard.readObjects(forClasses: classes, options: [:]) ?? []
 
         if let image = objectsToPaste.first as? NSImage {
-            let url = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("vcam_clipboard.png")
+            let url = URL.temporaryDirectory.appending(path: "vcam_clipboard.png")
             try image.writeAsPNG(to: url)
             imageURL = url
         }

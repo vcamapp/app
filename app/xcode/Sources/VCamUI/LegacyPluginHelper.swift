@@ -11,12 +11,12 @@ import VCamLogger
 
 
 private let dalPath = URL(fileURLWithPath: "/Library/CoreMediaIO/Plug-Ins/DAL/")
-private let pluginPath = dalPath.appendingPathComponent("VCam.plugin")
-private let sourcePluginPath = URL(fileURLWithPath: Bundle.main.bundlePath).appendingPathComponent("Contents/VCam.plugin")
+private let pluginPath = dalPath.appending(path: "VCam.plugin")
+private let sourcePluginPath = URL(fileURLWithPath: Bundle.main.bundlePath).appending(path: "Contents/VCam.plugin")
 
 public struct LegacyPluginHelper {
     private static var pluginVersion: String {
-        let plistURL = sourcePluginPath.appendingPathComponent("Contents/Info.plist")
+        let plistURL = sourcePluginPath.appending(path: "Contents/Info.plist")
         let plist = NSDictionary(contentsOf: plistURL)
         return plist?["CFBundleShortVersionString"] as? String ?? ""
     }

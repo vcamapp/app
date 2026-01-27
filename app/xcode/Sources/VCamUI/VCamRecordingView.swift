@@ -159,7 +159,7 @@ extension VCamRecordingView {
 
         restWaitTime = screenshotWaitTime
         let save = {
-            let url = destination.appendingPathComponent("vcam_\(Date().yyyyMMddHHmmss).png")
+            let url = destination.appending(path: "vcam_\(Date().yyyyMMddHHmmss).png")
             do {
                 try image.writeAsPNG(to: url)
             } catch {

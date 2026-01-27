@@ -106,6 +106,10 @@ public enum L10n {
   public static let commercialLicenseRequired = LocalizedString(lookupKey: "commercialLicenseRequired")
   /// Uninstallation is complete.
   public static let completeUninstalling = LocalizedString(lookupKey: "completeUninstalling")
+  /// Are you sure you want to delete "%@"?
+  public static func confirmDeleteModel(_ p1: Any) -> ArgumentsLocalizedString {
+    ArgumentsLocalizedString("confirmDeleteModel %@", "confirmDeleteModel \(String(describing: p1))", String(describing: p1))
+  }
   /// Are you sure you want to sign out?
   public static let confirmSignOut = LocalizedString(lookupKey: "confirmSignOut")
   /// Connect
@@ -306,6 +310,8 @@ public enum L10n {
   public static let lipSync = LocalizedString(lookupKey: "lipSync")
   /// Lip-sync sensitivity (mic)
   public static let lipSyncSensitivity = LocalizedString(lookupKey: "lipSyncSensitivity")
+  /// Load
+  public static let loadModel = LocalizedString(lookupKey: "loadModel")
   /// Load Model File
   public static let loadModelFile = LocalizedString(lookupKey: "loadModelFile")
   /// Load Avatar on VRoid Hub
@@ -344,6 +350,10 @@ public enum L10n {
   public static let mocapNetworkInterpolation = LocalizedString(lookupKey: "mocapNetworkInterpolation")
   /// Reduces jitter from packet drops (adds latency). Applies to VCamMocap and iFacialMocap. 
   public static let mocapNetworkInterpolationHelp = LocalizedString(lookupKey: "mocapNetworkInterpolationHelp")
+  /// Model List
+  public static let modelList = LocalizedString(lookupKey: "modelList")
+  /// Missing
+  public static let modelMissing = LocalizedString(lookupKey: "modelMissing")
   /// Motion
   public static let motion = LocalizedString(lookupKey: "motion")
   /// Reset position
@@ -354,6 +364,8 @@ public enum L10n {
   public static let no = LocalizedString(lookupKey: "no")
   /// Nod
   public static let nod = LocalizedString(lookupKey: "nod")
+  /// No models found
+  public static let noModelsFound = LocalizedString(lookupKey: "noModelsFound")
   /// None
   public static let `none` = LocalizedString(lookupKey: "none")
   /// Normal
@@ -434,6 +446,8 @@ public enum L10n {
   public static let reload = LocalizedString(lookupKey: "reload")
   /// Remove this app from the capture
   public static let removeVCamFromCapture = LocalizedString(lookupKey: "removeVCamFromCapture")
+  /// Rename
+  public static let rename = LocalizedString(lookupKey: "rename")
   /// Rendering
   public static let rendering = LocalizedString(lookupKey: "rendering")
   /// Rendering Quality

@@ -20,6 +20,7 @@
 "apply" = "Apply";
 "delete" = "Delete";
 "duplicate" = "Duplicate";
+"rename" = "Rename";
 "title" = "Title";
 "notitle" = "No Title";
 "object" = "Object";
@@ -369,3 +370,11 @@
 "editOutputBoundsMessage" = "Set the minimum and maximum values for the output range.";
 "minimum" = "Minimum";
 "maximum" = "Maximum";
+
+// MARK: - Model List
+
+"modelList" = "Model List";
+"noModelsFound" = "No models found";
+"loadModel" = "Load";
+"confirmDeleteModel %@" = "Are you sure you want to delete \"%@\"?";
+"modelMissing" = "Missing";

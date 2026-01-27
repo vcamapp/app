@@ -59,7 +59,7 @@ public struct VCamSceneDataStore {
     }
 
     public func dataURL(id: String) -> URL {
-        sceneRootURL.appendingPathComponent(id)
+        sceneRootURL.appending(path: id)
     }
 
     public func delete() throws {

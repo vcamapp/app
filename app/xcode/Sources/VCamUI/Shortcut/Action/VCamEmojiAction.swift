@@ -25,7 +25,7 @@ public struct VCamEmojiAction: VCamAction {
         guard !configuration.emoji.isEmpty else {
             throw VCamActionError(L10n.isNotSetYet(L10n.emoji.text).text)
         }
-        let url = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("vcam_emoji.png")
+        let url = URL.temporaryDirectory.appending(path: "vcam_emoji.png")
         try configuration.emoji.drawImage().writeAsPNG(to: url)
 
         UniBridge.shared.showEmojiStamp(url.path)
