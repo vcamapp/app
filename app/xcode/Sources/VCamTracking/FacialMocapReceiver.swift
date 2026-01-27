@@ -9,6 +9,7 @@ import Network
 import Combine
 import VCamBridge
 import Accelerate
+import VCamLogger
 
 @Observable
 public final class FacialMocapReceiver {
@@ -22,18 +23,18 @@ public final class FacialMocapReceiver {
 
     @MainActor public private(set) var connectionStatus = ConnectionStatus.disconnected
 
+    @ObservationIgnored private var shouldAutoReconnect = true
+    @ObservationIgnored private var lastConnectedIP: String?
+    @ObservationIgnored private var timeoutTask: Task<Void, Never>?
+
+    private static let dataTimeoutSeconds: UInt64 = 2
+
     private final class SmoothingBox {
         var smoothing: TrackingSmoothing
 
         init(_ smoothing: TrackingSmoothing) {
             self.smoothing = smoothing
         }
-    }
-
-    public enum ConnectionStatus {
-        case disconnected
-        case connecting
-        case connected
     }
 
     enum ReceiverResult {
@@ -60,7 +61,9 @@ public final class FacialMocapReceiver {
 
     @MainActor
     public func connect(ip: String) async throws {
-        await stop()
+        await stopInternal()
+        shouldAutoReconnect = true
+        lastConnectedIP = ip
 
 #if FEATURE_3
         let port = NWEndpoint.Port(integerLiteral: 49983)
@@ -72,7 +75,9 @@ public final class FacialMocapReceiver {
             switch result {
             case .success: ()
             case .cancel, .error:
-                self?.stopAsync()
+                Task { @MainActor in
+                    await self?.handleDisconnection()
+                }
             }
         }
 
@@ -80,13 +85,24 @@ public final class FacialMocapReceiver {
             switch result {
             case .success: ()
             case .cancel, .error:
-                self?.stopAsync()
+                Task { @MainActor in
+                    await self?.handleDisconnection()
+                }
             }
         }
     }
 
     @MainActor
     public func stop() async {
+        shouldAutoReconnect = false
+        await stopInternal()
+    }
+
+    @MainActor
+    private func stopInternal() async {
+        timeoutTask?.cancel()
+        timeoutTask = nil
+
         if let listener = listener {
             listener.stateUpdateHandler = nil
             listener.newConnectionHandler = nil
@@ -94,11 +110,35 @@ public final class FacialMocapReceiver {
             self.listener = nil
         }
 
+        connection?.stateUpdateHandler = nil
         connection?.cancel()
         connection = nil
         connectionStatus = .disconnected
 
         stopResamplers()
+    }
+
+    @MainActor
+    private func resetTimeoutTimer() {
+        timeoutTask?.cancel()
+        timeoutTask = Task { @MainActor [weak self] in
+            do {
+                try await Task.sleep(nanoseconds: Self.dataTimeoutSeconds * NSEC_PER_SEC)
+                Logger.log("Data timeout - resetting listener")
+                await self?.handleTimeout()
+            } catch {}
+        }
+    }
+
+    @MainActor
+    private func handleTimeout() async {
+        guard connectionStatus == .connected, shouldAutoReconnect, let ip = lastConnectedIP else { return }
+        await stopInternal()
+        do {
+            try await connect(ip: ip)
+        } catch {
+            Logger.log("Restart failed: \(error.localizedDescription)")
+        }
     }
 
     func updateSmoothing(_ smoothing: TrackingSmoothing) {
@@ -108,9 +148,17 @@ public final class FacialMocapReceiver {
         }
     }
 
-    private func stopAsync() {
-        Task {
-            await self.stop()
+    @MainActor
+    private func handleDisconnection() async {
+        guard shouldAutoReconnect, let ip = lastConnectedIP else {
+            await stopInternal()
+            return
+        }
+        await stopInternal()
+        do {
+            try await connect(ip: ip)
+        } catch {
+            Logger.log("Restart failed: \(error.localizedDescription)")
         }
     }
 
@@ -148,10 +196,13 @@ public final class FacialMocapReceiver {
 }
 
 private extension NWConnection {
-    func receiveData(with oniFacialMocapReceived: @escaping (FacialMocapData) -> Void) {
+    func receiveData(
+        with oniFacialMocapReceived: @escaping (FacialMocapData) -> Void,
+        onDataReceived: @escaping () -> Void
+    ) {
         receive(minimumIncompleteLength: 1, maximumLength: 8192) { [weak self] content, contentContext, isComplete, error in
             defer {
-                self?.receiveData(with: oniFacialMocapReceived)
+                self?.receiveData(with: oniFacialMocapReceived, onDataReceived: onDataReceived)
             }
 
             guard error == nil,
@@ -160,7 +211,7 @@ private extension NWConnection {
                   let mocapData = FacialMocapData(rawData: rawData) else {
                 return
             }
-
+            onDataReceived()
             oniFacialMocapReceived(mocapData)
         }
     }
@@ -194,17 +245,26 @@ extension FacialMocapReceiver {
                      switch state {
                      case .setup, .preparing: ()
                      case .waiting(let error):
+                         Logger.log("Connection waiting: \(error.localizedDescription)")
                          if case .posix(let posixError) = error, posixError == .ECONNREFUSED {
                              try? await Task.sleep(nanoseconds: NSEC_PER_SEC * 2)
                              try? await self.startServer(port: port, completion: completion)
                          }
                      case .ready:
+                         Logger.log("Connection ready")
                          self.connectionStatus = .connected
-                         connection.receiveData(with: self.oniFacialMocapReceived)
+                         self.resetTimeoutTimer()
+                         connection.receiveData(with: self.oniFacialMocapReceived, onDataReceived: { [weak self] in
+                             Task { @MainActor in
+                                 self?.resetTimeoutTimer()
+                             }
+                         })
                      case .cancelled:
-                         self.stopAsync()
-                     case .failed:
-                         try? await self.startServer(port: port, completion: completion)
+                         Logger.log("Connection cancelled")
+                         await self.handleDisconnection()
+                     case .failed(let error):
+                         Logger.log("Connection failed: \(error.localizedDescription)")
+                         await self.handleDisconnection()
                      @unknown default: ()
                      }
                 }

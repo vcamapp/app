@@ -249,8 +249,10 @@
 
 // MARK: - Integration
 "connect" = "接続";
-"connecting" = "接続中";
+"connecting" = "接続中...";
+"connected" = "接続済";
 "disconnect" = "接続解除";
+"disconnected" = "未接続";
 "helpMocopIP" = "mocopi側のPC接続設定でのポートは「12351」にしてください";
 
 // MARK: - License

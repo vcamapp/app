@@ -249,8 +249,10 @@
 
 // MARK: - Integration
 "connect" = "Connect";
-"connecting" = "Connecting";
+"connecting" = "Connecting...";
+"connected" = "Connected";
 "disconnect" = "Disconnect";
+"disconnected" = "Disconnected";
 "helpMocopIP" = "The port in the PC connection settings on the mocopi side should be \"12351\".";
 
 // MARK: - License

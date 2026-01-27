@@ -40,7 +40,15 @@ public struct VCamSettingsIntegrationView: View {
                 }
             }
             FeatureView(title: "VCamMocap") {
-                Toggle(isOn: $integrationVCamMocap) {
+                LabeledContent {
+                    VCamMotionReceiverStatusView()
+
+                    Toggle(isOn: $integrationVCamMocap) {
+                        Text(L10n.enable.key, bundle: .localize)
+                    }
+                    .labelsHidden()
+                    .toggleStyle(.switch)
+                } label: {
                     Text(L10n.enable.key, bundle: .localize)
                 }
                 .onChange(of: integrationVCamMocap) { _, newValue in
@@ -54,9 +62,14 @@ public struct VCamSettingsIntegrationView: View {
                 }
             }
             FeatureView(title: "iFacialMocap") {
-                HStack {
-                    TextField("IP", text: $integrationFacialMocapIp)
-                        .textFieldStyle(.roundedBorder)
+                LabeledContent {
+                    FacialMocapReceiverStatusView()
+
+                    TextField(text: $integrationFacialMocapIp) {
+                        Text(verbatim: "IP")
+                    }
+                    .textFieldStyle(.roundedBorder)
+                    .labelsHidden()
 
                     Button {
                         Task {
@@ -69,6 +82,8 @@ public struct VCamSettingsIntegrationView: View {
                     } label: {
                         Text(facialMocapConnectTitle, bundle: .localize)
                     }
+                } label: {
+                    Text(verbatim: "IP")
                 }
             }
             Section {
@@ -87,6 +102,42 @@ public struct VCamSettingsIntegrationView: View {
 #endif
         }
         .formStyle(.grouped)
+    }
+}
+
+private struct ReceiverStatusView: View {
+    let connectionStatus: ConnectionStatus
+
+    private var statusText: LocalizedStringKey {
+        switch connectionStatus {
+        case .disconnected: return L10n.disconnected.key
+        case .connecting: return L10n.connecting.key
+        case .connected: return L10n.connected.key
+        }
+    }
+
+    var body: some View {
+        Text(statusText, bundle: .localize)
+            .foregroundStyle(connectionStatus == .connected ? Color.accentColor : .secondary)
+            .font(.callout)
+            .fontWeight(.medium)
+            .opacity(connectionStatus == .connected ? 1.0 : 0.6)
+    }
+}
+
+private struct VCamMotionReceiverStatusView: View {
+    @Bindable private var receiver = Tracking.shared.vcamMotionReceiver
+
+    var body: some View {
+        ReceiverStatusView(connectionStatus: receiver.connectionStatus)
+    }
+}
+
+private struct FacialMocapReceiverStatusView: View {
+    @Bindable private var receiver = Tracking.shared.iFacialMocapReceiver
+
+    var body: some View {
+        ReceiverStatusView(connectionStatus: receiver.connectionStatus)
     }
 }
 

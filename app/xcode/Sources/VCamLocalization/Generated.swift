@@ -110,7 +110,9 @@ public enum L10n {
   public static let confirmSignOut = LocalizedString(lookupKey: "confirmSignOut")
   /// Connect
   public static let connect = LocalizedString(lookupKey: "connect")
-  /// Connecting
+  /// Connected
+  public static let connected = LocalizedString(lookupKey: "connected")
+  /// Connecting...
   public static let connecting = LocalizedString(lookupKey: "connecting")
   /// Contrast
   public static let contrast = LocalizedString(lookupKey: "contrast")
@@ -148,6 +150,8 @@ public enum L10n {
   public static let diffusion = LocalizedString(lookupKey: "diffusion")
   /// Disconnect
   public static let disconnect = LocalizedString(lookupKey: "disconnect")
+  /// Disconnected
+  public static let disconnected = LocalizedString(lookupKey: "disconnected")
   /// Display
   public static let display = LocalizedString(lookupKey: "display")
   /// https://docs.vcamapp.com/v/en/virtual-camera/virtualcamera
