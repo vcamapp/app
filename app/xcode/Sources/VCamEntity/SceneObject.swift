@@ -45,7 +45,7 @@ public extension SceneObject {
         var name: String {
             switch self {
             case .avatar:
-                return L10n.avatar.text
+                return L10n.model.text
             case .image:
                 return L10n.image.text
             case .screen:

@@ -144,8 +144,8 @@ extension Migration {
         guard FileManager.default.fileExists(atPath: oldPath.path) else { return }
 
         do {
-            let model = try await ModelManager.shared.saveModel(from: oldPath)
-            Logger.log("Migrated model to: \(model.name)")
+            let item = try await ModelManager.shared.saveModel(from: oldPath)
+            Logger.log("Migrated model to: \(item.model.name)")
         } catch {
             Logger.error(error)
         }

@@ -50,8 +50,6 @@ public enum L10n {
   public static let asVerticalVideo = LocalizedString(lookupKey: "asVerticalVideo")
   /// Authentication Error
   public static let authenticationError = LocalizedString(lookupKey: "authenticationError")
-  /// Avatar
-  public static let avatar = LocalizedString(lookupKey: "avatar")
   /// Background
   public static let background = LocalizedString(lookupKey: "background")
   /// Bloom
@@ -174,8 +172,8 @@ public enum L10n {
   public static let easeOfOpeningFingers = LocalizedString(lookupKey: "easeOfOpeningFingers")
   /// Edit
   public static let edit = LocalizedString(lookupKey: "edit")
-  /// Edit Avatar
-  public static let editAvatar = LocalizedString(lookupKey: "editAvatar")
+  /// Edit Model
+  public static let editModel = LocalizedString(lookupKey: "editModel")
   /// Edit Output Bounds
   public static let editOutputBounds = LocalizedString(lookupKey: "editOutputBounds")
   /// Set the minimum and maximum values for the output range.
@@ -350,6 +348,8 @@ public enum L10n {
   public static let mocapNetworkInterpolation = LocalizedString(lookupKey: "mocapNetworkInterpolation")
   /// Reduces jitter from packet drops (adds latency). Applies to VCamMocap and iFacialMocap. 
   public static let mocapNetworkInterpolationHelp = LocalizedString(lookupKey: "mocapNetworkInterpolationHelp")
+  /// Model
+  public static let model = LocalizedString(lookupKey: "model")
   /// Model List
   public static let modelList = LocalizedString(lookupKey: "modelList")
   /// Missing
@@ -384,6 +384,8 @@ public enum L10n {
   public static let ok = LocalizedString(lookupKey: "ok")
   /// Open File
   public static let openFile = LocalizedString(lookupKey: "openFile")
+  /// Open Model List
+  public static let openModelList = LocalizedString(lookupKey: "openModelList")
   /// Open preferences
   public static let openPreference = LocalizedString(lookupKey: "openPreference")
   /// Open %@
@@ -454,8 +456,8 @@ public enum L10n {
   public static let renderingQuality = LocalizedString(lookupKey: "renderingQuality")
   /// Reset All to Default
   public static let resetAllToDefault = LocalizedString(lookupKey: "resetAllToDefault")
-  /// Reset Avatar Position
-  public static let resetAvatarPosition = LocalizedString(lookupKey: "resetAvatarPosition")
+  /// Reset Model Position
+  public static let resetModelPosition = LocalizedString(lookupKey: "resetModelPosition")
   /// Reset to Default
   public static let resetToDefault = LocalizedString(lookupKey: "resetToDefault")
   /// Reset Window Size

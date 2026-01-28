@@ -6,10 +6,10 @@ import VCamLocalization
 
 public struct ModelListView: View {
     @Bindable private var modelManager: ModelManager
-    @State private var selectedModel: ModelsMeta.ModelInfo?
+    @State private var selectedModel: ModelItem?
     @State private var showDeleteConfirmation = false
-    @State private var modelToDelete: ModelsMeta.ModelInfo?
-    @State private var modelToRename: ModelsMeta.ModelInfo?
+    @State private var modelToDelete: ModelItem?
+    @State private var modelToRename: ModelItem?
 
     public init(modelManager: ModelManager = .shared) {
         self.modelManager = modelManager
@@ -62,14 +62,14 @@ public struct ModelListView: View {
             }
         } message: {
             if let model = modelToDelete {
-                Text(L10n.confirmDeleteModel(model.localizedName).key, bundle: .localize)
+                Text(L10n.confirmDeleteModel(model.model.localizedName).key, bundle: .localize)
             }
         }
     }
 
     @ViewBuilder
     private var modelList: some View {
-        if modelManager.models.isEmpty {
+        if modelManager.modelItems.isEmpty {
             ContentUnavailableView {
                 Label {
                     Text(L10n.noModelsFound.key, bundle: .localize)
@@ -80,11 +80,11 @@ public struct ModelListView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             List(selection: $selectedModel) {
-                ForEach(modelManager.models) { model in
-                    ModelRowView(model: model, isRenaming: modelToRename?.id == model.id) {
+                ForEach(modelManager.modelItems) { item in
+                    ModelRowView(item: item, isRenaming: modelToRename?.id == item.id) {
                         modelToRename = nil
                     }
-                    .tag(model)
+                    .tag(item)
                 }
                 .onMove { source, destination in
                     modelManager.moveModel(fromOffsets: source, toOffset: destination)
@@ -92,21 +92,21 @@ public struct ModelListView: View {
             }
             .listStyle(.inset)
             .onDeleteCommand {
-                guard let model = selectedModel, modelManager.models.count > 1 else { return }
+                guard let model = selectedModel, modelManager.modelItems.count > 1 else { return }
                 modelToDelete = model
                 showDeleteConfirmation = true
             }
-            .contextMenu(forSelectionType: ModelsMeta.ModelInfo.self) { models in
-                if let model = models.first {
+            .contextMenu(forSelectionType: ModelItem.self) { items in
+                if let item = items.first {
                     Button {
-                        modelToRename = model
+                        modelToRename = item
                     } label: {
                         Image(systemName: "pencil")
                         Text(L10n.rename.key, bundle: .localize)
                     }
-                    if model.status == .valid {
+                    if item.status == .valid {
                         Button {
-                            self.duplicateModel(model)
+                            self.duplicateModel(item)
                         } label: {
                             Image(systemName: "doc.on.doc")
                             Text(L10n.duplicate.key, bundle: .localize)
@@ -114,18 +114,18 @@ public struct ModelListView: View {
                     }
                     Divider()
                     Button(role: .destructive) {
-                        modelToDelete = model
+                        modelToDelete = item
                         showDeleteConfirmation = true
                     } label: {
                         Image(systemName: "trash")
                         Text(L10n.delete.key, bundle: .localize)
                     }
-                    .disabled(modelManager.models.count <= 1)
+                    .disabled(modelManager.modelItems.count <= 1)
                 }
-            } primaryAction: { models in
+            } primaryAction: { items in
                 // Double click to load
-                guard let model = models.first, model.status == .valid else { return }
-                selectedModel = model
+                guard let item = items.first, item.status == .valid else { return }
+                selectedModel = item
                 loadSelectedModel()
             }
         }
@@ -147,22 +147,22 @@ public struct ModelListView: View {
     }
 
     private func loadSelectedModel() {
-        guard let model = selectedModel,
-              model.status == .valid else { return }
-        let url = model.modelURL
+        guard let item = selectedModel,
+              item.status == .valid else { return }
+        let url = item.model.modelURL
 #if FEATURE_3
         UniBridge.shared.loadVRM(url.path)
 #else
         UniBridge.shared.loadModel(url.path)
 #endif
-        modelManager.setLastLoadedModel(model)
+        modelManager.setLastLoadedModel(item)
         MacWindowManager.shared.close(ModelListView.self)
     }
 
-    private func deleteModel(_ model: ModelsMeta.ModelInfo) {
+    private func deleteModel(_ item: ModelItem) {
         do {
-            try modelManager.deleteModel(model)
-            if selectedModel?.id == model.id {
+            try modelManager.deleteModel(item)
+            if selectedModel?.id == item.id {
                 selectedModel = nil
             }
         } catch {
@@ -171,11 +171,11 @@ public struct ModelListView: View {
         modelToDelete = nil
     }
 
-    private func duplicateModel(_ model: ModelsMeta.ModelInfo) {
+    private func duplicateModel(_ item: ModelItem) {
         Task {
             do {
-                let newModel = try await modelManager.duplicateModel(model)
-                selectedModel = newModel
+                let newItem = try await modelManager.duplicateModel(item)
+                selectedModel = newItem
             } catch {
                 print("Failed to duplicate model: \(error)")
             }
@@ -201,7 +201,7 @@ public struct ModelListView: View {
 }
 
 struct ModelRowView: View {
-    let model: ModelsMeta.ModelInfo
+    let item: ModelItem
     var isRenaming: Bool = false
     var onRenameEnd: () -> Void = {}
     @Bindable private var modelManager = ModelManager.shared
@@ -235,20 +235,20 @@ struct ModelRowView: View {
                                 }
                             }
                     } else {
-                        Text(model.localizedName)
+                        Text(item.model.localizedName)
                             .font(.body)
-                            .foregroundStyle(model.status == .missing ? .secondary : .primary)
+                            .foregroundStyle(item.status == .missing ? .secondary : .primary)
                             .onTapGesture {
                                 startEditing()
                             }
                     }
-                    if model.status == .missing {
+                    if item.status == .missing {
                         Text("(\(L10n.modelMissing.text))")
                             .font(.caption)
                             .foregroundStyle(.red)
                     }
                 }
-                Text(model.type.displayName)
+                Text(item.model.type.displayName)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -260,17 +260,17 @@ struct ModelRowView: View {
 
             Spacer()
 
-            Text(model.createdAt, style: .date)
+            Text(item.model.createdAt, style: .date)
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
         .padding(.vertical, 4)
-        .opacity(model.status == .missing ? 0.6 : 1.0)
+        .opacity(item.status == .missing ? 0.6 : 1.0)
         .contentShape(Rectangle())
     }
 
     private func startEditing() {
-        editingName = model.localizedName
+        editingName = item.model.localizedName
         isEditing = true
         isFocused = true
     }
@@ -278,19 +278,19 @@ struct ModelRowView: View {
     private func commitRename() {
         isEditing = false
         onRenameEnd()
-        guard !editingName.isEmpty, editingName != model.localizedName else { return }
-        modelManager.renameModel(model, to: editingName)
+        guard !editingName.isEmpty, editingName != item.model.localizedName else { return }
+        modelManager.renameModel(item, to: editingName)
     }
 
     @ViewBuilder
     private var thumbnailView: some View {
-        if let thumbnail = model.thumbnail {
+        if let thumbnail = item.model.thumbnail {
             Image(nsImage: thumbnail)
                 .resizable()
                 .aspectRatio(contentMode: .fill)
         } else {
-            Image(systemName: model.status == .missing ? "exclamationmark.triangle.fill" : "person.2.fill")
-                .foregroundStyle(model.status == .missing ? .red : .pink)
+            Image(systemName: item.status == .missing ? "exclamationmark.triangle.fill" : "person.2.fill")
+                .foregroundStyle(item.status == .missing ? .red : .pink)
                 .font(.title2)
         }
     }
@@ -312,9 +312,9 @@ extension ModelListView: MacWindow {
 }
 
 #Preview("With Models") {
-    let models: [ModelsMeta.ModelInfo] = [
+    let models: [Models.Model] = [
         .init(name: "Avatar1", type: .vrm),
-        .init(name: "Avatar2", type: .vrm, status: .missing),
+        .init(name: "Avatar2", type: .vrm),
         .init(name: "MyModel", type: .vrm),
     ]
     ModelListView(modelManager: .init(models: models, lastLoadedModelId: models[0].id))

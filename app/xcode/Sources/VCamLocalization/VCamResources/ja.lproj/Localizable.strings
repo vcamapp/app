@@ -24,7 +24,7 @@
 "title" = "タイトル";
 "notitle" = "タイトルなし";
 "object" = "オブジェクト";
-"avatar" = "アバター";
+"model" = "モデル";
 "image" = "画像";
 "screen" = "画面";
 "web" = "ウェブ";
@@ -121,7 +121,7 @@
 "playIdleMotions" = "待機モーションをランダム再生する";
 "simulateShadows" = "影をシミュレーションする (負荷増)";
 "optimizeMeshes" = "モデルのメッシュを最適化する (推奨)";
-"enableAutoConvertingToVRM1" = "VRM0.x系のアバターを1.0系に自動変換する";
+"enableAutoConvertingToVRM1" = "VRM0.x系のモデルを1.0系に自動変換する";
 "helpMesh" = "メッシュの結合等によりアプリの負荷を大幅に下げられます。モデルの表示に問題がある場合はオフにした後、モデルを再読込してください。";
 "flipScreen" = "仮想カメラの画面を左右反転する";
 "addToMacOSMenuBar" = "macOSのメニューバーに追加する";
@@ -288,10 +288,11 @@
 "aboutApp" = "このアプリについて";
 "checkForUpdates" = "アップデート確認";
 "file" = "ファイル";
+"openModelList" = "モデル一覧を開く";
 "loadVRMFile" = "VRMファイルを読み込む";
-"loadOnVRoidHub" = "VRoid Hubからアバターを選ぶ";
+"loadOnVRoidHub" = "VRoid Hubからモデルを選ぶ";
 "loadModelFile" = "モデルを読み込む";
-"resetAvatarPosition" = "アバターの位置をリセット";
+"resetModelPosition" = "モデルの位置をリセット";
 "alwaysOnTop" = "ウィンドウを常に最前面にする";
 "resetWindowSize" = "ウィンドウサイズを初期値に戻す";
 "help" = "ヘルプ";
@@ -299,7 +300,7 @@
 "quitVCam" = "%@を終了";
 "openVCam" = "%@を開く";
 
-"editAvatar" = "アバターの編集";
+"editModel" = "モデルの編集";
 "calibrate" = "キャリブレーション";
 
 "update" = "更新";

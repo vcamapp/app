@@ -6,10 +6,8 @@ import VCamEntity
 public final class ModelManager {
     public static let shared = ModelManager()
 
-    public private(set) var models: [ModelsMeta.ModelInfo] = []
+    public private(set) var modelItems: [ModelItem] = []
     public private(set) var lastLoadedModelId: UUID?
-
-    private let fileManager = FileManager.default
 
     private init() {
         loadMeta()
@@ -17,47 +15,46 @@ public final class ModelManager {
     }
 
     #if DEBUG
-    public init(models: [ModelsMeta.ModelInfo], lastLoadedModelId: UUID? = nil) {
-        self.models = models
+    public init(models: [Models.Model], lastLoadedModelId: UUID? = nil) {
+        self.modelItems = models.map { ModelItem(model: $0) }
         self.lastLoadedModelId = lastLoadedModelId
     }
     #endif
 
-    public var lastLoadedModel: ModelsMeta.ModelInfo? {
+    public var lastLoadedModel: ModelItem? {
         guard let id = lastLoadedModelId else { return nil }
-        return models.first { $0.id == id }
+        return modelItems.first { $0.id == id }
     }
 
-    public func setLastLoadedModel(_ model: ModelsMeta.ModelInfo) {
+    public func setLastLoadedModel(_ model: ModelItem) {
         lastLoadedModelId = model.id
         saveMeta()
     }
 
     @MainActor
-    public func saveModel(from source: URL, name: String? = nil) async throws -> ModelsMeta.ModelInfo {
+    public func saveModel(from source: URL, name: String? = nil) async throws -> ModelItem {
 #if FEATURE_3
         let baseName = name ?? source.deletingPathExtension().lastPathComponent
 #else
         let baseName = name ?? source.lastPathComponent
 #endif
         let directoryName = generateUniqueDirectoryName(baseName: baseName)
-        let modelDirectory = ModelsMeta.modelDirectory(ofName: directoryName)
-        try fileManager.createDirectoryIfNeeded(at: modelDirectory)
+        let modelDirectory = Models.modelDirectory(ofName: directoryName)
+        try FileManager.default.createDirectoryIfNeeded(at: modelDirectory)
 
-        let destinationURL = modelDirectory.appending(path: ModelsMeta.modelFileName)
-        if fileManager.fileExists(atPath: destinationURL.path) {
-            try fileManager.removeItem(at: destinationURL)
+        let destinationURL = modelDirectory.appending(path: Models.modelFileName)
+        if FileManager.default.fileExists(atPath: destinationURL.path) {
+            try FileManager.default.removeItem(at: destinationURL)
         }
-        try fileManager.copyItem(at: source, to: destinationURL)
+        try FileManager.default.copyItem(at: source, to: destinationURL)
 
-        let modelInfo = ModelsMeta.ModelInfo(name: directoryName, type: ModelsMeta.modelType)
+        let modelInfo = Models.Model(name: directoryName, type: Models.modelType)
         await saveThumbnail(for: modelInfo)
-        addModel(modelInfo)
-        return modelInfo
+        return addModel(modelInfo)
     }
 
     @MainActor
-    private func saveThumbnail(for model: ModelsMeta.ModelInfo) async {
+    private func saveThumbnail(for model: Models.Model) async {
         let metadata = await Task.detached(priority: .utility) {
             try? ModelMetaLoader.load(from: model.modelURL)
         }.value
@@ -67,33 +64,35 @@ public final class ModelManager {
         }
     }
 
-    public func deleteModel(_ model: ModelsMeta.ModelInfo) throws {
-        let modelDirectory = model.rootURL
-        if fileManager.fileExists(atPath: modelDirectory.path) {
-            try fileManager.removeItem(at: modelDirectory)
+    public func deleteModel(_ item: ModelItem) throws {
+        let modelDirectory = item.model.rootURL
+        if FileManager.default.fileExists(atPath: modelDirectory.path) {
+            try FileManager.default.removeItem(at: modelDirectory)
         }
-        removeModel(model)
+        removeModel(item)
     }
 
     @MainActor
-    public func duplicateModel(_ model: ModelsMeta.ModelInfo) async throws -> ModelsMeta.ModelInfo {
-        guard model.status == .valid else {
+    public func duplicateModel(_ item: ModelItem) async throws -> ModelItem {
+        guard item.status == .valid else {
             throw ModelManagerError.modelURLNotFound
         }
-        return try await saveModel(from: model.modelURL, name: "\(model.name)_copy")
+        return try await saveModel(from: item.model.modelURL, name: "\(item.model.name)_copy")
     }
 
     public func moveModel(fromOffsets source: IndexSet, toOffset destination: Int) {
-        models.move(fromOffsets: source, toOffset: destination)
+        modelItems.move(fromOffsets: source, toOffset: destination)
         saveMeta()
     }
 
-    public func renameModel(_ model: ModelsMeta.ModelInfo, to newName: String) {
+    public func renameModel(_ item: ModelItem, to newName: String) {
         let trimmedName = newName.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedName.isEmpty, trimmedName != model.localizedName else { return }
+        guard !trimmedName.isEmpty, trimmedName != item.model.localizedName else { return }
 
-        if let index = models.firstIndex(where: { $0.id == model.id }) {
-            models[index].displayName = trimmedName
+        if let index = modelItems.firstIndex(where: { $0.id == item.id }) {
+            var model = modelItems[index].model
+            model.displayName = trimmedName
+            modelItems[index] = ModelItem(model: model, status: modelItems[index].status)
         }
         saveMeta()
     }
@@ -105,7 +104,7 @@ public final class ModelManager {
     private func generateUniqueDirectoryName(baseName: String) -> String {
         var name = baseName
         var counter = 1
-        while models.contains(where: { $0.name == name }) || fileManager.fileExists(atPath: ModelsMeta.modelDirectory(ofName: name).path) {
+        while modelItems.contains(where: { $0.model.name == name }) || FileManager.default.fileExists(atPath: Models.modelDirectory(ofName: name).path) {
             counter += 1
             name = "\(baseName)_\(counter)"
         }
@@ -113,80 +112,84 @@ public final class ModelManager {
     }
 
     private func validateModels() {
-        for i in models.indices {
-            let url = models[i].modelURL
-            models[i].status = fileManager.fileExists(atPath: url.path) ? .valid : .missing
+        modelItems = modelItems.map { item in
+            let url = item.model.modelURL
+            let status: ModelItem.ModelStatus = FileManager.default.fileExists(atPath: url.path) ? .valid : .missing
+            return ModelItem(model: item.model, status: status)
         }
         scanForNewModels()
         saveMeta()
     }
 
     private func scanForNewModels() {
-        guard fileManager.fileExists(atPath: ModelsMeta.modelsDirectory.path) else { return }
+        guard FileManager.default.fileExists(atPath: Models.modelsDirectory.path) else { return }
 
         do {
-            let contents = try fileManager.contentsOfDirectory(
-                at: ModelsMeta.modelsDirectory,
+            let contents = try FileManager.default.contentsOfDirectory(
+                at: Models.modelsDirectory,
                 includingPropertiesForKeys: [.creationDateKey],
                 options: [.skipsHiddenFiles]
             )
 
-            let existingNames = Set(models.map { $0.name })
+            let existingNames = Set(modelItems.map(\.model.name))
 
             for directory in contents {
                 let name = directory.lastPathComponent
-                guard name != "meta.json", !existingNames.contains(name) else { continue }
+                guard name != Models.metaFileName, !existingNames.contains(name) else { continue }
 
-                let modelFile = directory.appending(path: ModelsMeta.modelFileName)
-                guard fileManager.fileExists(atPath: modelFile.path) else { continue }
+                let modelFile = directory.appending(path: Models.modelFileName)
+                guard FileManager.default.fileExists(atPath: modelFile.path) else { continue }
 
-                let attributes = try? fileManager.attributesOfItem(atPath: modelFile.path)
-                let createdAt = attributes?[.creationDate] as? Date ?? Date()
-                let modelInfo = ModelsMeta.ModelInfo(name: name, type: ModelsMeta.modelType, createdAt: createdAt, status: .valid)
-                models.append(modelInfo)
+                let attributes = try? FileManager.default.attributesOfItem(atPath: modelFile.path)
+                let createdAt = attributes?[.creationDate] as? Date ?? .now
+                let modelInfo = Models.Model(name: name, type: Models.modelType, createdAt: createdAt)
+                modelItems.append(ModelItem(model: modelInfo, status: .valid))
             }
         } catch {
             print("Failed to scan models: \(error)")
         }
     }
 
-    private func addModel(_ model: ModelsMeta.ModelInfo) {
-        guard !models.contains(where: { $0.id == model.id }) else { return }
-        models.insert(model, at: 0)
+    @discardableResult
+    private func addModel(_ model: Models.Model) -> ModelItem {
+        let item = ModelItem(model: model, status: .valid)
+        guard !modelItems.contains(where: { $0.id == model.id }) else { return item }
+        modelItems.insert(item, at: 0)
         saveMeta()
+        return item
     }
 
-    private func removeModel(_ model: ModelsMeta.ModelInfo) {
-        models.removeAll { $0.id == model.id }
-        if lastLoadedModelId == model.id {
+    private func removeModel(_ item: ModelItem) {
+        modelItems.removeAll { $0.id == item.id }
+        if lastLoadedModelId == item.id {
             lastLoadedModelId = nil
         }
         saveMeta()
     }
 
     private func loadMeta() {
-        guard fileManager.fileExists(atPath: ModelsMeta.metaURL.path),
-              let data = try? Data(contentsOf: ModelsMeta.metaURL),
-              let meta = try? JSONDecoder().decode(ModelsMeta.self, from: data) else {
+        guard FileManager.default.fileExists(atPath: Models.metaURL.path),
+              let data = try? Data(contentsOf: Models.metaURL),
+              let meta = try? JSONDecoder().decode(Models.self, from: data) else {
             return
         }
-        models = meta.models
+        modelItems = meta.models.map { ModelItem(model: $0) }
         lastLoadedModelId = meta.lastModelId
     }
 
     private func saveMeta() {
         do {
-            try fileManager.createDirectoryIfNeeded(at: ModelsMeta.modelsDirectory)
-            let meta = ModelsMeta(models: models, lastModelId: lastLoadedModelId)
+            try FileManager.default.createDirectoryIfNeeded(at: Models.modelsDirectory)
+            let meta = Models(models: modelItems.map(\.model), lastModelId: lastLoadedModelId)
             let encoder = JSONEncoder()
             let data = try encoder.encode(meta)
-            try data.write(to: ModelsMeta.metaURL)
+            try data.write(to: Models.metaURL)
         } catch {
             print("Failed to save meta: \(error)")
         }
     }
 
-    private func saveThumbnail(_ image: NSImage, for model: ModelsMeta.ModelInfo) {
+    private func saveThumbnail(_ image: NSImage, for model: Models.Model) {
         guard let tiffData = image.tiffRepresentation,
               let bitmap = NSBitmapImageRep(data: tiffData),
               let pngData = bitmap.representation(using: .png, properties: [:]) else {
@@ -194,7 +197,7 @@ public final class ModelManager {
         }
 
         do {
-            try pngData.write(to: model.rootURL.appending(path: ModelsMeta.ModelInfo.thumbnailFileName))
+            try pngData.write(to: model.rootURL.appending(path: Models.Model.thumbnailFileName))
         } catch {
             print("Failed to save thumbnail: \(error)")
         }

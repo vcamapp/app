@@ -1,8 +1,8 @@
 import AppKit
 import VCamEntity
 
-public struct ModelsMeta: Codable, Sendable {
-    var models: [ModelInfo]
+public struct Models: Codable, Sendable {
+    var models: [Model]
     var lastModelId: UUID?
 
     public static var modelsDirectory: URL {
@@ -16,42 +16,35 @@ public struct ModelsMeta: Codable, Sendable {
     public static let modelFileName = "live2d"
     public static let modelType: ModelType = .live2d
 #endif
+    public static let metaFileName = "meta.json"
 
     public static var metaURL: URL {
-        modelsDirectory.appending(path: "meta.json")
+        modelsDirectory.appending(path: metaFileName)
     }
 
     public static func modelDirectory(ofName name: String) -> URL {
         modelsDirectory.appending(path: name)
     }
 
-    public struct ModelInfo: Identifiable, Codable, Equatable, Hashable, Sendable {
+    public struct Model: Identifiable, Codable, Equatable, Hashable, Sendable {
         public let id: UUID
         public var name: String
         public var displayName: String?
         public let type: ModelType
         public let createdAt: Date
-        public var status: ModelStatus
-
-        public enum ModelStatus: String, Codable, Hashable, Sendable {
-            case valid
-            case missing
-        }
 
         public init(
             id: UUID = UUID(),
             name: String,
             displayName: String? = nil,
             type: ModelType,
-            createdAt: Date = .now,
-            status: ModelStatus = .valid
+            createdAt: Date = .now
         ) {
             self.id = id
             self.name = name
             self.displayName = displayName
             self.type = type
             self.createdAt = createdAt
-            self.status = status
         }
 
         public var localizedName: String {
@@ -60,15 +53,32 @@ public struct ModelsMeta: Codable, Sendable {
     }
 }
 
-extension ModelsMeta.ModelInfo {
+public struct ModelItem: Identifiable, Equatable, Hashable, Sendable {
+    public let model: Models.Model
+    public var status: ModelStatus
+
+    public var id: UUID { model.id }
+
+    public init(model: Models.Model, status: ModelStatus = .valid) {
+        self.model = model
+        self.status = status
+    }
+
+    public enum ModelStatus: String, Hashable, Sendable {
+        case valid
+        case missing
+    }
+}
+
+extension Models.Model {
     static var thumbnailFileName: String { "thumbnail.png" }
 
     public var rootURL: URL {
-        ModelsMeta.modelDirectory(ofName: name)
+        Models.modelDirectory(ofName: name)
     }
 
     public var modelURL: URL {
-        rootURL.appending(path: ModelsMeta.modelFileName)
+        rootURL.appending(path: Models.modelFileName)
     }
 
     public var thumbnail: NSImage? {

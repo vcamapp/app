@@ -17,7 +17,7 @@ public struct VCamResetCameraAction: VCamAction {
     }
 
     public var configuration: VCamResetCameraActionConfiguration
-    public var name: String { L10n.resetAvatarPosition.text }
+    public var name: String { L10n.resetModelPosition.text }
     public var icon: Image { Image(systemName: "arrow.triangle.2.circlepath.camera.fill") }
 
     @MainActor

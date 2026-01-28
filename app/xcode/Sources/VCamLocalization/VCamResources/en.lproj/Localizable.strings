@@ -24,7 +24,7 @@
 "title" = "Title";
 "notitle" = "No Title";
 "object" = "Object";
-"avatar" = "Avatar";
+"model" = "Model";
 "image" = "Image";
 "screen" = "Screen";
 "clipboard" = "Clipboard";
@@ -288,10 +288,11 @@
 "aboutApp" = "About %@";
 "checkForUpdates" = "Check for Updates...";
 "file" = "File";
+"openModelList" = "Open Model List";
 "loadVRMFile" = "Load VRM File";
 "loadOnVRoidHub" = "Load Avatar on VRoid Hub";
 "loadModelFile" = "Load Model File";
-"resetAvatarPosition" = "Reset Avatar Position";
+"resetModelPosition" = "Reset Model Position";
 "alwaysOnTop" = "Always on Top";
 "resetWindowSize" = "Reset Window Size";
 "help" = "Help";
@@ -299,7 +300,7 @@
 "quitVCam" = "Quit %@";
 "openVCam" = "Open %@";
 
-"editAvatar" = "Edit Avatar";
+"editModel" = "Edit Model";
 "calibrate" = "Calibrate";
 
 "update" = "Update";

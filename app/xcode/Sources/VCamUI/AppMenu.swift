@@ -31,7 +31,7 @@ public final class AppMenu: NSObject {
         setupEditMenu(subMenu: menu)
         setupObjectMenu(subMenu: menu)
 #if FEATURE_3
-        setupAvatarMenu(subMenu: menu)
+        setupModelMenu(subMenu: menu)
 #endif
         setupWindowMenu(subMenu: menu)
         setupHelpMenu(subMenu: menu)
@@ -104,45 +104,27 @@ private extension AppMenu {
 // MARK: - File
 private extension AppMenu {
     private func setupFileMenu(subMenu: NSMenu) {
+        var items: [NSMenuItem] = [
+            makeMenuItem(title: L10n.openModelList.text, action: #selector(openModelList)),
+        ]
 #if FEATURE_3
-        let items: [NSMenuItem] = [
-            makeMenuItem(title: L10n.loadVRMFile.text, action: #selector(loadVRM)),
+        items.append(contentsOf: [
+            .separator(),
             makeMenuItem(title: L10n.loadOnVRoidHub.text, action: #selector(openVRoidHub)),
-        ]
-#else
-        let items: [NSMenuItem] = [
-            makeMenuItem(title: L10n.loadModelFile.text, action: #selector(loadModel)),
-        ]
+        ])
 #endif
         Self.makeSubMenu(menu: subMenu, title: L10n.file.text, items: items)
     }
 
-    @objc private func loadVRM() {
-        Logger.log(event: .loadVRMFile)
+    @objc private func openModelList() {
         Logger.log("")
-        guard let url = FileUtility.openFile(type: .vrm) else { return }
-        UniBridge.shared.loadVRM(url.path)
-        saveModel(url: url)
+        MacWindowManager.shared.open(ModelListView())
     }
 
     @objc private func openVRoidHub() {
         Logger.log(event: .openVRoidHub)
         Logger.log("")
         UniBridge.shared.openVRoidHub()
-    }
-
-    @objc private func loadModel() {
-        Logger.log(event: .loadModelFile)
-        Logger.log("")
-        guard let url = FileUtility.pickDirectory(canCreateDirectories: false) else { return }
-        UniBridge.shared.loadModel(url.path)
-        saveModel(url: url)
-    }
-
-    private func saveModel(url: URL) {
-        Task {
-            _ = try await ModelManager.shared.saveModel(from: url)
-        }
     }
 }
 
@@ -151,8 +133,6 @@ private extension AppMenu {
     private func setupObjectMenu(subMenu: NSMenu) {
 #if FEATURE_3
         let items: [NSMenuItem] = [
-            makeMenuItem(title: L10n.resetAvatarPosition.text, action: #selector(resetAvatarPosition)),
-            .separator(),
             makeMenuItem(title: L10n.addImage.text, action: #selector(addImage)),
             makeMenuItem(title: L10n.addScreenCapture.text, action: #selector(addScreenCapture)),
             makeMenuItem(title: L10n.addVideoCapture.text, action: #selector(addVideoCapture)),
@@ -162,7 +142,7 @@ private extension AppMenu {
         ]
 #else
         let items: [NSMenuItem] = [
-            makeMenuItem(title: L10n.resetAvatarPosition.text, action: #selector(resetAvatarPosition)),
+            makeMenuItem(title: L10n.resetModelPosition.text, action: #selector(resetModelPosition)),
             .separator(),
             makeMenuItem(title: L10n.addImage.text, action: #selector(addImage)),
             makeMenuItem(title: L10n.addScreenCapture.text, action: #selector(addScreenCapture)),
@@ -171,10 +151,6 @@ private extension AppMenu {
         ]
 #endif
         Self.makeSubMenu(menu: subMenu, title: L10n.object.text, items: items)
-    }
-
-    @objc private func resetAvatarPosition() {
-        UniBridge.shared.resetCamera()
     }
 
     @objc private func addImage() {
@@ -206,29 +182,28 @@ private extension AppMenu {
     }
 }
 
-// MARK: - Avatar
+// MARK: - Model
 private extension AppMenu {
-    private func setupAvatarMenu(subMenu: NSMenu) {
-        Self.makeSubMenu(menu: subMenu, title: L10n.avatar.text, items: [
-            makeMenuItem(title: L10n.modelList.text, action: #selector(openModelList)),
-            makeMenuItem(title: L10n.editAvatar.text, action: #selector(editAvatar)),
+    private func setupModelMenu(subMenu: NSMenu) {
+        Self.makeSubMenu(menu: subMenu, title: L10n.model.text, items: [
+            makeMenuItem(title: L10n.editModel.text, action: #selector(editModel)),
             .separator(),
             makeMenuItem(title: L10n.calibrate.text, action: #selector(resetCalibration)),
+            makeMenuItem(title: L10n.resetModelPosition.text, action: #selector(resetModelPosition)),
         ])
     }
 
-    @objc private func openModelList() {
-        Logger.log("")
-        MacWindowManager.shared.open(ModelListView())
-    }
-
-    @objc private func editAvatar() {
+    @objc private func editModel() {
         Logger.log("")
         UniBridge.shared.editAvatar()
     }
 
     @objc private func resetCalibration() {
         Tracking.shared.resetCalibration()
+    }
+
+    @objc private func resetModelPosition() {
+        UniBridge.shared.resetCamera()
     }
 }
 
