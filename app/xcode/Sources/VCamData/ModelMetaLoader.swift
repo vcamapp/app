@@ -51,7 +51,7 @@ enum ModelMetaLoader {
     }
 
     private static func live2DModelJSON(in directory: URL) -> URL? {
-        guard let contents = try? FileManager.default.contentsOfDirectory(
+        guard let enumerator = FileManager.default.enumerator(
             at: directory,
             includingPropertiesForKeys: [.isRegularFileKey],
             options: [.skipsHiddenFiles]
@@ -59,11 +59,14 @@ enum ModelMetaLoader {
             return nil
         }
 
-        let candidates = contents
-            .filter { isLive2DModelJSON($0) }
-            .sorted { $0.lastPathComponent < $1.lastPathComponent }
+        var candidates: [URL] = []
+        for case let fileURL as URL in enumerator {
+            if isLive2DModelJSON(fileURL) {
+                candidates.append(fileURL)
+            }
+        }
 
-        return candidates.first
+        return candidates.sorted { $0.lastPathComponent < $1.lastPathComponent }.first
     }
 
     private static func isLive2DModelJSON(_ url: URL) -> Bool {

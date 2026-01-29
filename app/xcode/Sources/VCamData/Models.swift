@@ -53,16 +53,12 @@ public struct Models: Codable, Sendable {
     }
 }
 
-public struct ModelItem: Identifiable, Equatable, Hashable, Sendable {
+public struct ModelItem: Identifiable, Hashable {
     public let model: Models.Model
     public var status: ModelStatus
+    public var thumbnail: NSImage?
 
     public var id: UUID { model.id }
-
-    public init(model: Models.Model, status: ModelStatus = .valid) {
-        self.model = model
-        self.status = status
-    }
 
     public enum ModelStatus: String, Hashable, Sendable {
         case valid
@@ -81,8 +77,11 @@ extension Models.Model {
         rootURL.appending(path: Models.modelFileName)
     }
 
-    public var thumbnail: NSImage? {
-        let thumbnailURL = rootURL.appending(path: Self.thumbnailFileName)
-        return NSImage(contentsOfFile: thumbnailURL.path)
+    public var thumbnailURL: URL {
+        rootURL.appending(path: Self.thumbnailFileName)
+    }
+
+    public func loadThumbnail() -> NSImage? {
+        NSImage(contentsOfFile: thumbnailURL.path)
     }
 }

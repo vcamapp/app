@@ -133,11 +133,11 @@ extension Migration {
 #if FEATURE_3
         // If updated from a version prior to 0.14.1
         guard version[0] == 0 && (version[1] < 14 || (version[1] == 14 && version[2] < 1)) else { return }
-        let oldPath = URL.applicationSupportDirectory.appending(path: "tattn/VCam/prev/model.vrm")
+        let oldPath = URL.applicationSupportDirectoryWithBundleID.appending(path: "prev/model.vrm")
 #else
         // If updated from a version prior to 0.0.3
         guard version[0] == 0 && version[1] == 0 && version[2] < 3 else { return }
-        let oldPath = URL.applicationSupportDirectory.appending(path: "Unlypt/VCam2D/prev/model")
+        let oldPath = URL.applicationSupportDirectoryWithBundleID.appending(path: "prev/model")
 #endif
         Logger.log("Migrating models from \(version.map(String.init).joined(separator: "."))")
 

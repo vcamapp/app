@@ -21,6 +21,7 @@
 "delete" = "Delete";
 "duplicate" = "Duplicate";
 "rename" = "Rename";
+"changeThumbnail" = "Change Thumbnail";
 "title" = "Title";
 "notitle" = "No Title";
 "object" = "Object";

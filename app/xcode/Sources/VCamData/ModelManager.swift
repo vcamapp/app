@@ -10,13 +10,14 @@ public final class ModelManager {
     public private(set) var lastLoadedModelId: UUID?
 
     private init() {
+        try? FileManager.default.createDirectoryIfNeeded(at: Models.modelsDirectory)
         loadMeta()
         validateModels()
     }
 
     #if DEBUG
     public init(models: [Models.Model], lastLoadedModelId: UUID? = nil) {
-        self.modelItems = models.map { ModelItem(model: $0) }
+        self.modelItems = models.map { ModelItem(model: $0, status: .valid, thumbnail: $0.loadThumbnail()) }
         self.lastLoadedModelId = lastLoadedModelId
     }
     #endif
@@ -36,7 +37,8 @@ public final class ModelManager {
 #if FEATURE_3
         let baseName = name ?? source.deletingPathExtension().lastPathComponent
 #else
-        let baseName = name ?? source.lastPathComponent
+        let metadata = try? ModelMetaLoader.load(from: source)
+        let baseName = name ?? metadata?.name ?? source.lastPathComponent
 #endif
         let directoryName = generateUniqueDirectoryName(baseName: baseName)
         let modelDirectory = Models.modelDirectory(ofName: directoryName)
@@ -92,9 +94,22 @@ public final class ModelManager {
         if let index = modelItems.firstIndex(where: { $0.id == item.id }) {
             var model = modelItems[index].model
             model.displayName = trimmedName
-            modelItems[index] = ModelItem(model: model, status: modelItems[index].status)
+            modelItems[index] = ModelItem(model: model, status: modelItems[index].status, thumbnail: modelItems[index].thumbnail)
         }
         saveMeta()
+    }
+
+    public func setThumbnail(for item: ModelItem, from imageURL: URL) throws {
+        guard let image = NSImage(contentsOf: imageURL) else {
+            throw ModelManagerError.invalidImage
+        }
+        saveThumbnail(image, for: item.model)
+        updateThumbnail(for: item, image: image)
+    }
+
+    private func updateThumbnail(for item: ModelItem, image: NSImage) {
+        guard let index = modelItems.firstIndex(where: { $0.id == item.id }) else { return }
+        modelItems[index] = ModelItem(model: item.model, status: item.status, thumbnail: image)
     }
 
     public func refresh() {
@@ -115,7 +130,7 @@ public final class ModelManager {
         modelItems = modelItems.map { item in
             let url = item.model.modelURL
             let status: ModelItem.ModelStatus = FileManager.default.fileExists(atPath: url.path) ? .valid : .missing
-            return ModelItem(model: item.model, status: status)
+            return ModelItem(model: item.model, status: status, thumbnail: item.thumbnail ?? item.model.loadThumbnail())
         }
         scanForNewModels()
         saveMeta()
@@ -143,7 +158,7 @@ public final class ModelManager {
                 let attributes = try? FileManager.default.attributesOfItem(atPath: modelFile.path)
                 let createdAt = attributes?[.creationDate] as? Date ?? .now
                 let modelInfo = Models.Model(name: name, type: Models.modelType, createdAt: createdAt)
-                modelItems.append(ModelItem(model: modelInfo, status: .valid))
+                modelItems.append(ModelItem(model: modelInfo, status: .valid, thumbnail: modelInfo.loadThumbnail()))
             }
         } catch {
             print("Failed to scan models: \(error)")
@@ -152,7 +167,7 @@ public final class ModelManager {
 
     @discardableResult
     private func addModel(_ model: Models.Model) -> ModelItem {
-        let item = ModelItem(model: model, status: .valid)
+        let item = ModelItem(model: model, status: .valid, thumbnail: model.loadThumbnail())
         guard !modelItems.contains(where: { $0.id == model.id }) else { return item }
         modelItems.insert(item, at: 0)
         saveMeta()
@@ -173,7 +188,7 @@ public final class ModelManager {
               let meta = try? JSONDecoder().decode(Models.self, from: data) else {
             return
         }
-        modelItems = meta.models.map { ModelItem(model: $0) }
+        modelItems = meta.models.map { ModelItem(model: $0, status: .valid, thumbnail: $0.loadThumbnail()) }
         lastLoadedModelId = meta.lastModelId
     }
 
@@ -206,4 +221,5 @@ public final class ModelManager {
 
 public enum ModelManagerError: Error {
     case modelURLNotFound
+    case invalidImage
 }

@@ -21,6 +21,7 @@
 "delete" = "削除";
 "duplicate" = "複製";
 "rename" = "名前を変更";
+"changeThumbnail" = "サムネイルを変更";
 "title" = "タイトル";
 "notitle" = "タイトルなし";
 "object" = "オブジェクト";

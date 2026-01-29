@@ -76,6 +76,8 @@ public enum L10n {
   public static let capturePreference = LocalizedString(lookupKey: "capturePreference")
   /// Capture Type
   public static let captureType = LocalizedString(lookupKey: "captureType")
+  /// Change Thumbnail
+  public static let changeThumbnail = LocalizedString(lookupKey: "changeThumbnail")
   /// Change the direction of the wind randomly
   public static let changeWindDirection = LocalizedString(lookupKey: "changeWindDirection")
   /// Check for Updates...

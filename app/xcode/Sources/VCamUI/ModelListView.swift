@@ -104,9 +104,15 @@ public struct ModelListView: View {
                         Image(systemName: "pencil")
                         Text(L10n.rename.key, bundle: .localize)
                     }
+                    Button {
+                        changeThumbnail(item)
+                    } label: {
+                        Image(systemName: "photo")
+                        Text(L10n.changeThumbnail.key, bundle: .localize)
+                    }
                     if item.status == .valid {
                         Button {
-                            self.duplicateModel(item)
+                            duplicateModel(item)
                         } label: {
                             Image(systemName: "doc.on.doc")
                             Text(L10n.duplicate.key, bundle: .localize)
@@ -180,6 +186,11 @@ public struct ModelListView: View {
                 print("Failed to duplicate model: \(error)")
             }
         }
+    }
+
+    private func changeThumbnail(_ item: ModelItem) {
+        guard let url = FileUtility.openFile(type: .image) else { return }
+        try? modelManager.setThumbnail(for: item, from: url)
     }
 
     private func addNewModel() {
@@ -284,7 +295,7 @@ struct ModelRowView: View {
 
     @ViewBuilder
     private var thumbnailView: some View {
-        if let thumbnail = item.model.thumbnail {
+        if let thumbnail = item.thumbnail {
             Image(nsImage: thumbnail)
                 .resizable()
                 .aspectRatio(contentMode: .fill)
