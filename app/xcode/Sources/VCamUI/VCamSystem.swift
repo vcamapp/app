@@ -1,10 +1,3 @@
-//
-//  VCamSystem.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2023/02/25.
-//
-
 import AppKit
 import VCamAppExtension
 import VCamBridge
@@ -15,6 +8,7 @@ import VCamData
 import VCamEntity
 import VCamWorkaround
 
+@MainActor
 public final class VCamSystem {
     public static let shared = VCamSystem()
     public static var initializeToUnity: (() -> Void)?
@@ -30,11 +24,15 @@ public final class VCamSystem {
 
     private init() {
         ExtensionNotificationCenter.default.setObserver(for: .startCameraExtensionStream) { [weak self] in
-            self?.startSystem()
+            Task {
+                self?.startSystem()
+            }
         }
 
         ExtensionNotificationCenter.default.setObserver(for: .stopAllCameraExtensionStreams) { [weak self] in
-            self?.stopSystem()
+            Task {
+                self?.stopSystem()
+            }
         }
 
         UniState.shared.initializeToUnity()

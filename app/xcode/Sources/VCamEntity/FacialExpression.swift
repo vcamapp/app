@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum FacialExpression: Int32 {
+public enum FacialExpression: Int32, Sendable {
     case neutral
     case laugh
 

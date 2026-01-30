@@ -9,7 +9,7 @@ import Foundation
 import class AppKit.NSEvent
 import var Carbon.HIToolbox.Events.kVK_Space
 
-public struct KeyCombination: Equatable, CustomStringConvertible {
+public struct KeyCombination: Equatable, CustomStringConvertible, Sendable {
     public init(key: String = "", keyCode: UInt16 = 0, modifiers: NSEvent.ModifierFlags = []) {
         self.key = key.lowercased()
         self.keyCode = keyCode

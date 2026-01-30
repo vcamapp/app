@@ -1,17 +1,11 @@
-//
-//  PasteboardObserver.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2022/06/04.
-//
-
 import AppKit
 
+@MainActor
 @Observable
 public final class PasteboardObserver {
     public static let shared = PasteboardObserver()
 
-    @ObservationIgnored private var timer: Timer?
+    @ObservationIgnored nonisolated(unsafe) private var timer: Timer?
     @ObservationIgnored private var lastChangeCount: Int = 0
 
     private let pasteboard: NSPasteboard = .general
@@ -23,12 +17,14 @@ public final class PasteboardObserver {
     }
 
     deinit {
-        dispose()
+        timer?.invalidate()
+        timer = nil
     }
 
     public func observe() {
         timer?.invalidate()
-        timer = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { _ in
+        timer = Timer.scheduledTimerOnMain(withTimeInterval: 2, repeats: true) { [weak self] _ in
+            guard let self else { return }
             if self.lastChangeCount != self.pasteboard.changeCount {
                 self.lastChangeCount = self.pasteboard.changeCount
                 try? self.updateState()
@@ -54,6 +50,17 @@ public final class PasteboardObserver {
             let url = URL.temporaryDirectory.appending(path: "vcam_clipboard.png")
             try image.writeAsPNG(to: url)
             imageURL = url
+        }
+    }
+}
+
+extension Timer {
+    @MainActor @discardableResult static func scheduledTimerOnMain(withTimeInterval: TimeInterval, repeats: Bool, block: @escaping @MainActor (Timer) -> Void) -> Timer {
+        Timer.scheduledTimer(withTimeInterval: withTimeInterval, repeats: repeats) { timer in
+            nonisolated(unsafe) let timer: Timer = timer
+            MainActor.assumeIsolated {
+                block(timer)
+            }
         }
     }
 }

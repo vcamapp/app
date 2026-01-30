@@ -10,6 +10,7 @@ import VCamBridge
 import VCamUI
 
 public enum VCamUIPreviewStub {
+    @MainActor
     public static func stub() {
         MainTexture.shared.setTexture(MTLTextureStub.makeMainTexture())
 

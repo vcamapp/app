@@ -8,6 +8,7 @@
 import AppKit
 
 public enum Workaround {
+    @MainActor
     public static func fixColorPickerOpacity_macOS14() {
         if #available(macOS 14, *) {
             // The root cause is unknown, but under specific conditions on macOS 14,

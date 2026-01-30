@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct VCamScene: Codable, Identifiable {
+public struct VCamScene: Codable, Identifiable, Sendable {
     public init(id: Int32, name: String, objects: [VCamScene.Object], aspectRatio: Float) {
         self.id = id
         self.name = name
@@ -28,7 +28,7 @@ extension VCamScene: CustomStringConvertible {
 }
 
 public extension VCamScene {
-    struct Object: Codable, Identifiable {
+    struct Object: Codable, Identifiable, Sendable {
         public init(id: Int32, name: String, type: VCamScene.ObjectType, isHidden: Bool, isLocked: Bool) {
             self.id = id
             self.name = name
@@ -44,7 +44,7 @@ public extension VCamScene {
         public var isLocked: Bool? // [Added 0.9.7]
     }
 
-    enum ObjectType: Codable {
+    enum ObjectType: Codable, Sendable {
         case avatar(state: Solid)
         case image(id: String, state: Image)
         case screen(id: String, state: ScreenCapture)
@@ -53,7 +53,7 @@ public extension VCamScene {
         case wind(state: Solid)
     }
 
-    struct Vector: Codable, Equatable {
+    struct Vector: Codable, Equatable, Sendable {
         public init(vector: SIMD3<Float>) {
             x = vector.x
             y = vector.y
@@ -69,7 +69,7 @@ public extension VCamScene {
         }
     }
 
-    struct Solid: Codable, Equatable {
+    struct Solid: Codable, Equatable, Sendable {
         public init(position: Vector, rotation: Vector) {
             self.position = position
             self.rotation = rotation
@@ -81,7 +81,7 @@ public extension VCamScene {
         public static let zero = Solid(position: .zero, rotation: .zero)
     }
 
-    struct Image: Codable {
+    struct Image: Codable, Sendable {
         public init(x: Float, y: Float, width: Float, height: Float, filter: ImageFilterConfiguration?) {
             self.x = x
             self.y = y
@@ -101,7 +101,7 @@ public extension VCamScene {
         }
     }
 
-    struct Plane: Codable {
+    struct Plane: Codable, Sendable {
         public init(x: Float, y: Float, width: Float, height: Float) {
             self.x = x
             self.y = y
@@ -126,7 +126,7 @@ public extension VCamScene {
         }
     }
 
-    struct RenderTexture: Codable {
+    struct RenderTexture: Codable, Sendable {
         public init(width: Float, height: Float, region: VCamScene.Plane, crop: VCamScene.Plane, filter: ImageFilterConfiguration?) {
             self.width = width
             self.height = height
@@ -146,7 +146,7 @@ public extension VCamScene {
         }
     }
 
-    struct ScreenCapture: Codable {
+    struct ScreenCapture: Codable, Sendable {
         public init(captureType: VCamScene.ScreenCapture.CaptureType, texture: VCamScene.RenderTexture) {
             self.captureType = captureType
             self.texture = texture
@@ -155,12 +155,12 @@ public extension VCamScene {
         public var captureType: CaptureType
         public var texture: RenderTexture
 
-        public enum CaptureType: String, Codable {
+        public enum CaptureType: String, Codable, Sendable {
             case display, window
         }
     }
 
-    struct Web: Codable {
+    struct Web: Codable, Sendable {
         public init(url: URL?, path: Data?, fps: Int, css: String?, js: String?, texture: VCamScene.RenderTexture) {
             self.url = url
             self.path = path

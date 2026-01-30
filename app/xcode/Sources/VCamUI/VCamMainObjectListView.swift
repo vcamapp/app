@@ -1,10 +1,3 @@
-//
-//  VCamMainObjectListView.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2022/04/29.
-//
-
 import SwiftUI
 import VCamUIFoundation
 import VCamEntity
@@ -29,6 +22,7 @@ public struct VCamMainObjectListView: View {
         GroupBox {
             List(selection: selectedIdBinding) {
                 ForEach($objectManager.objects) { $object in
+                    let objectId = object.id
                     TextFieldListRow(
                         id: object.id,
                         text: .init(value: object.name, set: {

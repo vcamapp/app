@@ -1,16 +1,9 @@
-//
-//  Version.swift
-//  Version
-//
-//  Created by Tatsuya Tanaka on 2017/04/14.
-//  Copyright © 2017 tattn. All rights reserved.
-//
 import Foundation
 
 public struct Version {
     public let components: [Int]
 
-    static var bundle: Bundle = .main
+    static var bundle: Bundle { .main }
 
     public init() {
         components = []

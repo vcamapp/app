@@ -8,7 +8,7 @@
 import SwiftUI
 
 public enum VCamSettingExperimentView {
-    public static var make: () -> AnyView = {
+    @MainActor public static var make: () -> AnyView = {
         AnyView(Color.clear)
     }
 }

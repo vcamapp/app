@@ -1,16 +1,9 @@
-//
-//  RenderTextureManager.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/03/20.
-//
-
 import SwiftUI
 import VCamBridge
 import VCamLogger
 
 @_cdecl("uniOnAddTexture")
-public func uniOnAddTexture(_ id: Int32, imagePointer: UnsafeRawPointer?) {
+@MainActor public func uniOnAddTexture(_ id: Int32, imagePointer: UnsafeRawPointer?) {
     guard let pointer = imagePointer else { return }
     let bridgedMtlTexture: any MTLTexture = __bridge(pointer)
     let mtlTexture = bridgedMtlTexture.makeTextureView(pixelFormat: .rgba8Unorm)! // Do not use sRGB as it becomes brighter due to gamma correction
@@ -18,6 +11,7 @@ public func uniOnAddTexture(_ id: Int32, imagePointer: UnsafeRawPointer?) {
     RenderTextureManager.shared.setRenderTexture(mtlTexture, id: id)
 }
 
+@MainActor
 public final class RenderTextureManager {
     public static let shared = RenderTextureManager()
 

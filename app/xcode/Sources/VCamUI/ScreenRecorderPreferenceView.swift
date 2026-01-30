@@ -1,15 +1,9 @@
-//
-//  ScreenRecorderPreferenceView.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/03/20.
-//
-
 import Foundation
 import SwiftUI
 import ScreenCaptureKit
 import Combine
 
+@MainActor
 public func showScreenRecorderPreferenceView(capture: @escaping (ScreenRecorder) -> Void) {
     showSheet(
         title: L10n.capturePreference.text,

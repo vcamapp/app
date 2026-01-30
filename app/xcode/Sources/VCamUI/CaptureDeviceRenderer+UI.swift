@@ -1,16 +1,10 @@
-//
-//  CaptureDeviceRenderer+UI.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/06/25.
-//
-
 import SwiftUI
 import AVFoundation
 import VideoToolbox
 import VCamCamera
 import VCamLogger
 
+@MainActor
 public func showCaptureDeviceSelectView(didSelect: @escaping (AVCaptureDevice, CGRect) -> Void) {
     guard Camera.hasCamera else { return } // Calling the following will crash if there's no camera.
     showSheet(
@@ -101,6 +95,7 @@ private struct CaptureDeviceSelectView: View {
 }
 
 public extension CaptureDeviceRenderer {
+    @MainActor
     static func selectDevice(result: @escaping (CaptureDeviceRenderer) -> Void) {
         showCaptureDeviceSelectView { device, cropRect in
             do {

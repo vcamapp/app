@@ -62,6 +62,7 @@ extension AnyVCamActionConfiguration {
     }
 }
 
+@MainActor
 let allActions: [any VCamAction] = [
     VCamEmojiAction(configuration: .default),
     VCamMessageAction(configuration: .default),

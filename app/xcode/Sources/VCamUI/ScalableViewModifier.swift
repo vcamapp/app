@@ -1,10 +1,3 @@
-//
-//  ScalableViewModifier.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/04/13.
-//
-
 import SwiftUI
 import simd
 import VCamUIFoundation
@@ -200,6 +193,7 @@ private struct DraggableEdge<Content: View>: View {
         case leading
         case trailing
 
+        @MainActor
         func pushHoverCursor() {
             switch self {
             case .top, .bottom:

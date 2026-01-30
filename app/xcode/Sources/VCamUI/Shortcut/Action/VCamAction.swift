@@ -1,10 +1,3 @@
-//
-//  VCamAction.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2023/04/02.
-//
-
 import Foundation
 import VCamEntity
 import struct SwiftUI.Image
@@ -19,7 +12,7 @@ public protocol VCamAction<Configuration>: Identifiable<UUID> {
 
     init(configuration: Configuration)
 
-    func callAsFunction(context: VCamActionContext) async throws
+    @MainActor func callAsFunction(context: VCamActionContext) async throws
 
     func deleteResources(shortcut: VCamShortcut)
 }
@@ -34,7 +27,7 @@ public extension VCamAction {
     }
 }
 
-public struct VCamActionContext {
+public struct VCamActionContext: Sendable {
     public let shortcut: VCamShortcut
 
     public static let empty = VCamActionContext(shortcut: .create())

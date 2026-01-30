@@ -361,7 +361,7 @@ struct VCamSettingMappingTableView: NSViewRepresentable {
             applySnapshot()
         }
 
-        func validateUserInterfaceItem(_ item: NSValidatedUserInterfaceItem) -> Bool {
+        func validateUserInterfaceItem(_ item: any NSValidatedUserInterfaceItem) -> Bool {
             guard let tableView else { return false }
             let selectedCount = tableView.selectedRowIndexes.count
 

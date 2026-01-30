@@ -1,6 +1,5 @@
 //
-//  FacialEsitimator.swift
-//  
+//  FacialEstimator.swift
 //
 //  Created by Tatsuya Tanaka on 2022/03/06.
 //

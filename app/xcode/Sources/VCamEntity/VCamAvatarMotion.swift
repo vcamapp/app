@@ -8,6 +8,6 @@
 import Foundation
 import VCamLocalization
 
-public enum VCamAvatarMotion: String, CaseIterable, Codable {
+public enum VCamAvatarMotion: String, CaseIterable, Codable, Sendable {
     case hi, bye, jump, cheer, what, pose, nod, no, shudder, run
 }

@@ -89,3 +89,5 @@ extension CameraExtension: OSSystemExtensionRequestDelegate {
         .replace
     }
 }
+
+extension OSSystemExtensionProperties: @retroactive @unchecked Sendable {}

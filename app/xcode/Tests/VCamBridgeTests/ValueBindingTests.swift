@@ -11,11 +11,11 @@ import struct SwiftUI.Binding
 import struct SwiftUI.Color
 
 final class ValueBindingTests: XCTestCase {
-    private enum TestType: Int32 {
+    private enum TestType: Int32, Sendable {
         case value
     }
 
-    private class ValueStore<T: ValueBindingDefaultValue> {
+    private class ValueStore<T: ValueBindingDefaultValue & Sendable> {
         var store: T
         let binding = ValueBinding<T, TestType>()
 

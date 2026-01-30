@@ -1,13 +1,7 @@
-//
-//  ImageFilterView.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/06/13.
-//
-
 import SwiftUI
 import VCamEntity
 
+@MainActor
 public func showImageFilterView(image: NSImage, configuration: ImageFilterConfiguration?, completion: @escaping (ImageFilter) -> Void) {
     showSheet(
         title: L10n.filter.text,

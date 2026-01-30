@@ -32,14 +32,13 @@ extension FourCharCode: @retroactive ExpressibleByStringLiteral {
         self = FourCharCode(stringLiteral: value)
     }
 
-    public var string: String? {
-        let cString: [CChar] = [
-            CChar(self >> 24 & 0xFF),
-            CChar(self >> 16 & 0xFF),
-            CChar(self >> 8 & 0xFF),
-            CChar(self & 0xFF),
-            0
+    public var string: String {
+        let bytes: [UInt8] = [
+            UInt8(self >> 24 & 0xFF),
+            UInt8(self >> 16 & 0xFF),
+            UInt8(self >> 8 & 0xFF),
+            UInt8(self & 0xFF),
         ]
-        return String(cString: cString)
+        return String(decoding: bytes, as: UTF8.self)
     }
 }

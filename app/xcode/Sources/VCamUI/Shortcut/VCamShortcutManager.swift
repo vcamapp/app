@@ -1,14 +1,8 @@
-//
-//  VCamShortcutManager.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2023/03/26.
-//
-
 import Foundation
 import VCamEntity
 import VCamData
 
+@MainActor
 @Observable
 public final class VCamShortcutManager {
     public static let shared = VCamShortcutManager()

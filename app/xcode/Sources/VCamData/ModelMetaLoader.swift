@@ -3,9 +3,9 @@ import AppKit
 import VRMKit
 #endif
 
-public struct ModelMeta: Hashable {
+public struct ModelMeta: Hashable, Sendable {
     public var name: String
-    public var image: NSImage?
+    public var image: Data?
 }
 
 enum ModelMetaLoader {
@@ -16,13 +16,13 @@ enum ModelMetaLoader {
             let vrm1 = try loader.load(VRM1.self, withURL: url)
             return ModelMeta(
                 name: vrm1.meta.name,
-                image: try? loader.loadThumbnail(from: vrm1)
+                image: try? loader.loadThumbnail(from: vrm1).png
             )
         } catch {
             let vrm0 = try loader.load(VRM.self, withURL: url)
             return ModelMeta(
                 name: vrm0.meta.title ?? url.deletingPathExtension().lastPathComponent,
-                image: try? loader.loadThumbnail(from: vrm0)
+                image: try? loader.loadThumbnail(from: vrm0).png
             )
         }
     }

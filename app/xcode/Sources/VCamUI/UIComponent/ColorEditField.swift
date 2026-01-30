@@ -1,10 +1,3 @@
-//
-//  ColorEditField.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/02/22.
-//
-
 import SwiftUI
 import VCamLocalization
 
@@ -32,7 +25,7 @@ public struct ColorEditField: View {
     }
 }
 
-extension ColorEditField: Equatable {
+extension ColorEditField: @MainActor Equatable {
     public static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.value == rhs.value && lhs.label == rhs.label
     }

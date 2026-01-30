@@ -16,7 +16,7 @@ public struct VCamAlert: View {
     let onOK: () -> Void
     let onCancel: () -> Void
 
-    public enum Result {
+    public enum Result: Sendable {
         case ok
         case cancel
     }

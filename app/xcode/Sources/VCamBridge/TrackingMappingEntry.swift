@@ -96,13 +96,13 @@ public extension TrackingMappingEntry.Key {
     }
 }
 
-extension TrackingMappingEntry.InputKey: Codable {
-    private enum CodingKeys: String, CodingKey {
-        case key, boundsMin, boundsMax, rangeMin, rangeMax
-    }
+private enum RangeKeyCodingKeys: String, CodingKey {
+    case key, boundsMin, boundsMax, rangeMin, rangeMax
+}
 
+extension TrackingMappingEntry.InputKey: Codable {
     public init(from decoder: any Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let container = try decoder.container(keyedBy: RangeKeyCodingKeys.self)
         let key = try container.decode(String.self, forKey: .key)
         let boundsMin = try container.decode(Float.self, forKey: .boundsMin)
         let boundsMax = try container.decode(Float.self, forKey: .boundsMax)
@@ -112,7 +112,7 @@ extension TrackingMappingEntry.InputKey: Codable {
     }
 
     public func encode(to encoder: any Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
+        var container = encoder.container(keyedBy: RangeKeyCodingKeys.self)
         try container.encode(key, forKey: .key)
         try container.encode(bounds.lowerBound, forKey: .boundsMin)
         try container.encode(bounds.upperBound, forKey: .boundsMax)
@@ -122,12 +122,8 @@ extension TrackingMappingEntry.InputKey: Codable {
 }
 
 extension TrackingMappingEntry.OutputKey: Codable {
-    private enum CodingKeys: String, CodingKey {
-        case key, boundsMin, boundsMax, rangeMin, rangeMax
-    }
-
     public init(from decoder: any Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let container = try decoder.container(keyedBy: RangeKeyCodingKeys.self)
         let key = try container.decode(String.self, forKey: .key)
         let boundsMin = try container.decode(Float.self, forKey: .boundsMin)
         let boundsMax = try container.decode(Float.self, forKey: .boundsMax)
@@ -137,7 +133,7 @@ extension TrackingMappingEntry.OutputKey: Codable {
     }
 
     public func encode(to encoder: any Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
+        var container = encoder.container(keyedBy: RangeKeyCodingKeys.self)
         try container.encode(key, forKey: .key)
         try container.encode(bounds.lowerBound, forKey: .boundsMin)
         try container.encode(bounds.upperBound, forKey: .boundsMax)

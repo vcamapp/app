@@ -2,6 +2,7 @@ import AppKit
 import Observation
 import VCamEntity
 
+@MainActor
 @Observable
 public final class ModelManager {
     public static let shared = ModelManager()
@@ -17,7 +18,7 @@ public final class ModelManager {
 
     #if DEBUG
     public init(models: [Models.Model], lastLoadedModelId: UUID? = nil) {
-        self.modelItems = models.map { ModelItem(model: $0, status: .valid, thumbnail: $0.loadThumbnail()) }
+        self.modelItems = models.map { ModelItem(model: $0, status: .valid, thumbnail: $0.loadThumbnail()?.png) }
         self.lastLoadedModelId = lastLoadedModelId
     }
     #endif
@@ -62,7 +63,7 @@ public final class ModelManager {
         }.value
 
         if let image = metadata?.image {
-            saveThumbnail(image, for: model)
+            try? saveThumbnail(image, for: model)
         }
     }
 
@@ -100,14 +101,14 @@ public final class ModelManager {
     }
 
     public func setThumbnail(for item: ModelItem, from imageURL: URL) throws {
-        guard let image = NSImage(contentsOf: imageURL) else {
+        guard let image = NSImage(contentsOf: imageURL), let imageData = image.png else {
             throw ModelManagerError.invalidImage
         }
-        saveThumbnail(image, for: item.model)
-        updateThumbnail(for: item, image: image)
+        try saveThumbnail(imageData, for: item.model)
+        updateThumbnail(for: item, image: imageData)
     }
 
-    private func updateThumbnail(for item: ModelItem, image: NSImage) {
+    private func updateThumbnail(for item: ModelItem, image: Data) {
         guard let index = modelItems.firstIndex(where: { $0.id == item.id }) else { return }
         modelItems[index] = ModelItem(model: item.model, status: item.status, thumbnail: image)
     }
@@ -130,7 +131,7 @@ public final class ModelManager {
         modelItems = modelItems.map { item in
             let url = item.model.modelURL
             let status: ModelItem.ModelStatus = FileManager.default.fileExists(atPath: url.path) ? .valid : .missing
-            return ModelItem(model: item.model, status: status, thumbnail: item.thumbnail ?? item.model.loadThumbnail())
+            return ModelItem(model: item.model, status: status, thumbnail: item.thumbnail ?? item.model.loadThumbnail()?.png)
         }
         scanForNewModels()
         saveMeta()
@@ -158,7 +159,7 @@ public final class ModelManager {
                 let attributes = try? FileManager.default.attributesOfItem(atPath: modelFile.path)
                 let createdAt = attributes?[.creationDate] as? Date ?? .now
                 let modelInfo = Models.Model(name: name, type: Models.modelType, createdAt: createdAt)
-                modelItems.append(ModelItem(model: modelInfo, status: .valid, thumbnail: modelInfo.loadThumbnail()))
+                modelItems.append(ModelItem(model: modelInfo, status: .valid, thumbnail: modelInfo.loadThumbnail()?.png))
             }
         } catch {
             print("Failed to scan models: \(error)")
@@ -167,7 +168,7 @@ public final class ModelManager {
 
     @discardableResult
     private func addModel(_ model: Models.Model) -> ModelItem {
-        let item = ModelItem(model: model, status: .valid, thumbnail: model.loadThumbnail())
+        let item = ModelItem(model: model, status: .valid, thumbnail: model.loadThumbnail()?.png)
         guard !modelItems.contains(where: { $0.id == model.id }) else { return item }
         modelItems.insert(item, at: 0)
         saveMeta()
@@ -188,7 +189,7 @@ public final class ModelManager {
               let meta = try? JSONDecoder().decode(Models.self, from: data) else {
             return
         }
-        modelItems = meta.models.map { ModelItem(model: $0, status: .valid, thumbnail: $0.loadThumbnail()) }
+        modelItems = meta.models.map { ModelItem(model: $0, status: .valid, thumbnail: $0.loadThumbnail()?.png) }
         lastLoadedModelId = meta.lastModelId
     }
 
@@ -204,18 +205,8 @@ public final class ModelManager {
         }
     }
 
-    private func saveThumbnail(_ image: NSImage, for model: Models.Model) {
-        guard let tiffData = image.tiffRepresentation,
-              let bitmap = NSBitmapImageRep(data: tiffData),
-              let pngData = bitmap.representation(using: .png, properties: [:]) else {
-            return
-        }
-
-        do {
-            try pngData.write(to: model.rootURL.appending(path: Models.Model.thumbnailFileName))
-        } catch {
-            print("Failed to save thumbnail: \(error)")
-        }
+    private func saveThumbnail(_ image: Data, for model: Models.Model) throws {
+        try image.write(to: model.rootURL.appending(path: Models.Model.thumbnailFileName))
     }
 }
 

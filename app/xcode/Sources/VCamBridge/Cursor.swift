@@ -1,10 +1,3 @@
-//
-//  Cursor.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/05/21.
-//
-
 import AppKit
 import VCamUIFoundation
 
@@ -26,7 +19,7 @@ enum CursorType: Int {
 }
 
 @_cdecl("uniPushCursor")
-public func uniPushCursor(_ type: Int) {
+@MainActor public func uniPushCursor(_ type: Int) {
     guard let cursor = CursorType(rawValue: type) else { return }
     switch cursor {
     case .northWestSouthEastResize, .northEastSouthWestResize, .move:
@@ -36,6 +29,6 @@ public func uniPushCursor(_ type: Int) {
 }
 
 @_cdecl("uniPopCursor")
-public func uniPopCursor() {
+@MainActor public func uniPopCursor() {
     NSCursor.popForSwiftUI()
 }

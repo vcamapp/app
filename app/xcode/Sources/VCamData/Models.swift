@@ -53,10 +53,10 @@ public struct Models: Codable, Sendable {
     }
 }
 
-public struct ModelItem: Identifiable, Hashable {
+public struct ModelItem: Identifiable, Hashable, Sendable {
     public let model: Models.Model
     public var status: ModelStatus
-    public var thumbnail: NSImage?
+    public var thumbnail: Data?
 
     public var id: UUID { model.id }
 

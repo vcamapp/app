@@ -1,10 +1,3 @@
-//
-//  Tracking.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2023/01/01.
-//
-
 import Foundation
 import Accelerate
 import simd
@@ -14,18 +7,18 @@ import VCamData
 import VCamBridge
 
 @_cdecl("uniUseBlinker")
-public func uniUseBlinker() -> Bool {
+@MainActor public func uniUseBlinker() -> Bool {
     Tracking.shared.avatarCameraManager.isBlinkerUsed
 }
 
 @_cdecl("uniSupportsPerfectSync")
-public func uniSupportsPerfectSync() -> Bool {
+@MainActor public func uniSupportsPerfectSync() -> Bool {
     Tracking.shared.faceTrackingMethod.supportsPerfectSync
 }
 
 @Observable
 public final class Tracking {
-    public static let shared = Tracking()
+    nonisolated(unsafe) public static let shared = Tracking() // TODO: MainActor
 
     public private(set) var faceTrackingMethod = TrackingMethod.Face.default
 #if FEATURE_3
@@ -78,17 +71,14 @@ public final class Tracking {
             if mappings[Int(TrackingMode.perfectSync.rawValue)].isEmpty {
                 mappings[Int(TrackingMode.perfectSync.rawValue)] = TrackingMappingEntry.defaultMappings(for: .perfectSync)
             }
+            applyMappingsToUnity(for: .perfectSync)
         } else {
             mappings[Int(TrackingMode.perfectSync.rawValue)] = []
         }
     }
 
+    @MainActor
     public func configure() {
-        mappings = [
-            TrackingMappingEntry.defaultMappings(for: .blendShape),
-            UniBridge.shared.hasPerfectSyncBlendShape ? TrackingMappingEntry.defaultMappings(for: .perfectSync) : []
-        ]
-
         setFaceTrackingMethod(UserDefaults.standard.value(for: .trackingMethodFace))
 #if FEATURE_3
         setHandTrackingMethod(UserDefaults.standard.value(for: .trackingMethodHand))
@@ -99,8 +89,8 @@ public final class Tracking {
 #endif
 
         if UserDefaults.standard.value(for: .integrationVCamMocap) {
-            Task {
-                try await startVCamMotionReceiver()
+            Task { @MainActor in
+                try await Self.shared.startVCamMotionReceiver()
             }
         }
     }
@@ -153,6 +143,7 @@ public final class Tracking {
         avatarCameraManager.resetCalibration()
     }
 
+    @MainActor
     public func setFaceTrackingMethod(_ method: TrackingMethod.Face) {
         if faceTrackingMethod != method {
             stopFaceResamplers()
@@ -212,6 +203,7 @@ public final class Tracking {
         }
     }
 
+    @MainActor
     public func setLipSyncType(_ type: LipSyncType) {
         let useCamera = type == .camera
         UniState.shared.lipSyncWebCam = useCamera
@@ -228,6 +220,7 @@ public final class Tracking {
         faceTrackingMethod.supportsPerfectSync && UniBridge.shared.hasPerfectSyncBlendShape
     }
 
+    @MainActor
     public func updateLipSyncIfNeeded() {
         guard micLipSyncDisabled else {
             return

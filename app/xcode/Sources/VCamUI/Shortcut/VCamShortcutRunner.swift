@@ -1,15 +1,8 @@
-//
-//  VCamShortcutRunner.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2023/03/30.
-//
-
 import Foundation
 import VCamEntity
 import VCamLogger
 
-public struct VCamShortcutRunner {
+public struct VCamShortcutRunner: Sendable {
     public static let shared = VCamShortcutRunner()
 
     @MainActor public func run(_ shortcut: VCamShortcut) async {

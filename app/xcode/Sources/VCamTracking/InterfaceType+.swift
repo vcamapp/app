@@ -1,10 +1,3 @@
-//
-//  InterfaceType+.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2023/01/21.
-//
-
 import Network
 
 public extension NWInterface.InterfaceType {
@@ -59,7 +52,7 @@ public extension NWInterface.InterfaceType {
                 socklen_t(0),
                 NI_NUMERICHOST
             )
-            return String(cString: hostname)
+            return String(utf8String: hostname)
         }
 
         return nil

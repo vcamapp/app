@@ -1,10 +1,3 @@
-//
-//  VCamHands.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2022/03/30.
-//
-
 import Foundation
 import simd
 import Vision
@@ -20,7 +13,7 @@ public struct VCamHands {
         self.right = right
     }
 
-    public struct Hand {
+    public struct Hand: Sendable {
         public let wrist: SIMD2<Float>
         public let thumbCMC: SIMD2<Float>
         public let littleMCP: SIMD2<Float>

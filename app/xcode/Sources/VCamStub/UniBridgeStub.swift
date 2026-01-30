@@ -1,13 +1,7 @@
-//
-//  UniBridgeStub.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2023/10/18.
-//
-
 import Foundation
 import VCamBridge
 
+@MainActor
 public final class UniBridgeStub {
     public static let shared = UniBridgeStub()
 

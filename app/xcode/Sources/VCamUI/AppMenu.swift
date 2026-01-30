@@ -8,6 +8,7 @@ import VCamTracking
 import VCamLogger
 import SystemExtensions
 
+@MainActor
 public final class AppMenu: NSObject {
     public static let shared = AppMenu()
 

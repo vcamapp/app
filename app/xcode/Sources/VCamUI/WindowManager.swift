@@ -11,6 +11,7 @@ import VCamCamera
 import VCamBridge
 import VCamData
 
+@MainActor
 @Observable
 public final class WindowManager {
     public private(set) var size = NSSize(width: 1280, height: 720)
@@ -28,9 +29,10 @@ public final class WindowManager {
     }
 
     init() {
-        NotificationCenter.default.addObserver(forName: NSWindow.didResizeNotification, object: nil, queue: .main) { _ in
-            if let size = NSApp.mainWindow?.contentView?.frame.size {
-                DispatchQueue.main.async {
+        NotificationCenter.default.addObserver(forName: NSWindow.didResizeNotification, object: nil, queue: .main) { [weak self] _ in
+            Task { @MainActor in
+                guard let self else { return }
+                if let size = NSApp.mainWindow?.contentView?.frame.size {
                     self.size = size
                 }
             }
@@ -38,7 +40,9 @@ public final class WindowManager {
 
         NotificationCenter.default.addObserver(forName: NSApplication.didBecomeActiveNotification, object: nil, queue: .main) { _ in
             // Display the window when launching the app while it's stored in the menu bar.
-            VCamSystem.shared.windowManager.unhide()
+            MainActor.assumeIsolated {
+                VCamSystem.shared.windowManager.unhide()
+            }
         }
     }
 

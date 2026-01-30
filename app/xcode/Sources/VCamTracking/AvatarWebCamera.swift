@@ -1,10 +1,3 @@
-//
-//  AvatarWebCamera.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2023/01/05.
-//
-
 import AVFoundation
 import Vision
 import VCamCamera
@@ -30,7 +23,7 @@ public final class AvatarWebCamera {
     private var prevHands = Array(repeating: RevisedMovingAverage<SIMD2<Float>>(weight: .six), count: 6)
     private var prevFingers = Array(repeating: RevisedMovingAverage<Float>(weight: .six), count: 10)
 
-    public struct Usage: OptionSet {
+    public struct Usage: OptionSet, Sendable {
         public let rawValue: UInt8
         public init(rawValue: UInt8) {
             self.rawValue = rawValue
@@ -123,9 +116,9 @@ public final class AvatarWebCamera {
 
         if isEmotionEnabled {
             if facialExpressionCounter > 4 {
-                let facialExp = facialExpressionEstimator.estimate(vnLandmarks, observation)
+                let facialExpRawValue = facialExpressionEstimator.estimate(vnLandmarks, observation).rawValue
                 DispatchQueue.main.async {
-                    UniBridge.shared.facialExpression(facialExp.rawValue)
+                    UniBridge.shared.facialExpression(facialExpRawValue)
                 }
                 facialExpressionCounter = 0
             }

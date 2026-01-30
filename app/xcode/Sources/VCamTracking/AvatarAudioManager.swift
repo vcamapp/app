@@ -1,10 +1,3 @@
-//
-//  AvatarAudioManager.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/03/06.
-//
-
 import Foundation
 import VCamData
 import VCamMedia
@@ -13,8 +6,8 @@ import VCamBridge
 import VCamLogger
 import AVFAudio
 
-public final class AvatarAudioManager: NSObject {
-    public static let shared = AvatarAudioManager()
+public final class AvatarAudioManager {
+    nonisolated(unsafe) public static let shared = AvatarAudioManager()
 
     public var videoRecorderRenderAudioFrame: (AVAudioPCMBuffer, AVAudioTime, TimeInterval, AudioDevice?) -> Void = { _, _, _, _ in }
 
@@ -28,9 +21,7 @@ public final class AvatarAudioManager: NSObject {
         return AudioDevice.device(forUid: uid)
     }
 
-    override init() {
-        super.init()
-
+    init() {
         NotificationCenter.default.addObserver(
             self, selector: #selector(onConfigurationChange), name: .AVAudioEngineConfigurationChange,
             object: nil)
@@ -41,7 +32,7 @@ public final class AvatarAudioManager: NSObject {
     }
 
     public func startIfNeeded() {
-        guard !UniState.shared.lipSyncWebCam else { return }
+        guard UserDefaults.standard.value(for: .lipSyncType) != 1 else { return }
         AvatarAudioManager.shared.start(usage: .lipSync)
     }
 
@@ -58,9 +49,9 @@ public final class AvatarAudioManager: NSObject {
                 } else {
                     currentInputDevice?.setAsDefaultDevice()
                 }
-                try audioManager.startRecording { [self] inputFormat in
-                    audioExpressionEstimator.configure(format: inputFormat)
-                    isConfiguring = false
+                try audioManager.startRecording { inputFormat in
+                    Self.shared.audioExpressionEstimator.configure(format: inputFormat)
+                    Self.shared.isConfiguring = false
                 }
             }
             self.usage.insert(usage)
@@ -93,11 +84,16 @@ public final class AvatarAudioManager: NSObject {
     }
 
     public func setEmotionEnabled(_ isEnabled: Bool) {
-        audioExpressionEstimator.onUpdate = isEnabled ? { emotion in
-            Task { @MainActor in
-                UniBridge.shared.facialExpression(emotion.rawValue)
+        if isEnabled {
+            audioExpressionEstimator.onUpdate = { emotion in
+                let rawValue = emotion.rawValue
+                Task { @MainActor in
+                    UniBridge.shared.facialExpression(rawValue)
+                }
             }
-        } : nil
+        } else {
+            audioExpressionEstimator.onUpdate = nil
+        }
     }
 
     public func setAudioDevice(_ audioDevice: AudioDevice) {
@@ -109,7 +105,7 @@ public final class AvatarAudioManager: NSObject {
             stop(usage: usage)
             Task { @MainActor in
                 try? await Task.sleep(for: .milliseconds(500))
-                start(usage: usage)
+                Self.shared.start(usage: usage)
             }
         }
     }
@@ -122,7 +118,7 @@ public final class AvatarAudioManager: NSObject {
 //        }
     }
 
-    public struct Usage: OptionSet {
+    public struct Usage: OptionSet, Sendable {
         public init(rawValue: UInt) {
             self.rawValue = rawValue
         }

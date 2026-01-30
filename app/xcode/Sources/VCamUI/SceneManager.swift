@@ -1,10 +1,3 @@
-//
-//  SceneManager.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2022/05/07.
-//
-
 import SwiftUI
 import VCamEntity
 import VCamBridge
@@ -12,7 +5,7 @@ import VCamData
 import VCamLogger
 
 @_cdecl("uniLoadScene")
-public func uniLoadScene() {
+@MainActor public func uniLoadScene() {
     do {
         try SceneManager.shared.loadCurrentScene()
     } catch {
@@ -21,7 +14,7 @@ public func uniLoadScene() {
 }
 
 @_cdecl("uniUpdateScene")
-public func uniUpdateScene() {
+@MainActor public func uniUpdateScene() {
     do {
         try SceneManager.shared.saveCurrentSceneAndObjects()
     } catch {
@@ -29,6 +22,7 @@ public func uniUpdateScene() {
     }
 }
 
+@MainActor
 @Observable
 public final class SceneManager {
     public static let shared = SceneManager()
@@ -53,7 +47,9 @@ public final class SceneManager {
             object: nil,
             queue: .main
         ) { _ in
-            SceneManager.shared.changeAspectRatio()
+            MainActor.assumeIsolated {
+                SceneManager.shared.changeAspectRatio()
+            }
         }
 
         do {

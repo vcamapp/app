@@ -8,6 +8,7 @@
 import SwiftUI
 import VCamEntity
 
+@MainActor
 @Observable
 public final class VCamUIState {
     public static let shared = VCamUIState()

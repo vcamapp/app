@@ -1,13 +1,6 @@
-//
-//  VCamShortcut.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2023/03/24.
-//
-
 import Foundation
 
-public struct VCamShortcut: Codable, Identifiable, Equatable {
+public struct VCamShortcut: Codable, Identifiable, Equatable, Sendable {
     public var id: UUID
     public var title: String
     public var iconName: String?
@@ -20,7 +13,7 @@ public struct VCamShortcut: Codable, Identifiable, Equatable {
 }
 
 public extension VCamShortcut {
-    struct ShortcutKey: Codable, Equatable {
+    struct ShortcutKey: Codable, Equatable, Sendable {
         public init(character: String, modifiers: UInt) {
             self.character = character
             self.modifiers = modifiers
@@ -31,7 +24,7 @@ public extension VCamShortcut {
     }
 }
 
-public protocol VCamActionConfiguration: Identifiable<UUID>, Codable, Equatable {
+public protocol VCamActionConfiguration: Identifiable<UUID>, Codable, Equatable, Sendable {
     var id: UUID { get set }
 
     static var `default`: Self { get }
@@ -39,7 +32,7 @@ public protocol VCamActionConfiguration: Identifiable<UUID>, Codable, Equatable 
     func erased() -> AnyVCamActionConfiguration
 }
 
-public enum AnyVCamActionConfiguration: VCamActionConfiguration {
+public enum AnyVCamActionConfiguration: VCamActionConfiguration, Sendable {
     case emoji(configuration: VCamEmojiActionConfiguration)
     case message(configuration: VCamMessageActionConfiguration)
     case motion(configuration: VCamMotionActionConfiguration)

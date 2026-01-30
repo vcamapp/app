@@ -11,7 +11,7 @@ import VCamEntity
 public struct FacialExpressionEstimator {
     // Currently working on improving the model's accuracy and downsizing
 
-    public static var create: () -> FacialExpressionEstimator = {
+    nonisolated(unsafe) public static var create: () -> FacialExpressionEstimator = {
         .init(
             estimate: { _, _ in
                 .neutral

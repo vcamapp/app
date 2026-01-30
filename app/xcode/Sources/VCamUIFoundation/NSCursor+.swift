@@ -7,6 +7,7 @@
 
 import AppKit
 
+@MainActor
 public extension NSCursor {
     func pushForSwiftUI() {
         // https://stackoverflow.com/questions/11287523/nscursor-always-resets-to-arrow

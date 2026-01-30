@@ -1,10 +1,3 @@
-//
-//  SceneObjectManager.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2022/04/27.
-//
-
 import SwiftUI
 import VCamEntity
 import VCamLocalization
@@ -14,13 +7,13 @@ import VCamLogger
 import AVFoundation
 
 @_cdecl("uniRemoveObject")
-public func uniRemoveObject(_ id: Int32) {
+@MainActor public func uniRemoveObject(_ id: Int32) {
     uniDebugLog("uniRemoveTexture \(id)")
     SceneObjectManager.shared.remove(byId: id)
 }
 
 @_cdecl("uniUpdateObjectAvatar")
-public func uniUpdateObjectAvatar(px: Float, py: Float, pz: Float, rx: Float, ry: Float, rz: Float) {
+@MainActor public func uniUpdateObjectAvatar(px: Float, py: Float, pz: Float, rx: Float, ry: Float, rz: Float) {
     guard let object = SceneObjectManager.shared.objects.find(byId: SceneObject.avatarID),
           case .avatar(let avatar) = object.type else { return }
     avatar.position = .init(px, py, pz)
@@ -29,7 +22,7 @@ public func uniUpdateObjectAvatar(px: Float, py: Float, pz: Float, rx: Float, ry
 }
 
 @_cdecl("uniUpdateObjectImage")
-public func uniUpdateObjectImage(id: Int32, px: Float, py: Float, sx: Float, sy: Float) {
+@MainActor public func uniUpdateObjectImage(id: Int32, px: Float, py: Float, sx: Float, sy: Float) {
     guard let object = SceneObjectManager.shared.objects.find(byId: id) else { return }
     switch object.type {
     case .avatar, .wind:
@@ -50,6 +43,7 @@ public func uniUpdateObjectImage(id: Int32, px: Float, py: Float, sx: Float, sy:
     uniUpdateScene()
 }
 
+@MainActor
 @Observable
 public final class SceneObjectManager {
     public static let shared = SceneObjectManager()

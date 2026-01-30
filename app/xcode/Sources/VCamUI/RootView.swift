@@ -124,7 +124,7 @@ extension View {
     }
 }
 
-extension UnityView: Equatable {
+extension UnityView: @MainActor Equatable {
     static func == (lhs: Self, rhs: Self) -> Bool {
         true
     }

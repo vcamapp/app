@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct VCamActionEditorPicker<Item: Hashable, Candidate: CustomStringConvertible>: View {
+struct VCamActionEditorPicker<Item: Hashable & Sendable, Candidate: CustomStringConvertible & Sendable>: View {
     @Binding var item: Item
     let items: [Candidate]
     let mapValue: (Candidate) -> Item

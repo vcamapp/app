@@ -1,15 +1,8 @@
-//
-//  DeviceAuthorization.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/06/08.
-//
-
 import AppKit
 import AVFoundation
 
 public enum DeviceAuthorization {
-    public enum AuthorizationType {
+    public enum AuthorizationType: Sendable {
         case camera
         case mic
 
@@ -48,21 +41,25 @@ public enum DeviceAuthorization {
         AVCaptureDevice.authorizationStatus(for: type.mediaType) == .authorized
     }
 
-    public static func requestAuthorization(type: AuthorizationType, completion: @escaping (Bool) -> Void) {
+    public static func requestAuthorization(type: AuthorizationType, completion: @escaping @Sendable (Bool) -> Void) {
         switch AVCaptureDevice.authorizationStatus(for: type.mediaType) {
         case .authorized:
             completion(true)
 
         case .notDetermined:
+            let authType = type
+            let completion = completion
             AVCaptureDevice.requestAccess(for: type.mediaType) { _ in
                 Task { @MainActor in
-                    requestAuthorization(type: type, completion: completion)
+                    requestAuthorization(type: authType, completion: completion)
                 }
             }
 
         case .denied, .restricted:
+            let authType = type
+            let completion = completion
             Task { @MainActor in
-                await showAuthorizationError(type: type)
+                await showAuthorizationError(type: authType)
                 completion(false)
             }
         @unknown default:

@@ -1,10 +1,3 @@
-//
-//  WebRenderer.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/06/06.
-//
-
 import Foundation
 import CoreImage
 import WebKit
@@ -12,6 +5,7 @@ import Combine
 import SwiftUI
 import VCamEntity
 
+@MainActor
 public final class WebRenderer {
     public let resource: Resource
     public var size: CGSize
@@ -67,7 +61,7 @@ public final class WebRenderer {
         }
     }
 
-    deinit {
+    isolated deinit {
         stopRendering()
     }
 
@@ -168,7 +162,7 @@ public final class WebRenderer {
 
     private func makeTimer() -> Timer? {
         guard fps > 0 else { return nil }
-        return Timer.scheduledTimer(withTimeInterval: 1.0 / TimeInterval(fps), repeats: true) { [weak self] _ in
+        return Timer.scheduledTimerOnMain(withTimeInterval: 1.0 / TimeInterval(fps), repeats: true) { [weak self] _ in
             guard let self = self else { return }
             self.renderWebViewTexture()
         }
@@ -268,13 +262,14 @@ struct NSViewRepresentableBuilder<Content: NSView>: NSViewRepresentable {
 
 }
 
+@MainActor
 extension WebRenderer: RenderTextureRenderer {
     public func setRenderTexture(updator: @escaping (CIImage) -> Void) {
         render = updator
         renderWebViewTexture()
     }
 
-    public func snapshot() -> CIImage {
+    public func snapshot() async -> CIImage {
         lastFrame
     }
 

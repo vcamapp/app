@@ -1,10 +1,3 @@
-//
-//  UnityCallback.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2023/01/21.
-//
-
 import Foundation
 import VCamData
 import VCamBridge
@@ -14,7 +7,7 @@ import VCamLogger
 import VCamEntity
 
 @_cdecl("uniOnVCamSystemStart")
-public func uniOnVCamSystemStart() {
+@MainActor public func uniOnVCamSystemStart() {
     Logger.log("uniOnVCamSystemStart")
     UniState.shared.initializeToUnity()
     VCamSystem.initializeToUnity?()
@@ -26,7 +19,7 @@ public func uniOnVCamSystemStart() {
 }
 
 @_cdecl("uniOnVCamSystemDestroy")
-public func uniOnVCamSystemDestroy() {
+@MainActor public func uniOnVCamSystemDestroy() {
     Logger.log("uniOnVCamSystemDestroy")
     VCamSystem.shared.isUniVCamSystemEnabled = false
     VCamUIState.shared.interactable = false
@@ -34,7 +27,7 @@ public func uniOnVCamSystemDestroy() {
 }
 
 @_cdecl("uniOnApplyCaptureSystem")
-public func uniOnApplyCaptureSystem() {
+@MainActor public func uniOnApplyCaptureSystem() {
     UniBridge.shared.useFullTracking(UserDefaults.standard.value(for: .integrationMocopi))
     Tracking.shared.updateLipSyncIfNeeded()
     Tracking.shared.syncPerfectSyncAvailability()
@@ -46,19 +39,19 @@ public func uniUseAutoConvertVRM1() -> Bool {
 }
 
 @_cdecl("uniDisposeWindow")
-public func uniDisposeWindow() {
+@MainActor public func uniDisposeWindow() {
     Logger.log("")
     VCamSystem.shared.windowManager.dispose()
 }
 
 @_cdecl("uniHideWindow")
-public func uniHideWindow() {
+@MainActor public func uniHideWindow() {
     Logger.log("")
     VCamSystem.shared.windowManager.hide()
 }
 
 @_cdecl("uniUpdateRenderFrame")
-public func uniUpdateRenderFrame() {
+@MainActor public func uniUpdateRenderFrame() {
     guard VCamSystem.shared.windowManager.isConfigured else { return }
     VirtualCameraManager.shared.sendImageToVirtualCamera(
         with: MainTexture.shared.texture

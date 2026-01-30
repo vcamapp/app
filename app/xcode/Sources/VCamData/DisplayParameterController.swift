@@ -10,6 +10,7 @@
 import Foundation
 import VCamBridge
 
+@MainActor
 public final class DisplayParameterController {
     private unowned let state: UniState
     private var storedParameterId = UserDefaults.standard.value(for: .displayParameterId)

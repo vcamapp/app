@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct VCamColor: Codable, Equatable, Hashable {
+public struct VCamColor: Codable, Equatable, Hashable, Sendable {
     public init(red: Float, green: Float, blue: Float, alpha: Float) {
         self.red = red
         self.green = green

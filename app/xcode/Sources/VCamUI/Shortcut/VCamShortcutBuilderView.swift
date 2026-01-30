@@ -1,10 +1,3 @@
-//
-//  VCamShortcutBuilderView.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2023/03/24.
-//
-
 import SwiftUI
 import VCamEntity
 import VCamLocalization
@@ -168,13 +161,22 @@ struct VCamShortcutBuilderActionItemEditView: View {
 
 private extension Binding {
     init<Configuration: VCamActionConfiguration>(_ configuration: Configuration, keyPath: WritableKeyPath<Configuration, Value>, to: Binding<AnyVCamActionConfiguration>) {
+        let keyPathBox = KeyPathBox(keyPath)
         self.init {
-            configuration[keyPath: keyPath]
+            configuration[keyPath: keyPathBox.keyPath]
         } set: {
             var configuration = configuration
-            configuration[keyPath: keyPath] = $0
+            configuration[keyPath: keyPathBox.keyPath] = $0
             to.wrappedValue = configuration.erased()
         }
+    }
+}
+
+private final class KeyPathBox<Root, Value>: @unchecked Sendable {
+    let keyPath: WritableKeyPath<Root, Value>
+
+    init(_ keyPath: WritableKeyPath<Root, Value>) {
+        self.keyPath = keyPath
     }
 }
 

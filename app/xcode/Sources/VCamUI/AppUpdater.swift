@@ -1,15 +1,8 @@
-//
-//  AppUpdater.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/04/23.
-//
-
 import Foundation
 import VCamEntity
 import AppKit
 
-public struct AppUpdater {
+public struct AppUpdater: Sendable {
     public init(repository: AppUpdater.Repository) {
         self.repository = repository
     }
@@ -38,7 +31,7 @@ public struct AppUpdater {
 #endif
     }
 
-    public struct Repository {
+    public struct Repository: Sendable {
         public init(owner: String, repo: String) {
             self.owner = owner
             self.repo = repo

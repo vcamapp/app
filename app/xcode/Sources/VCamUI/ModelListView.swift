@@ -295,8 +295,8 @@ struct ModelRowView: View {
 
     @ViewBuilder
     private var thumbnailView: some View {
-        if let thumbnail = item.thumbnail {
-            Image(nsImage: thumbnail)
+        if let thumbnail = item.thumbnail, let image = NSImage(data: thumbnail) {
+            Image(nsImage: image)
                 .resizable()
                 .aspectRatio(contentMode: .fill)
         } else {

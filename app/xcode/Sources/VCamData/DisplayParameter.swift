@@ -30,7 +30,7 @@ public struct DisplayParameter: Codable, Identifiable, Equatable {
         public init() {}
     }
 
-    public struct Color: Codable, Equatable {
+    public struct Color: Codable, Equatable, Sendable {
         public var r: Float
         public var g: Float
         public var b: Float
@@ -77,6 +77,7 @@ private struct DisplayParameterPresetsFile: Codable {
     var parameters: [DisplayParameter]
 }
 
+@MainActor
 @Observable
 public final class DisplayParameterPresets {
     public static let shared = DisplayParameterPresets()
@@ -157,13 +158,7 @@ public final class DisplayParameterPresets {
 
 // MARK: - DisplayParameterPreset (for UI compatibility)
 
-public struct DisplayParameterPreset: CaseIterable, Hashable, Identifiable, CustomStringConvertible {
-    public static var allCases: [DisplayParameterPreset] {
-        DisplayParameterPresets.shared.parameters.map {
-            DisplayParameterPreset(id: $0.id, description: $0.name)
-        }
-    }
-
+public struct DisplayParameterPreset: Hashable, Identifiable, CustomStringConvertible, Sendable {
     public static let newPreset = Self.init(id: "", description: L10n.newPreset.text)
 
     public let id: String

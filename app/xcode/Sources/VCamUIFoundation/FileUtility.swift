@@ -16,6 +16,7 @@ public enum FileUtility {
         case html
     }
 
+    @MainActor
     public static func openFile(type: FileType) -> URL? {
         switch type {
         case .vrm:
@@ -29,6 +30,7 @@ public enum FileUtility {
         }
     }
 
+    @MainActor
     public static func pickDirectory(canCreateDirectories: Bool = true) -> URL? {
         let openPanel = NSOpenPanel()
         openPanel.allowsMultipleSelection = false
@@ -39,6 +41,7 @@ public enum FileUtility {
         return openPanel.url
     }
 
+    @MainActor
     private static func makeOpenSingleFilePanel() -> NSOpenPanel {
         let openPanel = NSOpenPanel()
         openPanel.allowsMultipleSelection = false
@@ -48,6 +51,7 @@ public enum FileUtility {
         return openPanel
     }
 
+    @MainActor
     private static func openFile(with types: [UTType]) -> URL? {
         let openPanel = makeOpenSingleFilePanel()
         openPanel.allowedContentTypes = types
@@ -55,6 +59,7 @@ public enum FileUtility {
         return openPanel.url
     }
 
+    @MainActor
     private static func openFile(withExtensions extensions: [String]) -> URL? {
         let openPanel = makeOpenSingleFilePanel()
         openPanel.allowedContentTypes = extensions.map { UTType(filenameExtension: $0)! }
