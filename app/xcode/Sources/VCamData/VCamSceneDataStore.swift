@@ -68,9 +68,11 @@ public struct VCamSceneDataStore {
 }
 
 extension VCamSceneDataStore {
-    public static let defaultObjects: [SceneObject] = [
-        .init(id: SceneObject.avatarID, type: .avatar(.init()), isHidden: false, isLocked: false)
-    ]
+    public static var defaultObjects: [SceneObject] {
+        [
+            .init(id: SceneObject.avatarID, type: .avatar(.init()), isHidden: false, isLocked: false)
+        ]
+    }
 
     public func makeNewScene() -> VCamScene {
         try? addSceneIdIfNeeded()

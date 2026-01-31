@@ -55,7 +55,7 @@ public extension View {
     }
 }
 
-public struct FlatButtonStyle {
+public struct FlatButtonStyle: Sendable {
     public var hasBorder = true
     public var backgroundColor: Color?
     public var cornerRadius: CGFloat = 0

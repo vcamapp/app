@@ -1,16 +1,9 @@
-//
-//  VirtualCameraManager.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2023/02/16.
-//
-
 import Foundation
 import CoreImage
 import VCamDefaults
 import Combine
 
-public final class VirtualCameraManager {
+public final class VirtualCameraManager: @unchecked Sendable {
     public static let shared = VirtualCameraManager()
 
     public let sinkStream = CoreMediaSinkStream()

@@ -1,10 +1,3 @@
-//
-//  VCamRecordingView.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/04/17.
-//
-
 import SwiftUI
 import VCamUIFoundation
 import VCamEntity
@@ -168,7 +161,7 @@ extension VCamRecordingView {
             }
         }
         if restWaitTime > 0 {
-            Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { timer in
+            Timer.scheduledTimerOnMain(withTimeInterval: 1, repeats: true) { timer in
                 restWaitTime -= 1
                 if restWaitTime <= 0 {
                     timer.invalidate()

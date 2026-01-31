@@ -1,28 +1,20 @@
-//
-//  Camera.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/06/25.
-//
-
-import AVFoundation
+@preconcurrency import AVFoundation
 import CoreMediaIO
+import os
 import VCamEntity
 
 public enum Camera {
-    private static var cachedDevices: [AVCaptureDevice] = [] {
-        didSet {
-            NotificationCenter.default.post(name: .deviceWasChanged, object: nil)
-        }
+    private static let cache = OSAllocatedUnfairLock(initialState: [AVCaptureDevice]())
+
+    private static func updateCache() {
+        enableDalDevices()
+        let deviceDiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInWideAngleCamera, .external], mediaType: nil, position: .unspecified)
+        let devices = deviceDiscoverySession.devices.filter { $0.uniqueID != "vcam-device" }
+        cache.withLock { $0 = devices }
+        NotificationCenter.default.post(name: .deviceWasChanged, object: nil)
     }
 
     public static func configure() {
-        let updateCache = {
-            Camera.enableDalDevices()
-            let deviceDiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInWideAngleCamera, .external], mediaType: nil, position: .unspecified)
-            cachedDevices = deviceDiscoverySession.devices.filter { $0.uniqueID != "vcam-device" }
-        }
-
         updateCache()
 
         NotificationCenter.default.addObserver(forName: .AVCaptureDeviceWasConnected, object: nil, queue: .main) { _ in
@@ -55,15 +47,17 @@ public enum Camera {
     }
 
     public static func cameras(type: AVMediaType? = .video) -> [AVCaptureDevice] {
-        if let type {
-            return cachedDevices.filter { $0.hasMediaType(type) }
-        } else {
-            return cachedDevices
+        cache.withLock { devices in
+            if let type {
+                return devices.filter { $0.hasMediaType(type) }
+            } else {
+                return devices
+            }
         }
     }
 
     public static func camera(id: String?) -> AVCaptureDevice? {
-        cachedDevices.first { $0.uniqueID == id }
+        cache.withLock { $0.first { $0.uniqueID == id } }
     }
 
     public static func searchHighestResolutionFormat(for device: AVCaptureDevice) -> (format: AVCaptureDevice.Format, resolution: CGSize)? {

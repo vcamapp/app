@@ -1,13 +1,7 @@
-//
-//  ExtensionNotificationCenter.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2023/02/25.
-//
-
 import Foundation
+import os
 
-public enum ExtensionNotification: String, Equatable {
+public enum ExtensionNotification: String, Equatable, Sendable {
     case startCameraExtensionStream
     case stopAllCameraExtensionStreams
 
@@ -23,11 +17,11 @@ public enum ExtensionNotification: String, Equatable {
     }
 }
 
-public final class ExtensionNotificationCenter {
+public final class ExtensionNotificationCenter: Sendable {
     public static let `default` = ExtensionNotificationCenter()
 
-    private let center = CFNotificationCenterGetDarwinNotifyCenter()
-    private var observers: [ExtensionNotification: () -> Void] = [:]
+    private nonisolated(unsafe) let center = CFNotificationCenterGetDarwinNotifyCenter()
+    private let observers = OSAllocatedUnfairLock(initialState: [ExtensionNotification: @Sendable () -> Void]())
 
     public func post(_ notification: ExtensionNotification) {
         CFNotificationCenterPostNotification(
@@ -39,14 +33,14 @@ public final class ExtensionNotificationCenter {
         )
     }
 
-    public func setObserver(for notification: ExtensionNotification, using: @escaping () -> Void) {
-        defer {
+    public func setObserver(for notification: ExtensionNotification, using: @escaping @Sendable () -> Void) {
+        let alreadyRegistered = observers.withLock { observers in
+            let exists = observers.keys.contains(notification)
             observers[notification] = using
+            return exists
         }
 
-        guard !observers.keys.contains(notification) else {
-            return
-        }
+        guard !alreadyRegistered else { return }
 
         let observer = UnsafeRawPointer(Unmanaged.passUnretained(self).toOpaque())
         CFNotificationCenterAddObserver(
@@ -55,7 +49,7 @@ public final class ExtensionNotificationCenter {
             { _, observer, name, _, _ in
                 if let observer = observer, let name = name, let notification = ExtensionNotification(name: name) {
                     let observerSelf = Unmanaged<ExtensionNotificationCenter>.fromOpaque(observer).takeUnretainedValue()
-                    observerSelf.observers[notification]?()
+                    observerSelf.observers.withLock { $0[notification]?() }
                 }
             },
             notification.rawValue as CFString,
@@ -65,7 +59,7 @@ public final class ExtensionNotificationCenter {
     }
 
     public func removeAllObservers() {
-        observers.removeAll()
+        observers.withLock { $0.removeAll() }
         CFNotificationCenterRemoveEveryObserver(center, Unmanaged.passRetained(self).toOpaque())
     }
 }

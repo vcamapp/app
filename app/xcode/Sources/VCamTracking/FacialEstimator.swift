@@ -26,7 +26,7 @@ public struct Facial {
 public struct FacialEstimator {
     // Currently working on accuracy improvements. PRs are welcome.
 
-    public static var create: () -> FacialEstimator = {
+    nonisolated(unsafe) public static var create: () -> FacialEstimator = {
         .init(
             prevRawEyeballY: { 0 },
             estimate: { _ in

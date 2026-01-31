@@ -1,13 +1,7 @@
-//
-//  CustomModal.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/03/20.
-//
-
 import AppKit
 import SwiftUI
 
+@MainActor
 public func showSheet<Content: View>(title: String, view: (@escaping () -> Void) -> Content) {
     var panel: NSPanel?
     panel = NSPanel(contentViewController: NSHostingController(rootView: view({
@@ -23,6 +17,7 @@ public func showSheet<Content: View>(title: String, view: (@escaping () -> Void)
 }
 
 // Deprecated: Migrate to MacWindowManager
+@MainActor
 public enum VCamWindow {
     public static func showWindow<Content: View>(title: String, view: (@escaping () -> Void) -> Content, close: (() -> Void)? = nil) {
         var panel: NSPanel!

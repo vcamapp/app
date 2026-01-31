@@ -42,6 +42,7 @@ struct MacWindowViewModifier<Content: View, ModifiedContent: View>: View {
     }
 }
 
+@MainActor
 public final class MacWindowManager {
     public static let shared = MacWindowManager()
 
@@ -77,12 +78,13 @@ public final class MacWindowManager {
         window.makeKeyAndOrderFront(nil)
         openWindows[id] = window
 
-        var observation: Any?
-        observation = NotificationCenter.default.addObserver(forName: NSWindow.willCloseNotification, object: nil, queue: .main) { notification in
-            guard notification.object as? NSWindow == window else { return }
-            Self.shared.openWindows.removeValue(forKey: id)
-            if let observation {
-                NotificationCenter.default.removeObserver(observation)
+        var observation: (any NSObjectProtocol)?
+        observation = NotificationCenter.default.addObserver(forName: NSWindow.willCloseNotification, object: window, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated {
+                self?.openWindows.removeValue(forKey: id)
+                if let observation {
+                    NotificationCenter.default.removeObserver(observation)
+                }
             }
         }
     }

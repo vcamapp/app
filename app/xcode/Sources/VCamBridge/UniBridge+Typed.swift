@@ -1,14 +1,7 @@
-//
-//  UniBridge+Typed.swift
-//
-//
-//  Created by tattn on 2025/12/07.
-//
-
 import Foundation
 
 // MARK: - Method ID Enum
-public struct UniBridgeMethodId: RawRepresentable {
+public struct UniBridgeMethodId: RawRepresentable, Sendable {
     static let playMotion = Self.init(rawValue: 0)
     static let stopMotion = Self.init(rawValue: 1)
     static let applyExpression = Self.init(rawValue: 2)
@@ -62,7 +55,7 @@ public struct ScreenResolutionPayload: Equatable {
 
 // MARK: - Bridge Callback
 public extension UniBridge {
-    fileprivate(set) static var methodCallback: (UniBridgeMethodId, UnsafeMutableRawPointer?, UnsafeMutableRawPointer?) -> Void = { _, _, _ in }
+    nonisolated(unsafe) fileprivate(set) static var methodCallback: (UniBridgeMethodId, UnsafeMutableRawPointer?, UnsafeMutableRawPointer?) -> Void = { _, _, _ in }
 }
 
 // MARK: - Bridge Implementation

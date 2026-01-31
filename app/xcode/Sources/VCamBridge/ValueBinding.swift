@@ -1,16 +1,9 @@
-//
-//  ValueBinding.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2022/03/11.
-//
-
 import struct CoreGraphics.CGFloat
 import class AppKit.NSColor
 import struct SwiftUI.Binding
 import struct SwiftUI.Color
 
-public final class ValueBinding<Value, Kind: RawRepresentable> where Kind.RawValue == Int32 {
+public final class ValueBinding<Value, Kind: RawRepresentable>: @unchecked Sendable where Kind.RawValue == Int32, Kind: Sendable {
     public var getValue: ((Kind) -> Value)?
     public var setValue: (Kind, Value) -> Void = { _, _ in }
 
@@ -22,8 +15,8 @@ public final class ValueBinding<Value, Kind: RawRepresentable> where Kind.RawVal
     }
 }
 
-extension ValueBinding where Value: ValueBindingDefaultValue {
-    @inlinable public func binding(_ type: Kind, onGet: @escaping (Value) -> Void = { _ in }, onSet: @escaping (Value) -> Void = { _ in }) -> Binding<Value> {
+extension ValueBinding where Value: ValueBindingDefaultValue & Sendable {
+    @inlinable public func binding(_ type: Kind, onGet: @escaping @Sendable (Value) -> Void = { _ in }, onSet: @escaping @Sendable (Value) -> Void = { _ in }) -> Binding<Value> {
         .init { [weak self] in
             let value = self?.getValue?(type) ?? Value.defaultValue
             onGet(value)
@@ -50,7 +43,7 @@ extension ValueBinding where Value == Void {
 }
 
 extension ValueBinding where Value == UnsafeMutableRawPointer {
-    @inlinable public func binding<T: ValueBindingStructType>(_ kind: Kind, type: T.Type = T.self, onGet: @escaping (T) -> Void = { _ in }, onSet: @escaping (T) -> Void = { _ in }) -> Binding<T> {
+    @inlinable public func binding<T: ValueBindingStructType & Sendable>(_ kind: Kind, type: T.Type = T.self, onGet: @escaping @Sendable (T) -> Void = { _ in }, onSet: @escaping @Sendable (T) -> Void = { _ in }) -> Binding<T> {
         .init { [weak self] in
             guard let value = self?.getValue?(kind), UInt(bitPattern: value) != 0 else {
                 return T.defaultValue
@@ -79,7 +72,7 @@ extension ValueBinding where Value == UnsafeMutableRawPointer {
         }
     }
 
-    @inlinable public func binding<T: BridgeArrayType>(_ kind: Kind, size: Int, type: T.Type = T.self, onGet: @escaping (T) -> Void = { _ in }, onSet: @escaping (T) -> Void = { _ in }) -> Binding<T> {
+    @inlinable public func binding<T: BridgeArrayType & Sendable>(_ kind: Kind, size: Int, type: T.Type = T.self, onGet: @escaping @Sendable (T) -> Void = { _ in }, onSet: @escaping @Sendable (T) -> Void = { _ in }) -> Binding<T> {
         .init { [weak self] in
             guard let retrievedValue: T = self?.get(kind, size: size) else {
                 return T.defaultValue

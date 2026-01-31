@@ -1,13 +1,7 @@
-//
-//  AudioDevice+.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/04/24.
-//
-
 import Foundation
 import CoreAudio
 import AVFAudio
+import os
 import VCamEntity
 import VCamLogger
 
@@ -153,26 +147,27 @@ public extension AudioDevice {
 }
 
 extension AudioDevice {
-    private static var cachedDevices: [AudioDevice] = [] {
-        didSet {
-            NotificationCenter.default.post(name: .deviceWasChanged, object: nil)
-        }
+    private static let cache = OSAllocatedUnfairLock(initialState: [AudioDevice]())
+
+    private static func updateCachedDevices(_ devices: [AudioDevice]) {
+        cache.withLock { $0 = devices }
+        NotificationCenter.default.post(name: .deviceWasChanged, object: nil)
     }
 
     public static func configure() {
-        Self.cachedDevices = Self.loadDevices()
+        Self.updateCachedDevices(Self.loadDevices())
 
         NotificationCenter.default.addObserver(forName: .AVCaptureDeviceWasConnected, object: nil, queue: .main) { _ in
-            Self.cachedDevices = Self.loadDevices()
+            Self.updateCachedDevices(Self.loadDevices())
         }
 
         NotificationCenter.default.addObserver(forName: .AVCaptureDeviceWasDisconnected, object: nil, queue: .main) { _ in
-            Self.cachedDevices = Self.loadDevices()
+            Self.updateCachedDevices(Self.loadDevices())
         }
     }
 
     public static func devices() -> [AudioDevice] {
-        cachedDevices
+        cache.withLock { $0 }
     }
 
     private static func loadDevices() -> [AudioDevice] {
@@ -312,4 +307,3 @@ extension AudioUnit {
         print("AudioUnit.set", status)
     }
 }
-

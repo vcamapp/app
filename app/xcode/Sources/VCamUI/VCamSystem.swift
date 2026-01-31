@@ -24,13 +24,13 @@ public final class VCamSystem {
 
     private init() {
         ExtensionNotificationCenter.default.setObserver(for: .startCameraExtensionStream) { [weak self] in
-            Task {
+            Task { @MainActor in
                 self?.startSystem()
             }
         }
 
         ExtensionNotificationCenter.default.setObserver(for: .stopAllCameraExtensionStreams) { [weak self] in
-            Task {
+            Task { @MainActor in
                 self?.stopSystem()
             }
         }

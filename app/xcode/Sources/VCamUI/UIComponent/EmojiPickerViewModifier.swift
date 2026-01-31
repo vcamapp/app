@@ -44,7 +44,7 @@ public extension EnvironmentValues {
         .init(textFieldId: textFieldId)
     }
 
-    public struct Action {
+    public struct Action: Sendable {
         let textFieldId: Int
 
         public func callAsFunction() {
@@ -98,10 +98,13 @@ private struct HiddenTextField: NSViewRepresentable {
             if let key = key {
                 NotificationCenter.default.removeObserver(key)
             }
-            key = NotificationCenter.default.addObserver(forName: .showEmojiPicker, object: nil, queue: .main) { notification in
-                guard notification.userInfo?[OpenEmojiPicker.idKey] as? Int == textField.tag else { return }
-                textField.window?.makeFirstResponder(textField)
-                NSApp.orderFrontCharacterPalette(textField)
+            key = NotificationCenter.default.addObserver(forName: .showEmojiPicker, object: nil, queue: .main) { [weak textField] notification in
+                let targetId = notification.userInfo?[OpenEmojiPicker.idKey] as? Int
+                MainActor.assumeIsolated {
+                    guard let textField, targetId == textField.tag else { return }
+                    textField.window?.makeFirstResponder(textField)
+                    NSApp.orderFrontCharacterPalette(textField)
+                }
             }
         }
 
