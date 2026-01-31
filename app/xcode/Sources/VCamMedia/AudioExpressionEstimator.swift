@@ -1,17 +1,12 @@
-//
-//  AudioExpressionEstimator.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/07/31.
-//
-
+import Foundation
 import SoundAnalysis
 import Accelerate
 import VCamEntity
+@preconcurrency import AVFAudio
 
-public final class AudioExpressionEstimator: NSObject {
-    public var onUpdate: ((FacialExpression) -> Void)?
-    public var onAudioLevelUpdate: ((Float) -> Void)?
+public final class AudioExpressionEstimator: NSObject, @unchecked Sendable { // TODO: Fix Sendable conformance
+    nonisolated(unsafe) public var onUpdate: (@Sendable (FacialExpression) -> Void)?
+    nonisolated(unsafe) public var onAudioLevelUpdate: (@Sendable (Float) -> Void)?
 
     private var analyzer: SNAudioStreamAnalyzer?
     private var averagePowerForChannel0: Float = 0
@@ -20,32 +15,47 @@ public final class AudioExpressionEstimator: NSObject {
     private let levelLowPassTrig: Float32 = 0.30
     private let inversedFps: Double = 1 / 8
     private let queue = DispatchQueue(label: "com.github.tattn.vcam.queue.audio-expression")
+    private let queueKey = DispatchSpecificKey<Void>()
+
+    public override init() {
+        super.init()
+        queue.setSpecific(key: queueKey, value: ())
+    }
 
     public func configure(format: AVAudioFormat) {
-        averagePowerForChannel0 = 0
-        analyzer = SNAudioStreamAnalyzer(format: format)
+        withQueue {
+            averagePowerForChannel0 = 0
+            analyzer = SNAudioStreamAnalyzer(format: format)
 
-        do {
-            let request = try SNClassifySoundRequest(classifierIdentifier: .version1)
-            request.windowDuration = CMTimeMakeWithSeconds(0.5, preferredTimescale: 48_000)
-            request.overlapFactor = 0.9
+            do {
+                let request = try SNClassifySoundRequest(classifierIdentifier: .version1)
+                request.windowDuration = CMTimeMakeWithSeconds(0.5, preferredTimescale: 48_000)
+                request.overlapFactor = 0.9
 
-            try analyzer!.add(request, withObserver: self)
-        } catch {
+                try analyzer!.add(request, withObserver: self)
+            } catch {
+            }
         }
     }
 
     public func reset() {
         onUpdate = nil
         onAudioLevelUpdate = nil
-        analyzer = nil
+        withQueue {
+            analyzer = nil
+            averagePowerForChannel0 = 0
+            previousSampleTime = Date()
+        }
     }
 
     public func analyze(buffer: AVAudioPCMBuffer, time: AVAudioTime) {
-        queue.async { [self] in
+        let sampleTime = time.sampleTime
+        nonisolated(unsafe) let buffer = buffer
+        queue.async { [weak self] in
+            guard let self else { return }
             if onUpdate != nil {
                 if Date().timeIntervalSince(previousSampleTime) >= inversedFps {
-                    analyzer?.analyze(buffer, atAudioFramePosition: time.sampleTime)
+                    analyzer?.analyze(buffer, atAudioFramePosition: sampleTime)
                     previousSampleTime = Date()
                 }
             }
@@ -71,6 +81,13 @@ public final class AudioExpressionEstimator: NSObject {
 
         averagePowerForChannel0 = (levelLowPassTrig * v) + ((1 - levelLowPassTrig) * averagePowerForChannel0)
         return Float(100 + averagePowerForChannel0) / 100.0 // 0 to 1
+    }
+
+    private func withQueue<T>(_ body: () -> T) -> T {
+        if DispatchQueue.getSpecific(key: queueKey) != nil {
+            return body()
+        }
+        return queue.sync(execute: body)
     }
 }
 

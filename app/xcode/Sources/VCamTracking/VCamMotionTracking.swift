@@ -1,26 +1,16 @@
-//
-//  VCamMotionTracking.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2023/01/15.
-//
-
 import Foundation
 import VCamBridge
 
-public final class VCamMotionTracking {
+public final class VCamMotionTracking: @unchecked Sendable { // TODO: Fix Sendable conformance
     private let blendShapeResampler: TrackingResampler
     private let perfectSyncResampler: TrackingResampler
     private let handsResampler: TrackingResampler
     private let fingersResampler: TrackingResampler
-    private let smoothingBox: SmoothingBox
+    private let smoothingHolder: SmoothingHolder
 
-    private final class SmoothingBox {
+    private final class SmoothingHolder: @unchecked Sendable {
         var smoothing: TrackingSmoothing
-
-        init(_ smoothing: TrackingSmoothing) {
-            self.smoothing = smoothing
-        }
+        init(_ smoothing: TrackingSmoothing) { self.smoothing = smoothing }
     }
 
     private struct HandOutput {
@@ -31,10 +21,10 @@ public final class VCamMotionTracking {
     }
 
     public init(smoothing: TrackingSmoothing) {
-        let smoothingBox = SmoothingBox(smoothing)
-        self.smoothingBox = smoothingBox
-        let settingsProvider = {
-            smoothingBox.smoothing.settings()
+        let holder = SmoothingHolder(smoothing)
+        self.smoothingHolder = holder
+        let settingsProvider: @Sendable () -> TrackingResampler.Settings = {
+            holder.smoothing.settings()
         }
 
         blendShapeResampler = TrackingResampler(label: "vcam-motion-blendshape", settingsProvider: settingsProvider) { values in
@@ -59,14 +49,14 @@ public final class VCamMotionTracking {
     }
 
     func updateSmoothing(_ smoothing: TrackingSmoothing) {
-        smoothingBox.smoothing = smoothing
+        smoothingHolder.smoothing = smoothing
         if !smoothing.isEnabled {
             stopResamplers()
         }
     }
 
     public func onVCamMotionReceived(_ data: VCamMotion, tracking: Tracking) {
-        let smoothingEnabled = smoothingBox.smoothing.isEnabled
+        let smoothingEnabled = smoothingHolder.smoothing.isEnabled
         let useFaceTracking = tracking.faceTrackingMethod == .vcamMocap
         let usePerfectSync = UniBridge.shared.hasPerfectSyncBlendShape
         let useHands = tracking.handTrackingMethod == .vcamMocap

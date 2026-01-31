@@ -8,7 +8,7 @@
 import Foundation
 import VCamLocalization
 
-public enum VideoFormat: String, CaseIterable, Identifiable {
+public enum VideoFormat: String, CaseIterable, Identifiable, Sendable {
     case mp4, mov, m4v, hevcWithAlpha
 
     public var name: String {

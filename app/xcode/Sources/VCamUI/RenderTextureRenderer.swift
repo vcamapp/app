@@ -1,15 +1,9 @@
-//
-//  RenderTextureRenderer.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/04/13.
-//
-
 import Foundation
 import CoreImage
 import AppKit
 import VCamEntity
 
+@MainActor
 public protocol RenderTextureRenderer: AnyObject {
     var cropRect: CGRect { get }
     var filter: ImageFilter? { get set }

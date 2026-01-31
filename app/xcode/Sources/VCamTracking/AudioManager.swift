@@ -1,27 +1,27 @@
 //
 //  AudioManager.swift
-//  
+//
 //
 //  Created by Tatsuya Tanaka on 2022/03/06.
 //
 
-import AVFAudio
+@preconcurrency import AVFAudio
 import VCamLogger
 
-public final class AudioManager {
+public final class AudioManager: Sendable {
     public init() {}
 
-    public static var isMicrophoneAuthorized: () -> Bool = { false }
-    public static var requestMicrophonePermission: (@escaping ((Bool) -> Void)) -> Void = { _ in }
-    public var onUpdateAudioBuffer: ((AVAudioPCMBuffer, AVAudioTime, TimeInterval) -> Void) = { _, _, _ in }
+    nonisolated(unsafe) public static var isMicrophoneAuthorized: () -> Bool = { false }
+    nonisolated(unsafe) public static var requestMicrophonePermission: (@escaping ((Bool) -> Void)) -> Void = { _ in }
+    nonisolated(unsafe) public var onUpdateAudioBuffer: ((AVAudioPCMBuffer, AVAudioTime, TimeInterval) -> Void) = { _, _, _ in }
 
     public var isRunning: Bool {
         audioEngine.isRunning
     }
 
-    private var audioEngine = AVAudioEngine()
+    nonisolated(unsafe) private var audioEngine = AVAudioEngine()
 
-    public func startRecording(onStart: @escaping (AVAudioFormat) -> Void) throws {
+    public func startRecording(onStart: @Sendable @escaping (AVAudioFormat) -> Void) throws {
         guard Self.isMicrophoneAuthorized() else {
             Logger.log("requestAuthorization")
             Self.requestMicrophonePermission { [self] authorized in

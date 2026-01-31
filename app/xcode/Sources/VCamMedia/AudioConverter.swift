@@ -1,37 +1,33 @@
-//
-//  AudioConverter.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/12/30.
-//
+import Foundation
+@preconcurrency import AVFAudio
 
-import AVFAudio
-
-public class AudioConverter {
+public actor AudioConverter {
     private let converter: AVAudioConverter
+    private let outputFormat: AVAudioFormat
 
     public init?(from fromFormat: AVAudioFormat, to toFormat: AVAudioFormat) {
         guard let converter = AVAudioConverter(from: fromFormat, to: toFormat) else {
             return nil
         }
         self.converter = converter
+        self.outputFormat = toFormat
     }
 
     public func convert(_ pcmBuffer: AVAudioPCMBuffer) -> AVAudioPCMBuffer? {
         guard let convertedBuffer = AVAudioPCMBuffer(
-            pcmFormat: converter.outputFormat,
-            frameCapacity: AVAudioFrameCount(converter.outputFormat.sampleRate) * pcmBuffer.frameLength / AVAudioFrameCount(pcmBuffer.format.sampleRate)
+            pcmFormat: outputFormat,
+            frameCapacity: AVAudioFrameCount(outputFormat.sampleRate) * pcmBuffer.frameLength / AVAudioFrameCount(pcmBuffer.format.sampleRate)
         ) else {
             return nil
         }
 
         var error: NSError?
-        var hasData = true
+        nonisolated(unsafe) var hasData = true
 
-        let status = converter.convert(to: convertedBuffer, error: &error) { inNumPackets, outStatus in
+        let status = converter.convert(to: convertedBuffer, error: &error) { _, outStatus in
             if hasData {
-                outStatus.pointee = .haveData
                 hasData = false
+                outStatus.pointee = .haveData
                 return pcmBuffer
             } else {
                 outStatus.pointee = .noDataNow

@@ -1,19 +1,27 @@
-//
-//  AvatarCameraManager.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/03/05.
-//
-
 import AVFoundation
+import os
 import VCamCamera
 import VCamBridge
 
-public final class AvatarCameraManager {
+public final class AvatarCameraManager: @unchecked Sendable { // TODO: Fix Sendable conformance
     private let webCamera = AvatarWebCamera()
 
-    public static var isCameraAuthorized: () -> Bool = { false }
-    public static var requestCameraPermission: (@escaping (Bool) -> Void) -> Void = { _ in }
+    private static let permissionStorage = OSAllocatedUnfairLock(initialState: PermissionState())
+
+    private struct PermissionState: Sendable {
+        var isCameraAuthorized: @Sendable () -> Bool = { false }
+        var requestCameraPermission: @Sendable (@escaping @Sendable (Bool) -> Void) -> Void = { _ in }
+    }
+
+    public static var isCameraAuthorized: @Sendable () -> Bool {
+        get { permissionStorage.withLock { $0.isCameraAuthorized } }
+        set { permissionStorage.withLock { $0.isCameraAuthorized = newValue } }
+    }
+
+    public static var requestCameraPermission: @Sendable (@escaping @Sendable (Bool) -> Void) -> Void {
+        get { permissionStorage.withLock { $0.requestCameraPermission } }
+        set { permissionStorage.withLock { $0.requestCameraPermission = newValue } }
+    }
 
     public var currentCaptureDevice: AVCaptureDevice? { webCamera.currentCaptureDevice }
     public var webCameraUsage: AvatarWebCamera.Usage { webCamera.usage }
@@ -38,9 +46,9 @@ public final class AvatarCameraManager {
         if Self.isCameraAuthorized() {
             webCamera.start()
         } else {
-            Self.requestCameraPermission { [self] authorized in
-                guard authorized else { return }
-                webCamera.start()
+            Self.requestCameraPermission { [weak self] authorized in
+                guard authorized, let self else { return }
+                self.webCamera.start()
             }
         }
     }

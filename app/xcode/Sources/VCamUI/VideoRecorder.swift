@@ -1,10 +1,3 @@
-//
-//  VideoRecorder.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2022/04/18.
-//
-
 import Foundation
 import CoreImage
 import AVFoundation
@@ -15,7 +8,7 @@ import VCamTracking
 import VCamLogger
 
 @Observable
-public final class VideoRecorder {
+public final class VideoRecorder: @unchecked Sendable { // TODO: Migrate new API for macOS 26+
     public static let shared = VideoRecorder()
 
     public private(set) var isRecording = false
@@ -107,14 +100,18 @@ public final class VideoRecorder {
 
         if capturesSystemAudio {
             systemAudioRecorder = ScreenRecorder.audioOnly { buffer, startTime in
-                Self.shared.renderPCAudioFrame(buffer, startTime: startTime)
+                Task {
+                    await Self.shared.renderPCAudioFrame(buffer, startTime: startTime)
+                }
             }
         }
 
 #if DEBUG
         debugTimer = Timer.scheduledTimer(withTimeInterval: 1 / 30, repeats: true) { _ in
-            let debugImage = NSImage(color: .red, size: CGSize(width: 1920, height: 1080)).ciImage!
-            Self.shared.renderFrame(debugImage)
+            Task {
+                let debugImage = NSImage(color: .red, size: CGSize(width: 1920, height: 1080)).ciImage!
+                await Self.shared.renderFrame(debugImage)
+            }
         }
 #endif
 
@@ -162,7 +159,8 @@ public final class VideoRecorder {
         }
     }
 
-    public func renderFrame(_ frame: CIImage) {
+    @concurrent
+    public func renderFrame(_ frame: CIImage) async {
         guard let assetWriterAdaptor = assetVideoWriterAdaptor else { return }
 
         context.render(frame, to: pixelBuffer!)
@@ -180,7 +178,8 @@ public final class VideoRecorder {
         frameCount += 1
     }
 
-    public func renderAudioFrame(_ pcmBuffer: AVAudioPCMBuffer, time: AVAudioTime, latency: TimeInterval, device: AudioDevice?) {
+    @concurrent
+    public func renderAudioFrame(_ pcmBuffer: AVAudioPCMBuffer, time: AVAudioTime, latency: TimeInterval, device: AudioDevice?) async {
         guard isRecording, frameCount > 0 else { return }
 
         if sampleCount <= 0 {
@@ -210,14 +209,15 @@ public final class VideoRecorder {
             return
         }
 
-        guard let convertedBuffer = converter.convert(pcmBuffer),
+        guard let convertedBuffer = await converter.convert(pcmBuffer),
               let buffer = createSampleBuffer(pcmBuffer: convertedBuffer, sampleCount: &sampleCount) else {
             return
         }
         assetAudioWriterInput?.append(buffer)
     }
 
-    func renderPCAudioFrame(_ sampleBuffer: CMSampleBuffer, startTime: CFTimeInterval) {
+    @concurrent
+    func renderPCAudioFrame(_ sampleBuffer: CMSampleBuffer, startTime: CFTimeInterval) async {
         guard isRecording, frameCount > 0,
                 let formatDescription = sampleBuffer.formatDescription,
               let sampleRate = (formatDescription.audioStreamBasicDescription?.mSampleRate).flatMap(TimeInterval.init),
@@ -269,3 +269,5 @@ public final class VideoRecorder {
         return try? CMSampleBuffer.create(pcmBuffer: pcmBuffer, sampleCount: sampleCount)
     }
 }
+
+extension AVAudioPCMBuffer: @unchecked @retroactive Sendable {}

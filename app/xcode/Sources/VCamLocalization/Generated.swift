@@ -3,7 +3,7 @@
 import SwiftUI
 
 
-public enum L10n {
+public enum L10n: Sendable {
   /// Default
   public static let expautoDefault = LocalizedString(lookupKey: "_expauto_default_")
   /// About %@
@@ -641,7 +641,7 @@ public enum L10n {
 }
 
 extension L10n {
-  private static var bundles: [String: Bundle] = [:]
+  nonisolated(unsafe) private static var bundles: [String: Bundle] = [:]
   fileprivate static func tr(_ table: String, _ key: String, _ args: any CVarArg...) -> String {
     let bundle = currentBundle()
     return String(format: NSLocalizedString(key, tableName: nil, bundle: bundle, value: key, comment: ""), arguments: args)
@@ -668,7 +668,7 @@ extension L10n {
   }
 }
 
-public struct LocalizedString {
+public struct LocalizedString: Sendable {
   let lookupKey: String
 
   public var key: LocalizedStringKey {

@@ -57,7 +57,9 @@ public func uniUseAutoConvertVRM1() -> Bool {
         with: MainTexture.shared.texture
     )
 
-    VideoRecorder.shared.renderFrame(MainTexture.shared.texture)
+    Task {
+        await VideoRecorder.shared.renderFrame(MainTexture.shared.texture)
+    }
 }
 
 @_cdecl("uniRegisterString")

@@ -34,7 +34,7 @@ public enum VCamMenuItem: Identifiable, CaseIterable {
         switch self {
         case .main:
 #if CI_TESTING
-            Image("symbolIcon")
+            Image("SymbolIcon", bundle: .module)
 #else
             Image(.symbolIcon)
                 .resizable()

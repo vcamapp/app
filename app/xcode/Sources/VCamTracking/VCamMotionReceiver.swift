@@ -1,16 +1,9 @@
-//
-//  VCamMotionReceiver.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2023/01/09.
-//
-
 import Network
 import Observation
 import VCamLogger
 
 @Observable
-public final class VCamMotionReceiver {
+public final class VCamMotionReceiver: @unchecked Sendable { // TODO: Fix Sendable conformance
     private static let queue = DispatchQueue(label: "com.github.tattn.vcam.vcammotionreceiver")
     @ObservationIgnored private var listener: NWListener?
     @ObservationIgnored private var connection: NWConnection?
@@ -165,8 +158,8 @@ public final class VCamMotionReceiver {
 
 private extension NWConnection {
     func receiveData(
-        with onVCamMotionReceived: @escaping (VCamMotion, Tracking) -> Void,
-        onDataReceived: @escaping () -> Void
+        with onVCamMotionReceived: @escaping @Sendable (VCamMotion, Tracking) -> Void,
+        onDataReceived: @escaping @Sendable () -> Void
     ) {
         receive(minimumIncompleteLength: 1, maximumLength: 8192) { [weak self] content, contentContext, isComplete, error in
             defer {

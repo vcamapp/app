@@ -1,10 +1,3 @@
-//
-//  ScreenRecorder.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/03/20.
-//
-
 import ScreenCaptureKit
 import AVFAudio
 import VCamBridge
@@ -15,7 +8,7 @@ public protocol ScreenRecorderProtocol: AnyObject {
 }
 
 @Observable
-public final class ScreenRecorder: NSObject, ScreenRecorderProtocol {
+public final class ScreenRecorder: NSObject, ScreenRecorderProtocol, @unchecked Sendable { // TODO: Fix Sendable conformance
     public enum CaptureType {
         case independentWindow
         case display
@@ -62,7 +55,7 @@ public final class ScreenRecorder: NSObject, ScreenRecorderProtocol {
         }
     }
 
-    struct CapturedFrame {
+    struct CapturedFrame: @unchecked Sendable {
         var sampleBuffer: CMSampleBuffer
         var surfaceRef: IOSurfaceRef
         var contentRect: CGRect
@@ -90,6 +83,7 @@ public final class ScreenRecorder: NSObject, ScreenRecorderProtocol {
     @ObservationIgnored private var didVideoOutput: ((CapturedFrame) -> Void)?
     @ObservationIgnored private var didAudioOutput: ((CMSampleBuffer) -> Void)?
 
+    @MainActor
     @ObservationIgnored public var size: CGSize {
         guard let config = captureConfig else {
             return .init(width: 1024, height: 640)
@@ -186,6 +180,7 @@ public final class ScreenRecorder: NSObject, ScreenRecorderProtocol {
         }
     }
 
+    @MainActor
     private func contentFilter(for config: CaptureConfiguration) async throws -> SCContentFilter {
         switch config.captureType {
         case .display:
@@ -225,6 +220,7 @@ public final class ScreenRecorder: NSObject, ScreenRecorderProtocol {
         throw ScreenRecorderError("The configuration doesn't provide a display or window.")
     }
 
+    @MainActor
     private func streamConfiguration(for captureConfig: CaptureConfiguration) -> SCStreamConfiguration {
         let streamConfig = SCStreamConfiguration()
 
@@ -366,7 +362,8 @@ extension ScreenRecorder: RenderTextureRenderer {
     }
 
     public func snapshot() async -> CIImage {
-        guard let frame = await latestFrame else { return .init() }
+        let frame = await MainActor.run { latestFrame }
+        guard let frame else { return .init() }
         return frame.croppedCIImage
     }
 
@@ -396,8 +393,9 @@ extension ScreenRecorder: RenderTextureRenderer {
 }
 
 public extension ScreenRecorder {
+    @MainActor
     static func create(id: String, screenCapture: VCamScene.ScreenCapture, completion: @escaping (ScreenRecorder) -> Void) {
-        Task { @MainActor in // Use the main thread for size since the Unity side's Canvas size is required
+        Task { // Use the main thread for size since the Unity side's Canvas size is required
             let availableContent = try await SCShareableContent.excludingDesktopWindows(
                 false,
                 onScreenWindowsOnly: true
@@ -466,3 +464,5 @@ public extension ScreenRecorder.CaptureType {
         }
     }
 }
+
+extension CMSampleBuffer: @retroactive @unchecked Sendable {}

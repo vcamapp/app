@@ -1,14 +1,7 @@
-//
-//  TrackingResampler.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2026/01/24.
-//
-
 import Foundation
 import Accelerate
 
-final class TrackingResampler {
+final class TrackingResampler: @unchecked Sendable { // TODO: Fix Sendable conformance
     struct Settings {
         let fps: Double
         let bufferDelay: Double
@@ -27,13 +20,13 @@ final class TrackingResampler {
     }
 
     private let queue: DispatchQueue
-    private let settingsProvider: () -> Settings
-    private let output: ([Float]) -> Void
+    private let settingsProvider: @Sendable () -> Settings
+    private let output: @Sendable ([Float]) -> Void
     private var frames: [Frame] = []
     private var timer: (any DispatchSourceTimer)?
     private var valueCount: Int?
 
-    init(label: String, settingsProvider: @escaping () -> Settings, output: @escaping ([Float]) -> Void) {
+    init(label: String, settingsProvider: @escaping @Sendable () -> Settings, output: @escaping @Sendable ([Float]) -> Void) {
         self.queue = DispatchQueue(label: "com.github.tattn.vcam.tracking.resampler.\(label)")
         self.settingsProvider = settingsProvider
         self.output = output

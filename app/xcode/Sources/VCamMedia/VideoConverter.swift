@@ -1,18 +1,7 @@
-//
-//  VideoConverter.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/12/27.
-//
-
 import Foundation
 import AVFoundation
 
-@globalActor private actor VideoConverterActor {
-    static let shared = VideoConverterActor()
-}
-
-public enum VideoConverter {
+public enum VideoConverter { // TODO: Migrate to new API for macOS 26+
     /// Merge audio tracks into a single audio track
     /// - Parameters:
     ///   - asset: A source asset which must have a video asset and some audio tracks.
@@ -20,20 +9,20 @@ public enum VideoConverter {
     ///   - fileType: The file format of the output.
     ///   - videoOutputSettings: The settings to use for encoding the media you append to the output. Create an output settings dictionary manually, or use AVOutputSettingsAssistant to create preset-based settings.
     ///   - audioOutputSettings: The settings to use for encoding the media you append to the output. Create an output settings dictionary manually, or use AVOutputSettingsAssistant to create preset-based settings.
-    @VideoConverterActor
+    @concurrent
     public static func mergeAudioTracks(
         asset: AVAsset,
         outputURL: URL,
         fileType: AVFileType,
-        videoOutputSettings: [String : Any],
-        audioOutputSettings: [String : Any]
+        videoOutputSettings: sending [String : Any],
+        audioOutputSettings: sending [String : Any]
     ) async throws {
         let reader = try AVAssetReader(asset: asset)
 
-        let audioOutput = AVAssetReaderAudioMixOutput(audioTracks: try await asset.loadTracks(withMediaType: .audio), audioSettings: nil)
+        nonisolated(unsafe) let audioOutput = AVAssetReaderAudioMixOutput(audioTracks: try await asset.loadTracks(withMediaType: .audio), audioSettings: nil)
         reader.add(audioOutput)
 
-        let videoOutput = AVAssetReaderTrackOutput(track: try await asset.loadTracks(withMediaType: .video)[0], outputSettings: nil)
+        nonisolated(unsafe) let videoOutput = AVAssetReaderTrackOutput(track: try await asset.loadTracks(withMediaType: .video)[0], outputSettings: nil)
         reader.add(videoOutput)
 
         reader.startReading()
@@ -46,8 +35,8 @@ public enum VideoConverter {
         )
 
         await withCheckedContinuation { continuation in
-            let videoInput = AVAssetWriterInput(mediaType: .video, outputSettings: nil, sourceFormatHint: formatHint)
-            let audioInput = AVAssetWriterInput(mediaType: .audio, outputSettings: audioOutputSettings)
+            nonisolated(unsafe) let videoInput = AVAssetWriterInput(mediaType: .video, outputSettings: nil, sourceFormatHint: formatHint)
+            nonisolated(unsafe) let audioInput = AVAssetWriterInput(mediaType: .audio, outputSettings: audioOutputSettings)
 
             videoInput.expectsMediaDataInRealTime = false
             audioInput.expectsMediaDataInRealTime = false
@@ -66,7 +55,7 @@ public enum VideoConverter {
             let videoQueue = DispatchQueue(label: "vcam.mergeAudioTracks.videoQueue")
             let audioQueue = DispatchQueue(label: "vcam.mergeAudioTracks.audioQueue")
 
-            videoInput.requestMediaDataWhenReadySending(on: videoQueue) {
+            videoInput.requestMediaDataWhenReady(on: videoQueue) {
                 while videoInput.isReadyForMoreMediaData {
                     guard let buffer = videoOutput.copyNextSampleBuffer() else {
                         videoInput.markAsFinished()
@@ -77,7 +66,7 @@ public enum VideoConverter {
                 }
             }
 
-            audioInput.requestMediaDataWhenReadySending(on: audioQueue) {
+            audioInput.requestMediaDataWhenReady(on: audioQueue) {
                 while audioInput.isReadyForMoreMediaData {
                     guard let buffer = audioOutput.copyNextSampleBuffer() else {
                         audioInput.markAsFinished()
@@ -94,11 +83,5 @@ public enum VideoConverter {
         }
 
         await assetwriter.finishWriting()
-    }
-}
-
-extension AVAssetWriterInput {
-    func requestMediaDataWhenReadySending(on queue: dispatch_queue_t, using block: sending @escaping () -> Void) {
-        requestMediaDataWhenReady(on: queue, using: block)
     }
 }

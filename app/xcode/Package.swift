@@ -48,14 +48,14 @@ let package = Package(
         .testTarget(name: "VCamBridgeTests", dependencies: ["VCamBridge"]),
         .testTarget(name: "VCamAppExtensionTests", dependencies: ["VCamAppExtension"]),
     ],
-    swiftLanguageModes: [.v5]
+    swiftLanguageModes: [.v6]
 )
 
 let isThree = true
 
 for target in package.targets {
     var swiftSettings = (target.swiftSettings ?? []) + [
-        .enableUpcomingFeature("ExistentialAny", .when(configuration: .debug)),
+        // .enableUpcomingFeature("NonisolatedNonsendingByDefault", .when(configuration: .debug)),
         .define("ENABLE_MOCOPI"),
     ]
 

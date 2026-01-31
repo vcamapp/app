@@ -7,7 +7,7 @@
 
 import AVFoundation
 
-public enum ScreenResolution: Identifiable, CaseIterable {
+public enum ScreenResolution: Identifiable, CaseIterable, Sendable {
 //    case resolution4320p
     case resolution2160p
 //    case resolution1440p

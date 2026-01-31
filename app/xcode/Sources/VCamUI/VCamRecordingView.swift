@@ -88,22 +88,11 @@ public struct VCamRecordingView: View {
                 HStack {
                     Button {
                         if recorder.isRecording {
-                            recorder.stop()
-                        } else {
-                            do {
-                                let ext = recordingVideoFormat
-                                let format = VideoFormat(rawValue: ext) ?? .mp4
-                                let destination = try setDestinationURL()
-                                try recorder.start(
-                                    with: destination,
-                                    name: "vcam_\(Date().yyyyMMddHHmmss)",
-                                    format: format,
-                                    screenResolution: uniState.screenResolution,
-                                    capturesSystemAudio: recordSystemSound
-                                )
-                            } catch {
-                                print(error)
+                            Task {
+                                try await recorder.stop()
                             }
+                        } else {
+                            startRecording()
                         }
                     } label: {
                         HStack(spacing: 4) {
@@ -135,6 +124,25 @@ public struct VCamRecordingView: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+    }
+
+    private func startRecording() {
+        Task {
+            do {
+                let ext = recordingVideoFormat
+                let format = VideoFormat(rawValue: ext) ?? .mp4
+                let destination = try setDestinationURL()
+                try await recorder.start(
+                    with: destination,
+                    name: "vcam_\(Date().yyyyMMddHHmmss)",
+                    format: format,
+                    screenResolution: uniState.screenResolution,
+                    capturesSystemAudio: recordSystemSound
+                )
+            } catch {
+                print(error)
+            }
         }
     }
 }
