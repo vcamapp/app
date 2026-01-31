@@ -55,7 +55,7 @@ let isThree = true
 
 for target in package.targets {
     var swiftSettings = (target.swiftSettings ?? []) + [
-        // .enableUpcomingFeature("NonisolatedNonsendingByDefault", .when(configuration: .debug)),
+        .enableUpcomingFeature("NonisolatedNonsendingByDefault"),
         .define("ENABLE_MOCOPI"),
     ]
 

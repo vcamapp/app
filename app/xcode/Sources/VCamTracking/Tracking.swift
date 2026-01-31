@@ -6,16 +6,6 @@ import VCamEntity
 import VCamData
 import VCamBridge
 
-@_cdecl("uniUseBlinker")
-@MainActor public func uniUseBlinker() -> Bool {
-    Tracking.shared.avatarCameraManager.isBlinkerUsed
-}
-
-@_cdecl("uniSupportsPerfectSync")
-@MainActor public func uniSupportsPerfectSync() -> Bool {
-    Tracking.shared.faceTrackingMethod.supportsPerfectSync
-}
-
 @Observable
 public final class Tracking {
     nonisolated(unsafe) public static let shared = Tracking() // TODO: MainActor
@@ -228,6 +218,7 @@ public final class Tracking {
         setLipSyncType(.camera)
     }
 
+    @concurrent
     public func startVCamMotionReceiver() async throws {
         try await vcamMotionReceiver.start(with: vcamMotionTracking)
     }

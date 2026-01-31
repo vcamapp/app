@@ -55,17 +55,10 @@ public struct ScreenResolutionPayload: Equatable {
 
 // MARK: - Bridge Callback
 public extension UniBridge {
-    nonisolated(unsafe) fileprivate(set) static var methodCallback: (UniBridgeMethodId, UnsafeMutableRawPointer?, UnsafeMutableRawPointer?) -> Void = { _, _, _ in }
+    nonisolated(unsafe) static var methodCallback: (UniBridgeMethodId, UnsafeMutableRawPointer?, UnsafeMutableRawPointer?) -> Void = { _, _, _ in }
 }
 
 // MARK: - Bridge Implementation
-
-@_cdecl("uniBridgeRegister")
-public func uniBridgeRegister(_ callback: @escaping @convention(c) (Int32, UnsafeMutableRawPointer?, UnsafeMutableRawPointer?) -> Void) {
-    UniBridge.methodCallback = { methodId, payloadPtr, returnPtr in
-        callback(methodId.rawValue, payloadPtr, returnPtr)
-    }
-}
 
 public extension UniBridge {
     static let isUnity = Bundle.main.bundlePath.hasSuffix("Unity.app")

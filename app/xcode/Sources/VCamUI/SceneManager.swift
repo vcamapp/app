@@ -4,24 +4,6 @@ import VCamBridge
 import VCamData
 import VCamLogger
 
-@_cdecl("uniLoadScene")
-@MainActor public func uniLoadScene() {
-    do {
-        try SceneManager.shared.loadCurrentScene()
-    } catch {
-        uniDebugLog(error.localizedDescription)
-    }
-}
-
-@_cdecl("uniUpdateScene")
-@MainActor public func uniUpdateScene() {
-    do {
-        try SceneManager.shared.saveCurrentSceneAndObjects()
-    } catch {
-        uniDebugLog(error.localizedDescription)
-    }
-}
-
 @MainActor
 @Observable
 public final class SceneManager {
@@ -127,7 +109,7 @@ public final class SceneManager {
         if currentSceneId == scene.id, let nextScene = scenes.first {
             try? loadScene(id: nextScene.id)
         } else {
-            uniUpdateScene()
+            try? saveCurrentSceneAndObjects()
         }
     }
 
@@ -163,7 +145,7 @@ public final class SceneManager {
         try loadScene(id: currentSceneId)
     }
 
-    func saveCurrentSceneAndObjects() throws {
+    public func saveCurrentSceneAndObjects() throws {
         let dataStore = VCamSceneDataStore(sceneId: currentSceneId)
         let scene = try dataStore.makeScene(name: currentScene.name, objects: SceneObjectManager.shared.objects)
         try dataStore.save(scene)

@@ -3,9 +3,7 @@ import SwiftUI
 
 @MainActor private var debugLog: ((String) -> Void)?
 
-
-@_cdecl("uniRegisterDebugLog")
-@MainActor public func uniRegisterDebugLog(_ function: @escaping @convention(c) (UnsafePointer<CChar>) -> Void) {
+@MainActor public func registerDebugLog(_ function: @escaping @convention(c) (UnsafePointer<CChar>) -> Void) {
     debugLog = { function(($0 as NSString).utf8String!) }
 }
 

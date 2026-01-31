@@ -9,7 +9,8 @@ public struct AppUpdater: Sendable {
 
     let repository: Repository
 
-    public func check() async throws -> LatestRelease? {
+    @concurrent
+    func check() async throws -> LatestRelease? {
         guard Bundle.main.executableURL != nil else {
             throw Error.invalidExecutableURL
         }

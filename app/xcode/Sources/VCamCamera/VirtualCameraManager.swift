@@ -32,6 +32,7 @@ public final class VirtualCameraManager: @unchecked Sendable {
         return processedImage
     }
 
+    @concurrent
     public func installAndStartCameraExtension() async -> Bool {
         do {
             try await CameraExtension().installExtensionIfNotInstalled()

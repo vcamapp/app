@@ -6,43 +6,6 @@ import VCamData
 import VCamLogger
 import AVFoundation
 
-@_cdecl("uniRemoveObject")
-@MainActor public func uniRemoveObject(_ id: Int32) {
-    uniDebugLog("uniRemoveTexture \(id)")
-    SceneObjectManager.shared.remove(byId: id)
-}
-
-@_cdecl("uniUpdateObjectAvatar")
-@MainActor public func uniUpdateObjectAvatar(px: Float, py: Float, pz: Float, rx: Float, ry: Float, rz: Float) {
-    guard let object = SceneObjectManager.shared.objects.find(byId: SceneObject.avatarID),
-          case .avatar(let avatar) = object.type else { return }
-    avatar.position = .init(px, py, pz)
-    avatar.rotation = .init(rx, ry, rz)
-    uniUpdateScene()
-}
-
-@_cdecl("uniUpdateObjectImage")
-@MainActor public func uniUpdateObjectImage(id: Int32, px: Float, py: Float, sx: Float, sy: Float) {
-    guard let object = SceneObjectManager.shared.objects.find(byId: id) else { return }
-    switch object.type {
-    case .avatar, .wind:
-        return
-    case let .image(image):
-        image.offset = .init(px, py)
-        image.size = CGSize(width:  CGFloat(sx), height: CGFloat(sy))
-    case let .screen(screen):
-        screen.region.origin = .init(x: CGFloat(px), y: CGFloat(py))
-        screen.region.size = .init(width: CGFloat(sx), height: CGFloat(sy))
-    case let .videoCapture(videoCapture):
-        videoCapture.region.origin = .init(x: CGFloat(px), y: CGFloat(py))
-        videoCapture.region.size = .init(width: CGFloat(sx), height: CGFloat(sy))
-    case let .web(web):
-        web.region.origin = .init(x: CGFloat(px), y: CGFloat(py))
-        web.region.size = .init(width: CGFloat(sx), height: CGFloat(sy))
-    }
-    uniUpdateScene()
-}
-
 @MainActor
 @Observable
 public final class SceneObjectManager {
@@ -54,7 +17,7 @@ public final class SceneObjectManager {
         Logger.log("")
         configure(object)
         objects.append(object)
-        uniUpdateScene()
+        try? SceneManager.shared.saveCurrentSceneAndObjects()
     }
 
     private func configure(_ object: SceneObject) {
@@ -106,7 +69,7 @@ public final class SceneObjectManager {
     public func update(_ object: SceneObject) {
         objects.update(object)
         configure(object)
-        uniUpdateScene()
+        try? SceneManager.shared.saveCurrentSceneAndObjects()
     }
 
     func remove(byIndex index: Int) {
@@ -134,7 +97,7 @@ public final class SceneObjectManager {
         }
         objects.remove(byId: object.id)
         UniBridge.shared.deleteObject()
-        uniUpdateScene()
+        try? SceneManager.shared.saveCurrentSceneAndObjects()
     }
 
     public func move(byId id: Int32, up: Bool) {
@@ -169,7 +132,7 @@ public final class SceneObjectManager {
 
     func updateObjectOrder() {
         UniBridge.shared.updateObjectOrder(SceneObjectManager.shared.objects.map(\.id) + [-1])
-        uniUpdateScene()
+        try? SceneManager.shared.saveCurrentSceneAndObjects()
     }
 
     public func didChangeObjects() {

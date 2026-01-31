@@ -28,7 +28,7 @@ public struct VCamSceneListView: View {
                         editingId: $editingId,
                         selectedId: selectedId
                     ) {
-                        uniUpdateScene()
+                        try? SceneManager.shared.saveCurrentSceneAndObjects()
                     }
                     .modifier(EditSceneViewModifier(scene: scene))
                     .tag(scene.id)

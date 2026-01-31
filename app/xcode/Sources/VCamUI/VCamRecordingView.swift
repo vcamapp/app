@@ -88,9 +88,7 @@ public struct VCamRecordingView: View {
                 HStack {
                     Button {
                         if recorder.isRecording {
-                            Task {
-                                try await recorder.stop()
-                            }
+                            recorder.stop()
                         } else {
                             startRecording()
                         }
@@ -128,21 +126,19 @@ public struct VCamRecordingView: View {
     }
 
     private func startRecording() {
-        Task {
-            do {
-                let ext = recordingVideoFormat
-                let format = VideoFormat(rawValue: ext) ?? .mp4
-                let destination = try setDestinationURL()
-                try await recorder.start(
-                    with: destination,
-                    name: "vcam_\(Date().yyyyMMddHHmmss)",
-                    format: format,
-                    screenResolution: uniState.screenResolution,
-                    capturesSystemAudio: recordSystemSound
-                )
-            } catch {
-                print(error)
-            }
+        do {
+            let ext = recordingVideoFormat
+            let format = VideoFormat(rawValue: ext) ?? .mp4
+            let destination = try setDestinationURL()
+            try recorder.start(
+                with: destination,
+                name: "vcam_\(Date().yyyyMMddHHmmss)",
+                format: format,
+                screenResolution: uniState.screenResolution,
+                capturesSystemAudio: recordSystemSound
+            )
+        } catch {
+            print(error)
         }
     }
 }

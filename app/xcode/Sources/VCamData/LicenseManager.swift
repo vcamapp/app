@@ -16,6 +16,7 @@ public protocol LicenseManager: Observable {
     func signIn()
     func signOut() throws
     func openManagementPage()
+    @concurrent
     func updateStatus() async
 }
 

@@ -4,7 +4,8 @@ import VCamBridge
 import VCamEntity
 
 public protocol ScreenRecorderProtocol: AnyObject {
-    @MainActor func stopCapture() async
+    @concurrent
+    func stopCapture() async
 }
 
 @Observable
@@ -361,6 +362,7 @@ extension ScreenRecorder: RenderTextureRenderer {
         }
     }
 
+    @concurrent
     public func snapshot() async -> CIImage {
         let frame = await MainActor.run { latestFrame }
         guard let frame else { return .init() }

@@ -23,7 +23,7 @@ public enum VCamWindow {
         var panel: NSPanel!
         var closeObserver: (any NSObjectProtocol)?
 
-        let windowClosed = {
+        let windowClosed = { @MainActor in
             panel = nil
             close?()
 
@@ -33,11 +33,13 @@ public enum VCamWindow {
             }
         }
 
-        closeObserver = NotificationCenter.default.addObserver(forName: NSWindow.willCloseNotification, object: nil, queue: .main) { notification in
+        closeObserver = NotificationCenter.default.addObserver(forName: NSWindow.willCloseNotification, object: nil, queue: .main) { [panel] notification in
             guard notification.object as? NSPanel === panel else {
                 return
             }
-            windowClosed()
+            MainActor.assumeIsolated {
+                windowClosed()
+            }
         }
 
         panel = NSPanel(contentViewController: NSHostingController(rootView: view({

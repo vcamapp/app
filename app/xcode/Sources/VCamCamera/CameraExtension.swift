@@ -20,6 +20,7 @@ public final class CameraExtension: NSObject {
     private var deactivationRequestContinuation: CheckedContinuation<Void, any Error>?
     private var propertiesRequestContinuation: CheckedContinuation<OSSystemExtensionProperties, any Error>?
 
+    @concurrent
     public func installExtension() async throws {
         return try await withCheckedThrowingContinuation { continuation in
             self.activationRequestContinuation = continuation
@@ -29,6 +30,7 @@ public final class CameraExtension: NSObject {
         }
     }
 
+    @concurrent
     public func uninstallExtension() async throws {
         return try await withCheckedThrowingContinuation { continuation in
             self.deactivationRequestContinuation = continuation
@@ -38,6 +40,7 @@ public final class CameraExtension: NSObject {
         }
     }
 
+    @concurrent
     public func extensionProperties() async throws -> OSSystemExtensionProperties {
         return try await withCheckedThrowingContinuation { continuation in
             self.propertiesRequestContinuation = continuation
@@ -47,6 +50,7 @@ public final class CameraExtension: NSObject {
         }
     }
 
+    @concurrent
     public func installExtensionIfNotInstalled() async throws {
         if CoreMediaSinkStream.isInstalled {
             return

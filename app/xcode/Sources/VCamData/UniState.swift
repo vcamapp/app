@@ -84,11 +84,11 @@ public final class UniState {
 
     // MARK: - Original Properties
 
-    public fileprivate(set) var motions: [Avatar.Motion] = []
-    public fileprivate(set) var isMotionPlaying: [Avatar.Motion: Bool] = [:]
-    public fileprivate(set) var expressions: [Avatar.Expression] = []
-    public fileprivate(set) var currentExpressionIndex: Int?
-    public fileprivate(set) var blendShapeNames: [String] = []
+    public var motions: [Avatar.Motion] = []
+    public var isMotionPlaying: [Avatar.Motion: Bool] = [:]
+    public var expressions: [Avatar.Expression] = []
+    public var currentExpressionIndex: Int?
+    public var blendShapeNames: [String] = []
 
     // MARK: - Bool Properties
 
@@ -335,7 +335,7 @@ public final class UniState {
 
     // MARK: - Unity → Swift Update Methods (bypasses Unity sync to avoid loops)
 
-    func setFromUnity(intType: UniBridge.IntType, value: Int32) {
+    public func setFromUnity(intType: UniBridge.IntType, value: Int32) {
         switch intType {
         case .lensFlare:
 #if FEATURE_3
@@ -348,51 +348,4 @@ public final class UniState {
         case .qualityLevel: __qualityLevel = value
         }
     }
-}
-
-@_cdecl("uniStateSetMotions")
-@MainActor public func uniStateSetMotions(_ motionsPtr: UnsafePointer<UnsafePointer<CChar>?>, _ count: Int32) {
-    let motions: [Avatar.Motion] = (0..<Int(count)).compactMap { index in
-        guard let cString = motionsPtr.advanced(by: index).pointee else { return nil }
-        return Avatar.Motion(name: String(cString: cString))
-    }
-    UniState.shared.motions = motions
-}
-
-@_cdecl("uniStateSetMotionPlaying")
-@MainActor public func uniStateSetMotionPlaying(_ motion: UnsafePointer<CChar>, _ isPlaying: Bool) {
-    let motion = Avatar.Motion(name: String(cString: motion))
-    UniState.shared.isMotionPlaying[motion] = isPlaying
-}
-
-@_cdecl("uniStateSetExpressions")
-@MainActor public func uniStateSetExpressions(_ expressionsPtr: UnsafePointer<UnsafePointer<CChar>?>, _ count: Int32) {
-    let expressions: [Avatar.Expression] = (0..<Int(count)).compactMap { index in
-        guard let cString = expressionsPtr.advanced(by: index).pointee else { return nil }
-        return Avatar.Expression(name: String(cString: cString))
-    }
-    UniState.shared.expressions = expressions
-    UniState.shared.currentExpressionIndex = nil
-}
-
-@_cdecl("uniStateSetCurrentExpressionIndex")
-@MainActor public func uniStateSetCurrentExpressionIndex(_ index: Int32) {
-    UniState.shared.currentExpressionIndex = index >= 0 ? Int(index) : nil
-}
-
-@_cdecl("uniStateSetBlendShapeNames")
-@MainActor public func uniStateSetBlendShapeNames(_ namesPtr: UnsafePointer<UnsafePointer<CChar>?>, _ count: Int32) {
-    let names: [String] = (0..<Int(count)).compactMap { index in
-        guard let cString = namesPtr.advanced(by: index).pointee else { return nil }
-        return String(cString: cString)
-    }
-    UniState.shared.blendShapeNames = names
-}
-
-// MARK: - Unity -> Swift
-
-@_cdecl("uniStateSetInt")
-@MainActor public func uniStateSetInt(_ type: Int32, _ value: Int32) {
-    guard let intType = UniBridge.IntType(rawValue: type) else { return }
-    UniState.shared.setFromUnity(intType: intType, value: value)
 }

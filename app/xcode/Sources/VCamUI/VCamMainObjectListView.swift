@@ -22,7 +22,6 @@ public struct VCamMainObjectListView: View {
         GroupBox {
             List(selection: selectedIdBinding) {
                 ForEach($objectManager.objects) { $object in
-                    let objectId = object.id
                     TextFieldListRow(
                         id: object.id,
                         text: .init(value: object.name, set: {
@@ -33,7 +32,7 @@ public struct VCamMainObjectListView: View {
                         editingId: $editingId,
                         selectedId: selectedId
                     ) {
-                        uniUpdateScene()
+                        try? SceneManager.shared.saveCurrentSceneAndObjects()
                     }
                     .opacity(object.isHidden ? 0.5 : 1)
                     .modifier(EditSceneObjectViewModifier(object: object))
@@ -426,7 +425,7 @@ private struct EditSceneObjectViewModifier: ViewModifier {
     }
 
     private func applyFilter() {
-        uniUpdateScene()
+        try? SceneManager.shared.saveCurrentSceneAndObjects()
         SceneObjectManager.shared.didChangeObjects() // Reflect the state when resetting the filter
     }
 }

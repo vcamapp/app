@@ -75,7 +75,7 @@ extension AppUpdateInformationView: MacWindow {
 
 extension AppUpdater {
     @MainActor
-    public func presentUpdateAlert() async {
+    func presentUpdateAlert() async {
         guard let release = try? await check() else {
         await VCamAlert.showModal(title: L10n.upToDate.text, message: L10n.upToDateMessage(Version.current.description).text, canCancel: false)
             return

@@ -6,6 +6,7 @@ import VCamCamera
 import AppKit
 
 public struct Migration {
+    @concurrent
     public static func migrate() async {
         let previousVersion = UserDefaults.standard.value(for: .previousVersion)
 
@@ -34,6 +35,7 @@ public struct Migration {
 }
 
 extension Migration {
+    @concurrent
     static func migrationFirst(previousVersion: String) async throws {
         guard previousVersion.isEmpty else { return }
         await VCamAlert.showModal(title: L10n.installVirtualCamera.text, message: L10n.explainAboutInstallingCameraExtension.text, canCancel: false)
@@ -129,6 +131,7 @@ extension Migration {
         }
     }
 
+    @concurrent
     static func migration0141(version: [Int]) async throws {
 #if FEATURE_3
         // If updated from a version prior to 0.14.1

@@ -12,7 +12,8 @@ public protocol VCamAction<Configuration>: Identifiable<UUID> {
 
     init(configuration: Configuration)
 
-    @MainActor func callAsFunction(context: VCamActionContext) async throws
+    @concurrent
+    func callAsFunction(context: VCamActionContext) async throws
 
     func deleteResources(shortcut: VCamShortcut)
 }

@@ -23,7 +23,7 @@ public final class VCamMotionReceiver: @unchecked Sendable { // TODO: Fix Sendab
     public init() {}
 
     @MainActor
-    public func start(with tracking: VCamMotionTracking) async throws {
+    func start(with tracking: VCamMotionTracking) async throws {
         Logger.log("\(listener == nil)")
         guard listener == nil else { return }
 

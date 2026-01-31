@@ -5,7 +5,7 @@
 //  Created by Tatsuya Tanaka on 2023/02/14.
 //
 
-import AppKit
+@preconcurrency import AppKit
 import SwiftUI
 import VCamEntity
 import VCamData

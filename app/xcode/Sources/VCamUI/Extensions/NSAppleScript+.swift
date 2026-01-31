@@ -8,6 +8,7 @@
 import Foundation
 
 extension NSAppleScript {
+    @concurrent
     static func execute(_ source: String) async throws {
         return try await withCheckedThrowingContinuation { continuation in
             DispatchQueue.global().async {
@@ -26,6 +27,7 @@ extension NSAppleScript {
         }
     }
 
+    @concurrent
     static func execute(contentsOf url: URL) async throws {
         return try await withCheckedThrowingContinuation { continuation in
             DispatchQueue.global().async {
