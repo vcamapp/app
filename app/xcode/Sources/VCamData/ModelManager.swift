@@ -28,6 +28,10 @@ public final class ModelManager {
         return modelItems.first { $0.id == id }
     }
 
+    public func model(for modelId: UUID) -> Models.Model? {
+        modelItems.first { $0.id == modelId }?.model
+    }
+
     public func setLastLoadedModel(_ model: ModelItem) {
         lastLoadedModelId = model.id
         saveMeta()

@@ -3,13 +3,14 @@ import Observation
 import VCamLogger
 
 @Observable
-public final class VCamMotionReceiver: @unchecked Sendable { // TODO: Fix Sendable conformance
+@MainActor
+public final class VCamMotionReceiver {
     private static let queue = DispatchQueue(label: "com.github.tattn.vcam.vcammotionreceiver")
     @ObservationIgnored private var listener: NWListener?
     @ObservationIgnored private var connection: NWConnection?
     @ObservationIgnored private weak var tracking: VCamMotionTracking?
 
-    @MainActor public private(set) var connectionStatus = ConnectionStatus.disconnected
+    public private(set) var connectionStatus = ConnectionStatus.disconnected
 
     @ObservationIgnored private var shouldAutoReconnect = true
     @ObservationIgnored private var timeoutTask: Task<Void, Never>?
@@ -22,7 +23,6 @@ public final class VCamMotionReceiver: @unchecked Sendable { // TODO: Fix Sendab
 
     public init() {}
 
-    @MainActor
     func start(with tracking: VCamMotionTracking) async throws {
         Logger.log("\(listener == nil)")
         guard listener == nil else { return }
@@ -60,46 +60,48 @@ public final class VCamMotionReceiver: @unchecked Sendable { // TODO: Fix Sendab
                 }
             }
             listener.newConnectionHandler = { [weak self] connection in
-                self?.connection = connection
-                connection.stateUpdateHandler = { [weak self] state in
-                     Task { @MainActor [weak self] in
-                        switch state {
-                        case .setup, .preparing: ()
-                        case .waiting(let error):
-                            Logger.log("Connection waiting: \(error.localizedDescription)")
-                        case .ready:
-                            Logger.log("Connection ready")
-                            self?.connectionStatus = .connected
-                            self?.resetTimeoutTimer()
-                            connection.receiveData(with: tracking.onVCamMotionReceived, onDataReceived: { [weak self] in
-                                Task { @MainActor in
-                                    self?.resetTimeoutTimer()
+                Task { @MainActor in
+                    self?.connection = connection
+                    connection.stateUpdateHandler = { [weak self] state in
+                         Task { @MainActor [weak self] in
+                            switch state {
+                            case .setup, .preparing: ()
+                            case .waiting(let error):
+                                Logger.log("Connection waiting: \(error.localizedDescription)")
+                            case .ready:
+                                Logger.log("Connection ready")
+                                self?.connectionStatus = .connected
+                                self?.resetTimeoutTimer()
+                                if let tracking = self?.tracking {
+                                    connection.receiveData(with: tracking.handleVCamMotionReceived, onDataReceived: { [weak self] in
+                                        Task { @MainActor in
+                                            self?.resetTimeoutTimer()
+                                        }
+                                    })
                                 }
-                            })
-                        case .cancelled:
-                            Logger.log("Connection cancelled")
-                            await self?.handleDisconnection()
-                        case .failed(let error):
-                            Logger.log("Connection failed: \(error.localizedDescription)")
-                            await self?.handleDisconnection()
-                        @unknown default: ()
+                            case .cancelled:
+                                Logger.log("Connection cancelled")
+                                await self?.handleDisconnection()
+                            case .failed(let error):
+                                Logger.log("Connection failed: \(error.localizedDescription)")
+                                await self?.handleDisconnection()
+                            @unknown default: ()
+                            }
                         }
                     }
-                }
 
-                connection.start(queue: Self.queue)
+                    connection.start(queue: Self.queue)
+                }
             }
             listener.start(queue: Self.queue)
         }
     }
 
-    @MainActor
     public func stop() {
         shouldAutoReconnect = false
         stopInternal()
     }
 
-    @MainActor
     private func stopInternal() {
         timeoutTask?.cancel()
         timeoutTask = nil
@@ -118,10 +120,9 @@ public final class VCamMotionReceiver: @unchecked Sendable { // TODO: Fix Sendab
         tracking?.stop()
     }
 
-    @MainActor
     private func resetTimeoutTimer() {
         timeoutTask?.cancel()
-        timeoutTask = Task { @MainActor [weak self] in
+        timeoutTask = Task { [weak self] in
             do {
                 try await Task.sleep(nanoseconds: Self.dataTimeoutSeconds * NSEC_PER_SEC)
                 Logger.log("Data timeout - resetting listener")
@@ -130,7 +131,6 @@ public final class VCamMotionReceiver: @unchecked Sendable { // TODO: Fix Sendab
         }
     }
 
-    @MainActor
     private func handleTimeout() async {
         guard connectionStatus == .connected, shouldAutoReconnect, let tracking = tracking else { return }
         stopInternal()
@@ -141,7 +141,6 @@ public final class VCamMotionReceiver: @unchecked Sendable { // TODO: Fix Sendab
         }
     }
 
-    @MainActor
     private func handleDisconnection() async {
         guard shouldAutoReconnect, let tracking = tracking else {
             stopInternal()
@@ -158,7 +157,7 @@ public final class VCamMotionReceiver: @unchecked Sendable { // TODO: Fix Sendab
 
 private extension NWConnection {
     func receiveData(
-        with onVCamMotionReceived: @escaping @Sendable (VCamMotion, Tracking) -> Void,
+        with onVCamMotionReceived: @escaping @Sendable (VCamMotion) -> Void,
         onDataReceived: @escaping @Sendable () -> Void
     ) {
         receive(minimumIncompleteLength: 1, maximumLength: 8192) { [weak self] content, contentContext, isComplete, error in
@@ -173,7 +172,7 @@ private extension NWConnection {
             }
             onDataReceived()
             let mocapData = VCamMotion(rawData: content)
-            onVCamMotionReceived(mocapData, .shared)
+            onVCamMotionReceived(mocapData)
         }
     }
 }

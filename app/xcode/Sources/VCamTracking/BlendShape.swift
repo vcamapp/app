@@ -1,13 +1,6 @@
-//
-//  BlendShape.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2023/01/26.
-//
-
 import Foundation
 
-public struct BlendShape: Equatable {
+public struct BlendShape: Equatable, Sendable {
     public var lookAtPoint: SIMD2<Float>
     public var browDownLeft: Float
     public var browDownRight: Float

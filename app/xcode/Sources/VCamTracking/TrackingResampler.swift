@@ -1,8 +1,8 @@
 import Foundation
 import Accelerate
 
-final class TrackingResampler: @unchecked Sendable { // TODO: Fix Sendable conformance
-    struct Settings {
+final class TrackingResampler: @unchecked Sendable {
+    struct Settings: Sendable {
         let fps: Double
         let bufferDelay: Double
         let maxPrediction: Double
@@ -14,19 +14,24 @@ final class TrackingResampler: @unchecked Sendable { // TODO: Fix Sendable confo
         }
     }
 
-    private struct Frame {
+    private struct Frame: Sendable {
         let time: Double
         let values: [Float]
     }
 
+    private struct State: Sendable {
+        var frames: [Frame] = []
+        var timer: (any DispatchSourceTimer)?
+        var valueCount: Int?
+    }
+
+    private var state: State
     private let queue: DispatchQueue
     private let settingsProvider: @Sendable () -> Settings
-    private let output: @Sendable ([Float]) -> Void
-    private var frames: [Frame] = []
-    private var timer: (any DispatchSourceTimer)?
-    private var valueCount: Int?
+    private let output: @MainActor @Sendable ([Float]) -> Void
 
-    init(label: String, settingsProvider: @escaping @Sendable () -> Settings, output: @escaping @Sendable ([Float]) -> Void) {
+    init(label: String, settingsProvider: @escaping @Sendable () -> Settings, output: @escaping @MainActor @Sendable ([Float]) -> Void) {
+        self.state = State()
         self.queue = DispatchQueue(label: "com.github.tattn.vcam.tracking.resampler.\(label)")
         self.settingsProvider = settingsProvider
         self.output = output
@@ -34,13 +39,12 @@ final class TrackingResampler: @unchecked Sendable { // TODO: Fix Sendable confo
 
     func push(_ values: [Float]) {
         let timestamp = ProcessInfo.processInfo.systemUptime
-        queue.async { [weak self] in
-            guard let self else { return }
-            ensureValueCount(values)
-            frames.append(Frame(time: timestamp, values: values))
+        queue.async { [self] in
+            ensureValueCount(values, state: &state)
+            state.frames.append(Frame(time: timestamp, values: values))
             let maxFrames = settingsProvider().maxFrames
-            if frames.count > maxFrames {
-                frames.removeFirst(frames.count - maxFrames)
+            if state.frames.count > maxFrames {
+                state.frames.removeFirst(state.frames.count - maxFrames)
             }
             startLocked()
         }
@@ -48,52 +52,59 @@ final class TrackingResampler: @unchecked Sendable { // TODO: Fix Sendable confo
 
     func reset(with values: [Float]? = nil) {
         let timestamp = ProcessInfo.processInfo.systemUptime
-        queue.async { [weak self] in
-            guard let self else { return }
-            frames.removeAll(keepingCapacity: true)
+        queue.async { [self] in
+            state.frames.removeAll(keepingCapacity: true)
             if let values {
-                ensureValueCount(values)
-                frames.append(Frame(time: timestamp, values: values))
+                ensureValueCount(values, state: &state)
+                state.frames.append(Frame(time: timestamp, values: values))
+            }
+            if values != nil {
                 startLocked()
             }
         }
     }
 
     func stop() {
-        queue.async { [weak self] in
-            self?.stopLocked()
+        queue.async { [self] in
+            stopLocked()
         }
     }
 
     private func startLocked() {
-        guard timer == nil else { return }
+        guard state.timer == nil else { return }
+
         let settings = settingsProvider()
         let timer = DispatchSource.makeTimerSource(queue: queue)
         timer.schedule(deadline: .now(), repeating: settings.outputInterval, leeway: .milliseconds(2))
-        timer.setEventHandler { [weak self] in
-            self?.tick()
+        timer.setEventHandler { [self] in
+            tick()
         }
         timer.resume()
-        self.timer = timer
+        state.timer = timer
     }
 
     private func stopLocked() {
-        timer?.cancel()
-        timer = nil
-        frames.removeAll(keepingCapacity: true)
-        valueCount = nil
+        state.timer?.cancel()
+        state.timer = nil
+        state.frames.removeAll(keepingCapacity: true)
+        state.valueCount = nil
     }
 
     private func tick() {
         let settings = settingsProvider()
+        let frames = state.frames
         guard !frames.isEmpty else { return }
         let now = ProcessInfo.processInfo.systemUptime
         let renderTime = now - settings.bufferDelay
-        guard let sample = sample(at: renderTime, settings: settings) else { return }
-        output(sample)
+        guard let sample = sample(at: renderTime, frames: frames, settings: settings) else { return }
+        // Unity requires main thread for data transmission
+        let output = self.output
+        DispatchQueue.runOnMain {
+            output(sample)
+        }
     }
 
-    private func sample(at renderTime: Double, settings: Settings) -> [Float]? {
+    private func sample(at renderTime: Double, frames: [Frame], settings: Settings) -> [Float]? {
         guard !frames.isEmpty else { return nil }
 
         if let prevIndex = frames.lastIndex(where: { $0.time <= renderTime }) {
@@ -105,13 +116,13 @@ final class TrackingResampler: @unchecked Sendable { // TODO: Fix Sendable confo
                 let t = Float((renderTime - prev.time) / span)
                 return vDSP.linearInterpolate(prev.values, next.values, using: max(0, min(1, t)))
             }
-            return predict(from: prevIndex, renderTime: renderTime, settings: settings)
+            return predict(from: prevIndex, frames: frames, renderTime: renderTime, settings: settings)
         }
 
         return frames.first?.values
     }
 
-    private func predict(from index: Int, renderTime: Double, settings: Settings) -> [Float] {
+    private func predict(from index: Int, frames: [Frame], renderTime: Double, settings: Settings) -> [Float] {
         let last = frames[index]
         guard index > 0 else { return last.values }
         let prev = frames[index - 1]
@@ -123,11 +134,11 @@ final class TrackingResampler: @unchecked Sendable { // TODO: Fix Sendable confo
         return vDSP.linearInterpolate(prev.values, last.values, using: 1 + factor)
     }
 
-    private func ensureValueCount(_ values: [Float]) {
-        if let valueCount {
+    private func ensureValueCount(_ values: [Float], state: inout State) {
+        if let valueCount = state.valueCount {
             precondition(values.count == valueCount, "TrackingResampler values size mismatch")
         } else {
-            valueCount = values.count
+            state.valueCount = values.count
         }
     }
 }

@@ -3,7 +3,8 @@ import class AppKit.NSColor
 import struct SwiftUI.Binding
 import struct SwiftUI.Color
 
-public final class ValueBinding<Value, Kind: RawRepresentable>: @unchecked Sendable where Kind.RawValue == Int32, Kind: Sendable {
+@MainActor
+public final class ValueBinding<Value, Kind: RawRepresentable> where Kind.RawValue == Int32, Kind: Sendable {
     public var getValue: ((Kind) -> Value)?
     public var setValue: (Kind, Value) -> Void = { _, _ in }
 

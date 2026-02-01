@@ -5,22 +5,54 @@ import Combine
 import VCamEntity
 import VCamData
 import VCamBridge
+import os
 
 @Observable
+@MainActor
 public final class Tracking {
-    nonisolated(unsafe) public static let shared = Tracking() // TODO: MainActor
+    public static let shared = Tracking()
 
-    public private(set) var faceTrackingMethod = TrackingMethod.Face.default
+    private struct MethodCache: Sendable {
+        var face: TrackingMethod.Face = .default
+        var hand: TrackingMethod.Hand = .disabled
+        var finger: TrackingMethod.Finger = .disabled
+    }
+    nonisolated(unsafe) private static var methodCache = MethodCache()
+
+    public nonisolated static var cachedFaceTrackingMethod: TrackingMethod.Face {
+        methodCache.face
+    }
+
+    public nonisolated static var cachedHandTrackingMethod: TrackingMethod.Hand {
+        methodCache.hand
+    }
+
+    public nonisolated static var cachedFingerTrackingMethod: TrackingMethod.Finger {
+        methodCache.finger
+    }
+
+    public private(set) var faceTrackingMethod = TrackingMethod.Face.default {
+        didSet { Self.methodCache.face = faceTrackingMethod }
+    }
 #if FEATURE_3
-    public private(set) var handTrackingMethod = TrackingMethod.Hand.default
-    public private(set) var fingerTrackingMethod = TrackingMethod.Finger.default
+    public private(set) var handTrackingMethod = TrackingMethod.Hand.default {
+        didSet { Self.methodCache.hand = handTrackingMethod }
+    }
+    public private(set) var fingerTrackingMethod = TrackingMethod.Finger.default {
+        didSet { Self.methodCache.finger = fingerTrackingMethod }
+    }
 #else
-    public private(set) var handTrackingMethod = TrackingMethod.Hand.disabled
-    public private(set) var fingerTrackingMethod = TrackingMethod.Finger.disabled
+    public private(set) var handTrackingMethod = TrackingMethod.Hand.disabled {
+        didSet { Self.methodCache.hand = handTrackingMethod }
+    }
+    public private(set) var fingerTrackingMethod = TrackingMethod.Finger.disabled {
+        didSet { Self.methodCache.finger = fingerTrackingMethod }
+    }
 #endif
 
     @ObservationIgnored public private(set) var useEyeTracking = false
     @ObservationIgnored public private(set) var useVowelEstimation = false
+    @ObservationIgnored public private(set) var currentModelId: UUID?
 
     public var mappings: [[TrackingMappingEntry]] = [
         TrackingMappingEntry.defaultMappings(for: .blendShape),
@@ -67,7 +99,6 @@ public final class Tracking {
         }
     }
 
-    @MainActor
     public func configure() {
         setFaceTrackingMethod(UserDefaults.standard.value(for: .trackingMethodFace))
 #if FEATURE_3
@@ -79,9 +110,20 @@ public final class Tracking {
 #endif
 
         if UserDefaults.standard.value(for: .integrationVCamMocap) {
-            Task { @MainActor in
+            Task {
                 try await Self.shared.startVCamMotionReceiver()
             }
+        }
+    }
+
+    private func resetToDefaultMappings() {
+        mappings = [
+            TrackingMappingEntry.defaultMappings(for: .blendShape),
+            UniBridge.shared.hasPerfectSyncBlendShape ? TrackingMappingEntry.defaultMappings(for: .perfectSync) : []
+        ]
+        applyMappingsToUnity(for: .blendShape)
+        if UniBridge.shared.hasPerfectSyncBlendShape {
+            applyMappingsToUnity(for: .perfectSync)
         }
     }
 
@@ -133,7 +175,6 @@ public final class Tracking {
         avatarCameraManager.resetCalibration()
     }
 
-    @MainActor
     public func setFaceTrackingMethod(_ method: TrackingMethod.Face) {
         if faceTrackingMethod != method {
             stopFaceResamplers()
@@ -193,7 +234,6 @@ public final class Tracking {
         }
     }
 
-    @MainActor
     public func setLipSyncType(_ type: LipSyncType) {
         let useCamera = type == .camera
         UniState.shared.lipSyncWebCam = useCamera
@@ -210,7 +250,6 @@ public final class Tracking {
         faceTrackingMethod.supportsPerfectSync && UniBridge.shared.hasPerfectSyncBlendShape
     }
 
-    @MainActor
     public func updateLipSyncIfNeeded() {
         guard micLipSyncDisabled else {
             return
@@ -218,7 +257,6 @@ public final class Tracking {
         setLipSyncType(.camera)
     }
 
-    @concurrent
     public func startVCamMotionReceiver() async throws {
         try await vcamMotionReceiver.start(with: vcamMotionTracking)
     }

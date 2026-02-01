@@ -1,17 +1,14 @@
 import Foundation
 import VCamBridge
+import os
 
-public final class VCamMotionTracking: @unchecked Sendable { // TODO: Fix Sendable conformance
+@MainActor
+public final class VCamMotionTracking {
     private let blendShapeResampler: TrackingResampler
     private let perfectSyncResampler: TrackingResampler
     private let handsResampler: TrackingResampler
     private let fingersResampler: TrackingResampler
-    private let smoothingHolder: SmoothingHolder
-
-    private final class SmoothingHolder: @unchecked Sendable {
-        var smoothing: TrackingSmoothing
-        init(_ smoothing: TrackingSmoothing) { self.smoothing = smoothing }
-    }
+    private let smoothingLock: OSAllocatedUnfairLock<TrackingSmoothing>
 
     private struct HandOutput {
         let hands: [Float]
@@ -21,25 +18,24 @@ public final class VCamMotionTracking: @unchecked Sendable { // TODO: Fix Sendab
     }
 
     public init(smoothing: TrackingSmoothing) {
-        let holder = SmoothingHolder(smoothing)
-        self.smoothingHolder = holder
-        let settingsProvider: @Sendable () -> TrackingResampler.Settings = {
-            holder.smoothing.settings()
+        self.smoothingLock = OSAllocatedUnfairLock(initialState: smoothing)
+        let settingsProvider: @Sendable () -> TrackingResampler.Settings = { [smoothingLock] in
+            smoothingLock.withLock { $0.settings() }
         }
 
-        blendShapeResampler = TrackingResampler(label: "vcam-motion-blendshape", settingsProvider: settingsProvider) { values in
+        blendShapeResampler = TrackingResampler(label: "vcam-motion-blendshape", settingsProvider: settingsProvider) { @MainActor values in
             UniBridge.shared.receiveVCamBlendShape(values)
         }
 
-        perfectSyncResampler = TrackingResampler(label: "vcam-motion-perfectsync", settingsProvider: settingsProvider) { values in
+        perfectSyncResampler = TrackingResampler(label: "vcam-motion-perfectsync", settingsProvider: settingsProvider) { @MainActor values in
             UniBridge.shared.receivePerfectSync(values)
         }
 
-        handsResampler = TrackingResampler(label: "vcam-motion-hands", settingsProvider: settingsProvider) { values in
+        handsResampler = TrackingResampler(label: "vcam-motion-hands", settingsProvider: settingsProvider) { @MainActor values in
             UniBridge.shared.hands(values)
         }
 
-        fingersResampler = TrackingResampler(label: "vcam-motion-fingers", settingsProvider: settingsProvider) { values in
+        fingersResampler = TrackingResampler(label: "vcam-motion-fingers", settingsProvider: settingsProvider) { @MainActor values in
             UniBridge.shared.fingers(values)
         }
     }
@@ -48,15 +44,24 @@ public final class VCamMotionTracking: @unchecked Sendable { // TODO: Fix Sendab
         stopResamplers()
     }
 
-    func updateSmoothing(_ smoothing: TrackingSmoothing) {
-        smoothingHolder.smoothing = smoothing
+    nonisolated func updateSmoothing(_ smoothing: TrackingSmoothing) {
+        smoothingLock.withLock { $0 = smoothing }
         if !smoothing.isEnabled {
-            stopResamplers()
+            Task { @MainActor in
+                stopResamplers()
+            }
         }
     }
 
-    public func onVCamMotionReceived(_ data: VCamMotion, tracking: Tracking) {
-        let smoothingEnabled = smoothingHolder.smoothing.isEnabled
+    /// Called from network thread, schedules processing on MainActor
+    nonisolated func handleVCamMotionReceived(_ data: VCamMotion) {
+        Task { @MainActor in
+            self.onVCamMotionReceived(data, tracking: Tracking.shared)
+        }
+    }
+
+    private func onVCamMotionReceived(_ data: VCamMotion, tracking: Tracking) {
+        let smoothingEnabled = smoothingLock.withLock { $0.isEnabled }
         let useFaceTracking = tracking.faceTrackingMethod == .vcamMocap
         let usePerfectSync = UniBridge.shared.hasPerfectSyncBlendShape
         let useHands = tracking.handTrackingMethod == .vcamMocap

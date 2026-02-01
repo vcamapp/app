@@ -22,7 +22,7 @@ public extension UserDefaults {
 }
 
 public extension UserDefaults {
-    struct Key<Value: UserDefaultsValue> {
+    struct Key<Value: UserDefaultsValue>: Sendable {
         public let rawValue: String
         public let defaultValue: Value
 

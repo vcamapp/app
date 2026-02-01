@@ -1,24 +1,17 @@
-//
-//  VCamMotion.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2023/01/09.
-//
-
 import Foundation
 import simd
 
-public struct VCamMotion: Equatable {
+public struct VCamMotion: Equatable, Sendable {
     public var version: UInt32
     public var head: Head
     public var hands: Hands
     public var blendShape: BlendShape
 
-    public struct Head: Equatable {
+    public struct Head: Equatable, Sendable {
         public var translation: SIMD3<Float>
         public var rotation: simd_quatf
     }
-    public struct Hands: Equatable {
+    public struct Hands: Equatable, Sendable {
         public init(right: VCamMotion.Hand, left: VCamMotion.Hand) {
             self.right = right
             self.left = left
@@ -28,7 +21,7 @@ public struct VCamMotion: Equatable {
         public var left: Hand
     }
 
-    public struct Hand: Equatable {
+    public struct Hand: Equatable, Sendable {
         public init(wrist: SIMD2<Float>, thumbCMC: SIMD2<Float>, littleMCP: SIMD2<Float>, thumbTip: SIMD2<Float>, indexTip: SIMD2<Float>, middleTip: SIMD2<Float>, ringTip: SIMD2<Float>, littleTip: SIMD2<Float>) {
             self.wrist = wrist
             self.thumbCMC = thumbCMC

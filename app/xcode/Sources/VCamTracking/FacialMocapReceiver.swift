@@ -10,29 +10,26 @@ import Combine
 import VCamBridge
 import Accelerate
 import VCamLogger
+import os
 
 @Observable
-public final class FacialMocapReceiver: @unchecked Sendable { // TODO: Fix Sendable conformance
+@MainActor
+public final class FacialMocapReceiver {
     @ObservationIgnored private var listener: NWListener?
     @ObservationIgnored private var connection: NWConnection?
     @ObservationIgnored private var facialMocapLastValues: [Float] = Array(repeating: 0, count: 12)
     @ObservationIgnored private var blendShapeResampler: TrackingResampler
     @ObservationIgnored private var perfectSyncResampler: TrackingResampler
-    @ObservationIgnored private let smoothingHolder: SmoothingHolder
-    private static let queue = DispatchQueue(label: "com.github.tattn.vcam.facialmocapreceiver")
+    @ObservationIgnored private let smoothingLock: OSAllocatedUnfairLock<TrackingSmoothing>
+    nonisolated private static let queue = DispatchQueue(label: "com.github.tattn.vcam.facialmocapreceiver")
 
-    @MainActor public private(set) var connectionStatus = ConnectionStatus.disconnected
+    public private(set) var connectionStatus = ConnectionStatus.disconnected
 
     @ObservationIgnored private var shouldAutoReconnect = true
     @ObservationIgnored private var lastConnectedIP: String?
     @ObservationIgnored private var timeoutTask: Task<Void, Never>?
 
     private static let dataTimeoutSeconds: UInt64 = 2
-
-    private final class SmoothingHolder: @unchecked Sendable {
-        var smoothing: TrackingSmoothing
-        init(_ smoothing: TrackingSmoothing) { self.smoothing = smoothing }
-    }
 
     enum ReceiverResult {
         case success
@@ -41,24 +38,22 @@ public final class FacialMocapReceiver: @unchecked Sendable { // TODO: Fix Senda
     }
 
     public init(smoothing: TrackingSmoothing) {
-        let holder = SmoothingHolder(smoothing)
-        self.smoothingHolder = holder
-        let settingsProvider: @Sendable () -> TrackingResampler.Settings = {
-            holder.smoothing.settings()
+        self.smoothingLock = OSAllocatedUnfairLock(initialState: smoothing)
+        let settingsProvider: @Sendable () -> TrackingResampler.Settings = { [smoothingLock] in
+            smoothingLock.withLock { $0.settings() }
         }
 
-        blendShapeResampler = TrackingResampler(label: "facial-mocap-blendshape", settingsProvider: settingsProvider) { values in
+        blendShapeResampler = TrackingResampler(label: "facial-mocap-blendshape", settingsProvider: settingsProvider) { @MainActor values in
             UniBridge.shared.receiveVCamBlendShape(values)
         }
 
-        perfectSyncResampler = TrackingResampler(label: "facial-mocap-perfectsync", settingsProvider: settingsProvider) { values in
+        perfectSyncResampler = TrackingResampler(label: "facial-mocap-perfectsync", settingsProvider: settingsProvider) { @MainActor values in
             UniBridge.shared.receivePerfectSync(values)
         }
     }
 
-    @MainActor
     public func connect(ip: String) async throws {
-        await stopInternal()
+        stopInternal()
         shouldAutoReconnect = true
         lastConnectedIP = ip
 
@@ -89,14 +84,12 @@ public final class FacialMocapReceiver: @unchecked Sendable { // TODO: Fix Senda
         }
     }
 
-    @MainActor
     public func stop() async {
         shouldAutoReconnect = false
-        await stopInternal()
+        stopInternal()
     }
 
-    @MainActor
-    private func stopInternal() async {
+    private func stopInternal() {
         timeoutTask?.cancel()
         timeoutTask = nil
 
@@ -115,10 +108,9 @@ public final class FacialMocapReceiver: @unchecked Sendable { // TODO: Fix Senda
         stopResamplers()
     }
 
-    @MainActor
     private func resetTimeoutTimer() {
         timeoutTask?.cancel()
-        timeoutTask = Task { @MainActor [weak self] in
+        timeoutTask = Task { [weak self] in
             do {
                 try await Task.sleep(nanoseconds: Self.dataTimeoutSeconds * NSEC_PER_SEC)
                 Logger.log("Data timeout - resetting listener")
@@ -127,10 +119,9 @@ public final class FacialMocapReceiver: @unchecked Sendable { // TODO: Fix Senda
         }
     }
 
-    @MainActor
     private func handleTimeout() async {
         guard connectionStatus == .connected, shouldAutoReconnect, let ip = lastConnectedIP else { return }
-        await stopInternal()
+        stopInternal()
         do {
             try await connect(ip: ip)
         } catch {
@@ -138,20 +129,21 @@ public final class FacialMocapReceiver: @unchecked Sendable { // TODO: Fix Senda
         }
     }
 
-    func updateSmoothing(_ smoothing: TrackingSmoothing) {
-        smoothingHolder.smoothing = smoothing
+    nonisolated func updateSmoothing(_ smoothing: TrackingSmoothing) {
+        smoothingLock.withLock { $0 = smoothing }
         if !smoothing.isEnabled {
-            stopResamplers()
+            Task { @MainActor in
+                stopResamplers()
+            }
         }
     }
 
-    @MainActor
     private func handleDisconnection() async {
         guard shouldAutoReconnect, let ip = lastConnectedIP else {
-            await stopInternal()
+            stopInternal()
             return
         }
-        await stopInternal()
+        stopInternal()
         do {
             try await connect(ip: ip)
         } catch {
@@ -162,7 +154,7 @@ public final class FacialMocapReceiver: @unchecked Sendable { // TODO: Fix Senda
     private func oniFacialMocapReceived(_ data: FacialMocapData) {
         guard Tracking.shared.faceTrackingMethod == .iFacialMocap else { return }
 
-        let smoothingEnabled = smoothingHolder.smoothing.isEnabled
+        let smoothingEnabled = smoothingLock.withLock { $0.isEnabled }
         if UniBridge.shared.hasPerfectSyncBlendShape {
             let perfectSync = data.perfectSync(useEyeTracking: Tracking.shared.useEyeTracking)
             if smoothingEnabled {
@@ -215,7 +207,6 @@ private extension NWConnection {
 }
 
 extension FacialMocapReceiver {
-    @MainActor
     private func startServer(port: NWEndpoint.Port, completion: @escaping @Sendable (ReceiverResult) -> Void) async throws {
         connectionStatus = .connecting
 
@@ -235,7 +226,9 @@ extension FacialMocapReceiver {
             }
         }
         listener.newConnectionHandler = { [weak self] connection in
-            self?.connection = connection
+            DispatchQueue.runOnMain { [weak self] in
+                self?.connection = connection
+            }
             connection.stateUpdateHandler = { [weak self] state in
                  Task { @MainActor [weak self] in
                      guard let self else { return }
@@ -252,7 +245,9 @@ extension FacialMocapReceiver {
                          self.connectionStatus = .connected
                          self.resetTimeoutTimer()
                          connection.receiveData(with: { [weak self] data in
-                             self?.oniFacialMocapReceived(data)
+                             DispatchQueue.runOnMain { [weak self] in
+                                 self?.oniFacialMocapReceived(data)
+                             }
                          }, onDataReceived: { @Sendable [weak self] in
                              Task { @MainActor in
                                  self?.resetTimeoutTimer()
@@ -276,12 +271,8 @@ extension FacialMocapReceiver {
 }
 
 extension FacialMocapReceiver {
-    private func requestConnection(ip: String, port: NWEndpoint.Port, completion: @escaping @Sendable (ReceiverResult) -> Void) {
+    private nonisolated func requestConnection(ip: String, port: NWEndpoint.Port, completion: @escaping @Sendable (ReceiverResult) -> Void) {
         @Sendable func retry(completion: @escaping @Sendable (ReceiverResult) -> Void) {
-            guard self.listener != nil else {
-                completion(.cancel)
-                return
-            }
             Self.queue.asyncAfter(deadline: .now() + 2) { [self] in
                 self.requestConnection(ip: ip, port: port, completion: completion)
             }
@@ -311,7 +302,7 @@ extension FacialMocapReceiver {
         connection.start(queue: Self.queue)
     }
 
-    private func sendStartToken(connection: NWConnection, completion: @escaping @Sendable ((any Error)?) -> Void) {
+    private nonisolated func sendStartToken(connection: NWConnection, completion: @escaping @Sendable ((any Error)?) -> Void) {
         let token = "iFacialMocap_sahuasouryya9218sauhuiayeta91555dy3719|sendDataVersion=v2".data(using: .utf8)
         connection.send(content: token, completion: .contentProcessed { error in
             completion(error)

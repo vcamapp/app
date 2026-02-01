@@ -1,13 +1,6 @@
-//
-//  UserDefaultsValue.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/04/23.
-//
-
 import Foundation
 
-public protocol UserDefaultsValue {
+public protocol UserDefaultsValue: Sendable {
     associatedtype EncodeValue
     func encodeUserDefaultValue() -> EncodeValue
     static func decodeUserDefaultValue(_ value: EncodeValue) -> Self?

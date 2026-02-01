@@ -10,11 +10,13 @@ import VCamBridge
 import struct SwiftUI.Binding
 import struct SwiftUI.Color
 
+@MainActor
 final class ValueBindingTests: XCTestCase {
     private enum TestType: Int32, Sendable {
         case value
     }
 
+    @MainActor
     private class ValueStore<T: ValueBindingDefaultValue & Sendable> {
         var store: T
         let binding = ValueBinding<T, TestType>()

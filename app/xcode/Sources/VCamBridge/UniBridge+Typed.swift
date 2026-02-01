@@ -55,7 +55,7 @@ public struct ScreenResolutionPayload: Equatable {
 
 // MARK: - Bridge Callback
 public extension UniBridge {
-    nonisolated(unsafe) static var methodCallback: (UniBridgeMethodId, UnsafeMutableRawPointer?, UnsafeMutableRawPointer?) -> Void = { _, _, _ in }
+    @MainActor static var methodCallback: (UniBridgeMethodId, UnsafeMutableRawPointer?, UnsafeMutableRawPointer?) -> Void = { _, _, _ in }
 }
 
 // MARK: - Bridge Implementation

@@ -1,6 +1,6 @@
 import Foundation
 
-public struct Version {
+public struct Version: Sendable {
     public let components: [Int]
 
     static var bundle: Bundle { .main }

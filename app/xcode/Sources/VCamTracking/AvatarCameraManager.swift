@@ -3,22 +3,23 @@ import os
 import VCamCamera
 import VCamBridge
 
-public final class AvatarCameraManager: @unchecked Sendable { // TODO: Fix Sendable conformance
+@MainActor
+public final class AvatarCameraManager {
     private let webCamera = AvatarWebCamera()
 
-    private static let permissionStorage = OSAllocatedUnfairLock(initialState: PermissionState())
+    nonisolated private static let permissionStorage = OSAllocatedUnfairLock(initialState: PermissionState())
 
     private struct PermissionState: Sendable {
         var isCameraAuthorized: @Sendable () -> Bool = { false }
         var requestCameraPermission: @Sendable (@escaping @Sendable (Bool) -> Void) -> Void = { _ in }
     }
 
-    public static var isCameraAuthorized: @Sendable () -> Bool {
+    public nonisolated static var isCameraAuthorized: @Sendable () -> Bool {
         get { permissionStorage.withLock { $0.isCameraAuthorized } }
         set { permissionStorage.withLock { $0.isCameraAuthorized = newValue } }
     }
 
-    public static var requestCameraPermission: @Sendable (@escaping @Sendable (Bool) -> Void) -> Void {
+    public nonisolated static var requestCameraPermission: @Sendable (@escaping @Sendable (Bool) -> Void) -> Void {
         get { permissionStorage.withLock { $0.requestCameraPermission } }
         set { permissionStorage.withLock { $0.requestCameraPermission = newValue } }
     }
@@ -47,8 +48,10 @@ public final class AvatarCameraManager: @unchecked Sendable { // TODO: Fix Senda
             webCamera.start()
         } else {
             Self.requestCameraPermission { [weak self] authorized in
-                guard authorized, let self else { return }
-                self.webCamera.start()
+                guard authorized else { return }
+                DispatchQueue.runOnMain {
+                    self?.webCamera.start()
+                }
             }
         }
     }

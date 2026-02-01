@@ -115,7 +115,9 @@ public final class VideoRecorder: @unchecked Sendable { // TODO: Migrate new API
         }
 #endif
 
-        AvatarAudioManager.shared.start(usage: .record)
+        Task { @MainActor in
+            AvatarAudioManager.shared.start(usage: .record)
+        }
     }
 
     public func stop() {
@@ -132,7 +134,9 @@ public final class VideoRecorder: @unchecked Sendable { // TODO: Migrate new API
         assetVideoWriterAdaptor = nil
         assetAudioWriterInput = nil
         converter = nil
-        AvatarAudioManager.shared.stop(usage: .record)
+        Task { @MainActor in
+            AvatarAudioManager.shared.stop(usage: .record)
+        }
 
         guard let assetwriter else { return }
 

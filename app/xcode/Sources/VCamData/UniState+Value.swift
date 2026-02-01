@@ -16,8 +16,9 @@ public struct UniStateValue<Value> {
     public typealias SelfKeyPath = ReferenceWritableKeyPath<UniState, Self>
 
     private let keyPath: ValueKeyPath
-    private let onSet: ((UniState, Value) -> Void)?
+    private let onSet: (@MainActor (UniState, Value) -> Void)?
 
+    @MainActor
     public static subscript(
         _enclosingInstance instance: UniState,
         wrapped wrappedKeyPath: ValueKeyPath,
@@ -39,7 +40,7 @@ public struct UniStateValue<Value> {
         set { fatalError() }
     }
 
-    init(_ keyPath: ValueKeyPath, onSet: ((UniState, Value) -> Void)? = nil) {
+    init(_ keyPath: ValueKeyPath, onSet: (@MainActor (UniState, Value) -> Void)? = nil) {
         self.keyPath = keyPath
         self.onSet = onSet
     }
@@ -49,14 +50,14 @@ public struct UniStateValue<Value> {
 
 extension UniStateValue where Value == Bool {
     init(_ keyPath: ValueKeyPath, persist: UserDefaults.Key<Bool>? = nil, bridge: UniBridge.BoolType) {
-        self.init(keyPath) { _, newValue in
+        self.init(keyPath) { @MainActor _, newValue in
             if let key = persist { UserDefaults.standard.set(newValue, for: key) }
             UniBridge.shared.boolMapper.setValue(bridge, newValue)
         }
     }
 
     init(_ keyPath: ValueKeyPath, persistAsInt: UserDefaults.Key<Int>, trueValue: Int = 1, bridge: UniBridge.BoolType) {
-        self.init(keyPath) { _, newValue in
+        self.init(keyPath) { @MainActor _, newValue in
             UserDefaults.standard.set(newValue ? trueValue : 0, for: persistAsInt)
             UniBridge.shared.boolMapper.setValue(bridge, newValue)
         }
@@ -67,14 +68,14 @@ extension UniStateValue where Value == Bool {
 
 extension UniStateValue where Value == CGFloat {
     init(_ keyPath: ValueKeyPath, persist: UserDefaults.Key<Double>? = nil, bridge: UniBridge.FloatType) {
-        self.init(keyPath) { _, newValue in
+        self.init(keyPath) { @MainActor _, newValue in
             if let key = persist { UserDefaults.standard.set(Double(newValue), for: key) }
             UniBridge.shared.floatMapper.setValue(bridge, newValue)
         }
     }
 
     init(_ keyPath: ValueKeyPath, bridge: UniBridge.FloatType) {
-        self.init(keyPath) { _, newValue in
+        self.init(keyPath) { @MainActor _, newValue in
             UniBridge.shared.floatMapper.setValue(bridge, newValue)
         }
     }
@@ -84,14 +85,14 @@ extension UniStateValue where Value == CGFloat {
 
 extension UniStateValue where Value == Int32 {
     init(_ keyPath: ValueKeyPath, persist: UserDefaults.Key<Int>? = nil, bridge: UniBridge.IntType) {
-        self.init(keyPath) { _, newValue in
+        self.init(keyPath) { @MainActor _, newValue in
             if let key = persist { UserDefaults.standard.set(Int(newValue), for: key) }
             UniBridge.shared.intMapper.setValue(bridge, newValue)
         }
     }
 
     init(_ keyPath: ValueKeyPath, bridge: UniBridge.IntType) {
-        self.init(keyPath) { _, newValue in
+        self.init(keyPath) { @MainActor _, newValue in
             UniBridge.shared.intMapper.setValue(bridge, newValue)
         }
     }
@@ -101,7 +102,7 @@ extension UniStateValue where Value == Int32 {
 
 extension UniStateValue where Value == String {
     init(_ keyPath: ValueKeyPath, persist: UserDefaults.Key<String>? = nil, bridge: UniBridge.StringType) {
-        self.init(keyPath) { _, newValue in
+        self.init(keyPath) { @MainActor _, newValue in
             if let key = persist { UserDefaults.standard.set(newValue, for: key) }
             UniBridge.shared.stringMapper.setValue(bridge, newValue)
         }
@@ -112,7 +113,7 @@ extension UniStateValue where Value == String {
 
 extension UniStateValue where Value == Color {
     init(_ keyPath: ValueKeyPath, persist: UserDefaults.Key<String>? = nil, bridge: UniBridge.StructType) {
-        self.init(keyPath) { _, newValue in
+        self.init(keyPath) { @MainActor _, newValue in
             if let key = persist, let hex = newValue.hexRGBAString {
                 UserDefaults.standard.set(hex, for: key)
             }
@@ -121,7 +122,7 @@ extension UniStateValue where Value == Color {
     }
 
     init(_ keyPath: ValueKeyPath, bridge: UniBridge.StructType) {
-        self.init(keyPath) { _, newValue in
+        self.init(keyPath) { @MainActor _, newValue in
             UniBridge.shared.structMapper.binding(bridge).wrappedValue = newValue
         }
     }

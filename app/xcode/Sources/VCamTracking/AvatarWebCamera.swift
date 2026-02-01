@@ -108,7 +108,7 @@ public final class AvatarWebCamera {
     }
 
     private func onLandmarkUpdate(observation: VNFaceObservation, vnLandmarks: VNFaceLandmarks2D) {
-        guard Tracking.shared.faceTrackingMethod == .default else { return }
+        guard Tracking.cachedFaceTrackingMethod == .default else { return }
 
         let landmarks = VisionLandmarks(landmarks: vnLandmarks, imageSize: cameraManager.captureDeviceResolution)
         let (headPosition, headRotation) = poseEstimator.estimate(landmarks, observation: observation)
@@ -117,7 +117,7 @@ public final class AvatarWebCamera {
         if isEmotionEnabled {
             if facialExpressionCounter > 4 {
                 let facialExpRawValue = facialExpressionEstimator.estimate(vnLandmarks, observation).rawValue
-                DispatchQueue.main.async {
+                DispatchQueue.runOnMain {
                     UniBridge.shared.facialExpression(facialExpRawValue)
                 }
                 facialExpressionCounter = 0
@@ -135,50 +135,60 @@ public final class AvatarWebCamera {
             facial.eyeball.y,
             Float(facial.vowel.rawValue)
         )
-        UniBridge.shared.receiveVCamBlendShape(values)
+        DispatchQueue.runOnMain {
+            UniBridge.shared.receiveVCamBlendShape(values)
+        }
     }
 
     private func onHandsUpdate(_ hands: VCamHands) {
+        // Early check on camera thread to avoid unnecessary computation
+        let isHandTrackingEnabled = Tracking.cachedHandTrackingMethod == .default
+        let isFingerTrackingEnabled = Tracking.cachedFingerTrackingMethod == .default
+        guard isHandTrackingEnabled || isFingerTrackingEnabled else { return }
+
         let left = hands.left ?? .missing
         let right = hands.right ?? .missing
 
-        if hands.left == nil {
-            // When the track is lost or started, eliminate the effects of linearInterpolate and move directly to the initial position
-            prevHands[0].setValues(-.one)
-            prevHands[2].setValues(-.one)
-            prevHands[4].setValues(-.one)
-        } else if prevHands[0].latestValue.x == -1 {
-            prevHands[0].setValues(left.wrist)
-            prevHands[2].setValues(left.thumbCMC)
-            prevHands[4].setValues(left.littleMCP)
-        }
-        if hands.right == nil {
-            prevHands[1].setValues(-.one)
-            prevHands[3].setValues(-.one)
-            prevHands[5].setValues(-.one)
-        } else if prevHands[1].latestValue.x  == -1{
-            prevHands[1].setValues(right.wrist)
-            prevHands[3].setValues(right.thumbCMC)
-            prevHands[5].setValues(right.littleMCP)
-        }
+        var handsValues: [Float]?
+        var fingersValues: [Float]?
 
-        let wristLeft = prevHands[0].appending(left.wrist)
-        let wristRight = prevHands[1].appending(right.wrist)
-        let thumbCMCLeft = prevHands[2].appending(left.thumbCMC)
-        let thumbCMCRight = prevHands[3].appending(right.thumbCMC)
-        let littleMCPLeft = prevHands[4].appending(left.littleMCP)
-        let littleMCPRight = prevHands[5].appending(right.littleMCP)
+        if isHandTrackingEnabled {
+            if hands.left == nil {
+                // When the track is lost or started, eliminate the effects of linearInterpolate and move directly to the initial position
+                prevHands[0].setValues(-.one)
+                prevHands[2].setValues(-.one)
+                prevHands[4].setValues(-.one)
+            } else if prevHands[0].latestValue.x == -1 {
+                prevHands[0].setValues(left.wrist)
+                prevHands[2].setValues(left.thumbCMC)
+                prevHands[4].setValues(left.littleMCP)
+            }
+            if hands.right == nil {
+                prevHands[1].setValues(-.one)
+                prevHands[3].setValues(-.one)
+                prevHands[5].setValues(-.one)
+            } else if prevHands[1].latestValue.x == -1 {
+                prevHands[1].setValues(right.wrist)
+                prevHands[3].setValues(right.thumbCMC)
+                prevHands[5].setValues(right.littleMCP)
+            }
 
-        if Tracking.shared.handTrackingMethod == .default {
-            UniBridge.shared.hands([
+            let wristLeft = prevHands[0].appending(left.wrist)
+            let wristRight = prevHands[1].appending(right.wrist)
+            let thumbCMCLeft = prevHands[2].appending(left.thumbCMC)
+            let thumbCMCRight = prevHands[3].appending(right.thumbCMC)
+            let littleMCPLeft = prevHands[4].appending(left.littleMCP)
+            let littleMCPRight = prevHands[5].appending(right.littleMCP)
+
+            handsValues = [Float](arrayLiteral:
                 wristLeft.x, wristLeft.y, wristRight.x, wristRight.y,
                 thumbCMCLeft.x, thumbCMCLeft.y, thumbCMCRight.x, thumbCMCRight.y,
                 littleMCPLeft.x, littleMCPLeft.y, littleMCPRight.x, littleMCPRight.y
-            ])
+            )
         }
 
-        if Tracking.shared.fingerTrackingMethod == .default {
-            UniBridge.shared.fingers([
+        if isFingerTrackingEnabled {
+            fingersValues = [Float](arrayLiteral:
                 prevFingers[0].appending(left.thumbTip),
                 prevFingers[1].appending(left.indexTip),
                 prevFingers[2].appending(left.middleTip),
@@ -188,8 +198,17 @@ public final class AvatarWebCamera {
                 prevFingers[6].appending(right.indexTip),
                 prevFingers[7].appending(right.middleTip),
                 prevFingers[8].appending(right.ringTip),
-                prevFingers[9].appending(right.littleTip),
-            ])
+                prevFingers[9].appending(right.littleTip)
+            )
+        }
+
+        DispatchQueue.runOnMain {
+            if let handsValues {
+                UniBridge.shared.hands(handsValues)
+            }
+            if let fingersValues {
+                UniBridge.shared.fingers(fingersValues)
+            }
         }
     }
 }

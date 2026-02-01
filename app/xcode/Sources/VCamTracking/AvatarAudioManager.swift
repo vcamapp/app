@@ -6,10 +6,11 @@ import VCamBridge
 import VCamLogger
 import AVFAudio
 
+@MainActor
 public final class AvatarAudioManager {
-    nonisolated(unsafe) public static let shared = AvatarAudioManager()
+    public static let shared = AvatarAudioManager()
 
-    public var videoRecorderRenderAudioFrame: (AVAudioPCMBuffer, AVAudioTime, TimeInterval, AudioDevice?) -> Void = { _, _, _, _ in }
+    public var videoRecorderRenderAudioFrame: @MainActor (AVAudioPCMBuffer, AVAudioTime, TimeInterval, AudioDevice?) -> Void = { _, _, _, _ in }
 
     private let audioManager = AudioManager()
     private let audioExpressionEstimator = AudioExpressionEstimator()
@@ -38,27 +39,24 @@ public final class AvatarAudioManager {
 
     public func start(usage: Usage, isSystemSoundRecording: Bool = false) {
         reconfigureIfNeeded()
-        do {
-            Logger.log("\(isConfiguring), \(audioManager.isRunning)")
-            if !isConfiguring, !audioManager.isRunning {
-                // There's a delay in AudioManager::startRecording, so don't allow consecutive calls (it causes a crash in installTap)
-                isConfiguring = true
+        Logger.log("\(isConfiguring), \(audioManager.isRunning)")
+        if !isConfiguring, !audioManager.isRunning {
+            // There's a delay in AudioManager::startRecording, so don't allow consecutive calls (it causes a crash in installTap)
+            isConfiguring = true
 
-                if isSystemSoundRecording {
-                    AudioDevice.device(forUid: "vcam-audio-device-001")?.setAsDefaultDevice()
-                } else {
-                    currentInputDevice?.setAsDefaultDevice()
-                }
-                try audioManager.startRecording { inputFormat in
-                    Self.shared.audioExpressionEstimator.configure(format: inputFormat)
-                    Self.shared.isConfiguring = false
+            if isSystemSoundRecording {
+                AudioDevice.device(forUid: "vcam-audio-device-001")?.setAsDefaultDevice()
+            } else {
+                currentInputDevice?.setAsDefaultDevice()
+            }
+            audioManager.startRecording { [weak self] inputFormat in
+                Task { @MainActor in
+                    self?.audioExpressionEstimator.configure(format: inputFormat)
+                    self?.isConfiguring = false
                 }
             }
-            self.usage.insert(usage)
-        } catch {
-            isConfiguring = false
-            Logger.error(error)
         }
+        self.usage.insert(usage)
     }
 
     public func stop(usage: Usage) {
@@ -70,29 +68,35 @@ public final class AvatarAudioManager {
 
     private func reconfigureIfNeeded() {
         setEmotionEnabled(UserDefaults.standard.value(for: .useEmotion))
-        audioExpressionEstimator.onAudioLevelUpdate = { level in
+        audioExpressionEstimator.setOnAudioLevelUpdate { level in
             Task { @MainActor in
                 UniBridge.shared.micAudioLevel(CGFloat(level))
             }
         }
-        audioManager.onUpdateAudioBuffer = { buffer, time, latency in
-            if Self.shared.usage.contains(.lipSync) { // Ensure no malfunctions during recording
-                Self.shared.audioExpressionEstimator.analyze(buffer: buffer, time: time)
+        audioManager.setOnUpdateAudioBuffer { buffer, time, latency in
+            // Audio buffer is only accessed synchronously and not stored,
+            // so it's safe to pass to main thread despite not being Sendable
+            nonisolated(unsafe) let unsafeBuffer = buffer
+            DispatchQueue.runOnMain { [weak self] in
+                guard let self else { return }
+                if self.usage.contains(.lipSync) { // Ensure no malfunctions during recording
+                    self.audioExpressionEstimator.analyze(buffer: unsafeBuffer, time: time)
+                }
+                self.videoRecorderRenderAudioFrame(unsafeBuffer, time, latency, self.currentInputDevice)
             }
-            Self.shared.videoRecorderRenderAudioFrame(buffer, time, latency, Self.shared.currentInputDevice)
         }
     }
 
     public func setEmotionEnabled(_ isEnabled: Bool) {
         if isEnabled {
-            audioExpressionEstimator.onUpdate = { emotion in
+            audioExpressionEstimator.setOnUpdate { emotion in
                 let rawValue = emotion.rawValue
                 Task { @MainActor in
                     UniBridge.shared.facialExpression(rawValue)
                 }
             }
         } else {
-            audioExpressionEstimator.onUpdate = nil
+            audioExpressionEstimator.setOnUpdate(nil)
         }
     }
 
@@ -105,7 +109,7 @@ public final class AvatarAudioManager {
             stop(usage: usage)
             Task { @MainActor in
                 try? await Task.sleep(for: .milliseconds(500))
-                Self.shared.start(usage: usage)
+                self.start(usage: usage)
             }
         }
     }

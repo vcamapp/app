@@ -1,18 +1,11 @@
-//
-//  FacialMocapData.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/12/30.
-//
-
 import Foundation
 import simd
 
-public struct FacialMocapData: Equatable {
+public struct FacialMocapData: Equatable, Sendable {
     public let blendShape: BlendShape
     public let head: Head
 
-    public struct Head: Equatable {
+    public struct Head: Equatable, Sendable {
         public let rotation: SIMD3<Float>
         public let translation: SIMD3<Float>
 
