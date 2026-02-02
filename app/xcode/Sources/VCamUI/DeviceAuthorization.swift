@@ -41,29 +41,22 @@ public enum DeviceAuthorization {
         AVCaptureDevice.authorizationStatus(for: type.mediaType) == .authorized
     }
 
-    public static func requestAuthorization(type: AuthorizationType, completion: @escaping @Sendable (Bool) -> Void) {
+    @MainActor
+    public static func requestAuthorization(type: AuthorizationType) async -> Bool {
         switch AVCaptureDevice.authorizationStatus(for: type.mediaType) {
         case .authorized:
-            completion(true)
+            return true
 
         case .notDetermined:
-            let authType = type
-            let completion = completion
-            AVCaptureDevice.requestAccess(for: type.mediaType) { _ in
-                Task { @MainActor in
-                    requestAuthorization(type: authType, completion: completion)
-                }
-            }
+            await AVCaptureDevice.requestAccess(for: type.mediaType)
+            return await requestAuthorization(type: type)
 
         case .denied, .restricted:
-            let authType = type
-            let completion = completion
-            Task { @MainActor in
-                await showAuthorizationError(type: authType)
-                completion(false)
-            }
+            await showAuthorizationError(type: type)
+            return false
+
         @unknown default:
-            completion(false)
+            return false
         }
     }
 

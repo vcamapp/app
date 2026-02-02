@@ -7,7 +7,7 @@ public final class AudioManager {
     public init() {}
 
     public static var isMicrophoneAuthorized: () -> Bool = { false }
-    public static var requestMicrophonePermission: (@escaping ((Bool) -> Void)) -> Void = { _ in }
+    public static var requestMicrophonePermission: @MainActor () async -> Bool = { false }
     
     private var onUpdateAudioBuffer: (@Sendable (AVAudioPCMBuffer, AVAudioTime, TimeInterval) -> Void)?
 
@@ -24,11 +24,9 @@ public final class AudioManager {
     public func startRecording(onStart: @Sendable @escaping (AVAudioFormat) -> Void) {
         guard Self.isMicrophoneAuthorized() else {
             Logger.log("requestAuthorization")
-            Self.requestMicrophonePermission { [weak self] authorized in
-                guard authorized else { return }
-                Task { @MainActor in
-                    self?.startRecording(onStart: onStart)
-                }
+            Task {
+                guard await Self.requestMicrophonePermission() else { return }
+                startRecording(onStart: onStart)
             }
             return
         }

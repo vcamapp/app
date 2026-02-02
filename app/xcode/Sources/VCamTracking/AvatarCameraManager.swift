@@ -11,7 +11,7 @@ public final class AvatarCameraManager {
 
     private struct PermissionState: Sendable {
         var isCameraAuthorized: @Sendable () -> Bool = { false }
-        var requestCameraPermission: @Sendable (@escaping @Sendable (Bool) -> Void) -> Void = { _ in }
+        var requestCameraPermission: @Sendable @MainActor () async -> Bool = { false }
     }
 
     public nonisolated static var isCameraAuthorized: @Sendable () -> Bool {
@@ -19,7 +19,7 @@ public final class AvatarCameraManager {
         set { permissionStorage.withLock { $0.isCameraAuthorized = newValue } }
     }
 
-    public nonisolated static var requestCameraPermission: @Sendable (@escaping @Sendable (Bool) -> Void) -> Void {
+    public nonisolated static var requestCameraPermission: @Sendable @MainActor () async -> Bool {
         get { permissionStorage.withLock { $0.requestCameraPermission } }
         set { permissionStorage.withLock { $0.requestCameraPermission = newValue } }
     }
@@ -47,11 +47,9 @@ public final class AvatarCameraManager {
         if Self.isCameraAuthorized() {
             webCamera.start()
         } else {
-            Self.requestCameraPermission { [weak self] authorized in
-                guard authorized else { return }
-                DispatchQueue.runOnMain {
-                    self?.webCamera.start()
-                }
+            Task {
+                guard await Self.requestCameraPermission() else { return }
+                webCamera.start()
             }
         }
     }
