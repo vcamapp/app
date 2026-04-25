@@ -78,12 +78,12 @@ public final class MacWindowManager {
         window.makeKeyAndOrderFront(nil)
         openWindows[id] = window
 
-        var observation: (any NSObjectProtocol)?
-        observation = NotificationCenter.default.addObserver(forName: NSWindow.willCloseNotification, object: window, queue: .main) { [weak self] _ in
+        let observer = NotificationObserver()
+        observer.value = NotificationCenter.default.addObserver(forName: NSWindow.willCloseNotification, object: window, queue: .main) { [weak self] _ in
             MainActor.assumeIsolated {
                 self?.openWindows.removeValue(forKey: id)
-                if let observation {
-                    NotificationCenter.default.removeObserver(observation)
+                if let token = observer.value {
+                    NotificationCenter.default.removeObserver(token)
                 }
             }
         }
@@ -112,4 +112,9 @@ private struct WindowContainer<Content: View>: View {
             .environment(\.locale, locale.isEmpty ? .current : Locale(identifier: locale))
             .environment(\.nsWindow, nsWindow)
     }
+}
+
+@MainActor
+private final class NotificationObserver {
+    var value: (any NSObjectProtocol)?
 }
