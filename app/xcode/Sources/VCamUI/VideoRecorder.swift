@@ -126,8 +126,8 @@ public final class VideoRecorder: @unchecked Sendable { // TODO: Migrate new API
         debugTimer?.invalidate()
         debugTimer = nil
 #endif
-        let videoOutputSettings = assetVideoWriterAdaptor?.assetWriterInput.outputSettings ?? [:]
-        let audioOutputSettings = assetAudioWriterInput?.outputSettings ?? [:]
+        let videoOutputSettings = assetVideoWriterAdaptor?.assetWriterInput.outputSettings as? [String: any Sendable] ?? [:]
+        let audioOutputSettings = assetAudioWriterInput?.outputSettings as? [String: any Sendable] ?? [:]
 
         outputFile = nil
         isRecording = false
