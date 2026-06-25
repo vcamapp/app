@@ -49,7 +49,7 @@ struct VCamActionEditorCodeEditor: View {
     }
 
     private func loadScript() {
-        code = (try? String(contentsOf: url)) ?? ""
+        code = (try? String(contentsOf: url, encoding: .utf8)) ?? ""
     }
 }
 

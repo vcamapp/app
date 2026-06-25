@@ -1,4 +1,5 @@
 import Foundation
+import AVFoundation
 import CoreAudio
 import AVFAudio
 import os
@@ -157,11 +158,11 @@ extension AudioDevice {
     public static func configure() {
         Self.updateCachedDevices(Self.loadDevices())
 
-        NotificationCenter.default.addObserver(forName: .AVCaptureDeviceWasConnected, object: nil, queue: .main) { _ in
+        NotificationCenter.default.addObserver(forName: AVCaptureDevice.wasConnectedNotification, object: nil, queue: .main) { _ in
             Self.updateCachedDevices(Self.loadDevices())
         }
 
-        NotificationCenter.default.addObserver(forName: .AVCaptureDeviceWasDisconnected, object: nil, queue: .main) { _ in
+        NotificationCenter.default.addObserver(forName: AVCaptureDevice.wasDisconnectedNotification, object: nil, queue: .main) { _ in
             Self.updateCachedDevices(Self.loadDevices())
         }
     }

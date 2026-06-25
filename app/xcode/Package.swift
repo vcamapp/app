@@ -5,7 +5,7 @@ import PackageDescription
 let package = Package(
     name: "VCam",
     defaultLocalization: "en",
-    platforms: [.macOS(.v14)],
+    platforms: [.macOS(.v15)],
     products: [
         .library(name: "VCam", targets: ["VCamUI", "VCamMedia", "VCamBridge"]),
         .library(name: "VCamMedia", targets: ["VCamMedia"]),
