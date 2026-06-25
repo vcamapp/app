@@ -210,6 +210,7 @@
 "lensFlareIntensity" = "レンズフレアの強さ";
 "vignette" = "ビネット効果";
 "smoothness" = "滑らかさ";
+"smoothing" = "スムージング";
 "roundness" = "丸み";
 "none" = "なし";
 "typeNo %@" = "タイプ%@";
@@ -217,6 +218,8 @@
 // MARK: - Filter
 "chromaKeying" = "クロマキー合成";
 "blur" = "ブラー / ぼかし";
+"trackingFilterSmooth" = "なめらかさ";
+"trackingFilterResponse" = "反応";
 
 // MARK: - Permission
 

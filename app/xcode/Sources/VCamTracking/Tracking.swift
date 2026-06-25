@@ -159,11 +159,12 @@ public final class Tracking {
                 inputRangeMin: mapping.input.rangeMin,
                 inputRangeMax: mapping.input.rangeMax,
                 outputRangeMin: mapping.outputKey.rangeMin,
-                outputRangeMax: mapping.outputKey.rangeMax
+                outputRangeMax: mapping.outputKey.rangeMax,
+                filter: mapping.filter
             )
         }
         if mode == .blendShape {
-            UniBridge.addTrackingMapping(mode: mode, inputKey: "_vowel", outputKey: "_vowel", inputRangeMin: 0, inputRangeMax: 4, outputRangeMin: 0, outputRangeMax: 4)
+            UniBridge.addTrackingMapping(mode: mode, inputKey: "_vowel", outputKey: "_vowel", inputRangeMin: 0, inputRangeMax: 4, outputRangeMin: 0, outputRangeMax: 4, filter: .none)
         }
     }
 

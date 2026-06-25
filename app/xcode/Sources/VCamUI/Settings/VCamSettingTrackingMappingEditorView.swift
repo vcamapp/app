@@ -1,10 +1,3 @@
-//
-//  VCamSettingTrackingMappingEditorView.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2026/01/16.
-//
-
 import SwiftUI
 import AppKit
 import VCamBridge
@@ -85,7 +78,7 @@ public struct VCamSettingTrackingMappingEditorView: View {
                 .menuIndicator(.hidden)
             }
         }
-        .frame(minWidth: 700, minHeight: 400)
+        .frame(minWidth: 840, minHeight: 400)
     }
 
     private var footerView: some View {
@@ -110,9 +103,7 @@ extension VCamSettingTrackingMappingEditorView: MacWindow {
     }
 
     public func configureWindow(_ window: NSWindow) -> NSWindow {
-        window.setContentSize(NSSize(width: 800, height: 600))
         window.styleMask.insert(.resizable)
-        window.minSize = NSSize(width: 700, height: 400)
         window.level = .floating
         return window
     }
@@ -195,7 +186,7 @@ final class MappingDataStore {
     }
 
     func addMapping() {
-        tracking.addMapping(.init(input: .posX, outputKey: .empty), for: selectedMode)
+        tracking.addMapping(.init(input: TrackingMappingEntry.DefaultInputKey.posX.inputKey, outputKey: .empty), for: selectedMode)
         mappingsRevision &+= 1
     }
 

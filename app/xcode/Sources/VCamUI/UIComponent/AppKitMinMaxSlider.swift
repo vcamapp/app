@@ -8,6 +8,8 @@
 import AppKit
 
 public final class AppKitMinMaxSlider: NSView, NSTextFieldDelegate {
+    static let textFieldWidth: CGFloat = 60
+    static let minimumWidth: CGFloat = textFieldWidth * 2 + 4
     private let minKnob: NSView
     private let maxKnob: NSView
     private let trackView: NSView
@@ -103,7 +105,7 @@ public final class AppKitMinMaxSlider: NSView, NSTextFieldDelegate {
 
         super.init(frame: .zero)
         setContentHuggingPriority(.defaultLow, for: .horizontal)
-        setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        setContentCompressionResistancePriority(.required, for: .horizontal)
         setupLayout()
         setupGestures()
 
@@ -121,7 +123,7 @@ public final class AppKitMinMaxSlider: NSView, NSTextFieldDelegate {
             addSubview(view)
         }
 
-        let textFieldsWidth: CGFloat = 60
+        let textFieldsWidth = Self.textFieldWidth
 
         NSLayoutConstraint.activate([
             trackView.topAnchor.constraint(equalTo: topAnchor, constant: 4),
@@ -319,6 +321,10 @@ public final class AppKitMinMaxSlider: NSView, NSTextFieldDelegate {
 
     func update(minValue: Float, maxValue: Float) {
         update(minValue: minValue, maxValue: maxValue, min: nil, max: nil)
+    }
+
+    public override var intrinsicContentSize: NSSize {
+        NSSize(width: Self.minimumWidth, height: NSView.noIntrinsicMetric)
     }
 
     public override func layout() {

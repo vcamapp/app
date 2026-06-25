@@ -1,10 +1,3 @@
-//
-//  TrackingMappingEntry.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2026/01/16.
-//
-
 import Foundation
 import SwiftUI
 import VCamLocalization
@@ -14,12 +7,14 @@ public struct TrackingMappingEntry: Codable, Sendable, Hashable, Identifiable {
     public var isEnabled: Bool
     public var input: InputKey
     public var outputKey: OutputKey
+    public var filter: TrackingFilter
 
-    public init(id: UUID = UUID(), isEnabled: Bool = true, input: InputKey, outputKey: OutputKey) {
+    public init(id: UUID = UUID(), isEnabled: Bool = true, input: InputKey, outputKey: OutputKey, filter: TrackingFilter = .none) {
         self.id = id
         self.isEnabled = isEnabled
         self.input = input
         self.outputKey = outputKey
+        self.filter = filter
     }
 
     public func scaleValue(_ value: Float) -> Float {
@@ -31,6 +26,7 @@ public struct TrackingMappingEntry: Codable, Sendable, Hashable, Identifiable {
     public mutating func resetToDefault() {
         input.resetToDefault()
         outputKey.resetToDefault()
+        filter = .none
     }
 }
 
@@ -47,16 +43,16 @@ public extension TrackingMappingEntry {
 
         public init(key: String, bounds: ClosedRange<Float>?, rangeMin: Float? = nil, rangeMax: Float? = nil) {
             self.key = key
-            self.bounds = bounds ?? Self.allKeys.first { $0.key == key }?.bounds ?? -1...1
+            self.bounds = bounds ?? DefaultInputKey.allKeys.first { $0.key == key }?.bounds ?? -1...1
             self.rangeMin = rangeMin ?? self.bounds.lowerBound
             self.rangeMax = rangeMax ?? self.bounds.upperBound
         }
 
         public mutating func resetToDefault() {
-            guard let defaultKey = Self.allKeys.first(where: { $0.key == key }) else { return }
-            bounds = defaultKey.bounds
-            rangeMin = defaultKey.bounds.lowerBound
-            rangeMax = defaultKey.bounds.upperBound
+            guard let definition = DefaultInputKey.allKeys.first(where: { $0.key == key }) else { return }
+            bounds = definition.inputKey.bounds
+            rangeMin = definition.inputKey.rangeMin
+            rangeMax = definition.inputKey.rangeMax
         }
     }
 
@@ -70,16 +66,30 @@ public extension TrackingMappingEntry {
 
         public init(key: String, bounds: ClosedRange<Float>? = nil, rangeMin: Float? = nil, rangeMax: Float? = nil) {
             self.key = key
-            self.bounds = bounds ?? InputKey.allKeys.first { $0.key == key }?.bounds ?? -1...1
+            self.bounds = bounds ?? DefaultInputKey.allKeys.first { $0.key == key }?.bounds ?? -1...1
             self.rangeMin = rangeMin ?? self.bounds.lowerBound
             self.rangeMax = rangeMax ?? self.bounds.upperBound
         }
 
         public mutating func resetToDefault() {
-            let defaultBounds = InputKey.allKeys.first { $0.key == key }?.bounds ?? -1...1
-            bounds = defaultBounds
-            rangeMin = defaultBounds.lowerBound
-            rangeMax = defaultBounds.upperBound
+            guard let defaultKey = DefaultInputKey.allKeys.first(where: { $0.key == key }) else { return }
+            bounds = defaultKey.inputKey.bounds
+            rangeMin = defaultKey.inputKey.rangeMin
+            rangeMax = defaultKey.inputKey.rangeMax
+        }
+    }
+
+
+    struct DefaultInputKey: Sendable, Hashable {
+        public let inputKey: InputKey
+        public let filter: TrackingFilter
+
+        public var key: String { inputKey.key }
+        public var bounds: ClosedRange<Float> { inputKey.bounds }
+
+        public init(key: String, bounds: ClosedRange<Float>, rangeMin: Float? = nil, rangeMax: Float? = nil, filter: TrackingFilter = .none) {
+            self.inputKey = InputKey(key: key, bounds: bounds, rangeMin: rangeMin, rangeMax: rangeMax)
+            self.filter = filter
         }
     }
 }
@@ -142,17 +152,17 @@ extension TrackingMappingEntry.OutputKey: Codable {
     }
 }
 
-public extension TrackingMappingEntry.InputKey {
+public extension TrackingMappingEntry.DefaultInputKey {
     static let posX = Self(key: "_posX", bounds: -1...1)
     static let posY = Self(key: "_posY", bounds: -1...1)
     static let posZ = Self(key: "_posZ", bounds: -1...1)
     static let headX = Self(key: "_headX", bounds: -90...90)
     static let headY = Self(key: "_headY", bounds: -90...90)
     static let headZ = Self(key: "_headZ", bounds: -90...90)
-    static let eyeX = Self(key: "_eyeX", bounds: -1...1)
-    static let eyeY = Self(key: "_eyeY", bounds: -1...1)
-    static let blinkL = Self(key: "_blinkL", bounds: 0...1, rangeMin: 0.02, rangeMax: 0.98)
-    static let blinkR = Self(key: "_blinkR", bounds: 0...1, rangeMin: 0.02, rangeMax: 0.98)
+    static let eyeX = Self(key: "_eyeX", bounds: -1...1, rangeMin: -0.6, rangeMax: 0.6, filter: .oneEuro(minCutoff: 1.0, beta: 0.8))
+    static let eyeY = Self(key: "_eyeY", bounds: -1...1, rangeMin: -0.2, rangeMax: 0.2, filter: .oneEuro(minCutoff: 1.0, beta: 0.2))
+    static let blinkL = Self(key: "_blinkL", bounds: 0...1, rangeMin: 0.2, rangeMax: 0.8, filter: .oneEuro(minCutoff: 0.3, beta: 1.0))
+    static let blinkR = Self(key: "_blinkR", bounds: 0...1, rangeMin: 0.2, rangeMax: 0.8, filter: .oneEuro(minCutoff: 0.3, beta: 1.0))
     static let mouth = Self(key: "_mouth", bounds: 0...1)
 
     // ARKit BlendShapes
@@ -209,7 +219,7 @@ public extension TrackingMappingEntry.InputKey {
     static let noseSneerRight = Self(key: "NoseSneerRight", bounds: 0...1)
     static let tongueOut = Self(key: "TongueOut", bounds: 0...1)
 
-    static let allKeys: Set<Self> = [
+    static let allKeys: [Self] = [
         .posX, .posY, .posZ,
         .headX, .headY, .headZ,
         .eyeX, .eyeY,
@@ -235,7 +245,7 @@ public extension TrackingMappingEntry.InputKey {
 }
 
 public extension TrackingMappingEntry {
-    private static func inputKeyDefinitions(for mode: TrackingMode) -> [InputKey] {
+    private static func inputKeyDefinitions(for mode: TrackingMode) -> [DefaultInputKey] {
 #if FEATURE_3
         switch mode {
         case .perfectSync:
@@ -254,7 +264,7 @@ public extension TrackingMappingEntry {
     }
 
 #if FEATURE_3
-    private static let vrmPerfectSyncKeyDefinitions: [InputKey] = [
+    private static let vrmPerfectSyncKeyDefinitions: [DefaultInputKey] = [
         .posX, .posY, .posZ,
         .headX, .headY, .headZ,
         .eyeX, .eyeY,
@@ -280,7 +290,7 @@ public extension TrackingMappingEntry {
         .noseSneerLeft, .noseSneerRight, .tongueOut
     ]
 
-    private static let vrmBlendShapeKeyDefinitions: [InputKey] = [
+    private static let vrmBlendShapeKeyDefinitions: [DefaultInputKey] = [
         .posX, .posY, .posZ,
         .headX, .headY, .headZ,
         .blinkL, .blinkR,
@@ -288,9 +298,9 @@ public extension TrackingMappingEntry {
         .eyeX, .eyeY
     ]
 #else
-    private static let live2DPerfectSyncKeyDefinitions: [InputKey] = live2DBlendShapeKeyDefinitions
+    private static let live2DPerfectSyncKeyDefinitions: [DefaultInputKey] = live2DBlendShapeKeyDefinitions
 
-    private static let live2DBlendShapeKeyDefinitions: [InputKey] = [
+    private static let live2DBlendShapeKeyDefinitions: [DefaultInputKey] = [
         .posX, .posY, .posZ,
         .headX, .headY, .headZ,
         .blinkL, .blinkR,
@@ -300,11 +310,11 @@ public extension TrackingMappingEntry {
 #endif
 
     static func availableInputKeys(for mode: TrackingMode) -> [InputKey] {
-        inputKeyDefinitions(for: mode)
+        inputKeyDefinitions(for: mode).map { $0.inputKey }
     }
 
     static func defaultMappings(for mode: TrackingMode) -> [TrackingMappingEntry] {
         inputKeyDefinitions(for: mode)
-            .map { TrackingMappingEntry(input: $0, outputKey: .init(key: $0.key, bounds: $0.bounds)) }
+            .map { TrackingMappingEntry(input: $0.inputKey, outputKey: .init(key: $0.key, bounds: $0.bounds), filter: $0.filter) }
     }
 }

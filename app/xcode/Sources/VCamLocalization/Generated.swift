@@ -514,6 +514,8 @@ public enum L10n: Sendable {
   public static let simulateShadows = LocalizedString(lookupKey: "simulateShadows")
   /// Skip This Version
   public static let skipThisVersion = LocalizedString(lookupKey: "skipThisVersion")
+  /// Smoothing
+  public static let smoothing = LocalizedString(lookupKey: "smoothing")
   /// Smoothness
   public static let smoothness = LocalizedString(lookupKey: "smoothness")
   /// Soft Knee
@@ -550,6 +552,10 @@ public enum L10n: Sendable {
   public static let tracking = LocalizedString(lookupKey: "tracking")
   /// Tracking Adjustment
   public static let trackingAdjustment = LocalizedString(lookupKey: "trackingAdjustment")
+  /// Response
+  public static let trackingFilterResponse = LocalizedString(lookupKey: "trackingFilterResponse")
+  /// Smooth
+  public static let trackingFilterSmooth = LocalizedString(lookupKey: "trackingFilterSmooth")
   /// Blink Left
   public static let trackingInputBlinkL = LocalizedString(lookupKey: "trackingInput__blinkL")
   /// Blink Right

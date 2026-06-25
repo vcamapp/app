@@ -1,12 +1,6 @@
-//
-//  MappingTableView.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2026/01/16.
-//
-
 import SwiftUI
 import AppKit
+import simd
 import VCamBridge
 import VCamLocalization
 
@@ -43,7 +37,7 @@ struct VCamSettingMappingTableView: NSViewRepresentable {
         let inputColumn = NSTableColumn(identifier: .input)
         inputColumn.title = L10n.trackingMappingInput.text
         inputColumn.width = 280
-        inputColumn.minWidth = 200
+        inputColumn.minWidth = 280
         tableView.addTableColumn(inputColumn)
 
         let arrowColumn = NSTableColumn(identifier: .arrow)
@@ -56,8 +50,14 @@ struct VCamSettingMappingTableView: NSViewRepresentable {
         let outputColumn = NSTableColumn(identifier: .output)
         outputColumn.title = L10n.trackingMappingOutput.text
         outputColumn.width = 280
-        outputColumn.minWidth = 200
+        outputColumn.minWidth = 280
         tableView.addTableColumn(outputColumn)
+
+        let filterColumn = NSTableColumn(identifier: .filter)
+        filterColumn.title = L10n.smoothing.text
+        filterColumn.width = 220
+        filterColumn.minWidth = 180
+        tableView.addTableColumn(filterColumn)
 
         tableView.columnAutoresizingStyle = .uniformColumnAutoresizingStyle
         tableView.delegate = context.coordinator
@@ -250,6 +250,17 @@ struct VCamSettingMappingTableView: NSViewRepresentable {
                     }
                 )
                 return cell
+            case .filter:
+                let cell = makeFilterCell(in: tableView)
+                cell.configure(
+                    filter: entry.filter,
+                    row: row,
+                    isEnabled: entry.isEnabled,
+                    onFilterChanged: { [weak self] row, newFilter in
+                        self?.filterChanged(row: row, filter: newFilter)
+                    }
+                )
+                return cell
             default:
                 return nil
             }
@@ -289,6 +300,15 @@ struct VCamSettingMappingTableView: NSViewRepresentable {
             }
             let cell = OutputCell(hasBlendShapeNames: hasBlendShapeNames)
             cell.identifier = identifier
+            return cell
+        }
+
+        private func makeFilterCell(in tableView: NSTableView) -> FilterCell {
+            if let cell = tableView.makeView(withIdentifier: .filterCell, owner: self) as? FilterCell {
+                return cell
+            }
+            let cell = FilterCell()
+            cell.identifier = .filterCell
             return cell
         }
 
@@ -346,6 +366,12 @@ struct VCamSettingMappingTableView: NSViewRepresentable {
             store.mappings[row].outputKey.rangeMax = clampedMax
             store.updateMapping(at: row)
             reloadRow(row)
+        }
+
+        private func filterChanged(row: Int, filter: TrackingFilter) {
+            guard row >= 0, row < store.mappings.count else { return }
+            store.mappings[row].filter = filter
+            store.updateMapping(at: row)
         }
 
         @objc func resetToDefault(_ sender: Any?) {
@@ -450,11 +476,13 @@ private extension NSUserInterfaceItemIdentifier {
     static let input = NSUserInterfaceItemIdentifier("input")
     static let arrow = NSUserInterfaceItemIdentifier("arrow")
     static let output = NSUserInterfaceItemIdentifier("output")
+    static let filter = NSUserInterfaceItemIdentifier("filter")
     static let checkboxCell = NSUserInterfaceItemIdentifier("checkboxCell")
     static let inputCell = NSUserInterfaceItemIdentifier("inputCell")
     static let arrowCell = NSUserInterfaceItemIdentifier("arrowCell")
     static let outputPopupCell = NSUserInterfaceItemIdentifier("outputPopupCell")
     static let outputTextCell = NSUserInterfaceItemIdentifier("outputTextCell")
+    static let filterCell = NSUserInterfaceItemIdentifier("filterCell")
 }
 
 private final class MappingTableView: NSTableView {
@@ -583,6 +611,16 @@ private final class InputCell: NSView {
             addSubview(view)
         }
 
+        popupButton.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        popupButton.setContentHuggingPriority(.defaultLow, for: .horizontal)
+
+        let popupMinWidth = popupButton.widthAnchor.constraint(greaterThanOrEqualToConstant: 90)
+        let popupMaxWidth = popupButton.widthAnchor.constraint(lessThanOrEqualToConstant: 150)
+        popupMaxWidth.priority = .defaultHigh
+
+        let sliderTrailing = slider.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8)
+        sliderTrailing.priority = .defaultHigh
+
         NSLayoutConstraint.activate([
             iconView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 8),
             iconView.centerYAnchor.constraint(equalTo: centerYAnchor),
@@ -591,12 +629,14 @@ private final class InputCell: NSView {
 
             popupButton.leadingAnchor.constraint(equalTo: iconView.trailingAnchor, constant: 8),
             popupButton.centerYAnchor.constraint(equalTo: centerYAnchor),
-            popupButton.widthAnchor.constraint(equalToConstant: 150),
+            popupMinWidth,
+            popupMaxWidth,
 
             slider.leadingAnchor.constraint(equalTo: popupButton.trailingAnchor, constant: 8),
-            slider.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8),
+            sliderTrailing,
             slider.centerYAnchor.constraint(equalTo: centerYAnchor),
-            slider.heightAnchor.constraint(equalToConstant: 32)
+            slider.heightAnchor.constraint(equalToConstant: 32),
+            slider.widthAnchor.constraint(greaterThanOrEqualToConstant: AppKitMinMaxSlider.minimumWidth)
         ])
     }
 
@@ -720,10 +760,17 @@ private final class OutputCell: NSView {
         if let popupButton {
             popupButton.translatesAutoresizingMaskIntoConstraints = false
             addSubview(popupButton)
+            popupButton.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+            popupButton.setContentHuggingPriority(.defaultLow, for: .horizontal)
+
+            let popupMinWidth = popupButton.widthAnchor.constraint(greaterThanOrEqualToConstant: 90)
+            let popupMaxWidth = popupButton.widthAnchor.constraint(lessThanOrEqualToConstant: 150)
+            popupMaxWidth.priority = .defaultHigh
             NSLayoutConstraint.activate([
                 popupButton.leadingAnchor.constraint(equalTo: iconView.trailingAnchor, constant: 8),
                 popupButton.centerYAnchor.constraint(equalTo: centerYAnchor),
-                popupButton.widthAnchor.constraint(equalToConstant: 150)
+                popupMinWidth,
+                popupMaxWidth
             ])
             leadingView = popupButton
         }
@@ -731,16 +778,27 @@ private final class OutputCell: NSView {
         if let textField {
             textField.translatesAutoresizingMaskIntoConstraints = false
             addSubview(textField)
+            textField.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+            textField.setContentHuggingPriority(.defaultLow, for: .horizontal)
+
+            let textMinWidth = textField.widthAnchor.constraint(greaterThanOrEqualToConstant: 90)
+            let textMaxWidth = textField.widthAnchor.constraint(lessThanOrEqualToConstant: 150)
+            textMaxWidth.priority = .defaultHigh
             NSLayoutConstraint.activate([
                 textField.leadingAnchor.constraint(equalTo: iconView.trailingAnchor, constant: 8),
                 textField.centerYAnchor.constraint(equalTo: centerYAnchor),
-                textField.widthAnchor.constraint(equalToConstant: 150)
+                textMinWidth,
+                textMaxWidth
             ])
             leadingView = textField
         }
 
         slider.translatesAutoresizingMaskIntoConstraints = false
         addSubview(slider)
+
+        let sliderTrailing = slider.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8)
+        sliderTrailing.priority = .defaultHigh
+
         NSLayoutConstraint.activate([
             iconView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 8),
             iconView.centerYAnchor.constraint(equalTo: centerYAnchor),
@@ -748,9 +806,10 @@ private final class OutputCell: NSView {
             iconView.heightAnchor.constraint(equalToConstant: 16),
 
             slider.leadingAnchor.constraint(equalTo: leadingView.trailingAnchor, constant: 8),
-            slider.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8),
+            sliderTrailing,
             slider.centerYAnchor.constraint(equalTo: centerYAnchor),
-            slider.heightAnchor.constraint(equalToConstant: 32)
+            slider.heightAnchor.constraint(equalToConstant: 32),
+            slider.widthAnchor.constraint(greaterThanOrEqualToConstant: AppKitMinMaxSlider.minimumWidth)
         ])
     }
 
@@ -811,5 +870,235 @@ extension OutputCell: NSTextFieldDelegate {
     func controlTextDidChange(_ obj: Notification) {
         guard let textField = obj.object as? NSTextField else { return }
         onOutputTextChanged?(row, textField.stringValue)
+    }
+}
+
+private final class FilterCell: NSView {
+    private let filterToggle: NSButton
+    private let smoothLabel: NSTextField
+    private let smoothSlider: NSSlider
+    private let smoothValueLabel: NSTextField
+    private let responseLabel: NSTextField
+    private let responseSlider: NSSlider
+    private let responseValueLabel: NSTextField
+    private let smoothRow: NSStackView
+    private let responseRow: NSStackView
+    private let parameterStack: NSStackView
+
+    private var onFilterChanged: ((Int, TrackingFilter) -> Void)?
+    private var row: Int = 0
+    private var currentFilter: TrackingFilter = .none
+    private var lastOneEuro: TrackingFilter = .defaultOneEuro
+
+    init() {
+        filterToggle = NSButton(checkboxWithTitle: "", target: nil, action: nil)
+        filterToggle.toolTip = L10n.smoothing.text
+        smoothLabel = NSTextField(labelWithString: "")
+        smoothSlider = NSSlider()
+        smoothValueLabel = NSTextField(labelWithString: "")
+        responseLabel = NSTextField(labelWithString: "")
+        responseSlider = NSSlider()
+        responseValueLabel = NSTextField(labelWithString: "")
+        smoothRow = NSStackView(views: [smoothLabel, smoothSlider, smoothValueLabel])
+        responseRow = NSStackView(views: [responseLabel, responseSlider, responseValueLabel])
+        parameterStack = NSStackView(views: [smoothRow, responseRow])
+
+        super.init(frame: .zero)
+
+        filterToggle.target = self
+        filterToggle.action = #selector(filterToggleChanged)
+        filterToggle.setContentCompressionResistancePriority(.required, for: .horizontal)
+
+        smoothSlider.target = self
+        smoothSlider.action = #selector(smoothSliderChanged)
+        smoothSlider.isContinuous = true
+        smoothSlider.controlSize = .mini
+
+        responseSlider.target = self
+        responseSlider.action = #selector(responseSliderChanged)
+        responseSlider.isContinuous = true
+        responseSlider.controlSize = .mini
+
+        smoothLabel.font = .systemFont(ofSize: 10)
+        smoothLabel.textColor = .secondaryLabelColor
+        responseLabel.font = .systemFont(ofSize: 10)
+        responseLabel.textColor = .secondaryLabelColor
+        smoothLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
+        responseLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
+
+        smoothValueLabel.font = .monospacedDigitSystemFont(ofSize: 10, weight: .regular)
+        smoothValueLabel.textColor = .secondaryLabelColor
+        smoothValueLabel.alignment = .right
+        smoothValueLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
+
+        responseValueLabel.font = .monospacedDigitSystemFont(ofSize: 10, weight: .regular)
+        responseValueLabel.textColor = .secondaryLabelColor
+        responseValueLabel.alignment = .right
+        responseValueLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
+
+        smoothRow.orientation = .horizontal
+        smoothRow.spacing = 4
+        smoothRow.alignment = .centerY
+
+        responseRow.orientation = .horizontal
+        responseRow.spacing = 4
+        responseRow.alignment = .centerY
+
+        parameterStack.orientation = .vertical
+        parameterStack.spacing = 2
+        parameterStack.alignment = .leading
+
+        setupLayout()
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    private func setupLayout() {
+        for view in [filterToggle, parameterStack] {
+            view.translatesAutoresizingMaskIntoConstraints = false
+            addSubview(view)
+        }
+
+        let smoothSliderWidth = smoothSlider.widthAnchor.constraint(equalToConstant: 66)
+        smoothSliderWidth.priority = .defaultHigh
+
+        let responseSliderWidth = responseSlider.widthAnchor.constraint(equalToConstant: 66)
+        responseSliderWidth.priority = .defaultHigh
+
+        NSLayoutConstraint.activate([
+            filterToggle.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 4),
+            filterToggle.centerYAnchor.constraint(equalTo: centerYAnchor),
+            filterToggle.widthAnchor.constraint(equalToConstant: 18),
+            filterToggle.heightAnchor.constraint(equalToConstant: 18),
+
+            parameterStack.leadingAnchor.constraint(equalTo: filterToggle.trailingAnchor, constant: 6),
+            parameterStack.centerYAnchor.constraint(equalTo: centerYAnchor),
+            parameterStack.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -4),
+            parameterStack.topAnchor.constraint(greaterThanOrEqualTo: topAnchor, constant: 2),
+            parameterStack.bottomAnchor.constraint(lessThanOrEqualTo: bottomAnchor, constant: -2),
+
+            smoothSliderWidth,
+            responseSliderWidth,
+            smoothLabel.widthAnchor.constraint(equalTo: responseLabel.widthAnchor),
+            smoothValueLabel.widthAnchor.constraint(equalTo: responseValueLabel.widthAnchor),
+            smoothValueLabel.widthAnchor.constraint(equalToConstant: 28)
+        ])
+    }
+
+    @objc private func filterToggleChanged() {
+        if filterToggle.state == .on {
+            if case .oneEuro = currentFilter {
+            } else if case .oneEuro = lastOneEuro {
+                currentFilter = lastOneEuro
+            } else {
+                currentFilter = .defaultOneEuro
+            }
+        } else {
+            if case .oneEuro = currentFilter {
+                lastOneEuro = currentFilter
+            }
+            currentFilter = .none
+        }
+        updateParameterUI()
+        onFilterChanged?(row, currentFilter)
+    }
+
+    @objc private func smoothSliderChanged() {
+        updateFilterFromSliders()
+    }
+
+    @objc private func responseSliderChanged() {
+        updateFilterFromSliders()
+    }
+
+    private func updateFilterFromSliders() {
+        guard filterToggle.state == .on else { return }
+
+        let smoothPercent = Float(smoothSlider.doubleValue)
+        let responsePercent = Float(responseSlider.doubleValue)
+        let minCutoff = unitFromPercent(smoothPercent)
+        let beta = unitFromPercent(responsePercent)
+
+        currentFilter = .oneEuro(minCutoff: minCutoff, beta: beta)
+        lastOneEuro = currentFilter
+        smoothValueLabel.stringValue = formatPercent(smoothPercent)
+        responseValueLabel.stringValue = formatPercent(responsePercent)
+        onFilterChanged?(row, currentFilter)
+    }
+
+    private func updateParameterUI() {
+        switch currentFilter {
+        case .none:
+            parameterStack.isHidden = true
+            smoothLabel.isHidden = true
+            smoothSlider.isHidden = true
+            smoothValueLabel.isHidden = true
+            responseLabel.isHidden = true
+            responseSlider.isHidden = true
+            responseValueLabel.isHidden = true
+
+        case .oneEuro(let minCutoff, let beta):
+            parameterStack.isHidden = false
+            let smoothPercent = percentFromUnit(minCutoff)
+            let responsePercent = percentFromUnit(beta)
+
+            smoothLabel.stringValue = L10n.trackingFilterSmooth.text
+            smoothLabel.isHidden = false
+            smoothSlider.minValue = 0
+            smoothSlider.maxValue = 100
+            smoothSlider.doubleValue = Double(smoothPercent)
+            smoothSlider.isHidden = false
+            smoothValueLabel.stringValue = formatPercent(smoothPercent)
+            smoothValueLabel.isHidden = false
+
+            responseLabel.stringValue = L10n.trackingFilterResponse.text
+            responseLabel.isHidden = false
+            responseSlider.minValue = 0
+            responseSlider.maxValue = 100
+            responseSlider.doubleValue = Double(responsePercent)
+            responseSlider.isHidden = false
+            responseValueLabel.stringValue = formatPercent(responsePercent)
+            responseValueLabel.isHidden = false
+        }
+    }
+
+    func configure(
+        filter: TrackingFilter,
+        row: Int,
+        isEnabled: Bool,
+        onFilterChanged: @escaping (Int, TrackingFilter) -> Void
+    ) {
+        self.row = row
+        self.onFilterChanged = onFilterChanged
+        self.currentFilter = filter
+        if case .oneEuro = filter {
+            lastOneEuro = filter
+        }
+
+        if case .oneEuro = filter {
+            filterToggle.state = .on
+        } else {
+            filterToggle.state = .off
+        }
+        updateParameterUI()
+        alphaValue = isEnabled ? 1.0 : 0.5
+    }
+
+    private func unitFromPercent(_ percent: Float) -> Float {
+        clampPercent(percent) / 100
+    }
+
+    private func percentFromUnit(_ value: Float) -> Float {
+        simd_clamp(value, 0, 1) * 100
+    }
+
+    private func clampPercent(_ percent: Float) -> Float {
+        simd_clamp(percent, 0, 100)
+    }
+
+    private func formatPercent(_ percent: Float) -> String {
+        String(format: "%.0f%%", percent)
     }
 }

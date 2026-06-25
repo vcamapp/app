@@ -210,6 +210,7 @@
 "lensFlareIntensity" = "Lens flare intensity";
 "vignette" = "Vignette";
 "smoothness" = "Smoothness";
+"smoothing" = "Smoothing";
 "roundness" = "Roundness";
 "none" = "None";
 "typeNo %@" = "Type%@";
@@ -217,6 +218,8 @@
 // MARK: - Filter
 "chromaKeying" = "Chroma Keying";
 "blur" = "Blur";
+"trackingFilterSmooth" = "Smooth";
+"trackingFilterResponse" = "Response";
 
 // MARK: - Permission
 
