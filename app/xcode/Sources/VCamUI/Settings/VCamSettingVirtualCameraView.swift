@@ -140,11 +140,7 @@ extension VCamSettingVirtualCameraView {
 
 extension URL {
     static var cameraExtension: URL {
-        if #available(macOS 15, *) {
-            return URL(string: "x-apple.systempreferences:com.apple.ExtensionsPreferences?extensionPointIdentifier=com.apple.system_extension.cmio.extension-point")!
-        } else {
-            return URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy")!
-        }
+        URL(string: "x-apple.systempreferences:com.apple.ExtensionsPreferences?extensionPointIdentifier=com.apple.system_extension.cmio.extension-point")!
     }
 }
 

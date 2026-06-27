@@ -56,11 +56,7 @@ public struct VCamSettingView: View {
             case .rendering:
                 Image(systemName: "display")
             case .tracking:
-                if #available(macOS 14, *) {
-                    Image(systemName: "figure")
-                } else {
-                    Image(systemName: "figure.arms.open")
-                }
+                Image(systemName: "figure")
             case .virtualCamera:
                 Image(systemName: "camera.fill")
             case .integration:

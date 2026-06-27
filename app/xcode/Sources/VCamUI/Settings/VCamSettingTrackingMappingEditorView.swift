@@ -186,7 +186,8 @@ final class MappingDataStore {
     }
 
     func addMapping() {
-        tracking.addMapping(.init(input: TrackingMappingEntry.DefaultInputKey.posX.inputKey, outputKey: .empty), for: selectedMode)
+        let input = TrackingMappingEntry.availableInputKeys(for: selectedMode).first ?? TrackingMappingEntry.DefaultInputKey.posX.inputKey
+        tracking.addMapping(.init(input: input, outputKey: .empty), for: selectedMode)
         mappingsRevision &+= 1
     }
 
@@ -201,7 +202,7 @@ final class MappingDataStore {
 
     func resetToDefault(at indices: IndexSet) {
         for index in indices {
-            tracking.mappings[Int(selectedMode.rawValue)][index].resetToDefault()
+            tracking.mappings[Int(selectedMode.rawValue)][index].resetToDefault(for: selectedMode)
             tracking.updateMapping(at: index, for: selectedMode)
         }
         if !indices.isEmpty {
