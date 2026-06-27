@@ -12,6 +12,8 @@ public struct VCamSettingTrackingMappingEditorView: View {
     public init() {}
 
     public var body: some View {
+        let supportsIPhoneMode = supportsIPhoneTrackingMapping
+
         NavigationStack {
             VStack(spacing: 0) {
                 if store.isInitialized {
@@ -29,7 +31,7 @@ public struct VCamSettingTrackingMappingEditorView: View {
             }
         }
         .task {
-            store.initialize(blendShapeNames: uniState.blendShapeNames, hasPerfectSync: uniState.hasPerfectSyncBlendShape)
+            store.initialize(blendShapeNames: uniState.blendShapeNames, supportsIPhoneMode: supportsIPhoneMode)
         }
         .onChange(of: uniState.blendShapeNames) { _, newValue in
             store.updateBlendShapeNames(newValue)
@@ -43,8 +45,7 @@ public struct VCamSettingTrackingMappingEditorView: View {
                 }
             }
 
-#if FEATURE_3
-            if uniState.hasPerfectSyncBlendShape {
+            if supportsIPhoneMode {
                 ToolbarItem(placement: .automatic) {
                     Picker(L10n.trackingMode.text, selection: $store.selectedMode) {
                         Text(L10n.normal.key, bundle: .localize).tag(TrackingMode.blendShape)
@@ -57,11 +58,6 @@ public struct VCamSettingTrackingMappingEditorView: View {
                     ToolbarSpacer(.fixed)
                 }
             }
-#else
-            if #available(macOS 26.0, *) {
-                ToolbarSpacer(.fixed)
-            }
-#endif
 
             ToolbarItem(placement: .automatic) {
                 Menu {
@@ -79,6 +75,14 @@ public struct VCamSettingTrackingMappingEditorView: View {
             }
         }
         .frame(minWidth: 840, minHeight: 400)
+    }
+
+    private var supportsIPhoneTrackingMapping: Bool {
+#if FEATURE_3
+        uniState.hasPerfectSyncBlendShape
+#else
+        true
+#endif
     }
 
     private var footerView: some View {
@@ -141,22 +145,18 @@ final class MappingDataStore {
         set { tracking.mappings[Int(selectedMode.rawValue)] = newValue }
     }
 
-    func initialize(blendShapeNames: [String], hasPerfectSync: Bool) {
+    func initialize(blendShapeNames: [String], supportsIPhoneMode: Bool) {
         guard !isInitialized else { return }
 
-        Task.detached { [blendShapeNames, hasPerfectSync] in
+        Task.detached { [blendShapeNames, supportsIPhoneMode] in
             let outputKeys = blendShapeNames.map { TrackingMappingEntry.OutputKey(key: $0) }
             let outputCache = KeyCache(keys: outputKeys)
 
             var inputCaches: [TrackingMode: KeyCache<TrackingMappingEntry.InputKey>] = [:]
-#if FEATURE_3
             var modes: [TrackingMode] = [.blendShape]
-            if hasPerfectSync {
+            if supportsIPhoneMode {
                 modes.append(.perfectSync)
             }
-#else
-            let modes: [TrackingMode] = [.blendShape]
-#endif
             for mode in modes {
                 let inputKeys = TrackingMappingEntry.availableInputKeys(for: mode)
                 inputCaches[mode] = KeyCache(keys: inputKeys)

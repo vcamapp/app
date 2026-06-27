@@ -89,7 +89,7 @@ public final class Tracking {
 
     public func syncPerfectSyncAvailability() {
         stopFaceResamplers()
-        if UniBridge.shared.hasPerfectSyncBlendShape {
+        if supportsIPhoneTrackingMapping {
             if mappings[Int(TrackingMode.perfectSync.rawValue)].isEmpty {
                 mappings[Int(TrackingMode.perfectSync.rawValue)] = TrackingMappingEntry.defaultMappings(for: .perfectSync)
             }
@@ -119,10 +119,10 @@ public final class Tracking {
     private func resetToDefaultMappings() {
         mappings = [
             TrackingMappingEntry.defaultMappings(for: .blendShape),
-            UniBridge.shared.hasPerfectSyncBlendShape ? TrackingMappingEntry.defaultMappings(for: .perfectSync) : []
+            supportsIPhoneTrackingMapping ? TrackingMappingEntry.defaultMappings(for: .perfectSync) : []
         ]
         applyMappingsToUnity(for: .blendShape)
-        if UniBridge.shared.hasPerfectSyncBlendShape {
+        if supportsIPhoneTrackingMapping {
             applyMappingsToUnity(for: .perfectSync)
         }
     }
@@ -142,7 +142,7 @@ public final class Tracking {
     }
 
     public func resetMappings(for mode: TrackingMode) {
-        if mode == .perfectSync, !UniBridge.shared.hasPerfectSyncBlendShape {
+        if mode == .perfectSync, !supportsIPhoneTrackingMapping {
             return
         }
         mappings[Int(mode.rawValue)] = TrackingMappingEntry.defaultMappings(for: mode)
@@ -249,6 +249,14 @@ public final class Tracking {
 
     public var micLipSyncDisabled: Bool {
         faceTrackingMethod.supportsPerfectSync && UniBridge.shared.hasPerfectSyncBlendShape
+    }
+
+    private var supportsIPhoneTrackingMapping: Bool {
+#if FEATURE_3
+        UniBridge.shared.hasPerfectSyncBlendShape
+#else
+        true
+#endif
     }
 
     public func updateLipSyncIfNeeded() {
