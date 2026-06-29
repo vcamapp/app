@@ -20,4 +20,21 @@ class FacialMocapTests: XCTestCase {
         ))
         XCTAssertEqual(decoded.blendShape.lookAtPoint, .init(-0.020375613, 0.46402508))
     }
+
+    func testHeadTranslationIsIncludedInTrackingOutput() {
+        let testData = "jawOpen&12|eyeBlink_L&7|eyeBlink_R&8|=head#-21.488958,-6.038993,-6.6019735,-0.030653415,-0.10287084,-0.6584072|rightEye#6.0297494,2.4403017,0.25649446|leftEye#6.034903,-1.6660284,-0.17520553|"
+
+        let decoded = FacialMocapData(rawData: testData)!
+
+        XCTAssertEqual(Array(decoded.vcamHeadTransform(useEyeTracking: false)[0...2]), [
+            0.030653415,
+            -0.10287084,
+            -0.6584072
+        ])
+        XCTAssertEqual(Array(decoded.perfectSync(useEyeTracking: false)[0...2]), [
+            0.030653415,
+            -0.10287084,
+            -0.6584072
+        ])
+    }
 }

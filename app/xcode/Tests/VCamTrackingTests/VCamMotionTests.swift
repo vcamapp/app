@@ -6,6 +6,7 @@
 //
 
 import XCTest
+import VCamBridge
 @testable import VCamTracking
 
 class VCamMotionTests: XCTestCase {
@@ -16,5 +17,38 @@ class VCamMotionTests: XCTestCase {
         let encodedData = testRawData.dataNoCopy()
         let decodedData = VCamMotion(rawData: encodedData)
         XCTAssertEqual(testRawData, decodedData)
+    }
+
+    func testInvertedTrackingInputRangeScalesInReverse() {
+        let entry = TrackingMappingEntry(
+            input: .init(key: "_posY", bounds: -1...1, rangeMin: 1, rangeMax: -1),
+            outputKey: .init(key: "_posY", bounds: -1...1)
+        )
+
+        XCTAssertEqual(entry.scaleValue(1), -1)
+        XCTAssertEqual(entry.scaleValue(0), 0)
+        XCTAssertEqual(entry.scaleValue(-1), 1)
+    }
+
+    func testPositionYAndZDefaultOutputRangeIsDisabled() {
+        let mappings = TrackingMappingEntry.defaultMappings(for: .perfectSync)
+
+        for key in ["_posY", "_posZ"] {
+            let mapping = try! XCTUnwrap(mappings.first { $0.input.key == key })
+            XCTAssertEqual(mapping.outputKey.rangeMin, 0)
+            XCTAssertEqual(mapping.outputKey.rangeMax, 0)
+        }
+    }
+
+    func testResetToDefaultDisablesPositionYAndZOutputRange() {
+        var entry = TrackingMappingEntry(
+            input: .init(key: "_posY", bounds: -1...1, rangeMin: -0.5, rangeMax: 0.5),
+            outputKey: .init(key: "_posY", bounds: -1...1, rangeMin: -1, rangeMax: 1)
+        )
+
+        entry.resetToDefault(for: .perfectSync)
+
+        XCTAssertEqual(entry.outputKey.rangeMin, 0)
+        XCTAssertEqual(entry.outputKey.rangeMax, 0)
     }
 }

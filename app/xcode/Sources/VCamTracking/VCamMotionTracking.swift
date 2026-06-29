@@ -183,7 +183,7 @@ private extension VCamMotion {
         let rotation = head.rotation.eulerAngles()
 
         return [
-            -head.translation.x, /*head.translation.y*/0, /*head.translation.z*/0,
+            -head.translation.x, head.translation.y, head.translation.z,
              rotation.x, -rotation.y, -rotation.z,
              blendShape.eyeBlinkLeft,
              blendShape.eyeBlinkRight,
@@ -198,7 +198,7 @@ private extension VCamMotion {
         let rotation = head.rotation.eulerAngles()
 
         return [
-            -head.translation.x, /*head.translation.y*/0, /*head.translation.z*/0,
+            -head.translation.x, head.translation.y, head.translation.z,
              rotation.x, -rotation.y, -rotation.z,
              blendShape.lookAtPoint.x, blendShape.lookAtPoint.y,
              blendShape.browDownLeft,

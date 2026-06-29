@@ -186,7 +186,7 @@ final class MappingDataStore {
     }
 
     func addMapping() {
-        let input = TrackingMappingEntry.availableInputKeys(for: selectedMode).first ?? TrackingMappingEntry.DefaultInputKey.posX.inputKey
+        let input = TrackingMappingEntry.availableInputKeys(for: selectedMode).first ?? TrackingMappingEntry.DefaultMappingDefinition.posX.inputKey
         tracking.addMapping(.init(input: input, outputKey: .empty), for: selectedMode)
         mappingsRevision &+= 1
     }

@@ -118,7 +118,7 @@ extension FacialMocapData {
         let vowel = VowelEstimator.estimate(blendShape: blendShape)
 
         return [
-            -head.translation.x, /*head.translation.y*/0, /*head.translation.z*/0,
+            -head.translation.x, head.translation.y, head.translation.z,
              head.rotation.x, -head.rotation.y, -head.rotation.z,
              blendShape.eyeBlinkLeft,
              blendShape.eyeBlinkRight,
@@ -131,7 +131,7 @@ extension FacialMocapData {
 
     func perfectSync(useEyeTracking: Bool) -> [Float] {
         return [
-            -head.translation.x, /*head.translation.y*/0, /*head.translation.z*/0,
+            -head.translation.x, head.translation.y, head.translation.z,
              head.rotation.x, -head.rotation.y, -head.rotation.z,
              blendShape.lookAtPoint.x, blendShape.lookAtPoint.y,
              blendShape.browDownLeft,

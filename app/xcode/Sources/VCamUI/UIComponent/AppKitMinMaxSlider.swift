@@ -6,6 +6,7 @@
 //
 
 import AppKit
+import simd
 
 public final class AppKitMinMaxSlider: NSView, NSTextFieldDelegate {
     static let textFieldWidth: CGFloat = 60
@@ -209,7 +210,7 @@ public final class AppKitMinMaxSlider: NSView, NSTextFieldDelegate {
             let newMinOffset = Swift.max(0, Swift.min(currentMinOffset + Float(translation.x), width - knobHalfWidth * 2)) + knobHalfWidth
             let normalizedX = (newMinOffset - knobHalfWidth) / width
             let scaledValue = normalizedX * range + min
-            let clampedValue = Swift.min(Swift.max(scaledValue, min), maxValue)
+            let clampedValue = simd_clamp(scaledValue, min, max)
             let steppedValue = (clampedValue / step).rounded() * step
 
             if abs(minValue - steppedValue) >= step / 2 {
@@ -246,7 +247,7 @@ public final class AppKitMinMaxSlider: NSView, NSTextFieldDelegate {
             let newMaxOffset = Swift.max(knobHalfWidth * 2, Swift.min(currentMaxOffset + Float(translation.x), width)) - knobHalfWidth
             let normalizedX = (newMaxOffset + knobHalfWidth) / width
             let scaledValue = normalizedX * range + min
-            let clampedValue = Swift.min(Swift.max(scaledValue, minValue), max)
+            let clampedValue = simd_clamp(scaledValue, min, max)
             let steppedValue = (clampedValue / step).rounded() * step
 
             if abs(maxValue - steppedValue) >= step / 2 {
@@ -282,7 +283,10 @@ public final class AppKitMinMaxSlider: NSView, NSTextFieldDelegate {
         let widthValue = Float(width)
         let minOffset = ((minValue - min) / range) * widthValue
         let maxOffset = ((maxValue - min) / range) * widthValue
-        let activeWidth = maxOffset - minOffset
+        let activeStartOffset = Swift.min(minOffset, maxOffset)
+        let activeEndOffset = Swift.max(minOffset, maxOffset)
+        let activeWidth = activeEndOffset - activeStartOffset
+        let isInverted = minValue > maxValue
 
         if minValue != lastLayoutMinValue {
             minTextField.stringValue = String(format: "%.2f", minValue)
@@ -294,8 +298,9 @@ public final class AppKitMinMaxSlider: NSView, NSTextFieldDelegate {
         let knobHalfWidth: CGFloat = 2
         minKnobCenterXConstraint.constant = CGFloat(minOffset) + knobHalfWidth
         maxKnobCenterXConstraint.constant = CGFloat(maxOffset) - knobHalfWidth
-        activeTrackLeadingConstraint.constant = CGFloat(minOffset) + knobHalfWidth
-        activeTrackWidthConstraint.constant = CGFloat(activeWidth) - knobHalfWidth * 2
+        activeTrackLeadingConstraint.constant = CGFloat(activeStartOffset)
+        activeTrackWidthConstraint.constant = CGFloat(activeWidth)
+        activeTrackView.layer?.backgroundColor = (isInverted ? NSColor.controlAccentColor.withAlphaComponent(0.45) : NSColor.controlAccentColor).cgColor
 
         lastLayoutWidth = width
         lastLayoutMinValue = minValue
@@ -312,10 +317,8 @@ public final class AppKitMinMaxSlider: NSView, NSTextFieldDelegate {
             self.max = max
         }
 
-        let clampedMin = Swift.max(self.min, Swift.min(minValue, maxValue))
-        let clampedMax = Swift.min(self.max, Swift.max(maxValue, clampedMin))
-        self.minValue = clampedMin
-        self.maxValue = clampedMax
+        self.minValue = simd_clamp(minValue, self.min, self.max)
+        self.maxValue = simd_clamp(maxValue, self.min, self.max)
         updateLayout()
     }
 
@@ -361,7 +364,7 @@ extension AppKitMinMaxSlider {
                 currentMaxTextFieldValue = nil
                 return
             }
-            let clampedValue = Swift.min(Swift.max(newValue, min), maxValue)
+            let clampedValue = simd_clamp(newValue, min, max)
             minValue = clampedValue
             minTextField.stringValue = formatValue(minValue)
             updateLayout()
@@ -377,7 +380,7 @@ extension AppKitMinMaxSlider {
                 currentMaxTextFieldValue = nil
                 return
             }
-            let clampedValue = Swift.max(minValue, Swift.min(newValue, max))
+            let clampedValue = simd_clamp(newValue, min, max)
             maxValue = clampedValue
             maxTextField.stringValue = formatValue(maxValue)
             updateLayout()
