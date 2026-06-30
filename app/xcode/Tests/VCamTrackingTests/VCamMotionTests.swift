@@ -6,6 +6,7 @@
 //
 
 import XCTest
+import Vision
 import VCamBridge
 @testable import VCamTracking
 
@@ -30,7 +31,7 @@ class VCamMotionTests: XCTestCase {
         XCTAssertEqual(entry.scaleValue(-1), 1)
     }
 
-    func testPositionYAndZDefaultOutputRangeIsDisabled() {
+    func testPerfectSyncPositionYAndZDefaultOutputRangeIsDisabled() {
         let mappings = TrackingMappingEntry.defaultMappings(for: .perfectSync)
 
         for key in ["_posY", "_posZ"] {
@@ -50,5 +51,55 @@ class VCamMotionTests: XCTestCase {
 
         XCTAssertEqual(entry.outputKey.rangeMin, 0)
         XCTAssertEqual(entry.outputKey.rangeMax, 0)
+    }
+
+    func testWebCameraPositionYAndZDefaultOutputRangeIsDisabled() {
+        let mappings = TrackingMappingEntry.defaultMappings(for: .blendShape)
+
+        let posXMapping = try! XCTUnwrap(mappings.first { $0.input.key == "_posX" })
+        XCTAssertEqual(posXMapping.outputKey.rangeMin, -1)
+        XCTAssertEqual(posXMapping.outputKey.rangeMax, 1)
+
+        for key in ["_posY", "_posZ"] {
+            let mapping = try! XCTUnwrap(mappings.first { $0.input.key == key })
+            XCTAssertEqual(mapping.outputKey.rangeMin, 0)
+            XCTAssertEqual(mapping.outputKey.rangeMax, 0)
+        }
+    }
+
+    func testVisionHeadPoseEstimatorDelegatesToInjectedImplementation() {
+        let mock = MockHeadPoseEstimator()
+        let defaultCreate = VisionHeadPoseEstimator.create
+        defer {
+            VisionHeadPoseEstimator.create = defaultCreate
+        }
+        VisionHeadPoseEstimator.create = {
+            mock
+        }
+
+        let estimator = VisionHeadPoseEstimator()
+
+        estimator.configure(size: .init(width: 640, height: 480))
+        estimator.calibrate()
+
+        XCTAssertEqual(mock.configuredSize, .init(width: 640, height: 480))
+        XCTAssertTrue(mock.isCalibrated)
+    }
+}
+
+private final class MockHeadPoseEstimator: HeadPoseEstimator {
+    var configuredSize: CGSize?
+    var isCalibrated = false
+
+    func configure(size: CGSize) {
+        configuredSize = size
+    }
+
+    func calibrate() {
+        isCalibrated = true
+    }
+
+    func estimate(_ landmarks: VisionLandmarks, observation: VNFaceObservation) -> (position: SIMD3<Float>, rotation: SIMD3<Float>) {
+        (.zero, .zero)
     }
 }

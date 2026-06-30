@@ -165,8 +165,8 @@ extension TrackingMappingEntry.OutputKey: Codable {
 
 public extension TrackingMappingEntry.DefaultMappingDefinition {
     static let posX = Self(key: "_posX", bounds: -1...1)
-    static let posY = Self(key: "_posY", bounds: -1...1)
-    static let posZ = Self(key: "_posZ", bounds: -1...1)
+    static let posY = Self(key: "_posY", bounds: -1...1, outputRangeMin: 0, outputRangeMax: 0)
+    static let posZ = Self(key: "_posZ", bounds: -1...1, outputRangeMin: 0, outputRangeMax: 0)
     static let headX = Self(key: "_headX", bounds: -90...90)
     static let headY = Self(key: "_headY", bounds: -90...90)
     static let headZ = Self(key: "_headZ", bounds: -90...90)
