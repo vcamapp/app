@@ -4,8 +4,9 @@ import VCamCamera
 import VCamBridge
 import VCamData
 import VCamLogger
+import os
 
-public final class AvatarWebCamera {
+public final class AvatarWebCamera: @unchecked Sendable {
     public init() {}
 
     private let cameraManager = CameraManager()
@@ -15,7 +16,7 @@ public final class AvatarWebCamera {
     private let faceTracker = FaceTracker()
     public let handTracking = HandTracking()
 
-    private let handler = VNSequenceRequestHandler()
+    private let visionProcessingLock = OSAllocatedUnfairLock(initialState: false)
     private let facialEstimator = FacialEstimator.create()
     private let facialExpressionEstimator = FacialExpressionEstimator.create()
     private var facialExpressionCounter = 0
@@ -92,22 +93,45 @@ public final class AvatarWebCamera {
     }
 
     private func didOutput(sampleBuffer: CMSampleBuffer) {
-        var requests: [VNRequest] = []
-        if usage.contains(.faceTracking) {
-            requests.append(contentsOf: faceTracker.makeRequests())
-        }
-        if usage.intersection([.handTracking, .fingerTracking]) != .disabled {
-            requests.append(contentsOf: handTracking.makeRequests())
+        let usesFaceTracking = usage.contains(.faceTracking)
+        let usesHandTracking = usage.intersection([.handTracking, .fingerTracking]) != .disabled
+        guard usesFaceTracking || usesHandTracking else { return }
+
+        guard visionProcessingLock.withLock({ isProcessing in
+            guard !isProcessing else { return false }
+            isProcessing = true
+            return true
+        }) else {
+            return
         }
 
-        do {
-            try handler.perform(requests, on: sampleBuffer)
-        } catch let error as NSError {
-            Logger.log("Failed to perform VNImageRequestHandler: \(error.localizedDescription)")
+        let sampleBuffer = SendableCMSampleBuffer(sampleBuffer)
+        Task { [self, sampleBuffer, usesFaceTracking, usesHandTracking] in
+            defer {
+                visionProcessingLock.withLock { $0 = false }
+            }
+
+            let handler = ImageRequestHandler(sampleBuffer.value)
+            do {
+                switch (usesFaceTracking, usesHandTracking) {
+                case (true, true):
+                    let (faceObservations, handObservations) = try await handler.perform(faceTracker.request, handTracking.request)
+                    faceTracker.process(observations: faceObservations)
+                    handTracking.process(observations: handObservations)
+                case (true, false):
+                    faceTracker.process(observations: try await handler.perform(faceTracker.request))
+                case (false, true):
+                    handTracking.process(observations: try await handler.perform(handTracking.request))
+                case (false, false):
+                    break
+                }
+            } catch let error as NSError {
+                Logger.log("Failed to perform Vision requests: \(error.localizedDescription)")
+            }
         }
     }
 
-    private func onLandmarkUpdate(observation: VNFaceObservation, vnLandmarks: VNFaceLandmarks2D) {
+    private func onLandmarkUpdate(observation: FaceObservation, vnLandmarks: FaceObservation.Landmarks2D) {
         guard Tracking.cachedFaceTrackingMethod == .default else { return }
 
         let landmarks = VisionLandmarks(landmarks: vnLandmarks, imageSize: cameraManager.captureDeviceResolution)

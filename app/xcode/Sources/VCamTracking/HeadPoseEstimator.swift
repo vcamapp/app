@@ -3,7 +3,7 @@ import Vision
 public protocol HeadPoseEstimator {
     func configure(size: CGSize)
     func calibrate()
-    func estimate(_ landmarks: VisionLandmarks, observation: VNFaceObservation) -> (position: SIMD3<Float>, rotation: SIMD3<Float>)
+    func estimate(_ landmarks: VisionLandmarks, observation: FaceObservation) -> (position: SIMD3<Float>, rotation: SIMD3<Float>)
 }
 
 public final class VisionHeadPoseEstimator: HeadPoseEstimator {
@@ -26,7 +26,7 @@ public final class VisionHeadPoseEstimator: HeadPoseEstimator {
         estimator.calibrate()
     }
 
-    public func estimate(_ landmarks: VisionLandmarks, observation: VNFaceObservation) -> (position: SIMD3<Float>, rotation: SIMD3<Float>) {
+    public func estimate(_ landmarks: VisionLandmarks, observation: FaceObservation) -> (position: SIMD3<Float>, rotation: SIMD3<Float>) {
         estimator.estimate(landmarks, observation: observation)
     }
 }
@@ -34,7 +34,7 @@ public final class VisionHeadPoseEstimator: HeadPoseEstimator {
 private final class EmptyHeadPoseEstimator: HeadPoseEstimator {
     func configure(size: CGSize) {}
     func calibrate() {}
-    func estimate(_ landmarks: VisionLandmarks, observation: VNFaceObservation) -> (position: SIMD3<Float>, rotation: SIMD3<Float>) {
+    func estimate(_ landmarks: VisionLandmarks, observation: FaceObservation) -> (position: SIMD3<Float>, rotation: SIMD3<Float>) {
         (.zero, .zero)
     }
 }

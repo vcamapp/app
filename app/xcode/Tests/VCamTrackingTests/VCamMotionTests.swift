@@ -99,7 +99,7 @@ private final class MockHeadPoseEstimator: HeadPoseEstimator {
         isCalibrated = true
     }
 
-    func estimate(_ landmarks: VisionLandmarks, observation: VNFaceObservation) -> (position: SIMD3<Float>, rotation: SIMD3<Float>) {
+    func estimate(_ landmarks: VisionLandmarks, observation: FaceObservation) -> (position: SIMD3<Float>, rotation: SIMD3<Float>) {
         (.zero, .zero)
     }
 }

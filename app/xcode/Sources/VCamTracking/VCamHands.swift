@@ -50,32 +50,39 @@ public struct VCamHands {
 }
 
 public extension VCamHands {
-    init(observations: [VNHumanHandPoseObservation], configuration config: FingerTrackingConfiguration) throws {
-        let observations = try observations.filter { (try $0.recognizedPoint(.wrist)).confidence > 0.6 }
-        let points = try observations.map { try $0.recognizedPoints(.all) }
+    init(observations: [HumanHandPoseObservation], configuration config: FingerTrackingConfiguration) throws {
+        let observations = observations.filter { ($0.joint(for: .wrist)?.confidence ?? 0) > 0.6 }
+        let points = observations.map { $0.allJoints() }
 
         var left, right: Hand?
 
         if observations.count == 1 {
             switch observations[0].chirality {
-            case .unknown:
+            case nil:
                 // If only one hand is present, determine left or right based on the screen orientation
                 let p = points[0]
-                if p[.wrist]?.x ?? 0 > 0.5 {
+                if p[.wrist]?.location.x ?? 0 > 0.5 {
                     left = .init(p: p, isRight: false, configuration: config)
                 } else {
                     right = .init(p: p, isRight: true, configuration: config)
                 }
-            case .left:
+            case .left?:
                 left = .init(p: points[0], isRight: false, configuration: config)
-            case .right:
+            case .right?:
                 right = .init(p: points[0], isRight: true, configuration: config)
+            @unknown default:
+                let p = points[0]
+                if p[.wrist]?.location.x ?? 0 > 0.5 {
+                    left = .init(p: p, isRight: false, configuration: config)
+                } else {
+                    right = .init(p: p, isRight: true, configuration: config)
+                }
             }
-        } else if observations.allSatisfy({ $0.chirality == .unknown }) {
-            if let rightPoints = points.max(by: { $0[.wrist]?.x ?? 0 > $1[.wrist]?.x ?? 0 }) {
+        } else if observations.allSatisfy({ $0.chirality == nil }) {
+            if let rightPoints = points.max(by: { $0[.wrist]?.location.x ?? 0 > $1[.wrist]?.location.x ?? 0 }) {
                 right = .init(p: rightPoints, isRight: true, configuration: config)
             }
-            if let leftPoints = points.max(by: { $0[.wrist]?.x ?? 0 <= $1[.wrist]?.x ?? 0 }) {
+            if let leftPoints = points.max(by: { $0[.wrist]?.location.x ?? 0 <= $1[.wrist]?.location.x ?? 0 }) {
                 left = .init(p: leftPoints, isRight: false, configuration: config)
             }
         } else {
@@ -85,7 +92,7 @@ public extension VCamHands {
             if let index = observations.firstIndex(where: { $0.chirality == .right }) {
                 right = .init(p: points[index], isRight: true, configuration: config)
             }
-            if let index = observations.firstIndex(where: { $0.chirality == .unknown }) {
+            if let index = observations.firstIndex(where: { $0.chirality == nil }) {
                 if right == nil {
                     right = .init(p: points[index], isRight: true, configuration: config)
                 }
@@ -133,7 +140,7 @@ public extension VCamHands {
 }
 
 public extension VCamHands.Hand {
-    init?(p: [VNHumanHandPoseObservation.JointName : VNRecognizedPoint], isRight: Bool, configuration config: FingerTrackingConfiguration) {
+    init?(p: [HumanHandPoseObservation.JointName : Joint], isRight: Bool, configuration config: FingerTrackingConfiguration) {
         guard let wrist = p[.wrist], let thumbCMC = p[.thumbCMC], let littleMCP = p[.littleMCP] else {
             return nil
         }
@@ -197,8 +204,8 @@ public extension VCamHands.Hand {
     }
 }
 
-private extension VNRecognizedPoint {
+private extension Joint {
     var vector: SIMD2<Float> {
-        .init(Float(x), Float(y))
+        .init(Float(location.x), Float(location.y))
     }
 }

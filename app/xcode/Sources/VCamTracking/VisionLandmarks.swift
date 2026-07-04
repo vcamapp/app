@@ -36,8 +36,8 @@ public struct VisionLandmarks {
 
     public let noseHeight: Float
 
-    init(landmarks: VNFaceLandmarks2D, imageSize: CGSize) {
-        p = landmarks.allPoints!.pointsInImage(imageSize: imageSize)
+    init(landmarks: FaceObservation.Landmarks2D, imageSize: CGSize) {
+        p = landmarks.allPoints.pointsInImageCoordinates(imageSize)
 
         leftEyeBall = SIMD2(p[13])
         leftEyeInner = SIMD2(p[8])

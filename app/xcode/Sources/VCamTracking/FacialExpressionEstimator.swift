@@ -1,10 +1,3 @@
-//
-//  FacialExpressionEstimator.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/03/06.
-//
-
 import Vision
 import VCamEntity
 
@@ -19,9 +12,9 @@ public struct FacialExpressionEstimator {
         )
     }
 
-    public init(estimate: @escaping (VNFaceLandmarks2D, VNFaceObservation) -> FacialExpression) {
+    public init(estimate: @escaping (FaceObservation.Landmarks2D, FaceObservation) -> FacialExpression) {
         self.estimate = estimate
     }
 
-    public private(set) var estimate: (_ landmark: VNFaceLandmarks2D, _ observation: VNFaceObservation) -> FacialExpression
+    public private(set) var estimate: (_ landmark: FaceObservation.Landmarks2D, _ observation: FaceObservation) -> FacialExpression
 }

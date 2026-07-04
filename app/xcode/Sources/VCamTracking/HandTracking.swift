@@ -7,20 +7,13 @@ import os
 public final class HandTracking: @unchecked Sendable {
     public var onHandsUpdate: ((VCamHands) -> Void) = { _ in }
 
-    private lazy var handPoseRequest: VNDetectHumanHandPoseRequest = { // TODO: Migrate to new API
-        let request = VNDetectHumanHandPoseRequest { [self] _, _ in
-            guard let observations = handPoseRequest.results else { return }
-            do {
-                let hands = try VCamHands(observations: observations, configuration: configuration)
-                onHandsUpdate(hands)
-            } catch {
-            }
-        }
+    private var handPoseRequest: DetectHumanHandPoseRequest = {
+        var request = DetectHumanHandPoseRequest()
         request.maximumHandCount = 2
         return request
     }()
+    var request: DetectHumanHandPoseRequest { handPoseRequest }
 
-    private lazy var handPoseRequests = [handPoseRequest]
     private let configurationLock = OSAllocatedUnfairLock(initialState: Configuration())
     private var cancellables: Set<AnyCancellable> = []
 
@@ -51,8 +44,12 @@ public final class HandTracking: @unchecked Sendable {
             .store(in: &cancellables)
     }
 
-    public func makeRequests() -> [VNRequest] {
-        handPoseRequests
+    func process(observations: [HumanHandPoseObservation]) {
+        do {
+            let hands = try VCamHands(observations: observations, configuration: configuration)
+            onHandsUpdate(hands)
+        } catch {
+        }
     }
 }
 
