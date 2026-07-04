@@ -1,19 +1,10 @@
 import VCamData
 import VCamEntity
-import Vision
 import Combine
+import Foundation
 import os
 
-public final class HandTracking: @unchecked Sendable {
-    public var onHandsUpdate: ((VCamHands) -> Void) = { _ in }
-
-    private var handPoseRequest: DetectHumanHandPoseRequest = {
-        var request = DetectHumanHandPoseRequest()
-        request.maximumHandCount = 2
-        return request
-    }()
-    var request: DetectHumanHandPoseRequest { handPoseRequest }
-
+public final class HandTracking {
     private let configurationLock = OSAllocatedUnfairLock(initialState: Configuration())
     private var cancellables: Set<AnyCancellable> = []
 
@@ -42,14 +33,6 @@ public final class HandTracking: @unchecked Sendable {
                 self?.configurationLock.withLock { $0.fingerTrackingEnabled = method != .disabled }
             }
             .store(in: &cancellables)
-    }
-
-    func process(observations: [HumanHandPoseObservation]) {
-        do {
-            let hands = try VCamHands(observations: observations, configuration: configuration)
-            onHandsUpdate(hands)
-        } catch {
-        }
     }
 }
 

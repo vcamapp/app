@@ -1,28 +1,21 @@
 import AVFoundation
-import Vision
 import VCamCamera
 import VCamBridge
 import VCamData
 import VCamLogger
 import os
 
-public final class AvatarWebCamera: @unchecked Sendable {
-    public init() {}
+public final class AvatarWebCamera {
+    public init() {
+        self.pipeline = VisionTrackingPipeline(frameStream: frameStream) { output in
+            Self.apply(output)
+        }
+    }
 
     private let cameraManager = CameraManager()
-    private let poseEstimator: some HeadPoseEstimator = {
-        VisionHeadPoseEstimator()
-    }()
-    private let faceTracker = FaceTracker()
     public let handTracking = HandTracking()
-
-    private let visionProcessingLock = OSAllocatedUnfairLock(initialState: false)
-    private let facialEstimator = FacialEstimator.create()
-    private let facialExpressionEstimator = FacialExpressionEstimator.create()
-    private var facialExpressionCounter = 0
-
-    private var prevHands = Array(repeating: RevisedMovingAverage<SIMD2<Float>>(weight: .six), count: 6)
-    private var prevFingers = Array(repeating: RevisedMovingAverage<Float>(weight: .six), count: 10)
+    private var frameStream = VisionFrameStream()
+    private var pipeline: VisionTrackingPipeline
 
     public struct Usage: OptionSet, Sendable {
         public let rawValue: UInt8
@@ -37,9 +30,17 @@ public final class AvatarWebCamera: @unchecked Sendable {
         public static let lipTracking = Usage(rawValue: 0x8)
     }
 
-    public var usage: Usage = []
+    public var usage: Usage = [] {
+        didSet {
+            updatePipelineConfiguration()
+        }
+    }
 
-    public var isEmotionEnabled = false
+    public var isEmotionEnabled = false {
+        didSet {
+            updatePipelineConfiguration()
+        }
+    }
 
     public var currentCaptureDevice: AVCaptureDevice? {
         guard let id = UserDefaults.standard.value(for: .captureDeviceId) else { return Camera.defaultCaptureDevice }
@@ -54,20 +55,25 @@ public final class AvatarWebCamera: @unchecked Sendable {
         guard !cameraManager.isRunning else {
             return
         }
-        faceTracker.onResult = onLandmarkUpdate
-        faceTracker.prepareVisionRequest()
-        handTracking.onHandsUpdate = onHandsUpdate(_:)
+        frameStream = VisionFrameStream()
+        pipeline = VisionTrackingPipeline(frameStream: frameStream) { output in
+            Self.apply(output)
+        }
         cameraManager.didOutput = didOutput(sampleBuffer:)
         try? cameraManager.setupAVCaptureSession(device: currentCaptureDevice)
-        poseEstimator.configure(size: cameraManager.captureDeviceResolution)
+        updatePipelineConfiguration()
 
         cameraManager.start()
+        Task { [pipeline] in
+            await pipeline.start()
+        }
     }
 
     public func stop() {
-        faceTracker.onResult = { _, _ in }    // avoid crash on quitting app
-        handTracking.onHandsUpdate = { _ in } // avoid crash on quitting app
         cameraManager.stop()
+        Task { [pipeline] in
+            await pipeline.stop()
+        }
     }
 
     public func setCaptureDevice(id: String?) {
@@ -75,10 +81,14 @@ public final class AvatarWebCamera: @unchecked Sendable {
         if let id = id {
             UserDefaults.standard.set(id, for: .captureDeviceId)
         }
-        let isRunning = cameraManager.isRunning
-        cameraManager.stop()
+        let wasRunning = cameraManager.isRunning
+        if wasRunning {
+            stop()
+        } else {
+            cameraManager.stop()
+        }
         try? cameraManager.setupAVCaptureSession(deviceId: id)
-        if isRunning {
+        if wasRunning {
             start()
         }
     }
@@ -88,151 +98,65 @@ public final class AvatarWebCamera: @unchecked Sendable {
     }
 
     public func resetCalibration() {
-        UserDefaults.standard.set(CGFloat(-facialEstimator.prevRawEyeballY()), for: .eyeTrackingOffsetY)
-        poseEstimator.calibrate()
+        Task { [pipeline] in
+            let prevRawEyeballY = await pipeline.previousRawEyeballY()
+            UserDefaults.standard.set(CGFloat(-prevRawEyeballY), for: .eyeTrackingOffsetY)
+            await pipeline.calibrate()
+        }
     }
 
     private func didOutput(sampleBuffer: CMSampleBuffer) {
-        let usesFaceTracking = usage.contains(.faceTracking)
-        let usesHandTracking = usage.intersection([.handTracking, .fingerTracking]) != .disabled
-        guard usesFaceTracking || usesHandTracking else { return }
+        let snapshot = configurationSnapshot()
+        guard snapshot.needsFaceLandmarks || snapshot.needsHandPose else { return }
 
-        guard visionProcessingLock.withLock({ isProcessing in
-            guard !isProcessing else { return false }
-            isProcessing = true
-            return true
-        }) else {
-            return
+        Task { [pipeline, snapshot] in
+            await pipeline.updateConfiguration(snapshot)
         }
 
-        let sampleBuffer = SendableCMSampleBuffer(sampleBuffer)
-        Task { [self, sampleBuffer, usesFaceTracking, usesHandTracking] in
-            defer {
-                visionProcessingLock.withLock { $0 = false }
-            }
-
-            let handler = ImageRequestHandler(sampleBuffer.value)
-            do {
-                switch (usesFaceTracking, usesHandTracking) {
-                case (true, true):
-                    let (faceObservations, handObservations) = try await handler.perform(faceTracker.request, handTracking.request)
-                    faceTracker.process(observations: faceObservations)
-                    handTracking.process(observations: handObservations)
-                case (true, false):
-                    faceTracker.process(observations: try await handler.perform(faceTracker.request))
-                case (false, true):
-                    handTracking.process(observations: try await handler.perform(handTracking.request))
-                case (false, false):
-                    break
-                }
-            } catch let error as NSError {
-                Logger.log("Failed to perform Vision requests: \(error.localizedDescription)")
-            }
-        }
-    }
-
-    private func onLandmarkUpdate(observation: FaceObservation, vnLandmarks: FaceObservation.Landmarks2D) {
-        guard Tracking.cachedFaceTrackingMethod == .default else { return }
-
-        let landmarks = VisionLandmarks(landmarks: vnLandmarks, imageSize: cameraManager.captureDeviceResolution)
-        let (headPosition, headRotation) = poseEstimator.estimate(landmarks, observation: observation)
-        let facial = facialEstimator.estimate(landmarks)
-
-        if isEmotionEnabled {
-            if facialExpressionCounter > 4 {
-                let facialExpRawValue = facialExpressionEstimator.estimate(vnLandmarks, observation).rawValue
-                DispatchQueue.runOnMain {
-                    UniBridge.shared.facialExpression(facialExpRawValue)
-                }
-                facialExpressionCounter = 0
-            }
-            facialExpressionCounter += 1
-        }
-
-        let values = [Float](
-            arrayLiteral: headPosition.x, headPosition.y, headPosition.z,
-            headRotation.x, headRotation.y, headRotation.z,
-            facial.blendShapeLeftEye,
-            facial.blendShapeRightEye,
-            facial.blendShapeMouthOpen,
-            facial.eyeball.x,
-            facial.eyeball.y,
-            Float(facial.vowel.rawValue)
+        frameStream.yield(
+            VisionFrame(
+                sampleBuffer: SendableSampleBuffer(sampleBuffer),
+                timestamp: sampleBuffer.presentationTimeStamp,
+                captureSize: cameraManager.captureDeviceResolution,
+                orientation: .up
+            )
         )
-        DispatchQueue.runOnMain {
-            UniBridge.shared.receiveVCamBlendShape(values)
+    }
+
+    private func updatePipelineConfiguration() {
+        let snapshot = configurationSnapshot()
+        Task { [pipeline] in
+            await pipeline.updateConfiguration(snapshot)
         }
     }
 
-    private func onHandsUpdate(_ hands: VCamHands) {
-        // Early check on camera thread to avoid unnecessary computation
-        let isHandTrackingEnabled = Tracking.cachedHandTrackingMethod == .default
-        let isFingerTrackingEnabled = Tracking.cachedFingerTrackingMethod == .default
-        guard isHandTrackingEnabled || isFingerTrackingEnabled else { return }
-
-        let left = hands.left ?? .missing
-        let right = hands.right ?? .missing
-
-        var handsValues: [Float]?
-        var fingersValues: [Float]?
-
-        if isHandTrackingEnabled {
-            if hands.left == nil {
-                // When the track is lost or started, eliminate the effects of linearInterpolate and move directly to the initial position
-                prevHands[0].setValues(-.one)
-                prevHands[2].setValues(-.one)
-                prevHands[4].setValues(-.one)
-            } else if prevHands[0].latestValue.x == -1 {
-                prevHands[0].setValues(left.wrist)
-                prevHands[2].setValues(left.thumbCMC)
-                prevHands[4].setValues(left.littleMCP)
-            }
-            if hands.right == nil {
-                prevHands[1].setValues(-.one)
-                prevHands[3].setValues(-.one)
-                prevHands[5].setValues(-.one)
-            } else if prevHands[1].latestValue.x == -1 {
-                prevHands[1].setValues(right.wrist)
-                prevHands[3].setValues(right.thumbCMC)
-                prevHands[5].setValues(right.littleMCP)
-            }
-
-            let wristLeft = prevHands[0].appending(left.wrist)
-            let wristRight = prevHands[1].appending(right.wrist)
-            let thumbCMCLeft = prevHands[2].appending(left.thumbCMC)
-            let thumbCMCRight = prevHands[3].appending(right.thumbCMC)
-            let littleMCPLeft = prevHands[4].appending(left.littleMCP)
-            let littleMCPRight = prevHands[5].appending(right.littleMCP)
-
-            handsValues = [Float](arrayLiteral:
-                wristLeft.x, wristLeft.y, wristRight.x, wristRight.y,
-                thumbCMCLeft.x, thumbCMCLeft.y, thumbCMCRight.x, thumbCMCRight.y,
-                littleMCPLeft.x, littleMCPLeft.y, littleMCPRight.x, littleMCPRight.y
+    private func configurationSnapshot() -> VisionTrackingConfigurationSnapshot {
+        let fingerConfiguration = handTracking.configuration
+        return VisionTrackingConfigurationSnapshot(
+            usage: usage,
+            isEmotionEnabled: isEmotionEnabled,
+            captureSize: cameraManager.captureDeviceResolution,
+            finger: FingerTrackingConfigurationSnapshot(
+                open: fingerConfiguration.open,
+                close: fingerConfiguration.close,
+                isFingerEnabled: fingerConfiguration.isFingerEnabled
             )
-        }
+        )
+    }
 
-        if isFingerTrackingEnabled {
-            fingersValues = [Float](arrayLiteral:
-                prevFingers[0].appending(left.thumbTip),
-                prevFingers[1].appending(left.indexTip),
-                prevFingers[2].appending(left.middleTip),
-                prevFingers[3].appending(left.ringTip),
-                prevFingers[4].appending(left.littleTip),
-                prevFingers[5].appending(right.thumbTip),
-                prevFingers[6].appending(right.indexTip),
-                prevFingers[7].appending(right.middleTip),
-                prevFingers[8].appending(right.ringTip),
-                prevFingers[9].appending(right.littleTip)
-            )
+    @MainActor
+    private static func apply(_ output: TrackingOutput) {
+        if let face = output.face {
+            UniBridge.shared.receiveVCamBlendShape(face.blendShapeValues)
         }
-
-        DispatchQueue.runOnMain {
-            if let handsValues {
-                UniBridge.shared.hands(handsValues)
-            }
-            if let fingersValues {
-                UniBridge.shared.fingers(fingersValues)
-            }
+        if let emotion = output.emotion {
+            UniBridge.shared.facialExpression(emotion)
+        }
+        if let handsValues = output.hands?.handsValues {
+            UniBridge.shared.hands(handsValues)
+        }
+        if let fingersValues = output.hands?.fingersValues {
+            UniBridge.shared.fingers(fingersValues)
         }
     }
 }
