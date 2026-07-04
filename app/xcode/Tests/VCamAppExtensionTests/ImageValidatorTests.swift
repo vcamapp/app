@@ -1,15 +1,10 @@
-//
-//  ImageValidatorTests.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2023/02/09.
-//
-
-import XCTest
+import Testing
 @testable import VCamAppExtension
 
-final class ImageValidatorTests: XCTestCase {
-    func testEncodeDecode() {
+@Suite
+struct ImageValidatorTests {
+    @Test
+    func encodeDecode() {
         let imageData = Data((1...5000).map { _ in UInt8.random(in: 0..<UInt8.max) })
 
         let width = 1000
@@ -17,13 +12,13 @@ final class ImageValidatorTests: XCTestCase {
         let encoded = ImageValidator.dataWithChecksum(from: imageData, width: width, height: height)
 
         let (isStart, isEnd, needsMoreData) = ImageValidator.inspect(encoded)
-        XCTAssertTrue(isStart)
-        XCTAssertTrue(isEnd)
-        XCTAssertFalse(needsMoreData)
+        #expect(isStart)
+        #expect(isEnd)
+        #expect(!needsMoreData)
 
         let (decoded, decodedWidth, decodedHeight) = ImageValidator.extractImageData(from: encoded)
-        XCTAssertEqual(imageData, decoded)
-        XCTAssertEqual(width, decodedWidth)
-        XCTAssertEqual(height, decodedHeight)
+        #expect(imageData == decoded)
+        #expect(width == decodedWidth)
+        #expect(height == decodedHeight)
     }
 }

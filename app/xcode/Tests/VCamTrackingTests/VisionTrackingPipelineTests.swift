@@ -1,21 +1,25 @@
-import XCTest
+import Testing
 @testable import VCamTracking
 
-final class VisionTrackingPipelineTests: XCTestCase {
-    func testConfigurationNeedsFaceLandmarksForFaceOrLipTracking() {
-        XCTAssertTrue(makeConfiguration(usage: .faceTracking).needsFaceLandmarks)
-        XCTAssertTrue(makeConfiguration(usage: .lipTracking).needsFaceLandmarks)
-        XCTAssertFalse(makeConfiguration(usage: .handTracking).needsFaceLandmarks)
+@Suite
+struct VisionTrackingPipelineTests {
+    @Test
+    func configurationNeedsFaceLandmarksForFaceOrLipTracking() {
+        #expect(makeConfiguration(usage: .faceTracking).needsFaceLandmarks)
+        #expect(makeConfiguration(usage: .lipTracking).needsFaceLandmarks)
+        #expect(!makeConfiguration(usage: .handTracking).needsFaceLandmarks)
     }
 
-    func testConfigurationNeedsHandPoseForHandOrFingerTracking() {
-        XCTAssertTrue(makeConfiguration(usage: .handTracking).needsHandPose)
-        XCTAssertTrue(makeConfiguration(usage: .fingerTracking).needsHandPose)
-        XCTAssertTrue(makeConfiguration(usage: [.handTracking, .fingerTracking]).needsHandPose)
-        XCTAssertFalse(makeConfiguration(usage: .faceTracking).needsHandPose)
+    @Test
+    func configurationNeedsHandPoseForHandOrFingerTracking() {
+        #expect(makeConfiguration(usage: .handTracking).needsHandPose)
+        #expect(makeConfiguration(usage: .fingerTracking).needsHandPose)
+        #expect(makeConfiguration(usage: [.handTracking, .fingerTracking]).needsHandPose)
+        #expect(!makeConfiguration(usage: .faceTracking).needsHandPose)
     }
 
-    func testHandSmoothingStateReturnsRequestedOutputsOnly() {
+    @Test
+    func handSmoothingStateReturnsRequestedOutputsOnly() {
         var smoothing = HandSmoothingState()
         let output = smoothing.makeOutput(
             hands: makeHands(),
@@ -23,11 +27,12 @@ final class VisionTrackingPipelineTests: XCTestCase {
             needsFingerOutput: false
         )
 
-        XCTAssertEqual(output.handsValues?.count, 12)
-        XCTAssertNil(output.fingersValues)
+        #expect(output.handsValues?.count == 12)
+        #expect(output.fingersValues == nil)
     }
 
-    func testHandSmoothingStateResetsMissingHandPosition() {
+    @Test
+    func handSmoothingStateResetsMissingHandPosition() {
         var smoothing = HandSmoothingState()
 
         _ = smoothing.makeOutput(
@@ -42,17 +47,18 @@ final class VisionTrackingPipelineTests: XCTestCase {
             needsFingerOutput: true
         )
 
-        XCTAssertEqual(missingOutput.handsValues?[0], -1)
-        XCTAssertEqual(missingOutput.handsValues?[1], -1)
-        XCTAssertEqual(missingOutput.fingersValues?.count, 10)
+        #expect(missingOutput.handsValues?[0] == -1)
+        #expect(missingOutput.handsValues?[1] == -1)
+        #expect(missingOutput.fingersValues?.count == 10)
     }
 
-    func testFingerConfigurationSnapshotStoresValues() {
+    @Test
+    func fingerConfigurationSnapshotStoresValues() {
         let snapshot = FingerTrackingConfigurationSnapshot(open: 1.2, close: 0.8, isFingerEnabled: false)
 
-        XCTAssertEqual(snapshot.open, 1.2)
-        XCTAssertEqual(snapshot.close, 0.8)
-        XCTAssertFalse(snapshot.isFingerEnabled)
+        #expect(snapshot.open == 1.2)
+        #expect(snapshot.close == 0.8)
+        #expect(!snapshot.isFingerEnabled)
     }
 
     private func makeConfiguration(usage: AvatarWebCamera.Usage) -> VisionTrackingConfigurationSnapshot {

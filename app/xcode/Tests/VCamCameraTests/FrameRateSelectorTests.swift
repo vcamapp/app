@@ -1,82 +1,85 @@
-//
-//  FrameRateSelectorTests.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2023/04/22.
-//
-
-import XCTest
+import Testing
 import CoreMedia
 import VCamCamera
 
-final class FrameRateSelectorTests: XCTestCase {
-    func testOutOfRangeLow() throws {
+@Suite
+struct FrameRateSelectorTests {
+    @Test
+    func outOfRangeLow() throws {
         let range = MockAVFrameRateRange(
             minFrameDuration: CMTime(value: 1000000, timescale: 45000000),
             maxFrameDuration: CMTime(value: 1000000, timescale: 30000000)
         )
-        let result = FrameRateSelector.recommendedFrameRate(targetFPS: 16, supportedFrameRateRanges: [range])
-        XCTAssertEqual(result.minFrameDuration, range.maxFrameDuration)
-        XCTAssertEqual(result.maxFrameDuration, range.maxFrameDuration)
+        expectRecommendedFrameRate(targetFPS: 16, ranges: [range], min: range.maxFrameDuration, max: range.maxFrameDuration)
     }
 
-    func testOutOfRangeHigh() throws {
+    @Test
+    func outOfRangeHigh() throws {
         let range = MockAVFrameRateRange(
             minFrameDuration: CMTime(value: 1000000, timescale: 30000000),
             maxFrameDuration: CMTime(value: 1000000, timescale: 15000000)
         )
-        let result = FrameRateSelector.recommendedFrameRate(targetFPS: 60, supportedFrameRateRanges: [range])
-        XCTAssertEqual(result.minFrameDuration, .init(value: 1, timescale: 30))
-        XCTAssertEqual(result.maxFrameDuration, .init(value: 1, timescale: 30))
+        expectRecommendedFrameRate(
+            targetFPS: 60,
+            ranges: [range],
+            min: .init(value: 1, timescale: 30),
+            max: .init(value: 1, timescale: 30)
+        )
     }
 
-    func testInRange() throws {
+    @Test
+    func inRange() throws {
         let range = MockAVFrameRateRange(
             minFrameDuration: CMTime(value: 1000000, timescale: 60000000),
             maxFrameDuration: CMTime(value: 1000000, timescale: 30000000)
         )
-        let result = FrameRateSelector.recommendedFrameRate(targetFPS: 45, supportedFrameRateRanges: [range])
-        XCTAssertEqual(result.minFrameDuration, .init(value: 1, timescale: 45))
-        XCTAssertEqual(result.maxFrameDuration, .init(value: 1, timescale: 45))
+        expectRecommendedFrameRate(
+            targetFPS: 45,
+            ranges: [range],
+            min: .init(value: 1, timescale: 45),
+            max: .init(value: 1, timescale: 45)
+        )
     }
 
-    func testEmpty() throws {
-        let result = FrameRateSelector.recommendedFrameRate(targetFPS: 45, supportedFrameRateRanges: [] as [MockAVFrameRateRange])
-        XCTAssertEqual(result.minFrameDuration, .invalid)
-        XCTAssertEqual(result.maxFrameDuration, .invalid)
+    @Test
+    func empty() throws {
+        expectRecommendedFrameRate(targetFPS: 45, ranges: [], min: .invalid, max: .invalid)
     }
 
-    func testNonIntegerFPS() throws {
+    @Test
+    func nonIntegerFPS() throws {
         let range = MockAVFrameRateRange(
             minFrameDuration: CMTime(value: 1000000, timescale: 30000030), // Razer Kiyo Webcam
             maxFrameDuration: CMTime(value: 1000000, timescale: 30000030)
         )
-        let result = FrameRateSelector.recommendedFrameRate(targetFPS: 30, supportedFrameRateRanges: [range])
-        XCTAssertEqual(result.minFrameDuration, range.minFrameDuration)
-        XCTAssertEqual(result.maxFrameDuration, range.maxFrameDuration)
+        expectRecommendedFrameRate(targetFPS: 30, ranges: [range], min: range.minFrameDuration, max: range.maxFrameDuration)
     }
 
-    func testNonIntegerFPS2() throws {
+    @Test
+    func nonIntegerFPS2() throws {
         let range = MockAVFrameRateRange(
             minFrameDuration: CMTime(value: 1000000, timescale: 29999970),
             maxFrameDuration: CMTime(value: 1000000, timescale: 29999970)
         )
-        let result = FrameRateSelector.recommendedFrameRate(targetFPS: 30, supportedFrameRateRanges: [range])
-        XCTAssertEqual(result.minFrameDuration, range.minFrameDuration)
-        XCTAssertEqual(result.maxFrameDuration, range.maxFrameDuration)
+        expectRecommendedFrameRate(targetFPS: 30, ranges: [range], min: range.minFrameDuration, max: range.maxFrameDuration)
     }
 
-    func testNonIntegerFPS3() throws {
+    @Test
+    func nonIntegerFPS3() throws {
         let range = MockAVFrameRateRange(
             minFrameDuration: CMTime(value: 1000000, timescale: 30000030),
             maxFrameDuration: CMTime(value: 1000000, timescale: 29999970)
         )
-        let result = FrameRateSelector.recommendedFrameRate(targetFPS: 30, supportedFrameRateRanges: [range])
-        XCTAssertEqual(result.minFrameDuration, .init(value: 1000000, timescale: 1000000 * 30))
-        XCTAssertEqual(result.maxFrameDuration, .init(value: 1000000, timescale: 1000000 * 30))
+        expectRecommendedFrameRate(
+            targetFPS: 30,
+            ranges: [range],
+            min: .init(value: 1000000, timescale: 1000000 * 30),
+            max: .init(value: 1000000, timescale: 1000000 * 30)
+        )
     }
 
-    func testNonIntegerNonContinuous() throws {
+    @Test
+    func nonIntegerNonContinuous() throws {
         let ranges: [MockAVFrameRateRange] = [
             MockAVFrameRateRange(
                 minFrameDuration: CMTime(value: 1001, timescale: 3000),
@@ -95,24 +98,23 @@ final class FrameRateSelectorTests: XCTestCase {
                 maxFrameDuration: CMTime(value: 1000000, timescale: 14999992)
             ),
         ]
-        let case5 = FrameRateSelector.recommendedFrameRate(targetFPS: 5, supportedFrameRateRanges: ranges)
-        XCTAssertEqual(case5.minFrameDuration, ranges[0].minFrameDuration)
-        XCTAssertEqual(case5.maxFrameDuration, ranges[0].maxFrameDuration)
-        let case10 = FrameRateSelector.recommendedFrameRate(targetFPS: 10, supportedFrameRateRanges: ranges)
-        XCTAssertEqual(case10.minFrameDuration, ranges[0].minFrameDuration)
-        XCTAssertEqual(case10.maxFrameDuration, ranges[0].maxFrameDuration)
-        let case15 = FrameRateSelector.recommendedFrameRate(targetFPS: 15, supportedFrameRateRanges: ranges)
-        XCTAssertEqual(case15.minFrameDuration, ranges[3].minFrameDuration)
-        XCTAssertEqual(case15.maxFrameDuration, ranges[3].maxFrameDuration)
-        let case23 = FrameRateSelector.recommendedFrameRate(targetFPS: 23, supportedFrameRateRanges: ranges)
-        XCTAssertEqual(case23.minFrameDuration, ranges[3].minFrameDuration)
-        XCTAssertEqual(case23.maxFrameDuration, ranges[3].maxFrameDuration)
-        let case24 = FrameRateSelector.recommendedFrameRate(targetFPS: 24, supportedFrameRateRanges: ranges)
-        XCTAssertEqual(case24.minFrameDuration, ranges[2].minFrameDuration)
-        XCTAssertEqual(case24.maxFrameDuration, ranges[2].maxFrameDuration)
-        let case29 = FrameRateSelector.recommendedFrameRate(targetFPS: 29, supportedFrameRateRanges: ranges)
-        XCTAssertEqual(case29.minFrameDuration, ranges[1].minFrameDuration)
-        XCTAssertEqual(case29.maxFrameDuration, ranges[1].maxFrameDuration)
+        expectRecommendedFrameRate(targetFPS: 5, ranges: ranges, min: ranges[0].minFrameDuration, max: ranges[0].maxFrameDuration)
+        expectRecommendedFrameRate(targetFPS: 10, ranges: ranges, min: ranges[0].minFrameDuration, max: ranges[0].maxFrameDuration)
+        expectRecommendedFrameRate(targetFPS: 15, ranges: ranges, min: ranges[3].minFrameDuration, max: ranges[3].maxFrameDuration)
+        expectRecommendedFrameRate(targetFPS: 23, ranges: ranges, min: ranges[3].minFrameDuration, max: ranges[3].maxFrameDuration)
+        expectRecommendedFrameRate(targetFPS: 24, ranges: ranges, min: ranges[2].minFrameDuration, max: ranges[2].maxFrameDuration)
+        expectRecommendedFrameRate(targetFPS: 29, ranges: ranges, min: ranges[1].minFrameDuration, max: ranges[1].maxFrameDuration)
+    }
+
+    private func expectRecommendedFrameRate(
+        targetFPS: Float64,
+        ranges: [MockAVFrameRateRange],
+        min: CMTime,
+        max: CMTime
+    ) {
+        let result = FrameRateSelector.recommendedFrameRate(targetFPS: targetFPS, supportedFrameRateRanges: ranges)
+        #expect(result.minFrameDuration == min)
+        #expect(result.maxFrameDuration == max)
     }
 }
 

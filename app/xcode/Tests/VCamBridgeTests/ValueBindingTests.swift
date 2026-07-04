@@ -1,17 +1,12 @@
-//
-//  ValueBindingTests.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2023/10/08.
-//
-
-import XCTest
+import Testing
+import CoreGraphics
 import VCamBridge
 import struct SwiftUI.Binding
 import struct SwiftUI.Color
 
 @MainActor
-final class ValueBindingTests: XCTestCase {
+@Suite
+struct ValueBindingTests {
     private enum TestType: Int32, Sendable {
         case value
     }
@@ -31,43 +26,48 @@ final class ValueBindingTests: XCTestCase {
         }
     }
 
-    func testInt32() throws {
+    @Test
+    func int32() throws {
         let store = ValueStore(123 as Int32)
-        XCTAssertEqual(store.value, 123)
+        #expect(store.value == 123)
 
         store.value = 321
-        XCTAssertEqual(store.value, 321)
-        XCTAssertEqual(store.value, store.store)
+        #expect(store.value == 321)
+        #expect(store.value == store.store)
     }
 
-    func testCGFloat() throws {
+    @Test
+    func cgFloat() throws {
         let store = ValueStore(123 as CGFloat)
-        XCTAssertEqual(store.value, 123)
+        #expect(store.value == 123)
 
         store.value = 321
-        XCTAssertEqual(store.value, 321)
-        XCTAssertEqual(store.value, store.store)
+        #expect(store.value == 321)
+        #expect(store.value == store.store)
     }
 
-    func testBool() throws {
+    @Test
+    func bool() throws {
         let store = ValueStore(false)
-        XCTAssertEqual(store.value, false)
+        #expect(store.value == false)
 
         store.value = true
-        XCTAssertEqual(store.value, true)
-        XCTAssertEqual(store.value, store.store)
+        #expect(store.value == true)
+        #expect(store.value == store.store)
     }
 
-    func testString() throws {
+    @Test
+    func string() throws {
         let store = ValueStore("hello")
-        XCTAssertEqual(store.value, "hello")
+        #expect(store.value == "hello")
 
         store.value = "world"
-        XCTAssertEqual(store.value, "world")
-        XCTAssertEqual(store.value, store.store)
+        #expect(store.value == "world")
+        #expect(store.value == store.store)
     }
 
-    func testVoid() throws {
+    @Test
+    func void() throws {
         let binding = ValueBinding<Void, TestType>()
         let trigger = binding.trigger(.value)
 
@@ -78,20 +78,22 @@ final class ValueBindingTests: XCTestCase {
         binding.setValue = { _, _ in setCalled = true }
 
         trigger()
-        XCTAssertEqual(getCalled, true)
-        XCTAssertEqual(setCalled, false)
+        #expect(getCalled == true)
+        #expect(setCalled == false)
     }
 
-    func testColor2() throws {
+    @Test
+    func color2() throws {
         let store = ValueStore(Color.purple)
-        XCTAssertEqual(store.value, .purple)
+        #expect(store.value == .purple)
 
         store.value = .yellow
-        XCTAssertEqual(store.value, .yellow)
-        XCTAssertEqual(store.value, store.store)
+        #expect(store.value == .yellow)
+        #expect(store.value == store.store)
     }
 
-    func testColor() throws {
+    @Test
+    func color() throws {
         let binding = ValueBinding<UnsafeMutableRawPointer, TestType>()
 
         let value = binding.binding(.value, type: Color.self)
@@ -108,14 +110,15 @@ final class ValueBindingTests: XCTestCase {
             pointerOwner = store.set()
         }
 
-        XCTAssertEqual(value.wrappedValue, initialColor)
+        #expect(value.wrappedValue == initialColor)
 
         value.wrappedValue = updatedColor
-        XCTAssertEqual(value.wrappedValue, updatedColor)
-        XCTAssertEqual(value.wrappedValue, store)
+        #expect(value.wrappedValue == updatedColor)
+        #expect(value.wrappedValue == store)
     }
 
-    func testArray() throws {
+    @Test
+    func array() throws {
         let binding = ValueBinding<UnsafeMutableRawPointer, TestType>()
 
         let value = binding.binding(.value, size: 3, type: [Int32].self)
@@ -129,13 +132,12 @@ final class ValueBindingTests: XCTestCase {
         }
         binding.setValue = { _, newValue in
             store = [Int32].get(newValue, size: store.count)
-            
         }
 
-        XCTAssertEqual(value.wrappedValue, [1, 2, 3])
+        #expect(value.wrappedValue == [1, 2, 3])
 
         value.wrappedValue = [2, 1, 0]
-        XCTAssertEqual(value.wrappedValue, [2, 1, 0])
-        XCTAssertEqual(value.wrappedValue, store)
+        #expect(value.wrappedValue == [2, 1, 0])
+        #expect(value.wrappedValue == store)
     }
 }

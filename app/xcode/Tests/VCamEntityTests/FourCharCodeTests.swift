@@ -1,35 +1,35 @@
-//
-//  FourCharCodeTests.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2023/09/20.
-//
-
-import XCTest
+import Testing
+import CoreServices
+import CoreVideo
 import VCamEntity
 
-final class FourCharCodeTests: XCTestCase {
-    func testUnknown() throws {
+@Suite
+struct FourCharCodeTests {
+    @Test
+    func unknown() throws {
         let code: FourCharCode = "invalid string"
-        XCTAssertEqual(code, FourCharCode(kUnknownType))
-        XCTAssertEqual(code.string, "????")
+        #expect(code == FourCharCode(kUnknownType))
+        #expect(code.string == "????")
     }
 
-    func test420v() throws {
+    @Test
+    func videoRange420v() {
         let code: FourCharCode = "420v"
-        XCTAssertEqual(code, kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange)
-        XCTAssertEqual(code.string, "420v")
+        #expect(code == kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange)
+        #expect(code.string == "420v")
     }
 
-    func test420f() throws {
+    @Test
+    func fullRange420f() {
         let code: FourCharCode = "420f"
-        XCTAssertEqual(code, kCVPixelFormatType_420YpCbCr8BiPlanarFullRange)
-        XCTAssertEqual(code.string, "420f")
+        #expect(code == kCVPixelFormatType_420YpCbCr8BiPlanarFullRange)
+        #expect(code.string == "420f")
     }
 
-    func testBGRA() throws {
+    @Test
+    func bgra() {
         let code: FourCharCode = "BGRA"
-        XCTAssertEqual(code, kCVPixelFormatType_32BGRA)
-        XCTAssertEqual(code.string, "BGRA")
+        #expect(code == kCVPixelFormatType_32BGRA)
+        #expect(code.string == "BGRA")
     }
 }

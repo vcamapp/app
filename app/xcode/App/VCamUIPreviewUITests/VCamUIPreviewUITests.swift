@@ -1,10 +1,3 @@
-//
-//  VCamUIPreviewUITests.swift
-//  VCamUIPreviewUITests
-//
-//  Created by Tatsuya Tanaka on 2023/10/18.
-//
-
 import XCTest
 import VCamLocalization
 
