@@ -1,16 +1,20 @@
 @preconcurrency import AVFoundation
 import CoreMediaIO
-import os
+import Synchronization
 import VCamEntity
 
 public enum Camera {
-    private static let cache = OSAllocatedUnfairLock(initialState: [AVCaptureDevice]())
+    private struct CacheState: @unchecked Sendable {
+        var devices: [AVCaptureDevice] = []
+    }
+
+    private static let cache = Mutex(CacheState())
 
     private static func updateCache() {
         enableDalDevices()
         let deviceDiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInWideAngleCamera, .external], mediaType: nil, position: .unspecified)
         let devices = deviceDiscoverySession.devices.filter { $0.uniqueID != "vcam-device" }
-        cache.withLock { $0 = devices }
+        cache.withLock { $0.devices = devices }
         NotificationCenter.default.post(name: .deviceWasChanged, object: nil)
     }
 
@@ -47,17 +51,17 @@ public enum Camera {
     }
 
     public static func cameras(type: AVMediaType? = .video) -> [AVCaptureDevice] {
-        cache.withLock { devices in
+        cache.withLock { cache in
             if let type {
-                return devices.filter { $0.hasMediaType(type) }
+                return cache.devices.filter { $0.hasMediaType(type) }
             } else {
-                return devices
+                return cache.devices
             }
         }
     }
 
     public static func camera(id: String?) -> AVCaptureDevice? {
-        cache.withLock { $0.first { $0.uniqueID == id } }
+        cache.withLock { $0.devices.first { $0.uniqueID == id } }
     }
 
     public static func searchHighestResolutionFormat(for device: AVCaptureDevice) -> (format: AVCaptureDevice.Format, resolution: CGSize)? {

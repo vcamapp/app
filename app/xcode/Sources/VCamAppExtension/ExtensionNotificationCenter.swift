@@ -1,5 +1,5 @@
 import Foundation
-import os
+import Synchronization
 
 public enum ExtensionNotification: String, Equatable, Sendable {
     case startCameraExtensionStream
@@ -21,7 +21,7 @@ public final class ExtensionNotificationCenter: Sendable {
     public static let `default` = ExtensionNotificationCenter()
 
     private nonisolated(unsafe) let center = CFNotificationCenterGetDarwinNotifyCenter()
-    private let observers = OSAllocatedUnfairLock(initialState: [ExtensionNotification: @Sendable () -> Void]())
+    private let observers = Mutex([ExtensionNotification: @Sendable () -> Void]())
 
     public func post(_ notification: ExtensionNotification) {
         CFNotificationCenterPostNotification(
@@ -49,7 +49,8 @@ public final class ExtensionNotificationCenter: Sendable {
             { _, observer, name, _, _ in
                 if let observer = observer, let name = name, let notification = ExtensionNotification(name: name) {
                     let observerSelf = Unmanaged<ExtensionNotificationCenter>.fromOpaque(observer).takeUnretainedValue()
-                    observerSelf.observers.withLock { $0[notification]?() }
+                    let handler = observerSelf.observers.withLock { $0[notification] }
+                    handler?()
                 }
             },
             notification.rawValue as CFString,
@@ -60,6 +61,6 @@ public final class ExtensionNotificationCenter: Sendable {
 
     public func removeAllObservers() {
         observers.withLock { $0.removeAll() }
-        CFNotificationCenterRemoveEveryObserver(center, Unmanaged.passRetained(self).toOpaque())
+        CFNotificationCenterRemoveEveryObserver(center, Unmanaged.passUnretained(self).toOpaque())
     }
 }

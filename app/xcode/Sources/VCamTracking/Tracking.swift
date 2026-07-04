@@ -5,7 +5,7 @@ import Combine
 import VCamEntity
 import VCamData
 import VCamBridge
-import os
+import Synchronization
 
 @Observable
 @MainActor
@@ -17,36 +17,36 @@ public final class Tracking {
         var hand: TrackingMethod.Hand = .disabled
         var finger: TrackingMethod.Finger = .disabled
     }
-    nonisolated(unsafe) private static var methodCache = MethodCache()
+    nonisolated private static let methodCache = Mutex(MethodCache())
 
     public nonisolated static var cachedFaceTrackingMethod: TrackingMethod.Face {
-        methodCache.face
+        methodCache.withLock { $0.face }
     }
 
     public nonisolated static var cachedHandTrackingMethod: TrackingMethod.Hand {
-        methodCache.hand
+        methodCache.withLock { $0.hand }
     }
 
     public nonisolated static var cachedFingerTrackingMethod: TrackingMethod.Finger {
-        methodCache.finger
+        methodCache.withLock { $0.finger }
     }
 
     public private(set) var faceTrackingMethod = TrackingMethod.Face.default {
-        didSet { Self.methodCache.face = faceTrackingMethod }
+        didSet { Self.methodCache.withLock { $0.face = faceTrackingMethod } }
     }
 #if FEATURE_3
     public private(set) var handTrackingMethod = TrackingMethod.Hand.default {
-        didSet { Self.methodCache.hand = handTrackingMethod }
+        didSet { Self.methodCache.withLock { $0.hand = handTrackingMethod } }
     }
     public private(set) var fingerTrackingMethod = TrackingMethod.Finger.default {
-        didSet { Self.methodCache.finger = fingerTrackingMethod }
+        didSet { Self.methodCache.withLock { $0.finger = fingerTrackingMethod } }
     }
 #else
     public private(set) var handTrackingMethod = TrackingMethod.Hand.disabled {
-        didSet { Self.methodCache.hand = handTrackingMethod }
+        didSet { Self.methodCache.withLock { $0.hand = handTrackingMethod } }
     }
     public private(set) var fingerTrackingMethod = TrackingMethod.Finger.disabled {
-        didSet { Self.methodCache.finger = fingerTrackingMethod }
+        didSet { Self.methodCache.withLock { $0.finger = fingerTrackingMethod } }
     }
 #endif
 

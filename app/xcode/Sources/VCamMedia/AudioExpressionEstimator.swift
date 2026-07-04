@@ -3,17 +3,20 @@ import SoundAnalysis
 import Accelerate
 import VCamEntity
 import AVFAudio
-import os
+import Synchronization
 
-private final class AudioLevelCalculator: @unchecked Sendable {
-    private var averagePowerForChannel0: Float = 0
+private final class AudioLevelCalculator: Sendable {
+    private struct State: Sendable {
+        var averagePowerForChannel0: Float = 0
+    }
+
     private let levelLowPassTrig: Float32 = 0.30
-    private var lock = os_unfair_lock()
+    private let state = Mutex(State())
 
     func reset() {
-        os_unfair_lock_lock(&lock)
-        averagePowerForChannel0 = 0
-        os_unfair_lock_unlock(&lock)
+        state.withLock {
+            $0.averagePowerForChannel0 = 0
+        }
     }
 
     func computeAudioLevel(from buffer: AVAudioPCMBuffer) -> Float {
@@ -28,60 +31,59 @@ private final class AudioLevelCalculator: @unchecked Sendable {
         var avgValue: Float = 0
         vDSP_meamgv(samples, 1, &avgValue, frameCount)
 
-        var v: Float = -100
+        var value: Float = -100
         if avgValue != 0 {
-            v = 20.0 * log10f(avgValue)
+            value = 20.0 * log10f(avgValue)
         }
 
-        os_unfair_lock_lock(&lock)
-        averagePowerForChannel0 = (levelLowPassTrig * v) + ((1 - levelLowPassTrig) * averagePowerForChannel0)
-        let result = Float(100 + averagePowerForChannel0) / 100.0
-        os_unfair_lock_unlock(&lock)
-
-        return result
+        return state.withLock { state in
+            state.averagePowerForChannel0 = (levelLowPassTrig * value) + ((1 - levelLowPassTrig) * state.averagePowerForChannel0)
+            return Float(100 + state.averagePowerForChannel0) / 100.0
+        }
     }
 }
 
-private final class ExpressionAnalyzerState: @unchecked Sendable {
-    private var analyzer: SNAudioStreamAnalyzer?
-    private var previousSampleTime = Date()
-    private var lock = os_unfair_lock()
+private final class ExpressionAnalyzerState: Sendable {
+    private struct State: @unchecked Sendable {
+        var analyzer: SNAudioStreamAnalyzer?
+        var previousSampleTime = Date()
+    }
 
+    private let state = Mutex(State())
     private let inversedFps: Double = 1 / 8
 
     func configure(format: AVAudioFormat, observer: any SNResultsObserving) {
-        os_unfair_lock_lock(&lock)
-        analyzer = SNAudioStreamAnalyzer(format: format)
-        do {
-            let request = try SNClassifySoundRequest(classifierIdentifier: .version1)
-            request.windowDuration = CMTimeMakeWithSeconds(0.5, preferredTimescale: 48_000)
-            request.overlapFactor = 0.9
-            try analyzer?.add(request, withObserver: observer)
-        } catch {
-            // Silently fail if sound classification is unavailable
+        state.withLock { state in
+            state.analyzer = SNAudioStreamAnalyzer(format: format)
+            do {
+                let request = try SNClassifySoundRequest(classifierIdentifier: .version1)
+                request.windowDuration = CMTimeMakeWithSeconds(0.5, preferredTimescale: 48_000)
+                request.overlapFactor = 0.9
+                try state.analyzer?.add(request, withObserver: observer)
+            } catch {
+                // Silently fail if sound classification is unavailable
+            }
         }
-        os_unfair_lock_unlock(&lock)
     }
 
     func reset() {
-        os_unfair_lock_lock(&lock)
-        analyzer = nil
-        previousSampleTime = Date()
-        os_unfair_lock_unlock(&lock)
+        state.withLock { state in
+            state.analyzer = nil
+            state.previousSampleTime = Date()
+        }
     }
 
     /// Analyzes the buffer if enough time has passed since the last analysis.
     /// Returns true if analysis was performed.
     func analyzeIfNeeded(buffer: AVAudioPCMBuffer, sampleTime: AVAudioFramePosition) -> Bool {
-        os_unfair_lock_lock(&lock)
-        defer { os_unfair_lock_unlock(&lock) }
+        state.withLock { state in
+            guard let analyzer = state.analyzer else { return false }
+            guard Date().timeIntervalSince(state.previousSampleTime) >= inversedFps else { return false }
 
-        guard let analyzer else { return false }
-        guard Date().timeIntervalSince(previousSampleTime) >= inversedFps else { return false }
-
-        analyzer.analyze(buffer, atAudioFramePosition: sampleTime)
-        previousSampleTime = Date()
-        return true
+            analyzer.analyze(buffer, atAudioFramePosition: sampleTime)
+            state.previousSampleTime = Date()
+            return true
+        }
     }
 }
 

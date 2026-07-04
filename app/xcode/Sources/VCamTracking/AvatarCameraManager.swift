@@ -1,5 +1,5 @@
 import AVFoundation
-import os
+import Synchronization
 import VCamCamera
 import VCamBridge
 
@@ -7,7 +7,7 @@ import VCamBridge
 public final class AvatarCameraManager {
     private let webCamera = AvatarWebCamera()
 
-    nonisolated private static let permissionStorage = OSAllocatedUnfairLock(initialState: PermissionState())
+    nonisolated private static let permissionStorage = Mutex(PermissionState())
 
     private struct PermissionState: Sendable {
         var isCameraAuthorized: @Sendable () -> Bool = { false }

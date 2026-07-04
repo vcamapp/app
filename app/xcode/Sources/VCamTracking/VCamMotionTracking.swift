@@ -1,14 +1,34 @@
 import Foundation
 import VCamBridge
-import os
+import Synchronization
 
 @MainActor
 public final class VCamMotionTracking {
+    private final class SmoothingStorage: Sendable {
+        private let storage: Mutex<TrackingSmoothing>
+
+        init(_ smoothing: TrackingSmoothing) {
+            storage = Mutex(smoothing)
+        }
+
+        func settings() -> TrackingResampler.Settings {
+            storage.withLock { $0.settings() }
+        }
+
+        func update(_ smoothing: TrackingSmoothing) {
+            storage.withLock { $0 = smoothing }
+        }
+
+        var isEnabled: Bool {
+            storage.withLock { $0.isEnabled }
+        }
+    }
+
     private let blendShapeResampler: TrackingResampler
     private let perfectSyncResampler: TrackingResampler
     private let handsResampler: TrackingResampler
     private let fingersResampler: TrackingResampler
-    private let smoothingLock: OSAllocatedUnfairLock<TrackingSmoothing>
+    private let smoothingStorage: SmoothingStorage
 
     private struct HandOutput {
         let hands: [Float]
@@ -18,9 +38,9 @@ public final class VCamMotionTracking {
     }
 
     public init(smoothing: TrackingSmoothing) {
-        self.smoothingLock = OSAllocatedUnfairLock(initialState: smoothing)
-        let settingsProvider: @Sendable () -> TrackingResampler.Settings = { [smoothingLock] in
-            smoothingLock.withLock { $0.settings() }
+        self.smoothingStorage = SmoothingStorage(smoothing)
+        let settingsProvider: @Sendable () -> TrackingResampler.Settings = { [smoothingStorage] in
+            smoothingStorage.settings()
         }
 
         blendShapeResampler = TrackingResampler(label: "vcam-motion-blendshape", settingsProvider: settingsProvider) { @MainActor values in
@@ -45,7 +65,7 @@ public final class VCamMotionTracking {
     }
 
     nonisolated func updateSmoothing(_ smoothing: TrackingSmoothing) {
-        smoothingLock.withLock { $0 = smoothing }
+        smoothingStorage.update(smoothing)
         if !smoothing.isEnabled {
             Task { @MainActor in
                 stopResamplers()
@@ -61,7 +81,7 @@ public final class VCamMotionTracking {
     }
 
     private func onVCamMotionReceived(_ data: VCamMotion, tracking: Tracking) {
-        let smoothingEnabled = smoothingLock.withLock { $0.isEnabled }
+        let smoothingEnabled = smoothingStorage.isEnabled
         let useFaceTracking = tracking.faceTrackingMethod == .vcamMocap
         let usePerfectSync = UniBridge.shared.hasPerfectSyncBlendShape
         let useHands = tracking.handTrackingMethod == .vcamMocap

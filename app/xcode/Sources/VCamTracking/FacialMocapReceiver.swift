@@ -1,26 +1,39 @@
-//
-//  FacialMocapReceiver.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2023/01/02.
-//
-
 import Network
 import Combine
 import VCamBridge
 import Accelerate
 import VCamLogger
-import os
+import Synchronization
 
 @Observable
 @MainActor
 public final class FacialMocapReceiver {
+    private final class SmoothingStorage: Sendable {
+        private let storage: Mutex<TrackingSmoothing>
+
+        init(_ smoothing: TrackingSmoothing) {
+            storage = Mutex(smoothing)
+        }
+
+        func settings() -> TrackingResampler.Settings {
+            storage.withLock { $0.settings() }
+        }
+
+        func update(_ smoothing: TrackingSmoothing) {
+            storage.withLock { $0 = smoothing }
+        }
+
+        var isEnabled: Bool {
+            storage.withLock { $0.isEnabled }
+        }
+    }
+
     @ObservationIgnored private var listener: NWListener?
     @ObservationIgnored private var connection: NWConnection?
     @ObservationIgnored private var facialMocapLastValues: [Float] = Array(repeating: 0, count: 12)
     @ObservationIgnored private var blendShapeResampler: TrackingResampler
     @ObservationIgnored private var perfectSyncResampler: TrackingResampler
-    @ObservationIgnored private let smoothingLock: OSAllocatedUnfairLock<TrackingSmoothing>
+    @ObservationIgnored private let smoothingStorage: SmoothingStorage
     nonisolated private static let queue = DispatchQueue(label: "com.github.tattn.vcam.facialmocapreceiver")
 
     public private(set) var connectionStatus = ConnectionStatus.disconnected
@@ -38,9 +51,9 @@ public final class FacialMocapReceiver {
     }
 
     public init(smoothing: TrackingSmoothing) {
-        self.smoothingLock = OSAllocatedUnfairLock(initialState: smoothing)
-        let settingsProvider: @Sendable () -> TrackingResampler.Settings = { [smoothingLock] in
-            smoothingLock.withLock { $0.settings() }
+        self.smoothingStorage = SmoothingStorage(smoothing)
+        let settingsProvider: @Sendable () -> TrackingResampler.Settings = { [smoothingStorage] in
+            smoothingStorage.settings()
         }
 
         blendShapeResampler = TrackingResampler(label: "facial-mocap-blendshape", settingsProvider: settingsProvider) { @MainActor values in
@@ -130,7 +143,7 @@ public final class FacialMocapReceiver {
     }
 
     nonisolated func updateSmoothing(_ smoothing: TrackingSmoothing) {
-        smoothingLock.withLock { $0 = smoothing }
+        smoothingStorage.update(smoothing)
         if !smoothing.isEnabled {
             Task { @MainActor in
                 stopResamplers()
@@ -154,7 +167,7 @@ public final class FacialMocapReceiver {
     private func oniFacialMocapReceived(_ data: FacialMocapData) {
         guard Tracking.shared.faceTrackingMethod == .iFacialMocap else { return }
 
-        let smoothingEnabled = smoothingLock.withLock { $0.isEnabled }
+        let smoothingEnabled = smoothingStorage.isEnabled
         if UniBridge.shared.hasPerfectSyncBlendShape {
             let perfectSync = data.perfectSync(useEyeTracking: Tracking.shared.useEyeTracking)
             if smoothingEnabled {

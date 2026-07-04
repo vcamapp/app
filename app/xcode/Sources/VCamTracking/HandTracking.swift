@@ -2,10 +2,10 @@ import VCamData
 import VCamEntity
 import Combine
 import Foundation
-import os
+import Synchronization
 
 public final class HandTracking {
-    private let configurationLock = OSAllocatedUnfairLock(initialState: Configuration())
+    private let configurationStorage = Mutex(Configuration())
     private var cancellables: Set<AnyCancellable> = []
 
     private struct Configuration: Sendable {
@@ -15,22 +15,22 @@ public final class HandTracking {
     }
 
     public var configuration: FingerTrackingConfiguration {
-        configurationLock.withLock {
+        configurationStorage.withLock {
             ($0.open, $0.close, $0.fingerTrackingEnabled)
         }
     }
 
     public init() {
         UserDefaults.standard.publisher(for: \.vc_ftracking_open_intensity, options: [.initial, .new])
-            .sink { [weak self] value in self?.configurationLock.withLock { $0.open = Float(value) } }
+            .sink { [weak self] value in self?.configurationStorage.withLock { $0.open = Float(value) } }
             .store(in: &cancellables)
         UserDefaults.standard.publisher(for: \.vc_ftracking_close_intensity, options: [.initial, .new])
-            .sink { [weak self] value in self?.configurationLock.withLock { $0.close = Float(value) } }
+            .sink { [weak self] value in self?.configurationStorage.withLock { $0.close = Float(value) } }
             .store(in: &cancellables)
         UserDefaults.standard.publisher(for: \.vc_tracking_method_finger, options: [.initial, .new])
             .sink { [weak self] value in
                 let method = TrackingMethod.Finger(rawValue: value) ?? .default
-                self?.configurationLock.withLock { $0.fingerTrackingEnabled = method != .disabled }
+                self?.configurationStorage.withLock { $0.fingerTrackingEnabled = method != .disabled }
             }
             .store(in: &cancellables)
     }

@@ -2,7 +2,7 @@ import Foundation
 import AVFoundation
 import CoreAudio
 import AVFAudio
-import os
+import Synchronization
 import VCamEntity
 import VCamLogger
 
@@ -148,7 +148,7 @@ public extension AudioDevice {
 }
 
 extension AudioDevice {
-    private static let cache = OSAllocatedUnfairLock(initialState: [AudioDevice]())
+    private static let cache = Mutex([AudioDevice]())
 
     private static func updateCachedDevices(_ devices: [AudioDevice]) {
         cache.withLock { $0 = devices }
