@@ -143,10 +143,15 @@ actor VisionTrackingPipeline {
 
         switch (configuration.needsFaceLandmarks, configuration.needsHandPose) {
         case (true, true):
-            let (faceObservations, handObservations) = try await handler.perform(faceMapper.request, handMapper.request)
+            let faceObservations = try await handler.perform(faceMapper.request)
+            let hands = try handMapper.map(
+                sampleBuffer: frame.sampleBuffer.value,
+                orientation: frame.orientation,
+                configuration: configuration
+            )
             return TrackingOutput(
                 face: faceMapper.map(observations: faceObservations, configuration: configuration),
-                hands: handMapper.map(observations: handObservations, configuration: configuration),
+                hands: hands,
                 emotion: faceMapper.mapEmotionIfNeeded(observations: faceObservations, configuration: configuration)
             )
         case (true, false):
@@ -157,10 +162,13 @@ actor VisionTrackingPipeline {
                 emotion: faceMapper.mapEmotionIfNeeded(observations: faceObservations, configuration: configuration)
             )
         case (false, true):
-            let handObservations = try await handler.perform(handMapper.request)
             return TrackingOutput(
                 face: nil,
-                hands: handMapper.map(observations: handObservations, configuration: configuration),
+                hands: try handMapper.map(
+                    sampleBuffer: frame.sampleBuffer.value,
+                    orientation: frame.orientation,
+                    configuration: configuration
+                ),
                 emotion: nil
             )
         case (false, false):
