@@ -9,6 +9,9 @@ public struct Migration {
     @concurrent
     public static func migrate() async {
         let previousVersion = UserDefaults.standard.value(for: .previousVersion)
+        defer {
+            UserDefaults.standard.set(Bundle.main.version, for: .previousVersion)
+        }
 
         do {
             try await migrationFirst(previousVersion: previousVersion)
@@ -30,7 +33,6 @@ public struct Migration {
             Logger.error(error)
         }
 
-        UserDefaults.standard.set(Bundle.main.version, for: .previousVersion)
     }
 }
 

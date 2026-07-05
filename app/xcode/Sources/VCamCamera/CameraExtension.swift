@@ -51,8 +51,18 @@ public final class CameraExtension: NSObject {
     }
 
     @concurrent
+    public func isInstalled() async -> Bool {
+        do {
+            let properties = try await extensionProperties()
+            return !properties.isUninstalling
+        } catch {
+            return false
+        }
+    }
+
+    @concurrent
     public func installExtensionIfNotInstalled() async throws {
-        if CoreMediaSinkStream.isInstalled {
+        if await isInstalled() {
             return
         }
         try await installExtension()
@@ -82,6 +92,7 @@ extension CameraExtension: OSSystemExtensionRequestDelegate {
 
     public func request(_ request: OSSystemExtensionRequest, foundProperties properties: [OSSystemExtensionProperties]) {
         guard let continuation = propertiesRequestContinuation else { return }
+        propertiesRequestContinuation = nil
         if let property = properties.first {
             continuation.resume(returning: property)
         } else {

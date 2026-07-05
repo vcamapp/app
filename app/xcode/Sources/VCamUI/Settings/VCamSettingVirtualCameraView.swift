@@ -106,10 +106,13 @@ public struct VCamSettingVirtualCameraView: View {
                 }
             }
             .task {
-                isCameraExtensionInstalled = CoreMediaSinkStream.isInstalled
                 isCameraExtensionStarting = VirtualCameraManager.shared.sinkStream.isStarting
                 if let property = try? await CameraExtension().extensionProperties() {
+                    isCameraExtensionInstalled = !property.isUninstalling
                     isAwaitingUserApproval = property.isAwaitingUserApproval
+                } else {
+                    isCameraExtensionInstalled = false
+                    isAwaitingUserApproval = false
                 }
             }
         }
