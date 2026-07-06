@@ -37,7 +37,7 @@ public struct VCamHands {
         // When unable to track, set the grip to a naturally relaxed level
         public static let missing = Hand(wrist: -.one, thumbCMC: -.one, littleMCP: -.one, thumbTip: 0.75, indexTip: 0.75, middleTip: 0.75, ringTip: 0.75, littleTip: 0.75)
 
-        @inline(__always) @inlinable
+        @inline(always) @inlinable
         public static func finger(_ p: SIMD2<Float>, wrist: SIMD2<Float>, palmHeight: Float, configuration config: FingerTrackingConfiguration) -> Float {
             if p != .zero {
                 // Distance between the fingertip and the wrist

@@ -7,7 +7,7 @@ extension DispatchQueue {
     /// (e.g., 60fps tracking).
     /// `Task` creates a new task context, while `DispatchQueue.main.async` is a lightweight
     /// dispatch to the main thread.
-    @inline(__always)
+    @inline(always)
     public static func runOnMain(_ operation: @MainActor @escaping () -> Void) {
         main.async {
             MainActor.assumeIsolated {

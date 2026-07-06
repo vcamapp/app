@@ -63,7 +63,7 @@ public final class AudioManager {
     }
 }
 
-@inline(__always)
+@inline(always)
 private func makeAudioTapBlock(
     onUpdateAudioBuffer: (@Sendable (AVAudioPCMBuffer, AVAudioTime, TimeInterval) -> Void)?,
     presentationLatency: TimeInterval
