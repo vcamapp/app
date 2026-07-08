@@ -177,7 +177,7 @@ public extension TrackingMappingEntry.DefaultMappingDefinition {
     static let mouth = Self(key: "_mouth", bounds: 0...1)
     static let iPhonePosX = Self(key: "_posX", bounds: -1...1)
     static let iPhonePosY = Self(key: "_posY", bounds: -1...1, outputRangeMin: 0, outputRangeMax: 0)
-    static let iPhonePosZ = Self(key: "_posZ", bounds: -1...1, outputRangeMin: 0, outputRangeMax: 0)
+    static let iPhonePosZ = Self(key: "_posZ", bounds: -1...1, rangeMin: -1, rangeMax: 0, outputRangeMin: 0, outputRangeMax: 0)
     static let iPhoneHeadX = Self(key: "_headX", bounds: -90...90)
     static let iPhoneHeadY = Self(key: "_headY", bounds: -90...90)
     static let iPhoneHeadZ = Self(key: "_headZ", bounds: -90...90)
