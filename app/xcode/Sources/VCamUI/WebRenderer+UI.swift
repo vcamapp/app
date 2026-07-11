@@ -1,21 +1,13 @@
-//
-//  WebRenderer+UI.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/06/20.
-//
-
 import Foundation
 import SwiftUI
 import CoreImage
 import Combine
-import VCamLocalization
 import VCamUIFoundation
 
 public extension WebRenderer {
     static func showPreferences(url: String?, bookmarkData: Data?, width: Int?, height: Int?, fps: Int?, css: String?, js: String?, completion: @escaping (WebRenderer) -> Void) {
         showSheet(
-            title: L10n.web.text,
+            title: String(localized: .web),
             view: { close in
                 WebRendererPreferenceView(
                     url: url,
@@ -87,7 +79,7 @@ public struct WebRendererPreferenceView: View {
     }
 
     public var body: some View {
-        ModalSheet(doneTitle: L10n.apply.text, doneDisabled: doneDisabled) {
+        ModalSheet(doneTitle: String(localized: .apply), doneDisabled: doneDisabled) {
             renderer = nil // References remain, so explicitly clear them
             close()
         } done: {
@@ -120,11 +112,11 @@ public struct WebRendererPreferenceView: View {
             ScrollView {
                 Form {
                     HStack {
-                        Text("URL")
+                        Text(verbatim: "URL")
                         Spacer()
                         if isLocalFile {
                             HStack {
-                                TextField("", text: $path)
+                                TextField(text: $path) { EmptyView() }
                                     .disabled(true)
                                 Button {
                                     guard let url = FileUtility.openFile(type: .html),
@@ -133,52 +125,52 @@ public struct WebRendererPreferenceView: View {
                                     path = url.path
                                     pathBookmarkData = bookmarkData
                                 } label: {
-                                    Text(L10n.pick.key, bundle: .localize)
+                                    Text(.pick)
                                 }
                             }
                         } else {
-                            TextField("", text: $url)
+                            TextField(text: $url) { EmptyView() }
                         }
                         if !doneDisabled, let resource = resource {
                             Button {
                                 refreshScreen(resource: resource)
                             } label: {
-                                Text(L10n.refreshScreen.key, bundle: .localize)
+                                Text(.refreshScreen)
                             }
                         }
                         if let renderer = renderer {
                             Button {
                                 renderer.showWindow()
                             } label: {
-                                Text(L10n.interact.key, bundle: .localize)
+                                Text(.interact)
                             }
                         }
                     }
                     HStack {
                         Spacer()
                         Toggle(isOn: $isLocalFile) {
-                            Text(L10n.localFile.key, bundle: .localize)
+                            Text(.localFile)
                         }
                     }
                     HStack(alignment: .top) {
                         VStack {
                             Form {
                                 HStack {
-                                    Text(L10n.width.key, bundle: .localize)
+                                    Text(.width)
                                     Spacer()
-                                    TextField("", text: $width.map())
+                                    TextField(text: $width.map()) { EmptyView() }
                                         .acceptNumberOnly($width.map())
                                 }
                                 HStack {
-                                    Text(L10n.height.key, bundle: .localize)
+                                    Text(.height)
                                     Spacer()
-                                    TextField("", text: $height.map())
+                                    TextField(text: $height.map()) { EmptyView() }
                                         .acceptNumberOnly($height.map())
                                 }
                                 HStack {
-                                    Text("FPS")
+                                    Text(verbatim: "FPS")
                                     Spacer()
-                                    TextField("", text: $fps.map())
+                                    TextField(text: $fps.map()) { EmptyView() }
                                         .acceptNumberOnly($fps.map())
                                 }
                             }
@@ -187,7 +179,7 @@ public struct WebRendererPreferenceView: View {
                         VStack {
                             GroupBox {
                                 VStack {
-                                    Text("CSS")
+                                    Text(verbatim: "CSS")
                                     TextEditor(text: $css)
                                         .font(Font.footnote.monospaced())
                                         .disableAutocorrection(true)
@@ -195,13 +187,13 @@ public struct WebRendererPreferenceView: View {
                             }
                             GroupBox {
                                 VStack {
-                                    Text("JavaScript")
+                                    Text(verbatim: "JavaScript")
                                         .frame(maxWidth: .infinity)
                                         .overlay(
                                             Button {
                                                 renderer?.javaScript = js
                                             } label: {
-                                                Text(L10n.runCode.key, bundle: .localize)
+                                                Text(.runCode)
                                             },
                                             alignment: .trailing
                                         )

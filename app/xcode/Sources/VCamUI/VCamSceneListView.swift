@@ -1,10 +1,3 @@
-//
-//  VCamSceneListView.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2022/05/06.
-//
-
 import SwiftUI
 import VCamEntity
 import VCamData
@@ -25,6 +18,7 @@ public struct VCamSceneListView: View {
                     TextFieldListRow(
                         id: scene.id,
                         text: $scene.name,
+                        placeholder: String(localized: .scene),
                         editingId: $editingId,
                         selectedId: selectedId
                     ) {
@@ -105,7 +99,7 @@ public struct VCamSceneListView: View {
 
 extension VCamSceneListView: MacWindow {
     public var windowTitle: String {
-        L10n.scene.text
+        String(localized: .scene)
     }
 
     public func configureWindow(_ window: NSWindow) -> NSWindow {
@@ -127,7 +121,7 @@ private struct DeleteSceneButton: View {
             SceneManager.shared.remove(byId: scene.id)
         } label: {
             Image(systemName: "trash")
-            Text(L10n.delete.key, bundle: .localize)
+            Text(.delete)
         }
     }
 }
@@ -159,7 +153,7 @@ private struct EditSceneViewModifier: ViewModifier {
                     }
                 } label: {
                     Image(systemName: "doc.on.doc")
-                    Text(L10n.duplicate.key, bundle: .localize)
+                    Text(.duplicate)
                 }
                 Divider()
                 DeleteSceneButton(scene: scene)

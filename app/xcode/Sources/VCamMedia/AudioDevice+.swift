@@ -75,7 +75,6 @@ public extension AudioDevice {
 
         let value = name as? String ?? ""
         return value
-//        return value.hasPrefix("CADefaultDevice") ? L10n.default.text : value
     }
 
     func bufferSize() -> UInt32 {

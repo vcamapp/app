@@ -1,12 +1,4 @@
-//
-//  VCamSettingLicenseView.swift
-//
-//
-//  Created by tattn on 2025/11/17.
-//
-
 import SwiftUI
-import VCamLocalization
 import VCamData
 import VCamEntity
 import VCamLogger
@@ -49,7 +41,7 @@ struct VCamSettingLicenseView: View {
                 }
             } footer: {
                 if licenseState == .notLoggedIn {
-                    Text(L10n.licenseCheckIfAlreadyAcquired.key, bundle: .localize)
+                    Text(.licenseCheckIfAlreadyAcquired)
                         .foregroundStyle(.secondary)
                         .font(.footnote)
                         .tint(.accentColor)
@@ -63,14 +55,14 @@ struct VCamSettingLicenseView: View {
                             licenseManager.openManagementPage()
                         } label: {
                             Label {
-                                Text(L10n.accountManagement.key, bundle: .localize)
+                                Text(.accountManagement)
                             } icon: {
                                 Image(systemName: "gearshape.fill")
                             }
                         }
                         .buttonStyle(.bordered)
                     } label: {
-                        Text(L10n.manageAccountAndSubscription.key, bundle: .localize)
+                        Text(.manageAccountAndSubscription)
                     }
                 }
             } footer: {
@@ -79,7 +71,7 @@ struct VCamSettingLicenseView: View {
                         isSignOutAlertPresented = true
                     } label: {
                         Label {
-                            Text(L10n.signOut.key, bundle: .localize)
+                            Text(.signOut)
                         } icon: {
                             Image(systemName: "rectangle.portrait.and.arrow.right")
                         }
@@ -92,19 +84,19 @@ struct VCamSettingLicenseView: View {
         }
         .formStyle(.grouped)
         .disabled(licenseState == .loading)
-        .confirmationDialog(Text(L10n.signOut.key, bundle: .localize), isPresented: $isSignOutAlertPresented) {
+        .confirmationDialog(Text(.signOut), isPresented: $isSignOutAlertPresented) {
             Button(role: .cancel) {
             } label: {
-                Text(L10n.cancel.key, bundle: .localize)
+                Text(.cancel)
             }
 
             Button(role: .destructive) {
                 signOut()
             } label: {
-                Text(L10n.signOut.key, bundle: .localize)
+                Text(.signOut)
             }
         } message: {
-            Text(L10n.confirmSignOut.key, bundle: .localize)
+            Text(.confirmSignOut)
         }
     }
 
@@ -115,16 +107,16 @@ struct VCamSettingLicenseView: View {
             HStack {
                 ProgressView()
                     .controlSize(.small)
-                Text(L10n.checkingLicense.key, bundle: .localize)
+                Text(.checkingLicense)
                     .foregroundStyle(.secondary)
             }
 
         case .notLoggedIn:
             Label {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(L10n.commercialLicenseNotActive.key, bundle: .localize)
+                    Text(.commercialLicenseNotActive)
                         .font(.headline)
-                    Text(L10n.commercialLicenseRequired.key, bundle: .localize)
+                    Text(.commercialLicenseRequired)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -136,10 +128,10 @@ struct VCamSettingLicenseView: View {
         case .active:
             Label {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(L10n.commercialLicenseActive.key, bundle: .localize)
+                    Text(.commercialLicenseActive)
                         .font(.headline)
                     if let expiryDate {
-                        (Text(L10n.expiryDate.key, bundle: .localize) + Text(expiryDate, style: .date))
+                        (Text(.expiryDate) + Text(expiryDate, style: .date))
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -152,9 +144,9 @@ struct VCamSettingLicenseView: View {
         case .inactive:
             Label {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(L10n.commercialLicenseNotActive.key, bundle: .localize)
+                    Text(.commercialLicenseNotActive)
                         .font(.headline)
-                    Text(L10n.pleaseReauthenticate.key, bundle: .localize)
+                    Text(.pleaseReauthenticate)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -166,10 +158,10 @@ struct VCamSettingLicenseView: View {
         case .expired:
             Label {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(L10n.licenseExpired.key, bundle: .localize)
+                    Text(.licenseExpired)
                         .font(.headline)
                     if let expiryDate {
-                        (Text(L10n.expiryDate.key, bundle: .localize) + Text(expiryDate, style: .date))
+                        (Text(.expiryDate) + Text(expiryDate, style: .date))
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -188,7 +180,7 @@ struct VCamSettingLicenseView: View {
             EmptyView()
         case .notLoggedIn:
             Link(destination: licenseManager.licenseURL) {
-                Text(L10n.acquireLicense.key, bundle: .localize)
+                Text(.acquireLicense)
             }
             .buttonStyle(.bordered)
         case .active, .inactive, .expired:
@@ -196,7 +188,7 @@ struct VCamSettingLicenseView: View {
                 licenseManager.signIn()
             } label: {
                 Label {
-                    Text(L10n.reauthenticate.key, bundle: .localize)
+                    Text(.reauthenticate)
                 } icon: {
                     Image(systemName: "arrow.clockwise")
                 }
@@ -211,7 +203,7 @@ struct VCamSettingLicenseView: View {
             errorMessage = nil
         } catch {
             Logger.error(error)
-            errorMessage = Text(L10n.signOutFailed.key, bundle: .localize)
+            errorMessage = Text(.signOutFailed)
         }
     }
 }
@@ -223,7 +215,6 @@ struct VCamSettingLicenseView: View {
         .environment(\.licenseManager, LicenseManagerStub(
             licenseState: .notLoggedIn
         ))
-        .environment(\.locale, Locale(identifier: "ja_JP"))
 }
 
 #Preview("Logged In / Active") {
@@ -259,7 +250,7 @@ struct VCamSettingLicenseView: View {
 
 #Preview("Error") {
     VCamSettingLicenseView(
-        errorMessage: Text("Network Error")
+        errorMessage: Text(verbatim: "Network Error")
     )
     .environment(\.licenseManager, LicenseManagerStub(
         licenseState: .inactive

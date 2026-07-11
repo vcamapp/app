@@ -1,12 +1,4 @@
-//
-//  VCamSettingVirtualCameraView.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2023/08/16.
-//
-
 import SwiftUI
-import VCamLocalization
 import VCamCamera
 
 public struct VCamSettingVirtualCameraView: View {
@@ -24,12 +16,12 @@ public struct VCamSettingVirtualCameraView: View {
                 VStack {
                     HStack {
                         Image(systemName: "info.circle")
-                        Text(isCameraExtensionStarting ? L10n.cameraExtensionWorking.key : L10n.cameraExtensionNotWorking.key, bundle: .localize)
+                        Text(isCameraExtensionStarting ? .cameraExtensionWorking : .cameraExtensionNotWorking)
                     }
                     .frame(maxWidth: .infinity)
 
                     if !isCameraExtensionStarting, isCameraExtensionInstalled {
-                        Text(L10n.pleaseRestartMacToFix.key, bundle: .localize)
+                        Text(.pleaseRestartMacToFix)
                             .font(.footnote)
                             .opacity(0.5)
                     }
@@ -40,7 +32,7 @@ public struct VCamSettingVirtualCameraView: View {
                 HStack {
                     Image(systemName: "exclamationmark.triangle")
                     Link(destination: .cameraExtension) {
-                        Text(L10n.cameraExtensionAwaitingUserApproval.key, bundle: .localize)
+                        Text(.cameraExtensionAwaitingUserApproval)
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -57,11 +49,11 @@ public struct VCamSettingVirtualCameraView: View {
                                         try await uninstallExtension(isAlertShown: false)
                                         try await installExtension()
                                     } catch {
-                                        await VCamAlert.showModal(title: L10n.failure.text, message: error.localizedDescription, canCancel: false)
+                                        await VCamAlert.showModal(title: String(localized: .failure), message: error.localizedDescription, canCancel: false)
                                     }
                                 }
                             } label: {
-                                Text(L10n.reinstall.key, bundle: .localize)
+                                Text(.reinstall)
                             }
                             
                             Button {
@@ -70,11 +62,11 @@ public struct VCamSettingVirtualCameraView: View {
                                     do {
                                         try await uninstallExtension(isAlertShown: true)
                                     } catch {
-                                        await VCamAlert.showModal(title: L10n.failure.text, message: error.localizedDescription, canCancel: false)
+                                        await VCamAlert.showModal(title: String(localized: .failure), message: error.localizedDescription, canCancel: false)
                                     }
                                 }
                             } label: {
-                                Text(L10n.uninstall.key, bundle: .localize)
+                                Text(.uninstall)
                             }
                         } else {
                             Button {
@@ -83,25 +75,25 @@ public struct VCamSettingVirtualCameraView: View {
                                     do {
                                         try await installExtension()
                                     } catch {
-                                        await VCamAlert.showModal(title: L10n.failure.text, message: error.localizedDescription, canCancel: false)
+                                        await VCamAlert.showModal(title: String(localized: .failure), message: error.localizedDescription, canCancel: false)
                                     }
                                 }
                             } label: {
-                                Text(L10n.install.key, bundle: .localize)
+                                Text(.install)
                             }
                         }
                     }
                     .frame(maxWidth: .infinity)
                     
-                    Text(L10n.noteEnableNewCameraExtension.key, bundle: .localize)
+                    Text(.noteEnableNewCameraExtension)
                         .font(.footnote)
                         .opacity(0.5)
                 }
             }
 
             Section {
-                Link(destination: URL(string: L10n.docsURLForVirtualCamera.text)!) {
-                    Text(L10n.seeDocumentation.key, bundle: .localize)
+                Link(destination: URL(string: String(localized: .docsURLForVirtualCamera))!) {
+                    Text(.seeDocumentation)
                         .font(.footnote)
                 }
             }
@@ -127,7 +119,7 @@ extension VCamSettingVirtualCameraView {
         try await CameraExtension().installExtension()
         isCameraExtensionInstalled = true
         isCameraExtensionStarting = await VirtualCameraManager.shared.installAndStartCameraExtension()
-        await VCamAlert.showModal(title: L10n.success.text, message: L10n.restartAfterInstalling.text, canCancel: false)
+        await VCamAlert.showModal(title: String(localized: .success), message: String(localized: .restartAfterInstalling), canCancel: false)
     }
 
     @MainActor
@@ -136,7 +128,7 @@ extension VCamSettingVirtualCameraView {
         isCameraExtensionInstalled = false
         isCameraExtensionStarting = await VirtualCameraManager.shared.installAndStartCameraExtension()
         if isAlertShown {
-            await VCamAlert.showModal(title: L10n.success.text, message: L10n.completeUninstalling.text, canCancel: false)
+            await VCamAlert.showModal(title: String(localized: .success), message: String(localized: .completeUninstalling), canCancel: false)
         }
     }
 }

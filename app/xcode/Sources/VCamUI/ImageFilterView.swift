@@ -4,7 +4,7 @@ import VCamEntity
 @MainActor
 public func showImageFilterView(image: NSImage, configuration: ImageFilterConfiguration?, completion: @escaping (ImageFilter) -> Void) {
     showSheet(
-        title: L10n.filter.text,
+        title: String(localized: .filter),
         view: { close in
             ImageFilterView(image: image.ciImage ?? .empty(), configuration: configuration, close: close, completion: completion)
         }
@@ -22,7 +22,7 @@ public struct ImageFilterView: View {
     @State private var preview = NSImage()
     
     public var body: some View {
-        ModalSheet(doneTitle: L10n.apply.text) {
+        ModalSheet(doneTitle: String(localized: .apply)) {
             dismiss()
         } done: {
             dismiss()
@@ -128,13 +128,13 @@ struct ImageFilterParameterView: View {
         switch filter?.type {
         case let .chromaKey(chromaKey):
             Form {
-                ColorEditField(L10n.color.key, value: .init(value: color) { color in
+                ColorEditField(.color, value: .init(value: color) { color in
                     var chromaKey = chromaKey
                     chromaKey.color = VCamColor(color: color)
                     filter?.type = .chromaKey(chromaKey)
                     self.color = color
                 })
-                ValueEditField(L10n.threshold.key, value: .init(value: CGFloat(chromaKey.threshold), set: { threshold in
+                ValueEditField(.threshold, value: .init(value: CGFloat(chromaKey.threshold), set: { threshold in
                     var chromaKey = chromaKey
                     chromaKey.threshold = Float(threshold)
                     filter?.type = .chromaKey(chromaKey)
@@ -146,7 +146,7 @@ struct ImageFilterParameterView: View {
             }
         case let .blur(blur):
             Form {
-                ValueEditField(L10n.intensity.key, value: .init(value: CGFloat(blur.radius), set: { radius in
+                ValueEditField(.intensity, value: .init(value: CGFloat(blur.radius), set: { radius in
                     var blur = blur
                     blur.radius = Float(radius)
                     filter?.type = .blur(blur)

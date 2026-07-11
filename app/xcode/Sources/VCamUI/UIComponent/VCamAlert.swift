@@ -1,10 +1,3 @@
-//
-//  VCamAlert.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2023/02/22.
-//
-
 import SwiftUI
 
 public struct VCamAlert: View {
@@ -58,7 +51,7 @@ public struct VCamAlert: View {
 
                 if canCancel {
                     Button(action: cancel) {
-                        Text(L10n.cancel.text)
+                        Text(.cancel)
                             .padding(.vertical, 10)
                             .frame(maxWidth: .infinity)
                             .contentShape(Rectangle())

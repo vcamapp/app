@@ -1,13 +1,5 @@
-//
-//  VCamSettingRenderingView.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2023/02/14.
-//
-
 import SwiftUI
 import VCamEntity
-import VCamLocalization
 import VCamData
 
 public struct VCamSettingRenderingView: View {
@@ -25,18 +17,19 @@ public struct VCamSettingRenderingView: View {
                         .tag($0)
                 }
             } label: {
-                Text(L10n.screenResolution.key, bundle: .localize)
+                Text(.screenResolution)
             }
             Picker(selection: $state.qualityLevel) {
                 ForEach(QualityLevel.allCases) {
-                    Text($0.localizedName, bundle: .localize)
+                    Text($0.localizedName)
                         .tag($0.rawValue)
                 }
             } label: {
-                Text(L10n.renderingQuality.key, bundle: .localize)
+                Text(.renderingQuality)
             }
+            .accessibilityIdentifier("settings.rendering.quality")
 
-            ValueEditField(L10n.fpsScreen.key, value: $state.fps, type: .slider(10...60))
+            ValueEditField(.fpsScreen, value: $state.fps, type: .slider(10...60))
                 .disabled(uniState.useVSync)
         }
         .formStyle(.grouped)
@@ -49,7 +42,7 @@ private extension ScreenResolution {
     }
 
     private var videoType: String {
-        isLandscape ? L10n.asHorizontalVideo.text : L10n.asVerticalVideo.text
+        isLandscape ? String(localized: .asHorizontalVideo) : String(localized: .asVerticalVideo)
     }
 
     private var shortDescription: String {

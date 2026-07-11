@@ -1,10 +1,3 @@
-//
-//  VCamActionEditorDurationField.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2023/04/02.
-//
-
 import SwiftUI
 
 struct VCamActionEditorDurationField: View {
@@ -12,10 +5,10 @@ struct VCamActionEditorDurationField: View {
 
     var body: some View {
         HStack(spacing: 4) {
-            TextField("", value: $value, format: .number)
+            TextField(value: $value, format: .number) { EmptyView() }
                 .textFieldStyle(.roundedBorder)
                 .multilineTextAlignment(.center)
-            Text(L10n.seconds.key, bundle: .localize)
+            Text(.seconds)
         }
         .frame(width: 80)
     }

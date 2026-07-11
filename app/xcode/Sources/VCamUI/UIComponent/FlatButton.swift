@@ -1,10 +1,3 @@
-//
-//  FlatButton.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2023/04/01.
-//
-
 import SwiftUI
 
 public struct FlatButton<LabelItem: View>: View {
@@ -88,13 +81,13 @@ struct FlatButton_Previews: PreviewProvider {
     static var previews: some View {
         FlatButton {
         } label: {
-            Text("Hello")
+            Text(verbatim: "Hello")
         }
         .padding()
 
         FlatButton {
         } label: {
-            Text("Hello")
+            Text(verbatim: "Hello")
         }
         .flatButtonStyle(.filled())
         .padding()

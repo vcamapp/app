@@ -1,5 +1,4 @@
 import XCTest
-import VCamLocalization
 import VCamUI
 
 final class LaunchScreenshotTests: XCTestCase {
@@ -10,61 +9,59 @@ final class LaunchScreenshotTests: XCTestCase {
 
     override func setUpWithError() throws {
         continueAfterFailure = false
-        LocalizationEnvironment.currentLocaleIdentifier = { "en_US" }
     }
 
     func testLaunch() throws {
         let app = XCUIApplication.make()
+        app.launchArguments += ["-AppleLanguages", "(en)", "-AppleLocale", "en_US"]
         app.launch()
 
         XCTContext.runActivity(named: "Launch Screen") { activity in
             add(.keepAlways(screenshot: app.screenshot(), activity: activity))
         }
 
-        XCTContext.runActivity(named: "\(L10n.screenEffect.text) Screen") { activity in
-            app.buttons.contains(label: L10n.screenEffect.text).click()
-            _ = app.staticTexts[L10n.startRecording.text].waitForExistence(timeout: 5)
+        XCTContext.runActivity(named: "Screen Effect Screen") { activity in
+            app.buttons["menu.screenEffect"].click()
+            _ = app.buttons["recording.startButton"].waitForExistence(timeout: 5)
             add(.keepAlways(screenshot: app.screenshot(), activity: activity))
         }
 
-        XCTContext.runActivity(named: "\(L10n.recording.text) Screen") { activity in
-            app.buttons.contains(label: L10n.recording.text).click()
-            _ = app.staticTexts[L10n.whiteBalance.text].waitForExistence(timeout: 5)
+        XCTContext.runActivity(named: "Recording Screen") { activity in
+            app.buttons["menu.recording"].click()
+            _ = app.descendants(matching: .any)["display.whiteBalance"].waitForExistence(timeout: 5)
             add(.keepAlways(screenshot: app.screenshot(), activity: activity))
         }
 
-        XCTContext.runActivity(named: "\(L10n.settings.text) Screen") { activity in
+        XCTContext.runActivity(named: "Settings Screen") { activity in
             app.buttons["btn_settings"].click()
-            _ = app.staticTexts[L10n.settings.text].waitForExistence(timeout: 5)
+            _ = app.buttons["settings.tab.general"].waitForExistence(timeout: 5)
             add(.keepAlways(screenshot: app.screenshot(), activity: activity))
             XCTAssertTrue(app.cells.firstMatch.isSelected)
 
-            XCTContext.runActivity(named: "\(activity.name) - \(L10n.rendering.text)") { activity in
-                app.cells.staticTexts[L10n.rendering.text].click()
-                _ = app.staticTexts[L10n.renderingQuality.text].waitForExistence(timeout: 5)
+            XCTContext.runActivity(named: "\(activity.name) - Rendering") { activity in
+                app.cells["settings.tab.rendering"].click()
+                _ = app.descendants(matching: .any)["settings.rendering.quality"].waitForExistence(timeout: 5)
                 add(.keepAlways(screenshot: app.screenshot(), activity: activity))
             }
 
-            XCTContext.runActivity(named: "\(activity.name) - \(L10n.tracking.text)") { activity in
-                app.cells.staticTexts[L10n.tracking.text].click()
-                _ = app.staticTexts[L10n.fpsCamera.text].waitForExistence(timeout: 5)
+            XCTContext.runActivity(named: "\(activity.name) - Tracking") { activity in
+                app.cells["settings.tab.tracking"].click()
                 add(.keepAlways(screenshot: app.screenshot(), activity: activity))
             }
 
-            XCTContext.runActivity(named: "\(activity.name) - \(L10n.virtualCamera.text)") { activity in
-                app.cells.staticTexts[L10n.virtualCamera.text].click()
-                _ = app.staticTexts[L10n.noteEnableNewCameraExtension.text].waitForExistence(timeout: 5)
+            XCTContext.runActivity(named: "\(activity.name) - Virtual Camera") { activity in
+                app.cells["settings.tab.virtualCamera"].click()
                 add(.keepAlways(screenshot: app.screenshot(), activity: activity))
             }
 
-            XCTContext.runActivity(named: "\(activity.name) - \(L10n.integration.text)") { activity in
-                app.cells.staticTexts[L10n.integration.text].click()
+            XCTContext.runActivity(named: "\(activity.name) - Integration") { activity in
+                app.cells["settings.tab.integration"].click()
                 _ = app.staticTexts["VCamMocap"].waitForExistence(timeout: 5)
                 add(.keepAlways(screenshot: app.screenshot(), activity: activity))
             }
 
-            XCTContext.runActivity(named: "\(activity.name) - \(L10n.experiment.text)") { activity in
-                app.cells.staticTexts[L10n.experiment.text].click()
+            XCTContext.runActivity(named: "\(activity.name) - Experiment") { activity in
+                app.cells["settings.tab.experiment"].click()
                 add(.keepAlways(screenshot: app.screenshot(), activity: activity))
             }
         }

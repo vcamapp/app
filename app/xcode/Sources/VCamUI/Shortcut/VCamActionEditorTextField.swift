@@ -1,17 +1,10 @@
-//
-//  VCamActionEditorTextField.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2023/04/16.
-//
-
 import SwiftUI
 
 struct VCamActionEditorTextField: View {
     @Binding var value: String
 
     var body: some View {
-        TextField("", text: $value)
+        TextField(text: $value) { EmptyView() }
             .textFieldStyle(.roundedBorder)
     }
 }

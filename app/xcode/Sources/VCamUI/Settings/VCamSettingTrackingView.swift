@@ -1,10 +1,3 @@
-//
-//  VCamSettingTrackingView.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2023/02/14.
-//
-
 import SwiftUI
 import AVFoundation
 import VCamEntity
@@ -40,14 +33,14 @@ public struct VCamSettingTrackingView: View {
             }
 
             Toggle(isOn: $useVowelEstimation) {
-                Text(L10n.useVowelEstimation.key, bundle: .localize)
+                Text(.useVowelEstimation)
             }
 
             Section {
                 if uniState.currentLipSync == .mic {
-                    ValueEditField(L10n.lipSyncSensitivity.key, value: $state.lipSyncMicIntensity, type: .slider(0.1...3))
+                    ValueEditField(.lipSyncSensitivity, value: $state.lipSyncMicIntensity, type: .slider(0.1...3))
                 }
-                ValueEditField(L10n.fpsCamera.key, value: $cameraFps.map(), type: .slider(1...60) {
+                ValueEditField(.fpsCamera, value: $cameraFps.map(), type: .slider(1...60) {
                     guard !$0 else { return }
                     Tracking.shared.avatarCameraManager.setFPS(cameraFps)
                 })
@@ -55,8 +48,8 @@ public struct VCamSettingTrackingView: View {
 
 #if FEATURE_3
             Section {
-                ValueEditField(L10n.shoulderRotationWeight.key, value: $state.shoulderRotationWeight, type: .slider(0.0...1))
-                ValueEditField(L10n.swivelOffset.key, value: $state.swivelOffset, type: .slider(0.0...30))
+                ValueEditField(.shoulderRotationWeight, value: $state.shoulderRotationWeight, type: .slider(0.0...1))
+                ValueEditField(.swivelOffset, value: $state.swivelOffset, type: .slider(0.0...30))
             }
 #if ENABLE_MOCOPI
             .disabled(integrationMocopi)
@@ -64,25 +57,25 @@ public struct VCamSettingTrackingView: View {
 #endif
 #endif
             Section {
-                ValueEditField(L10n.trackingSmoothing.key, value: $state.trackingSmoothing, type: .slider(0...0.9)) {
+                ValueEditField(.trackingSmoothing, value: $state.trackingSmoothing, type: .slider(0...0.9)) {
                     Text($0, format: .percent.precision(.fractionLength(2)))
                 }
             }
             Section {
                 Toggle(isOn: $useEyeTracking) {
-                    Text(L10n.trackEyes.key, bundle: .localize)
+                    Text(.trackEyes)
                 }
                 Group {
-                    ValueEditField(L10n.eyesHorizontalSensitivity.key, value: $eyeTrackingIntensityX.map(), type: .slider(0...10))
-                    ValueEditField(L10n.eyesVerticalSensitivity.key, value: $eyeTrackingIntensityY.map(), type: .slider(0...10))
+                    ValueEditField(.eyesHorizontalSensitivity, value: $eyeTrackingIntensityX.map(), type: .slider(0...10))
+                    ValueEditField(.eyesVerticalSensitivity, value: $eyeTrackingIntensityY.map(), type: .slider(0...10))
                 }
                 .disabled(!useEyeTracking)
                 .opacity(useEyeTracking ? 1.0 : 0.5)
             }
 #if FEATURE_3
             Section {
-                ValueEditField(L10n.easeOfOpeningFingers.key, value: $fingerTrackingOpenIntensity.map(), type: .slider(0.1...3))
-                ValueEditField(L10n.easeOfCloseFingers.key, value: $fingerTrackingCloseIntensity.map(), type: .slider(0.1...3))
+                ValueEditField(.easeOfOpeningFingers, value: $fingerTrackingOpenIntensity.map(), type: .slider(0.1...3))
+                ValueEditField(.easeOfCloseFingers, value: $fingerTrackingCloseIntensity.map(), type: .slider(0.1...3))
             }
 #endif
         }

@@ -1,10 +1,3 @@
-//
-//  VCamMainToolbarBlendShapePicker.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2023/02/12.
-//
-
 import SwiftUI
 import VCamBridge
 import VCamEntity
@@ -24,7 +17,7 @@ public struct VCamMainToolbarExpressionPicker: View {
                             isSelected: uniState.currentExpressionIndex == index) {
                                 UniBridge.applyExpression(name: expression.name)
                             } label: {
-                                Text(.init(expression.name), bundle: .localize)
+                                Text(expression.name)
                             }
                     }
                 }
@@ -42,7 +35,7 @@ public struct VCamMainToolbarExpressionPicker: View {
 
 extension VCamMainToolbarExpressionPicker: MacWindow {
     public var windowTitle: String {
-        L10n.facialExpression.text
+        String(localized: .facialExpression)
     }
 
     public func configureWindow(_ window: NSWindow) -> NSWindow {

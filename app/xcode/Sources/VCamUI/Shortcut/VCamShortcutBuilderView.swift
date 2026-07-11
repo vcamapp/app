@@ -1,6 +1,5 @@
 import SwiftUI
 import VCamEntity
-import VCamLocalization
 import VCamBridge
 import VCamData
 
@@ -18,7 +17,7 @@ public struct VCamShortcutBuilderView: View {
             List {
                 HStack(spacing: 0) {
                     TextField(text: $shortcut.title) {
-                        Text(L10n.title.key, bundle: .localize)
+                        Text(.title)
                     }
                     .textFieldStyle(.roundedBorder)
 
@@ -52,7 +51,7 @@ public struct VCamShortcutBuilderView: View {
             .frame(minWidth: 280)
 
             VStack(spacing: 0) {
-                Text(L10n.action.key, bundle: .localize)
+                Text(.action)
                     .bold()
                     .padding()
                 List(allActions, id: \.id) { action in
@@ -144,15 +143,15 @@ struct VCamShortcutBuilderActionItemEditView: View {
         case let .message(configuration):
             VCamActionEditorTextField(value: .init(configuration, keyPath: \.message, to: $configuration))
         case let .motion(configuration):
-            VCamActionEditorPicker(item: .init(configuration, keyPath: \.motion, to: $configuration), items: VCamAvatarMotion.allCases)
+            VCamActionEditorPicker(item: .init(configuration, keyPath: \.motion, to: $configuration), items: VCamAvatarMotion.allCases, displayName: \.description)
         case let .blendShape(configuration):
-            VCamActionEditorPicker(item: .init(configuration, keyPath: \.blendShape, to: $configuration), items: UniState.shared.expressions.map(\.name))
+            VCamActionEditorPicker(item: .init(configuration, keyPath: \.blendShape, to: $configuration), items: UniState.shared.expressions.map(\.name), displayName: { $0 })
         case let .wait(configuration):
             VCamActionEditorDurationField(value: .init(configuration, keyPath: \.duration, to: $configuration))
         case .resetCamera:
             EmptyView()
         case let .loadScene(configuration):
-            VCamActionEditorPicker(item: .init(configuration, keyPath: \.sceneId, to: $configuration), items: SceneManager.shared.scenes, mapValue: \.id)
+            VCamActionEditorPicker(item: .init(configuration, keyPath: \.sceneId, to: $configuration), items: SceneManager.shared.scenes, mapValue: \.id, displayName: \.localizedDisplayName)
         case let .appleScript(configuration):
             VCamActionEditorCodeEditor(id: shortcut.id, actionId: configuration.id, name: VCamAppleScriptAction.scriptName)
         }
@@ -182,7 +181,7 @@ private final class KeyPathBox<Root, Value>: @unchecked Sendable {
 
 extension VCamShortcutBuilderView: MacWindow {
     public var windowTitle: String {
-        L10n.createShortcut.text
+        String(localized: .createShortcut)
     }
 
     public func configureWindow(_ window: NSWindow) -> NSWindow {

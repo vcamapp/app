@@ -8,7 +8,7 @@ import VCamLogger
 public func showCaptureDeviceSelectView(didSelect: @escaping (AVCaptureDevice, CGRect) -> Void) {
     guard Camera.hasCamera else { return } // Calling the following will crash if there's no camera.
     showSheet(
-        title: L10n.capturePreference.text,
+        title: String(localized: .capturePreference),
         view: { close in
             CaptureDeviceSelectView(didSelect: didSelect, close: close)
         }
@@ -27,7 +27,7 @@ private struct CaptureDeviceSelectView: View {
     @State private var cropPreviewWidth: CGFloat = 1
 
     var body: some View {
-        ModalSheet(doneTitle: L10n.addVideoCapture.text) {
+        ModalSheet(doneTitle: String(localized: .addVideoCapture)) {
             dismiss()
         } done: {
             dismiss()
@@ -39,12 +39,12 @@ private struct CaptureDeviceSelectView: View {
         } content: {
             VStack {
                 Form {
-                    Picker(L10n.videoCaptureDevice.text, selection: $captureDevice) {
+                    Picker(.videoCaptureDevice, selection: $captureDevice) {
                         ForEach(Camera.cameras(type: nil)) { device in
                             Text(device.localizedName).tag(device)
                         }
                     }
-                    Toggle(L10n.previewCapture.text, isOn: $previewable)
+                    Toggle(.previewCapture, isOn: $previewable)
                 }
                 if previewable, let preview = preview {
                     Image(nsImage: preview)

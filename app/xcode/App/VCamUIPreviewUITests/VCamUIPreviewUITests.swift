@@ -1,11 +1,10 @@
 import XCTest
-import VCamLocalization
+import VCamUI
 
 final class VCamUIPreviewUITests: XCTestCase {
 
     override func setUpWithError() throws {
         continueAfterFailure = false
-        LocalizationEnvironment.currentLocaleIdentifier = { "en_US" }
     }
 
     override func tearDownWithError() throws {
@@ -13,10 +12,11 @@ final class VCamUIPreviewUITests: XCTestCase {
 
     func testLaunchApp() throws {
         let app = XCUIApplication.make()
+        app.launchArguments += ["-AppleLanguages", "(en)", "-AppleLocale", "en_US"]
         app.launch()
 
         XCTContext.runActivity(named: "Check VCamUI") { _ in
-            XCTAssertTrue(app.buttons.contains(label: L10n.main.text).exists)
+            XCTAssertTrue(app.buttons["menu.main"].exists)
         }
     }
 }

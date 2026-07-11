@@ -2,7 +2,6 @@ import SwiftUI
 import AppKit
 import VCamBridge
 import VCamData
-import VCamLocalization
 import VCamTracking
 
 public struct VCamSettingTrackingMappingEditorView: View {
@@ -47,8 +46,8 @@ public struct VCamSettingTrackingMappingEditorView: View {
 
             if supportsIPhoneMode {
                 ToolbarItem(placement: .automatic) {
-                    Picker(L10n.trackingMode.text, selection: $store.selectedMode) {
-                        Text(L10n.normal.key, bundle: .localize).tag(TrackingMode.blendShape)
+                    Picker(.trackingMode, selection: $store.selectedMode) {
+                        Text(.normal).tag(TrackingMode.blendShape)
                         Text(verbatim: "iPhone").tag(TrackingMode.perfectSync)
                     }
                     .pickerStyle(.segmented)
@@ -65,7 +64,7 @@ public struct VCamSettingTrackingMappingEditorView: View {
                         store.resetAllMappings()
                     } label: {
                         Image(systemName: "arrow.uturn.backward")
-                        Text(L10n.resetAllToDefault.key, bundle: .localize)
+                        Text(.resetAllToDefault)
                     }
                     .foregroundStyle(.red)
                 } label: {
@@ -90,7 +89,7 @@ public struct VCamSettingTrackingMappingEditorView: View {
             HStack {
                 Image(systemName: "info.circle")
                     .foregroundStyle(.secondary)
-                Text(L10n.trackingMappingSaveComingSoon.text)
+                Text(.trackingMappingSaveComingSoon)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -103,7 +102,7 @@ public struct VCamSettingTrackingMappingEditorView: View {
 
 extension VCamSettingTrackingMappingEditorView: MacWindow {
     public var windowTitle: String {
-        L10n.trackingAdjustment.text
+        String(localized: .trackingAdjustment)
     }
 
     public func configureWindow(_ window: NSWindow) -> NSWindow {

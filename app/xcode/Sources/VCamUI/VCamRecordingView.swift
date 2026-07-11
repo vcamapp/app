@@ -27,8 +27,8 @@ public struct VCamRecordingView: View {
 
             GroupBox {
                 HStack(spacing: 4) {
-                    Text(L10n.destinationToSave.key, bundle: .localize)
-                    TextField("", text: .constant(screenshotDestinationString))
+                    Text(.destinationToSave)
+                    TextField(text: .constant(screenshotDestinationString)) { EmptyView() }
                         .textFieldStyle(.roundedBorder)
                         .disabled(true)
                     Button {
@@ -57,7 +57,7 @@ public struct VCamRecordingView: View {
                 } label: {
                     HStack(spacing: 4) {
                         Image(systemName: "camera.circle")
-                        restWaitTime < 1 ? Text(L10n.takePhoto.key, bundle: .localize) : Text(Int(restWaitTime).description)
+                        restWaitTime < 1 ? Text(.takePhoto) : Text(Int(restWaitTime).description)
                     }
                 }
                 .controlSize(.large)
@@ -68,9 +68,9 @@ public struct VCamRecordingView: View {
                                 in: 0...30) {
                             let seconds = Int(screenshotWaitTime)
                             HStack {
-                                Text(L10n.timeToTakePhoto.key, bundle: .localize)
-                                Text("\(seconds)")
-                                Text(L10n.seconds.key, bundle: .localize)
+                                Text(.timeToTakePhoto)
+                                Text(verbatim: "\(seconds)")
+                                Text(.seconds)
                             }
                         }
                         .padding(.leading, 8)
@@ -95,27 +95,28 @@ public struct VCamRecordingView: View {
                     } label: {
                         HStack(spacing: 4) {
                             Image(systemName: "video")
-                            Text(recorder.isRecording ? L10n.stopRecording.key : L10n.startRecording.key, bundle: .localize)
+                            Text(recorder.isRecording ? .stopRecording : .startRecording)
                         }
                     }
                     .controlSize(.large)
+                    .accessibilityIdentifier("recording.startButton")
                     Spacer()
                     Picker(selection: $recordingVideoFormat) {
                         ForEach(VideoFormat.allCases) { format in
-                            Text(format.name).tag(format.rawValue)
+                            Text(verbatim: format.localizedName).tag(format.rawValue)
                         }
                     } label: {
-                        Text(L10n.videoFormat.key, bundle: .localize)
+                        Text(.videoFormat)
                     }
                     .disabled(recorder.isRecording)
                 }
                 GroupBox {
                     HStack(spacing: 16) {
                         Toggle(isOn: $recordSystemSound) {
-                            Text(L10n.recordDesktopAudio.key, bundle: .localize)
+                            Text(.recordDesktopAudio)
                         }
                         Divider()
-                        ValueEditField.emptyValueLabel(L10n.micSyncOffset.key, value: $recordMicSyncOffset.map(), type: .stepper)
+                        ValueEditField.emptyValueLabel(.micSyncOffset, value: $recordMicSyncOffset.map(), type: .stepper)
                             .disabled(!recordSystemSound)
                             .opacity(recordSystemSound ? 1 : 0.5)
                     }

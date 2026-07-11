@@ -1,30 +1,22 @@
-//
-//  QualityLevel+.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/08/13.
-//
-
 import Foundation
 import VCamEntity
-import VCamLocalization
 import SwiftUI
 
 public extension QualityLevel {
-    var localizedName: LocalizedStringKey {
+    var localizedName: LocalizedStringResource {
         switch self {
         case .fastest:
-            return L10n.qualityFastest.key
+            return .qualityFastest
         case .fast:
-            return L10n.qualityFast.key
+            return .qualityFast
         case .simple:
-            return L10n.qualitySimple.key
+            return .qualitySimple
         case .good:
-            return L10n.qualityGood.key
+            return .qualityGood
         case .beautiful:
-            return L10n.qualityBeautiful.key
+            return .qualityBeautiful
         case .fantastic:
-            return L10n.qualityFantastic.key
+            return .qualityFantastic
         }
     }
 }

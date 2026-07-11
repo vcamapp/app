@@ -13,7 +13,6 @@ let package = Package(
 
         .library(name: "VCamDefaults", targets: ["VCamDefaults"]),
         .library(name: "VCamAppExtension", targets: ["VCamAppExtension"]),
-        .library(name: "VCamLocalization", targets: ["VCamLocalization"]),
 
         .library(name: "VCamStub", targets: ["VCamStub"]),
     ],
@@ -22,16 +21,15 @@ let package = Package(
     ],
     targets: [
         .target(name: "VCamUI", dependencies: [
-            "VCamUIFoundation", "VCamTracking", "VCamCamera", "VCamData", "VCamLocalization", "VCamBridge", "VCamWorkaround",
+            "VCamUIFoundation", "VCamTracking", "VCamCamera", "VCamData", "VCamBridge", "VCamWorkaround",
         ], resources: [
             .process("Resources"),
         ]),
         .target(name: "VCamUIFoundation"),
         .target(name: "VCamData", dependencies: ["VCamBridge", "VCamEntity"]),
-        .target(name: "VCamEntity", dependencies: ["VCamDefaults", "VCamLocalization"]),
-        .target(name: "VCamLocalization", resources: [.process("VCamResources")]),
+        .target(name: "VCamEntity", dependencies: ["VCamDefaults"]),
         .target(name: "VCamMedia", dependencies: ["VCamEntity", "VCamAppExtension", "VCamLogger"]),
-        .target(name: "VCamBridge", dependencies: ["VCamEntity", "VCamUIFoundation", "VCamLocalization"]),
+        .target(name: "VCamBridge", dependencies: ["VCamEntity", "VCamUIFoundation"]),
         .target(name: "VCamTracking", dependencies: ["VCamCamera"]),
         .target(name: "VCamCamera", dependencies: ["VCamMedia", "VCamData", "VCamLogger"]),
 

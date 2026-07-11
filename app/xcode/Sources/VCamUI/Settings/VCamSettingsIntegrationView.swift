@@ -1,14 +1,6 @@
-//
-//  VCamSettingsIntegrationView.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2023/01/05.
-//
-
 import SwiftUI
 import VCamTracking
 import VCamBridge
-import VCamLocalization
 import VCamData
 import Network
 
@@ -21,11 +13,11 @@ public struct VCamSettingsIntegrationView: View {
 
     @Bindable private var facialMocapReceiver = Tracking.shared.iFacialMocapReceiver
 
-    private var facialMocapConnectTitle: LocalizedStringKey {
+    private var facialMocapConnectTitle: LocalizedStringResource {
         switch facialMocapReceiver.connectionStatus {
-        case .disconnected: return L10n.connect.key
-        case .connecting: return L10n.connecting.key
-        case .connected: return L10n.disconnect.key
+        case .disconnected: return .connect
+        case .connecting: return .connecting
+        case .connected: return .disconnect
         }
     }
 
@@ -34,7 +26,7 @@ public struct VCamSettingsIntegrationView: View {
             if let ipAddress = NWInterface.InterfaceType.wiredEthernet.ipv4 ?? NWInterface.InterfaceType.wifi.ipv4 {
                 FeatureView(title: "Info.") {
                     HStack {
-                        Text("IP:")
+                        Text(verbatim: "IP:")
                         Text(ipAddress)
                     }
                 }
@@ -44,12 +36,12 @@ public struct VCamSettingsIntegrationView: View {
                     VCamMotionReceiverStatusView()
 
                     Toggle(isOn: $integrationVCamMocap) {
-                        Text(L10n.enable.key, bundle: .localize)
+                        Text(.enable)
                     }
                     .labelsHidden()
                     .toggleStyle(.switch)
                 } label: {
-                    Text(L10n.enable.key, bundle: .localize)
+                    Text(.enable)
                 }
                 .onChange(of: integrationVCamMocap) { _, newValue in
                     Task {
@@ -80,17 +72,17 @@ public struct VCamSettingsIntegrationView: View {
                             }
                         }
                     } label: {
-                        Text(facialMocapConnectTitle, bundle: .localize)
+                        Text(facialMocapConnectTitle)
                     }
                 } label: {
                     Text(verbatim: "IP")
                 }
             }
             Section {
-                ValueEditField(L10n.mocapNetworkInterpolation.key, value: $mocapNetworkInterpolation.map(), type: .slider(0...1.0)) {
+                ValueEditField(.mocapNetworkInterpolation, value: $mocapNetworkInterpolation.map(), type: .slider(0...1.0)) {
                     Text($0, format: .percent.precision(.fractionLength(2)))
                 }
-                Text(L10n.mocapNetworkInterpolationHelp.key, bundle: .localize)
+                Text(.mocapNetworkInterpolationHelp)
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }
@@ -108,16 +100,16 @@ public struct VCamSettingsIntegrationView: View {
 private struct ReceiverStatusView: View {
     let connectionStatus: ConnectionStatus
 
-    private var statusText: LocalizedStringKey {
+    private var statusText: LocalizedStringResource {
         switch connectionStatus {
-        case .disconnected: return L10n.disconnected.key
-        case .connecting: return L10n.connecting.key
-        case .connected: return L10n.connected.key
+        case .disconnected: return .disconnected
+        case .connecting: return .connecting
+        case .connected: return .connected
         }
     }
 
     var body: some View {
-        Text(statusText, bundle: .localize)
+        Text(statusText)
             .foregroundStyle(connectionStatus == .connected ? Color.accentColor : .secondary)
             .font(.callout)
             .fontWeight(.medium)
@@ -148,10 +140,10 @@ private struct MocopiSettingView: View {
     var body: some View {
         VCamSettingsIntegrationView.FeatureView(title: "mocopi") {
             Toggle(isOn: $integrationMocopi) {
-                Text(L10n.enable.key, bundle: .localize)
+                Text(.enable)
             }
         }
-        .help(L10n.helpMocopIP.text)
+        .help(.helpMocopIP)
         .onChange(of: integrationMocopi) { _, newValue in
             UniBridge.shared.useFullTracking(newValue)
             Tracking.shared.setHandTrackingMethod(.mocopi)

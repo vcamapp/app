@@ -15,8 +15,6 @@ public struct RootView: View {
     let uniState: UniState
 
     @State private var isLaunchScreenPresented = true
-    @AppStorage(key: .locale) var locale
-
     public var body: some View {
         RootViewContent(unityView: unityView)
             .background(.regularMaterial)
@@ -29,7 +27,6 @@ public struct RootView: View {
                     }
                 }
             }
-            .environment(\.locale, locale.isEmpty ? .current : Locale(identifier: locale))
             .rootView(state: state, uniState: uniState)
     }
 }
@@ -96,7 +93,7 @@ private struct UnityView: View {
 
     var body: some View {
         UnityContainerView(unityView: unityView)
-        //                    .help(L10n.helpMouseHover.text)
+        //                    .help(String(localized: .helpMouseHover))
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .aspectRatio(1280 / 720, contentMode: .fit)
     }

@@ -1,10 +1,3 @@
-//
-//  VCamShortcutGridView.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2023/09/21.
-//
-
 import SwiftUI
 import VCamEntity
 import VCamLogger
@@ -52,7 +45,7 @@ public struct VCamShortcutGridView: View {
                     shortcut.icon
                     Group {
                         if shortcut.title.isEmpty {
-                            Text(L10n.notitle.key, bundle: .localize)
+                            Text(.notitle)
                         } else {
                             Text(shortcut.title)
                         }
@@ -73,14 +66,14 @@ public struct VCamShortcutGridView: View {
                     editShortcut($shortcut)
                 } label: {
                     Image(systemName: "pencil")
-                    Text(L10n.edit.key, bundle: .localize)
+                    Text(.edit)
                 }
                 Divider()
                 Button {
                     VCamShortcutManager.shared.remove(shortcut)
                 } label: {
                     Image(systemName: "trash")
-                    Text(L10n.delete.key, bundle: .localize)
+                    Text(.delete)
                 }
             }
             .onDragMove(item: shortcut, items: $shortcutManager.shortcuts, dragging: $dragging, onMove: shortcutManager.move)

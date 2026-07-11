@@ -58,11 +58,11 @@ public final class AppMenu: NSObject {
     }
 
     private func setupEditMenu(subMenu: NSMenu) {
-        Self.makeSubMenu(menu: subMenu, title: L10n.edit.text, items: [
-            NSMenuItem(title: L10n.cut.text, action: #selector(NSText.copy(_:)), keyEquivalent: "x"),
-            NSMenuItem(title: L10n.copy.text, action: #selector(NSText.copy(_:)), keyEquivalent: "c"),
-            NSMenuItem(title: L10n.paste.text, action: #selector(NSText.paste(_:)), keyEquivalent: "v"),
-            NSMenuItem(title: L10n.selectAll.text, action: #selector(NSText.selectAll(_:)), keyEquivalent: "a"),
+        Self.makeSubMenu(menu: subMenu, title: String(localized: .edit), items: [
+            NSMenuItem(title: String(localized: .cut), action: #selector(NSText.copy(_:)), keyEquivalent: "x"),
+            NSMenuItem(title: String(localized: .copy), action: #selector(NSText.copy(_:)), keyEquivalent: "c"),
+            NSMenuItem(title: String(localized: .paste), action: #selector(NSText.paste(_:)), keyEquivalent: "v"),
+            NSMenuItem(title: String(localized: .selectAll), action: #selector(NSText.selectAll(_:)), keyEquivalent: "a"),
         ])
     }
 }
@@ -70,15 +70,15 @@ public final class AppMenu: NSObject {
 // MARK: - Main
 private extension AppMenu {
     private func setupMainMenu(subMenu: NSMenu) {
-        let quitItem = makeMenuItem(title: L10n.quitVCam(Bundle.main.displayName).text, action: #selector(quit), keyEquivalent: "q")
+        let quitItem = makeMenuItem(title: String(localized: .quitVCam(Bundle.main.displayName)), action: #selector(quit), keyEquivalent: "q")
         subMenu.items.insert(quitItem, at: 0)
         subMenu.items.insert(.separator(), at: 0)
-        let updateItem = makeMenuItem(title: L10n.checkForUpdates.text, action: #selector(checkUpdates))
+        let updateItem = makeMenuItem(title: String(localized: .checkForUpdates), action: #selector(checkUpdates))
         subMenu.items.insert(updateItem, at: 0)
         subMenu.items.insert(.separator(), at: 0)
-        let preferenceItem = makeMenuItem(title: L10n.settings.text, action: #selector(openPreferences), keyEquivalent: ",")
+        let preferenceItem = makeMenuItem(title: String(localized: .settings), action: #selector(openPreferences), keyEquivalent: ",")
         subMenu.items.insert(preferenceItem, at: 0)
-        let aboutItem = makeMenuItem(title: L10n.aboutApp(Bundle.main.displayName).text, action: #selector(about))
+        let aboutItem = makeMenuItem(title: String(localized: .aboutApp(Bundle.main.displayName)), action: #selector(about))
         subMenu.items.insert(aboutItem, at: 0)
     }
 
@@ -106,15 +106,15 @@ private extension AppMenu {
 private extension AppMenu {
     private func setupFileMenu(subMenu: NSMenu) {
         var items: [NSMenuItem] = [
-            makeMenuItem(title: L10n.openModelList.text, action: #selector(openModelList)),
+            makeMenuItem(title: String(localized: .openModelList), action: #selector(openModelList)),
         ]
 #if FEATURE_3
         items.append(contentsOf: [
             .separator(),
-            makeMenuItem(title: L10n.loadOnVRoidHub.text, action: #selector(openVRoidHub)),
+            makeMenuItem(title: String(localized: .loadOnVRoidHub), action: #selector(openVRoidHub)),
         ])
 #endif
-        Self.makeSubMenu(menu: subMenu, title: L10n.file.text, items: items)
+        Self.makeSubMenu(menu: subMenu, title: String(localized: .file), items: items)
     }
 
     @objc private func openModelList() {
@@ -134,24 +134,24 @@ private extension AppMenu {
     private func setupObjectMenu(subMenu: NSMenu) {
 #if FEATURE_3
         let items: [NSMenuItem] = [
-            makeMenuItem(title: L10n.addImage.text, action: #selector(addImage)),
-            makeMenuItem(title: L10n.addScreenCapture.text, action: #selector(addScreenCapture)),
-            makeMenuItem(title: L10n.addVideoCapture.text, action: #selector(addVideoCapture)),
-            makeMenuItem(title: L10n.addWeb.text, action: #selector(addWeb)),
+            makeMenuItem(title: String(localized: .addImage), action: #selector(addImage)),
+            makeMenuItem(title: String(localized: .addScreenCapture), action: #selector(addScreenCapture)),
+            makeMenuItem(title: String(localized: .addVideoCapture), action: #selector(addVideoCapture)),
+            makeMenuItem(title: String(localized: .addWeb), action: #selector(addWeb)),
             .separator(),
-            makeMenuItem(title: L10n.addWind.text, action: #selector(addWind)),
+            makeMenuItem(title: String(localized: .addWind), action: #selector(addWind)),
         ]
 #else
         let items: [NSMenuItem] = [
-            makeMenuItem(title: L10n.resetModelPosition.text, action: #selector(resetModelPosition)),
+            makeMenuItem(title: String(localized: .resetModelPosition), action: #selector(resetModelPosition)),
             .separator(),
-            makeMenuItem(title: L10n.addImage.text, action: #selector(addImage)),
-            makeMenuItem(title: L10n.addScreenCapture.text, action: #selector(addScreenCapture)),
-            makeMenuItem(title: L10n.addVideoCapture.text, action: #selector(addVideoCapture)),
-            makeMenuItem(title: L10n.addWeb.text, action: #selector(addWeb)),
+            makeMenuItem(title: String(localized: .addImage), action: #selector(addImage)),
+            makeMenuItem(title: String(localized: .addScreenCapture), action: #selector(addScreenCapture)),
+            makeMenuItem(title: String(localized: .addVideoCapture), action: #selector(addVideoCapture)),
+            makeMenuItem(title: String(localized: .addWeb), action: #selector(addWeb)),
         ]
 #endif
-        Self.makeSubMenu(menu: subMenu, title: L10n.object.text, items: items)
+        Self.makeSubMenu(menu: subMenu, title: String(localized: .object), items: items)
     }
 
     @objc private func addImage() {
@@ -186,11 +186,11 @@ private extension AppMenu {
 // MARK: - Model
 private extension AppMenu {
     private func setupModelMenu(subMenu: NSMenu) {
-        Self.makeSubMenu(menu: subMenu, title: L10n.model.text, items: [
-            makeMenuItem(title: L10n.editModel.text, action: #selector(editModel)),
+        Self.makeSubMenu(menu: subMenu, title: String(localized: .model), items: [
+            makeMenuItem(title: String(localized: .editModel), action: #selector(editModel)),
             .separator(),
-            makeMenuItem(title: L10n.calibrate.text, action: #selector(resetCalibration)),
-            makeMenuItem(title: L10n.resetModelPosition.text, action: #selector(resetModelPosition)),
+            makeMenuItem(title: String(localized: .calibrate), action: #selector(resetCalibration)),
+            makeMenuItem(title: String(localized: .resetModelPosition), action: #selector(resetModelPosition)),
         ])
     }
 
@@ -211,12 +211,12 @@ private extension AppMenu {
 // MARK: - Window
 private extension AppMenu {
     private func setupWindowMenu(subMenu: NSMenu) {
-        let alwaysOnTop = makeMenuItem(title: L10n.alwaysOnTop.text, action: #selector(toggleAlwaysOnTop))
+        let alwaysOnTop = makeMenuItem(title: String(localized: .alwaysOnTop), action: #selector(toggleAlwaysOnTop))
         alwaysOnTop.state = UserDefaults.standard.value(for: .alwaysOnTopEnabled) ? .on : .off
-        Self.makeSubMenu(menu: subMenu, title: L10n.window.text, items: [
+        Self.makeSubMenu(menu: subMenu, title: String(localized: .window), items: [
             alwaysOnTop,
             .separator(),
-            makeMenuItem(title: L10n.resetWindowSize.text, action: #selector(resetWindowSize)),
+            makeMenuItem(title: String(localized: .resetWindowSize), action: #selector(resetWindowSize)),
         ])
     }
 
@@ -234,8 +234,8 @@ private extension AppMenu {
 // MARK: - Help
 private extension AppMenu {
     private func setupHelpMenu(subMenu: NSMenu) {
-        Self.makeSubMenu(menu: subMenu, title: L10n.help.text, items: [
-            makeMenuItem(title: L10n.viewDocumentation.text, action: #selector(help)),
+        Self.makeSubMenu(menu: subMenu, title: String(localized: .help), items: [
+            makeMenuItem(title: String(localized: .viewDocumentation), action: #selector(help)),
         ])
     }
 

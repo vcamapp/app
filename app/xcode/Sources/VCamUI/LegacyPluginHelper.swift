@@ -44,8 +44,8 @@ public struct LegacyPluginHelper {
         Logger.log(event: .installPlugin)
 
         guard await VCamAlert.showModal(
-            title: L10n.installPlugin(isUpdate ? L10n.update.text : L10n.add.text).text,
-            message: L10n.installOne(pluginPath.path).text, canCancel: true) == .ok
+            title: String(localized: .installPlugin(isUpdate ? String(localized: .update) : String(localized: .add))),
+            message: String(localized: .installOne(pluginPath.path)), canCancel: true) == .ok
         else {
             Logger.log("cancel")
             return
@@ -57,17 +57,17 @@ public struct LegacyPluginHelper {
             let cp = "cp -r \\\"\(sourcePluginPath.path)\\\" \\\"\(pluginPath.path)\\\""
             try await NSAppleScript.execute("do shell script \"\(rm) && \(cp)\" with administrator privileges")
 
-            await VCamAlert.showModal(title: L10n.success.text, message: L10n.restartAfterInstalling.text, canCancel: false)
+            await VCamAlert.showModal(title: String(localized: .success), message: String(localized: .restartAfterInstalling), canCancel: false)
             UserDefaults.standard.set(pluginVersion, for: .pluginVersion)
         } catch {
-            await VCamAlert.showModal(title: L10n.failure.text, message: error.localizedDescription, canCancel: false)
+            await VCamAlert.showModal(title: String(localized: .failure), message: error.localizedDescription, canCancel: false)
             Logger.log("error")
         }
     }
 
     @MainActor
     public static func uninstallPlugin(canCancel: Bool = true) async {
-        guard await VCamAlert.showModal(title: L10n.deletePlugin.text, message: L10n.deleteOne(pluginPath).text, canCancel: canCancel) == .ok else {
+        guard await VCamAlert.showModal(title: String(localized: .deletePlugin), message: String(localized: .deleteOne(pluginPath.path)), canCancel: canCancel) == .ok else {
             return
         }
         do {
@@ -75,9 +75,9 @@ public struct LegacyPluginHelper {
             let rm = "rm -r \\\"\(pluginPath.path)\\\""
             try await NSAppleScript.execute("do shell script \"\(rm)\" with administrator privileges")
             
-            await VCamAlert.showModal(title: L10n.success.text, message: L10n.completeUninstalling.text, canCancel: false)
+            await VCamAlert.showModal(title: String(localized: .success), message: String(localized: .completeUninstalling), canCancel: false)
         } catch {
-            await VCamAlert.showModal(title: L10n.failure.text, message: error.localizedDescription, canCancel: false)
+            await VCamAlert.showModal(title: String(localized: .failure), message: error.localizedDescription, canCancel: false)
         }
     }
 }

@@ -1,17 +1,11 @@
-//
-//  TextFieldListRow.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/05/07.
-//
-
 import Foundation
 import SwiftUI
 
 public struct TextFieldListRow<ID: Equatable>: View {
-    public init(id: ID, text: Binding<String>, editingId: Binding<ID?>, selectedId: ID?, onCommit: @escaping () -> Void) {
+    public init(id: ID, text: Binding<String>, placeholder: String, editingId: Binding<ID?>, selectedId: ID?, onCommit: @escaping () -> Void) {
         self.id = id
         self._text = text
+        self.placeholder = placeholder
         self._editingId = editingId
         self.selectedId = selectedId
         self.onCommit = onCommit
@@ -19,6 +13,7 @@ public struct TextFieldListRow<ID: Equatable>: View {
 
     let id: ID
     @Binding var text: String
+    let placeholder: String
     @Binding var editingId: ID?
     let selectedId: ID?
     let onCommit: () -> Void
@@ -28,7 +23,10 @@ public struct TextFieldListRow<ID: Equatable>: View {
     public var body: some View {
         HStack {
             if editingId == id {
-                TextField("", text: $text) {
+                TextField(text: $text) {
+                    Text(verbatim: placeholder)
+                }
+                .onSubmit {
                     editingId = nil
                     onCommit()
                 }
@@ -38,13 +36,13 @@ public struct TextFieldListRow<ID: Equatable>: View {
                     isFocused = true
                 }
             } else if selectedId == id {
-                Text(text)
+                Text(verbatim: text.isEmpty ? placeholder : text)
                     .font(.subheadline)
                     .onTapGestureWithKeyboardShortcut(.defaultAction) {
                         editingId = id
                     }
             } else {
-                Text(text)
+                Text(verbatim: text.isEmpty ? placeholder : text)
                     .font(.subheadline)
             }
         }

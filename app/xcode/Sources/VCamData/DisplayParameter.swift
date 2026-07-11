@@ -1,7 +1,6 @@
 import Foundation
 import SwiftUI
 import AppKit
-import VCamLocalization
 
 public struct DisplayParameter: Codable, Identifiable, Equatable {
     public struct Value: Codable, Equatable {
@@ -66,7 +65,7 @@ public struct DisplayParameter: Codable, Identifiable, Equatable {
     public let id: String
     public var value: Value
 
-    public init(name: String = L10n.newPreset.text, id: String = UUID().uuidString, value: Value = Value()) {
+    public init(name: String = "", id: String = UUID().uuidString, value: Value = Value()) {
         self.name = name
         self.id = id
         self.value = value
@@ -159,7 +158,7 @@ public final class DisplayParameterPresets {
 // MARK: - DisplayParameterPreset (for UI compatibility)
 
 public struct DisplayParameterPreset: Hashable, Identifiable, CustomStringConvertible, Sendable {
-    public static let newPreset = Self.init(id: "", description: L10n.newPreset.text)
+    public static let newPreset = Self.init(id: "", description: "")
 
     public let id: String
     public var description: String

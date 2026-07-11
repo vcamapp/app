@@ -8,8 +8,8 @@ public enum DeviceAuthorization {
 
         public var name: String {
             switch self {
-            case .camera: return L10n.camera.text
-            case .mic: return L10n.mic.text
+            case .camera: return String(localized: .camera)
+            case .mic: return String(localized: .mic)
             }
         }
 
@@ -62,7 +62,7 @@ public enum DeviceAuthorization {
 
     @MainActor
     private static func showAuthorizationError(type: AuthorizationType) async {
-        switch await VCamAlert.showModal(title: "", message: L10n.allowFor(type.name).text, canCancel: true, okTitle: L10n.openPreference.text) {
+        switch await VCamAlert.showModal(title: "", message: String(localized: .allowFor(type.name)), canCancel: true, okTitle: String(localized: .openPreference)) {
         case .ok:
             type.openPreference()
         case .cancel: ()

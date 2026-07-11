@@ -1,7 +1,5 @@
 import Foundation
-import SwiftUI
 import simd
-import VCamLocalization
 
 public struct TrackingMappingEntry: Codable, Sendable, Hashable, Identifiable {
     public let id: UUID
@@ -106,15 +104,7 @@ public extension TrackingMappingEntry {
 }
 
 public extension TrackingMappingEntry.Key {
-    var isVCamKey: Bool { key.hasPrefix("_") }
     var id: String { key }
-    var nameKey: LocalizedStringKey {
-        if isVCamKey {
-            L10n.key("trackingInput_\(key)").key
-        } else {
-            "\(key)"
-        }
-    }
 }
 
 private enum RangeKeyCodingKeys: String, CodingKey {

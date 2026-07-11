@@ -1,24 +1,16 @@
-//
-//  ModalSheet.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/03/25.
-//
-
 import SwiftUI
 import VCamData
-import VCamLocalization
 
 public struct ModalSheet<Content: View>: View {
     public init(
-        cancelTitle: String = L10n.cancel.text,
+        cancelTitle: String? = nil,
         doneTitle: String,
         doneDisabled: Bool = false,
         cancel: (() -> Void)? = nil,
         done: @escaping () -> Void,
         content: @escaping () -> Content
     ) {
-        self.cancelTitle = cancelTitle
+        self.cancelTitle = cancelTitle ?? String(localized: .cancel)
         self.doneTitle = doneTitle
         self.doneDisabled = doneDisabled
         self.cancel = cancel
@@ -26,14 +18,12 @@ public struct ModalSheet<Content: View>: View {
         self.content = content
     }
 
-    var cancelTitle = L10n.cancel.text
+    var cancelTitle = String(localized: .cancel)
     let doneTitle: String
     var doneDisabled = false
     let cancel: (() -> Void)?
     let done: () -> Void
     @ViewBuilder let content: () -> Content
-
-    @AppStorage(key: .locale) var locale
 
     public var body: some View {
         VStack {
@@ -56,6 +46,5 @@ public struct ModalSheet<Content: View>: View {
             }
             .padding()
         }
-        .environment(\.locale, locale.isEmpty ? .current : Locale(identifier: locale))
     }
 }

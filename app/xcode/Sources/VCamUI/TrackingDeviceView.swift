@@ -36,13 +36,13 @@ public struct TrackingDeviceView: View {
                     Text(device.localizedName).tag(device)
                 }
             } label: {
-                Text(L10n.camera.key, bundle: .localize)
+                Text(.camera)
             }
         } else {
             Picker(selection: .constant(0)) {
-                Text(L10n.isNotFound(L10n.camera.text).key, bundle: .localize).tag(0)
+                Text(.isNotFound(String(localized: .camera))).tag(0)
             } label: {
-                Text(L10n.camera.key, bundle: .localize)
+                Text(.camera)
             }
         }
         if let firstDevice = AudioDevice.devices().first {
@@ -57,13 +57,13 @@ public struct TrackingDeviceView: View {
                     Text(device.name()).tag(device)
                 }
             } label: {
-                Text(L10n.mic.key, bundle: .localize)
+                Text(.mic)
             }
         } else {
             Picker(selection: .constant(0)) {
-                Text(L10n.isNotFound(L10n.mic.text).key, bundle: .localize).tag(0)
+                Text(.isNotFound(String(localized: .mic))).tag(0)
             } label: {
-                Text(L10n.mic.key, bundle: .localize)
+                Text(.mic)
             }
         }
         Picker(selection: Binding(
@@ -74,10 +74,10 @@ public struct TrackingDeviceView: View {
             }
         )) {
             ForEach(LipSyncType.allCases) { type in
-                Text(type.name, bundle: .localize).tag(type)
+                Text(type.name).tag(type)
             }
         } label: {
-            Text(L10n.lipSync.key, bundle: .localize)
+            Text(.lipSync)
         }
         .disabled(Tracking.shared.micLipSyncDisabled)
         .onReceive(NotificationCenter.default.publisher(for: .deviceWasChanged)) { _ in

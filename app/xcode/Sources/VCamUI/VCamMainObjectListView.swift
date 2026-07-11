@@ -29,6 +29,7 @@ public struct VCamMainObjectListView: View {
                             // Do not use `$object.name` now
                             object.name = $0
                         }),
+                        placeholder: object.type.localizedName,
                         editingId: $editingId,
                         selectedId: selectedId
                     ) {
@@ -53,7 +54,7 @@ public struct VCamMainObjectListView: View {
 
             VCamMainObjectListBottomBar(selectedId: selectedId)
         } label: {
-            Text(L10n.object.key, bundle: .localize)
+            Text(.object)
         }
         .onReceive(NotificationCenter.default.publisher(for: .unfocusObject)) { _ in
             selectedIdBinding.wrappedValue = nil
@@ -72,7 +73,7 @@ private struct VCamMainObjectListAddButton: View {
                     objectManager.addImage(url: url)
                 } label: {
                     Image(systemName: "photo")
-                    Text(L10n.clipboard.key, bundle: .localize)
+                    Text(.clipboard)
                 }
             }
             Button {
@@ -81,7 +82,7 @@ private struct VCamMainObjectListAddButton: View {
                 }
             } label: {
                 Image(systemName: "photo")
-                Text(L10n.image.key, bundle: .localize)
+                Text(.image)
             }
             Button {
                 showScreenRecorderPreferenceView { recorder in
@@ -91,7 +92,7 @@ private struct VCamMainObjectListAddButton: View {
                 }
             } label: {
                 Image(systemName: "display")
-                Text(L10n.screen.key, bundle: .localize)
+                Text(.screen)
             }
             Button {
                 CaptureDeviceRenderer.selectDevice { drawer in
@@ -100,13 +101,13 @@ private struct VCamMainObjectListAddButton: View {
                 }
             } label: {
                 Image(systemName: "camera")
-                Text(L10n.videoCaptureDevice.key, bundle: .localize)
+                Text(.videoCaptureDevice)
             }
             Button {
                 WebRenderer.showPreferencesForAdding()
             } label: {
                 Image(systemName: "network")
-                Text(L10n.web.key, bundle: .localize)
+                Text(.web)
             }
 
 #if FEATURE_3
@@ -116,7 +117,7 @@ private struct VCamMainObjectListAddButton: View {
                 objectManager.add(.init(type: .wind(), isHidden: false, isLocked: false))
             } label: {
                 Image(systemName: "wind")
-                Text(L10n.wind.key, bundle: .localize)
+                Text(.wind)
             }
 #endif
         } label: {
@@ -185,7 +186,7 @@ private struct VCamMainObjectListBottomBar: View {
 }
 
 private struct EditSceneObjectButton: View {
-    var key = L10n.edit.key
+    var key: LocalizedStringResource = .edit
     let isLocked: Bool
     let action: () -> Void
     var body: some View {
@@ -193,7 +194,7 @@ private struct EditSceneObjectButton: View {
             action()
         } label: {
             Image(systemName: "pencil")
-            Text(key, bundle: .localize)
+            Text(key)
         }
         .disabled(isLocked)
     }
@@ -214,7 +215,7 @@ private struct FilterSceneObjectButton: View {
             }
         } label: {
             Image(systemName: "wand.and.stars")
-            Text(L10n.filter.key, bundle: .localize)
+            Text(.filter)
         }
         .disabled(object.isLocked)
     }
@@ -228,7 +229,7 @@ private struct DeleteSceneObjectButton: View {
             SceneObjectManager.shared.remove(byId: object.id)
         } label: {
             Image(systemName: "trash")
-            Text(L10n.delete.key, bundle: .localize)
+            Text(.delete)
         }
         .disabled(object.isLocked)
     }
@@ -245,7 +246,7 @@ private struct HideSceneObjectButton: View {
         } label: {
             Image(systemName: "eye")
                 .symbolVariant(object.isHidden ? .none : .slash)
-            Text(object.isHidden ? L10n.show.key : L10n.hide.key, bundle: .localize)
+            Text(object.isHidden ? .show : .hide)
         }
     }
 }
@@ -261,7 +262,7 @@ private struct LockSceneObjectButton: View {
         } label: {
             Image(systemName: "lock")
                 .symbolVariant(object.isLocked ? .slash : .none)
-            Text(object.isLocked ? L10n.unlock.key : L10n.lock.key, bundle: .localize)
+            Text(object.isLocked ? .unlock : .lock)
         }
     }
 }
@@ -286,7 +287,7 @@ private struct EditSceneObjectViewModifier: ViewModifier {
                         UniBridge.shared.resetCamera()
                     } label: {
                         Image(systemName: "arrow.uturn.backward")
-                        Text(L10n.moveInitialPosition.key, bundle: .localize)
+                        Text(.moveInitialPosition)
                     }
                 }
         case let .image(image):
@@ -308,7 +309,7 @@ private struct EditSceneObjectViewModifier: ViewModifier {
                         SceneObjectManager.shared.moveToBack(id: object.id)
                     } label: {
                         Image(systemName: "person.and.background.dotted")
-                        Text(L10n.setAsBackground.key, bundle: .localize)
+                        Text(.setAsBackground)
                     }
                     Divider()
                     EditSceneObjectButton(isLocked: object.isLocked) {
@@ -399,7 +400,7 @@ private struct EditSceneObjectViewModifier: ViewModifier {
                         renderer.showWindow()
                     } label: {
                         Image(systemName: "network")
-                        Text(L10n.interact.key, bundle: .localize)
+                        Text(.interact)
                     }
                     FilterSceneObjectButton(object: object, configuration: web.filter?.configuration) { filter in
                         web.filter = filter
@@ -414,7 +415,7 @@ private struct EditSceneObjectViewModifier: ViewModifier {
                     HideSceneObjectButton(object: object)
                     LockSceneObjectButton(object: object)
                     Divider()
-                    EditSceneObjectButton(key: L10n.changeWindDirection.key, isLocked: object.isLocked) {
+                    EditSceneObjectButton(key: .changeWindDirection, isLocked: object.isLocked) {
                         wind.direction = SceneObject.Wind.random.direction
                         SceneObjectManager.shared.update(object)
                     }

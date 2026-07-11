@@ -1,15 +1,8 @@
-//
-//  ValueEditField.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2022/02/22.
-//
-
 import SwiftUI
 
 public struct ValueEditField<ValueLabel: View>: View {
     public init(
-        _ label: LocalizedStringKey,
+        _ label: LocalizedStringResource,
         value: Binding<CGFloat>,
         type: EditType,
         @ViewBuilder valueLabel: @escaping (CGFloat) -> ValueLabel
@@ -20,7 +13,7 @@ public struct ValueEditField<ValueLabel: View>: View {
         self.valueLabel = valueLabel
     }
 
-    let label: LocalizedStringKey
+    let label: LocalizedStringResource
     @Binding var value: CGFloat
     let type: EditType
     let valueLabel: (CGFloat) -> ValueLabel
@@ -28,7 +21,7 @@ public struct ValueEditField<ValueLabel: View>: View {
     public var body: some View {
         HStack(spacing: 2) {
             HStack(spacing: 4) {
-                Text(label, bundle: .localize)
+                Text(label)
                 valueLabel(value)
                     .lineLimit(1)
                     .font(.caption2)
@@ -41,7 +34,7 @@ public struct ValueEditField<ValueLabel: View>: View {
             case let .slider(range, onEditingChanged):
                 Slider(value: $value, in: range, onEditingChanged: onEditingChanged)
             case .stepper:
-                TextField("", value: $value, formatter: NumberFormatter())
+                TextField(value: $value, formatter: NumberFormatter()) { EmptyView() }
                     .textFieldStyle(.roundedBorder)
             }
         }
@@ -63,7 +56,7 @@ public struct ValueEditField<ValueLabel: View>: View {
 
 extension ValueEditField where ValueLabel == Text {
     public init<F>(
-        _ label: LocalizedStringKey,
+        _ label: LocalizedStringResource,
         value: Binding<CGFloat>,
         type: EditType,
         format: F
@@ -75,7 +68,7 @@ extension ValueEditField where ValueLabel == Text {
     }
 
     public init(
-        _ label: LocalizedStringKey,
+        _ label: LocalizedStringResource,
         value: Binding<CGFloat>,
         type: EditType,
         precision: FloatingPointFormatStyle<CGFloat>.Configuration.Precision = .fractionLength(1)
@@ -89,7 +82,7 @@ extension ValueEditField where ValueLabel == Text {
 
 extension ValueEditField where ValueLabel == EmptyView {
     static func emptyValueLabel(
-        _ label: LocalizedStringKey,
+        _ label: LocalizedStringResource,
         value: Binding<CGFloat>,
         type: EditType
     ) -> Self {

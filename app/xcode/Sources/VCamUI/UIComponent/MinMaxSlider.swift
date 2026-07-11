@@ -1,10 +1,3 @@
-//
-//  MinMaxSlider.swift
-//
-//
-//  Created by tattn on 2023/02/04.
-//
-
 import SwiftUI
 
 struct SliderBar: View {
@@ -117,11 +110,11 @@ public struct MinMaxSlider<Value: BinaryFloatingPoint & FloatingPoint & Foundati
 
     @ViewBuilder private var valueTextFieldsView: some View {
         HStack {
-            TextField("", value: Binding(
+            TextField(value: Binding(
                 get: { Double(minValue) },
                 set: { minValue = Value($0) }
             ), format: .number.precision(.fractionLength(2))
-            )
+            ) { EmptyView() }
             .multilineTextAlignment(.leading)
             .onSubmit {
                 let clamped = Swift.min(Swift.max(minValue, min), maxValue)
@@ -131,11 +124,11 @@ public struct MinMaxSlider<Value: BinaryFloatingPoint & FloatingPoint & Foundati
                 onEditingEnded?()
             }
             Spacer()
-            TextField("", value: Binding(
+            TextField(value: Binding(
                 get: { Double(maxValue) },
                 set: { maxValue = Value($0) }
             ), format: .number.precision(.fractionLength(2))
-            )
+            ) { EmptyView() }
             .multilineTextAlignment(.trailing)
             .onSubmit {
                 let clamped = Swift.min(Swift.max(maxValue, minValue), max)

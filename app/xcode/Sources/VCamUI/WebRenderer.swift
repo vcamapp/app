@@ -195,8 +195,8 @@ public final class WebRenderer {
         let containerView = webView.superview
         webView.removeFromSuperview()
 
-        VCamWindow.showWindow(title: L10n.interact.text) { close in
-            ModalSheet(doneTitle: L10n.done.text, done: close) {
+        VCamWindow.showWindow(title: String(localized: .interact)) { close in
+            ModalSheet(doneTitle: String(localized: .done), done: close) {
                 NSViewRepresentableBuilder {
                     webView
                 }

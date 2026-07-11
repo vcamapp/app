@@ -1,10 +1,3 @@
-//
-//  VCamMainToolbarBackgroundColorPicker.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2023/02/12.
-//
-
 import SwiftUI
 import VCamUIFoundation
 import VCamData
@@ -20,9 +13,9 @@ public struct VCamMainToolbarBackgroundColorPicker: View {
         GroupBox {
             Form {
                 HStack {
-                    Text(L10n.color.key, bundle: .localize)
+                    Text(.color)
                         .fixedSize(horizontal: true, vertical: false)
-                    ColorEditField(L10n.color.key, value: $state.backgroundColor)
+                    ColorEditField(.color, value: $state.backgroundColor)
                         .labelsHidden()
                 }
             }
