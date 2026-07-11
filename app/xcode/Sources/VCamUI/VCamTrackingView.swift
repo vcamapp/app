@@ -22,14 +22,14 @@ public struct VCamTrackingView: View {
     public var body: some View {
         HStack {
             VStack(spacing: 8) {
-                Text(L10n.faceEyeMouth.key, bundle: .localize)
+                Text(.faceEyeMouth)
                     .bold()
                 Picker(selection: faceTrackingMethod) {
                     ForEach(TrackingMethod.Face.allCases) { method in
-                        Text(method.name, bundle: .localize)
+                        Text(verbatim: method.name)
                     }
                 } label: {
-                    Text(L10n.faceEyeMouth.key, bundle: .localize)
+                    Text(.faceEyeMouth)
                 }
                 .labelsHidden()
                 .frame(maxWidth: .infinity, alignment: .trailing)
@@ -38,20 +38,20 @@ public struct VCamTrackingView: View {
             Divider()
 
             VStack(spacing: 8) {
-                Text(L10n.hand.key, bundle: .localize)
+                Text(.hand)
                     .bold()
 #if FEATURE_3
                 Picker(selection: handTrackingMethod) {
                     ForEach(TrackingMethod.Hand.allCases) { method in
-                        Text(method.name, bundle: .localize)
+                        Text(verbatim: method.name)
                     }
                 } label: {
-                    Text(L10n.hand.key, bundle: .localize)
+                    Text(.hand)
                 }
                 .labelsHidden()
                 .frame(maxWidth: .infinity, alignment: .trailing)
 #else
-                Text(L10n.notSupported.key, bundle: .localize)
+                Text(.notSupported)
                     .frame(maxWidth: .infinity, alignment: .trailing)
 #endif
             }
@@ -62,21 +62,21 @@ public struct VCamTrackingView: View {
             Divider()
 
             VStack(spacing: 8) {
-                Text(L10n.finger.key, bundle: .localize)
+                Text(.finger)
                     .bold()
 
 #if FEATURE_3
                 Picker(selection: fingerTrackingMethod) {
                     ForEach(TrackingMethod.Finger.allCases) { method in
-                        Text(method.name, bundle: .localize)
+                        Text(verbatim: method.name)
                     }
                 } label: {
-                    Text(L10n.finger.key, bundle: .localize)
+                    Text(.finger)
                 }
                 .labelsHidden()
                 .frame(maxWidth: .infinity, alignment: .trailing)
 #else
-                Text(L10n.notSupported.key, bundle: .localize)
+                Text(.notSupported)
                     .frame(maxWidth: .infinity, alignment: .trailing)
 #endif
             }
@@ -111,10 +111,10 @@ public struct VCamTrackingView: View {
 }
 
 extension TrackingMethod.Face {
-    var name: LocalizedStringKey {
+    var name: String {
         switch self {
-        case .disabled: return L10n.none.key
-        case .default: return L10n.default.key
+        case .disabled: return String(localized: .none)
+        case .default: return String(localized: .default)
         case .iFacialMocap: return "iFacialMocap"
         case .vcamMocap: return "VCamMocap"
         }
@@ -122,10 +122,10 @@ extension TrackingMethod.Face {
 }
 
 extension TrackingMethod.Hand {
-    var name: LocalizedStringKey {
+    var name: String {
         switch self {
-        case .disabled: return L10n.none.key
-        case .default: return L10n.default.key
+        case .disabled: return String(localized: .none)
+        case .default: return String(localized: .default)
         case .vcamMocap: return "VCamMocap"
 #if ENABLE_MOCOPI
         case .mocopi: return "mocopi"
@@ -135,10 +135,10 @@ extension TrackingMethod.Hand {
 }
 
 extension TrackingMethod.Finger {
-    var name: LocalizedStringKey {
+    var name: String {
         switch self {
-        case .disabled: return L10n.none.key
-        case .default: return L10n.default.key
+        case .disabled: return String(localized: .none)
+        case .default: return String(localized: .default)
         case .vcamMocap: return "VCamMocap"
         }
     }

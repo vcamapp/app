@@ -1,10 +1,3 @@
-//
-//  VCamShortcut+View.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2023/04/02.
-//
-
 import Foundation
 import VCamEntity
 import SwiftUI
@@ -22,7 +15,9 @@ public extension View {
     @ViewBuilder func keyboardShortcut(_ shortcutKey: VCamShortcut.ShortcutKey?, action: @escaping () -> Void) -> some View {
         if let shortcutKey {
             // Workaround to make shortcut keys work on any button
-            let hiddenButton = Button("", action: action)
+            let hiddenButton = Button(action: action) {
+                EmptyView()
+            }
                 .frame(width: 0, height: 0)
                 .opacity(0)
                 .allowsHitTesting(false)

@@ -2,7 +2,6 @@ import SwiftUI
 import AppKit
 import simd
 import VCamBridge
-import VCamLocalization
 
 private enum MappingTableSection {
     case main
@@ -35,7 +34,7 @@ struct VCamSettingMappingTableView: NSViewRepresentable {
         tableView.addTableColumn(enabledColumn)
 
         let inputColumn = NSTableColumn(identifier: .input)
-        inputColumn.title = L10n.trackingMappingInput.text
+        inputColumn.title = String(localized: .trackingMappingInput)
         inputColumn.width = 280
         inputColumn.minWidth = 280
         tableView.addTableColumn(inputColumn)
@@ -48,13 +47,13 @@ struct VCamSettingMappingTableView: NSViewRepresentable {
         tableView.addTableColumn(arrowColumn)
 
         let outputColumn = NSTableColumn(identifier: .output)
-        outputColumn.title = L10n.trackingMappingOutput.text
+        outputColumn.title = String(localized: .trackingMappingOutput)
         outputColumn.width = 280
         outputColumn.minWidth = 280
         tableView.addTableColumn(outputColumn)
 
         let filterColumn = NSTableColumn(identifier: .filter)
-        filterColumn.title = L10n.smoothing.text
+        filterColumn.title = String(localized: .smoothing)
         filterColumn.width = 220
         filterColumn.minWidth = 180
         tableView.addTableColumn(filterColumn)
@@ -65,19 +64,19 @@ struct VCamSettingMappingTableView: NSViewRepresentable {
         let menu = NSMenu()
         menu.autoenablesItems = true
 
-        let editBoundsItem = NSMenuItem(title: L10n.editOutputBounds.text, action: #selector(Coordinator.editOutputBounds(_:)), keyEquivalent: "")
+        let editBoundsItem = NSMenuItem(title: String(localized: .editOutputBounds), action: #selector(Coordinator.editOutputBounds(_:)), keyEquivalent: "")
         editBoundsItem.target = context.coordinator
         menu.addItem(editBoundsItem)
 
         menu.addItem(.separator())
 
-        let resetItem = NSMenuItem(title: L10n.resetToDefault.text, action: #selector(Coordinator.resetToDefault(_:)), keyEquivalent: "")
+        let resetItem = NSMenuItem(title: String(localized: .resetToDefault), action: #selector(Coordinator.resetToDefault(_:)), keyEquivalent: "")
         resetItem.target = context.coordinator
         menu.addItem(resetItem)
 
         menu.addItem(.separator())
 
-        let deleteItem = NSMenuItem(title: L10n.delete.text, action: #selector(Coordinator.deleteSelected(_:)), keyEquivalent: "")
+        let deleteItem = NSMenuItem(title: String(localized: .delete), action: #selector(Coordinator.deleteSelected(_:)), keyEquivalent: "")
         deleteItem.target = context.coordinator
         menu.addItem(deleteItem)
         tableView.menu = menu
@@ -155,13 +154,13 @@ struct VCamSettingMappingTableView: NSViewRepresentable {
 
             if inputKeysChanged {
                 inputKeyTitles = store.inputKeys.map { key in
-                    key.isVCamKey ? L10n.key("trackingInput_\(key.key)").text : key.key
+                    key.localizedTitle
                 }
             }
 
             if outputKeysChanged {
                 outputKeyTitles = store.outputKeys.map { key in
-                    key.isVCamKey ? L10n.key("trackingInput_\(key.key)").text : key.key
+                    key.localizedTitle
                 }
             }
 
@@ -409,15 +408,15 @@ struct VCamSettingMappingTableView: NSViewRepresentable {
 
             let entry = store.mappings[row]
             let alert = NSAlert()
-            alert.messageText = L10n.editOutputBounds.text
-            alert.informativeText = L10n.editOutputBoundsMessage.text
-            alert.addButton(withTitle: L10n.ok.text)
-            alert.addButton(withTitle: L10n.cancel.text)
+            alert.messageText = String(localized: .editOutputBounds)
+            alert.informativeText = String(localized: .editOutputBoundsMessage)
+            alert.addButton(withTitle: String(localized: .ok))
+            alert.addButton(withTitle: String(localized: .cancel))
 
             let minField = NSTextField(string: String(format: "%.2f", entry.outputKey.bounds.lowerBound))
-            minField.placeholderString = L10n.minimum.text
+            minField.placeholderString = String(localized: .minimum)
             let maxField = NSTextField(string: String(format: "%.2f", entry.outputKey.bounds.upperBound))
-            maxField.placeholderString = L10n.maximum.text
+            maxField.placeholderString = String(localized: .maximum)
             minField.translatesAutoresizingMaskIntoConstraints = false
             maxField.translatesAutoresizingMaskIntoConstraints = false
 
@@ -661,7 +660,7 @@ private final class InputCell: NSView {
 
         let newKeyIDs = inputKeys.map(\.key)
         let titles = inputKeyTitles.count == inputKeys.count ? inputKeyTitles : inputKeys.map { key in
-            key.isVCamKey ? L10n.key("trackingInput_\(key.key)").text : key.key
+            key.localizedTitle
         }
 
         if newKeyIDs != inputKeyIDs {
@@ -837,7 +836,7 @@ private final class OutputCell: NSView {
         if hasBlendShapeNames, let popupButton {
             let newKeyIDs = outputKeys.map(\.key)
             let titles = outputKeyTitles.count == outputKeys.count ? outputKeyTitles : outputKeys.map { key in
-                key.isVCamKey ? L10n.key("trackingInput_\(key.key)").text : key.key
+                key.localizedTitle
             }
 
             if newKeyIDs != outputKeyIDs {
@@ -892,7 +891,7 @@ private final class FilterCell: NSView {
 
     init() {
         filterToggle = NSButton(checkboxWithTitle: "", target: nil, action: nil)
-        filterToggle.toolTip = L10n.smoothing.text
+        filterToggle.toolTip = String(localized: .smoothing)
         smoothLabel = NSTextField(labelWithString: "")
         smoothSlider = NSSlider()
         smoothValueLabel = NSTextField(labelWithString: "")
@@ -1044,7 +1043,7 @@ private final class FilterCell: NSView {
             let smoothPercent = percentFromUnit(minCutoff)
             let responsePercent = percentFromUnit(beta)
 
-            smoothLabel.stringValue = L10n.trackingFilterSmooth.text
+            smoothLabel.stringValue = String(localized: .trackingFilterSmooth)
             smoothLabel.isHidden = false
             smoothSlider.minValue = 0
             smoothSlider.maxValue = 100
@@ -1053,7 +1052,7 @@ private final class FilterCell: NSView {
             smoothValueLabel.stringValue = formatPercent(smoothPercent)
             smoothValueLabel.isHidden = false
 
-            responseLabel.stringValue = L10n.trackingFilterResponse.text
+            responseLabel.stringValue = String(localized: .trackingFilterResponse)
             responseLabel.isHidden = false
             responseSlider.minValue = 0
             responseSlider.maxValue = 100

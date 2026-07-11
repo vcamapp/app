@@ -1,6 +1,5 @@
 import SwiftUI
 import VCamEntity
-import VCamLocalization
 import VCamBridge
 import VCamData
 import VCamLogger

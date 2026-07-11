@@ -1,13 +1,5 @@
-//
-//  VCamMessageAction.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2023/04/16.
-//
-
 import AppKit
 import VCamEntity
-import VCamLocalization
 import VCamBridge
 import VCamData
 import struct SwiftUI.Image
@@ -18,7 +10,7 @@ public struct VCamMessageAction: VCamAction {
     }
 
     public var configuration: VCamMessageActionConfiguration
-    public var name: String { L10n.message.text }
+    public var name: String { String(localized: .message) }
     public var icon: Image { Image(systemName: "text.bubble") }
 
     @MainActor

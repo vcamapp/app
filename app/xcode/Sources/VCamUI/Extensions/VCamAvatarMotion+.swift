@@ -1,10 +1,3 @@
-//
-//  VCamAvatarMotion+.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2023/04/02.
-//
-
 import SwiftUI
 import VCamEntity
 
@@ -12,25 +5,25 @@ extension VCamAvatarMotion: CustomStringConvertible {
     public var description: String {
         switch self {
         case .hi:
-            return L10n.hi.text
+            return String(localized: .hi)
         case .bye:
-            return L10n.bye.text
+            return String(localized: .bye)
         case .jump:
-            return L10n.jump.text
+            return String(localized: .jump)
         case .cheer:
-            return L10n.cheer.text
+            return String(localized: .cheer)
         case .what:
-            return L10n.what.text
+            return String(localized: .what)
         case .pose:
-            return L10n.pose.text
+            return String(localized: .pose)
         case .nod:
-            return L10n.nod.text
+            return String(localized: .nod)
         case .no:
-            return L10n.no.text
+            return String(localized: .no)
         case .shudder:
-            return L10n.shudder.text
+            return String(localized: .shudder)
         case .run:
-            return L10n.run.text
+            return String(localized: .run)
         }
     }
 }

@@ -1,13 +1,5 @@
-//
-//  VCamMotionAction.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2023/04/01.
-//
-
 import AppKit
 import VCamEntity
-import VCamLocalization
 import VCamBridge
 import VCamData
 import SwiftUI
@@ -18,7 +10,7 @@ public struct VCamMotionAction: VCamAction {
     }
 
     public var configuration: VCamMotionActionConfiguration
-    public var name: String { L10n.motion.text }
+    public var name: String { String(localized: .motion) }
     public var icon: Image { Image(systemName: "figure.wave") }
 
     @MainActor

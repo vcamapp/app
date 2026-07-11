@@ -1,14 +1,6 @@
-//
-//  AppUpdater+UI.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/04/23.
-//
-
 import SwiftUI
 import VCamEntity
 import VCamData
-import VCamLocalization
 
 struct AppUpdateInformationView: View {
     let release: AppUpdater.LatestRelease
@@ -19,11 +11,11 @@ struct AppUpdateInformationView: View {
 
     var body: some View {
         VStack(alignment: .leading) {
-            Text(L10n.existsNewAppVersion(release.version.description).key, bundle: .localize)
+            Text(.existsNewAppVersion(release.version.description))
                 .font(.title)
                 .fontWeight(.bold)
-            Text(L10n.currentVersion(Version.current.description).key, bundle: .localize)
-            Text(L10n.releaseNotes.key, bundle: .localize)
+            Text(.currentVersion(Version.current.description))
+            Text(.releaseNotes)
                 .fontWeight(.bold)
                 .padding(.top)
             ScrollView {
@@ -39,26 +31,25 @@ struct AppUpdateInformationView: View {
                     skipThisVersion = release.version.description
                     nsWindow?.close()
                 } label: {
-                    Text(L10n.skipThisVersion.key, bundle: .localize)
+                    Text(.skipThisVersion)
                 }
                 .keyboardShortcut(.cancelAction)
                 Spacer()
 
                 Button {
-                    switch LocalizationEnvironment.language {
-                    case .japanese:
+                    if Bundle.module.preferredLocalizations.first == "ja" {
                         NSWorkspace.shared.open(URL(string: "https://tattn.fanbox.cc/posts/3541433")!)
-                    case .english:
+                    } else {
                         NSWorkspace.shared.open(URL(string: "https://www.patreon.com/posts/64958634")!)
                     }
                 } label: {
-                    Text(L10n.downloadSupporterVersion.key, bundle: .localize)
+                    Text(.downloadSupporterVersion)
                 }
 
                 Button {
                     NSWorkspace.shared.open(release.downloadURL)
                 } label: {
-                    Text(L10n.download.key, bundle: .localize)
+                    Text(.download)
                 }
                 .keyboardShortcut(.defaultAction)
             }
@@ -70,14 +61,14 @@ struct AppUpdateInformationView: View {
 }
 
 extension AppUpdateInformationView: MacWindow {
-    var windowTitle: String { L10n.update.text }
+    var windowTitle: String { String(localized: .update) }
 }
 
 extension AppUpdater {
     @MainActor
     func presentUpdateAlert() async {
         guard let release = try? await check() else {
-        await VCamAlert.showModal(title: L10n.upToDate.text, message: L10n.upToDateMessage(Version.current.description).text, canCancel: false)
+        await VCamAlert.showModal(title: String(localized: .upToDate), message: String(localized: .upToDateMessage(Version.current.description)), canCancel: false)
             return
         }
 

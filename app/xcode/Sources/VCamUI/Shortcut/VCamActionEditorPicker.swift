@@ -1,21 +1,15 @@
-//
-//  VCamActionEditorPicker.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2023/04/02.
-//
-
 import SwiftUI
 
-struct VCamActionEditorPicker<Item: Hashable & Sendable, Candidate: CustomStringConvertible & Sendable>: View {
+struct VCamActionEditorPicker<Item: Hashable & Sendable, Candidate: Sendable>: View {
     @Binding var item: Item
     let items: [Candidate]
     let mapValue: (Candidate) -> Item
+    let displayName: (Candidate) -> String
 
     var body: some View {
         Picker(selection: $item) {
             ForEach(items.map(PickerItem.init)) { item in
-                Text(item.value.description)
+                Text(verbatim: displayName(item.value))
                     .tag(mapValue(item.value))
             }
         } label: {
@@ -25,10 +19,11 @@ struct VCamActionEditorPicker<Item: Hashable & Sendable, Candidate: CustomString
 }
 
 extension VCamActionEditorPicker where Item == Candidate {
-    init(item: Binding<Item>, items: [Candidate]) {
+    init(item: Binding<Item>, items: [Candidate], displayName: @escaping (Candidate) -> String) {
         self._item = item
         self.items = items
         mapValue = { $0 }
+        self.displayName = displayName
     }
 }
 
@@ -39,6 +34,6 @@ private struct PickerItem<Value>: Identifiable {
 
 struct VCamActionEditorPicker_Previews: PreviewProvider {
     static var previews: some View {
-        VCamActionEditorPicker(item: .constant(""), items: ["hello"])
+        VCamActionEditorPicker(item: .constant(""), items: ["hello"], displayName: { $0 })
     }
 }

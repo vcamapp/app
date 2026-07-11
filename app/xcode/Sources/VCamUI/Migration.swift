@@ -40,7 +40,7 @@ extension Migration {
     @concurrent
     static func migrationFirst(previousVersion: String) async throws {
         guard previousVersion.isEmpty else { return }
-        await VCamAlert.showModal(title: L10n.installVirtualCamera.text, message: L10n.explainAboutInstallingCameraExtension.text, canCancel: false)
+        await VCamAlert.showModal(title: String(localized: .installVirtualCamera), message: String(localized: .explainAboutInstallingCameraExtension), canCancel: false)
         Task {
             do {
                 if CoreMediaSinkStream.isInstalled {
@@ -48,9 +48,9 @@ extension Migration {
                 }
                 try await CameraExtension().installExtension()
                 _ = await VirtualCameraManager.shared.installAndStartCameraExtension()
-                await VCamAlert.showModal(title: L10n.success.text, message: L10n.restartAfterInstalling.text, canCancel: false)
+                await VCamAlert.showModal(title: String(localized: .success), message: String(localized: .restartAfterInstalling), canCancel: false)
             } catch {
-                await VCamAlert.showModal(title: L10n.failure.text, message: L10n.failedToInstallCameraExtension.text, canCancel: false)
+                await VCamAlert.showModal(title: String(localized: .failure), message: String(localized: .failedToInstallCameraExtension), canCancel: false)
             }
         }
     }
@@ -95,8 +95,8 @@ extension Migration {
         let isNewCameraInstalled = CoreMediaSinkStream.isInstalled
 
         await VCamAlert.showModal(
-            title: isNewCameraInstalled ? L10n.deleteOldDALPlugin.text : L10n.migrateToNewVirtualCamera.text,
-            message: isNewCameraInstalled ? L10n.deleteOldDALPluginMessage.text : L10n.migrateToNewVirtualCameraMessage.text,
+            title: isNewCameraInstalled ? String(localized: .deleteOldDALPlugin) : String(localized: .migrateToNewVirtualCamera),
+            message: isNewCameraInstalled ? String(localized: .deleteOldDALPluginMessage) : String(localized: .migrateToNewVirtualCameraMessage),
             canCancel: false
         )
 
@@ -116,8 +116,8 @@ extension Migration {
         Logger.log("Migrating to 0.13.1 from \(version.map(String.init).joined(separator: "."))")
 
         await VCamAlert.showModal(
-            title: L10n.update.text,
-            message: L10n.explainAboutReinstallingCameraExtension.text,
+            title: String(localized: .update),
+            message: String(localized: .explainAboutReinstallingCameraExtension),
             canCancel: false
         )
 
@@ -126,9 +126,9 @@ extension Migration {
             NSWorkspace.shared.open(.cameraExtension)
             try await CameraExtension().installExtension()
             _ = await VirtualCameraManager.shared.installAndStartCameraExtension()
-            await VCamAlert.showModal(title: L10n.success.text, message: L10n.restartAfterInstalling.text, canCancel: false)
+            await VCamAlert.showModal(title: String(localized: .success), message: String(localized: .restartAfterInstalling), canCancel: false)
         } catch {
-            await VCamAlert.showModal(title: L10n.failure.text, message: L10n.failedToInstallCameraExtension.text, canCancel: false)
+            await VCamAlert.showModal(title: String(localized: .failure), message: String(localized: .failedToInstallCameraExtension), canCancel: false)
             Logger.error(error)
         }
     }

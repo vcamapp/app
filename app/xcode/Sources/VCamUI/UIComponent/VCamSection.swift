@@ -1,19 +1,12 @@
-//
-//  VCamSection.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2022/04/23.
-//
-
 import SwiftUI
 
 public struct VCamSection<Content: View>: View {
-    public init(_ title: LocalizedStringKey, @ViewBuilder content: () -> Content) {
+    public init(_ title: LocalizedStringResource, @ViewBuilder content: () -> Content) {
         self.title = title
         self.content = content()
     }
 
-    let title: LocalizedStringKey
+    let title: LocalizedStringResource
     let content: Content
     @State private var isExpanded = false
 
@@ -25,7 +18,7 @@ public struct VCamSection<Content: View>: View {
             .padding(.top, 8)
             .padding(.leading)
         } label: {
-            Text(title, bundle: .localize)
+            Text(title)
                 .bold()
                 .contentShape(Rectangle())
                 .onTapGesture {

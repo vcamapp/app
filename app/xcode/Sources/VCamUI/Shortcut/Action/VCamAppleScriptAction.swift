@@ -1,13 +1,5 @@
-//
-//  VCamAppleScriptAction.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2023/04/16.
-//
-
 import AppKit
 import VCamEntity
-import VCamLocalization
 import struct SwiftUI.Image
 
 public struct VCamAppleScriptAction: VCamAction {

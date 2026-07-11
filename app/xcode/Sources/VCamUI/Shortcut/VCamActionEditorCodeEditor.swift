@@ -16,10 +16,10 @@ struct VCamActionEditorCodeEditor: View {
         VStack {
             HStack {
                 FlatButton(action: openScript) {
-                    Text(L10n.openFile.key, bundle: .localize)
+                    Text(.openFile)
                 }
                 FlatButton(action: loadScript) {
-                    Text(L10n.reload.key, bundle: .localize)
+                    Text(.reload)
                 }
             }
             .font(.caption2)

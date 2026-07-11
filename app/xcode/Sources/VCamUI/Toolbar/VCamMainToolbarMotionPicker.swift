@@ -1,10 +1,3 @@
-//
-//  VCamMainToolbarMotionPicker.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2023/02/12.
-//
-
 import SwiftUI
 import VCamBridge
 import VCamData
@@ -39,7 +32,7 @@ public struct VCamMainToolbarMotionPicker: View {
                                 }
                             }
                         ) {
-                            Text(.init(motion.name), bundle: .localize)
+                            Text(motion.name)
                         }
 
 #if !FEATURE_3
@@ -69,7 +62,7 @@ public struct VCamMainToolbarMotionPicker: View {
 
 extension VCamMainToolbarMotionPicker: MacWindow {
     public var windowTitle: String {
-        L10n.motion.text
+        String(localized: .motion)
     }
 
     public func configureWindow(_ window: NSWindow) -> NSWindow {

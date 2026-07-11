@@ -1,18 +1,17 @@
 import SwiftUI
-import VCamLocalization
 
 public struct ColorEditField: View {
-    public init(_ label: LocalizedStringKey, value: Binding<Color>) {
+    public init(_ label: LocalizedStringResource, value: Binding<Color>) {
         self.label = label
         self._value = value
     }
 
-    let label: LocalizedStringKey
+    let label: LocalizedStringResource
     @Binding var value: Color
 
     public var body: some View {
         ColorPicker(selection: $value) {
-            Text(label, bundle: .localize).bold()
+            Text(label).bold()
                 .lineLimit(1)
                 .modifier { view in
                     if #available(macOS 26.0, *) {

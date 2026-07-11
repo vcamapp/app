@@ -1,14 +1,6 @@
-//
-//  VCamSettingView.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2023/02/12.
-//
-
 import SwiftUI
 import VCamEntity
 import VCamCamera
-import VCamLocalization
 import AVFoundation
 
 public struct VCamSettingView: View {
@@ -26,26 +18,26 @@ public struct VCamSettingView: View {
 
         public var id: Self { self }
 
-        var title: LocalizedStringKey {
+        var title: String {
             switch self {
             case .general:
-                L10n.general.key
+                String(localized: .general)
             case .rendering:
-                L10n.rendering.key
+                String(localized: .rendering)
             case .tracking:
-                L10n.tracking.key
+                String(localized: .tracking)
             case .virtualCamera:
-                L10n.virtualCamera.key
+                String(localized: .virtualCamera)
             case .integration:
-                L10n.integration.key
+                String(localized: .integration)
             case .experiment:
-                L10n.experiment.key
+                String(localized: .experiment)
 #if ENABLE_ACCOUNT
             case .account:
-                L10n.license.key
+                String(localized: .license)
 #endif
             case .vcam:
-                LocalizedStringKey(Bundle.main.displayName)
+                Bundle.main.displayName
             }
         }
 
@@ -77,8 +69,6 @@ public struct VCamSettingView: View {
 
     @Bindable private var recorder = VideoRecorder.shared
 
-    @AppStorage(key: .locale) var locale
-
     public init(tab: Tab = .general) {
         self._tab = State(initialValue: tab)
     }
@@ -87,11 +77,12 @@ public struct VCamSettingView: View {
         HStack {
             List(Tab.allCases, selection: $tab) { tab in
                 Label {
-                    Text(tab.title, bundle: .localize)
+                    Text(verbatim: tab.title)
                         .font(.callout)
                 } icon: {
                     tab.icon
                 }
+                .accessibilityIdentifier("settings.tab.\(tab)")
             }
             .listStyle(.sidebar)
             .frame(width: 150)
@@ -120,14 +111,13 @@ public struct VCamSettingView: View {
             }
             .frame(minWidth: 500, maxHeight: .infinity, alignment: .top)
         }
-        .environment(\.locale, locale.isEmpty ? .current : Locale(identifier: locale))
         .disabled(recorder.isRecording)
         .rootView()
     }
 }
 
 extension VCamSettingView: MacWindow {
-    public var windowTitle: String { L10n.settings.text }
+    public var windowTitle: String { String(localized: .settings) }
 
     public func configureWindow(_ window: NSWindow) -> NSWindow {
         window.level = .floating

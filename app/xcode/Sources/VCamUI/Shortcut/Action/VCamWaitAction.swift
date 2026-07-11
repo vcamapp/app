@@ -1,13 +1,5 @@
-//
-//  VCamWaitAction.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2023/04/02.
-//
-
 import Foundation
 import VCamEntity
-import VCamLocalization
 import struct SwiftUI.Image
 
 public struct VCamWaitAction: VCamAction {
@@ -16,7 +8,7 @@ public struct VCamWaitAction: VCamAction {
     }
 
     public var configuration: VCamWaitActionConfiguration
-    public var name: String { L10n.wait.text }
+    public var name: String { String(localized: .wait) }
     public var icon: Image { Image(systemName: "timer") }
 
     @MainActor

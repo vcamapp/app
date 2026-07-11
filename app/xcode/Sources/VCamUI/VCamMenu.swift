@@ -17,28 +17,24 @@ public enum VCamMenuItem: Identifiable, CaseIterable {
     
     public var id: Self { self }
 
-    public var title: LocalizedStringKey {
+    public var title: LocalizedStringResource {
         switch self {
         case .main:
-            return L10n.main.key
+            return .main
 #if FEATURE_3
         case .screenEffect:
-            return L10n.screenEffect.key
+            return .screenEffect
 #endif
         case .recording:
-            return L10n.recording.key
+            return .recording
         }
     }
 
     public var icon: Image {
         switch self {
         case .main:
-#if CI_TESTING
-            Image("SymbolIcon", bundle: .module)
-#else
             Image(.symbolIcon)
                 .resizable()
-#endif
 #if FEATURE_3
         case .screenEffect:
             Image(systemName: "sparkles")
@@ -62,10 +58,11 @@ public struct VCamMenu: View {
                     item.icon
                         .scaledToFit()
                         .frame(width: 16)
-                    Text(item.title, bundle: .localize)
+                    Text(item.title)
                         .font(.callout)
                 }
                 .buttonStyle(VCamMenuButtonStyle(isSelected: item == state.currentMenu))
+                .accessibilityIdentifier("menu.\(item)")
             }
             Spacer()
             MenuBottomView()
@@ -82,7 +79,6 @@ private struct MenuBottomView: View {
 
     @Bindable private var recorder = VideoRecorder.shared
 
-    @Environment(\.locale) private var locale
 
     var body: some View {
         VStack(spacing: 2) {
@@ -114,11 +110,10 @@ private struct MenuBottomView: View {
                     }
                     .buttonStyle(.plain)
                     .popover(isPresented: $isScenePopover) {
-                        VCamPopoverContainerWithWindow(L10n.scene.key) {
+                        VCamPopoverContainerWithWindow(.scene) {
                             VCamSceneListView()
                         }
                         .frame(width: 200, height: 240)
-                        .environment(\.locale, locale)
                     }
                     .offset(y: -8)
                 }

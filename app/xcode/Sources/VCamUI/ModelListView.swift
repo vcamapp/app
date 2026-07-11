@@ -2,7 +2,6 @@ import SwiftUI
 import VCamUIFoundation
 import VCamData
 import VCamBridge
-import VCamLocalization
 
 public struct ModelListView: View {
     @Bindable private var modelManager: ModelManager
@@ -47,22 +46,22 @@ public struct ModelListView: View {
                 selectedModel = lastModel
             }
         }
-        .alert(L10n.delete.text, isPresented: $showDeleteConfirmation) {
+        .alert(.delete, isPresented: $showDeleteConfirmation) {
             Button(role: .cancel) {
                 modelToDelete = nil
             } label: {
-                Text(L10n.cancel.key, bundle: .localize)
+                Text(.cancel)
             }
             Button(role: .destructive) {
                 if let model = modelToDelete {
                     deleteModel(model)
                 }
             } label: {
-                Text(L10n.delete.key, bundle: .localize)
+                Text(.delete)
             }
         } message: {
             if let model = modelToDelete {
-                Text(L10n.confirmDeleteModel(model.model.localizedName).key, bundle: .localize)
+                Text(.confirmDeleteModel(model.model.localizedName))
             }
         }
     }
@@ -72,7 +71,7 @@ public struct ModelListView: View {
         if modelManager.modelItems.isEmpty {
             ContentUnavailableView {
                 Label {
-                    Text(L10n.noModelsFound.key, bundle: .localize)
+                    Text(.noModelsFound)
                 } icon: {
                     Image(systemName: "figure.arms.open")
                 }
@@ -102,20 +101,20 @@ public struct ModelListView: View {
                         modelToRename = item
                     } label: {
                         Image(systemName: "pencil")
-                        Text(L10n.rename.key, bundle: .localize)
+                        Text(.rename)
                     }
                     Button {
                         changeThumbnail(item)
                     } label: {
                         Image(systemName: "photo")
-                        Text(L10n.changeThumbnail.key, bundle: .localize)
+                        Text(.changeThumbnail)
                     }
                     if item.status == .valid {
                         Button {
                             duplicateModel(item)
                         } label: {
                             Image(systemName: "doc.on.doc")
-                            Text(L10n.duplicate.key, bundle: .localize)
+                            Text(.duplicate)
                         }
                     }
                     Divider()
@@ -124,7 +123,7 @@ public struct ModelListView: View {
                         showDeleteConfirmation = true
                     } label: {
                         Image(systemName: "trash")
-                        Text(L10n.delete.key, bundle: .localize)
+                        Text(.delete)
                     }
                     .disabled(modelManager.modelItems.count <= 1)
                 }
@@ -144,7 +143,7 @@ public struct ModelListView: View {
             Button {
                 loadSelectedModel()
             } label: {
-                Text(L10n.loadModel.key, bundle: .localize)
+                Text(.loadModel)
             }
             .disabled(selectedModel == nil || selectedModel?.status == .missing)
             .keyboardShortcut(.return, modifiers: [])
@@ -233,7 +232,7 @@ struct ModelRowView: View {
             VStack(alignment: .leading, spacing: 2) {
                 HStack {
                     if shouldEdit {
-                        TextField("", text: $editingName)
+                        TextField(text: $editingName) { EmptyView() }
                             .font(.body)
                             .textFieldStyle(.plain)
                             .focused($isFocused)
@@ -254,7 +253,7 @@ struct ModelRowView: View {
                             }
                     }
                     if item.status == .missing {
-                        Text("(\(L10n.modelMissing.text))")
+                        Text(verbatim: "(\(String(localized: .modelMissing)))")
                             .font(.caption)
                             .foregroundStyle(.red)
                     }
@@ -308,7 +307,7 @@ struct ModelRowView: View {
 }
 
 extension ModelListView: MacWindow {
-    public var windowTitle: String { L10n.modelList.text }
+    public var windowTitle: String { String(localized: .modelList) }
 
     public func configureWindow(_ window: NSWindow) -> NSWindow {
         window.level = .floating
@@ -316,7 +315,7 @@ extension ModelListView: MacWindow {
     }
 }
 
-#if DEBUG
+#if DEBUG && FEATURE_3
 
 #Preview("Empty") {
     ModelListView()

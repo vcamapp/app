@@ -1,24 +1,17 @@
-//
-//  VCamPopoverContainer.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2023/02/14.
-//
-
 import SwiftUI
 
 public struct VCamPopoverContainer<Content: View>: View {
-    public init(_ title: LocalizedStringKey, @ViewBuilder content: @escaping () -> Content) {
+    public init(_ title: LocalizedStringResource, @ViewBuilder content: @escaping () -> Content) {
         self.title = title
         self.content = content
     }
 
-    let title: LocalizedStringKey
+    let title: LocalizedStringResource
     let content: () -> Content
 
     public var body: some View {
         VStack(spacing: 1) {
-            Text(title, bundle: .localize)
+            Text(title)
                 .font(.caption)
 
             content()
@@ -29,19 +22,19 @@ public struct VCamPopoverContainer<Content: View>: View {
 }
 
 public struct VCamPopoverContainerWithButton<Content: View, ButtonContent: View>: View {
-    public init(_ title: LocalizedStringKey, @ViewBuilder button: @escaping () -> ButtonContent, @ViewBuilder content: @escaping () -> Content) {
+    public init(_ title: LocalizedStringResource, @ViewBuilder button: @escaping () -> ButtonContent, @ViewBuilder content: @escaping () -> Content) {
         self.title = title
         self.button = button
         self.content = content
     }
 
-    let title: LocalizedStringKey
+    let title: LocalizedStringResource
     let button: () -> ButtonContent
     let content: () -> Content
 
     public var body: some View {
         VStack(spacing: 1) {
-            Text(title, bundle: .localize)
+            Text(title)
                 .font(.caption)
                 .frame(maxWidth: .infinity)
                 .background(alignment: .topTrailing) {
@@ -59,12 +52,12 @@ public struct VCamPopoverContainerWithButton<Content: View, ButtonContent: View>
 
 
 public struct VCamPopoverContainerWithWindow<Content: MacWindow>: View {
-    public init(_ title: LocalizedStringKey, @ViewBuilder content: @escaping () -> Content) {
+    public init(_ title: LocalizedStringResource, @ViewBuilder content: @escaping () -> Content) {
         self.title = title
         self.content = content
     }
 
-    let title: LocalizedStringKey
+    let title: LocalizedStringResource
     let content: () -> Content
 
     public var body: some View {
@@ -83,7 +76,7 @@ public struct VCamPopoverContainerWithWindow<Content: MacWindow>: View {
 struct VCamMainToolbarContainer_Previews: PreviewProvider {
     static var previews: some View {
         VCamPopoverContainer("hello") {
-            Text("world")
+            Text(verbatim: "world")
         }
     }
 }

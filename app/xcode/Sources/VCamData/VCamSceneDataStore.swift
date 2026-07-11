@@ -1,6 +1,5 @@
 import Foundation
 import VCamEntity
-import VCamLocalization
 import VCamBridge
 
 public struct VCamSceneDataStore {
@@ -76,8 +75,8 @@ extension VCamSceneDataStore {
 
     public func makeNewScene() -> VCamScene {
         try? addSceneIdIfNeeded()
-        return .init(id: sceneId, name: L10n.scene.text, objects: [
-            .init(id: SceneObject.avatarID, name: L10n.model.text, type: .avatar(state: .zero), isHidden: false, isLocked: false)
+        return .init(id: sceneId, name: "", objects: [
+            .init(id: SceneObject.avatarID, name: "", type: .avatar(state: .zero), isHidden: false, isLocked: false)
         ], aspectRatio: MainTexture.shared.aspectRatio)
     }
 

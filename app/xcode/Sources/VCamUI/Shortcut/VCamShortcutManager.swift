@@ -69,6 +69,6 @@ public final class VCamShortcutManager {
     }
 
     private func showError(_ error: any Error) {
-        MacWindowManager.shared.open(VCamAlert(windowTitle: L10n.failure.text, message: error.localizedDescription, canCancel: false, okTitle: "OK", onOK: {}, onCancel: {}))
+        MacWindowManager.shared.open(VCamAlert(windowTitle: String(localized: .failure), message: error.localizedDescription, canCancel: false, okTitle: "OK", onOK: {}, onCancel: {}))
     }
 }

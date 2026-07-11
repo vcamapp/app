@@ -1,10 +1,3 @@
-//
-//  VCamShortcutKeyField.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2023/04/16.
-//
-
 import SwiftUI
 import VCamEntity
 
@@ -26,7 +19,7 @@ struct VCamShortcutKeyField: View {
         Button {
             isKeyRecordingPresented = true
         } label: {
-            TextField("", text: .constant(keyWithPadding), prompt: Text(L10n.shortcutKey.key, bundle: .localize) + Text("  "))
+            TextField(text: .constant(keyWithPadding), prompt: Text(.shortcutKey) + Text(verbatim: "  ")) { EmptyView() }
                 .textFieldStyle(.roundedBorder)
                 .multilineTextAlignment(.leading)
                 .allowsHitTesting(false)

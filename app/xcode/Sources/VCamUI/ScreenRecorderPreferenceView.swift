@@ -6,7 +6,7 @@ import Combine
 @MainActor
 public func showScreenRecorderPreferenceView(capture: @escaping (ScreenRecorder) -> Void) {
     showSheet(
-        title: L10n.capturePreference.text,
+        title: String(localized: .capturePreference),
         view: { close in
             ScreenRecorderPreferenceView(close: close, capture: capture)
         }
@@ -35,7 +35,7 @@ public struct ScreenRecorderPreferenceView: View {
     }
 
     public var body: some View {
-        ModalSheet(doneTitle: L10n.addScreenCapture.text, doneDisabled: !screenRecorder.isRecording) {
+        ModalSheet(doneTitle: String(localized: .addScreenCapture), doneDisabled: !screenRecorder.isRecording) {
             dismiss()
         } done: {
             error = nil
@@ -51,26 +51,26 @@ public struct ScreenRecorderPreferenceView: View {
     var content: some View {
         ScrollView {
             Form {
-                Picker(L10n.captureType.text, selection: $captureConfig.captureType) {
-                    Text(L10n.entireDisplay.text)
+                Picker(.captureType, selection: $captureConfig.captureType) {
+                    Text(.entireDisplay)
                         .tag(ScreenRecorder.CaptureType.display)
-                    Text(L10n.independentWindow.text)
+                    Text(.independentWindow)
                         .tag(ScreenRecorder.CaptureType.independentWindow)
                 }
 
                 switch captureConfig.captureType {
                 case .display:
-                    Picker(L10n.display.text, selection: $captureConfig.display) {
+                Picker(.display, selection: $captureConfig.display) {
                         ForEach(availableContent?.displays ?? []) { display in
-                            Text("\(display.width) x \(display.height)")
+                            Text(verbatim: "\(display.width) x \(display.height)")
                                 .tag(SCDisplay?.some(display))
                         }
                     }
 
-                    Toggle(L10n.removeVCamFromCapture.text, isOn: $captureConfig.filterOutOwningApplication)
+                Toggle(.removeVCamFromCapture, isOn: $captureConfig.filterOutOwningApplication)
 
                 case .independentWindow:
-                    Picker(L10n.window.text, selection: $captureConfig.window) {
+                Picker(.window, selection: $captureConfig.window) {
                         ForEach(filteredWindows ?? []) { window in
                             Text(window.displayName)
                                 .tag(SCWindow?.some(window))
@@ -87,7 +87,7 @@ public struct ScreenRecorderPreferenceView: View {
             if let error = error {
                 Group {
                     if error._code == -3801 {
-                        Text(L10n.errorScreenCapturePermission.text)
+                        Text(.errorScreenCapturePermission)
                     } else {
                         Text(error.localizedDescription)
                     }

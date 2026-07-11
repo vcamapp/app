@@ -1,10 +1,3 @@
-//
-//  KeyRecordingPopoverView.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2023/04/15.
-//
-
 import SwiftUI
 import VCamEntity
 
@@ -35,11 +28,11 @@ public struct KeyRecordingPopoverView: View {
 
     @Environment(\.dismiss) var dismiss
 
-    var helpMessage: LocalizedStringKey? {
+    var helpMessage: LocalizedStringResource? {
         if keys.key.isEmpty {
-            return L10n.recordingShortcutKey.key
+            return .recordingShortcutKey
         } else if isError {
-            return L10n.recordingShortcutKeyError.key
+            return .recordingShortcutKeyError
         }
         return nil
     }
@@ -49,7 +42,7 @@ public struct KeyRecordingPopoverView: View {
             keyView
 
             if let helpMessage {
-                Text(helpMessage, bundle: .localize)
+                Text(helpMessage)
                     .fixedSize()
                     .foregroundStyle(isError ? .red : .init(.labelColor))
             }

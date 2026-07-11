@@ -1,10 +1,3 @@
-//
-//  VCamMainToolbar.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2023/02/12.
-//
-
 import SwiftUI
 import VCamEntity
 import VCamData
@@ -18,7 +11,6 @@ public struct VCamMainToolbar: View {
     @State private var isBlendShapePickerPopover = false
 
     @Environment(UniState.self) var uniState
-    @Environment(\.locale) var locale
     @OpenEmojiPicker var openEmojiPicker
 
     public var body: some View {
@@ -29,22 +21,20 @@ public struct VCamMainToolbar: View {
                 Image(systemName: "paintpalette.fill")
             }
             .popover(isPresented: $isPhotoPopover) {
-                VCamPopoverContainer(L10n.background.key) {
+                VCamPopoverContainer(.background) {
                     VCamMainToolbarBackgroundColorPicker()
                 }
-                .environment(\.locale, locale)
             }
 
             Item {
                 isEmojiPickerPopover.toggle()
             } label: {
-                Text("👍")
+                Text(verbatim: "👍")
             }
             .popover(isPresented: $isEmojiPickerPopover) {
-                VCamPopoverContainer(L10n.emoji.key) {
+                VCamPopoverContainer(.emoji) {
                     VCamMainToolbarEmojiPicker()
                 }
-                .environment(\.locale, locale)
                 .frame(width: 240)
             }
 
@@ -54,10 +44,9 @@ public struct VCamMainToolbar: View {
                 Image(systemName: "figure.wave")
             }
             .popover(isPresented: $isMotionPickerPopover) {
-                VCamPopoverContainerWithWindow(L10n.motion.key) {
+                VCamPopoverContainerWithWindow(.motion) {
                     VCamMainToolbarMotionPicker()
                 }
-                .environment(\.locale, locale)
                 .frame(width: 240)
             }
 
@@ -67,10 +56,9 @@ public struct VCamMainToolbar: View {
                 Image(systemName: "face.smiling")
             }
             .popover(isPresented: $isBlendShapePickerPopover) {
-                VCamPopoverContainerWithWindow(L10n.facialExpression.key) {
+                VCamPopoverContainerWithWindow(.facialExpression) {
                     VCamMainToolbarExpressionPicker()
                 }
-                .environment(\.locale, locale)
                 .frame(width: 280, height: 150)
             }
             .disabled(uniState.expressions.isEmpty)

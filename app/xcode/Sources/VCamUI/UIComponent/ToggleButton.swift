@@ -1,16 +1,9 @@
-//
-//  ToggleButton.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2022/04/11.
-//
-
 import SwiftUI
 import Combine
 
 public struct ToggleButton: View {
-    public init(_ title: LocalizedStringKey, isOn: Binding<Bool>) {
-        self.text = Text(title, bundle: .localize)
+    public init(_ title: LocalizedStringResource, isOn: Binding<Bool>) {
+        self.text = Text(title)
         self._isOn = isOn
     }
 

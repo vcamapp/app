@@ -105,11 +105,8 @@ private struct WindowContainer<Content: View>: View {
     let content: Content
     let nsWindow: NSWindow
 
-    @AppStorage(key: .locale) var locale
-
     var body: some View {
         content
-            .environment(\.locale, locale.isEmpty ? .current : Locale(identifier: locale))
             .environment(\.nsWindow, nsWindow)
     }
 }

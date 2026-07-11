@@ -27,7 +27,7 @@ public struct VCamMainView: View {
                     MacWindowManager.shared.open(VCamSettingView(tab: .virtualCamera))
                 } label: {
                     Image(systemName: "exclamationmark.triangle")
-                    Text(L10n.cameraExtensionAwaitingUserApproval.key, bundle: .localize)
+                    Text(.cameraExtensionAwaitingUserApproval)
                 }
                 .font(.footnote)
                 .frame(maxWidth: .infinity, alignment: .trailing)
@@ -36,17 +36,17 @@ public struct VCamMainView: View {
             let calibrateButton = FlatButton {
                 Tracking.shared.resetCalibration()
             } label: {
-                Text(L10n.calibrate.key, bundle: .localize)
+                Text(.calibrate)
                     .font(.callout)
                     .foregroundStyle(.secondary)
             }
             .flatButtonStyle(.label)
-            .help(L10n.helpCalibrate.text)
+            .help(.helpCalibrate)
 
             HStack {
                 if #available(macOS 26.0, *) {
                     GroupBox {
-                        SelectAllTextField(placeholder: L10n.message.text, text: $state.message)
+                        SelectAllTextField(placeholder: String(localized: .message), text: $state.message)
                             .padding(.horizontal, 8)
                     }
 
@@ -56,7 +56,7 @@ public struct VCamMainView: View {
                             .padding(.vertical, -1.5)
                     }
                 } else {
-                    SelectAllTextField(placeholder: L10n.message.text, text: $state.message)
+                    SelectAllTextField(placeholder: String(localized: .message), text: $state.message)
 
                     calibrateButton
                 }

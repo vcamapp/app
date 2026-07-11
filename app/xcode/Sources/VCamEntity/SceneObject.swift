@@ -1,13 +1,5 @@
-//
-//  SceneObject.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2023/03/24.
-//
-
 import Foundation
 import CoreGraphics
-import VCamLocalization
 import simd
 
 public protocol SceneObjectCroppableTexture: AnyObject {
@@ -19,7 +11,7 @@ public struct SceneObject: Identifiable {
     public init(id: Int32 = .random(in: 0..<Int32.max), type: ObjectType, name: String? = nil, isHidden: Bool, isLocked: Bool) {
         self.id = id
         self.type = type
-        self.name = name ?? type.name
+        self.name = name ?? ""
         self.isHidden = isHidden
         self.isLocked = isLocked
     }
@@ -41,23 +33,6 @@ public extension SceneObject {
         case videoCapture(VideoCapture)
         case web(Web)
         case wind(Wind = .random)
-
-        var name: String {
-            switch self {
-            case .avatar:
-                return L10n.model.text
-            case .image:
-                return L10n.image.text
-            case .screen:
-                return L10n.screen.text
-            case .videoCapture:
-                return L10n.videoCapture.text
-            case .web:
-                return L10n.web.text
-            case .wind:
-                return L10n.wind.text
-            }
-        }
 
         public var croppableTexture: (any SceneObjectCroppableTexture)? {
             switch self {
