@@ -3,13 +3,15 @@ import AVFAudio
 import VCamBridge
 import VCamEntity
 
-public protocol ScreenRecorderProtocol: AnyObject {
+@MainActor
+public protocol ScreenRecorderProtocol: AnyObject, Sendable {
     @concurrent
     func stopCapture() async
 }
 
+@MainActor
 @Observable
-public final class ScreenRecorder: NSObject, ScreenRecorderProtocol, @unchecked Sendable { // TODO: Fix Sendable conformance
+public final class ScreenRecorder: NSObject, ScreenRecorderProtocol {
     public enum CaptureType {
         case independentWindow
         case display
@@ -110,7 +112,7 @@ public final class ScreenRecorder: NSObject, ScreenRecorderProtocol, @unchecked 
 
     @ObservationIgnored public private(set) var captureConfig: CaptureConfiguration?
     @ObservationIgnored private var stream: SCStream?
-    @ObservationIgnored private var cpuStartTime = mach_absolute_time()
+    @ObservationIgnored nonisolated(unsafe) private var cpuStartTime = mach_absolute_time()
     @ObservationIgnored private var mediaStartTime = CACurrentMediaTime()
     private let videoSampleBufferQueue = DispatchQueue(label: "com.github.tattn.vcam.queue.screenrecorder.video")
     private let audioSampleBufferQueue = DispatchQueue(label: "com.github.tattn.vcam.queue.screenrecorder.audio")
@@ -226,22 +228,19 @@ public final class ScreenRecorder: NSObject, ScreenRecorderProtocol, @unchecked 
         let streamConfig = SCStreamConfiguration()
 
         streamConfig.capturesAudio = captureConfig.capturesAudio
-        streamConfig.sampleRate = 44100 // not working?
+        streamConfig.sampleRate = 48000
         streamConfig.channelCount = 1
 //            streamConfig.excludesCurrentProcessAudio = isAppAudioExcluded // if excludes
 
-        if let minimumFrameInterval = captureConfig.minimumFrameInterval {
-            streamConfig.minimumFrameInterval = minimumFrameInterval
-        }
+        streamConfig.minimumFrameInterval =
+            captureConfig.minimumFrameInterval
+            ?? CMTime(value: 1, timescale: CMTimeScale(60))
 
         // Set the capture size to twice the display size to support retina displays.
         if let display = captureConfig.display, captureConfig.captureType == .display {
             streamConfig.width = display.width * 2
             streamConfig.height = display.height * 2
         }
-
-        // Set the capture interval at 60 fps.
-        streamConfig.minimumFrameInterval = CMTime(value: 1, timescale: CMTimeScale(60))
 
         // Increase the depth of the frame queue to ensure high fps at the expense of increasing
         // the memory footprint of WindowServer.
@@ -250,7 +249,7 @@ public final class ScreenRecorder: NSObject, ScreenRecorderProtocol, @unchecked 
         return streamConfig
     }
 
-    private func convertToSeconds(_ machTime: UInt64) -> TimeInterval {
+    nonisolated private func convertToSeconds(_ machTime: UInt64) -> TimeInterval {
         var timebase = mach_timebase_info_data_t()
         mach_timebase_info(&timebase)
         let nanoseconds = machTime * UInt64(timebase.numer) / UInt64(timebase.denom)
@@ -259,6 +258,7 @@ public final class ScreenRecorder: NSObject, ScreenRecorderProtocol, @unchecked 
 }
 
 extension ScreenRecorder: SCStreamOutput {
+    nonisolated
     public func stream(_ stream: SCStream, didOutputSampleBuffer sampleBuffer: CMSampleBuffer, of type: SCStreamOutputType) {
         guard sampleBuffer.isValid else {
             return
@@ -268,21 +268,21 @@ extension ScreenRecorder: SCStreamOutput {
             guard let frame = createCapturedFrame(for: sampleBuffer) else {
                 return
             }
-            DispatchQueue.main.async {
-                self.latestFrame = frame
-                self.didVideoOutput?(frame)
+            Task { @MainActor in
+                latestFrame = frame
+                didVideoOutput?(frame)
             }
         } else if type == .audio {
 //            guard let buffer = createPCMBuffer(for: sampleBuffer) else {
 //                return
 //            }
-            DispatchQueue.main.async {
+            Task { @MainActor in
                 self.didAudioOutput?(sampleBuffer)
             }
         }
     }
 
-    private func createCapturedFrame(for sampleBuffer: CMSampleBuffer) -> CapturedFrame? {
+    nonisolated private func createCapturedFrame(for sampleBuffer: CMSampleBuffer) -> CapturedFrame? {
         guard let attachmentsArray = CMSampleBufferGetSampleAttachmentsArray(sampleBuffer, createIfNecessary: true) as? [[SCStreamFrameInfo: Any]],
               let attachments = attachmentsArray.first else {
             return nil
@@ -326,7 +326,7 @@ extension ScreenRecorder: SCStreamOutput {
                              scaleFactor: scaleFactor)
     }
 
-    private func createPCMBuffer(for sampleBuffer: CMSampleBuffer) -> AVAudioPCMBuffer? {
+    nonisolated private func createPCMBuffer(for sampleBuffer: CMSampleBuffer) -> AVAudioPCMBuffer? {
         var ablPointer: UnsafePointer<AudioBufferList>?
         try? sampleBuffer.withAudioBufferList(flags: .audioBufferListAssure16ByteAlignment) { audioBufferList, blockBuffer in
             ablPointer = audioBufferList.unsafePointer
@@ -339,8 +339,9 @@ extension ScreenRecorder: SCStreamOutput {
 }
 
 extension ScreenRecorder: SCStreamDelegate {
+    nonisolated
     public func stream(_ stream: SCStream, didStopWithError error: any Error) {
-        DispatchQueue.main.async {
+        Task { @MainActor in
             self.error = error
             self.isRecording = false
         }
@@ -351,9 +352,9 @@ extension ScreenRecorder: RenderTextureRenderer {
     public func setRenderTexture(updator: @escaping (CIImage) -> Void) {
         didVideoOutput = { [weak self] frame in
             guard let self = self else { return }
-            DispatchQueue.main.async {
+            Task { @MainActor in
                 var image = frame.croppedCIImage
-                image = self.filter?.apply(to: image) ?? image
+                image = filter?.apply(to: image) ?? image
                 updator(image)
             }
         }
@@ -362,9 +363,8 @@ extension ScreenRecorder: RenderTextureRenderer {
         }
     }
 
-    @concurrent
     public func snapshot() async -> CIImage {
-        let frame = await MainActor.run { latestFrame }
+        let frame = latestFrame
         guard let frame else { return .init() }
         return frame.croppedCIImage
     }

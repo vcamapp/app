@@ -7,11 +7,34 @@ import VCamMedia
 import VCamTracking
 import VCamLogger
 
+public enum RecordingState {
+    case idle
+    case preparing
+    case recording
+    case finishing
+    case failed(Error)
+}
+
+private enum RecordingError: LocalizedError {
+    case appendFailed(AVMediaType)
+
+    var errorDescription: String? {
+        switch self {
+        case let .appendFailed(mediaType): "Failed to append \(mediaType.rawValue) media."
+        }
+    }
+}
+
+@MainActor
 @Observable
-public final class VideoRecorder: @unchecked Sendable { // TODO: Migrate new API for macOS 26+
+public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
     public static let shared = VideoRecorder()
 
-    public private(set) var isRecording = false
+    public private(set) var state: RecordingState = .idle
+    public var isRecording: Bool {
+        if case .recording = state { return true }
+        return false
+    }
 
     @ObservationIgnored private var assetwriter: AVAssetWriter?
     @ObservationIgnored private var assetVideoWriterAdaptor: AVAssetWriterInputPixelBufferAdaptor?
@@ -39,6 +62,17 @@ public final class VideoRecorder: @unchecked Sendable { // TODO: Migrate new API
 
     public func start(with outputDirectory: URL, name: String, format: VideoFormat, screenResolution: ScreenResolution, capturesSystemAudio: Bool) throws {
         Logger.log("")
+        guard case .idle = state else { return }
+        state = .preparing
+        do {
+            try startRecording(with: outputDirectory, name: name, format: format, screenResolution: screenResolution, capturesSystemAudio: capturesSystemAudio)
+        } catch {
+            state = .failed(error)
+            throw error
+        }
+    }
+
+    private func startRecording(with outputDirectory: URL, name: String, format: VideoFormat, screenResolution: ScreenResolution, capturesSystemAudio: Bool) throws {
         temporaryOutputURL = outputDirectory.appending(path: "\(name)_tmp.\(format.extension)")
         outputURL = outputDirectory.appending(path: "\(name).\(format.extension)")
 
@@ -92,7 +126,7 @@ public final class VideoRecorder: @unchecked Sendable { // TODO: Migrate new API
 
         assetwriter.startWriting()
 
-        isRecording = true
+        state = .recording
         frameCount = 0
         sampleCount = 0
         pcSampleCount = 0
@@ -122,6 +156,13 @@ public final class VideoRecorder: @unchecked Sendable { // TODO: Migrate new API
 
     public func stop() {
         Logger.log("")
+        switch state {
+        case .recording, .failed:
+            break
+        case .idle, .preparing, .finishing:
+            return
+        }
+        state = .finishing
 #if DEBUG
         debugTimer?.invalidate()
         debugTimer = nil
@@ -130,7 +171,6 @@ public final class VideoRecorder: @unchecked Sendable { // TODO: Migrate new API
         let audioOutputSettings = assetAudioWriterInput?.outputSettings as? [String: any Sendable] ?? [:]
 
         outputFile = nil
-        isRecording = false
         assetVideoWriterAdaptor = nil
         assetAudioWriterInput = nil
         converter = nil
@@ -138,7 +178,10 @@ public final class VideoRecorder: @unchecked Sendable { // TODO: Migrate new API
             AvatarAudioManager.shared.stop(usage: .record)
         }
 
-        guard let assetwriter else { return }
+        guard let assetwriter else {
+            state = .idle
+            return
+        }
 
         Task { @MainActor in
             defer {
@@ -153,21 +196,28 @@ public final class VideoRecorder: @unchecked Sendable { // TODO: Migrate new API
             self.pixelBuffer = nil
             self.assetwriter = nil
 
-            try await VideoConverter.mergeAudioTracks(
-                asset: AVURLAsset(url: self.temporaryOutputURL),
-                outputURL: self.outputURL,
-                fileType: assetwriter.outputFileType,
-                videoOutputSettings: videoOutputSettings,
-                audioOutputSettings: audioOutputSettings
-            )
+            do {
+                try await VideoConverter.mergeAudioTracks(
+                    asset: AVURLAsset(url: self.temporaryOutputURL),
+                    outputURL: self.outputURL,
+                    fileType: assetwriter.outputFileType,
+                    videoOutputSettings: videoOutputSettings,
+                    audioOutputSettings: audioOutputSettings
+                )
+                self.state = .idle
+            } catch {
+                self.state = .failed(error)
+                Logger.error(error)
+            }
         }
     }
 
-    @concurrent
     public func renderFrame(_ frame: CIImage) async {
-        guard let assetWriterAdaptor = assetVideoWriterAdaptor else { return }
+        guard case .recording = state,
+              let assetWriterAdaptor = assetVideoWriterAdaptor,
+              let pixelBuffer else { return }
 
-        context.render(frame, to: pixelBuffer!)
+        context.render(frame, to: pixelBuffer)
 
         if frameCount == 0 {
             startDate = Date()
@@ -178,13 +228,15 @@ public final class VideoRecorder: @unchecked Sendable { // TODO: Migrate new API
             assetwriter?.startSession(atSourceTime: CMTime.zero)
         }
 
-        assetWriterAdaptor.append(pixelBuffer!, withPresentationTime: currentPresentationTime)
+        guard assetWriterAdaptor.append(pixelBuffer, withPresentationTime: currentPresentationTime) else {
+            state = .failed(assetwriter?.error ?? RecordingError.appendFailed(.video))
+            return
+        }
         frameCount += 1
     }
 
-    @concurrent
     public func renderAudioFrame(_ pcmBuffer: AVAudioPCMBuffer, time: AVAudioTime, latency: TimeInterval, device: AudioDevice?) async {
-        guard isRecording, frameCount > 0 else { return }
+        guard case .recording = state, frameCount > 0 else { return }
 
         if sampleCount <= 0 {
             // Time from start of recording to capture.
@@ -217,12 +269,14 @@ public final class VideoRecorder: @unchecked Sendable { // TODO: Migrate new API
               let buffer = createSampleBuffer(pcmBuffer: convertedBuffer, sampleCount: &sampleCount) else {
             return
         }
-        assetAudioWriterInput?.append(buffer)
+        guard assetAudioWriterInput?.append(buffer) == true else {
+            state = .failed(assetwriter?.error ?? RecordingError.appendFailed(.audio))
+            return
+        }
     }
 
-    @concurrent
     func renderPCAudioFrame(_ sampleBuffer: CMSampleBuffer, startTime: CFTimeInterval) async {
-        guard isRecording, frameCount > 0,
+        guard case .recording = state, frameCount > 0,
                 let formatDescription = sampleBuffer.formatDescription,
               let sampleRate = (formatDescription.audioStreamBasicDescription?.mSampleRate).flatMap(TimeInterval.init),
               var sampleTimingInfo = (try? sampleBuffer.sampleTimingInfos())?.first
@@ -257,7 +311,10 @@ public final class VideoRecorder: @unchecked Sendable { // TODO: Migrate new API
         var newSampleBuffer: CMSampleBuffer?
         CMSampleBufferCreateCopyWithNewTiming(allocator: kCFAllocatorDefault, sampleBuffer: sampleBuffer, sampleTimingEntryCount: entryCount, sampleTimingArray: &sampleTimingInfo, sampleBufferOut: &newSampleBuffer)
 
-        assetPCAudioWriterInput?.append(newSampleBuffer ?? sampleBuffer)
+        guard assetPCAudioWriterInput?.append(newSampleBuffer ?? sampleBuffer) == true else {
+            state = .failed(assetwriter?.error ?? RecordingError.appendFailed(.audio))
+            return
+        }
 
         pcSampleCount += CMTimeValue(sampleBuffer.duration.seconds * sampleRate)
     }

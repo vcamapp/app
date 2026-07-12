@@ -80,9 +80,9 @@ private struct CaptureDeviceSelectView: View {
             // Using CIImage accumulates memory, so convert to CGImage using VideoToolbox.
             var cgImage: CGImage?
             _ = VTCreateCGImageFromCVPixelBuffer(frame.buffer, options: nil, imageOut: &cgImage)
-            let nsImage = cgImage.map { NSImage(cgImage: $0, size: .init(width: $0.width, height: $0.height)) }
-            DispatchQueue.main.async { [self] in
-                preview = nsImage
+            Task { @MainActor in
+                guard let cgImage else { return }
+                preview = NSImage(cgImage: cgImage, size: .init(width: cgImage.width, height: cgImage.height))
             }
         }
     }
