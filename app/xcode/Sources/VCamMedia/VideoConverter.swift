@@ -6,6 +6,7 @@ public enum VideoConverter { // TODO: Migrate to new API for macOS 26+
     private final class ConversionState: @unchecked Sendable {
         private let errorStorage = Mutex<Error?>(nil)
         private let finishedInputs = Mutex<Set<String>>([])
+        private let completionStorage = Mutex(false)
 
         var error: Error? {
             errorStorage.withLock { $0 }
@@ -20,6 +21,29 @@ public enum VideoConverter { // TODO: Migrate to new API for macOS 26+
         func finishInput(_ name: String) -> Bool {
             finishedInputs.withLock { inputs in
                 inputs.insert(name).inserted
+            }
+        }
+
+        func complete() -> Bool {
+            completionStorage.withLock { completed in
+                guard !completed else { return false }
+                completed = true
+                return true
+            }
+        }
+    }
+
+    private final class ContinuationBox: @unchecked Sendable {
+        private let storage = Mutex<CheckedContinuation<Void, Error>?>(nil)
+
+        func store(_ continuation: CheckedContinuation<Void, Error>) {
+            storage.withLock { $0 = continuation }
+        }
+        
+        func take() -> CheckedContinuation<Void, Error>? {
+            storage.withLock { value in
+                defer { value = nil }
+                return value
             }
         }
     }
@@ -107,15 +131,26 @@ public enum VideoConverter { // TODO: Migrate to new API for macOS 26+
         guard writer.startWriting() else { throw ConversionError.failedToStartWriting(writer.error) }
         writer.startSession(atSourceTime: .zero)
 
+        let cancellationBox = ContinuationBox()
         try await withTaskCancellationHandler {
             try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
                 let group = DispatchGroup()
                 let state = ConversionState()
+                cancellationBox.store(continuation)
                 group.enter()
                 group.enter()
 
                 let videoQueue = DispatchQueue(label: "vcam.mergeAudioTracks.videoQueue")
                 let audioQueue = DispatchQueue(label: "vcam.mergeAudioTracks.audioQueue")
+
+                func fail(_ error: Error) {
+                    state.set(error: error)
+                    reader.cancelReading()
+                    writer.cancelWriting()
+                    videoInput.markAsFinished()
+                    audioInput.markAsFinished()
+                    if state.complete() { cancellationBox.take()?.resume(throwing: error) }
+                }
 
                 videoInput.requestMediaDataWhenReady(on: videoQueue) {
                     while videoInput.isReadyForMoreMediaData {
@@ -125,9 +160,7 @@ public enum VideoConverter { // TODO: Migrate to new API for macOS 26+
                             return
                         }
                         guard videoInput.append(buffer) else {
-                            state.set(error: ConversionError.appendFailed(.video, writer.error))
-                            reader.cancelReading(); writer.cancelWriting()
-                            if state.finishInput("video") { group.leave() }
+                            fail(ConversionError.appendFailed(.video, writer.error))
                             return
                         }
                     }
@@ -140,32 +173,31 @@ public enum VideoConverter { // TODO: Migrate to new API for macOS 26+
                             return
                         }
                         guard audioInput.append(buffer) else {
-                            state.set(error: ConversionError.appendFailed(.audio, writer.error))
-                            reader.cancelReading(); writer.cancelWriting()
-                            if state.finishInput("audio") { group.leave() }
+                            fail(ConversionError.appendFailed(.audio, writer.error))
                             return
                         }
                     }
                 }
 
                 group.notify(queue: .global()) {
+                    guard state.complete() else { return }
                     if let error = state.error {
-                        continuation.resume(throwing: error)
+                        cancellationBox.take()?.resume(throwing: error)
                         return
                     }
                     guard reader.status == .completed else {
-                        continuation.resume(throwing: ConversionError.readerFailed(reader.error))
+                        cancellationBox.take()?.resume(throwing: ConversionError.readerFailed(reader.error))
                         return
                     }
                     guard writer.status == .writing || writer.status == .completed else {
-                        continuation.resume(throwing: ConversionError.writerFailed(writer.error))
+                        cancellationBox.take()?.resume(throwing: ConversionError.writerFailed(writer.error))
                         return
                     }
                     writer.finishWriting {
                         if writer.status == .completed {
-                            continuation.resume()
+                            cancellationBox.take()?.resume()
                         } else {
-                            continuation.resume(throwing: ConversionError.writerFailed(writer.error))
+                            cancellationBox.take()?.resume(throwing: ConversionError.writerFailed(writer.error))
                         }
                     }
                 }
@@ -173,6 +205,7 @@ public enum VideoConverter { // TODO: Migrate to new API for macOS 26+
         } onCancel: {
             reader.cancelReading()
             writer.cancelWriting()
+            cancellationBox.take()?.resume(throwing: CancellationError())
         }
 
         succeeded = true

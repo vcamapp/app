@@ -134,12 +134,34 @@ public actor CameraSession {
             }
             session.addOutput(videoOutput)
         }
-        if let old = deviceInput {
-            session.removeInput(old)
+        let oldInput = deviceInput
+        if let oldInput {
+            session.removeInput(oldInput)
         }
+
         guard session.canAddInput(input) else {
+            var restored = true
+            if let oldInput {
+                restored = session.canAddInput(oldInput)
+                if restored {
+                    session.addInput(oldInput)
+                }
+            }
             session.commitConfiguration()
-            if needsLock { device.unlockForConfiguration() }
+            if needsLock {
+                device.unlockForConfiguration()
+            }
+            if !restored {
+                deviceInput = nil
+                captureDevice = nil
+                selectedFormat = nil
+                captureSize = .zero
+                if let lockedDevice {
+                    lockedDevice.unlockForConfiguration()
+                }
+                self.lockedDevice = nil
+                throw CameraSessionError.cannotRestorePreviousInput
+            }
             throw CameraSessionError.cannotAddInput(device.uniqueID)
         }
         session.addInput(input)

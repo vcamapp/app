@@ -99,6 +99,15 @@ public struct VCamRecordingView: View {
                         }
                     }
                     .controlSize(.large)
+                    .disabled({
+                        if case .preparing = recorder.state {
+                            return true
+                        }
+                        if case .finishing = recorder.state {
+                            return true
+                        }
+                        return false
+                    }())
                     .accessibilityIdentifier("recording.startButton")
                     Spacer()
                     Picker(selection: $recordingVideoFormat) {

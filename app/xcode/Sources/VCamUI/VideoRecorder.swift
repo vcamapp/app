@@ -31,6 +31,7 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
     public static let shared = VideoRecorder()
 
     public private(set) var state: RecordingState = .idle
+    public private(set) var lastError: Error?
     public var isRecording: Bool {
         if case .recording = state { return true }
         return false
@@ -66,8 +67,9 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
         state = .preparing
         do {
             try startRecording(with: outputDirectory, name: name, format: format, screenResolution: screenResolution, capturesSystemAudio: capturesSystemAudio)
+            lastError = nil
         } catch {
-            state = .failed(error)
+            failRecording(error)
             throw error
         }
     }
@@ -206,8 +208,7 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
                 )
                 self.state = .idle
             } catch {
-                self.state = .failed(error)
-                Logger.error(error)
+                self.failRecording(error)
             }
         }
     }
@@ -229,7 +230,7 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
         }
 
         guard assetWriterAdaptor.append(pixelBuffer, withPresentationTime: currentPresentationTime) else {
-            state = .failed(assetwriter?.error ?? RecordingError.appendFailed(.video))
+            failRecording(assetwriter?.error ?? RecordingError.appendFailed(.video))
             return
         }
         frameCount += 1
@@ -270,7 +271,7 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
             return
         }
         guard assetAudioWriterInput?.append(buffer) == true else {
-            state = .failed(assetwriter?.error ?? RecordingError.appendFailed(.audio))
+            failRecording(assetwriter?.error ?? RecordingError.appendFailed(.audio))
             return
         }
     }
@@ -312,7 +313,7 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
         CMSampleBufferCreateCopyWithNewTiming(allocator: kCFAllocatorDefault, sampleBuffer: sampleBuffer, sampleTimingEntryCount: entryCount, sampleTimingArray: &sampleTimingInfo, sampleBufferOut: &newSampleBuffer)
 
         guard assetPCAudioWriterInput?.append(newSampleBuffer ?? sampleBuffer) == true else {
-            state = .failed(assetwriter?.error ?? RecordingError.appendFailed(.audio))
+            failRecording(assetwriter?.error ?? RecordingError.appendFailed(.audio))
             return
         }
 
@@ -328,6 +329,24 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
             sampleCount += CMTimeValue(pcmBuffer.frameLength)
         }
         return try? CMSampleBuffer.create(pcmBuffer: pcmBuffer, sampleCount: sampleCount)
+    }
+
+    private func failRecording(_ error: Error) {
+        lastError = error
+        assetwriter?.cancelWriting()
+        assetwriter = nil
+        assetVideoWriterAdaptor = nil
+        assetAudioWriterInput = nil
+        assetPCAudioWriterInput = nil
+        pixelBuffer = nil
+        converter = nil
+        if let systemAudioRecorder {
+            Task { await systemAudioRecorder.stopCapture() }
+        }
+        systemAudioRecorder = nil
+        AvatarAudioManager.shared.stop(usage: .record)
+        state = .idle
+        Logger.error(error)
     }
 }
 

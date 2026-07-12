@@ -7,6 +7,9 @@ import VCamLogger
 @MainActor
 public final class AvatarCameraManager {
     private let webCamera = AvatarWebCamera()
+    private var desiredCameraRunning = false
+    private var cameraLifecycleRevision: UInt64 = 0
+    private var cameraReconcileTask: Task<Void, Never>?
 
     nonisolated private static let permissionStorage = Mutex(PermissionState())
 
@@ -44,34 +47,13 @@ public final class AvatarCameraManager {
 
     private func start() {
         webCamera.isEmotionEnabled = UserDefaults.standard.value(for: .useEmotion)
-
-        if Self.isCameraAuthorized() {
-            Task {
-                do {
-                    try await webCamera.start()
-                } catch {
-                    Logger.log("Failed to start web camera: \(error.localizedDescription)")
-                }
-            }
-        } else {
-            Task {
-                guard await Self.requestCameraPermission() else {
-                    return
-                }
-
-                do {
-                    try await webCamera.start()
-                } catch {
-                    Logger.log("Failed to start web camera: \(error.localizedDescription)")
-                }
-            }
-        }
+        desiredCameraRunning = true
+        reconcileCameraState()
     }
 
     func stop() {
-        Task {
-            await webCamera.stop()
-        }
+        desiredCameraRunning = false
+        reconcileCameraState()
     }
 
     func resetCalibration() {
@@ -105,11 +87,28 @@ public final class AvatarCameraManager {
 
     public func setWebCamUsage(_ usage: AvatarWebCamera.Usage) {
         webCamera.usage = usage
-        if isWebCameraUsed {
-            start()
-        } else {
-            stop()
-        }
+        if isWebCameraUsed { start() } else { stop() }
         UniBridge.shared.useBlinker(isBlinkerUsed)
+    }
+
+    private func reconcileCameraState() {
+        cameraLifecycleRevision &+= 1
+        let revision = cameraLifecycleRevision
+        cameraReconcileTask?.cancel()
+        cameraReconcileTask = Task { @MainActor in
+            if self.desiredCameraRunning {
+                if !Self.isCameraAuthorized() {
+                    guard await Self.requestCameraPermission(), revision == self.cameraLifecycleRevision,
+                          self.desiredCameraRunning else { return }
+                }
+                do {
+                    try await self.webCamera.start()
+                } catch {
+                    Logger.log("Failed to start web camera: \(error.localizedDescription)")
+                }
+            } else {
+                await self.webCamera.stop()
+            }
+        }
     }
 }
