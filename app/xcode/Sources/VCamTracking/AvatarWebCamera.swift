@@ -1,21 +1,33 @@
 import AVFoundation
-import VCamCamera
 import VCamBridge
+import VCamCamera
 import VCamData
-import VCamLogger
-import os
 
+@MainActor
 public final class AvatarWebCamera {
-    public init() {
-        self.pipeline = VisionTrackingPipeline(frameStream: frameStream) { output in
-            Self.apply(output)
-        }
+    public enum State: Sendable, Equatable {
+        case stopped
+        case starting
+        case running
+        case stopping
+        case failed(String)
     }
 
-    private let cameraManager = CameraManager()
-    public let handTracking = HandTracking()
+    private let cameraSession: CameraSession
     private var frameStream = VisionFrameStream()
     private var pipeline: VisionTrackingPipeline
+    private var captureSize = CGSize.zero
+    public private(set) var state: State = .stopped
+    public let handTracking = HandTracking()
+
+    public init() {
+        let stream = VisionFrameStream()
+        frameStream = stream
+        pipeline = VisionTrackingPipeline(frameStream: stream) { output in
+            Self.apply(output)
+        }
+        cameraSession = CameraSession(initialFPS: Int(UserDefaults.standard.value(for: .cameraFps)))
+    }
 
     public struct Usage: OptionSet, Sendable {
         public let rawValue: UInt8
@@ -24,10 +36,10 @@ public final class AvatarWebCamera {
         }
 
         public static let disabled = Usage()
-        public static let faceTracking = Usage(rawValue: 0x1)
-        public static let handTracking = Usage(rawValue: 0x2)
-        public static let fingerTracking = Usage(rawValue: 0x4)
-        public static let lipTracking = Usage(rawValue: 0x8)
+        public static let faceTracking = Usage(rawValue: 1)
+        public static let handTracking = Usage(rawValue: 2)
+        public static let fingerTracking = Usage(rawValue: 4)
+        public static let lipTracking = Usage(rawValue: 8)
     }
 
     public var usage: Usage = [] {
@@ -43,84 +55,94 @@ public final class AvatarWebCamera {
     }
 
     public var currentCaptureDevice: AVCaptureDevice? {
-        guard let id = UserDefaults.standard.value(for: .captureDeviceId) else { return Camera.defaultCaptureDevice }
-        return Camera.camera(id: id) ?? Camera.defaultCaptureDevice
+        Camera.camera(id: currentCaptureDeviceID) ?? Camera.defaultCaptureDevice
     }
 
-    var isRunning: Bool {
-        cameraManager.isRunning
+    public var isRunning: Bool {
+        state == .running
     }
 
-    public func start() {
-        guard !cameraManager.isRunning else {
+    public func start() async throws {
+        guard state != .starting, state != .running else {
             return
         }
-        frameStream = VisionFrameStream()
-        pipeline = VisionTrackingPipeline(frameStream: frameStream) { output in
+        state = .starting
+        
+        let stream = VisionFrameStream()
+        let newPipeline = VisionTrackingPipeline(frameStream: stream) { output in
             Self.apply(output)
         }
-        cameraManager.didOutput = didOutput(sampleBuffer:)
-        try? cameraManager.setupAVCaptureSession(device: currentCaptureDevice)
-        updatePipelineConfiguration()
+        frameStream = stream
+        pipeline = newPipeline
+        await cameraSession.setFrameHandler { frame in
+            stream.yield(
+                VisionFrame(
+                    sampleBuffer: frame.sampleBuffer,
+                    timestamp: frame.timestamp,
+                    captureSize: frame.captureSize,
+                    orientation: .up
+                )
+            )
+        }
 
-        cameraManager.start()
-        Task { [pipeline] in
-            await pipeline.start()
+        do {
+            let snapshot = try await cameraSession.configure(
+                deviceID: currentCaptureDeviceID, fps: currentFPS)
+            captureSize = snapshot.captureSize
+            await newPipeline.updateConfiguration(configurationSnapshot())
+            await newPipeline.start()
+            try await cameraSession.start()
+            state = .running
+        } catch {
+            _ = await cameraSession.stop()
+            await cameraSession.setFrameHandler(nil)
+            await newPipeline.stop()
+            state = .failed(error.localizedDescription)
+            throw error
         }
     }
 
-    public func stop() {
-        cameraManager.stop()
-        Task { [pipeline] in
-            await pipeline.stop()
+    public func stop() async {
+        guard state != .stopped, state != .stopping else {
+            return
         }
+        state = .stopping
+        _ = await cameraSession.stop()
+        await cameraSession.setFrameHandler(nil)
+        await pipeline.stop()
+        state = .stopped
     }
 
-    public func setCaptureDevice(id: String?) {
-        Logger.log("")
-        if let id = id {
+    public func setCaptureDevice(id: String?) async throws {
+        let snapshot = try await cameraSession.setDevice(id: id)
+        captureSize = snapshot.captureSize
+        if let id {
             UserDefaults.standard.set(id, for: .captureDeviceId)
         }
-        let wasRunning = cameraManager.isRunning
-        if wasRunning {
-            stop()
-        } else {
-            cameraManager.stop()
-        }
-        try? cameraManager.setupAVCaptureSession(deviceId: id)
-        if wasRunning {
-            start()
-        }
+        await pipeline.updateConfiguration(configurationSnapshot())
     }
 
-    public func setFPS(_ fps: Int) {
-        cameraManager.setFPS(fps)
+    public func setFPS(_ fps: Int) async throws {
+        let snapshot = try await cameraSession.setFPS(fps)
+        captureSize = snapshot.captureSize
+        UserDefaults.standard.set(fps, for: .cameraFps)
+        await pipeline.updateConfiguration(configurationSnapshot())
     }
 
     public func resetCalibration() {
         Task { [pipeline] in
-            let prevRawEyeballY = await pipeline.previousRawEyeballY()
-            UserDefaults.standard.set(CGFloat(-prevRawEyeballY), for: .eyeTrackingOffsetY)
+            let y = await pipeline.previousRawEyeballY()
+            UserDefaults.standard.set(CGFloat(-y), for: .eyeTrackingOffsetY)
             await pipeline.calibrate()
         }
     }
 
-    private func didOutput(sampleBuffer: CMSampleBuffer) {
-        let snapshot = configurationSnapshot()
-        guard snapshot.needsFaceLandmarks || snapshot.needsHandPose else { return }
+    private var currentCaptureDeviceID: String? {
+        UserDefaults.standard.value(for: .captureDeviceId)
+    }
 
-        Task { [pipeline, snapshot] in
-            await pipeline.updateConfiguration(snapshot)
-        }
-
-        frameStream.yield(
-            VisionFrame(
-                sampleBuffer: SendableSampleBuffer(sampleBuffer),
-                timestamp: sampleBuffer.presentationTimeStamp,
-                captureSize: cameraManager.captureDeviceResolution,
-                orientation: .up
-            )
-        )
+    private var currentFPS: Int {
+        Int(UserDefaults.standard.value(for: .cameraFps))
     }
 
     private func updatePipelineConfiguration() {
@@ -131,15 +153,15 @@ public final class AvatarWebCamera {
     }
 
     private func configurationSnapshot() -> VisionTrackingConfigurationSnapshot {
-        let fingerConfiguration = handTracking.configuration
-        return VisionTrackingConfigurationSnapshot(
+        let configuration = handTracking.configuration
+        return .init(
             usage: usage,
             isEmotionEnabled: isEmotionEnabled,
-            captureSize: cameraManager.captureDeviceResolution,
-            finger: FingerTrackingConfigurationSnapshot(
-                open: fingerConfiguration.open,
-                close: fingerConfiguration.close,
-                isFingerEnabled: fingerConfiguration.isFingerEnabled
+            captureSize: captureSize,
+            finger: .init(
+                open: configuration.open,
+                close: configuration.close,
+                isFingerEnabled: configuration.isFingerEnabled
             )
         )
     }
@@ -152,11 +174,11 @@ public final class AvatarWebCamera {
         if let emotion = output.emotion {
             UniBridge.shared.facialExpression(emotion)
         }
-        if let handsValues = output.hands?.handsValues {
-            UniBridge.shared.hands(handsValues)
+        if let hands = output.hands?.handsValues {
+            UniBridge.shared.hands(hands)
         }
-        if let fingersValues = output.hands?.fingersValues {
-            UniBridge.shared.fingers(fingersValues)
+        if let fingers = output.hands?.fingersValues {
+            UniBridge.shared.fingers(fingers)
         }
     }
 }

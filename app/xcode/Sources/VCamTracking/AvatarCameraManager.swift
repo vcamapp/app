@@ -1,7 +1,8 @@
 import AVFoundation
 import Synchronization
-import VCamCamera
 import VCamBridge
+import VCamCamera
+import VCamLogger
 
 @MainActor
 public final class AvatarCameraManager {
@@ -45,17 +46,32 @@ public final class AvatarCameraManager {
         webCamera.isEmotionEnabled = UserDefaults.standard.value(for: .useEmotion)
 
         if Self.isCameraAuthorized() {
-            webCamera.start()
+            Task {
+                do {
+                    try await webCamera.start()
+                } catch {
+                    Logger.log("Failed to start web camera: \(error.localizedDescription)")
+                }
+            }
         } else {
             Task {
-                guard await Self.requestCameraPermission() else { return }
-                webCamera.start()
+                guard await Self.requestCameraPermission() else {
+                    return
+                }
+
+                do {
+                    try await webCamera.start()
+                } catch {
+                    Logger.log("Failed to start web camera: \(error.localizedDescription)")
+                }
             }
         }
     }
 
     func stop() {
-        webCamera.stop()
+        Task {
+            await webCamera.stop()
+        }
     }
 
     func resetCalibration() {
@@ -63,11 +79,23 @@ public final class AvatarCameraManager {
     }
 
     public func setCaptureDevice(id: String?) {
-        webCamera.setCaptureDevice(id: id)
+        Task {
+            do {
+                try await webCamera.setCaptureDevice(id: id)
+            } catch {
+                Logger.log("Failed to set web camera device: \(error.localizedDescription)")
+            }
+        }
     }
 
     public func setFPS(_ fps: Int) {
-        webCamera.setFPS(fps)
+        Task {
+            do {
+                try await webCamera.setFPS(fps)
+            } catch {
+                Logger.log("Failed to set web camera FPS: \(error.localizedDescription)")
+            }
+        }
     }
 
     public func setEmotionEnabled(_ isEnabled: Bool) {

@@ -1,10 +1,11 @@
 import AVFoundation
 import ImageIO
-import Vision
+import VCamCamera
 import VCamLogger
+import Vision
 
 struct VisionFrame: Sendable {
-    let sampleBuffer: SendableSampleBuffer
+    let sampleBuffer: CameraSampleBuffer
     let timestamp: CMTime
     let captureSize: CGSize
     let orientation: CGImagePropertyOrientation

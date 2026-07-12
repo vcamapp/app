@@ -1,7 +1,8 @@
-import Foundation
-import CoreImage
-import VCamDefaults
 import Combine
+import CoreImage
+import Foundation
+import VCamData
+import VCamDefaults
 
 public final class VirtualCameraManager: @unchecked Sendable {
     public static let shared = VirtualCameraManager()
@@ -48,6 +49,6 @@ public final class VirtualCameraManager: @unchecked Sendable {
     }
 }
 
-private extension UserDefaults {
-    @objc dynamic var vc_use_hmirror: Bool { value(for: .useHMirror) }
+extension UserDefaults {
+    @objc fileprivate dynamic var vc_use_hmirror: Bool { value(for: .useHMirror) }
 }
