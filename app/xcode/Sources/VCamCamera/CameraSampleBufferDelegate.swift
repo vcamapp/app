@@ -21,7 +21,6 @@ final class CameraSampleBufferDelegate: NSObject, AVCaptureVideoDataOutputSample
         frameHandler(
             CameraFrame(
                 sampleBuffer: CameraSampleBuffer(sampleBuffer),
-                timestamp: CMSampleBufferGetPresentationTimeStamp(sampleBuffer),
                 captureSize: CGSize(
                     width: CVPixelBufferGetWidth(pixelBuffer),
                     height: CVPixelBufferGetHeight(pixelBuffer)

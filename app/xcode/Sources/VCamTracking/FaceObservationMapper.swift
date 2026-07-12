@@ -32,15 +32,16 @@ struct FaceObservationMapper {
 
     mutating func map(
         observations: [FaceObservation],
+        captureSize: CGSize,
         configuration: VisionTrackingConfigurationSnapshot
     ) -> FaceTrackingOutput? {
-        guard Tracking.cachedFaceTrackingMethod == .default,
+        guard configuration.shouldOutputFace,
               let observation = observations.first,
               let landmarks = observation.landmarks else {
             return nil
         }
 
-        let landmarks2D = VisionLandmarks(landmarks: landmarks, imageSize: configuration.captureSize)
+        let landmarks2D = VisionLandmarks(landmarks: landmarks, imageSize: captureSize)
         let (headPosition, headRotation) = poseEstimator.estimate(landmarks2D, observation: observation)
         let facial = facialEstimator.estimate(landmarks2D)
         let values = [Float](

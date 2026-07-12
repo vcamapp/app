@@ -53,6 +53,7 @@ public actor CameraSession {
         autoreleaseFrequency: .workItem
     )
     private var videoOutputDelegate: CameraSampleBufferDelegate?
+    private var frameHandlerRevision: UInt64 = 0
     private var deviceInput: AVCaptureDeviceInput?
     private var captureDevice: AVCaptureDevice?
     private var selectedFormat: AVCaptureDevice.Format?
@@ -75,7 +76,9 @@ public actor CameraSession {
         requestedFPS = initialFPS > 0 ? initialFPS : 24
     }
 
-    public func setFrameHandler(_ handler: CameraFrameHandler?) {
+    public func setFrameHandler(_ handler: CameraFrameHandler?, revision: UInt64) {
+        guard revision >= frameHandlerRevision else { return }
+        frameHandlerRevision = revision
         videoOutput.setSampleBufferDelegate(nil, queue: nil)
         videoOutputDelegate = handler.map { CameraSampleBufferDelegate(frameHandler: $0) }
         if let delegate = videoOutputDelegate {

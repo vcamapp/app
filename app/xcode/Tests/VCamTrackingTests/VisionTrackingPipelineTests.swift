@@ -63,9 +63,12 @@ struct VisionTrackingPipelineTests {
 
     private func makeConfiguration(usage: AvatarWebCamera.Usage) -> VisionTrackingConfigurationSnapshot {
         VisionTrackingConfigurationSnapshot(
+            revision: 0,
             usage: usage,
             isEmotionEnabled: false,
-            captureSize: .init(width: 640, height: 480),
+            shouldOutputFace: usage.contains(.faceTracking),
+            shouldOutputHands: usage.contains(.handTracking),
+            shouldOutputFingers: usage.contains(.fingerTracking),
             finger: .init(open: 1, close: 1, isFingerEnabled: true)
         )
     }

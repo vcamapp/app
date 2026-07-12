@@ -12,16 +12,13 @@ public struct CameraSampleBuffer: @unchecked Sendable {
 
 public struct CameraFrame: Sendable {
     public let sampleBuffer: CameraSampleBuffer
-    public let timestamp: CMTime
     public let captureSize: CGSize
 
     public init(
         sampleBuffer: CameraSampleBuffer,
-        timestamp: CMTime,
         captureSize: CGSize
     ) {
         self.sampleBuffer = sampleBuffer
-        self.timestamp = timestamp
         self.captureSize = captureSize
     }
 }

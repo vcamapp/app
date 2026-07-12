@@ -16,7 +16,7 @@ public final class AvatarWebCamera {
     private let cameraSession: CameraSession
     private var frameStream = VisionFrameStream()
     private var pipeline: VisionTrackingPipeline
-    private var captureSize = CGSize.zero
+    private var configurationRevision: UInt64 = 0
     public private(set) var state: State = .stopped
     public let handTracking = HandTracking()
 
@@ -27,6 +27,11 @@ public final class AvatarWebCamera {
             Self.apply(output)
         }
         cameraSession = CameraSession(initialFPS: Int(UserDefaults.standard.value(for: .cameraFps)))
+        handTracking.setConfigurationChangeHandler { [weak self] in
+            Task { @MainActor in
+                self?.scheduleVisionConfigurationUpdate()
+            }
+        }
     }
 
     public struct Usage: OptionSet, Sendable {
@@ -44,13 +49,13 @@ public final class AvatarWebCamera {
 
     public var usage: Usage = [] {
         didSet {
-            updatePipelineConfiguration()
+            scheduleVisionConfigurationUpdate()
         }
     }
 
     public var isEmotionEnabled = false {
         didSet {
-            updatePipelineConfiguration()
+            scheduleVisionConfigurationUpdate()
         }
     }
 
@@ -74,28 +79,19 @@ public final class AvatarWebCamera {
         }
         frameStream = stream
         pipeline = newPipeline
-        await cameraSession.setFrameHandler { frame in
-            stream.yield(
-                VisionFrame(
-                    sampleBuffer: frame.sampleBuffer,
-                    timestamp: frame.timestamp,
-                    captureSize: frame.captureSize,
-                    orientation: .up
-                )
-            )
-        }
-
         do {
-            let snapshot = try await cameraSession.configure(
+            try await cameraSession.configure(
                 deviceID: currentCaptureDeviceID, fps: currentFPS)
-            captureSize = snapshot.captureSize
-            await newPipeline.updateConfiguration(configurationSnapshot())
+            let configuration = makeConfigurationSnapshot()
+            let handler = Self.makeFrameHandler(frameStream: stream, configuration: configuration)
+            await cameraSession.setFrameHandler(handler, revision: configuration.revision)
             await newPipeline.start()
             try await cameraSession.start()
             state = .running
         } catch {
             _ = await cameraSession.stop()
-            await cameraSession.setFrameHandler(nil)
+            configurationRevision &+= 1
+            await cameraSession.setFrameHandler(nil, revision: configurationRevision)
             await newPipeline.stop()
             state = .failed(error.localizedDescription)
             throw error
@@ -107,26 +103,23 @@ public final class AvatarWebCamera {
             return
         }
         state = .stopping
+        configurationRevision &+= 1
+        await cameraSession.setFrameHandler(nil, revision: configurationRevision)
         _ = await cameraSession.stop()
-        await cameraSession.setFrameHandler(nil)
         await pipeline.stop()
         state = .stopped
     }
 
     public func setCaptureDevice(id: String?) async throws {
-        let snapshot = try await cameraSession.setDevice(id: id)
-        captureSize = snapshot.captureSize
+        try await cameraSession.setDevice(id: id)
         if let id {
             UserDefaults.standard.set(id, for: .captureDeviceId)
         }
-        await pipeline.updateConfiguration(configurationSnapshot())
     }
 
     public func setFPS(_ fps: Int) async throws {
-        let snapshot = try await cameraSession.setFPS(fps)
-        captureSize = snapshot.captureSize
+        try await cameraSession.setFPS(fps)
         UserDefaults.standard.set(fps, for: .cameraFps)
-        await pipeline.updateConfiguration(configurationSnapshot())
     }
 
     public func resetCalibration() {
@@ -145,25 +138,46 @@ public final class AvatarWebCamera {
         Int(UserDefaults.standard.value(for: .cameraFps))
     }
 
-    private func updatePipelineConfiguration() {
-        let snapshot = configurationSnapshot()
-        Task { [pipeline] in
-            await pipeline.updateConfiguration(snapshot)
+    private func scheduleVisionConfigurationUpdate() {
+        guard state == .starting || state == .running else { return }
+        let configuration = makeConfigurationSnapshot()
+        let handler = Self.makeFrameHandler(frameStream: frameStream, configuration: configuration)
+        Task { [cameraSession] in
+            await cameraSession.setFrameHandler(handler, revision: configuration.revision)
         }
     }
 
-    private func configurationSnapshot() -> VisionTrackingConfigurationSnapshot {
+    private func makeConfigurationSnapshot() -> VisionTrackingConfigurationSnapshot {
+        configurationRevision &+= 1
         let configuration = handTracking.configuration
         return .init(
+            revision: configurationRevision,
             usage: usage,
             isEmotionEnabled: isEmotionEnabled,
-            captureSize: captureSize,
+            shouldOutputFace: usage.contains(.faceTracking),
+            shouldOutputHands: usage.contains(.handTracking),
+            shouldOutputFingers: usage.contains(.fingerTracking) && configuration.isFingerEnabled,
             finger: .init(
                 open: configuration.open,
                 close: configuration.close,
                 isFingerEnabled: configuration.isFingerEnabled
             )
         )
+    }
+
+    private nonisolated static func makeFrameHandler(
+        frameStream: VisionFrameStream,
+        configuration: VisionTrackingConfigurationSnapshot
+    ) -> CameraFrameHandler {
+        { frame in
+            guard configuration.needsVisionProcessing else { return }
+            frameStream.yield(VisionFrame(
+                sampleBuffer: frame.sampleBuffer,
+                captureSize: frame.captureSize,
+                orientation: .up,
+                configuration: configuration
+            ))
+        }
     }
 
     @MainActor

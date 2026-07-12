@@ -1,4 +1,5 @@
 import AVFoundation
+import CoreGraphics
 import ImageIO
 import VCamCamera
 import VCamLogger
@@ -6,9 +7,9 @@ import Vision
 
 struct VisionFrame: Sendable {
     let sampleBuffer: CameraSampleBuffer
-    let timestamp: CMTime
     let captureSize: CGSize
     let orientation: CGImagePropertyOrientation
+    let configuration: VisionTrackingConfigurationSnapshot
 }
 
 final class VisionFrameStream: Sendable {
@@ -32,32 +33,39 @@ final class VisionFrameStream: Sendable {
     }
 }
 
-struct FingerTrackingConfigurationSnapshot: Sendable {
+struct FingerTrackingConfigurationSnapshot: Sendable, Equatable {
     var open: Float
     var close: Float
     var isFingerEnabled: Bool
 }
 
-struct VisionTrackingConfigurationSnapshot: Sendable {
+struct VisionTrackingConfigurationSnapshot: Sendable, Equatable {
+    let revision: UInt64
     var usage: AvatarWebCamera.Usage
     var isEmotionEnabled: Bool
-    var captureSize: CGSize
+    var shouldOutputFace: Bool
+    var shouldOutputHands: Bool
+    var shouldOutputFingers: Bool
     var finger: FingerTrackingConfigurationSnapshot
 
     var needsFaceLandmarks: Bool {
-        usage.contains(.faceTracking) || usage.contains(.lipTracking)
+        usage.contains(.faceTracking) || usage.contains(.lipTracking) || isEmotionEnabled
     }
 
     var needsHandPose: Bool {
-        usage.intersection([.handTracking, .fingerTracking]) != .disabled
+        shouldOutputHands || shouldOutputFingers
     }
 
     var needsHandOutput: Bool {
-        usage.contains(.handTracking) && Tracking.cachedHandTrackingMethod == .default
+        shouldOutputHands
     }
 
     var needsFingerOutput: Bool {
-        usage.contains(.fingerTracking) && Tracking.cachedFingerTrackingMethod == .default
+        shouldOutputFingers
+    }
+
+    var needsVisionProcessing: Bool {
+        needsFaceLandmarks || needsHandPose
     }
 }
 
@@ -79,8 +87,6 @@ struct HandTrackingOutput: Sendable {
 actor VisionTrackingPipeline {
     private let frameStream: VisionFrameStream
     private var processingTask: Task<Void, Never>?
-    private var latestConfiguration: VisionTrackingConfigurationSnapshot?
-
     private var faceMapper = FaceObservationMapper()
     private var handMapper = HandObservationMapper()
 
@@ -123,11 +129,6 @@ actor VisionTrackingPipeline {
         frameStream.finish()
     }
 
-    func updateConfiguration(_ configuration: VisionTrackingConfigurationSnapshot) {
-        latestConfiguration = configuration
-        faceMapper.configure(size: configuration.captureSize)
-    }
-
     func calibrate() {
         faceMapper.calibrate()
     }
@@ -137,8 +138,12 @@ actor VisionTrackingPipeline {
     }
 
     private func process(_ frame: VisionFrame) async throws -> TrackingOutput? {
-        guard let configuration = latestConfiguration else { return nil }
+        let configuration = frame.configuration
         guard configuration.needsFaceLandmarks || configuration.needsHandPose else { return nil }
+
+        if configuration.needsFaceLandmarks {
+            faceMapper.configure(size: frame.captureSize)
+        }
 
         let handler = ImageRequestHandler(frame.sampleBuffer.value)
 
@@ -151,14 +156,14 @@ actor VisionTrackingPipeline {
                 configuration: configuration
             )
             return TrackingOutput(
-                face: faceMapper.map(observations: faceObservations, configuration: configuration),
+                face: faceMapper.map(observations: faceObservations, captureSize: frame.captureSize, configuration: configuration),
                 hands: hands,
                 emotion: faceMapper.mapEmotionIfNeeded(observations: faceObservations, configuration: configuration)
             )
         case (true, false):
             let faceObservations = try await handler.perform(faceMapper.request)
             return TrackingOutput(
-                face: faceMapper.map(observations: faceObservations, configuration: configuration),
+                face: faceMapper.map(observations: faceObservations, captureSize: frame.captureSize, configuration: configuration),
                 hands: nil,
                 emotion: faceMapper.mapEmotionIfNeeded(observations: faceObservations, configuration: configuration)
             )
