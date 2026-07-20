@@ -33,8 +33,7 @@ public final class VCamMotionTracking {
     private struct HandOutput {
         let hands: [Float]
         let fingers: [Float]
-        let missingLeft: Bool
-        let missingRight: Bool
+        let hasMissingHand: Bool
     }
 
     public init(smoothing: TrackingSmoothing) {
@@ -58,6 +57,7 @@ public final class VCamMotionTracking {
         fingersResampler = TrackingResampler(label: "vcam-motion-fingers", settingsProvider: settingsProvider) { @MainActor values in
             UniBridge.shared.fingers(values)
         }
+
     }
 
     public func stop() {
@@ -73,75 +73,55 @@ public final class VCamMotionTracking {
         }
     }
 
-    /// Called from network thread, schedules processing on MainActor
-    nonisolated func handleVCamMotionReceived(_ data: VCamMotion) {
-        Task { @MainActor in
-            self.onVCamMotionReceived(data, tracking: Tracking.shared)
-        }
+    func applyLegacyMotion(_ data: VCamMotion, tracking: Tracking) {
+        applyFace(data, tracking: tracking)
+        applyLegacyHands(data, tracking: tracking)
     }
 
-    private func onVCamMotionReceived(_ data: VCamMotion, tracking: Tracking) {
-        let smoothingEnabled = smoothingStorage.isEnabled
-        let useFaceTracking = tracking.faceTrackingMethod == .vcamMocap
-        let usePerfectSync = UniBridge.shared.hasPerfectSyncBlendShape
-        let useHands = tracking.handTrackingMethod == .vcamMocap
-        let useFingers = tracking.fingerTrackingMethod == .vcamMocap
-        let handOutput = (useHands || useFingers) ? makeHandOutput(data, tracking: tracking) : nil
+    func applyFace(_ data: VCamMotion, tracking: Tracking) {
+        guard tracking.faceTrackingMethod == .vcamMocap else { return }
 
-        if smoothingEnabled {
-            if useFaceTracking {
-                if usePerfectSync {
-                    let perfectSync = data.perfectSync(useEyeTracking: tracking.useEyeTracking)
-                    perfectSyncResampler.push(perfectSync)
-                } else {
-                    let blendShape = data.vcamHeadTransform(
-                        useEyeTracking: tracking.useEyeTracking,
-                        useVowelEstimation: tracking.useVowelEstimation
-                    )
-                    blendShapeResampler.push(blendShape)
-                }
-            }
-
-            if let handOutput {
-                if handOutput.missingLeft || handOutput.missingRight {
-                    if useHands {
-                        handsResampler.reset(with: handOutput.hands)
-                    }
-                    if useFingers {
-                        fingersResampler.reset(with: handOutput.fingers)
-                    }
-                } else {
-                    if useHands {
-                        handsResampler.push(handOutput.hands)
-                    }
-                    if useFingers {
-                        fingersResampler.push(handOutput.fingers)
-                    }
-                }
+        if UniBridge.shared.hasPerfectSyncBlendShape {
+            let values = data.perfectSync(useEyeTracking: tracking.useEyeTracking)
+            if smoothingStorage.isEnabled {
+                perfectSyncResampler.push(values)
+            } else {
+                UniBridge.shared.receivePerfectSync(values)
             }
             return
         }
 
-        if useFaceTracking {
-            if usePerfectSync {
-                UniBridge.shared.receivePerfectSync(
-                    data.perfectSync(useEyeTracking: tracking.useEyeTracking)
-                )
+        let values = data.vcamHeadTransform(
+            useEyeTracking: tracking.useEyeTracking,
+            useVowelEstimation: tracking.useVowelEstimation
+        )
+        if smoothingStorage.isEnabled {
+            blendShapeResampler.push(values)
+        } else {
+            UniBridge.shared.receiveVCamBlendShape(values)
+        }
+    }
+
+    /// Unity retargets v1 hand packets itself, but whether this tracking
+    /// source may drive the avatar at all is decided here, like the legacy path.
+    func applyHandsV1(_ packet: Data, tracking: Tracking) {
+        guard tracking.usesVCamMocapHandTracking else { return }
+        UniBridge.sendHandPacketV1(packet)
+    }
+
+    private func applyLegacyHands(_ data: VCamMotion, tracking: Tracking) {
+        guard tracking.usesVCamMocapHandTracking else { return }
+        let handOutput = makeHandOutput(data, tracking: tracking)
+        if smoothingStorage.isEnabled {
+            if handOutput.hasMissingHand {
+                handsResampler.reset(with: handOutput.hands)
+                fingersResampler.reset(with: handOutput.fingers)
             } else {
-                UniBridge.shared.receiveVCamBlendShape(
-                    data.vcamHeadTransform(
-                        useEyeTracking: tracking.useEyeTracking,
-                        useVowelEstimation: tracking.useVowelEstimation
-                    )
-                )
+                handsResampler.push(handOutput.hands)
+                fingersResampler.push(handOutput.fingers)
             }
-        }
-
-        if let handOutput, useHands {
+        } else {
             UniBridge.shared.hands(handOutput.hands)
-        }
-
-        if let handOutput, useFingers {
             UniBridge.shared.fingers(handOutput.fingers)
         }
     }
@@ -170,8 +150,7 @@ public final class VCamMotionTracking {
         return HandOutput(
             hands: hand,
             fingers: finger,
-            missingLeft: missingLeft,
-            missingRight: missingRight
+            hasMissingHand: missingLeft || missingRight
         )
     }
 
@@ -198,81 +177,21 @@ public final class VCamMotionTracking {
 
 private extension VCamMotion {
     func vcamHeadTransform(useEyeTracking: Bool, useVowelEstimation: Bool) -> [Float] {
-        let vowel = useVowelEstimation ? VowelEstimator.estimate(blendShape: blendShape) : .a
-
-        let rotation = head.rotation.eulerAngles()
-
-        return [
-            -head.translation.x, head.translation.y, head.translation.z,
-             rotation.x, -rotation.y, -rotation.z,
-             blendShape.eyeBlinkLeft,
-             blendShape.eyeBlinkRight,
-             blendShape.jawOpen,
-             useEyeTracking ? blendShape.eyeLookInLeft - blendShape.eyeLookOutLeft : 0,
-             useEyeTracking ? blendShape.eyeLookUpLeft - blendShape.eyeLookDownLeft : 0,
-             Float(vowel.rawValue)
-        ]
+        FaceTransformValues.vcamHeadTransform(
+            translation: head.translation,
+            rotationEuler: head.rotation.eulerAngles(),
+            blendShape: blendShape,
+            useEyeTracking: useEyeTracking,
+            vowel: useVowelEstimation ? VowelEstimator.estimate(blendShape: blendShape) : .a
+        )
     }
 
     func perfectSync(useEyeTracking: Bool) -> [Float] {
-        let rotation = head.rotation.eulerAngles()
-
-        return [
-            -head.translation.x, head.translation.y, head.translation.z,
-             rotation.x, -rotation.y, -rotation.z,
-             blendShape.lookAtPoint.x, blendShape.lookAtPoint.y,
-             blendShape.browDownLeft,
-             blendShape.browDownRight,
-             blendShape.browInnerUp,
-             blendShape.browOuterUpLeft,
-             blendShape.browOuterUpRight,
-             blendShape.cheekPuff,
-             blendShape.cheekSquintLeft,
-             blendShape.cheekSquintRight,
-             blendShape.eyeBlinkLeft,
-             blendShape.eyeBlinkRight,
-             useEyeTracking ? blendShape.eyeLookDownLeft : 0,
-             useEyeTracking ? blendShape.eyeLookDownRight : 0,
-             useEyeTracking ? blendShape.eyeLookInLeft : 0,
-             useEyeTracking ? blendShape.eyeLookInRight : 0,
-             useEyeTracking ? blendShape.eyeLookOutLeft : 0,
-             useEyeTracking ? blendShape.eyeLookOutRight : 0,
-             useEyeTracking ? blendShape.eyeLookUpLeft : 0,
-             useEyeTracking ? blendShape.eyeLookUpRight : 0,
-             useEyeTracking ? blendShape.eyeSquintLeft : 0,
-             useEyeTracking ? blendShape.eyeSquintRight : 0,
-             useEyeTracking ? blendShape.eyeWideLeft : 0,
-             useEyeTracking ? blendShape.eyeWideRight : 0,
-             blendShape.jawForward,
-             blendShape.jawLeft,
-             blendShape.jawOpen,
-             blendShape.jawRight,
-             blendShape.mouthClose,
-             blendShape.mouthDimpleLeft,
-             blendShape.mouthDimpleRight,
-             blendShape.mouthFrownLeft,
-             blendShape.mouthFrownRight,
-             blendShape.mouthFunnel,
-             blendShape.mouthLeft,
-             blendShape.mouthLowerDownLeft,
-             blendShape.mouthLowerDownRight,
-             blendShape.mouthPressLeft,
-             blendShape.mouthPressRight,
-             blendShape.mouthPucker,
-             blendShape.mouthRight,
-             blendShape.mouthRollLower,
-             blendShape.mouthRollUpper,
-             blendShape.mouthShrugLower,
-             blendShape.mouthShrugUpper,
-             blendShape.mouthSmileLeft,
-             blendShape.mouthSmileRight,
-             blendShape.mouthStretchLeft,
-             blendShape.mouthStretchRight,
-             blendShape.mouthUpperUpLeft,
-             blendShape.mouthUpperUpRight,
-             blendShape.noseSneerLeft,
-             blendShape.noseSneerRight,
-             blendShape.tongueOut
-        ]
+        FaceTransformValues.perfectSync(
+            translation: head.translation,
+            rotationEuler: head.rotation.eulerAngles(),
+            blendShape: blendShape,
+            useEyeTracking: useEyeTracking
+        )
     }
 }

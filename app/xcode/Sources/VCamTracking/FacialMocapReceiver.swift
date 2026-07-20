@@ -243,7 +243,7 @@ extension FacialMocapReceiver {
                 self?.connection = connection
             }
             connection.stateUpdateHandler = { [weak self] state in
-                 Task { @MainActor [weak self] in
+                 Task { @MainActor in
                      guard let self else { return }
                      switch state {
                      case .setup, .preparing: ()

@@ -5,6 +5,7 @@ public struct UniBridgeMethodId: RawRepresentable, Sendable {
     static let playMotion = Self.init(rawValue: 0)
     static let stopMotion = Self.init(rawValue: 1)
     static let applyExpression = Self.init(rawValue: 2)
+    static let sendHandPacketV1 = Self.init(rawValue: 3)
 
     static let addTrackingMapping = Self.init(rawValue: 11)
     static let updateTrackingMapping = Self.init(rawValue: 12)
@@ -54,6 +55,11 @@ public struct ScreenResolutionPayload: Equatable {
         self.width = width
         self.height = height
     }
+}
+
+public struct HandPacketV1Payload {
+    public var bytes: UnsafePointer<UInt8>?
+    public var byteCount: Int32
 }
 
 // MARK: - Bridge Callback
@@ -161,6 +167,23 @@ public extension UniBridge {
         var payload = ScreenResolutionPayload(width: width, height: height)
         withUnsafeMutablePointer(to: &payload) { payloadPtr in
             methodCallback(.setScreenResolution, payloadPtr, nil)
+        }
+    }
+
+    static func sendHandPacketV1(_ data: Data) {
+        data.withUnsafeBytes { raw in
+            guard
+                let byteCount = Int32(exactly: raw.count),
+                byteCount > 0,
+                let bytes = raw.baseAddress?.assumingMemoryBound(to: UInt8.self)
+            else {
+                return
+            }
+
+            var payload = HandPacketV1Payload(bytes: bytes, byteCount: byteCount)
+            withUnsafeMutablePointer(to: &payload) { payloadPtr in
+                methodCallback(.sendHandPacketV1, payloadPtr, nil)
+            }
         }
     }
 }

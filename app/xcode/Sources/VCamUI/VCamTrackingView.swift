@@ -67,7 +67,7 @@ public struct VCamTrackingView: View {
 
 #if FEATURE_3
                 Picker(selection: fingerTrackingMethod) {
-                    ForEach(TrackingMethod.Finger.allCases) { method in
+                    ForEach(fingerTrackingOptions) { method in
                         Text(verbatim: method.name)
                     }
                 } label: {
@@ -80,9 +80,22 @@ public struct VCamTrackingView: View {
                     .frame(maxWidth: .infinity, alignment: .trailing)
 #endif
             }
-            .disabled(Tracking.shared.handTrackingMethod == .disabled)
-            .opacity(Tracking.shared.handTrackingMethod == .disabled ? 0.5 : 1.0)
+            .disabled(isFingerPickerLocked)
+            .opacity(isFingerPickerLocked ? 0.5 : 1.0)
         }
+    }
+
+    // VCamMocap owns wrist and fingers as one method, so the finger picker
+    // never offers it as a choice. While the hand picker selects VCamMocap the
+    // current value is still included so the locked picker can display it.
+    private var fingerTrackingOptions: [TrackingMethod.Finger] {
+        tracking.handTrackingMethod == .vcamMocap
+            ? TrackingMethod.Finger.allCases
+            : TrackingMethod.Finger.allCases.filter { $0 != .vcamMocap }
+    }
+
+    private var isFingerPickerLocked: Bool {
+        tracking.handTrackingMethod == .disabled || tracking.handTrackingMethod == .vcamMocap
     }
 
     var faceTrackingMethod: Binding<TrackingMethod.Face> {

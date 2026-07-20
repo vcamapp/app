@@ -44,12 +44,10 @@ public struct VCamSettingsIntegrationView: View {
                     Text(.enable)
                 }
                 .onChange(of: integrationVCamMocap) { _, newValue in
-                    Task {
-                        if newValue {
-                            try await Tracking.shared.startVCamMotionReceiver()
-                        } else {
-                            Tracking.shared.vcamMotionReceiver.stop()
-                        }
+                    if newValue {
+                        try? Tracking.shared.startVCamMotionReceiver()
+                    } else {
+                        Tracking.shared.vcamMotionReceiver.stop()
                     }
                 }
             }
@@ -121,7 +119,14 @@ private struct VCamMotionReceiverStatusView: View {
     @Bindable private var receiver = Tracking.shared.vcamMotionReceiver
 
     var body: some View {
-        ReceiverStatusView(connectionStatus: receiver.connectionStatus)
+        VStack(alignment: .trailing, spacing: 2) {
+            ReceiverStatusView(connectionStatus: receiver.connectionStatus)
+            if let version = receiver.motionProtocolVersion {
+                Text(version.displayName)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
+        }
     }
 }
 

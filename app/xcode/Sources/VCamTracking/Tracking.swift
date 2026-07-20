@@ -5,49 +5,19 @@ import Combine
 import VCamEntity
 import VCamData
 import VCamBridge
-import Synchronization
 
 @Observable
 @MainActor
 public final class Tracking {
     public static let shared = Tracking()
 
-    private struct MethodCache: Sendable {
-        var face: TrackingMethod.Face = .default
-        var hand: TrackingMethod.Hand = .disabled
-        var finger: TrackingMethod.Finger = .disabled
-    }
-    nonisolated private static let methodCache = Mutex(MethodCache())
-
-    public nonisolated static var cachedFaceTrackingMethod: TrackingMethod.Face {
-        methodCache.withLock { $0.face }
-    }
-
-    public nonisolated static var cachedHandTrackingMethod: TrackingMethod.Hand {
-        methodCache.withLock { $0.hand }
-    }
-
-    public nonisolated static var cachedFingerTrackingMethod: TrackingMethod.Finger {
-        methodCache.withLock { $0.finger }
-    }
-
-    public private(set) var faceTrackingMethod = TrackingMethod.Face.default {
-        didSet { Self.methodCache.withLock { $0.face = faceTrackingMethod } }
-    }
+    public private(set) var faceTrackingMethod = TrackingMethod.Face.default
 #if FEATURE_3
-    public private(set) var handTrackingMethod = TrackingMethod.Hand.default {
-        didSet { Self.methodCache.withLock { $0.hand = handTrackingMethod } }
-    }
-    public private(set) var fingerTrackingMethod = TrackingMethod.Finger.default {
-        didSet { Self.methodCache.withLock { $0.finger = fingerTrackingMethod } }
-    }
+    public private(set) var handTrackingMethod = TrackingMethod.Hand.default
+    public private(set) var fingerTrackingMethod = TrackingMethod.Finger.default
 #else
-    public private(set) var handTrackingMethod = TrackingMethod.Hand.disabled {
-        didSet { Self.methodCache.withLock { $0.hand = handTrackingMethod } }
-    }
-    public private(set) var fingerTrackingMethod = TrackingMethod.Finger.disabled {
-        didSet { Self.methodCache.withLock { $0.finger = fingerTrackingMethod } }
-    }
+    public private(set) var handTrackingMethod = TrackingMethod.Hand.disabled
+    public private(set) var fingerTrackingMethod = TrackingMethod.Finger.disabled
 #endif
 
     @ObservationIgnored public private(set) var useEyeTracking = false
@@ -102,17 +72,20 @@ public final class Tracking {
     public func configure() {
         setFaceTrackingMethod(UserDefaults.standard.value(for: .trackingMethodFace))
 #if FEATURE_3
-        setHandTrackingMethod(UserDefaults.standard.value(for: .trackingMethodHand))
-        setFingerTrackingMethod(UserDefaults.standard.value(for: .trackingMethodFinger))
+        var hand: TrackingMethod.Hand = UserDefaults.standard.value(for: .trackingMethodHand)
+        var finger: TrackingMethod.Finger = UserDefaults.standard.value(for: .trackingMethodFinger)
+        // Normalize a stored state where only one side is .vcamMocap.
+        if (hand == .vcamMocap) != (finger == .vcamMocap) {
+            hand = .vcamMocap
+            finger = .vcamMocap
+        }
+        setHandAndFingerTrackingMethods(hand: hand, finger: finger)
 #else
-        setHandTrackingMethod(.disabled)
-        setFingerTrackingMethod(.disabled)
+        setHandAndFingerTrackingMethods(hand: .disabled, finger: .disabled)
 #endif
 
         if UserDefaults.standard.value(for: .integrationVCamMocap) {
-            Task {
-                try await Self.shared.startVCamMotionReceiver()
-            }
+            try? startVCamMotionReceiver()
         }
     }
 
@@ -203,36 +176,61 @@ public final class Tracking {
         applyMappingsToUnity(for: mode)
     }
 
-    public func setHandTrackingMethod(_ method: TrackingMethod.Hand) {
-        if handTrackingMethod != method {
-            vcamMotionTracking.stopHandResampling()
-        }
-        handTrackingMethod = method
-#if FEATURE_3
-        UserDefaults.standard.set(method, for: .trackingMethodHand)
-#endif
+    /// Whether VCamMocap drives the hands. Checks both methods to guard
+    /// against a partially applied state from a future settings path.
+    public var usesVCamMocapHandTracking: Bool {
+        handTrackingMethod == .vcamMocap && fingerTrackingMethod == .vcamMocap
+    }
 
-        if handTrackingMethod == .default {
-            Tracking.shared.avatarCameraManager.setWebCamUsage(Tracking.shared.avatarCameraManager.webCameraUsage.union(.handTracking))
+    // VCamMocap tracks wrist and fingers as one unit, so the settings never
+    // allow only one of hand/finger to be .vcamMocap. The invariant is
+    // enforced in the model so every settings path goes through it.
+    public func setHandTrackingMethod(_ method: TrackingMethod.Hand) {
+        if method == .vcamMocap {
+            setHandAndFingerTrackingMethods(hand: .vcamMocap, finger: .vcamMocap)
+        } else if fingerTrackingMethod == .vcamMocap {
+            setHandAndFingerTrackingMethods(hand: method, finger: .disabled)
         } else {
-            Tracking.shared.avatarCameraManager.setWebCamUsage(Tracking.shared.avatarCameraManager.webCameraUsage.subtracting(.handTracking))
+            setHandAndFingerTrackingMethods(hand: method, finger: fingerTrackingMethod)
         }
     }
 
     public func setFingerTrackingMethod(_ method: TrackingMethod.Finger) {
-        if fingerTrackingMethod != method {
+        if method == .vcamMocap {
+            setHandAndFingerTrackingMethods(hand: .vcamMocap, finger: .vcamMocap)
+        } else if handTrackingMethod == .vcamMocap {
+            setHandAndFingerTrackingMethods(hand: .disabled, finger: method)
+        } else {
+            setHandAndFingerTrackingMethods(hand: handTrackingMethod, finger: method)
+        }
+    }
+
+    private func setHandAndFingerTrackingMethods(hand: TrackingMethod.Hand, finger: TrackingMethod.Finger) {
+        if handTrackingMethod != hand {
+            vcamMotionTracking.stopHandResampling()
+        }
+        if fingerTrackingMethod != finger {
             vcamMotionTracking.stopFingerResampling()
         }
-        fingerTrackingMethod = method
+        handTrackingMethod = hand
+        fingerTrackingMethod = finger
 #if FEATURE_3
-        UserDefaults.standard.set(method, for: .trackingMethodFinger)
+        UserDefaults.standard.set(hand, for: .trackingMethodHand)
+        UserDefaults.standard.set(finger, for: .trackingMethodFinger)
 #endif
 
-        if fingerTrackingMethod == .default {
-            Tracking.shared.avatarCameraManager.setWebCamUsage(Tracking.shared.avatarCameraManager.webCameraUsage.union(.fingerTracking))
+        var usage = avatarCameraManager.webCameraUsage
+        if handTrackingMethod == .default {
+            usage.insert(.handTracking)
         } else {
-            Tracking.shared.avatarCameraManager.setWebCamUsage(Tracking.shared.avatarCameraManager.webCameraUsage.subtracting(.fingerTracking))
+            usage.remove(.handTracking)
         }
+        if fingerTrackingMethod == .default {
+            usage.insert(.fingerTracking)
+        } else {
+            usage.remove(.fingerTracking)
+        }
+        avatarCameraManager.setWebCamUsage(usage)
     }
 
     public func setLipSyncType(_ type: LipSyncType) {
@@ -266,8 +264,8 @@ public final class Tracking {
         setLipSyncType(.camera)
     }
 
-    public func startVCamMotionReceiver() async throws {
-        try await vcamMotionReceiver.start(with: vcamMotionTracking)
+    public func startVCamMotionReceiver() throws {
+        try vcamMotionReceiver.start(with: vcamMotionTracking)
     }
 
     private func stopFaceResamplers() {
