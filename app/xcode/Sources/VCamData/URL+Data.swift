@@ -21,6 +21,18 @@ public extension URL {
         sceneRoot(sceneId: id).appending(path: "data")
     }
 
+    static var motionsDirectory: URL {
+        applicationSupportDirectoryWithBundleID.appending(path: "motions")
+    }
+
+    static var motionsManifest: URL {
+        motionsDirectory.appending(path: "manifest.json")
+    }
+
+    static var motionFilesDirectory: URL {
+        motionsDirectory.appending(path: "files")
+    }
+
     static var shortcutMetadata: URL {
         applicationSupportDirectoryWithBundleID.appending(path: "shortcuts.json")
     }

@@ -41,6 +41,7 @@ let package = Package(
         .target(name: "VCamStub", dependencies: ["VCamUI"]),
 
         .testTarget(name: "VCamEntityTests", dependencies: ["VCamEntity"]),
+        .testTarget(name: "VCamDataTests", dependencies: ["VCamData"]),
         .testTarget(name: "VCamTrackingTests", dependencies: ["VCamTracking"]),
         .testTarget(name: "VCamCameraTests", dependencies: ["VCamCamera"]),
         .testTarget(name: "VCamBridgeTests", dependencies: ["VCamBridge"]),

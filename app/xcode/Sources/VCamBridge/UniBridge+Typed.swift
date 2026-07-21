@@ -14,6 +14,12 @@ public struct UniBridgeMethodId: RawRepresentable, Sendable {
 
     static let setScreenResolution = Self.init(rawValue: 20)
 
+    static let registerImportedMotion = Self.init(rawValue: 30)
+    static let updateImportedMotionAxes = Self.init(rawValue: 31)
+    static let removeImportedMotion = Self.init(rawValue: 32)
+
+    static let setTrackingChannelEnabled = Self.init(rawValue: 40)
+
     public let rawValue: Int32
 
     public init(rawValue: Int32) {
@@ -27,10 +33,38 @@ public enum TrackingMode: Int32 {
     case perfectSync = 1
 }
 
+// MARK: - Tracking Channel Enum
+public enum TrackingChannel: Int32 {
+    case eye = 0
+    case blink = 1
+    case mouth = 2
+    case expression = 3
+}
+
 // MARK: - Payload Structures
 public struct PlayMotionPayload {
     public var stringPtr: UnsafePointer<CChar>?
-    public var boolValue: Bool
+    // C# bool occupies 4 bytes in the struct layout and shifts field offsets, so ABI-compatible flags use UInt8
+    public var isLoop: UInt8
+}
+
+public struct RegisterImportedMotionPayload {
+    public var motionIDPtr: UnsafePointer<CChar>?
+    public var pathPtr: UnsafePointer<CChar>?
+    public var requestIDPtr: UnsafePointer<CChar>?
+    public var axisMask: UInt8
+    // C# bool occupies 4 bytes in the struct layout and shifts field offsets, so ABI-compatible flags use UInt8
+    public var loadImmediately: UInt8
+}
+
+public struct ImportedMotionAxesPayload {
+    public var motionIDPtr: UnsafePointer<CChar>?
+    public var axisMask: UInt8
+}
+
+public struct TrackingChannelEnabledPayload {
+    public var channel: Int32
+    public var isEnabled: UInt8
 }
 
 public struct TrackingMappingPayload {
@@ -72,18 +106,59 @@ public extension UniBridge {
 public extension UniBridge {
     static let isUnity = Bundle.main.bundlePath.hasSuffix("Unity.app")
 
-    static func playMotion(name: String, isLoop: Bool) {
-        name.withCString { namePtr in
-            var payload = PlayMotionPayload(stringPtr: namePtr, boolValue: isLoop)
+    static func playMotion(id: String, isLoop: Bool) {
+        id.withCString { idPtr in
+            var payload = PlayMotionPayload(stringPtr: idPtr, isLoop: isLoop ? 1 : 0)
             withUnsafeMutablePointer(to: &payload) { payloadPtr in
                 methodCallback(.playMotion, payloadPtr, nil)
             }
         }
     }
 
-    static func stopMotion(name: String) {
-        name.withCString { namePtr in
-            methodCallback(.stopMotion, UnsafeMutableRawPointer(mutating: namePtr), nil)
+    static func stopMotion(id: String) {
+        id.withCString { idPtr in
+            methodCallback(.stopMotion, UnsafeMutableRawPointer(mutating: idPtr), nil)
+        }
+    }
+
+    static func registerImportedMotion(id: String, path: String, axisMask: UInt8, loadImmediately: Bool, requestID: UUID) {
+        id.withCString { idPtr in
+            path.withCString { pathPtr in
+                requestID.uuidString.withCString { requestIDPtr in
+                    var payload = RegisterImportedMotionPayload(
+                        motionIDPtr: idPtr,
+                        pathPtr: pathPtr,
+                        requestIDPtr: requestIDPtr,
+                        axisMask: axisMask,
+                        loadImmediately: loadImmediately ? 1 : 0
+                    )
+                    withUnsafeMutablePointer(to: &payload) { payloadPtr in
+                        methodCallback(.registerImportedMotion, payloadPtr, nil)
+                    }
+                }
+            }
+        }
+    }
+
+    static func updateImportedMotionAxes(id: String, axisMask: UInt8) {
+        id.withCString { idPtr in
+            var payload = ImportedMotionAxesPayload(motionIDPtr: idPtr, axisMask: axisMask)
+            withUnsafeMutablePointer(to: &payload) { payloadPtr in
+                methodCallback(.updateImportedMotionAxes, payloadPtr, nil)
+            }
+        }
+    }
+
+    static func removeImportedMotion(id: String) {
+        id.withCString { idPtr in
+            methodCallback(.removeImportedMotion, UnsafeMutableRawPointer(mutating: idPtr), nil)
+        }
+    }
+
+    static func setTrackingChannelEnabled(_ channel: TrackingChannel, isEnabled: Bool) {
+        var payload = TrackingChannelEnabledPayload(channel: channel.rawValue, isEnabled: isEnabled ? 1 : 0)
+        withUnsafeMutablePointer(to: &payload) { payloadPtr in
+            methodCallback(.setTrackingChannelEnabled, payloadPtr, nil)
         }
     }
 

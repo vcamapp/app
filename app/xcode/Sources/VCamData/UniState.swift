@@ -18,7 +18,7 @@ public final class UniState {
 #if DEBUG
     public static func preview(
         motions: [Avatar.Motion] = [],
-        isMotionPlaying: [Avatar.Motion: Bool] = [:],
+        isMotionPlaying: [String: Bool] = [:],
         expressions: [Avatar.Expression] = [],
         currentExpressionIndex: Int? = nil,
         blendShapeNames: [String] = TrackingMappingEntry.defaultMappings(for: .blendShape).map(\.input.key),
@@ -85,7 +85,8 @@ public final class UniState {
     // MARK: - Original Properties
 
     public var motions: [Avatar.Motion] = []
-    public var isMotionPlaying: [Avatar.Motion: Bool] = [:]
+    /// Playback states keyed by motion ID
+    public var isMotionPlaying: [String: Bool] = [:]
     public var expressions: [Avatar.Expression] = []
     public var currentExpressionIndex: Int?
     public var blendShapeNames: [String] = []
@@ -310,6 +311,7 @@ public final class UniState {
         bridge.boolMapper.setValue(.useAddToMacOSMenuBar, __useAddToMacOSMenuBar)
         bridge.boolMapper.setValue(.useVSync, __useVSync)
         bridge.boolMapper.setValue(.lipSyncWebCam, __lipSyncWebCam)
+        UniBridge.setTrackingChannelEnabled(.eye, isEnabled: UserDefaults.standard.value(for: .useEyeTracking))
         bridge.floatMapper.setValue(.fps, __fps)
         bridge.floatMapper.setValue(.lipSyncMicIntensity, __lipSyncMicIntensity)
         bridge.floatMapper.setValue(.trackingSmoothing, __trackingSmoothing)

@@ -15,10 +15,14 @@ public struct VCamMotionAction: VCamAction {
 
     @MainActor
     public func callAsFunction(context: VCamActionContext) async throws {
-        if UniState.shared.isMotionPlaying[.init(name: configuration.motion.rawValue), default: false] {
-            UniBridge.stopMotion(name: configuration.motion.rawValue)
+        let motionID = configuration.motionID
+        guard MotionLibrary.shared.motionExists(motionID) else {
+            return // Safely ignore motions that have been deleted
+        }
+        if UniState.shared.isMotionPlaying[motionID, default: false] {
+            UniBridge.stopMotion(id: motionID)
         } else {
-            UniBridge.playMotion(name: configuration.motion.rawValue, isLoop: true)
+            UniBridge.playMotion(id: motionID, isLoop: MotionLibrary.shared.isLoopEnabled(for: motionID, trigger: .shortcut))
         }
     }
 }

@@ -19,6 +19,4 @@ public final class VCamUIState {
 
     public var currentMenu = VCamMenuItem.main
     public var interactable: Bool
-
-    public var modelConfiguration = ModelConfiguration()
 }

@@ -953,6 +953,23 @@
         }
       }
     },
+    "customMotions": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Custom (.vrma)"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "カスタム (.vrma)"
+          }
+        }
+      }
+    },
     "cut": {
       "extractionState": "manual",
       "localizations": {
@@ -1000,6 +1017,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "削除"
+          }
+        }
+      }
+    },
+    "deletedMotion": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deleted Motion"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "削除済みのモーション"
           }
         }
       }
@@ -1595,6 +1629,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "仮想カメラのインストールに失敗しました。利用する場合はこのアプリの設定からインストールしてください。"
+          }
+        }
+      }
+    },
+    "failedToLoadMotion": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failed to load the motion."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "モーションの読み込みに失敗しました。"
           }
         }
       }
@@ -2245,6 +2296,23 @@
         }
       }
     },
+    "loadMotion": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Load Motion"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "モーションを読み込む"
+          }
+        }
+      }
+    },
     "loadOnVRoidHub": {
       "extractionState": "manual",
       "localizations": {
@@ -2309,6 +2377,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "ロックする"
+          }
+        }
+      }
+    },
+    "loopPlayback": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loop Playback"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ループ再生"
           }
         }
       }
@@ -2564,6 +2649,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "モーション"
+          }
+        }
+      }
+    },
+    "motionName": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Motion Name"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "モーション名"
+          }
+        }
+      }
+    },
+    "motionUsedByShortcuts %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This motion is assigned to %lld shortcut(s)."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このモーションは%lld個のショートカットに割り当てられています。"
           }
         }
       }
@@ -4421,6 +4540,23 @@
         }
       }
     },
+    "translationAxes": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Translation"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移動"
+          }
+        }
+      }
+    },
     "typeNo %@": {
       "extractionState": "manual",
       "localizations": {
@@ -4672,6 +4808,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "仮想カメラ"
+          }
+        }
+      }
+    },
+    "vrmaRequiresVRM1Message": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "To play a VRMA, this model must be reloaded as VRM 1.0 using automatic conversion. Enable the setting and reload the model."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VRMAを再生するには、このモデルをVRM 1.0へ自動変換して読み込む必要があります。設定を有効にしてモデルを再読み込みしてください。"
           }
         }
       }

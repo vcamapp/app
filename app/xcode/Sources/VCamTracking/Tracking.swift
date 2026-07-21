@@ -42,7 +42,10 @@ public final class Tracking {
         vcamMotionTracking = VCamMotionTracking(smoothing: smoothing)
 
         UserDefaults.standard.publisher(for: \.vc_use_eye_tracking, options: [.initial, .new])
-            .sink { [unowned self] in useEyeTracking = $0 }
+            .sink { [unowned self] in
+                useEyeTracking = $0
+                UniBridge.setTrackingChannelEnabled(.eye, isEnabled: $0)
+            }
             .store(in: &cancellables)
         UserDefaults.standard.publisher(for: \.vc_use_vowel_estimation, options: [.initial, .new])
             .sink { [unowned self] in useVowelEstimation = $0 }

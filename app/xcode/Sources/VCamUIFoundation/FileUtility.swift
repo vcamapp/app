@@ -1,10 +1,3 @@
-//
-//  FileUtility.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/06/30.
-//
-
 import AppKit
 import UniformTypeIdentifiers
 
@@ -14,6 +7,7 @@ public enum FileUtility {
         case model
         case image
         case html
+        case vrma
     }
 
     @MainActor
@@ -27,6 +21,8 @@ public enum FileUtility {
             return openFile(with: [.image])
         case .html:
             return openFile(with: [.html])
+        case .vrma:
+            return openFile(withExtensions: ["vrma"])
         }
     }
 
