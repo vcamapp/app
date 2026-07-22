@@ -31,6 +31,9 @@ public final class CoreMediaSinkStream: NSObject {
         mElement: .main
     )
     private var scntDataSize: UInt32 = 0
+    private var cachedStreamingCount = 0
+    private var lastStreamingCountRefreshAt = ContinuousClock.now
+    private var isStreamingCountListenerRegistered = false
 
     public static var isInstalled: Bool {
         findCameraExtensionDeviceID() != nil
@@ -47,6 +50,10 @@ public final class CoreMediaSinkStream: NSObject {
         queue = createQueue(deviceId: deviceId, streamId: streamId)
 
         CMIOObjectGetPropertyDataSize(deviceId, &scntAddress, 0, nil, &scntDataSize)
+
+        registerStreamingCountListenerIfNeeded(deviceId: deviceId)
+        cachedStreamingCount = streamingCount()
+        lastStreamingCountRefreshAt = .now
 
         let status = CMIODeviceStartStream(deviceId, streamId)
         guard status == 0 else {
@@ -83,7 +90,15 @@ public final class CoreMediaSinkStream: NSObject {
     }
 
     func render(_ image: CIImage) {
-        guard let queue, streamingCount() > 0 else {
+        // Avoid a CMIO property read per frame; use the cache updated by the
+        // property listener, with a low-frequency sync as a safety net in case
+        // a notification is missed
+        let now = ContinuousClock.now
+        if now - lastStreamingCountRefreshAt > .seconds(1) {
+            lastStreamingCountRefreshAt = now
+            cachedStreamingCount = streamingCount()
+        }
+        guard let queue, cachedStreamingCount > 0 else {
             return
         }
         guard queue.fullness < 1 else {
@@ -131,6 +146,15 @@ public final class CoreMediaSinkStream: NSObject {
         } catch {
             print(error)
         }
+    }
+
+    private func registerStreamingCountListenerIfNeeded(deviceId: CMIOObjectID) {
+        guard !isStreamingCountListenerRegistered else { return }
+        let status = CMIOObjectAddPropertyListenerBlock(deviceId, &scntAddress, .main) { [weak self] _, _ in
+            guard let self else { return }
+            self.cachedStreamingCount = self.streamingCount()
+        }
+        isStreamingCountListenerRegistered = status == 0
     }
 
     public func streamingCount() -> Int {

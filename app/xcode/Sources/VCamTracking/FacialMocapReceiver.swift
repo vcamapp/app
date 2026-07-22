@@ -40,9 +40,10 @@ public final class FacialMocapReceiver {
 
     @ObservationIgnored private var shouldAutoReconnect = true
     @ObservationIgnored private var lastConnectedIP: String?
-    @ObservationIgnored private var timeoutTask: Task<Void, Never>?
+    @ObservationIgnored private var timeoutWatchdogTask: Task<Void, Never>?
+    @ObservationIgnored private var lastDataReceivedAt = ContinuousClock.now
 
-    private static let dataTimeoutSeconds: UInt64 = 2
+    private static let dataTimeout: Duration = .seconds(2)
 
     enum ReceiverResult {
         case success
@@ -103,8 +104,8 @@ public final class FacialMocapReceiver {
     }
 
     private func stopInternal() {
-        timeoutTask?.cancel()
-        timeoutTask = nil
+        timeoutWatchdogTask?.cancel()
+        timeoutWatchdogTask = nil
 
         if let listener = listener {
             listener.stateUpdateHandler = nil
@@ -121,14 +122,21 @@ public final class FacialMocapReceiver {
         stopResamplers()
     }
 
-    private func resetTimeoutTimer() {
-        timeoutTask?.cancel()
-        timeoutTask = Task { [weak self] in
-            do {
-                try await Task.sleep(nanoseconds: Self.dataTimeoutSeconds * NSEC_PER_SEC)
+    /// A single long-lived task checks the last receive time periodically, so
+    /// each incoming packet only has to update a timestamp instead of
+    /// cancelling and recreating a timer task at packet rate.
+    private func startTimeoutWatchdog() {
+        guard timeoutWatchdogTask == nil else { return }
+        timeoutWatchdogTask = Task { [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(1))
+                guard let self, !Task.isCancelled else { return }
+                guard self.connectionStatus == .connected,
+                      ContinuousClock.now - self.lastDataReceivedAt > Self.dataTimeout else { continue }
                 Logger.log("Data timeout - resetting listener")
-                await self?.handleTimeout()
-            } catch {}
+                await self.handleTimeout()
+                return
+            }
         }
     }
 
@@ -198,13 +206,10 @@ public final class FacialMocapReceiver {
 }
 
 private extension NWConnection {
-    func receiveData(
-        with oniFacialMocapReceived: @escaping @Sendable (FacialMocapData) -> Void,
-        onDataReceived: @escaping @Sendable () -> Void
-    ) {
+    func receiveData(with oniFacialMocapReceived: @escaping @Sendable (FacialMocapData) -> Void) {
         receive(minimumIncompleteLength: 1, maximumLength: 8192) { [weak self] content, contentContext, isComplete, error in
             defer {
-                self?.receiveData(with: oniFacialMocapReceived, onDataReceived: onDataReceived)
+                self?.receiveData(with: oniFacialMocapReceived)
             }
 
             guard error == nil,
@@ -213,7 +218,6 @@ private extension NWConnection {
                   let mocapData = FacialMocapData(rawData: rawData) else {
                 return
             }
-            onDataReceived()
             oniFacialMocapReceived(mocapData)
         }
     }
@@ -256,16 +260,15 @@ extension FacialMocapReceiver {
                      case .ready:
                          Logger.log("Connection ready")
                          self.connectionStatus = .connected
-                         self.resetTimeoutTimer()
-                         connection.receiveData(with: { [weak self] data in
+                         self.lastDataReceivedAt = .now
+                         self.startTimeoutWatchdog()
+                         connection.receiveData { [weak self] data in
                              DispatchQueue.runOnMain { [weak self] in
-                                 self?.oniFacialMocapReceived(data)
+                                 guard let self else { return }
+                                 self.lastDataReceivedAt = .now
+                                 self.oniFacialMocapReceived(data)
                              }
-                         }, onDataReceived: { @Sendable [weak self] in
-                             Task { @MainActor in
-                                 self?.resetTimeoutTimer()
-                             }
-                         })
+                         }
                      case .cancelled:
                          Logger.log("Connection cancelled")
                          await self.handleDisconnection()

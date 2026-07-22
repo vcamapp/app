@@ -22,7 +22,6 @@ public final class Tracking {
 
     @ObservationIgnored public private(set) var useEyeTracking = false
     @ObservationIgnored public private(set) var useVowelEstimation = false
-    @ObservationIgnored public private(set) var currentModelId: UUID?
 
     public var mappings: [[TrackingMappingEntry]] = [
         TrackingMappingEntry.defaultMappings(for: .blendShape),
@@ -89,17 +88,6 @@ public final class Tracking {
 
         if UserDefaults.standard.value(for: .integrationVCamMocap) {
             try? startVCamMotionReceiver()
-        }
-    }
-
-    private func resetToDefaultMappings() {
-        mappings = [
-            TrackingMappingEntry.defaultMappings(for: .blendShape),
-            supportsIPhoneTrackingMapping ? TrackingMappingEntry.defaultMappings(for: .perfectSync) : []
-        ]
-        applyMappingsToUnity(for: .blendShape)
-        if supportsIPhoneTrackingMapping {
-            applyMappingsToUnity(for: .perfectSync)
         }
     }
 

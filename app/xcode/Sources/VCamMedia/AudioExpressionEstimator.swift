@@ -97,11 +97,11 @@ public final class AudioExpressionEstimator: NSObject, Sendable {
     }
 
     public func setOnUpdate(_ handler: (@Sendable (FacialExpression) -> Void)?) {
-        Task { await callbackState.setOnUpdate(handler) }
+        callbackState.setOnUpdate(handler)
     }
 
     public func setOnAudioLevelUpdate(_ handler: (@Sendable (Float) -> Void)?) {
-        Task { await callbackState.setOnAudioLevelUpdate(handler) }
+        callbackState.setOnAudioLevelUpdate(handler)
     }
 
     public func configure(format: AVAudioFormat) {
@@ -112,47 +112,53 @@ public final class AudioExpressionEstimator: NSObject, Sendable {
     public func reset() {
         audioLevelCalculator.reset()
         analyzerState.reset()
-        Task { await callbackState.reset() }
+        callbackState.reset()
     }
 
     /// Analyzes the audio buffer for expression estimation and audio level.
     /// Audio level computation and expression analysis are done synchronously for performance.
+    /// Callbacks are invoked synchronously on the caller's thread.
     public func analyze(buffer: AVAudioPCMBuffer, time: AVAudioTime) {
         // Compute audio level synchronously (high frequency, needs to be fast)
         let level = audioLevelCalculator.computeAudioLevel(from: buffer)
 
-        // Notify audio level update asynchronously
-        Task { await callbackState.notifyAudioLevel(level) }
+        callbackState.notifyAudioLevel(level)
 
         // Expression analysis is rate-limited (~8fps) and runs synchronously
         _ = analyzerState.analyzeIfNeeded(buffer: buffer, sampleTime: time.sampleTime)
     }
 }
 
-/// Actor for managing callbacks safely.
-private actor CallbackState {
-    var onUpdate: (@Sendable (FacialExpression) -> Void)?
-    var onAudioLevelUpdate: (@Sendable (Float) -> Void)?
+/// Thread-safe storage for callbacks.
+private final class CallbackState: Sendable {
+    private struct State: Sendable {
+        var onUpdate: (@Sendable (FacialExpression) -> Void)?
+        var onAudioLevelUpdate: (@Sendable (Float) -> Void)?
+    }
+
+    private let state = Mutex(State())
 
     func setOnUpdate(_ handler: (@Sendable (FacialExpression) -> Void)?) {
-        onUpdate = handler
+        state.withLock { $0.onUpdate = handler }
     }
 
     func setOnAudioLevelUpdate(_ handler: (@Sendable (Float) -> Void)?) {
-        onAudioLevelUpdate = handler
+        state.withLock { $0.onAudioLevelUpdate = handler }
     }
 
     func reset() {
-        onUpdate = nil
-        onAudioLevelUpdate = nil
+        state.withLock {
+            $0.onUpdate = nil
+            $0.onAudioLevelUpdate = nil
+        }
     }
 
     func notifyExpression(_ expression: FacialExpression) {
-        onUpdate?(expression)
+        state.withLock { $0.onUpdate }?(expression)
     }
 
     func notifyAudioLevel(_ level: Float) {
-        onAudioLevelUpdate?(level)
+        state.withLock { $0.onAudioLevelUpdate }?(level)
     }
 }
 
@@ -160,11 +166,11 @@ extension AudioExpressionEstimator: SNResultsObserving {
     public func request(_ request: any SNRequest, didProduce result: any SNResult) {
         guard let result = result as? SNClassificationResult,
               let classification = result.classification(forIdentifier: "laughter") else {
-            Task { await callbackState.notifyExpression(.neutral) }
+            callbackState.notifyExpression(.neutral)
             return
         }
 
         let expression: FacialExpression = classification.confidence > 0.5 ? .laugh : .neutral
-        Task { await callbackState.notifyExpression(expression) }
+        callbackState.notifyExpression(expression)
     }
 }

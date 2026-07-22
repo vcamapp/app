@@ -69,7 +69,9 @@ public final class AvatarAudioManager {
     private func reconfigureIfNeeded() {
         setEmotionEnabled(UserDefaults.standard.value(for: .useEmotion))
         audioExpressionEstimator.setOnAudioLevelUpdate { level in
-            Task { @MainActor in
+            // analyze() is always called on the main thread (see setOnUpdateAudioBuffer below)
+            // and invokes this callback synchronously
+            MainActor.assumeIsolated {
                 UniBridge.shared.micAudioLevel(CGFloat(level))
             }
         }

@@ -109,24 +109,6 @@ public extension AudioDevice {
         ) / sampleRate
     }
 
-    private func deviceLatency(scope: AudioObjectPropertyScope) -> UInt32 {
-        var address =  AudioObjectPropertyAddress(mSelector: kAudioDevicePropertyLatency, mScope: scope, mElement: kAudioObjectPropertyElementMain)
-        var buf: UInt32 = 0
-        var bufSize = UInt32(MemoryLayout<UInt32>.size)
-
-        _ = AudioObjectGetPropertyData(id, &address, 0, nil, &bufSize, &buf)
-        return buf
-    }
-
-    private func streamLatency(scope: AudioObjectPropertyScope) -> UInt32 {
-        var address =  AudioObjectPropertyAddress(mSelector: kAudioStreamPropertyLatency, mScope: scope, mElement: kAudioObjectPropertyElementMain)
-        var buf: UInt32 = 0
-        var bufSize = UInt32(MemoryLayout<UInt32>.size)
-
-        _ = AudioObjectGetPropertyData(id, &address, 0, nil, &bufSize, &buf)
-        return buf
-    }
-
     private func safetyOffset(scope: AudioObjectPropertyScope) -> UInt32 {
         var address =  AudioObjectPropertyAddress(mSelector: kAudioDevicePropertySafetyOffset, mScope: scope, mElement: kAudioObjectPropertyElementMain)
         var buf: UInt32 = 0

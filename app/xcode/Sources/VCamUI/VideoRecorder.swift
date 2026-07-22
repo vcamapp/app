@@ -12,7 +12,6 @@ public enum RecordingState {
     case preparing
     case recording
     case finishing
-    case failed(Error)
 }
 
 private enum RecordingError: LocalizedError {
@@ -31,7 +30,6 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
     public static let shared = VideoRecorder()
 
     public private(set) var state: RecordingState = .idle
-    public private(set) var lastError: Error?
     public var isRecording: Bool {
         if case .recording = state { return true }
         return false
@@ -67,7 +65,6 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
         state = .preparing
         do {
             try startRecording(with: outputDirectory, name: name, format: format, screenResolution: screenResolution, capturesSystemAudio: capturesSystemAudio)
-            lastError = nil
         } catch {
             failRecording(error)
             throw error
@@ -159,7 +156,7 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
     public func stop() {
         Logger.log("")
         switch state {
-        case .recording, .failed:
+        case .recording:
             break
         case .idle, .preparing, .finishing:
             return
@@ -332,7 +329,6 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
     }
 
     private func failRecording(_ error: Error) {
-        lastError = error
         assetwriter?.cancelWriting()
         assetwriter = nil
         assetVideoWriterAdaptor = nil
