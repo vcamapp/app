@@ -314,14 +314,14 @@ struct VCamSettingMappingTableView: NSViewRepresentable {
         private func toggleEnabled(row: Int, state: Bool) {
             guard row >= 0, row < store.mappings.count else { return }
             store.mappings[row].isEnabled = state
-            store.updateMapping(at: row)
+            store.applyMappings()
             reloadRow(row)
         }
 
         private func inputKeyChanged(row: Int, key: TrackingMappingEntry.InputKey) {
             guard row >= 0, row < store.mappings.count else { return }
             store.mappings[row].input = key
-            store.updateMapping(at: row)
+            store.applyMappings()
             reloadRow(row)
         }
 
@@ -329,27 +329,27 @@ struct VCamSettingMappingTableView: NSViewRepresentable {
             guard row >= 0, row < store.mappings.count else { return }
             store.mappings[row].input.rangeMin = min
             store.mappings[row].input.rangeMax = max
-            store.updateMapping(at: row)
+            store.applyMappings()
         }
 
         private func outputKeyChanged(row: Int, key: TrackingMappingEntry.OutputKey) {
             guard row >= 0, row < store.mappings.count else { return }
             store.mappings[row].outputKey = key
-            store.updateMapping(at: row)
+            store.applyMappings()
             reloadRow(row)
         }
 
         private func outputTextChanged(row: Int, text: String) {
             guard row >= 0, row < store.mappings.count else { return }
             store.mappings[row].outputKey.key = text
-            store.updateMapping(at: row)
+            store.applyMappings()
         }
 
         private func updateOutputRange(row: Int, min: Float, max: Float) {
             guard row >= 0, row < store.mappings.count else { return }
             store.mappings[row].outputKey.rangeMin = min
             store.mappings[row].outputKey.rangeMax = max
-            store.updateMapping(at: row)
+            store.applyMappings()
         }
 
         private func updateOutputBounds(row: Int, min: Float, max: Float) {
@@ -363,14 +363,14 @@ struct VCamSettingMappingTableView: NSViewRepresentable {
             }
             store.mappings[row].outputKey.rangeMin = clampedMin
             store.mappings[row].outputKey.rangeMax = clampedMax
-            store.updateMapping(at: row)
+            store.applyMappings()
             reloadRow(row)
         }
 
         private func filterChanged(row: Int, filter: TrackingFilter) {
             guard row >= 0, row < store.mappings.count else { return }
             store.mappings[row].filter = filter
-            store.updateMapping(at: row)
+            store.applyMappings()
         }
 
         @objc func resetToDefault(_ sender: Any?) {

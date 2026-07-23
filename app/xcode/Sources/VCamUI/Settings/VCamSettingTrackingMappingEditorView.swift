@@ -122,21 +122,13 @@ final class MappingDataStore {
     var mappingsRevision = 0
     private(set) var isInitialized = false
 
-    private var inputKeyCaches: [TrackingMode: KeyCache<TrackingMappingEntry.InputKey>] = [:]
-    private var outputKeyCache = KeyCache<TrackingMappingEntry.OutputKey>()
+    private var inputKeysByMode: [TrackingMode: [TrackingMappingEntry.InputKey]] = [:]
+    private(set) var outputKeys: [TrackingMappingEntry.OutputKey] = []
 
     private var tracking: Tracking { Tracking.shared }
 
-    private var inputKeyCache: KeyCache<TrackingMappingEntry.InputKey> {
-        inputKeyCaches[selectedMode] ?? KeyCache()
-    }
-
     var inputKeys: [TrackingMappingEntry.InputKey] {
-        inputKeyCache.keys
-    }
-
-    var outputKeys: [TrackingMappingEntry.OutputKey] {
-        outputKeyCache.keys
+        inputKeysByMode[selectedMode] ?? []
     }
 
     var mappings: [TrackingMappingEntry] {
@@ -147,41 +139,25 @@ final class MappingDataStore {
     func initialize(blendShapeNames: [String], supportsIPhoneMode: Bool) {
         guard !isInitialized else { return }
 
-        Task.detached { [blendShapeNames, supportsIPhoneMode] in
-            let outputKeys = blendShapeNames.map { TrackingMappingEntry.OutputKey(key: $0) }
-            let outputCache = KeyCache(keys: outputKeys)
+        outputKeys = blendShapeNames.map { TrackingMappingEntry.OutputKey(key: $0) }
 
-            var inputCaches: [TrackingMode: KeyCache<TrackingMappingEntry.InputKey>] = [:]
-            var modes: [TrackingMode] = [.blendShape]
-            if supportsIPhoneMode {
-                modes.append(.perfectSync)
-            }
-            for mode in modes {
-                let inputKeys = TrackingMappingEntry.availableInputKeys(for: mode)
-                inputCaches[mode] = KeyCache(keys: inputKeys)
-            }
-
-            await MainActor.run { [inputCaches, outputCache] in
-                self.inputKeyCaches = inputCaches
-                self.outputKeyCache = outputCache
-                self.isInitialized = true
-            }
+        var modes: [TrackingMode] = [.blendShape]
+        if supportsIPhoneMode {
+            modes.append(.perfectSync)
         }
+        for mode in modes {
+            inputKeysByMode[mode] = TrackingMappingEntry.availableInputKeys(for: mode)
+        }
+
+        isInitialized = true
     }
 
     func updateBlendShapeNames(_ names: [String]) {
-        Task.detached {
-            let outputKeys = names.map { TrackingMappingEntry.OutputKey(key: $0) }
-            let outputCache = KeyCache(keys: outputKeys)
-
-            await MainActor.run {
-                self.outputKeyCache = outputCache
-            }
-        }
+        outputKeys = names.map { TrackingMappingEntry.OutputKey(key: $0) }
     }
 
-    func updateMapping(at index: Int) {
-        tracking.updateMapping(at: index, for: selectedMode)
+    func applyMappings() {
+        tracking.applyMappings(for: selectedMode)
     }
 
     func addMapping() {
@@ -202,9 +178,9 @@ final class MappingDataStore {
     func resetToDefault(at indices: IndexSet) {
         for index in indices {
             tracking.mappings[Int(selectedMode.rawValue)][index].resetToDefault(for: selectedMode)
-            tracking.updateMapping(at: index, for: selectedMode)
         }
         if !indices.isEmpty {
+            tracking.applyMappings(for: selectedMode)
             mappingsRevision &+= 1
         }
     }
@@ -212,16 +188,6 @@ final class MappingDataStore {
     func resetAllMappings() {
         tracking.resetMappings(for: selectedMode)
         mappingsRevision &+= 1
-    }
-}
-
-private struct KeyCache<T: Identifiable & Sendable>: Sendable where T.ID == String {
-    var keys: [T]
-    var lookup: [String: T]
-
-    init(keys: [T] = []) {
-        self.keys = keys
-        self.lookup = Dictionary(uniqueKeysWithValues: keys.map { ($0.id, $0) })
     }
 }
 

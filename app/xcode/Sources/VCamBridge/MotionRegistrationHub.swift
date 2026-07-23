@@ -11,8 +11,12 @@ public enum MotionImportError: Error {
 public final class MotionRegistrationHub {
     public static let shared = MotionRegistrationHub()
 
-    private var continuations: [UUID: CheckedContinuation<Void, any Error>] = [:]
-    private var timeoutTasks: [UUID: Task<Void, Never>] = [:]
+    private struct PendingRequest {
+        let continuation: CheckedContinuation<Void, any Error>
+        let timeoutTask: Task<Void, Never>
+    }
+
+    private var requests: [UUID: PendingRequest] = [:]
 
     private init() {}
 
@@ -20,12 +24,12 @@ public final class MotionRegistrationHub {
         try Task.checkCancellation()
         try await withTaskCancellationHandler {
             try await withCheckedThrowingContinuation { continuation in
-                continuations[requestID] = continuation
-                timeoutTasks[requestID] = Task { [weak self] in
+                let timeoutTask = Task { [weak self] in
                     try? await Task.sleep(for: timeout)
                     guard !Task.isCancelled else { return }
                     self?.resume(requestID: requestID, result: .failure(MotionImportError.registrationTimedOut))
                 }
+                requests[requestID] = PendingRequest(continuation: continuation, timeoutTask: timeoutTask)
                 start()
             }
         } onCancel: {
@@ -46,9 +50,9 @@ public final class MotionRegistrationHub {
     }
 
     private func resume(requestID: UUID, result: Result<Void, any Error>) {
-        guard let continuation = continuations.removeValue(forKey: requestID) else { return }
-        timeoutTasks.removeValue(forKey: requestID)?.cancel()
-        continuation.resume(with: result)
+        guard let request = requests.removeValue(forKey: requestID) else { return }
+        request.timeoutTask.cancel()
+        request.continuation.resume(with: result)
     }
 }
 

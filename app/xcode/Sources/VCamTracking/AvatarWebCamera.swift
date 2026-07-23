@@ -14,7 +14,7 @@ public final class AvatarWebCamera {
     }
 
     private let cameraSession: CameraSession
-    private var frameStream = VisionFrameStream()
+    private var frameStream: VisionFrameStream
     private var pipeline: VisionTrackingPipeline
     private var configurationRevision: UInt64 = 0
     public private(set) var state: State = .stopped
@@ -114,6 +114,9 @@ public final class AvatarWebCamera {
         try await cameraSession.setDevice(id: id)
         if let id {
             UserDefaults.standard.set(id, for: .captureDeviceId)
+        } else {
+            // Clear the stored ID so the next launch falls back to the default camera
+            UserDefaults.standard.remove(for: .captureDeviceId)
         }
     }
 

@@ -96,7 +96,7 @@ public final class Tracking {
         applyMappingsToUnity(for: mode)
     }
 
-    public func updateMapping(at index: Int, for mode: TrackingMode) {
+    public func applyMappings(for mode: TrackingMode) {
         applyMappingsToUnity(for: mode)
     }
 
@@ -147,7 +147,7 @@ public final class Tracking {
         faceTrackingMethod = method
         UserDefaults.standard.set(method, for: .trackingMethodFace)
 
-        var usage = Tracking.shared.avatarCameraManager.webCameraUsage
+        var usage = avatarCameraManager.webCameraUsage
 
         switch method {
         case .disabled, .iFacialMocap, .vcamMocap:
@@ -159,7 +159,7 @@ public final class Tracking {
                 usage.insert(.lipTracking)
             }
         }
-        Tracking.shared.avatarCameraManager.setWebCamUsage(usage)
+        avatarCameraManager.setWebCamUsage(usage)
 
         updateLipSyncIfNeeded()
 
@@ -229,10 +229,10 @@ public final class Tracking {
         UniState.shared.lipSyncWebCam = useCamera
         if useCamera {
             AvatarAudioManager.shared.stop(usage: .lipSync)
-            Tracking.shared.avatarCameraManager.setWebCamUsage(Tracking.shared.avatarCameraManager.webCameraUsage.union(.lipTracking))
+            avatarCameraManager.setWebCamUsage(avatarCameraManager.webCameraUsage.union(.lipTracking))
         } else {
             AvatarAudioManager.shared.start(usage: .lipSync)
-            Tracking.shared.avatarCameraManager.setWebCamUsage(Tracking.shared.avatarCameraManager.webCameraUsage.subtracting(.lipTracking))
+            avatarCameraManager.setWebCamUsage(avatarCameraManager.webCameraUsage.subtracting(.lipTracking))
         }
     }
 
