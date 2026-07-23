@@ -13,19 +13,19 @@ public final class AvatarWebCamera {
         case failed(String)
     }
 
+    /// The frame stream and pipeline only exist while the camera is running.
+    private struct ActivePipeline {
+        let stream: VisionFrameStream
+        let pipeline: VisionTrackingPipeline
+    }
+
     private let cameraSession: CameraSession
-    private var frameStream: VisionFrameStream
-    private var pipeline: VisionTrackingPipeline
+    private var activePipeline: ActivePipeline?
     private var configurationRevision: UInt64 = 0
     public private(set) var state: State = .stopped
     public let handTracking = HandTracking()
 
     public init() {
-        let stream = VisionFrameStream()
-        frameStream = stream
-        pipeline = VisionTrackingPipeline(frameStream: stream) { output in
-            Self.apply(output)
-        }
         cameraSession = CameraSession(initialFPS: Int(UserDefaults.standard.value(for: .cameraFps)))
         handTracking.setConfigurationChangeHandler { [weak self] in
             Task { @MainActor in
@@ -72,27 +72,27 @@ public final class AvatarWebCamera {
             return
         }
         state = .starting
-        
+
         let stream = VisionFrameStream()
-        let newPipeline = VisionTrackingPipeline(frameStream: stream) { output in
+        let pipeline = VisionTrackingPipeline(frameStream: stream) { output in
             Self.apply(output)
         }
-        frameStream = stream
-        pipeline = newPipeline
+        activePipeline = ActivePipeline(stream: stream, pipeline: pipeline)
         do {
             try await cameraSession.configure(
                 deviceID: currentCaptureDeviceID, fps: currentFPS)
             let configuration = makeConfigurationSnapshot()
             let handler = Self.makeFrameHandler(frameStream: stream, configuration: configuration)
             await cameraSession.setFrameHandler(handler, revision: configuration.revision)
-            await newPipeline.start()
+            await pipeline.start()
             try await cameraSession.start()
             state = .running
         } catch {
             _ = await cameraSession.stop()
             configurationRevision &+= 1
             await cameraSession.setFrameHandler(nil, revision: configurationRevision)
-            await newPipeline.stop()
+            await pipeline.stop()
+            activePipeline = nil
             state = .failed(error.localizedDescription)
             throw error
         }
@@ -106,7 +106,8 @@ public final class AvatarWebCamera {
         configurationRevision &+= 1
         await cameraSession.setFrameHandler(nil, revision: configurationRevision)
         _ = await cameraSession.stop()
-        await pipeline.stop()
+        await activePipeline?.pipeline.stop()
+        activePipeline = nil
         state = .stopped
     }
 
@@ -126,7 +127,8 @@ public final class AvatarWebCamera {
     }
 
     public func resetCalibration() {
-        Task { [pipeline] in
+        guard let pipeline = activePipeline?.pipeline else { return }
+        Task {
             let y = await pipeline.previousRawEyeballY()
             UserDefaults.standard.set(CGFloat(-y), for: .eyeTrackingOffsetY)
             await pipeline.calibrate()
@@ -142,9 +144,9 @@ public final class AvatarWebCamera {
     }
 
     private func scheduleVisionConfigurationUpdate() {
-        guard state == .starting || state == .running else { return }
+        guard state == .starting || state == .running, let stream = activePipeline?.stream else { return }
         let configuration = makeConfigurationSnapshot()
-        let handler = Self.makeFrameHandler(frameStream: frameStream, configuration: configuration)
+        let handler = Self.makeFrameHandler(frameStream: stream, configuration: configuration)
         Task { [cameraSession] in
             await cameraSession.setFrameHandler(handler, revision: configuration.revision)
         }

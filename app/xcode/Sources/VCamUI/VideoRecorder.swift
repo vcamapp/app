@@ -47,13 +47,12 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
     @ObservationIgnored private var baseHostTime = mach_absolute_time()
     @ObservationIgnored private var pixelBuffer: CVPixelBuffer?
     private let context = CIContext(options: [.cacheIntermediates: false, .name: "VideoRecorder"])
-    @ObservationIgnored private var outputFile: AVAudioFile!
     @ObservationIgnored private var outputURL: URL!
     @ObservationIgnored private var temporaryOutputURL: URL!
 
     @ObservationIgnored private var converter: AudioConverter?
     private let expectedFormat = AVAudioFormat(standardFormatWithSampleRate: 48000, channels: 1)!
-    @ObservationIgnored private var systemAudioRecorder: (any ScreenRecorderProtocol)?
+    @ObservationIgnored private var systemAudioRecorder: ScreenRecorder?
 
 #if DEBUG
     @ObservationIgnored private var debugTimer: Timer?
@@ -132,9 +131,9 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
         baseHostTime = mach_absolute_time()
 
         if capturesSystemAudio {
-            systemAudioRecorder = ScreenRecorder.audioOnly { buffer, startTime in
+            systemAudioRecorder = ScreenRecorder.audioOnly { buffer in
                 Task {
-                    await Self.shared.renderPCAudioFrame(buffer, startTime: startTime)
+                    await Self.shared.renderPCAudioFrame(buffer)
                 }
             }
         }
@@ -169,7 +168,6 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
         let videoOutputSettings = assetVideoWriterAdaptor?.assetWriterInput.outputSettings as? [String: any Sendable] ?? [:]
         let audioOutputSettings = assetAudioWriterInput?.outputSettings as? [String: any Sendable] ?? [:]
 
-        outputFile = nil
         assetVideoWriterAdaptor = nil
         assetAudioWriterInput = nil
         converter = nil
@@ -273,7 +271,7 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
         }
     }
 
-    func renderPCAudioFrame(_ sampleBuffer: CMSampleBuffer, startTime: CFTimeInterval) async {
+    func renderPCAudioFrame(_ sampleBuffer: CMSampleBuffer) async {
         guard case .recording = state, frameCount > 0,
                 let formatDescription = sampleBuffer.formatDescription,
               let sampleRate = (formatDescription.audioStreamBasicDescription?.mSampleRate).flatMap(TimeInterval.init),

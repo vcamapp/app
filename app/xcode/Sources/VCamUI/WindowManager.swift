@@ -82,10 +82,6 @@ public final class WindowManager {
     public func setUpView() {
         Logger.log("")
 
-        defer {
-            isConfigured = true
-        }
-
         guard !isConfigured, containerView.subviews.isEmpty, let window = NSApp.vcamWindow, let unityView = window.contentView else {
             return
         }
@@ -109,6 +105,8 @@ public final class WindowManager {
             setupMenuBar()
             setAlwaysOnTopEnabled(UserDefaults.standard.value(for: .alwaysOnTopEnabled))
         }
+
+        isConfigured = true
     }
 
     public func setupMenuBar() {

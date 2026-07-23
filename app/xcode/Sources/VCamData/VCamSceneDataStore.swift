@@ -122,6 +122,7 @@ extension VCamSceneDataStore { // TODO: Refactor
             do {
                 let dataStore = Self.init(sceneId: id)
                 var scene = try dataStore.load()
+                let originalCount = scene.objects.count
                 scene.objects = scene.objects.compactMap {
                     switch $0.type {
                     case .avatar, .screen, .captureDevice, .web, .wind: ()
@@ -132,7 +133,10 @@ extension VCamSceneDataStore { // TODO: Refactor
                     }
                     return $0
                 }
-                try dataStore.save(scene)
+                // Only rewrite the scene when an invalid object was actually removed
+                if scene.objects.count != originalCount {
+                    try dataStore.save(scene)
+                }
                 return true
             } catch {
                 try? FileManager.default.removeItem(at: .sceneRoot(sceneId: id))

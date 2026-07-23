@@ -4,14 +4,8 @@ import VCamBridge
 import VCamEntity
 
 @MainActor
-public protocol ScreenRecorderProtocol: AnyObject, Sendable {
-    @concurrent
-    func stopCapture() async
-}
-
-@MainActor
 @Observable
-public final class ScreenRecorder: NSObject, ScreenRecorderProtocol {
+public final class ScreenRecorder: NSObject {
     public enum CaptureType {
         case independentWindow
         case display
@@ -62,8 +56,6 @@ public final class ScreenRecorder: NSObject, ScreenRecorderProtocol {
         var sampleBuffer: CMSampleBuffer
         var surfaceRef: IOSurfaceRef
         var contentRect: CGRect
-        var displayTime: TimeInterval
-        var contentScale: Double
         var scaleFactor: Double
         var surface: IOSurface {
             // Force-cast the IOSurfaceRef to IOSurface.
@@ -112,8 +104,6 @@ public final class ScreenRecorder: NSObject, ScreenRecorderProtocol {
 
     @ObservationIgnored public private(set) var captureConfig: CaptureConfiguration?
     @ObservationIgnored private var stream: SCStream?
-    @ObservationIgnored nonisolated(unsafe) private var cpuStartTime = mach_absolute_time()
-    @ObservationIgnored private var mediaStartTime = CACurrentMediaTime()
     private let videoSampleBufferQueue = DispatchQueue(label: "com.github.tattn.vcam.queue.screenrecorder.video")
     private let audioSampleBufferQueue = DispatchQueue(label: "com.github.tattn.vcam.queue.screenrecorder.audio")
 
@@ -142,8 +132,6 @@ public final class ScreenRecorder: NSObject, ScreenRecorderProtocol {
             // Start the capture session.
             try await stream?.startCapture()
 
-            cpuStartTime = mach_absolute_time()
-            mediaStartTime = CACurrentMediaTime()
             isRecording = true
 
             await update(with: captureConfig)
@@ -249,12 +237,6 @@ public final class ScreenRecorder: NSObject, ScreenRecorderProtocol {
         return streamConfig
     }
 
-    nonisolated private func convertToSeconds(_ machTime: UInt64) -> TimeInterval {
-        var timebase = mach_timebase_info_data_t()
-        mach_timebase_info(&timebase)
-        let nanoseconds = machTime * UInt64(timebase.numer) / UInt64(timebase.denom)
-        return Double(nanoseconds) / Double(kSecondScale)
-    }
 }
 
 extension ScreenRecorder: SCStreamOutput {
@@ -307,22 +289,13 @@ extension ScreenRecorder: SCStreamOutput {
             return nil
         }
 
-        guard let displayTime = attachments[.displayTime] as? UInt64 else {
-            return nil
-        }
-
-        let elapsedTime = convertToSeconds(displayTime) - convertToSeconds(cpuStartTime)
-
-        guard let contentScale = attachments[.contentScale] as? Double,
-              let scaleFactor = attachments[.scaleFactor] as? Double else {
+        guard let scaleFactor = attachments[.scaleFactor] as? Double else {
             return nil
         }
 
         return CapturedFrame(sampleBuffer: sampleBuffer,
                              surfaceRef: surfaceRef,
                              contentRect: contentRect,
-                             displayTime: elapsedTime,
-                             contentScale: contentScale,
                              scaleFactor: scaleFactor)
     }
 
@@ -395,30 +368,29 @@ extension ScreenRecorder: RenderTextureRenderer {
 }
 
 public extension ScreenRecorder {
+    // Use the main thread for size since the Unity side's Canvas size is required
     @MainActor
-    static func create(id: String, screenCapture: VCamScene.ScreenCapture, completion: @escaping (ScreenRecorder) -> Void) {
-        Task { // Use the main thread for size since the Unity side's Canvas size is required
-            let availableContent = try await SCShareableContent.excludingDesktopWindows(
-                false,
-                onScreenWindowsOnly: true
-            )
-            uniDebugLog("ScreenRecorder.create: \(availableContent)")
-            let configuration = CaptureConfiguration(
-                captureType: .init(type: screenCapture.captureType),
-                display: availableContent.displays.first { $0.id == id },
-                window: availableContent.windows.first { $0.id == id }
-            )
+    static func create(id: String, screenCapture: VCamScene.ScreenCapture) async throws -> ScreenRecorder {
+        let availableContent = try await SCShareableContent.excludingDesktopWindows(
+            false,
+            onScreenWindowsOnly: true
+        )
+        uniDebugLog("ScreenRecorder.create: \(availableContent)")
+        let configuration = CaptureConfiguration(
+            captureType: .init(type: screenCapture.captureType),
+            display: availableContent.displays.first { $0.id == id },
+            window: availableContent.windows.first { $0.id == id }
+        )
 
-            let screenRecorder = ScreenRecorder()
-            screenRecorder.cropRect = screenCapture.texture.crop.rect
-            screenRecorder.filter = screenCapture.texture.filter.map(ImageFilter.init(configuration:))
-            await screenRecorder.startCapture(with: configuration)
-            uniDebugLog("ScreenRecorder.create: \(screenRecorder)")
-            completion(screenRecorder)
-        }
+        let screenRecorder = ScreenRecorder()
+        screenRecorder.cropRect = screenCapture.texture.crop.rect
+        screenRecorder.filter = screenCapture.texture.filter.map(ImageFilter.init(configuration:))
+        await screenRecorder.startCapture(with: configuration)
+        uniDebugLog("ScreenRecorder.create: \(screenRecorder)")
+        return screenRecorder
     }
 
-    static func audioOnly(output: @escaping (CMSampleBuffer, CFTimeInterval) -> Void) -> ScreenRecorder {
+    static func audioOnly(output: @escaping (CMSampleBuffer) -> Void) -> ScreenRecorder {
         let audioCapture = ScreenRecorder()
         Task {
             let availableContent = try await SCShareableContent.excludingDesktopWindows(
@@ -432,9 +404,8 @@ public extension ScreenRecorder {
             )
             await audioCapture.startCapture(with: configuration)
         }
-        let mediaStartTime = audioCapture.mediaStartTime
         audioCapture.didAudioOutput = { buffer in
-            output(buffer, mediaStartTime)
+            output(buffer)
         }
         return audioCapture
     }

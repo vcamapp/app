@@ -4,19 +4,8 @@ import Synchronization
 
 public enum VideoConverter { // TODO: Migrate to new API for macOS 26+
     private final class ConversionState: @unchecked Sendable {
-        private let errorStorage = Mutex<Error?>(nil)
         private let finishedInputs = Mutex<Set<String>>([])
         private let completionStorage = Mutex(false)
-
-        var error: Error? {
-            errorStorage.withLock { $0 }
-        }
-
-        func set(error: Error) {
-            errorStorage.withLock { storedError in
-                storedError = storedError ?? error
-            }
-        }
 
         func finishInput(_ name: String) -> Bool {
             finishedInputs.withLock { inputs in
@@ -144,7 +133,6 @@ public enum VideoConverter { // TODO: Migrate to new API for macOS 26+
                 let audioQueue = DispatchQueue(label: "vcam.mergeAudioTracks.audioQueue")
 
                 func fail(_ error: Error) {
-                    state.set(error: error)
                     reader.cancelReading()
                     writer.cancelWriting()
                     videoInput.markAsFinished()
@@ -181,10 +169,6 @@ public enum VideoConverter { // TODO: Migrate to new API for macOS 26+
 
                 group.notify(queue: .global()) {
                     guard state.complete() else { return }
-                    if let error = state.error {
-                        cancellationBox.take()?.resume(throwing: error)
-                        return
-                    }
                     guard reader.status == .completed else {
                         cancellationBox.take()?.resume(throwing: ConversionError.readerFailed(reader.error))
                         return

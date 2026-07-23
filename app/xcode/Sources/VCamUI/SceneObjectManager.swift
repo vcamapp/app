@@ -130,7 +130,7 @@ public final class SceneObjectManager {
     }
 
     func updateObjectOrder() {
-        UniBridge.shared.updateObjectOrder(SceneObjectManager.shared.objects.map(\.id) + [-1])
+        UniBridge.shared.updateObjectOrder(objects.map(\.id) + [-1])
         try? SceneManager.shared.saveCurrentSceneAndObjects()
     }
 
@@ -149,10 +149,9 @@ public final class SceneObjectManager {
         let x = Int32(canvasSize.width * region.origin.x)
         let y = Int32(canvasSize.height * region.origin.y)
 
-        let estimatedWidth = fitSize(crop.size, regionSize: region.size).width
-        let estimatedHeight = estimatedWidth * crop.size.height / crop.size.width
+        let estimatedSize = fitSize(crop.size, regionSize: region.size)
 
-        return [x, y, Int32(estimatedWidth), Int32(estimatedHeight)]
+        return [x, y, Int32(estimatedSize.width), Int32(estimatedSize.height)]
     }
 
     private func fitSize(_ size: CGSize, regionSize: CGSize) -> CGSize {
@@ -184,8 +183,8 @@ extension SceneObjectManager {
 
         self.objects = []
 
+        // Only screen capture creation is asynchronous, so the group tracks just those branches.
         let group = DispatchGroup()
-        scene.objects.forEach { _ in group.enter() }
 
         for object in scene.objects {
             let sceneObject = object.sceneObject(dataStore: dataStore)
@@ -200,20 +199,24 @@ extension SceneObjectManager {
                         avatar.rotation.x, avatar.rotation.y, avatar.rotation.z,
                     ])
                 }
-                group.leave()
             case .image:
                 if case let .image(image) = sceneObject.type {
                     let renderer = ImageRenderer(imageURL: image.url, filter: image.filter)
                     RenderTextureManager.shared.set(renderer, id: object.id)
                     configure(sceneObject)
                 }
-                group.leave()
             case let .screen(id, state):
-                ScreenRecorder.create(id: id, screenCapture: state) { recorder in
-                    recorder.filter = state.texture.filter.map(ImageFilter.init(configuration:))
-                    RenderTextureManager.shared.set(recorder, id: object.id)
-                    self.configure(sceneObject)
-                    group.leave()
+                group.enter()
+                Task { @MainActor in
+                    defer { group.leave() }
+                    do {
+                        let recorder = try await ScreenRecorder.create(id: id, screenCapture: state)
+                        recorder.filter = state.texture.filter.map(ImageFilter.init(configuration:))
+                        RenderTextureManager.shared.set(recorder, id: object.id)
+                        self.configure(sceneObject)
+                    } catch {
+                        Logger.log("Failed to create ScreenRecorder: \(error.localizedDescription)")
+                    }
                 }
             case let .captureDevice(uniqueID, state):
                 if let device = AVCaptureDevice(uniqueID: uniqueID),
@@ -222,16 +225,13 @@ extension SceneObjectManager {
                     RenderTextureManager.shared.set(drawer, id: object.id)
                 }
                 configure(sceneObject)
-                group.leave()
             case let .web(state):
                 let renderer = WebRenderer(resource: state.url != nil ? .url(state.url!) : .path(bookmark: state.path ?? .init()), size: state.texture.textureSize, fps: state.fps, css: state.css, js: state.js)
                 renderer.filter = state.texture.filter.map(ImageFilter.init(configuration:))
                 RenderTextureManager.shared.set(renderer, id: object.id)
                 configure(sceneObject)
-                group.leave()
             case .wind:
                 configure(sceneObject)
-                group.leave()
             }
             objects.append(sceneObject)
         }

@@ -169,34 +169,19 @@ public extension UniBridge {
     }
 
     static func addTrackingMapping(mode: TrackingMode, inputKey: String, outputKey: String, inputRangeMin: Float, inputRangeMax: Float, outputRangeMin: Float, outputRangeMax: Float, filter: TrackingFilter = .none) {
-        inputKey.withCString { inputKeyPtr in
-            outputKey.withCString { outputKeyPtr in
-                var payload = TrackingMappingPayload(
-                    mode: mode.rawValue,
-                    index: 0,
-                    inputKeyPtr: inputKeyPtr,
-                    outputKeyPtr: outputKeyPtr,
-                    inputRangeMin: inputRangeMin,
-                    inputRangeMax: inputRangeMax,
-                    outputRangeMin: outputRangeMin,
-                    outputRangeMax: outputRangeMax,
-                    filterType: filter.typeId,
-                    filterParam0: filter.parameters.count > 0 ? filter.parameters[0] : 0,
-                    filterParam1: filter.parameters.count > 1 ? filter.parameters[1] : 0
-                )
-                withUnsafeMutablePointer(to: &payload) { payloadPtr in
-                    methodCallback(.addTrackingMapping, payloadPtr, nil)
-                }
-            }
-        }
+        sendTrackingMapping(.addTrackingMapping, mode: mode, index: 0, inputKey: inputKey, outputKey: outputKey, inputRangeMin: inputRangeMin, inputRangeMax: inputRangeMax, outputRangeMin: outputRangeMin, outputRangeMax: outputRangeMax, filter: filter)
     }
 
     static func updateTrackingMapping(mode: TrackingMode, at index: Int, inputKey: String, outputKey: String, inputRangeMin: Float, inputRangeMax: Float, outputRangeMin: Float, outputRangeMax: Float, filter: TrackingFilter = .none) {
+        sendTrackingMapping(.updateTrackingMapping, mode: mode, index: Int32(index), inputKey: inputKey, outputKey: outputKey, inputRangeMin: inputRangeMin, inputRangeMax: inputRangeMax, outputRangeMin: outputRangeMin, outputRangeMax: outputRangeMax, filter: filter)
+    }
+
+    private static func sendTrackingMapping(_ method: UniBridgeMethodId, mode: TrackingMode, index: Int32, inputKey: String, outputKey: String, inputRangeMin: Float, inputRangeMax: Float, outputRangeMin: Float, outputRangeMax: Float, filter: TrackingFilter) {
         inputKey.withCString { inputKeyPtr in
             outputKey.withCString { outputKeyPtr in
                 var payload = TrackingMappingPayload(
                     mode: mode.rawValue,
-                    index: Int32(index),
+                    index: index,
                     inputKeyPtr: inputKeyPtr,
                     outputKeyPtr: outputKeyPtr,
                     inputRangeMin: inputRangeMin,
@@ -208,7 +193,7 @@ public extension UniBridge {
                     filterParam1: filter.parameters.count > 1 ? filter.parameters[1] : 0
                 )
                 withUnsafeMutablePointer(to: &payload) { payloadPtr in
-                    methodCallback(.updateTrackingMapping, payloadPtr, nil)
+                    methodCallback(method, payloadPtr, nil)
                 }
             }
         }
