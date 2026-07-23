@@ -29,7 +29,7 @@ public struct VCamSceneDataStore {
         let url = sceneURL
         let encoder = JSONEncoder()
         let data = try encoder.encode(scene)
-        try data.write(to: url)
+        try data.write(to: url, options: .atomic)
         uniDebugLog("scene saved: " + url.path)
     }
 
@@ -106,28 +106,25 @@ extension VCamSceneDataStore {
     }
 }
 
-extension VCamSceneDataStore { // TODO: Refactor
-    public static func clean(metadata: VCamSceneMetadata) throws -> VCamSceneMetadata {
-        // Remove the scenes if there're data inconsistency
+extension VCamSceneDataStore {
+    /// Loads every scene while repairing data inconsistencies in a single pass:
+    /// drops scenes that can't be loaded, removes image objects whose files are missing,
+    /// rebuilds the metadata from the surviving (deduplicated) IDs, and persists only what changed.
+    public static func loadAndRepair(metadata: VCamSceneMetadata) throws -> (scenes: [VCamScene], metadata: VCamSceneMetadata) {
+        var scenes: [VCamScene] = []
+        var validIds: [Int32] = []
 
-        let dataIds = (try FileManager.default.contentsOfDirectory(atPath: URL.scenesDirectory.path)
-            .compactMap { $0.components(separatedBy: "/").last })
-            .compactMap(Int32.init)
-            .filter { FileManager.default.fileExists(atPath: URL.scene(sceneId: $0).path) }
-
-        // Exclude scenes where the data file is missing
-        var existingIds = dataIds.filter { metadata.sceneIds.contains($0) }
-        existingIds = existingIds.filter { id in
-            // Remove objects that cannot be loaded
+        for id in metadata.sceneIds where !validIds.contains(id) {
+            let dataStore = Self.init(sceneId: id)
             do {
-                let dataStore = Self.init(sceneId: id)
                 var scene = try dataStore.load()
+                // Remove image objects whose data files are missing
                 let originalCount = scene.objects.count
                 scene.objects = scene.objects.compactMap {
                     switch $0.type {
                     case .avatar, .screen, .captureDevice, .web, .wind: ()
-                    case let .image(id, _):
-                        if !FileManager.default.fileExists(atPath: dataStore.dataURL(id: id).path) {
+                    case let .image(imageId, _):
+                        if !FileManager.default.fileExists(atPath: dataStore.dataURL(id: imageId).path) {
                             return nil
                         }
                     }
@@ -137,20 +134,20 @@ extension VCamSceneDataStore { // TODO: Refactor
                 if scene.objects.count != originalCount {
                     try dataStore.save(scene)
                 }
-                return true
+                scenes.append(scene)
+                validIds.append(id)
             } catch {
-                try? FileManager.default.removeItem(at: .sceneRoot(sceneId: id))
-                return false
+                // Scenes that couldn't be loaded are deleted
+                try? dataStore.delete()
             }
         }
 
-        if Set(metadata.sceneIds) != Set(existingIds) {
-            var metadata = metadata
-            metadata.sceneIds = metadata.sceneIds.filter { existingIds.contains($0) }
+        var metadata = metadata
+        // Compare as ordered arrays so duplicate IDs (e.g. [1, 1]) are also repaired
+        if validIds != metadata.sceneIds {
+            metadata.sceneIds = validIds
             try metadata.save()
-            return metadata
         }
-
-        return metadata
+        return (scenes, metadata)
     }
 }

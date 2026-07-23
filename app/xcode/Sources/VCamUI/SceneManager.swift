@@ -17,9 +17,14 @@ public final class SceneManager {
         }
     }
 
-    public var scenes: [VCamScene]
-    @ObservationIgnored private var landScapeScenes: [VCamScene]
-    @ObservationIgnored private var portraitScenes: [VCamScene]
+    // Scenes are kept per orientation (key = isLandscape) so each keeps its own order.
+    // `scenes` is the slice for the current orientation, so the working copy never drifts from the backing store.
+    private var scenesByOrientation: [Bool: [VCamScene]] = [:]
+
+    public var scenes: [VCamScene] {
+        get { scenesByOrientation[MainTexture.shared.isLandscape, default: []] }
+        set { scenesByOrientation[MainTexture.shared.isLandscape] = newValue }
+    }
 
     private init() {
         let newSceneId = Int32.random(in: 0..<Int32.max)
@@ -35,36 +40,21 @@ public final class SceneManager {
         }
 
         do {
-            var metadata = try VCamSceneMetadata.load()
-            metadata = try VCamSceneDataStore.clean(metadata: metadata)
-            let scenes: [VCamScene] = metadata.sceneIds
-                .map(VCamSceneDataStore.init(sceneId:))
-                .compactMap { dataStore in
-                    do {
-                        return try dataStore.load()
-                    } catch {
-                        // Scenes that couldn't be loaded are deleted.
-                        uniDebugLog("Delete scene: \(dataStore.sceneId)")
-                        try? dataStore.delete()
-                        metadata.remove(sceneId: dataStore.sceneId)
-                        try? metadata.save()
-                        return nil
-                    }
-                }
-            self.landScapeScenes = scenes.scenes(isLandscape: true)
-            self.portraitScenes = scenes.scenes(isLandscape: false)
-            self.landScapeScenes = self.landScapeScenes.isEmpty ? [Self.createNewScene()] : self.landScapeScenes
-            self.portraitScenes = self.portraitScenes.isEmpty ? [Self.createNewScene()] : self.portraitScenes
-            let currentScenes = MainTexture.shared.isLandscape ? self.landScapeScenes : self.portraitScenes
-            self.scenes = currentScenes
+            let metadata = try VCamSceneMetadata.load()
+            let (scenes, _) = try VCamSceneDataStore.loadAndRepair(metadata: metadata)
+            var landscape = scenes.scenes(isLandscape: true)
+            var portrait = scenes.scenes(isLandscape: false)
+            landscape = landscape.isEmpty ? [Self.createNewScene()] : landscape
+            portrait = portrait.isEmpty ? [Self.createNewScene()] : portrait
+            self.scenesByOrientation = [true: landscape, false: portrait]
+            let currentScenes = MainTexture.shared.isLandscape ? landscape : portrait
             self.currentSceneId = currentScenes.first?.id ?? newSceneId
         } catch {
             uniDebugLog(error.localizedDescription)
             let dataStore = VCamSceneDataStore(sceneId: newSceneId)
             let scene = dataStore.makeNewScene()
-            self.landScapeScenes = [scene]
-            self.portraitScenes = [scene]
-            self.scenes = MainTexture.shared.isLandscape ? self.landScapeScenes : self.portraitScenes
+            // Assign only to the current orientation to avoid registering the same scene ID for both.
+            self.scenesByOrientation = [MainTexture.shared.isLandscape: [scene]]
             self.currentSceneId = newSceneId
             try? dataStore.save(scene)
         }
@@ -154,25 +144,13 @@ public final class SceneManager {
 
     private func save() throws {
         var metadata = VCamSceneMetadata.loadOrCreate()
-        if MainTexture.shared.isLandscape {
-            landScapeScenes = scenes
-        } else {
-            portraitScenes = scenes
-        }
-        metadata.sceneIds = (landScapeScenes + portraitScenes).map(\.id)
+        metadata.sceneIds = (scenesByOrientation[true, default: []] + scenesByOrientation[false, default: []]).map(\.id)
         try metadata.save()
     }
 
     func changeAspectRatio() {
-        // Store the previous state in memory
-        // (since the flag is already toggled, store it in the reversed state)
-        if MainTexture.shared.isLandscape {
-            portraitScenes = scenes
-        } else {
-            landScapeScenes = scenes
-        }
-        scenes = MainTexture.shared.isLandscape ? landScapeScenes : portraitScenes
-        
+        // The aspect-ratio flag is already toggled, so `scenes` now reflects the new
+        // orientation automatically (edits were always written to the backing store).
         if let scene = scenes.first {
             UniBridge.shared.resetAllObjects() // Since processing is delayed, first remove only the list items from UI.
             Task { @MainActor in
