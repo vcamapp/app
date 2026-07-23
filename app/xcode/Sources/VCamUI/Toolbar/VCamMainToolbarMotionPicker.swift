@@ -19,7 +19,7 @@ public struct VCamMainToolbarMotionPicker: View {
                 }
             }
 
-            if MotionLibrary.shared.supportsImportedMotions {
+            if MotionLibrary.supportsImportedMotions {
                 customMotionSection
             }
         }

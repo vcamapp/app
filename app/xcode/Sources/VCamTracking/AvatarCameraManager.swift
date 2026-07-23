@@ -1,8 +1,22 @@
 import AVFoundation
-import Synchronization
 import VCamBridge
 import VCamCamera
 import VCamLogger
+
+public struct CameraPermissionProvider: Sendable {
+    public var isAuthorized: @Sendable () -> Bool
+    public var requestPermission: @Sendable @MainActor () async -> Bool
+
+    public init(
+        isAuthorized: @escaping @Sendable () -> Bool,
+        requestPermission: @escaping @Sendable @MainActor () async -> Bool
+    ) {
+        self.isAuthorized = isAuthorized
+        self.requestPermission = requestPermission
+    }
+
+    public static let denied = CameraPermissionProvider(isAuthorized: { false }, requestPermission: { false })
+}
 
 @MainActor
 public final class AvatarCameraManager {
@@ -11,26 +25,15 @@ public final class AvatarCameraManager {
     private var cameraLifecycleRevision: UInt64 = 0
     private var cameraReconcileTask: Task<Void, Never>?
 
-    nonisolated private static let permissionStorage = Mutex(PermissionState())
+    public var permissionProvider: CameraPermissionProvider
 
-    private struct PermissionState: Sendable {
-        var isCameraAuthorized: @Sendable () -> Bool = { false }
-        var requestCameraPermission: @Sendable @MainActor () async -> Bool = { false }
-    }
-
-    public nonisolated static var isCameraAuthorized: @Sendable () -> Bool {
-        get { permissionStorage.withLock { $0.isCameraAuthorized } }
-        set { permissionStorage.withLock { $0.isCameraAuthorized = newValue } }
-    }
-
-    public nonisolated static var requestCameraPermission: @Sendable @MainActor () async -> Bool {
-        get { permissionStorage.withLock { $0.requestCameraPermission } }
-        set { permissionStorage.withLock { $0.requestCameraPermission = newValue } }
+    public init(permissionProvider: CameraPermissionProvider = .denied) {
+        self.permissionProvider = permissionProvider
     }
 
     public var currentCaptureDevice: AVCaptureDevice? { webCamera.currentCaptureDevice }
     public var webCameraUsage: AvatarWebCamera.Usage { webCamera.usage }
-    public var finterConfiguration: FingerTrackingConfiguration { webCamera.handTracking.configuration }
+    public var fingerConfiguration: FingerTrackingConfiguration { webCamera.handTracking.configuration }
 
     private var isWebCameraUsed: Bool {
         webCamera.usage.intersection([.faceTracking, .handTracking, .fingerTracking]) != .disabled
@@ -97,8 +100,8 @@ public final class AvatarCameraManager {
         cameraReconcileTask?.cancel()
         cameraReconcileTask = Task { @MainActor in
             if self.desiredCameraRunning {
-                if !Self.isCameraAuthorized() {
-                    guard await Self.requestCameraPermission(), revision == self.cameraLifecycleRevision,
+                if !self.permissionProvider.isAuthorized() {
+                    guard await self.permissionProvider.requestPermission(), revision == self.cameraLifecycleRevision,
                           self.desiredCameraRunning else { return }
                 }
                 do {
