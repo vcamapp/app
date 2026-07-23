@@ -2,6 +2,7 @@ import AVFoundation
 import VCamBridge
 import VCamCamera
 import VCamData
+import VCamLogger
 
 @MainActor
 public final class AvatarWebCamera {
@@ -24,6 +25,11 @@ public final class AvatarWebCamera {
     private var configurationRevision: UInt64 = 0
     public private(set) var state: State = .stopped
     public let handTracking = HandTracking()
+
+    public var permissionProvider: CameraPermissionProvider = .denied
+
+    private var lifecycleGeneration: UInt64 = 0
+    private var lifecycleTask: Task<Void, Never>?
 
     public init() {
         cameraSession = CameraSession(initialFPS: Int(UserDefaults.standard.value(for: .cameraFps)))
@@ -67,7 +73,31 @@ public final class AvatarWebCamera {
         state == .running
     }
 
-    public func start() async throws {
+    /// The single owner of the camera lifecycle. Transitions are serialized so a start
+    /// and a stop can never interleave mid-flight, and a request superseded by a newer
+    /// one is skipped instead of racing it.
+    public func setRunning(_ shouldRun: Bool) async {
+        lifecycleGeneration &+= 1
+        let generation = lifecycleGeneration
+        let previousTask = lifecycleTask
+        let task = Task { [weak self] in
+            await previousTask?.value
+            guard let self, generation == self.lifecycleGeneration else { return }
+            if shouldRun {
+                await self.startCamera(generation: generation)
+            } else {
+                await self.stopCamera()
+            }
+        }
+        lifecycleTask = task
+        await task.value
+    }
+
+    private func startCamera(generation: UInt64) async {
+        if !permissionProvider.isAuthorized() {
+            // The permission dialog can stay open indefinitely; drop the request if it was superseded meanwhile
+            guard await permissionProvider.requestPermission(), generation == lifecycleGeneration else { return }
+        }
         guard state != .starting, state != .running else {
             return
         }
@@ -94,11 +124,11 @@ public final class AvatarWebCamera {
             await pipeline.stop()
             activePipeline = nil
             state = .failed(error.localizedDescription)
-            throw error
+            Logger.log("Failed to start web camera: \(error.localizedDescription)")
         }
     }
 
-    public func stop() async {
+    private func stopCamera() async {
         guard state != .stopped, state != .stopping else {
             return
         }

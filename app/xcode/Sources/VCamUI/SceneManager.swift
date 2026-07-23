@@ -17,18 +17,33 @@ public final class SceneManager {
         }
     }
 
-    // Scenes are kept per orientation (key = isLandscape) so each keeps its own order.
-    // `scenes` is the slice for the current orientation, so the working copy never drifts from the backing store.
-    private var scenesByOrientation: [Bool: [VCamScene]] = [:]
+    /// Scenes are kept per orientation so each keeps its own order.
+    /// Both orientations always hold at least one scene by construction.
+    private struct OrientedScenes {
+        var landscape: [VCamScene]
+        var portrait: [VCamScene]
 
+        subscript(isLandscape isLandscape: Bool) -> [VCamScene] {
+            get { isLandscape ? landscape : portrait }
+            set {
+                if isLandscape {
+                    landscape = newValue
+                } else {
+                    portrait = newValue
+                }
+            }
+        }
+    }
+
+    private var scenesByOrientation: OrientedScenes
+
+    // The slice for the current orientation, so the working copy never drifts from the backing store.
     public var scenes: [VCamScene] {
-        get { scenesByOrientation[MainTexture.shared.isLandscape, default: []] }
-        set { scenesByOrientation[MainTexture.shared.isLandscape] = newValue }
+        get { scenesByOrientation[isLandscape: MainTexture.shared.isLandscape] }
+        set { scenesByOrientation[isLandscape: MainTexture.shared.isLandscape] = newValue }
     }
 
     private init() {
-        let newSceneId = Int32.random(in: 0..<Int32.max)
-
         NotificationCenter.default.addObserver(
             forName: .aspectRatioDidChange,
             object: nil,
@@ -39,30 +54,39 @@ public final class SceneManager {
             }
         }
 
+        // Even when loading fails, fall back to empty and create default scenes below,
+        // so both orientations are always populated with distinct scene IDs.
+        let loadedScenes: [VCamScene]
         do {
             let metadata = try VCamSceneMetadata.load()
-            let (scenes, _) = try VCamSceneDataStore.loadAndRepair(metadata: metadata)
-            var landscape = scenes.scenes(isLandscape: true)
-            var portrait = scenes.scenes(isLandscape: false)
-            landscape = landscape.isEmpty ? [Self.createNewScene()] : landscape
-            portrait = portrait.isEmpty ? [Self.createNewScene()] : portrait
-            self.scenesByOrientation = [true: landscape, false: portrait]
-            let currentScenes = MainTexture.shared.isLandscape ? landscape : portrait
-            self.currentSceneId = currentScenes.first?.id ?? newSceneId
+            (loadedScenes, _) = try VCamSceneDataStore.loadAndRepair(metadata: metadata)
         } catch {
             uniDebugLog(error.localizedDescription)
-            let dataStore = VCamSceneDataStore(sceneId: newSceneId)
-            let scene = dataStore.makeNewScene()
-            // Assign only to the current orientation to avoid registering the same scene ID for both.
-            self.scenesByOrientation = [MainTexture.shared.isLandscape: [scene]]
-            self.currentSceneId = newSceneId
-            try? dataStore.save(scene)
+            loadedScenes = []
         }
+
+        var landscape = loadedScenes.scenes(isLandscape: true)
+        var portrait = loadedScenes.scenes(isLandscape: false)
+        if landscape.isEmpty {
+            landscape = [Self.createAndSaveNewScene()]
+        }
+        if portrait.isEmpty {
+            portrait = [Self.createAndSaveNewScene()]
+        }
+        self.scenesByOrientation = OrientedScenes(landscape: landscape, portrait: portrait)
+        let currentScenes = MainTexture.shared.isLandscape ? landscape : portrait
+        self.currentSceneId = currentScenes[0].id
     }
 
     private static func createNewScene(sceneId: Int32 = .random(in: 0..<Int32.max)) -> VCamScene {
         let dataStore = VCamSceneDataStore(sceneId: sceneId)
         return dataStore.makeNewScene()
+    }
+
+    private static func createAndSaveNewScene() -> VCamScene {
+        let scene = createNewScene()
+        try? VCamSceneDataStore(sceneId: scene.id).save(scene)
+        return scene
     }
 
     public func addNewScene() throws {
@@ -128,7 +152,9 @@ public final class SceneManager {
         uniDebugLog("\(scene.id) \(scene.objects.count)")
         Logger.log("\(scene.id) \(scene.objects.count)")
         currentSceneId = id
-        SceneObjectManager.shared.loadObjects(scene)
+        Task {
+            await SceneObjectManager.shared.loadObjects(scene)
+        }
     }
 
     public func loadCurrentScene() throws {
@@ -144,20 +170,25 @@ public final class SceneManager {
 
     private func save() throws {
         var metadata = VCamSceneMetadata.loadOrCreate()
-        metadata.sceneIds = (scenesByOrientation[true, default: []] + scenesByOrientation[false, default: []]).map(\.id)
+        metadata.sceneIds = (scenesByOrientation.landscape + scenesByOrientation.portrait).map(\.id)
         try metadata.save()
     }
 
     func changeAspectRatio() {
         // The aspect-ratio flag is already toggled, so `scenes` now reflects the new
         // orientation automatically (edits were always written to the backing store).
-        if let scene = scenes.first {
-            UniBridge.shared.resetAllObjects() // Since processing is delayed, first remove only the list items from UI.
-            Task { @MainActor in
-                try? await Task.sleep(for: .milliseconds(800))
-                // A slight delay is needed until the canvas size aspect ratio changes (TODO: investigation required).
-                try? self.loadScene(id: scene.id)
+        guard let scene = scenes.first else { return }
+        UniBridge.shared.resetAllObjects() // Since processing is delayed, first remove only the list items from UI.
+        Task { @MainActor in
+            // Unity doesn't notify when the canvas finishes resizing, so poll until its
+            // orientation matches instead of waiting a fixed time; time out as a fallback.
+            let isLandscape = MainTexture.shared.isLandscape
+            for _ in 0..<40 {
+                let canvasSize = UniBridge.shared.canvasCGSize
+                if (canvasSize.width >= canvasSize.height) == isLandscape { break }
+                try? await Task.sleep(for: .milliseconds(50))
             }
+            try? self.loadScene(id: scene.id)
         }
     }
 }

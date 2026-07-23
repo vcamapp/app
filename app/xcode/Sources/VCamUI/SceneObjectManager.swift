@@ -11,6 +11,7 @@ public final class SceneObjectManager {
     public static let shared = SceneObjectManager()
 
     public var objects: [SceneObject] = VCamSceneDataStore.defaultObjects
+    @ObservationIgnored private var loadGeneration = 0
 
     public func add(_ object: SceneObject) {
         Logger.log("")
@@ -129,9 +130,11 @@ public final class SceneObjectManager {
         updateObjectOrder()
     }
 
-    func updateObjectOrder() {
+    func updateObjectOrder(persist: Bool = true) {
         UniBridge.shared.updateObjectOrder(objects.map(\.id) + [-1])
-        try? SceneManager.shared.saveCurrentSceneAndObjects()
+        if persist {
+            try? SceneManager.shared.saveCurrentSceneAndObjects()
+        }
     }
 
     public func didChangeObjects() {
@@ -175,16 +178,17 @@ public final class SceneObjectManager {
 }
 
 extension SceneObjectManager {
-    func loadObjects(_ scene: VCamScene) {
+    func loadObjects(_ scene: VCamScene) async {
+        // Abandon this load when a newer one starts while awaiting screen capture creation
+        loadGeneration &+= 1
+        let generation = loadGeneration
+
         let dataStore = VCamSceneDataStore(sceneId: scene.id)
 
         RenderTextureManager.shared.removeAll()
         UniBridge.shared.resetAllObjects()
 
         self.objects = []
-
-        // Only screen capture creation is asynchronous, so the group tracks just those branches.
-        let group = DispatchGroup()
 
         for object in scene.objects {
             let sceneObject = object.sceneObject(dataStore: dataStore)
@@ -206,17 +210,15 @@ extension SceneObjectManager {
                     configure(sceneObject)
                 }
             case let .screen(id, state):
-                group.enter()
-                Task { @MainActor in
-                    defer { group.leave() }
-                    do {
-                        let recorder = try await ScreenRecorder.create(id: id, screenCapture: state)
-                        recorder.filter = state.texture.filter.map(ImageFilter.init(configuration:))
-                        RenderTextureManager.shared.set(recorder, id: object.id)
-                        self.configure(sceneObject)
-                    } catch {
-                        Logger.log("Failed to create ScreenRecorder: \(error.localizedDescription)")
-                    }
+                do {
+                    let recorder = try await ScreenRecorder.create(id: id, screenCapture: state)
+                    guard generation == loadGeneration else { return }
+                    recorder.filter = state.texture.filter.map(ImageFilter.init(configuration:))
+                    RenderTextureManager.shared.set(recorder, id: object.id)
+                    configure(sceneObject)
+                } catch {
+                    guard generation == loadGeneration else { return }
+                    Logger.log("Failed to create ScreenRecorder: \(error.localizedDescription)")
                 }
             case let .captureDevice(uniqueID, state):
                 if let device = AVCaptureDevice(uniqueID: uniqueID),
@@ -236,10 +238,9 @@ extension SceneObjectManager {
             objects.append(sceneObject)
         }
 
-        group.notify(queue: .main) {
-            Logger.log("finish loadObjects")
-            self.updateObjectOrder()
-        }
+        Logger.log("finish loadObjects")
+        // Loading a scene must not implicitly save it, so only notify the order to Unity
+        updateObjectOrder(persist: false)
     }
 }
 

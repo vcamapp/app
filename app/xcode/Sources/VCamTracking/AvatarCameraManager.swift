@@ -21,14 +21,15 @@ public struct CameraPermissionProvider: Sendable {
 @MainActor
 public final class AvatarCameraManager {
     private let webCamera = AvatarWebCamera()
-    private var desiredCameraRunning = false
-    private var cameraLifecycleRevision: UInt64 = 0
-    private var cameraReconcileTask: Task<Void, Never>?
 
-    public var permissionProvider: CameraPermissionProvider
+    /// The camera lifecycle is owned by AvatarWebCamera; this just forwards the injection point.
+    public var permissionProvider: CameraPermissionProvider {
+        get { webCamera.permissionProvider }
+        set { webCamera.permissionProvider = newValue }
+    }
 
     public init(permissionProvider: CameraPermissionProvider = .denied) {
-        self.permissionProvider = permissionProvider
+        webCamera.permissionProvider = permissionProvider
     }
 
     public var currentCaptureDevice: AVCaptureDevice? { webCamera.currentCaptureDevice }
@@ -50,13 +51,15 @@ public final class AvatarCameraManager {
 
     private func start() {
         webCamera.isEmotionEnabled = UserDefaults.standard.value(for: .useEmotion)
-        desiredCameraRunning = true
-        reconcileCameraState()
+        Task {
+            await webCamera.setRunning(true)
+        }
     }
 
     func stop() {
-        desiredCameraRunning = false
-        reconcileCameraState()
+        Task {
+            await webCamera.setRunning(false)
+        }
     }
 
     func resetCalibration() {
@@ -94,24 +97,4 @@ public final class AvatarCameraManager {
         UniBridge.shared.useBlinker(isBlinkerUsed)
     }
 
-    private func reconcileCameraState() {
-        cameraLifecycleRevision &+= 1
-        let revision = cameraLifecycleRevision
-        cameraReconcileTask?.cancel()
-        cameraReconcileTask = Task { @MainActor in
-            if self.desiredCameraRunning {
-                if !self.permissionProvider.isAuthorized() {
-                    guard await self.permissionProvider.requestPermission(), revision == self.cameraLifecycleRevision,
-                          self.desiredCameraRunning else { return }
-                }
-                do {
-                    try await self.webCamera.start()
-                } catch {
-                    Logger.log("Failed to start web camera: \(error.localizedDescription)")
-                }
-            } else {
-                await self.webCamera.stop()
-            }
-        }
-    }
 }
