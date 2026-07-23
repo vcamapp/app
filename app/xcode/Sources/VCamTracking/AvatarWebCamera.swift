@@ -154,9 +154,6 @@ public final class AvatarWebCamera {
             revision: configurationRevision,
             usage: usage,
             isEmotionEnabled: isEmotionEnabled,
-            shouldOutputFace: usage.contains(.faceTracking),
-            shouldOutputHands: usage.contains(.handTracking),
-            shouldOutputFingers: usage.contains(.fingerTracking) && configuration.isFingerEnabled,
             finger: .init(
                 open: configuration.open,
                 close: configuration.close,

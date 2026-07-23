@@ -14,7 +14,6 @@ public final class CoreMediaSinkStream: NSObject {
     private let context = CIContext(options: [.cacheIntermediates: false, .name: "CoreMediaSinkStream", .workingFormat: CIFormat.BGRA8])
     private var pixelBuffer: CVPixelBuffer?
     private var videoFormatDescription: CMVideoFormatDescription?
-    private var readyToEnqueue = false
     public private(set) var isStarting = false
 #if DEBUG
     private var timer: Timer?
@@ -110,7 +109,6 @@ public final class CoreMediaSinkStream: NSObject {
             start()
             return
         }
-        self.readyToEnqueue = false
 
         let width = Int(image.extent.width)
         let height = Int(image.extent.height)
@@ -268,18 +266,12 @@ public final class CoreMediaSinkStream: NSObject {
         var status: OSStatus = 0
 
         let queuePointer = UnsafeMutablePointer<Unmanaged<CMSimpleQueue>?>.allocate(capacity: 1)
-        let pointerRef = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
 
         self.queuePointer?.deallocate()
         self.queuePointer = queuePointer
 
-        status = CMIOStreamCopyBufferQueue(streamId, { id, token, refcon in
-            guard let refcon else {
-                return
-            }
-            let sender = Unmanaged<CoreMediaSinkStream>.fromOpaque(refcon).takeUnretainedValue()
-            sender.readyToEnqueue = true
-        }, pointerRef, queuePointer)
+        // The queue-altered callback is required by CMIOStreamCopyBufferQueue but unused here
+        status = CMIOStreamCopyBufferQueue(streamId, { _, _, _ in }, nil, queuePointer)
 
         guard status == 0 else {
             print(status)

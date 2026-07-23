@@ -17,11 +17,7 @@ final class VisionFrameStream: Sendable {
     let stream: AsyncStream<VisionFrame>
 
     init() {
-        var continuation: AsyncStream<VisionFrame>.Continuation!
-        stream = AsyncStream(VisionFrame.self, bufferingPolicy: .bufferingNewest(1)) {
-            continuation = $0
-        }
-        self.continuation = continuation
+        (stream, continuation) = AsyncStream.makeStream(of: VisionFrame.self, bufferingPolicy: .bufferingNewest(1))
     }
 
     func yield(_ frame: VisionFrame) {
@@ -43,10 +39,19 @@ struct VisionTrackingConfigurationSnapshot: Sendable, Equatable {
     let revision: UInt64
     var usage: AvatarWebCamera.Usage
     var isEmotionEnabled: Bool
-    var shouldOutputFace: Bool
-    var shouldOutputHands: Bool
-    var shouldOutputFingers: Bool
     var finger: FingerTrackingConfigurationSnapshot
+
+    var shouldOutputFace: Bool {
+        usage.contains(.faceTracking)
+    }
+
+    var shouldOutputHands: Bool {
+        usage.contains(.handTracking)
+    }
+
+    var shouldOutputFingers: Bool {
+        usage.contains(.fingerTracking) && finger.isFingerEnabled
+    }
 
     var needsFaceLandmarks: Bool {
         usage.contains(.faceTracking) || usage.contains(.lipTracking) || isEmotionEnabled
@@ -139,46 +144,40 @@ actor VisionTrackingPipeline {
 
     private func process(_ frame: VisionFrame) async throws -> TrackingOutput? {
         let configuration = frame.configuration
-        guard configuration.needsFaceLandmarks || configuration.needsHandPose else { return nil }
+        guard configuration.needsVisionProcessing else { return nil }
 
-        if configuration.needsFaceLandmarks {
-            faceMapper.configure(size: frame.captureSize)
-        }
+        let face = configuration.needsFaceLandmarks
+            ? try await processFace(frame, configuration: configuration)
+            : (output: nil, emotion: nil)
 
+        let hands = configuration.needsHandPose
+            ? try processHands(frame, configuration: configuration)
+            : nil
+
+        return TrackingOutput(face: face.output, hands: hands, emotion: face.emotion)
+    }
+
+    private func processFace(
+        _ frame: VisionFrame,
+        configuration: VisionTrackingConfigurationSnapshot
+    ) async throws -> (output: FaceTrackingOutput?, emotion: Int32?) {
+        faceMapper.configure(size: frame.captureSize)
         let handler = ImageRequestHandler(frame.sampleBuffer.value)
+        let observations = try await handler.perform(faceMapper.request)
+        return (
+            faceMapper.map(observations: observations, captureSize: frame.captureSize, configuration: configuration),
+            faceMapper.mapEmotionIfNeeded(observations: observations, configuration: configuration)
+        )
+    }
 
-        switch (configuration.needsFaceLandmarks, configuration.needsHandPose) {
-        case (true, true):
-            let faceObservations = try await handler.perform(faceMapper.request)
-            let hands = try handMapper.map(
-                sampleBuffer: frame.sampleBuffer.value,
-                orientation: frame.orientation,
-                configuration: configuration
-            )
-            return TrackingOutput(
-                face: faceMapper.map(observations: faceObservations, captureSize: frame.captureSize, configuration: configuration),
-                hands: hands,
-                emotion: faceMapper.mapEmotionIfNeeded(observations: faceObservations, configuration: configuration)
-            )
-        case (true, false):
-            let faceObservations = try await handler.perform(faceMapper.request)
-            return TrackingOutput(
-                face: faceMapper.map(observations: faceObservations, captureSize: frame.captureSize, configuration: configuration),
-                hands: nil,
-                emotion: faceMapper.mapEmotionIfNeeded(observations: faceObservations, configuration: configuration)
-            )
-        case (false, true):
-            return TrackingOutput(
-                face: nil,
-                hands: try handMapper.map(
-                    sampleBuffer: frame.sampleBuffer.value,
-                    orientation: frame.orientation,
-                    configuration: configuration
-                ),
-                emotion: nil
-            )
-        case (false, false):
-            return nil
-        }
+    private func processHands(
+        _ frame: VisionFrame,
+        configuration: VisionTrackingConfigurationSnapshot
+    ) throws -> HandTrackingOutput? {
+        try handMapper.map(
+            sampleBuffer: frame.sampleBuffer.value,
+            orientation: frame.orientation,
+            configuration: configuration
+        )
     }
 }

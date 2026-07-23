@@ -66,9 +66,6 @@ struct VisionTrackingPipelineTests {
             revision: 0,
             usage: usage,
             isEmotionEnabled: false,
-            shouldOutputFace: usage.contains(.faceTracking),
-            shouldOutputHands: usage.contains(.handTracking),
-            shouldOutputFingers: usage.contains(.fingerTracking),
             finger: .init(open: 1, close: 1, isFingerEnabled: true)
         )
     }

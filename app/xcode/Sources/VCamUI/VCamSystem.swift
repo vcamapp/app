@@ -75,23 +75,22 @@ public final class VCamSystem {
     public func stopSystem() {
         Logger.log("\(isStarted), \(windowManager.isWindowClosed)")
         guard isStarted, windowManager.isWindowClosed else { return }
-        isStarted = false
-        Tracking.shared.stop()
-        AvatarAudioManager.shared.stop(usage: .all)
-        VideoRecorder.shared.stop()
-        RenderTextureManager.shared.pause()
-        PasteboardObserver.shared.dispose()
+        stopSubsystems()
         UniBridge.shared.pauseApp()
     }
 
     public func dispose() {
+        stopSubsystems()
+        UniBridge.shared.reset()
+    }
+
+    private func stopSubsystems() {
         isStarted = false
         Tracking.shared.stop()
         AvatarAudioManager.shared.stop(usage: .all)
         VideoRecorder.shared.stop()
         RenderTextureManager.shared.pause()
         PasteboardObserver.shared.dispose()
-        UniBridge.shared.reset()
     }
 }
 

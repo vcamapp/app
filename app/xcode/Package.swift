@@ -29,7 +29,7 @@ let package = Package(
         .target(name: "VCamData", dependencies: ["VCamBridge", "VCamEntity"]),
         .target(name: "VCamEntity", dependencies: ["VCamDefaults"]),
         .target(name: "VCamMedia", dependencies: ["VCamEntity", "VCamAppExtension", "VCamLogger"]),
-        .target(name: "VCamBridge", dependencies: ["VCamEntity", "VCamUIFoundation"]),
+        .target(name: "VCamBridge", dependencies: ["VCamEntity"]),
         .target(name: "VCamTracking", dependencies: ["VCamCamera"]),
         .target(name: "VCamCamera", dependencies: ["VCamMedia", "VCamData", "VCamLogger"]),
 
