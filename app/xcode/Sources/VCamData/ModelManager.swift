@@ -1,3 +1,4 @@
+import VCamLogger
 import AppKit
 import Observation
 import VCamEntity
@@ -166,7 +167,7 @@ public final class ModelManager {
                 modelItems.append(ModelItem(model: modelInfo, status: .valid, thumbnail: modelInfo.loadThumbnail()?.pngData()))
             }
         } catch {
-            print("Failed to scan models: \(error)")
+            Logger.error(error)
         }
     }
 
@@ -205,7 +206,7 @@ public final class ModelManager {
             let data = try encoder.encode(meta)
             try data.write(to: Models.metaURL)
         } catch {
-            print("Failed to save meta: \(error)")
+            Logger.error(error)
         }
     }
 

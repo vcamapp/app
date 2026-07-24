@@ -43,40 +43,25 @@ public struct VCamSettingVirtualCameraView: View {
                     HStack {
                         if isCameraExtensionInstalled {
                             Button {
-                                task?.cancel()
-                                task = Task {
-                                    do {
-                                        try await uninstallExtension(isAlertShown: false)
-                                        try await installExtension()
-                                    } catch {
-                                        await VCamAlert.showModal(title: String(localized: .failure), message: error.localizedDescription, canCancel: false)
-                                    }
+                                runExtensionTask {
+                                    try await uninstallExtension(isAlertShown: false)
+                                    try await installExtension()
                                 }
                             } label: {
                                 Text(.reinstall)
                             }
-                            
+
                             Button {
-                                task?.cancel()
-                                task = Task {
-                                    do {
-                                        try await uninstallExtension(isAlertShown: true)
-                                    } catch {
-                                        await VCamAlert.showModal(title: String(localized: .failure), message: error.localizedDescription, canCancel: false)
-                                    }
+                                runExtensionTask {
+                                    try await uninstallExtension(isAlertShown: true)
                                 }
                             } label: {
                                 Text(.uninstall)
                             }
                         } else {
                             Button {
-                                task?.cancel()
-                                task = Task {
-                                    do {
-                                        try await installExtension()
-                                    } catch {
-                                        await VCamAlert.showModal(title: String(localized: .failure), message: error.localizedDescription, canCancel: false)
-                                    }
+                                runExtensionTask {
+                                    try await installExtension()
                                 }
                             } label: {
                                 Text(.install)
@@ -99,13 +84,9 @@ public struct VCamSettingVirtualCameraView: View {
             }
             .task {
                 isCameraExtensionStarting = VirtualCameraManager.shared.sinkStream.isStarting
-                if let property = try? await CameraExtension().extensionProperties() {
-                    isCameraExtensionInstalled = !property.isUninstalling
-                    isAwaitingUserApproval = property.isAwaitingUserApproval
-                } else {
-                    isCameraExtensionInstalled = false
-                    isAwaitingUserApproval = false
-                }
+                let status = await CameraExtension().status()
+                isCameraExtensionInstalled = status.isInstalled
+                isAwaitingUserApproval = status.isAwaitingUserApproval
             }
         }
         .formStyle(.grouped)
@@ -113,6 +94,17 @@ public struct VCamSettingVirtualCameraView: View {
 }
 
 extension VCamSettingVirtualCameraView {
+    private func runExtensionTask(_ operation: @escaping @MainActor () async throws -> Void) {
+        task?.cancel()
+        task = Task {
+            do {
+                try await operation()
+            } catch {
+                await VCamAlert.showModal(title: String(localized: .failure), message: error.localizedDescription, canCancel: false)
+            }
+        }
+    }
+
     @MainActor
     private func installExtension() async throws {
         NSWorkspace.shared.open(.cameraExtension)

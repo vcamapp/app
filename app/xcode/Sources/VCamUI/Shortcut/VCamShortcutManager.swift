@@ -12,13 +12,7 @@ public final class VCamShortcutManager {
     private let dataStore = VCamShortcutDataStore()
 
     public init(shortcuts: [VCamShortcut] = []) {
-        if shortcuts.isEmpty {
-            for shortcut in dataStore.load() {
-                self.shortcuts.append(shortcut)
-            }
-        } else {
-            self.shortcuts = shortcuts
-        }
+        self.shortcuts = shortcuts.isEmpty ? dataStore.load() : shortcuts
     }
 
     @discardableResult
@@ -69,6 +63,6 @@ public final class VCamShortcutManager {
     }
 
     private func showError(_ error: any Error) {
-        MacWindowManager.shared.open(VCamAlert(windowTitle: String(localized: .failure), message: error.localizedDescription, canCancel: false, okTitle: "OK", onOK: {}, onCancel: {}))
+        VCamAlert.showError(title: String(localized: .failure), message: error.localizedDescription)
     }
 }

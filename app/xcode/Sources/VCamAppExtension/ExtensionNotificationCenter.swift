@@ -59,8 +59,4 @@ public final class ExtensionNotificationCenter: Sendable {
         )
     }
 
-    public func removeAllObservers() {
-        observers.withLock { $0.removeAll() }
-        CFNotificationCenterRemoveEveryObserver(center, Unmanaged.passUnretained(self).toOpaque())
-    }
 }

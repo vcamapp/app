@@ -74,15 +74,13 @@ private final class ExpressionAnalyzerState: Sendable {
     }
 
     /// Analyzes the buffer if enough time has passed since the last analysis.
-    /// Returns true if analysis was performed.
-    func analyzeIfNeeded(buffer: AVAudioPCMBuffer, sampleTime: AVAudioFramePosition) -> Bool {
+    func analyzeIfNeeded(buffer: AVAudioPCMBuffer, sampleTime: AVAudioFramePosition) {
         state.withLock { state in
-            guard let analyzer = state.analyzer else { return false }
-            guard Date().timeIntervalSince(state.previousSampleTime) >= inversedFps else { return false }
+            guard let analyzer = state.analyzer else { return }
+            guard Date().timeIntervalSince(state.previousSampleTime) >= inversedFps else { return }
 
             analyzer.analyze(buffer, atAudioFramePosition: sampleTime)
             state.previousSampleTime = Date()
-            return true
         }
     }
 }
@@ -125,7 +123,7 @@ public final class AudioExpressionEstimator: NSObject, Sendable {
         callbackState.notifyAudioLevel(level)
 
         // Expression analysis is rate-limited (~8fps) and runs synchronously
-        _ = analyzerState.analyzeIfNeeded(buffer: buffer, sampleTime: time.sampleTime)
+        analyzerState.analyzeIfNeeded(buffer: buffer, sampleTime: time.sampleTime)
     }
 }
 

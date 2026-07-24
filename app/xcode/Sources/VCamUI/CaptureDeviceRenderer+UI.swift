@@ -77,6 +77,8 @@ private struct CaptureDeviceSelectView: View {
     private func startPreview() {
         previewer = try? CaptureDevicePreviewer(device: captureDevice)
         previewer?.didOutput = { frame in
+            // Skip the conversion entirely while the preview is hidden
+            guard previewable else { return }
             // Using CIImage accumulates memory, so convert to CGImage using VideoToolbox.
             var cgImage: CGImage?
             _ = VTCreateCGImageFromCVPixelBuffer(frame.buffer, options: nil, imageOut: &cgImage)

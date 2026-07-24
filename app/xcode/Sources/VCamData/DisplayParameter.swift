@@ -1,4 +1,5 @@
 import Foundation
+import VCamLogger
 import SwiftUI
 import AppKit
 
@@ -121,7 +122,7 @@ public final class DisplayParameterPresets {
             try FileManager.default.createDirectoryIfNeeded(at: directory)
             try data.write(to: Self.fileURL)
         } catch {
-            print("Failed to save display parameters: \(error)")
+            Logger.error(error)
         }
     }
 

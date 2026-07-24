@@ -12,7 +12,7 @@ public struct VCamShortcutRunner: Sendable {
             do {
                 try await action(context: .init(shortcut: shortcut))
             } catch {
-                await MacWindowManager.shared.open(VCamAlert(windowTitle: action.name, message: error.localizedDescription, canCancel: false, okTitle: "OK", onOK: {}, onCancel: {}))
+                await VCamAlert.showError(title: action.name, message: error.localizedDescription)
                 return
             }
         }

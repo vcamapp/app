@@ -109,8 +109,7 @@ public struct VCamShortcutGridView: View {
 
     private func editShortcut(_ shortcut: Binding<VCamShortcut>) {
         Logger.log("")
-        MacWindowManager.shared.close(VCamShortcutBuilderView.self)
-        MacWindowManager.shared.open(VCamShortcutBuilderView(shortcut: shortcut))
+        MacWindowManager.shared.reopen(VCamShortcutBuilderView(shortcut: shortcut))
     }
 }
 

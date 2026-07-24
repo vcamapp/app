@@ -7,7 +7,8 @@ public final class RenderTextureManager {
     public static let shared = RenderTextureManager()
 
     private var recorders: [Int32: any RenderTextureRenderer] = [:]
-    private let ciContext = CIContext(mtlDevice: MTLCreateSystemDefaultDevice()!)
+    // Streaming inputs differ every frame, so intermediate caching only wastes memory
+    private let ciContext = CIContext(mtlDevice: MTLCreateSystemDefaultDevice()!, options: [.cacheIntermediates: false, .name: "RenderTextureManager"])
 
     public func add(_ recorder: any RenderTextureRenderer) -> Int32 {
         let id = Int32.random(in: 0..<Int32.max)

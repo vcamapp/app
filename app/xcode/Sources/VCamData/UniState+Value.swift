@@ -56,9 +56,9 @@ extension UniStateValue where Value == Bool {
         }
     }
 
-    init(_ keyPath: ValueKeyPath, persistAsInt: UserDefaults.Key<Int>, trueValue: Int = 1, bridge: UniBridge.BoolType) {
+    init(_ keyPath: ValueKeyPath, persistAsInt: UserDefaults.Key<Int>, bridge: UniBridge.BoolType) {
         self.init(keyPath) { @MainActor _, newValue in
-            UserDefaults.standard.set(newValue ? trueValue : 0, for: persistAsInt)
+            UserDefaults.standard.set(newValue ? 1 : 0, for: persistAsInt)
             UniBridge.shared.boolMapper.setValue(bridge, newValue)
         }
     }
@@ -73,12 +73,6 @@ extension UniStateValue where Value == CGFloat {
             UniBridge.shared.floatMapper.setValue(bridge, newValue)
         }
     }
-
-    init(_ keyPath: ValueKeyPath, bridge: UniBridge.FloatType) {
-        self.init(keyPath) { @MainActor _, newValue in
-            UniBridge.shared.floatMapper.setValue(bridge, newValue)
-        }
-    }
 }
 
 // MARK: - Int32 Convenience Initializers
@@ -87,12 +81,6 @@ extension UniStateValue where Value == Int32 {
     init(_ keyPath: ValueKeyPath, persist: UserDefaults.Key<Int>? = nil, bridge: UniBridge.IntType) {
         self.init(keyPath) { @MainActor _, newValue in
             if let key = persist { UserDefaults.standard.set(Int(newValue), for: key) }
-            UniBridge.shared.intMapper.setValue(bridge, newValue)
-        }
-    }
-
-    init(_ keyPath: ValueKeyPath, bridge: UniBridge.IntType) {
-        self.init(keyPath) { @MainActor _, newValue in
             UniBridge.shared.intMapper.setValue(bridge, newValue)
         }
     }
@@ -117,12 +105,6 @@ extension UniStateValue where Value == Color {
             if let key = persist, let hex = newValue.hexRGBAString {
                 UserDefaults.standard.set(hex, for: key)
             }
-            UniBridge.shared.structMapper.binding(bridge).wrappedValue = newValue
-        }
-    }
-
-    init(_ keyPath: ValueKeyPath, bridge: UniBridge.StructType) {
-        self.init(keyPath) { @MainActor _, newValue in
             UniBridge.shared.structMapper.binding(bridge).wrappedValue = newValue
         }
     }

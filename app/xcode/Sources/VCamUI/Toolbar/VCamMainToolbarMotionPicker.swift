@@ -150,14 +150,12 @@ public struct VCamMainToolbarMotionPicker: View {
     private func startImport() {
         guard let url = FileUtility.openFile(type: .vrma) else { return }
         // The popover closes when the file dialog opens, so present these in standalone windows
-        MacWindowManager.shared.close(VCamMotionImportView.self)
-        MacWindowManager.shared.open(VCamMotionImportView(sourceURL: url))
+        MacWindowManager.shared.reopen(VCamMotionImportView(sourceURL: url))
     }
 
     private func openSettings(record: ImportedMotionRecord?) {
         guard let record else { return }
-        MacWindowManager.shared.close(VCamImportedMotionSettingsView.self)
-        MacWindowManager.shared.open(VCamImportedMotionSettingsView(record: record))
+        MacWindowManager.shared.reopen(VCamImportedMotionSettingsView(record: record))
     }
 
     private func delete(_ motion: Avatar.Motion) {

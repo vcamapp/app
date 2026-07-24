@@ -50,14 +50,23 @@ public final class CameraExtension: NSObject {
         }
     }
 
+    public struct Status: Sendable {
+        public let isInstalled: Bool
+        public let isAwaitingUserApproval: Bool
+    }
+
+    /// Returns the extension status; a failed properties request reads as not installed
+    @concurrent
+    public func status() async -> Status {
+        guard let properties = try? await extensionProperties() else {
+            return Status(isInstalled: false, isAwaitingUserApproval: false)
+        }
+        return Status(isInstalled: !properties.isUninstalling, isAwaitingUserApproval: properties.isAwaitingUserApproval)
+    }
+
     @concurrent
     public func isInstalled() async -> Bool {
-        do {
-            let properties = try await extensionProperties()
-            return !properties.isUninstalling
-        } catch {
-            return false
-        }
+        await status().isInstalled
     }
 
     @concurrent

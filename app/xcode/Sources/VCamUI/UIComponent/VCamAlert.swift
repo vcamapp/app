@@ -30,6 +30,17 @@ public struct VCamAlert: View {
         }
     }
 
+    /// Shows an error alert without waiting for it to be dismissed
+    @MainActor
+    public static func showError(title: String, message: String) {
+        let alert = VCamAlert(windowTitle: title, message: message, canCancel: false, okTitle: "OK") {
+            NSApp.vcamWindow?.becomeMain()
+        } onCancel: {
+            NSApp.vcamWindow?.becomeMain()
+        }
+        MacWindowManager.shared.open(alert)
+    }
+
     public var body: some View {
         VStack(spacing: 16)  {
             if !windowTitle.isEmpty {

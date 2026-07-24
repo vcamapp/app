@@ -65,9 +65,7 @@ public struct VCamMainView: View {
             VCamShortcutGridView()
         }
         .task {
-            if let property = try? await CameraExtension().extensionProperties() {
-                isCameraExtensionDisallow = property.isAwaitingUserApproval
-            }
+            isCameraExtensionDisallow = await CameraExtension().status().isAwaitingUserApproval
         }
     }
 }

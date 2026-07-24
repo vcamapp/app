@@ -51,7 +51,7 @@ public extension AudioDevice {
                                                &propsize,
                                                &outputID)
         if error != noErr {
-            print("defaultDevice error: \(error)")
+            Logger.log("defaultDevice error: \(error)")
             return nil
         }
         return AudioDevice(id: outputID)
@@ -277,6 +277,6 @@ extension AudioUnit {
                              0,
                              &inputDeviceID,
                              UInt32(MemoryLayout<AudioDeviceID>.size))
-        print("AudioUnit.set", status)
+        Logger.log("AudioUnit.set \(status)")
     }
 }

@@ -52,7 +52,6 @@ private struct RootViewContent: View {
                         unityView.window?.makeFirstResponder(nil)
                         NotificationCenter.default.post(name: .unfocusObject, object: nil)
                     }
-                    .disabled(!state.interactable)
                     .modifier { view in
                         if #available(macOS 26.0, *) {
                             view.gesture(WindowDragGesture())
@@ -77,7 +76,6 @@ private struct RootViewContent: View {
                             unityView.window?.makeFirstResponder(nil)
                             NotificationCenter.default.post(name: .unfocusObject, object: nil)
                         }
-                        .disabled(!state.interactable)
                 }
             }
         } else {

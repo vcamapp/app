@@ -61,6 +61,13 @@ public final class MacWindowManager {
 
     public var openCredits: () -> Void = {}
 
+    /// Closes any existing window of the same type and opens a fresh one,
+    /// so the contents are rebuilt instead of just fronting the old window
+    public func reopen<T: MacWindow>(_ windowView: T) {
+        close(T.self)
+        open(windowView)
+    }
+
     public func open<T: MacWindow>(_ windowView: T) {
         let id = self.id(T.self)
         if let window = openWindows[id] {
