@@ -140,6 +140,22 @@ public final class Tracking {
         avatarCameraManager.resetCalibration()
     }
 
+    public var isBlinkerUsed: Bool {
+        switch faceTrackingMethod {
+        case .disabled:
+            return true
+        case .default, .iFacialMocap, .vcamMocap:
+            return false
+        }
+    }
+
+    /// Applies the camera usage and syncs the blinker state, which depends on
+    /// the tracking method owned here rather than by the camera manager
+    private func applyWebCamUsage(_ usage: AvatarWebCamera.Usage) {
+        avatarCameraManager.setWebCamUsage(usage)
+        UniBridge.shared.useBlinker(isBlinkerUsed)
+    }
+
     public func setFaceTrackingMethod(_ method: TrackingMethod.Face) {
         if faceTrackingMethod != method {
             stopFaceResamplers()
@@ -159,7 +175,7 @@ public final class Tracking {
                 usage.insert(.lipTracking)
             }
         }
-        avatarCameraManager.setWebCamUsage(usage)
+        applyWebCamUsage(usage)
 
         updateLipSyncIfNeeded()
 
@@ -221,7 +237,7 @@ public final class Tracking {
         } else {
             usage.remove(.fingerTracking)
         }
-        avatarCameraManager.setWebCamUsage(usage)
+        applyWebCamUsage(usage)
     }
 
     public func setLipSyncType(_ type: LipSyncType) {
@@ -229,10 +245,10 @@ public final class Tracking {
         UniState.shared.lipSyncWebCam = useCamera
         if useCamera {
             AvatarAudioManager.shared.stop(usage: .lipSync)
-            avatarCameraManager.setWebCamUsage(avatarCameraManager.webCameraUsage.union(.lipTracking))
+            applyWebCamUsage(avatarCameraManager.webCameraUsage.union(.lipTracking))
         } else {
             AvatarAudioManager.shared.start(usage: .lipSync)
-            avatarCameraManager.setWebCamUsage(avatarCameraManager.webCameraUsage.subtracting(.lipTracking))
+            applyWebCamUsage(avatarCameraManager.webCameraUsage.subtracting(.lipTracking))
         }
     }
 

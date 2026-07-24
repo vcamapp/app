@@ -86,8 +86,8 @@ public enum VideoConverter { // TODO: Migrate to new API for macOS 26+
         }
 
         nonisolated(unsafe) let reader = try AVAssetReader(asset: asset)
-        let audioOutput = AVAssetReaderAudioMixOutput(audioTracks: audioTracks, audioSettings: nil)
-        let videoOutput = AVAssetReaderTrackOutput(track: videoTrack, outputSettings: nil)
+        nonisolated(unsafe) let audioOutput = AVAssetReaderAudioMixOutput(audioTracks: audioTracks, audioSettings: nil)
+        nonisolated(unsafe) let videoOutput = AVAssetReaderTrackOutput(track: videoTrack, outputSettings: nil)
         guard reader.canAdd(audioOutput), reader.canAdd(videoOutput) else {
             throw ConversionError.failedToAddReaderOutput
         }
@@ -105,8 +105,8 @@ public enum VideoConverter { // TODO: Migrate to new API for macOS 26+
         }
 
         let formatHint = try CMFormatDescription(videoCodecType: .h264, width: width, height: height)
-        let videoInput = AVAssetWriterInput(mediaType: .video, outputSettings: nil, sourceFormatHint: formatHint)
-        let audioInput = AVAssetWriterInput(mediaType: .audio, outputSettings: audioOutputSettings)
+        nonisolated(unsafe) let videoInput = AVAssetWriterInput(mediaType: .video, outputSettings: nil, sourceFormatHint: formatHint)
+        nonisolated(unsafe) let audioInput = AVAssetWriterInput(mediaType: .audio, outputSettings: audioOutputSettings)
         guard writer.canAdd(videoInput), writer.canAdd(audioInput) else {
             throw ConversionError.failedToAddWriterInput(.video)
         }
@@ -132,7 +132,7 @@ public enum VideoConverter { // TODO: Migrate to new API for macOS 26+
                 let videoQueue = DispatchQueue(label: "vcam.mergeAudioTracks.videoQueue")
                 let audioQueue = DispatchQueue(label: "vcam.mergeAudioTracks.audioQueue")
 
-                func fail(_ error: Error) {
+                @Sendable func fail(_ error: Error) {
                     reader.cancelReading()
                     writer.cancelWriting()
                     videoInput.markAsFinished()

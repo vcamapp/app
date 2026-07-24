@@ -40,15 +40,6 @@ public final class AvatarCameraManager {
         webCamera.usage.intersection([.faceTracking, .handTracking, .fingerTracking]) != .disabled
     }
 
-    public var isBlinkerUsed: Bool {
-        switch Tracking.shared.faceTrackingMethod {
-        case .disabled:
-            return true
-        case .default, .iFacialMocap, .vcamMocap:
-            return false
-        }
-    }
-
     private func start() {
         webCamera.isEmotionEnabled = UserDefaults.standard.value(for: .useEmotion)
         Task {
@@ -94,7 +85,6 @@ public final class AvatarCameraManager {
     public func setWebCamUsage(_ usage: AvatarWebCamera.Usage) {
         webCamera.usage = usage
         if isWebCameraUsed { start() } else { stop() }
-        UniBridge.shared.useBlinker(isBlinkerUsed)
     }
 
 }

@@ -276,9 +276,7 @@ private struct EditSceneObjectViewModifier: ViewModifier {
         case .avatar:
             content
                 .contextMenu {
-                    HideSceneObjectButton(object: object)
-                    LockSceneObjectButton(object: object)
-                    Divider()
+                    commonHeaderItems
                     EditSceneObjectButton(isLocked: object.isLocked) {
                         UniBridge.shared.editAvatar()
                     }
@@ -293,9 +291,7 @@ private struct EditSceneObjectViewModifier: ViewModifier {
         case let .image(image):
             content
                 .contextMenu {
-                    HideSceneObjectButton(object: object)
-                    LockSceneObjectButton(object: object)
-                    Divider()
+                    commonHeaderItems
                     Button {
                         if image.size.width > image.size.height {
                             image.size = .init(width: image.size.width / image.size.height, height: 1)
@@ -323,19 +319,12 @@ private struct EditSceneObjectViewModifier: ViewModifier {
                             SceneObjectManager.shared.update(object)
                         }
                     }
-                    FilterSceneObjectButton(object: object, configuration: image.filter?.configuration) { filter in
-                        image.filter = filter
-                        applyFilter()
-                    }
-                    Divider()
-                    DeleteSceneObjectButton(object: object)
+                    filterAndDeleteItems(configuration: image.filter?.configuration) { image.filter = $0 }
                 }
         case let .screen(screen):
             content
                 .contextMenu {
-                    HideSceneObjectButton(object: object)
-                    LockSceneObjectButton(object: object)
-                    Divider()
+                    commonHeaderItems
                     EditSceneObjectButton(isLocked: object.isLocked) {
                         showScreenRecorderPreferenceView { recorder in
                             guard let screenId = recorder.captureConfig?.id else { return }
@@ -348,19 +337,12 @@ private struct EditSceneObjectViewModifier: ViewModifier {
                             SceneObjectManager.shared.update(object)
                         }
                     }
-                    FilterSceneObjectButton(object: object, configuration: screen.filter?.configuration) { filter in
-                        screen.filter = filter
-                        applyFilter()
-                    }
-                    Divider()
-                    DeleteSceneObjectButton(object: object)
+                    filterAndDeleteItems(configuration: screen.filter?.configuration) { screen.filter = $0 }
                 }
         case let .videoCapture(videoCapture):
             content
                 .contextMenu {
-                    HideSceneObjectButton(object: object)
-                    LockSceneObjectButton(object: object)
-                    Divider()
+                    commonHeaderItems
                     EditSceneObjectButton(isLocked: object.isLocked) {
                         CaptureDeviceRenderer.selectDevice { drawer in
                             renderTextureManager.set(drawer, id: object.id)
@@ -372,19 +354,12 @@ private struct EditSceneObjectViewModifier: ViewModifier {
                             SceneObjectManager.shared.update(object)
                         }
                     }
-                    FilterSceneObjectButton(object: object, configuration: videoCapture.filter?.configuration) { filter in
-                        videoCapture.filter = filter
-                        applyFilter()
-                    }
-                    Divider()
-                    DeleteSceneObjectButton(object: object)
+                    filterAndDeleteItems(configuration: videoCapture.filter?.configuration) { videoCapture.filter = $0 }
                 }
         case let .web(web):
             content
                 .contextMenu {
-                    HideSceneObjectButton(object: object)
-                    LockSceneObjectButton(object: object)
-                    Divider()
+                    commonHeaderItems
                     EditSceneObjectButton(isLocked: object.isLocked) {
                         WebRenderer.showPreferences(url: web.url?.absoluteString, bookmarkData: web.path, width: Int(web.textureSize.width), height: Int(web.textureSize.height), fps: web.fps, css: web.css, js: web.js) { renderer in
                             renderTextureManager.set(renderer, id: object.id)
@@ -402,19 +377,12 @@ private struct EditSceneObjectViewModifier: ViewModifier {
                         Image(systemName: "network")
                         Text(.interact)
                     }
-                    FilterSceneObjectButton(object: object, configuration: web.filter?.configuration) { filter in
-                        web.filter = filter
-                        applyFilter()
-                    }
-                    Divider()
-                    DeleteSceneObjectButton(object: object)
+                    filterAndDeleteItems(configuration: web.filter?.configuration) { web.filter = $0 }
                 }
         case let .wind(wind):
             content
                 .contextMenu {
-                    HideSceneObjectButton(object: object)
-                    LockSceneObjectButton(object: object)
-                    Divider()
+                    commonHeaderItems
                     EditSceneObjectButton(key: .changeWindDirection, isLocked: object.isLocked) {
                         wind.direction = SceneObject.Wind.random.direction
                         SceneObjectManager.shared.update(object)
@@ -423,6 +391,25 @@ private struct EditSceneObjectViewModifier: ViewModifier {
                     DeleteSceneObjectButton(object: object)
                 }
         }
+    }
+
+    /// All object types share the same menu header
+    @ViewBuilder
+    private var commonHeaderItems: some View {
+        HideSceneObjectButton(object: object)
+        LockSceneObjectButton(object: object)
+        Divider()
+    }
+
+    /// Shared menu footer for filterable objects
+    @ViewBuilder
+    private func filterAndDeleteItems(configuration: ImageFilterConfiguration?, setFilter: @escaping (ImageFilter) -> Void) -> some View {
+        FilterSceneObjectButton(object: object, configuration: configuration) { filter in
+            setFilter(filter)
+            applyFilter()
+        }
+        Divider()
+        DeleteSceneObjectButton(object: object)
     }
 
     private func applyFilter() {
