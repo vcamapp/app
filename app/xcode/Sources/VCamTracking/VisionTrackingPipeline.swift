@@ -61,14 +61,6 @@ struct VisionTrackingConfigurationSnapshot: Sendable, Equatable {
         shouldOutputHands || shouldOutputFingers
     }
 
-    var needsHandOutput: Bool {
-        shouldOutputHands
-    }
-
-    var needsFingerOutput: Bool {
-        shouldOutputFingers
-    }
-
     var needsVisionProcessing: Bool {
         needsFaceLandmarks || needsHandPose
     }

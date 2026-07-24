@@ -8,33 +8,16 @@ import Synchronization
 @Observable
 @MainActor
 public final class FacialMocapReceiver {
-    private final class SmoothingStorage: Sendable {
-        private let storage: Mutex<TrackingSmoothing>
-
-        init(_ smoothing: TrackingSmoothing) {
-            storage = Mutex(smoothing)
-        }
-
-        func settings() -> TrackingResampler.Settings {
-            storage.withLock { $0.settings() }
-        }
-
-        func update(_ smoothing: TrackingSmoothing) {
-            storage.withLock { $0 = smoothing }
-        }
-
-        var isEnabled: Bool {
-            storage.withLock { $0.isEnabled }
-        }
-    }
-
     @ObservationIgnored private var listener: NWListener?
     @ObservationIgnored private var connection: NWConnection?
     @ObservationIgnored private var facialMocapLastValues: [Float] = Array(repeating: 0, count: 12)
     @ObservationIgnored private var blendShapeResampler: TrackingResampler
     @ObservationIgnored private var perfectSyncResampler: TrackingResampler
-    @ObservationIgnored private let smoothingStorage: SmoothingStorage
+    @ObservationIgnored private let smoothingStorage: TrackingSmoothingStorage
     nonisolated private static let queue = DispatchQueue(label: "com.github.tattn.vcam.facialmocapreceiver")
+    /// Bumped on every stop so the handshake retry loop, which runs off the
+    /// MainActor, abandons itself once its session is gone.
+    nonisolated private let handshakeGeneration = Mutex(0)
 
     public private(set) var connectionStatus = ConnectionStatus.disconnected
 
@@ -45,17 +28,16 @@ public final class FacialMocapReceiver {
 
     private static let dataTimeout: Duration = .seconds(2)
 
-    enum ReceiverResult {
-        case success
-        case cancel
-        case error(any Error)
-    }
+#if FEATURE_3
+    nonisolated private static let port = NWEndpoint.Port(integerLiteral: 49983)
+#else
+    nonisolated private static let port = NWEndpoint.Port(integerLiteral: 49984)
+#endif
 
     public init(smoothing: TrackingSmoothing) {
-        self.smoothingStorage = SmoothingStorage(smoothing)
-        let settingsProvider: @Sendable () -> TrackingResampler.Settings = { [smoothingStorage] in
-            smoothingStorage.settings()
-        }
+        let smoothingStorage = TrackingSmoothingStorage(smoothing)
+        self.smoothingStorage = smoothingStorage
+        let settingsProvider = smoothingStorage.settingsProvider
 
         blendShapeResampler = TrackingResampler(label: "facial-mocap-blendshape", settingsProvider: settingsProvider) { @MainActor values in
             UniBridge.shared.receiveVCamBlendShape(values)
@@ -66,36 +48,15 @@ public final class FacialMocapReceiver {
         }
     }
 
+    /// Throws only when the listener cannot be created. Failures after
+    /// startup are handled by the state handlers, which restart the listener.
     public func connect(ip: String) async throws {
         stopInternal()
         shouldAutoReconnect = true
         lastConnectedIP = ip
 
-#if FEATURE_3
-        let port = NWEndpoint.Port(integerLiteral: 49983)
-#else
-        let port = NWEndpoint.Port(integerLiteral: 49984)
-#endif
-
-        try await startServer(port: port) { @Sendable [weak self] result in
-            switch result {
-            case .success: ()
-            case .cancel, .error:
-                Task { @MainActor in
-                    await self?.handleDisconnection()
-                }
-            }
-        }
-
-        requestConnection(ip: ip, port: port) { @Sendable [weak self] result in
-            switch result {
-            case .success: ()
-            case .cancel, .error:
-                Task { @MainActor in
-                    await self?.handleDisconnection()
-                }
-            }
-        }
+        try startServer()
+        requestConnection(ip: ip, generation: handshakeGeneration.withLock { $0 })
     }
 
     public func stop() async {
@@ -104,6 +65,7 @@ public final class FacialMocapReceiver {
     }
 
     private func stopInternal() {
+        handshakeGeneration.withLock { $0 += 1 }
         timeoutWatchdogTask?.cancel()
         timeoutWatchdogTask = nil
 
@@ -131,18 +93,22 @@ public final class FacialMocapReceiver {
             while !Task.isCancelled {
                 try? await Task.sleep(for: .seconds(1))
                 guard let self, !Task.isCancelled else { return }
-                guard self.connectionStatus == .connected,
+                // Not `== .connected`: a connection stuck in .waiting never
+                // reaches .ready and has to be restarted too.
+                guard self.connectionStatus != .disconnected,
                       ContinuousClock.now - self.lastDataReceivedAt > Self.dataTimeout else { continue }
                 Logger.log("Data timeout - resetting listener")
-                await self.handleTimeout()
+                await self.restartIfNeeded()
                 return
             }
         }
     }
 
-    private func handleTimeout() async {
-        guard connectionStatus == .connected, shouldAutoReconnect, let ip = lastConnectedIP else { return }
-        stopInternal()
+    private func restartIfNeeded() async {
+        guard shouldAutoReconnect, let ip = lastConnectedIP else {
+            stopInternal()
+            return
+        }
         do {
             try await connect(ip: ip)
         } catch {
@@ -156,19 +122,6 @@ public final class FacialMocapReceiver {
             Task { @MainActor in
                 stopResamplers()
             }
-        }
-    }
-
-    private func handleDisconnection() async {
-        guard shouldAutoReconnect, let ip = lastConnectedIP else {
-            stopInternal()
-            return
-        }
-        stopInternal()
-        do {
-            try await connect(ip: ip)
-        } catch {
-            Logger.log("Restart failed: \(error.localizedDescription)")
         }
     }
 
@@ -207,121 +160,137 @@ public final class FacialMocapReceiver {
 
 private extension NWConnection {
     func receiveData(with oniFacialMocapReceived: @escaping @Sendable (FacialMocapData) -> Void) {
-        receive(minimumIncompleteLength: 1, maximumLength: 8192) { [weak self] content, contentContext, isComplete, error in
-            defer {
-                self?.receiveData(with: oniFacialMocapReceived)
+        receive(minimumIncompleteLength: 1, maximumLength: 8192) { [weak self] content, _, _, error in
+            // A failed or cancelled connection must not re-arm the receive;
+            // it would spin against a dead connection.
+            guard let self, error == nil else { return }
+            if let content,
+               let rawData = String(data: content, encoding: .utf8),
+               let mocapData = FacialMocapData(rawData: rawData) {
+                oniFacialMocapReceived(mocapData)
             }
-
-            guard error == nil,
-                  let content,
-                  let rawData = String(data: content, encoding: .utf8),
-                  let mocapData = FacialMocapData(rawData: rawData) else {
-                return
-            }
-            oniFacialMocapReceived(mocapData)
+            self.receiveData(with: oniFacialMocapReceived)
         }
     }
 }
 
 extension FacialMocapReceiver {
-    private func startServer(port: NWEndpoint.Port, completion: @escaping @Sendable (ReceiverResult) -> Void) async throws {
+    private func startServer() throws {
         connectionStatus = .connecting
 
         let parameters = NWParameters.udp
         parameters.allowLocalEndpointReuse = true
 
-        let listener = try NWListener(using: parameters, on: port)
+        let listener = try NWListener(using: parameters, on: Self.port)
         self.listener = listener
 
-        listener.stateUpdateHandler = { newState in
+        listener.stateUpdateHandler = { [weak self, weak listener] newState in
             switch newState {
             case .failed(let error):
-                completion(.error(error))
+                Logger.log("Listener failed: \(error.localizedDescription)")
             case .cancelled:
-                completion(.cancel)
-            default: ()
+                Logger.log("Listener cancelled")
+            default:
+                return
+            }
+            Task { @MainActor in
+                guard let self, let listener, self.listener === listener else { return }
+                await self.restartIfNeeded()
             }
         }
         listener.newConnectionHandler = { [weak self] connection in
-            DispatchQueue.runOnMain { [weak self] in
-                self?.connection = connection
-            }
-            connection.stateUpdateHandler = { [weak self] state in
-                 Task { @MainActor in
-                     guard let self else { return }
-                     switch state {
-                     case .setup, .preparing: ()
-                     case .waiting(let error):
-                         Logger.log("Connection waiting: \(error.localizedDescription)")
-                         if case .posix(let posixError) = error, posixError == .ECONNREFUSED {
-                             try? await Task.sleep(nanoseconds: NSEC_PER_SEC * 2)
-                             try? await self.startServer(port: port, completion: completion)
-                         }
-                     case .ready:
-                         Logger.log("Connection ready")
-                         self.connectionStatus = .connected
-                         self.lastDataReceivedAt = .now
-                         self.startTimeoutWatchdog()
-                         connection.receiveData { [weak self] data in
-                             DispatchQueue.runOnMain { [weak self] in
-                                 guard let self else { return }
-                                 self.lastDataReceivedAt = .now
-                                 self.oniFacialMocapReceived(data)
-                             }
-                         }
-                     case .cancelled:
-                         Logger.log("Connection cancelled")
-                         await self.handleDisconnection()
-                     case .failed(let error):
-                         Logger.log("Connection failed: \(error.localizedDescription)")
-                         await self.handleDisconnection()
-                     @unknown default: ()
-                     }
+            Task { @MainActor in
+                guard let self else { return }
+                // Cancel the stale connection so its late .failed/.cancelled
+                // cannot restart the listener under the new one.
+                self.connection?.stateUpdateHandler = nil
+                self.connection?.cancel()
+                self.connection = connection
+                self.lastDataReceivedAt = .now
+                self.startTimeoutWatchdog()
+                connection.stateUpdateHandler = { [weak self, weak connection] state in
+                    Task { @MainActor in
+                        guard let self, let connection, self.connection === connection else { return }
+                        switch state {
+                        case .setup, .preparing: ()
+                        case .waiting(let error):
+                            Logger.log("Connection waiting: \(error.localizedDescription)")
+                        case .ready:
+                            Logger.log("Connection ready")
+                            self.connectionStatus = .connected
+                            self.lastDataReceivedAt = .now
+                            self.startTimeoutWatchdog()
+                            connection.receiveData { [weak self, weak connection] data in
+                                Task { @MainActor in
+                                    guard let self, let connection, self.connection === connection else { return }
+                                    self.lastDataReceivedAt = .now
+                                    self.oniFacialMocapReceived(data)
+                                }
+                            }
+                        case .cancelled:
+                            Logger.log("Connection cancelled")
+                            await self.restartIfNeeded()
+                        case .failed(let error):
+                            Logger.log("Connection failed: \(error.localizedDescription)")
+                            await self.restartIfNeeded()
+                        @unknown default: ()
+                        }
+                    }
                 }
-            }
 
-            connection.start(queue: Self.queue)
+                connection.start(queue: Self.queue)
+            }
         }
         listener.start(queue: Self.queue)
     }
 }
 
 extension FacialMocapReceiver {
-    private nonisolated func requestConnection(ip: String, port: NWEndpoint.Port, completion: @escaping @Sendable (ReceiverResult) -> Void) {
-        @Sendable func retry(completion: @escaping @Sendable (ReceiverResult) -> Void) {
+    /// Asks the sender to start streaming. Data arrives on the listener above,
+    /// so this connection is only needed until the token lands and a failure
+    /// here retries the handshake instead of restarting the listener.
+    private nonisolated func requestConnection(ip: String, generation: Int) {
+        let connection = NWConnection(host: NWEndpoint.Host(ip), port: Self.port, using: .udp)
+
+        @Sendable func finish() {
+            connection.stateUpdateHandler = nil
+            connection.cancel()
+        }
+
+        @Sendable func retry() {
+            finish()
             Self.queue.asyncAfter(deadline: .now() + 2) { [self] in
-                self.requestConnection(ip: ip, port: port, completion: completion)
+                guard handshakeGeneration.withLock({ $0 }) == generation else { return }
+                requestConnection(ip: ip, generation: generation)
             }
         }
 
-        let connection = NWConnection(host: NWEndpoint.Host(ip), port: port, using: .udp)
-        connection.stateUpdateHandler = { [weak self] state in
+        connection.stateUpdateHandler = { [self] state in
+            guard handshakeGeneration.withLock({ $0 }) == generation else {
+                finish()
+                return
+            }
             switch state {
-            case .setup, .preparing: ()
+            case .setup, .preparing, .cancelled: ()
             case .waiting(let error):
-                if case .posix(let posixError) = error, posixError == .ECONNREFUSED {
-                    retry(completion: completion)
-                }
+                Logger.log("Start token connection waiting: \(error.localizedDescription)")
+                retry()
             case .ready:
-                self?.sendStartToken(connection: connection) { error in
+                let token = "iFacialMocap_sahuasouryya9218sauhuiayeta91555dy3719|sendDataVersion=v2".data(using: .utf8)
+                connection.send(content: token, completion: .contentProcessed { error in
                     if let error {
-                        completion(.error(error))
+                        Logger.log("Failed to send the start token: \(error.localizedDescription)")
+                        retry()
                     } else {
-                        completion(.success)
+                        finish()
                     }
-                }
-            case .failed, .cancelled:
-                retry(completion: completion)
+                })
+            case .failed(let error):
+                Logger.log("Start token connection failed: \(error.localizedDescription)")
+                retry()
             @unknown default: ()
             }
         }
         connection.start(queue: Self.queue)
-    }
-
-    private nonisolated func sendStartToken(connection: NWConnection, completion: @escaping @Sendable ((any Error)?) -> Void) {
-        let token = "iFacialMocap_sahuasouryya9218sauhuiayeta91555dy3719|sendDataVersion=v2".data(using: .utf8)
-        connection.send(content: token, completion: .contentProcessed { error in
-            completion(error)
-        })
     }
 }

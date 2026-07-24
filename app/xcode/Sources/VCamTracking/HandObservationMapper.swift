@@ -19,7 +19,7 @@ struct HandObservationMapper {
         orientation: CGImagePropertyOrientation,
         configuration: VisionTrackingConfigurationSnapshot
     ) throws -> HandTrackingOutput? {
-        guard configuration.needsHandOutput || configuration.needsFingerOutput else { return nil }
+        guard configuration.needsHandPose else { return nil }
 
         let handler = VNImageRequestHandler(
             cmSampleBuffer: sampleBuffer,
@@ -45,8 +45,8 @@ struct HandObservationMapper {
 
         return smoothing.makeOutput(
             hands: hands,
-            needsHandOutput: configuration.needsHandOutput,
-            needsFingerOutput: configuration.needsFingerOutput
+            needsHandOutput: configuration.shouldOutputHands,
+            needsFingerOutput: configuration.shouldOutputFingers
         )
     }
 }

@@ -17,24 +17,17 @@ public struct VCamShortcutDataStore {
         }
     }
 
-    public func add(_ shortcut: VCamShortcut) throws {
-        let encoder = JSONEncoder()
-        let data = try encoder.encode(shortcut)
+    public func save(_ shortcut: VCamShortcut) throws {
+        let data = try JSONEncoder().encode(shortcut)
 
-        try? FileManager.default.createDirectoryIfNeeded(at: .shortcutDirectory(id: shortcut.id))
-
-        let url = URL.shortcutData(id: shortcut.id)
-        try data.write(to: url)
+        try FileManager.default.createDirectoryIfNeeded(at: .shortcutDirectory(id: shortcut.id))
+        try data.write(to: URL.shortcutData(id: shortcut.id))
 
         var metadata = try VCamShortcutMetadata.load()
         if !metadata.ids.contains(shortcut.id) {
             metadata.ids.insert(shortcut.id, at: 0)
         }
         try metadata.save()
-    }
-
-    public func update(_ shortcut: VCamShortcut) throws {
-        try add(shortcut)
     }
 
     public func move(fromOffsets source: IndexSet, toOffset destination: Int) throws {

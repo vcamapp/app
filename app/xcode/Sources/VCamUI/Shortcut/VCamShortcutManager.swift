@@ -27,7 +27,7 @@ public final class VCamShortcutManager {
         shortcuts.insert(shortcut, at: 0)
 
         do {
-            try dataStore.add(shortcut)
+            try dataStore.save(shortcut)
         } catch {
             showError(error)
         }
@@ -37,7 +37,7 @@ public final class VCamShortcutManager {
         shortcuts[id: shortcut.id] = shortcut
 
         do {
-            try dataStore.update(shortcut)
+            try dataStore.save(shortcut)
         } catch {
             showError(error)
         }

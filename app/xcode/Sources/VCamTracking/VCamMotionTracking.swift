@@ -1,34 +1,13 @@
 import Foundation
 import VCamBridge
-import Synchronization
 
 @MainActor
 public final class VCamMotionTracking {
-    private final class SmoothingStorage: Sendable {
-        private let storage: Mutex<TrackingSmoothing>
-
-        init(_ smoothing: TrackingSmoothing) {
-            storage = Mutex(smoothing)
-        }
-
-        func settings() -> TrackingResampler.Settings {
-            storage.withLock { $0.settings() }
-        }
-
-        func update(_ smoothing: TrackingSmoothing) {
-            storage.withLock { $0 = smoothing }
-        }
-
-        var isEnabled: Bool {
-            storage.withLock { $0.isEnabled }
-        }
-    }
-
     private let blendShapeResampler: TrackingResampler
     private let perfectSyncResampler: TrackingResampler
     private let handsResampler: TrackingResampler
     private let fingersResampler: TrackingResampler
-    private let smoothingStorage: SmoothingStorage
+    private let smoothingStorage: TrackingSmoothingStorage
 
     private struct HandOutput {
         let hands: [Float]
@@ -37,10 +16,9 @@ public final class VCamMotionTracking {
     }
 
     public init(smoothing: TrackingSmoothing) {
-        self.smoothingStorage = SmoothingStorage(smoothing)
-        let settingsProvider: @Sendable () -> TrackingResampler.Settings = { [smoothingStorage] in
-            smoothingStorage.settings()
-        }
+        let smoothingStorage = TrackingSmoothingStorage(smoothing)
+        self.smoothingStorage = smoothingStorage
+        let settingsProvider = smoothingStorage.settingsProvider
 
         blendShapeResampler = TrackingResampler(label: "vcam-motion-blendshape", settingsProvider: settingsProvider) { @MainActor values in
             UniBridge.shared.receiveVCamBlendShape(values)
