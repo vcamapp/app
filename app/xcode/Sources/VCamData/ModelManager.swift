@@ -18,7 +18,7 @@ public final class ModelManager {
 
     #if DEBUG
     public init(models: [Models.Model], lastLoadedModelId: UUID? = nil) {
-        self.modelItems = models.map { ModelItem(model: $0, status: .valid, thumbnail: $0.loadThumbnail()?.png) }
+        self.modelItems = models.map { ModelItem(model: $0, status: .valid, thumbnail: $0.loadThumbnail()?.pngData()) }
         self.lastLoadedModelId = lastLoadedModelId
     }
     #endif
@@ -105,7 +105,7 @@ public final class ModelManager {
     }
 
     public func setThumbnail(for item: ModelItem, from imageURL: URL) throws {
-        guard let image = NSImage(contentsOf: imageURL), let imageData = image.png else {
+        guard let image = NSImage(contentsOf: imageURL), let imageData = image.pngData() else {
             throw ModelManagerError.invalidImage
         }
         try saveThumbnail(imageData, for: item.model)
@@ -135,7 +135,7 @@ public final class ModelManager {
         modelItems = modelItems.map { item in
             let url = item.model.modelURL
             let status: ModelItem.ModelStatus = FileManager.default.fileExists(atPath: url.path) ? .valid : .missing
-            return ModelItem(model: item.model, status: status, thumbnail: item.thumbnail ?? item.model.loadThumbnail()?.png)
+            return ModelItem(model: item.model, status: status, thumbnail: item.thumbnail ?? item.model.loadThumbnail()?.pngData())
         }
         scanForNewModels()
         saveMeta()
@@ -163,7 +163,7 @@ public final class ModelManager {
                 let attributes = try? FileManager.default.attributesOfItem(atPath: modelFile.path)
                 let createdAt = attributes?[.creationDate] as? Date ?? .now
                 let modelInfo = Models.Model(name: name, type: Models.modelType, createdAt: createdAt)
-                modelItems.append(ModelItem(model: modelInfo, status: .valid, thumbnail: modelInfo.loadThumbnail()?.png))
+                modelItems.append(ModelItem(model: modelInfo, status: .valid, thumbnail: modelInfo.loadThumbnail()?.pngData()))
             }
         } catch {
             print("Failed to scan models: \(error)")
@@ -172,7 +172,7 @@ public final class ModelManager {
 
     @discardableResult
     private func addModel(_ model: Models.Model) -> ModelItem {
-        let item = ModelItem(model: model, status: .valid, thumbnail: model.loadThumbnail()?.png)
+        let item = ModelItem(model: model, status: .valid, thumbnail: model.loadThumbnail()?.pngData())
         guard !modelItems.contains(where: { $0.id == model.id }) else { return item }
         modelItems.insert(item, at: 0)
         saveMeta()
@@ -193,7 +193,7 @@ public final class ModelManager {
               let meta = try? JSONDecoder().decode(Models.self, from: data) else {
             return
         }
-        modelItems = meta.models.map { ModelItem(model: $0, status: .valid, thumbnail: $0.loadThumbnail()?.png) }
+        modelItems = meta.models.map { ModelItem(model: $0, status: .valid, thumbnail: $0.loadThumbnail()?.pngData()) }
         lastLoadedModelId = meta.lastModelId
     }
 

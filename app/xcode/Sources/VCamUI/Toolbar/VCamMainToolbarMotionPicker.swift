@@ -190,13 +190,7 @@ extension VCamMainToolbarMotionPicker: MacWindow {
     }
 
     public func configureWindow(_ window: NSWindow) -> NSWindow {
-        window.level = .floating
-        window.styleMask = [.titled, .closable, .resizable, .fullSizeContentView]
-        window.setContentSize(.init(width: 200, height: 200))
-        window.isOpaque = false
-        window.backgroundColor = .clear
-        window.titlebarAppearsTransparent = true
-        return window
+        configureAsFloatingTransparentPanel(window, contentSize: .init(width: 200, height: 200))
     }
 }
 

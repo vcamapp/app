@@ -251,4 +251,15 @@ extension SceneObjectManager {
         let canvasSize = UniBridge.shared.canvasCGSize
         add(.init(id: id, type: .image(.init(url: url, size: .init(width: renderer.size.width / canvasSize.width, height: renderer.size.height / canvasSize.height), filter: nil)), isHidden: false, isLocked: false))
     }
+
+    public func addScreenCapture(_ recorder: ScreenRecorder) {
+        guard let config = recorder.captureConfig, let screenId = config.id else { return }
+        let id = RenderTextureManager.shared.add(recorder)
+        add(.init(id: id, type: .screen(.init(id: screenId, captureType: config.captureType.type, textureSize: recorder.size, crop: recorder.cropRect, filter: nil)), isHidden: false, isLocked: false))
+    }
+
+    public func addVideoCapture(_ drawer: CaptureDeviceRenderer) {
+        let id = RenderTextureManager.shared.add(drawer)
+        add(.init(id: id, type: .videoCapture(.init(id: drawer.id, textureSize: drawer.size, crop: drawer.cropRect, filter: nil)), isHidden: false, isLocked: false))
+    }
 }

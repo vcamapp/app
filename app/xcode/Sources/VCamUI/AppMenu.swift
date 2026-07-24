@@ -161,16 +161,13 @@ private extension AppMenu {
 
     @objc private func addScreenCapture() {
         showScreenRecorderPreferenceView { recorder in
-            guard let config = recorder.captureConfig, let screenId = config.id else { return }
-            let id = RenderTextureManager.shared.add(recorder)
-            SceneObjectManager.shared.add(.init(id: id, type: .screen(.init(id: screenId, captureType: config.captureType.type, textureSize: recorder.size, crop: recorder.cropRect, filter: nil)), isHidden: false, isLocked: false))
+            SceneObjectManager.shared.addScreenCapture(recorder)
         }
     }
 
     @objc private func addVideoCapture() {
         CaptureDeviceRenderer.selectDevice { drawer in
-            let id = RenderTextureManager.shared.add(drawer)
-            SceneObjectManager.shared.add(.init(id: id, type: .videoCapture(.init(id: drawer.id, textureSize: drawer.size, crop: drawer.cropRect, filter: nil)), isHidden: false, isLocked: false))
+            SceneObjectManager.shared.addVideoCapture(drawer)
         }
     }
 

@@ -18,7 +18,7 @@ public struct TrackingDeviceView: View {
 
     @Environment(UniState.self) private var uniState
 
-    @State private var captureDevice: AVCaptureDevice? = Tracking.shared.avatarCameraManager.currentCaptureDevice
+    @State private var captureDevice: AVCaptureDevice? = Tracking.shared.webCamera.currentCaptureDevice
     @State private var audioDevice: AudioDevice? = AvatarAudioManager.shared.currentInputDevice
 
     public var body: some View {
@@ -29,7 +29,7 @@ public struct TrackingDeviceView: View {
                 get: { currentDevice },
                 set: { newDevice in
                     captureDevice = newDevice
-                    Tracking.shared.avatarCameraManager.setCaptureDevice(id: newDevice.uniqueID)
+                    Tracking.shared.webCamera.setCaptureDevice(id: newDevice.uniqueID)
                 }
             )) {
                 ForEach(Camera.cameras()) { device in
@@ -82,7 +82,7 @@ public struct TrackingDeviceView: View {
         .disabled(Tracking.shared.micLipSyncDisabled)
         .onReceive(NotificationCenter.default.publisher(for: .deviceWasChanged)) { _ in
             // Refresh device list
-            captureDevice = Tracking.shared.avatarCameraManager.currentCaptureDevice
+            captureDevice = Tracking.shared.webCamera.currentCaptureDevice
             audioDevice = AvatarAudioManager.shared.currentInputDevice
         }
     }

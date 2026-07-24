@@ -1,4 +1,5 @@
 import AppKit
+import VCamEntity
 #if FEATURE_3
 import VRMKit
 #endif
@@ -16,13 +17,13 @@ enum ModelMetaLoader {
             let vrm1 = try loader.load(VRM1.self, withURL: url)
             return ModelMeta(
                 name: vrm1.meta.name,
-                image: try? loader.loadThumbnail(from: vrm1).png
+                image: try? loader.loadThumbnail(from: vrm1).pngData()
             )
         } catch {
             let vrm0 = try loader.load(VRM.self, withURL: url)
             return ModelMeta(
                 name: vrm0.meta.title ?? url.deletingPathExtension().lastPathComponent,
-                image: try? loader.loadThumbnail(from: vrm0).png
+                image: try? loader.loadThumbnail(from: vrm0).pngData()
             )
         }
     }

@@ -14,18 +14,6 @@ public extension SIMD2<Float> {
     }
 }
 
-public extension SIMD3<Float> {
-    static let axisX = SIMD3(1, 0, 0)
-    static let axisY = SIMD3(0, 1, 0)
-    static let axisZ = SIMD3(0, 0, 1)
-}
-
-public extension SIMD3<Double> {
-    static let axisX = SIMD3(1, 0, 0)
-    static let axisY = SIMD3(0, 1, 0)
-    static let axisZ = SIMD3(0, 0, 1)
-}
-
 public extension simd_float4x4 {
     @inlinable var translation: SIMD3<Float> {
         let p = columns.3
@@ -45,23 +33,6 @@ public extension simd_float4x4 {
         )
     }
 
-    @inlinable var axisY: Self {
-        .init(
-            SIMD4(columns.0.x, 0, columns.2.x, 0),
-            SIMD4(0, 1, 0, 0),
-            SIMD4(columns.0.z, 0, columns.2.z, 0),
-            SIMD4(0, 0, 0, 1)
-        )
-    }
-
-    @inlinable var axisZ: Self {
-        .init(
-            SIMD4(columns.0.x, columns.1.x, 0, 0),
-            SIMD4(columns.0.y, columns.1.y, 0, 0),
-            SIMD4(0, 0, 1, 0),
-            SIMD4(0, 0, 0, 1)
-        )
-    }
 }
 
 public extension simd_quatf {
@@ -79,10 +50,6 @@ public extension simd_quatf {
             cx * cy * sz - sx * sy * cz,
             cx * cy * cz + sx * sy * sz,
         ])
-    }
-
-    @inlinable init(_ quat: simd_quatd) {
-      self.init(vector: SIMD4(Float(quat.vector[0]), Float(quat.vector[1]), Float(quat.vector[2]), Float(quat.vector[3])))
     }
 
     @inlinable func eulerAngles() -> SIMD3<Float> {

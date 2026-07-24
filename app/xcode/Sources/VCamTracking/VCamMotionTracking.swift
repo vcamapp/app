@@ -127,7 +127,7 @@ public final class VCamMotionTracking {
     }
 
     private func makeHandOutput(_ data: VCamMotion, tracking: Tracking) -> HandOutput {
-        let config = tracking.avatarCameraManager.fingerConfiguration
+        let config = tracking.webCamera.handTracking.configuration
 
         let hands = VCamHands(
             left: .init(hand: data.hands.left, isRight: false, configuration: config),

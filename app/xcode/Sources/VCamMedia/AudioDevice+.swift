@@ -77,15 +77,6 @@ public extension AudioDevice {
         return value
     }
 
-    func bufferSize() -> UInt32 {
-        var address =  AudioObjectPropertyAddress(mSelector: kAudioDevicePropertyAvailableNominalSampleRates, mScope: kAudioObjectPropertyScopeGlobal, mElement: kAudioObjectPropertyElementMain)
-        var buf: UInt32 = 0
-        var bufSize = UInt32(MemoryLayout<UInt32>.size)
-
-        AudioObjectGetPropertyData(id, &address, 0, nil, &bufSize, &buf)
-        return buf
-    }
-
     func sampleRate() -> Float64 {
         var address =  AudioObjectPropertyAddress(mSelector: kAudioDevicePropertyActualSampleRate, mScope: kAudioObjectPropertyScopeGlobal, mElement: kAudioObjectPropertyElementMain)
         var buf: Float64 = 0

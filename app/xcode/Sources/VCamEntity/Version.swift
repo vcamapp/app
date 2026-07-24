@@ -5,10 +5,6 @@ public struct Version: Sendable {
 
     static var bundle: Bundle { .main }
 
-    public init() {
-        components = []
-    }
-
     public init?(version: String) {
         let separatedStrings = version.components(separatedBy: ".")
         components = separatedStrings.compactMap { Int($0) }
@@ -29,13 +25,6 @@ extension Version {
         return version
     }
 
-    public static var currentBuildNumber: Version {
-        guard let versionString = bundle.infoDictionary?["CFBundleVersion"] as? String,
-            let version = Version(version: versionString) else {
-                fatalError("CFBundleVersion is not a valid version string")
-        }
-        return version
-    }
 }
 
 extension Version: Hashable {

@@ -4,6 +4,21 @@ import VCamCamera
 import VCamData
 import VCamLogger
 
+public struct CameraPermissionProvider: Sendable {
+    public var isAuthorized: @Sendable () -> Bool
+    public var requestPermission: @Sendable @MainActor () async -> Bool
+
+    public init(
+        isAuthorized: @escaping @Sendable () -> Bool,
+        requestPermission: @escaping @Sendable @MainActor () async -> Bool
+    ) {
+        self.isAuthorized = isAuthorized
+        self.requestPermission = requestPermission
+    }
+
+    public static let denied = CameraPermissionProvider(isAuthorized: { false }, requestPermission: { false })
+}
+
 @MainActor
 public final class AvatarWebCamera {
     public enum State: Sendable, Equatable {
@@ -56,6 +71,11 @@ public final class AvatarWebCamera {
     public var usage: Usage = [] {
         didSet {
             scheduleVisionConfigurationUpdate()
+            // The camera runs exactly while some vision-based tracking is enabled
+            let shouldRun = usage.intersection([.faceTracking, .handTracking, .fingerTracking]) != .disabled
+            Task {
+                await setRunning(shouldRun)
+            }
         }
     }
 
@@ -94,6 +114,7 @@ public final class AvatarWebCamera {
     }
 
     private func startCamera(generation: UInt64) async {
+        isEmotionEnabled = UserDefaults.standard.value(for: .useEmotion)
         if !permissionProvider.isAuthorized() {
             // The permission dialog can stay open indefinitely; drop the request if it was superseded meanwhile
             guard await permissionProvider.requestPermission(), generation == lifecycleGeneration else { return }
@@ -141,19 +162,36 @@ public final class AvatarWebCamera {
         state = .stopped
     }
 
-    public func setCaptureDevice(id: String?) async throws {
-        try await cameraSession.setDevice(id: id)
-        if let id {
-            UserDefaults.standard.set(id, for: .captureDeviceId)
-        } else {
-            // Clear the stored ID so the next launch falls back to the default camera
-            UserDefaults.standard.remove(for: .captureDeviceId)
+    public func setCaptureDevice(id: String?) {
+        Task {
+            do {
+                try await cameraSession.setDevice(id: id)
+                if let id {
+                    UserDefaults.standard.set(id, for: .captureDeviceId)
+                } else {
+                    // Clear the stored ID so the next launch falls back to the default camera
+                    UserDefaults.standard.remove(for: .captureDeviceId)
+                }
+            } catch {
+                Logger.log("Failed to set web camera device: \(error.localizedDescription)")
+            }
         }
     }
 
-    public func setFPS(_ fps: Int) async throws {
-        try await cameraSession.setFPS(fps)
-        UserDefaults.standard.set(fps, for: .cameraFps)
+    public func setFPS(_ fps: Int) {
+        Task {
+            do {
+                try await cameraSession.setFPS(fps)
+                UserDefaults.standard.set(fps, for: .cameraFps)
+            } catch {
+                Logger.log("Failed to set web camera FPS: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    public func setEmotionEnabled(_ isEnabled: Bool) {
+        isEmotionEnabled = isEnabled
+        UserDefaults.standard.set(isEnabled, for: .useEmotion)
     }
 
     public func resetCalibration() {

@@ -205,13 +205,13 @@ struct VCamSettingMappingTableView: NSViewRepresentable {
         private func makeCell(tableView: NSTableView, columnID: NSUserInterfaceItemIdentifier, entry: TrackingMappingEntry, row: Int) -> NSView? {
             switch columnID {
             case .enabled:
-                let cell = makeCheckboxCell(in: tableView)
+                let cell = dequeueCell(.checkboxCell, in: tableView) { CheckboxCell() }
                 cell.configure(isEnabled: entry.isEnabled, row: row) { [weak self] row, state in
                     self?.toggleEnabled(row: row, state: state)
                 }
                 return cell
             case .input:
-                let cell = makeInputCell(in: tableView)
+                let cell = dequeueCell(.inputCell, in: tableView) { InputCell() }
                 cell.configure(
                     entry: entry,
                     row: row,
@@ -227,7 +227,7 @@ struct VCamSettingMappingTableView: NSViewRepresentable {
                 )
                 return cell
             case .arrow:
-                let cell = makeArrowCell(in: tableView)
+                let cell = dequeueCell(.arrowCell, in: tableView) { ArrowCell() }
                 cell.configure(isEnabled: entry.isEnabled)
                 return cell
             case .output:
@@ -250,7 +250,7 @@ struct VCamSettingMappingTableView: NSViewRepresentable {
                 )
                 return cell
             case .filter:
-                let cell = makeFilterCell(in: tableView)
+                let cell = dequeueCell(.filterCell, in: tableView) { FilterCell() }
                 cell.configure(
                     filter: entry.filter,
                     row: row,
@@ -265,50 +265,18 @@ struct VCamSettingMappingTableView: NSViewRepresentable {
             }
         }
 
-        private func makeCheckboxCell(in tableView: NSTableView) -> CheckboxCell {
-            if let cell = tableView.makeView(withIdentifier: .checkboxCell, owner: self) as? CheckboxCell {
+        private func dequeueCell<T: NSView>(_ identifier: NSUserInterfaceItemIdentifier, in tableView: NSTableView, make: () -> T) -> T {
+            if let cell = tableView.makeView(withIdentifier: identifier, owner: self) as? T {
                 return cell
             }
-            let cell = CheckboxCell()
-            cell.identifier = .checkboxCell
-            return cell
-        }
-
-        private func makeInputCell(in tableView: NSTableView) -> InputCell {
-            if let cell = tableView.makeView(withIdentifier: .inputCell, owner: self) as? InputCell {
-                return cell
-            }
-            let cell = InputCell()
-            cell.identifier = .inputCell
-            return cell
-        }
-
-        private func makeArrowCell(in tableView: NSTableView) -> ArrowCell {
-            if let cell = tableView.makeView(withIdentifier: .arrowCell, owner: self) as? ArrowCell {
-                return cell
-            }
-            let cell = ArrowCell()
-            cell.identifier = .arrowCell
+            let cell = make()
+            cell.identifier = identifier
             return cell
         }
 
         private func makeOutputCell(in tableView: NSTableView) -> OutputCell {
             let identifier: NSUserInterfaceItemIdentifier = hasBlendShapeNames ? .outputPopupCell : .outputTextCell
-            if let cell = tableView.makeView(withIdentifier: identifier, owner: self) as? OutputCell {
-                return cell
-            }
-            let cell = OutputCell(hasBlendShapeNames: hasBlendShapeNames)
-            cell.identifier = identifier
-            return cell
-        }
-
-        private func makeFilterCell(in tableView: NSTableView) -> FilterCell {
-            if let cell = tableView.makeView(withIdentifier: .filterCell, owner: self) as? FilterCell {
-                return cell
-            }
-            let cell = FilterCell()
-            cell.identifier = .filterCell
-            return cell
+            return dequeueCell(identifier, in: tableView) { OutputCell(hasBlendShapeNames: hasBlendShapeNames) }
         }
 
         private func toggleEnabled(row: Int, state: Bool) {
@@ -433,8 +401,8 @@ struct VCamSettingMappingTableView: NSViewRepresentable {
 
             let response = alert.runModal()
             if response == .alertFirstButtonReturn {
-                guard let min = parseFloat(minField.stringValue),
-                      let max = parseFloat(maxField.stringValue),
+                guard let min = Float(userInput: minField.stringValue),
+                      let max = Float(userInput: maxField.stringValue),
                       min < max else {
                     return
                 }
@@ -442,31 +410,6 @@ struct VCamSettingMappingTableView: NSViewRepresentable {
             }
         }
 
-        private func parseFloat(_ text: String) -> Float? {
-            let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !trimmed.isEmpty else { return nil }
-            let characters = Array(trimmed)
-            var lastSeparatorIndex: Int?
-            for (index, character) in characters.enumerated() {
-                if character == "." || character == "," {
-                    lastSeparatorIndex = index
-                }
-            }
-
-            var normalized = ""
-            normalized.reserveCapacity(characters.count)
-            for (index, character) in characters.enumerated() {
-                if character.isWholeNumber || character == "-" || character == "+" {
-                    normalized.append(character)
-                    continue
-                }
-                if (character == "." || character == ",") && index == lastSeparatorIndex {
-                    normalized.append(".")
-                }
-            }
-
-            return Float(normalized)
-        }
     }
 }
 

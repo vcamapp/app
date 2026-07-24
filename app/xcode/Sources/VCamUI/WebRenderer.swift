@@ -90,20 +90,6 @@ public final class WebRenderer {
         webView.navigationDelegate = delegator
     }
 
-    fileprivate func updateSize(width: Int, height: Int) {
-        size = .init(width: width, height: height)
-        webView.frame.size = size
-        viewHolder.contentView?.frame.size = size
-        cropRect = Self.makeCropRect(with: size)
-    }
-
-    fileprivate func updateFps(_ fps: Int) {
-        if self.fps != fps {
-            self.fps = fps
-            timer = makeTimer()
-        }
-    }
-
     fileprivate func update(by metadata: VCamTagMetadata) {
         if metadata.width != nil || metadata.height != nil {
             size = .init(width: metadata.width ?? Int(size.width), height: metadata.height ?? Int(size.height))
@@ -169,6 +155,8 @@ public final class WebRenderer {
     }
 
     private func renderWebViewTexture() {
+        // Skip the expensive web-view rasterization while no consumer is registered
+        guard render != nil else { return }
         webView.takeWebViewSnapshot(filter: self.filter) { raw, filtered in
             self.lastFrame = raw
             self.render?(filtered)

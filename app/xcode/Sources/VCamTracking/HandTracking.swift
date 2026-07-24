@@ -65,5 +65,5 @@ public final class HandTracking {
 private extension UserDefaults {
     @objc dynamic var vc_ftracking_open_intensity: Double { value(for: .fingerTrackingOpenIntensity) }
     @objc dynamic var vc_ftracking_close_intensity: Double { value(for: .fingerTrackingCloseIntensity) }
-    @objc dynamic var vc_tracking_method_finger: String { string(forKey: "vc_tracking_method_finger") ?? TrackingMethod.Finger.default.rawValue }
+    @objc dynamic var vc_tracking_method_finger: String { value(for: .trackingMethodFinger).rawValue }
 }

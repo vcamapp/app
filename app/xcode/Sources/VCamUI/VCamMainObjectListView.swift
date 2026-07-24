@@ -86,9 +86,7 @@ private struct VCamMainObjectListAddButton: View {
             }
             Button {
                 showScreenRecorderPreferenceView { recorder in
-                    guard let config = recorder.captureConfig, let screenId = config.id else { return }
-                    let id = RenderTextureManager.shared.add(recorder)
-                    objectManager.add(.init(id: id, type: .screen(.init(id: screenId, captureType: config.captureType.type, textureSize: recorder.size, crop: recorder.cropRect, filter: nil)), isHidden: false, isLocked: false))
+                    objectManager.addScreenCapture(recorder)
                 }
             } label: {
                 Image(systemName: "display")
@@ -96,8 +94,7 @@ private struct VCamMainObjectListAddButton: View {
             }
             Button {
                 CaptureDeviceRenderer.selectDevice { drawer in
-                    let id = RenderTextureManager.shared.add(drawer)
-                    objectManager.add(.init(id: id, type: .videoCapture(.init(id: drawer.id, textureSize: drawer.size, crop: drawer.cropRect, filter: nil)), isHidden: false, isLocked: false))
+                    objectManager.addVideoCapture(drawer)
                 }
             } label: {
                 Image(systemName: "camera")

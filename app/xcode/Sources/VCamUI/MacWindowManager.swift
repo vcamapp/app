@@ -19,6 +19,17 @@ public extension MacWindow {
     func configureWindow(_ window: NSWindow) -> NSWindow {
         window
     }
+
+    /// The shared style for floating transparent picker panels
+    func configureAsFloatingTransparentPanel(_ window: NSWindow, contentSize: CGSize) -> NSWindow {
+        window.level = .floating
+        window.styleMask = [.titled, .closable, .resizable, .fullSizeContentView]
+        window.setContentSize(contentSize)
+        window.isOpaque = false
+        window.backgroundColor = .clear
+        window.titlebarAppearsTransparent = true
+        return window
+    }
 }
 
 public extension View {

@@ -42,7 +42,7 @@ public struct VCamSettingTrackingView: View {
                 }
                 ValueEditField(.fpsCamera, value: $cameraFps.map(), type: .slider(1...60) {
                     guard !$0 else { return }
-                    Tracking.shared.avatarCameraManager.setFPS(cameraFps)
+                    Tracking.shared.webCamera.setFPS(cameraFps)
                 })
             }
 

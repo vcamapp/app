@@ -28,7 +28,7 @@ public final class Tracking {
         []
     ]
 
-    public let avatarCameraManager = AvatarCameraManager()
+    public let webCamera = AvatarWebCamera()
     public let iFacialMocapReceiver: FacialMocapReceiver
     public let vcamMotionReceiver = VCamMotionReceiver()
 
@@ -133,11 +133,13 @@ public final class Tracking {
     }
 
     public func stop() {
-        avatarCameraManager.stop()
+        Task {
+            await webCamera.setRunning(false)
+        }
     }
 
     public func resetCalibration() {
-        avatarCameraManager.resetCalibration()
+        webCamera.resetCalibration()
     }
 
     public var isBlinkerUsed: Bool {
@@ -150,9 +152,9 @@ public final class Tracking {
     }
 
     /// Applies the camera usage and syncs the blinker state, which depends on
-    /// the tracking method owned here rather than by the camera manager
+    /// the tracking method owned here rather than by the camera
     private func applyWebCamUsage(_ usage: AvatarWebCamera.Usage) {
-        avatarCameraManager.setWebCamUsage(usage)
+        webCamera.usage = usage
         UniBridge.shared.useBlinker(isBlinkerUsed)
     }
 
@@ -163,7 +165,7 @@ public final class Tracking {
         faceTrackingMethod = method
         UserDefaults.standard.set(method, for: .trackingMethodFace)
 
-        var usage = avatarCameraManager.webCameraUsage
+        var usage = webCamera.usage
 
         switch method {
         case .disabled, .iFacialMocap, .vcamMocap:
@@ -226,7 +228,7 @@ public final class Tracking {
         UserDefaults.standard.set(finger, for: .trackingMethodFinger)
 #endif
 
-        var usage = avatarCameraManager.webCameraUsage
+        var usage = webCamera.usage
         if handTrackingMethod == .default {
             usage.insert(.handTracking)
         } else {
@@ -245,10 +247,10 @@ public final class Tracking {
         UniState.shared.lipSyncWebCam = useCamera
         if useCamera {
             AvatarAudioManager.shared.stop(usage: .lipSync)
-            applyWebCamUsage(avatarCameraManager.webCameraUsage.union(.lipTracking))
+            applyWebCamUsage(webCamera.usage.union(.lipTracking))
         } else {
             AvatarAudioManager.shared.start(usage: .lipSync)
-            applyWebCamUsage(avatarCameraManager.webCameraUsage.subtracting(.lipTracking))
+            applyWebCamUsage(webCamera.usage.subtracting(.lipTracking))
         }
     }
 

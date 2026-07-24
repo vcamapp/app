@@ -354,7 +354,7 @@ extension AppKitMinMaxSlider {
         guard let textField = obj.object as? NSTextField else { return }
 
         if textField == minTextField {
-            guard let newValue = parseValue(textField.stringValue) else {
+            guard let newValue = Float(userInput: textField.stringValue) else {
                 if let fallback = currentMinTextFieldValue {
                     minValue = fallback
                     minTextField.stringValue = formatValue(minValue)
@@ -370,7 +370,7 @@ extension AppKitMinMaxSlider {
             updateLayout()
             onEditingEnded?(minValue, maxValue)
         } else if textField == maxTextField {
-            guard let newValue = parseValue(textField.stringValue) else {
+            guard let newValue = Float(userInput: textField.stringValue) else {
                 if let fallback = currentMaxTextFieldValue {
                     maxValue = fallback
                     maxTextField.stringValue = formatValue(maxValue)
@@ -392,32 +392,6 @@ extension AppKitMinMaxSlider {
     }
 
     public func controlTextDidChange(_ obj: Notification) {
-    }
-
-    private func parseValue(_ text: String) -> Float? {
-        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return nil }
-        let characters = Array(trimmed)
-        var lastSeparatorIndex: Int?
-        for (index, character) in characters.enumerated() {
-            if character == "." || character == "," {
-                lastSeparatorIndex = index
-            }
-        }
-
-        var normalized = ""
-        normalized.reserveCapacity(characters.count)
-        for (index, character) in characters.enumerated() {
-            if character.isWholeNumber || character == "-" || character == "+" {
-                normalized.append(character)
-                continue
-            }
-            if (character == "." || character == ",") && index == lastSeparatorIndex {
-                normalized.append(".")
-            }
-        }
-
-        return Float(normalized)
     }
 
     private func formatValue(_ value: Float) -> String {

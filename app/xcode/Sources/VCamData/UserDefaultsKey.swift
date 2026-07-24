@@ -21,7 +21,6 @@ public extension UserDefaults.Key {
     static var cameraFps: Key<Int> { .init("vc_camera_fps", default: 24) }
     static var captureDeviceId: Key<String?> { .init("vc_capture_device_id", default: nil) }
     static var audioDeviceUid: Key<String?> { .init("vc_audio_device_uid", default: nil) }
-    static var locale: Key<String> { .init("vc_locale", default: "") }
     static var pluginVersion: Key<String> { .init("vc_plugin_ver", default: "") }
     static var alwaysOnTopEnabled: Key<Bool> { .init("vc_alwaysontop_enabled", default: false) }
     static var trackingMethodFace: Key<TrackingMethod.Face> { .init("vc_tracking_method_face", default: .default) }
@@ -44,7 +43,6 @@ public extension UserDefaults.Key {
     static var integrationMocopi: Key<Bool> { .init("vc_intg_mocopi", default: false) }
     static var mocapNetworkInterpolation: Key<Double> { .init("vc_mocap_network_interpolation", default: 1.0) }
 
-    static var macOSMicModeEnabled: Key<Bool> { .init("vc_macos_micmode_enabled", default: false) }
     static var useAddToMacOSMenuBar: Key<Bool> { .init("vc_use_add_to_macos_menubar", default: true) }
 
     static var renderingQuality: Key<Int> { .init("vc_rendering_quality", default: 5) }

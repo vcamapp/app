@@ -35,8 +35,11 @@ public enum Camera {
     }
 
     public static var defaultCaptureDevice: AVCaptureDevice? {
-        AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInWideAngleCamera], mediaType: .video, position: .unspecified).devices.first ??
-        AVCaptureDevice.DiscoverySession(deviceTypes: [.external], mediaType: .video, position: .unspecified).devices.first
+        // Derived from the cache to avoid creating discovery sessions on every call;
+        // the cache is refreshed by the connect/disconnect observers in configure()
+        cache.withLock { cache in
+            cache.devices.first { $0.deviceType == .builtInWideAngleCamera } ?? cache.devices.first
+        }
     }
 
     public static func enableDalDevices() {

@@ -21,12 +21,13 @@ public extension NSImage {
         return CIImage(data: imageData)
     }
 
+    func pngData() -> Data? {
+        guard let tiffData = tiffRepresentation else { return nil }
+        return NSBitmapImageRep(data: tiffData)?.representation(using: .png, properties: [:])
+    }
+
     func writeAsPNG(to destination: URL) throws {
-        guard let tiffData = self.tiffRepresentation else {
-            throw NSError(domain: "vcam", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to get tiffRepresentation. url: \(destination)"])
-        }
-        let imageRep = NSBitmapImageRep(data: tiffData)
-        guard let imageData = imageRep?.representation(using: .png, properties: [:]) else {
+        guard let imageData = pngData() else {
             throw NSError(domain: "vcam", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to get PNG representation. url: \(destination)"])
         }
         try imageData.write(to: destination)
