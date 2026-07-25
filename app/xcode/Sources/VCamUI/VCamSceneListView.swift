@@ -36,7 +36,9 @@ public struct VCamSceneListView: View {
                         return
                     }
                     if sceneManager.currentSceneId != newId {
-                        try? sceneManager.loadScene(id: newId)
+                        Task {
+                            try? await sceneManager.loadScene(id: newId)
+                        }
                     }
                     selectedId = newId
                 }
@@ -50,7 +52,9 @@ public struct VCamSceneListView: View {
 
             HStack {
                 Button {
-                    try? sceneManager.addNewScene()
+                    Task {
+                        try? await sceneManager.addNewScene()
+                    }
                 } label: {
                     Image(systemName: "plus").background(Color.clear)
                 }
@@ -60,7 +64,9 @@ public struct VCamSceneListView: View {
                 Group {
                     Button {
                         if let selectedId = selectedId {
-                            sceneManager.remove(byId: selectedId)
+                            Task {
+                                await sceneManager.remove(byId: selectedId)
+                            }
                         }
                     } label: {
                         Image(systemName: "minus").background(Color.clear).frame(height: 14)
@@ -112,7 +118,9 @@ private struct DeleteSceneButton: View {
 
     var body: some View {
         Button(role: .destructive) {
-            SceneManager.shared.remove(byId: scene.id)
+            Task {
+                await SceneManager.shared.remove(byId: scene.id)
+            }
         } label: {
             Image(systemName: "trash")
             Text(.delete)

@@ -1,6 +1,7 @@
 import Foundation
 import VCamEntity
 import VCamBridge
+import VCamLogger
 
 public struct VCamSceneDataStore {
     public init(sceneId: Int32) {
@@ -38,12 +39,20 @@ public struct VCamSceneDataStore {
     /// Copies the data into the scene directory and returns the URL of the copy.
     /// Data that already belongs to the scene is used as is.
     public func copyData(fromURL url: URL, newUUID: String = UUID().uuidString) throws -> URL {
-        guard !url.path.hasPrefix(sceneRootURL.path) else { return url }
+        guard !contains(url) else { return url }
 
         let destination = dataURL(id: newUUID)
         try FileManager.default.createDirectoryIfNeeded(at: sceneRootURL)
         try FileManager.default.copyItem(at: url, to: destination)
         return destination
+    }
+
+    /// Compares path components so that a scene directory isn't confused with
+    /// another one that merely shares a prefix (e.g. scene 12 and scene 123).
+    private func contains(_ url: URL) -> Bool {
+        let root = sceneRootURL.standardizedFileURL.pathComponents
+        let target = url.standardizedFileURL.pathComponents
+        return target.count > root.count && Array(target.prefix(root.count)) == root
     }
 
     static func dataId(fromURL url: URL) throws -> UUID {
@@ -72,20 +81,16 @@ extension VCamSceneDataStore {
         ], aspectRatio: MainTexture.shared.aspectRatio)
     }
 
-    public func makeScene(name: String, objects: [SceneObject]) -> VCamScene {
+    /// Encoding is all-or-nothing so that an object which can't be converted is never
+    /// dropped from an otherwise successfully saved scene.
+    public func makeScene(name: String, objects: [SceneObject]) throws -> VCamScene {
         uniDebugLog("makeScene: \(objects.count)")
-
-        var results: [VCamScene.Object] = []
-        for object in objects {
-            do {
-                uniDebugLog("makeScene: \(object)")
-                results.append(try object.encodeScene())
-            } catch {
-                uniDebugLog(error.localizedDescription)
-            }
-        }
-
-        return .init(id: sceneId, name: name, objects: results, aspectRatio: MainTexture.shared.aspectRatio)
+        return .init(
+            id: sceneId,
+            name: name,
+            objects: try objects.map { try $0.encodeScene() },
+            aspectRatio: MainTexture.shared.aspectRatio
+        )
     }
 
     private func addSceneIdIfNeeded() throws {
@@ -99,7 +104,7 @@ extension VCamSceneDataStore {
 
 extension VCamSceneDataStore {
     /// Loads every scene while repairing data inconsistencies in a single pass:
-    /// drops scenes that can't be loaded, removes image objects whose files are missing,
+    /// skips scenes that can't be loaded, removes image objects whose files are missing,
     /// rebuilds the metadata from the surviving (deduplicated) IDs, and persists only what changed.
     public static func loadAndRepair(metadata: VCamSceneMetadata) throws -> (scenes: [VCamScene], metadata: VCamSceneMetadata) {
         var scenes: [VCamScene] = []
@@ -121,15 +126,25 @@ extension VCamSceneDataStore {
                     }
                     return $0
                 }
-                // Only rewrite the scene when an invalid object was actually removed
+                // Only rewrite the scene when an invalid object was actually removed.
+                // The rewrite is best-effort so a scene stays usable even if it can't be persisted.
                 if scene.objects.count != originalCount {
-                    try dataStore.save(scene)
+                    do {
+                        try dataStore.save(scene)
+                    } catch {
+                        Logger.error(error)
+                    }
                 }
                 scenes.append(scene)
                 validIds.append(id)
             } catch {
-                // Scenes that couldn't be loaded are deleted
-                try? dataStore.delete()
+                // A scene that fails to load is never deleted, since the failure can be transient.
+                // It stays registered so the next launch retries it, and only IDs whose file is
+                // already gone are dropped from the metadata.
+                Logger.error(error)
+                if FileManager.default.fileExists(atPath: dataStore.sceneURL.path) {
+                    validIds.append(id)
+                }
             }
         }
 

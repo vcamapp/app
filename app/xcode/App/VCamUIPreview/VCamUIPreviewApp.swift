@@ -33,7 +33,9 @@ struct VCamUIPreviewApp: App {
         VCamSystem.shared.configure()
 
         // TODO: Refactor
-        try? SceneManager.shared.loadCurrentScene()
+        Task {
+            try? await SceneManager.shared.loadCurrentScene()
+        }
         Tracking.shared.configure()
 
         VCamSystem.shared.isUniVCamSystemEnabled = true

@@ -64,6 +64,10 @@ struct VisionTrackingConfigurationSnapshot: Sendable, Equatable {
     var needsVisionProcessing: Bool {
         needsFaceLandmarks || needsHandPose
     }
+
+    var needsCameraCapture: Bool {
+        usage.contains(.faceTracking) || usage.contains(.lipTracking) || needsHandPose
+    }
 }
 
 struct TrackingOutput: Sendable {

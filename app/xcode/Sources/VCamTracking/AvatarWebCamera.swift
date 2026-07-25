@@ -50,7 +50,7 @@ public final class AvatarWebCamera {
         cameraSession = CameraSession(initialFPS: Int(UserDefaults.standard.value(for: .cameraFps)))
         handTracking.setConfigurationChangeHandler { [weak self] in
             Task { @MainActor in
-                self?.scheduleVisionConfigurationUpdate()
+                self?.applyVisionConfiguration()
             }
         }
     }
@@ -70,16 +70,13 @@ public final class AvatarWebCamera {
 
     public var usage: Usage = [] {
         didSet {
-            scheduleVisionConfigurationUpdate()
-            // The camera runs exactly while some vision-based tracking is enabled
-            let shouldRun = usage.intersection([.faceTracking, .handTracking, .fingerTracking]) != .disabled
-            setRunning(shouldRun)
+            applyVisionConfiguration()
         }
     }
 
-    public var isEmotionEnabled = false {
+    public var isEmotionEnabled = UserDefaults.standard.value(for: .useEmotion) {
         didSet {
-            scheduleVisionConfigurationUpdate()
+            applyVisionConfiguration()
         }
     }
 
@@ -114,7 +111,6 @@ public final class AvatarWebCamera {
     }
 
     private func startCamera(generation: UInt64) async {
-        isEmotionEnabled = UserDefaults.standard.value(for: .useEmotion)
         if !permissionProvider.isAuthorized() {
             // The permission dialog can stay open indefinitely; drop the request if it was superseded meanwhile
             guard await permissionProvider.requestPermission(), generation == lifecycleGeneration else { return }
@@ -211,9 +207,16 @@ public final class AvatarWebCamera {
         Int(UserDefaults.standard.value(for: .cameraFps))
     }
 
-    private func scheduleVisionConfigurationUpdate() {
-        guard state == .starting || state == .running, let stream = activePipeline?.stream else { return }
+    /// The single place that derives both the camera lifecycle and the frame handler
+    /// from the tracking configuration, so the two can't disagree.
+    private func applyVisionConfiguration() {
         let configuration = makeConfigurationSnapshot()
+        scheduleVisionConfigurationUpdate(configuration)
+        setRunning(configuration.needsCameraCapture)
+    }
+
+    private func scheduleVisionConfigurationUpdate(_ configuration: VisionTrackingConfigurationSnapshot) {
+        guard state == .starting || state == .running, let stream = activePipeline?.stream else { return }
         let handler = Self.makeFrameHandler(frameStream: stream, configuration: configuration)
         Task { [cameraSession] in
             await cameraSession.setFrameHandler(handler, revision: configuration.revision)

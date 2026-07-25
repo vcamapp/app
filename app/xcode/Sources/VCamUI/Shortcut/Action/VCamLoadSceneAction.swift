@@ -13,6 +13,6 @@ public struct VCamLoadSceneAction: VCamAction {
 
     @MainActor
     public func callAsFunction(context: VCamActionContext) async throws {
-        try? SceneManager.shared.loadScene(id: configuration.sceneId)
+        try await SceneManager.shared.loadScene(id: configuration.sceneId)
     }
 }

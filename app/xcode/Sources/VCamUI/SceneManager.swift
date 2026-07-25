@@ -89,10 +89,10 @@ public final class SceneManager {
         return scene
     }
 
-    public func addNewScene() throws {
+    public func addNewScene() async throws {
         let scene = Self.createNewScene()
         try add(scene)
-        try loadScene(id: scene.id)
+        try await loadScene(id: scene.id)
     }
 
     public func add(_ scene: VCamScene) throws {
@@ -109,19 +109,19 @@ public final class SceneManager {
         scenes[index] = scene
     }
 
-    public func remove(byId id: Int32) {
+    public func remove(byId id: Int32) async {
         guard let scene = scenes.find(byId: id) else {
             return
         }
-        remove(scene)
+        await remove(scene)
     }
 
-    private func remove(_ scene: VCamScene) {
+    private func remove(_ scene: VCamScene) async {
         scenes.remove(byId: scene.id)
         try? VCamSceneDataStore(sceneId: scene.id).delete()
         try? save()
         if currentSceneId == scene.id, let nextScene = scenes.first {
-            try? loadScene(id: nextScene.id)
+            try? await loadScene(id: nextScene.id)
         } else {
             try? saveCurrentSceneAndObjects()
         }
@@ -144,7 +144,7 @@ public final class SceneManager {
         try? save()
     }
 
-    public func loadScene(id: Int32) throws {
+    public func loadScene(id: Int32) async throws {
         if currentSceneId != id {
             try? saveCurrentSceneAndObjects() // Save when switching scenes
         }
@@ -152,13 +152,11 @@ public final class SceneManager {
         uniDebugLog("\(scene.id) \(scene.objects.count)")
         Logger.log("\(scene.id) \(scene.objects.count)")
         currentSceneId = id
-        Task {
-            await SceneObjectManager.shared.loadObjects(scene)
-        }
+        await SceneObjectManager.shared.loadObjects(scene)
     }
 
-    public func loadCurrentScene() throws {
-        try loadScene(id: currentSceneId)
+    public func loadCurrentScene() async throws {
+        try await loadScene(id: currentSceneId)
     }
 
     public func saveCurrentSceneAndObjects() throws {
@@ -188,7 +186,7 @@ public final class SceneManager {
                 if (canvasSize.width >= canvasSize.height) == isLandscape { break }
                 try? await Task.sleep(for: .milliseconds(50))
             }
-            try? self.loadScene(id: scene.id)
+            try? await self.loadScene(id: scene.id)
         }
     }
 }

@@ -7,6 +7,7 @@ struct VisionTrackingPipelineTests {
     func configurationNeedsFaceLandmarksForFaceOrLipTracking() {
         #expect(makeConfiguration(usage: .faceTracking).needsFaceLandmarks)
         #expect(makeConfiguration(usage: .lipTracking).needsFaceLandmarks)
+        #expect(makeConfiguration(usage: .disabled, isEmotionEnabled: true).needsFaceLandmarks)
         #expect(!makeConfiguration(usage: .handTracking).needsFaceLandmarks)
     }
 
@@ -16,6 +17,34 @@ struct VisionTrackingPipelineTests {
         #expect(makeConfiguration(usage: .fingerTracking).needsHandPose)
         #expect(makeConfiguration(usage: [.handTracking, .fingerTracking]).needsHandPose)
         #expect(!makeConfiguration(usage: .faceTracking).needsHandPose)
+    }
+
+    @Test(arguments: [
+        (usage: AvatarWebCamera.Usage.faceTracking, isEmotionEnabled: false, needsCameraCapture: true),
+        (usage: .lipTracking, isEmotionEnabled: false, needsCameraCapture: true),
+        (usage: .handTracking, isEmotionEnabled: false, needsCameraCapture: true),
+        (usage: .fingerTracking, isEmotionEnabled: false, needsCameraCapture: true),
+        // Emotion alone is covered by the mic, so it must not turn the camera on
+        (usage: .disabled, isEmotionEnabled: true, needsCameraCapture: false),
+        (usage: .disabled, isEmotionEnabled: false, needsCameraCapture: false),
+    ])
+    func configurationNeedsCameraCaptureForCameraDrivenTracking(
+        pattern: (usage: AvatarWebCamera.Usage, isEmotionEnabled: Bool, needsCameraCapture: Bool)
+    ) {
+        let configuration = makeConfiguration(usage: pattern.usage, isEmotionEnabled: pattern.isEmotionEnabled)
+        #expect(configuration.needsCameraCapture == pattern.needsCameraCapture)
+    }
+
+    @Test
+    func configurationDoesNotNeedCameraCaptureForDisabledFingerTracking() {
+        let configuration = VisionTrackingConfigurationSnapshot(
+            revision: 0,
+            usage: .fingerTracking,
+            isEmotionEnabled: false,
+            finger: .init(open: 1, close: 1, isFingerEnabled: false)
+        )
+
+        #expect(!configuration.needsCameraCapture)
     }
 
     @Test
@@ -61,11 +90,11 @@ struct VisionTrackingPipelineTests {
         #expect(!snapshot.isFingerEnabled)
     }
 
-    private func makeConfiguration(usage: AvatarWebCamera.Usage) -> VisionTrackingConfigurationSnapshot {
+    private func makeConfiguration(usage: AvatarWebCamera.Usage, isEmotionEnabled: Bool = false) -> VisionTrackingConfigurationSnapshot {
         VisionTrackingConfigurationSnapshot(
             revision: 0,
             usage: usage,
-            isEmotionEnabled: false,
+            isEmotionEnabled: isEmotionEnabled,
             finger: .init(open: 1, close: 1, isFingerEnabled: true)
         )
     }

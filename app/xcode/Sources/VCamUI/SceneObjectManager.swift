@@ -67,6 +67,11 @@ public final class SceneObjectManager {
             uniBridge.addWind([object.id, Int32(direction.x * scale), Int32(direction.y * scale), Int32(direction.z * scale)])
         }
 
+        applyState(object)
+    }
+
+    private func applyState(_ object: SceneObject) {
+        let uniBridge = UniBridge.shared
         uniBridge.setObjectActive([object.id, object.isHidden ? 0 : 1])
         uniBridge.setObjectLocked([object.id, object.isLocked ? 1 : 0])
     }
@@ -74,6 +79,26 @@ public final class SceneObjectManager {
     public func update(_ object: SceneObject) {
         objects.update(object)
         configure(object)
+        try? SceneManager.shared.saveCurrentSceneAndObjects()
+    }
+
+    public func setHidden(_ isHidden: Bool, id: Int32) {
+        updateState(id) { $0.isHidden = isHidden }
+    }
+
+    public func setLocked(_ isLocked: Bool, id: Int32) {
+        updateState(id) { $0.isLocked = isLocked }
+    }
+
+    /// Applies a change that only affects the object's own state, so the type-specific
+    /// resources (image copies, render textures, wind, ...) are left untouched.
+    private func updateState(_ id: Int32, _ change: (inout SceneObject) -> Void) {
+        guard var object = objects.find(byId: id) else {
+            return
+        }
+        change(&object)
+        objects.update(object)
+        applyState(object)
         try? SceneManager.shared.saveCurrentSceneAndObjects()
     }
 

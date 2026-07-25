@@ -236,9 +236,7 @@ private struct HideSceneObjectButton: View {
 
     var body: some View {
         Button(role: .destructive) {
-            var newObject = object
-            newObject.isHidden.toggle()
-            SceneObjectManager.shared.update(newObject)
+            SceneObjectManager.shared.setHidden(!object.isHidden, id: object.id)
         } label: {
             Image(systemName: "eye")
                 .symbolVariant(object.isHidden ? .none : .slash)
@@ -252,9 +250,7 @@ private struct LockSceneObjectButton: View {
 
     var body: some View {
         Button(role: .destructive) {
-            var newObject = object
-            newObject.isLocked.toggle()
-            SceneObjectManager.shared.update(newObject)
+            SceneObjectManager.shared.setLocked(!object.isLocked, id: object.id)
         } label: {
             Image(systemName: "lock")
                 .symbolVariant(object.isLocked ? .slash : .none)
