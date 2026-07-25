@@ -47,6 +47,13 @@ public struct VCamSceneDataStore {
         return destination
     }
 
+    /// Deletes the data only when it belongs to this scene, so a file that is still
+    /// referenced at its original location (e.g. `copyData` failed) is never touched.
+    public func removeManagedDataIfNeeded(at url: URL) {
+        guard contains(url) else { return }
+        try? FileManager.default.removeItem(at: url)
+    }
+
     /// Compares path components so that a scene directory isn't confused with
     /// another one that merely shares a prefix (e.g. scene 12 and scene 123).
     private func contains(_ url: URL) -> Bool {

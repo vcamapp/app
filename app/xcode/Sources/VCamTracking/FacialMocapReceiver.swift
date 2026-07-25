@@ -131,11 +131,7 @@ public final class FacialMocapReceiver {
         let smoothingEnabled = smoothingStorage.isEnabled
         if UniBridge.shared.hasPerfectSyncBlendShape {
             let perfectSync = data.perfectSync(useEyeTracking: Tracking.shared.useEyeTracking)
-            if smoothingEnabled {
-                perfectSyncResampler.push(perfectSync)
-            } else {
-                UniBridge.shared.receivePerfectSync(perfectSync)
-            }
+            perfectSyncResampler.send(perfectSync, smoothed: smoothingEnabled)
         } else {
             let blendShape = data.vcamHeadTransform(useEyeTracking: Tracking.shared.useEyeTracking)
             facialMocapLastValues = vDSP.linearInterpolate(
@@ -144,11 +140,7 @@ public final class FacialMocapReceiver {
                 using: 0.5
             )
 
-            if smoothingEnabled {
-                blendShapeResampler.push(facialMocapLastValues)
-            } else {
-                UniBridge.shared.receiveVCamBlendShape(facialMocapLastValues)
-            }
+            blendShapeResampler.send(facialMocapLastValues, smoothed: smoothingEnabled)
         }
     }
 

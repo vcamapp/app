@@ -320,13 +320,8 @@ private struct EditSceneObjectViewModifier: ViewModifier {
                     EditSceneObjectButton(isLocked: object.isLocked) {
                         showScreenRecorderPreferenceView { recorder in
                             guard let screenId = recorder.captureConfig?.id else { return }
-                            renderTextureManager.set(recorder, id: object.id)
                             screen.id = screenId
-                            screen.textureSize = recorder.size
-                            screen.region.size.scaleToFit(size: screen.textureSize)
-                            screen.crop = recorder.cropRect
-                            recorder.filter = screen.filter
-                            SceneObjectManager.shared.update(object)
+                            SceneObjectManager.shared.replaceRenderer(recorder, of: object)
                         }
                     }
                     filterAndDeleteItems(configuration: screen.filter?.configuration) { screen.filter = $0 }
@@ -337,13 +332,8 @@ private struct EditSceneObjectViewModifier: ViewModifier {
                     commonHeaderItems
                     EditSceneObjectButton(isLocked: object.isLocked) {
                         CaptureDeviceRenderer.selectDevice { drawer in
-                            renderTextureManager.set(drawer, id: object.id)
                             videoCapture.id = drawer.id
-                            videoCapture.textureSize = drawer.size
-                            videoCapture.region.size.scaleToFit(size: videoCapture.textureSize)
-                            videoCapture.crop = drawer.cropRect
-                            drawer.filter = videoCapture.filter
-                            SceneObjectManager.shared.update(object)
+                            SceneObjectManager.shared.replaceRenderer(drawer, of: object)
                         }
                     }
                     filterAndDeleteItems(configuration: videoCapture.filter?.configuration) { videoCapture.filter = $0 }
@@ -354,12 +344,7 @@ private struct EditSceneObjectViewModifier: ViewModifier {
                     commonHeaderItems
                     EditSceneObjectButton(isLocked: object.isLocked) {
                         WebRenderer.showPreferences(url: web.url?.absoluteString, bookmarkData: web.path, width: Int(web.textureSize.width), height: Int(web.textureSize.height), fps: web.fps, css: web.css, js: web.js) { renderer in
-                            renderTextureManager.set(renderer, id: object.id)
-                            web.textureSize = renderer.size
-                            web.region.size.scaleToFit(size: web.textureSize)
-                            web.crop = renderer.cropRect
-                            renderer.filter = web.filter
-                            SceneObjectManager.shared.update(object)
+                            SceneObjectManager.shared.replaceRenderer(renderer, of: object)
                         }
                     }
                     Button {
@@ -398,15 +383,10 @@ private struct EditSceneObjectViewModifier: ViewModifier {
     private func filterAndDeleteItems(configuration: ImageFilterConfiguration?, setFilter: @escaping (ImageFilter) -> Void) -> some View {
         FilterSceneObjectButton(object: object, configuration: configuration) { filter in
             setFilter(filter)
-            applyFilter()
+            SceneObjectManager.shared.didChange(object)
         }
         Divider()
         DeleteSceneObjectButton(object: object)
-    }
-
-    private func applyFilter() {
-        try? SceneManager.shared.saveCurrentSceneAndObjects()
-        SceneObjectManager.shared.didChangeObjects() // Reflect the state when resetting the filter
     }
 }
 

@@ -125,6 +125,7 @@ private struct DeleteSceneButton: View {
             Image(systemName: "trash")
             Text(.delete)
         }
+        .disabled(SceneManager.shared.scenes.count <= 1)
     }
 }
 

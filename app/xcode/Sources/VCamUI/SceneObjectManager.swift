@@ -76,9 +76,29 @@ public final class SceneObjectManager {
         uniBridge.setObjectLocked([object.id, object.isLocked ? 1 : 0])
     }
 
+    /// Re-registers the type-specific resources (image copies, render textures, wind, ...)
+    /// because the object now points at different data.
     public func update(_ object: SceneObject) {
-        objects.update(object)
         configure(object)
+        didChange(object)
+    }
+
+    /// Swaps in a renderer the user has just reconfigured, and fits the object's
+    /// texture geometry to the new source before re-registering it.
+    public func replaceRenderer(_ renderer: any RenderTextureRenderer, of object: SceneObject) {
+        guard let texture = object.type.croppableTexture else { return }
+        RenderTextureManager.shared.set(renderer, id: object.id)
+        texture.textureSize = renderer.size
+        texture.region.size.scaleToFit(size: texture.textureSize)
+        texture.crop = renderer.cropRect
+        renderer.filter = texture.filter
+        update(object)
+    }
+
+    /// Persists a change and notifies Observation. The object types hold their state in
+    /// reference types, so a change made through them stays invisible until it's pushed back here.
+    public func didChange(_ object: SceneObject) {
+        objects.update(object)
         try? SceneManager.shared.saveCurrentSceneAndObjects()
     }
 
@@ -91,15 +111,14 @@ public final class SceneObjectManager {
     }
 
     /// Applies a change that only affects the object's own state, so the type-specific
-    /// resources (image copies, render textures, wind, ...) are left untouched.
+    /// resources are left untouched.
     private func updateState(_ id: Int32, _ change: (inout SceneObject) -> Void) {
         guard var object = objects.find(byId: id) else {
             return
         }
         change(&object)
-        objects.update(object)
         applyState(object)
-        try? SceneManager.shared.saveCurrentSceneAndObjects()
+        didChange(object)
     }
 
     func remove(byIndex index: Int) {
@@ -120,7 +139,7 @@ public final class SceneObjectManager {
             return
         case .wind: ()
         case let .image(image):
-            try? FileManager.default.removeItem(at: image.url)
+            VCamSceneDataStore(sceneId: SceneManager.shared.currentSceneId).removeManagedDataIfNeeded(at: image.url)
             RenderTextureManager.shared.remove(id: object.id)
         case .screen, .videoCapture, .web:
             RenderTextureManager.shared.remove(id: object.id)
@@ -165,10 +184,6 @@ public final class SceneObjectManager {
         if persist {
             try? SceneManager.shared.saveCurrentSceneAndObjects()
         }
-    }
-
-    public func didChangeObjects() {
-        self.objects = objects
     }
 
     public func dispose() {

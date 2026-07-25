@@ -61,11 +61,7 @@ public final class VCamMotionTracking {
 
         if UniBridge.shared.hasPerfectSyncBlendShape {
             let values = data.perfectSync(useEyeTracking: tracking.useEyeTracking)
-            if smoothingStorage.isEnabled {
-                perfectSyncResampler.push(values)
-            } else {
-                UniBridge.shared.receivePerfectSync(values)
-            }
+            perfectSyncResampler.send(values, smoothed: smoothingStorage.isEnabled)
             return
         }
 
@@ -73,11 +69,7 @@ public final class VCamMotionTracking {
             useEyeTracking: tracking.useEyeTracking,
             useVowelEstimation: tracking.useVowelEstimation
         )
-        if smoothingStorage.isEnabled {
-            blendShapeResampler.push(values)
-        } else {
-            UniBridge.shared.receiveVCamBlendShape(values)
-        }
+        blendShapeResampler.send(values, smoothed: smoothingStorage.isEnabled)
     }
 
     /// Unity retargets v1 hand packets itself, but whether this tracking
@@ -90,18 +82,13 @@ public final class VCamMotionTracking {
     private func applyLegacyHands(_ data: VCamMotion, tracking: Tracking) {
         guard tracking.usesVCamMocapHandTracking else { return }
         let handOutput = makeHandOutput(data, tracking: tracking)
-        if smoothingStorage.isEnabled {
-            if handOutput.hasMissingHand {
-                handsResampler.reset(with: handOutput.hands)
-                fingersResampler.reset(with: handOutput.fingers)
-            } else {
-                handsResampler.push(handOutput.hands)
-                fingersResampler.push(handOutput.fingers)
-            }
-        } else {
-            UniBridge.shared.hands(handOutput.hands)
-            UniBridge.shared.fingers(handOutput.fingers)
+        if smoothingStorage.isEnabled, handOutput.hasMissingHand {
+            handsResampler.reset(with: handOutput.hands)
+            fingersResampler.reset(with: handOutput.fingers)
+            return
         }
+        handsResampler.send(handOutput.hands, smoothed: smoothingStorage.isEnabled)
+        fingersResampler.send(handOutput.fingers, smoothed: smoothingStorage.isEnabled)
     }
 
     private func makeHandOutput(_ data: VCamMotion, tracking: Tracking) -> HandOutput {

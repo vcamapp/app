@@ -168,18 +168,12 @@ extension Color: ValueBindingStructType {
 }
 
 public protocol BridgeArrayType: ValueBindingDefaultValue, RandomAccessCollection {
-    associatedtype Bridge
     static func get(_ ptr: UnsafeMutableRawPointer, size: Int) -> Self
-    func set() -> ValueBindingStructPointer<Bridge>
 }
 
 extension Array: BridgeArrayType {
     public static func get(_ ptr: UnsafeMutableRawPointer, size: Int) -> Self {
         let typedPointer = ptr.bindMemory(to: Element.self, capacity: size)
         return Array(UnsafeBufferPointer(start: typedPointer, count: size))
-    }
-
-    public func set() -> ValueBindingStructPointer<Self> {
-        .init(bridged: self)
     }
 }

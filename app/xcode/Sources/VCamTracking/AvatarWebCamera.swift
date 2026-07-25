@@ -135,11 +135,7 @@ public final class AvatarWebCamera {
             try await cameraSession.start()
             state = .running
         } catch {
-            _ = await cameraSession.stop()
-            configurationRevision &+= 1
-            await cameraSession.setFrameHandler(nil, revision: configurationRevision)
-            await pipeline.stop()
-            activePipeline = nil
+            await tearDownPipeline()
             state = .failed(error.localizedDescription)
             Logger.log("Failed to start web camera: \(error.localizedDescription)")
         }
@@ -150,12 +146,19 @@ public final class AvatarWebCamera {
             return
         }
         state = .stopping
+        await tearDownPipeline()
+        state = .stopped
+    }
+
+    /// Releases everything `startCamera` acquires, in the reverse order, so a
+    /// failed start leaves the same state as a normal stop. The caller owns the
+    /// resulting state because only it knows whether the stop was expected.
+    private func tearDownPipeline() async {
         configurationRevision &+= 1
         await cameraSession.setFrameHandler(nil, revision: configurationRevision)
         _ = await cameraSession.stop()
         await activePipeline?.pipeline.stop()
         activePipeline = nil
-        state = .stopped
     }
 
     public func setCaptureDevice(id: String?) {

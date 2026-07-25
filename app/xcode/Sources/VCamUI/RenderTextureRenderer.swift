@@ -5,6 +5,7 @@ import VCamEntity
 
 @MainActor
 public protocol RenderTextureRenderer: AnyObject {
+    var size: CGSize { get }
     var cropRect: CGRect { get }
     var filter: ImageFilter? { get set }
 

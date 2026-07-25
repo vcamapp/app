@@ -132,8 +132,8 @@ final class MappingDataStore {
     }
 
     var mappings: [TrackingMappingEntry] {
-        get { tracking.mappings[Int(selectedMode.rawValue)] }
-        set { tracking.mappings[Int(selectedMode.rawValue)] = newValue }
+        get { tracking.mappings[selectedMode] }
+        set { tracking.mappings[selectedMode] = newValue }
     }
 
     func initialize(blendShapeNames: [String], supportsIPhoneMode: Bool) {
@@ -177,7 +177,7 @@ final class MappingDataStore {
 
     func resetToDefault(at indices: IndexSet) {
         for index in indices {
-            tracking.mappings[Int(selectedMode.rawValue)][index].resetToDefault(for: selectedMode)
+            tracking.mappings[selectedMode][index].resetToDefault(for: selectedMode)
         }
         if !indices.isEmpty {
             tracking.applyMappings(for: selectedMode)

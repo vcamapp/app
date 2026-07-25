@@ -3,8 +3,10 @@ import CoreGraphics
 import simd
 
 public protocol SceneObjectCroppableTexture: AnyObject {
+    var textureSize: CGSize { get set }
     var region: CGRect { get set }
     var crop: CGRect { get set }
+    var filter: ImageFilter? { get set }
 }
 
 public struct SceneObject: Identifiable {

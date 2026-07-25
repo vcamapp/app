@@ -109,14 +109,11 @@ public final class SceneManager {
         scenes[index] = scene
     }
 
+    /// Each orientation must always keep at least one scene, so the last one can't be removed.
     public func remove(byId id: Int32) async {
-        guard let scene = scenes.find(byId: id) else {
+        guard scenes.count > 1, let scene = scenes.find(byId: id) else {
             return
         }
-        await remove(scene)
-    }
-
-    private func remove(_ scene: VCamScene) async {
         scenes.remove(byId: scene.id)
         try? VCamSceneDataStore(sceneId: scene.id).delete()
         try? save()

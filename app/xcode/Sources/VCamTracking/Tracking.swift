@@ -23,10 +23,7 @@ public final class Tracking {
     @ObservationIgnored public private(set) var useEyeTracking = false
     @ObservationIgnored public private(set) var useVowelEstimation = false
 
-    public var mappings: [[TrackingMappingEntry]] = [
-        TrackingMappingEntry.defaultMappings(for: .blendShape),
-        []
-    ]
+    public var mappings = TrackingMappings()
 
     public let webCamera = AvatarWebCamera()
     public let iFacialMocapReceiver: FacialMocapReceiver
@@ -62,12 +59,12 @@ public final class Tracking {
     public func syncPerfectSyncAvailability() {
         stopFaceResamplers()
         if supportsIPhoneTrackingMapping {
-            if mappings[Int(TrackingMode.perfectSync.rawValue)].isEmpty {
-                mappings[Int(TrackingMode.perfectSync.rawValue)] = TrackingMappingEntry.defaultMappings(for: .perfectSync)
+            if mappings.perfectSync.isEmpty {
+                mappings.perfectSync = TrackingMappingEntry.defaultMappings(for: .perfectSync)
             }
             applyMappingsToUnity(for: .perfectSync)
         } else {
-            mappings[Int(TrackingMode.perfectSync.rawValue)] = []
+            mappings.perfectSync = []
         }
     }
 
@@ -92,7 +89,7 @@ public final class Tracking {
     }
 
     public func addMapping(_ entry: TrackingMappingEntry, for mode: TrackingMode) {
-        mappings[Int(mode.rawValue)].append(entry)
+        mappings[mode].append(entry)
         applyMappingsToUnity(for: mode)
     }
 
@@ -101,7 +98,7 @@ public final class Tracking {
     }
 
     public func deleteMapping(at index: Int, for mode: TrackingMode) {
-        mappings[Int(mode.rawValue)].remove(at: index)
+        mappings[mode].remove(at: index)
         applyMappingsToUnity(for: mode)
     }
 
@@ -109,13 +106,13 @@ public final class Tracking {
         if mode == .perfectSync, !supportsIPhoneTrackingMapping {
             return
         }
-        mappings[Int(mode.rawValue)] = TrackingMappingEntry.defaultMappings(for: mode)
+        mappings[mode] = TrackingMappingEntry.defaultMappings(for: mode)
         applyMappingsToUnity(for: mode)
     }
 
     private func applyMappingsToUnity(for mode: TrackingMode) {
         UniBridge.clearTrackingMapping(mode: mode)
-        for mapping in mappings[Int(mode.rawValue)] where mapping.isEnabled {
+        for mapping in mappings[mode] where mapping.isEnabled {
             UniBridge.addTrackingMapping(
                 mode: mode,
                 inputKey: mapping.input.key,

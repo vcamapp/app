@@ -31,6 +31,34 @@ public struct TrackingMappingEntry: Codable, Sendable, Hashable, Identifiable {
     }
 }
 
+/// Mapping entries kept per tracking mode
+public struct TrackingMappings: Sendable {
+    public var blendShape: [TrackingMappingEntry]
+    /// Filled in once the avatar turns out to support Perfect Sync
+    public var perfectSync: [TrackingMappingEntry]
+
+    public init(blendShape: [TrackingMappingEntry] = TrackingMappingEntry.defaultMappings(for: .blendShape),
+                perfectSync: [TrackingMappingEntry] = []) {
+        self.blendShape = blendShape
+        self.perfectSync = perfectSync
+    }
+
+    public subscript(mode: TrackingMode) -> [TrackingMappingEntry] {
+        get {
+            switch mode {
+            case .blendShape: blendShape
+            case .perfectSync: perfectSync
+            }
+        }
+        set {
+            switch mode {
+            case .blendShape: blendShape = newValue
+            case .perfectSync: perfectSync = newValue
+            }
+        }
+    }
+}
+
 public extension TrackingMappingEntry {
     protocol Key: Identifiable, Sendable, Hashable, Codable {
         var key: String { get }

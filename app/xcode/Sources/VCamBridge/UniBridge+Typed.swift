@@ -106,19 +106,30 @@ public extension UniBridge {
 public extension UniBridge {
     static let isUnity = Bundle.main.bundlePath.hasSuffix("Unity.app")
 
+    /// The pointer handed to Unity is only valid while `methodCallback` runs synchronously,
+    /// so the receiver must copy anything it needs to keep.
+    private static func send<Payload>(_ method: UniBridgeMethodId, payload: inout Payload) {
+        withUnsafeMutablePointer(to: &payload) { payloadPtr in
+            methodCallback(method, payloadPtr, nil)
+        }
+    }
+
+    /// Sends a lone string as the whole payload, with the same lifetime rule as ``send(_:payload:)``.
+    private static func send(_ method: UniBridgeMethodId, string: String) {
+        string.withCString { stringPtr in
+            methodCallback(method, UnsafeMutableRawPointer(mutating: stringPtr), nil)
+        }
+    }
+
     static func playMotion(id: String, isLoop: Bool) {
         id.withCString { idPtr in
             var payload = PlayMotionPayload(stringPtr: idPtr, isLoop: isLoop ? 1 : 0)
-            withUnsafeMutablePointer(to: &payload) { payloadPtr in
-                methodCallback(.playMotion, payloadPtr, nil)
-            }
+            send(.playMotion, payload: &payload)
         }
     }
 
     static func stopMotion(id: String) {
-        id.withCString { idPtr in
-            methodCallback(.stopMotion, UnsafeMutableRawPointer(mutating: idPtr), nil)
-        }
+        send(.stopMotion, string: id)
     }
 
     static func registerImportedMotion(id: String, path: String, axisMask: UInt8, loadImmediately: Bool, requestID: UUID) {
@@ -132,9 +143,7 @@ public extension UniBridge {
                         axisMask: axisMask,
                         loadImmediately: loadImmediately ? 1 : 0
                     )
-                    withUnsafeMutablePointer(to: &payload) { payloadPtr in
-                        methodCallback(.registerImportedMotion, payloadPtr, nil)
-                    }
+                    send(.registerImportedMotion, payload: &payload)
                 }
             }
         }
@@ -143,29 +152,21 @@ public extension UniBridge {
     static func updateImportedMotionAxes(id: String, axisMask: UInt8) {
         id.withCString { idPtr in
             var payload = ImportedMotionAxesPayload(motionIDPtr: idPtr, axisMask: axisMask)
-            withUnsafeMutablePointer(to: &payload) { payloadPtr in
-                methodCallback(.updateImportedMotionAxes, payloadPtr, nil)
-            }
+            send(.updateImportedMotionAxes, payload: &payload)
         }
     }
 
     static func removeImportedMotion(id: String) {
-        id.withCString { idPtr in
-            methodCallback(.removeImportedMotion, UnsafeMutableRawPointer(mutating: idPtr), nil)
-        }
+        send(.removeImportedMotion, string: id)
     }
 
     static func setTrackingChannelEnabled(_ channel: TrackingChannel, isEnabled: Bool) {
         var payload = TrackingChannelEnabledPayload(channel: channel.rawValue, isEnabled: isEnabled ? 1 : 0)
-        withUnsafeMutablePointer(to: &payload) { payloadPtr in
-            methodCallback(.setTrackingChannelEnabled, payloadPtr, nil)
-        }
+        send(.setTrackingChannelEnabled, payload: &payload)
     }
 
     static func applyExpression(name: String) {
-        name.withCString { namePtr in
-            methodCallback(.applyExpression, UnsafeMutableRawPointer(mutating: namePtr), nil)
-        }
+        send(.applyExpression, string: name)
     }
 
     static func addTrackingMapping(mode: TrackingMode, inputKey: String, outputKey: String, inputRangeMin: Float, inputRangeMax: Float, outputRangeMin: Float, outputRangeMax: Float, filter: TrackingFilter = .none) {
@@ -192,9 +193,7 @@ public extension UniBridge {
                     filterParam0: filter.parameters.count > 0 ? filter.parameters[0] : 0,
                     filterParam1: filter.parameters.count > 1 ? filter.parameters[1] : 0
                 )
-                withUnsafeMutablePointer(to: &payload) { payloadPtr in
-                    methodCallback(method, payloadPtr, nil)
-                }
+                send(method, payload: &payload)
             }
         }
     }
@@ -213,9 +212,7 @@ public extension UniBridge {
             filterParam0: 0,
             filterParam1: 0
         )
-        withUnsafeMutablePointer(to: &payload) { payloadPtr in
-            methodCallback(.deleteTrackingMapping, payloadPtr, nil)
-        }
+        send(.deleteTrackingMapping, payload: &payload)
     }
 
     static func clearTrackingMapping(mode: TrackingMode) {
@@ -225,9 +222,7 @@ public extension UniBridge {
 
     static func setScreenResolution(width: Int32, height: Int32) {
         var payload = ScreenResolutionPayload(width: width, height: height)
-        withUnsafeMutablePointer(to: &payload) { payloadPtr in
-            methodCallback(.setScreenResolution, payloadPtr, nil)
-        }
+        send(.setScreenResolution, payload: &payload)
     }
 
     static func sendHandPacketV1(_ data: Data) {
@@ -241,9 +236,7 @@ public extension UniBridge {
             }
 
             var payload = HandPacketV1Payload(bytes: bytes, byteCount: byteCount)
-            withUnsafeMutablePointer(to: &payload) { payloadPtr in
-                methodCallback(.sendHandPacketV1, payloadPtr, nil)
-            }
+            send(.sendHandPacketV1, payload: &payload)
         }
     }
 }

@@ -37,6 +37,15 @@ final class TrackingResampler: @unchecked Sendable {
         self.output = output
     }
 
+    /// Routes values through the resampler, or straight to its output when smoothing is off
+    @MainActor func send(_ values: [Float], smoothed: Bool) {
+        if smoothed {
+            push(values)
+        } else {
+            output(values)
+        }
+    }
+
     func push(_ values: [Float]) {
         let timestamp = ProcessInfo.processInfo.systemUptime
         queue.async { [self] in

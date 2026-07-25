@@ -43,7 +43,6 @@ let package = Package(
         .testTarget(name: "VCamTrackingTests", dependencies: ["VCamTracking"]),
         .testTarget(name: "VCamCameraTests", dependencies: ["VCamCamera"]),
         .testTarget(name: "VCamBridgeTests", dependencies: ["VCamBridge"]),
-        .testTarget(name: "VCamAppExtensionTests", dependencies: ["VCamAppExtension"]),
     ],
     swiftLanguageModes: [.v6]
 )

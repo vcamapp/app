@@ -57,7 +57,7 @@ struct MacWindowViewModifier<Content: View, ModifiedContent: View>: View {
 public final class MacWindowManager {
     public static let shared = MacWindowManager()
 
-    private var openWindows: [String: NSWindow] = [:]
+    private var openWindows: [ObjectIdentifier: NSWindow] = [:]
 
     public var openCredits: () -> Void = {}
 
@@ -114,8 +114,8 @@ public final class MacWindowManager {
         openWindows.removeValue(forKey: id)
     }
 
-    private func id<T: MacWindow>(_ window: T.Type) -> String {
-        String(describing: T.self)
+    private func id<T: MacWindow>(_ window: T.Type) -> ObjectIdentifier {
+        ObjectIdentifier(T.self)
     }
 }
 
