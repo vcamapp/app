@@ -73,9 +73,7 @@ public final class AvatarWebCamera {
             scheduleVisionConfigurationUpdate()
             // The camera runs exactly while some vision-based tracking is enabled
             let shouldRun = usage.intersection([.faceTracking, .handTracking, .fingerTracking]) != .disabled
-            Task {
-                await setRunning(shouldRun)
-            }
+            setRunning(shouldRun)
         }
     }
 
@@ -93,10 +91,12 @@ public final class AvatarWebCamera {
         state == .running
     }
 
-    /// The single owner of the camera lifecycle. Transitions are serialized so a start
-    /// and a stop can never interleave mid-flight, and a request superseded by a newer
-    /// one is skipped instead of racing it.
-    public func setRunning(_ shouldRun: Bool) async {
+    /// The single owner of the camera lifecycle. The request is enqueued synchronously so
+    /// requests run in the order they were made, transitions are serialized so a start and
+    /// a stop can never interleave mid-flight, and a request superseded by a newer one is
+    /// skipped instead of racing it. Await the returned task to wait for the transition.
+    @discardableResult
+    public func setRunning(_ shouldRun: Bool) -> Task<Void, Never> {
         lifecycleGeneration &+= 1
         let generation = lifecycleGeneration
         let previousTask = lifecycleTask
@@ -110,7 +110,7 @@ public final class AvatarWebCamera {
             }
         }
         lifecycleTask = task
-        await task.value
+        return task
     }
 
     private func startCamera(generation: UInt64) async {

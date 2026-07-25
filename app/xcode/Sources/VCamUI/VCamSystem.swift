@@ -6,7 +6,6 @@ import VCamLogger
 import VCamCamera
 import VCamData
 import VCamEntity
-import VCamWorkaround
 
 @MainActor
 public final class VCamSystem {

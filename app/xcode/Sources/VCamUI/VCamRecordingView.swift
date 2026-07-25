@@ -1,5 +1,4 @@
 import SwiftUI
-import VCamUIFoundation
 import VCamEntity
 import VCamData
 import VCamBridge

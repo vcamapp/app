@@ -38,7 +38,6 @@ public final class ModelManager {
         saveMeta()
     }
 
-    @MainActor
     public func saveModel(from source: URL, name: String? = nil) async throws -> ModelItem {
 #if FEATURE_3
         let baseName = name ?? source.deletingPathExtension().lastPathComponent
@@ -48,20 +47,21 @@ public final class ModelManager {
 #endif
         let directoryName = generateUniqueDirectoryName(baseName: baseName)
         let modelDirectory = Models.modelDirectory(ofName: directoryName)
-        try FileManager.default.createDirectoryIfNeeded(at: modelDirectory)
-
         let destinationURL = modelDirectory.appending(path: Models.modelFileName)
-        if FileManager.default.fileExists(atPath: destinationURL.path) {
-            try FileManager.default.removeItem(at: destinationURL)
-        }
-        try FileManager.default.copyItem(at: source, to: destinationURL)
+        // Copy off the main actor so that large models do not block the UI
+        try await Task.detached(priority: .utility) {
+            try FileManager.default.createDirectoryIfNeeded(at: modelDirectory)
+            if FileManager.default.fileExists(atPath: destinationURL.path) {
+                try FileManager.default.removeItem(at: destinationURL)
+            }
+            try FileManager.default.copyItem(at: source, to: destinationURL)
+        }.value
 
         let modelInfo = Models.Model(name: directoryName, type: Models.modelType)
         await saveThumbnail(for: modelInfo)
         return addModel(modelInfo)
     }
 
-    @MainActor
     private func saveThumbnail(for model: Models.Model) async {
         let metadata = await Task.detached(priority: .utility) {
             try? ModelMetaLoader.load(from: model.modelURL)
@@ -80,7 +80,6 @@ public final class ModelManager {
         removeModel(item)
     }
 
-    @MainActor
     public func duplicateModel(_ item: ModelItem) async throws -> ModelItem {
         guard item.status == .valid else {
             throw ModelManagerError.modelURLNotFound

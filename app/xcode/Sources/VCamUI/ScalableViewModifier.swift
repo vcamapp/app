@@ -1,6 +1,5 @@
 import SwiftUI
 import simd
-import VCamUIFoundation
 
 public struct CropViewModifier: ViewModifier {
     @Binding var rect: CGRect

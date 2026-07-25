@@ -2,7 +2,6 @@ import Foundation
 import SwiftUI
 import CoreImage
 import Combine
-import VCamUIFoundation
 
 public extension WebRenderer {
     static func showPreferences(url: String?, bookmarkData: Data?, width: Int?, height: Int?, fps: Int?, css: String?, js: String?, completion: @escaping (WebRenderer) -> Void) {

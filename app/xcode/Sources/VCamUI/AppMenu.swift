@@ -1,6 +1,5 @@
 import Foundation
 import AppKit
-import VCamUIFoundation
 import VCamBridge
 import VCamData
 import VCamCamera

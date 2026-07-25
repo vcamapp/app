@@ -27,7 +27,12 @@ public final class SceneObjectManager {
         case .avatar: ()
         case let .image(image):
             let sceneId = SceneManager.shared.currentSceneId
-            image.url = VCamSceneDataStore(sceneId: sceneId).copyData(fromURL: image.url)
+            do {
+                image.url = try VCamSceneDataStore(sceneId: sceneId).copyData(fromURL: image.url)
+            } catch {
+                // Keep referencing the source file so that the object still renders in this session
+                Logger.error(error)
+            }
 
             let canvasSize = uniBridge.canvasCGSize
 

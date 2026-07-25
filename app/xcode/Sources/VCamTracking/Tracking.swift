@@ -133,9 +133,7 @@ public final class Tracking {
     }
 
     public func stop() {
-        Task {
-            await webCamera.setRunning(false)
-        }
+        webCamera.setRunning(false)
     }
 
     public func resetCalibration() {

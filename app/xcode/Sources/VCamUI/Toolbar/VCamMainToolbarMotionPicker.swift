@@ -2,7 +2,6 @@ import SwiftUI
 import VCamEntity
 import VCamBridge
 import VCamData
-import VCamUIFoundation
 
 public struct VCamMainToolbarMotionPicker: View {
     public init() {}

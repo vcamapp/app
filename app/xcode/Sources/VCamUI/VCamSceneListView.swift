@@ -127,22 +127,19 @@ private struct EditSceneViewModifier: ViewModifier {
         content
             .contextMenu {
                 Button {
+                    var duplicatedScene = scene
+                    duplicatedScene.id = Int32.random(in: 0..<Int32.max)
+                    let sourceDataStore = VCamSceneDataStore(sceneId: scene.id)
+                    let duplicatedDataStore = VCamSceneDataStore(sceneId: duplicatedScene.id)
                     do {
-                        var duplicatedScene = scene
-                        duplicatedScene.id = Int32.random(in: 0..<Int32.max)
-                        try SceneManager.shared.add(duplicatedScene)
-
-                        // Copy the necessary data
-                        for index in scene.objects.indices {
-                            let sourceObject = scene.objects[index]
-                            switch sourceObject.type {
-                            case .avatar, .screen, .captureDevice, .web, .wind: ()
-                            case let .image(id, _):
-                                let sourceImageURL = VCamSceneDataStore(sceneId: scene.id).dataURL(id: id)
-                                _ = VCamSceneDataStore(sceneId: duplicatedScene.id).copyData(fromURL: sourceImageURL, newUUID: id)
-                            }
+                        // Add the scene only after every referenced data is in place
+                        for sourceObject in scene.objects {
+                            guard case let .image(id, _) = sourceObject.type else { continue }
+                            _ = try duplicatedDataStore.copyData(fromURL: sourceDataStore.dataURL(id: id), newUUID: id)
                         }
+                        try SceneManager.shared.add(duplicatedScene)
                     } catch {
+                        try? duplicatedDataStore.delete()
                         Logger.error(error)
                     }
                 } label: {

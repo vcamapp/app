@@ -24,32 +24,25 @@ public struct VCamSceneDataStore {
     }
 
     public func save(_ scene: VCamScene) throws {
-        try? FileManager.default.createDirectoryIfNeeded(at: sceneRootURL)
+        try FileManager.default.createDirectoryIfNeeded(at: sceneRootURL)
 
         let url = sceneURL
         let encoder = JSONEncoder()
         let data = try encoder.encode(scene)
         try data.write(to: url, options: .atomic)
+        // Registered together with the file so that a saved scene is never missing from the metadata
+        try addSceneIdIfNeeded()
         uniDebugLog("scene saved: " + url.path)
     }
 
-    public func copyData(fromURL url: URL, newUUID: String = UUID().uuidString) -> URL {
-        let destination: URL
-        if url.path.hasPrefix(sceneRootURL.path) {
-            uniDebugLog("copyData: \(url.lastPathComponent)")
-            destination = url
-        } else {
-            destination = dataURL(id: newUUID)
-            uniDebugLog(destination.path)
+    /// Copies the data into the scene directory and returns the URL of the copy.
+    /// Data that already belongs to the scene is used as is.
+    public func copyData(fromURL url: URL, newUUID: String = UUID().uuidString) throws -> URL {
+        guard !url.path.hasPrefix(sceneRootURL.path) else { return url }
 
-            try? FileManager.default.createDirectoryIfNeeded(at: sceneRootURL)
-            do {
-                try FileManager.default.copyItem(at: url, to: destination)
-            } catch {
-                uniDebugLog(error.localizedDescription)
-            }
-        }
-        uniDebugLog("from: \(url.path), dest: \(destination.path)")
+        let destination = dataURL(id: newUUID)
+        try FileManager.default.createDirectoryIfNeeded(at: sceneRootURL)
+        try FileManager.default.copyItem(at: url, to: destination)
         return destination
     }
 
@@ -74,14 +67,12 @@ extension VCamSceneDataStore {
     }
 
     public func makeNewScene() -> VCamScene {
-        try? addSceneIdIfNeeded()
-        return .init(id: sceneId, name: "", objects: [
+        .init(id: sceneId, name: "", objects: [
             .init(id: SceneObject.avatarID, name: "", type: .avatar(state: .zero), isHidden: false, isLocked: false)
         ], aspectRatio: MainTexture.shared.aspectRatio)
     }
 
-    public func makeScene(name: String, objects: [SceneObject]) throws -> VCamScene {
-        try addSceneIdIfNeeded()
+    public func makeScene(name: String, objects: [SceneObject]) -> VCamScene {
         uniDebugLog("makeScene: \(objects.count)")
 
         var results: [VCamScene.Object] = []
