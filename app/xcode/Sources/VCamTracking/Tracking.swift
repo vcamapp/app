@@ -58,6 +58,7 @@ public final class Tracking {
 
     public func syncPerfectSyncAvailability() {
         stopFaceResamplers()
+        reconcileLipSyncState()
         if supportsIPhoneTrackingMapping {
             if mappings.perfectSync.isEmpty {
                 mappings.perfectSync = TrackingMappingEntry.defaultMappings(for: .perfectSync)
@@ -86,6 +87,8 @@ public final class Tracking {
         if UserDefaults.standard.value(for: .integrationVCamMocap) {
             try? startVCamMotionReceiver()
         }
+
+        reconcileLipSyncState()
     }
 
     public func addMapping(_ entry: TrackingMappingEntry, for mode: TrackingMode) {
@@ -167,14 +170,10 @@ public final class Tracking {
             usage.remove(.faceTracking)
         case .default:
             usage.insert(.faceTracking)
-
-            if UniState.shared.lipSyncWebCam {
-                usage.insert(.lipTracking)
-            }
         }
         applyWebCamUsage(usage)
 
-        updateLipSyncIfNeeded()
+        reconcileLipSyncState()
 
         let mode: TrackingMode = method.supportsPerfectSync ? .perfectSync : .blendShape
         applyMappingsToUnity(for: mode)
@@ -237,16 +236,11 @@ public final class Tracking {
         applyWebCamUsage(usage)
     }
 
+    /// The camera lip sync reuses the values of the camera face tracking, so it never
+    /// starts the camera by itself. Only the mic lip sync owns a resource to manage here.
     public func setLipSyncType(_ type: LipSyncType) {
-        let useCamera = type == .camera
-        UniState.shared.lipSyncWebCam = useCamera
-        if useCamera {
-            AvatarAudioManager.shared.stop(usage: .lipSync)
-            applyWebCamUsage(webCamera.usage.union(.lipTracking))
-        } else {
-            AvatarAudioManager.shared.start(usage: .lipSync)
-            applyWebCamUsage(webCamera.usage.subtracting(.lipTracking))
-        }
+        UniState.shared.currentLipSync = type
+        reconcileLipSyncState()
     }
 
     public var micLipSyncDisabled: Bool {
@@ -261,15 +255,27 @@ public final class Tracking {
 #endif
     }
 
-    public func updateLipSyncIfNeeded() {
-        guard micLipSyncDisabled else {
-            return
+    /// The single owner of the mic lip sync lifecycle. Perfect Sync drives the mouth on its
+    /// own, so the mic is suppressed while it is active without touching the user's choice,
+    /// which lets the choice take effect again as soon as Perfect Sync stops.
+    private func reconcileLipSyncState() {
+        if UniState.shared.currentLipSync == .mic, !micLipSyncDisabled {
+            AvatarAudioManager.shared.start(usage: .lipSync)
+        } else {
+            AvatarAudioManager.shared.stop(usage: .lipSync)
         }
-        setLipSyncType(.camera)
     }
 
     public func startVCamMotionReceiver() throws {
-        try vcamMotionReceiver.start(with: vcamMotionTracking)
+        try vcamMotionReceiver.start(with: vcamMotionTracking) { [unowned self] in
+            VCamMotionTrackingSettings(
+                isFaceTrackingEnabled: faceTrackingMethod == .vcamMocap,
+                isHandTrackingEnabled: usesVCamMocapHandTracking,
+                useEyeTracking: useEyeTracking,
+                useVowelEstimation: useVowelEstimation,
+                handConfiguration: webCamera.handTracking.configuration
+            )
+        }
     }
 
     private func stopFaceResamplers() {

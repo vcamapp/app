@@ -19,20 +19,12 @@ public final class MotionLibrary {
     /// Session-scoped loop settings of built-in motions (not persisted)
     private var builtInLoopStates: [String: Bool] = [:]
 
-    public static var supportsImportedMotions: Bool {
-#if FEATURE_3
-        true
-#else
-        false
-#endif
-    }
-
     public init(store: ImportedMotionStore = ImportedMotionStore()) {
         self.store = store
     }
 
     public var importedMotions: [Avatar.Motion] {
-#if FEATURE_3
+#if FEATURE_VRMA
         store.records.map { .imported(record: $0) }
 #else
         []
@@ -120,7 +112,7 @@ public final class MotionLibrary {
 
     /// Registers the persisted VRMA motions to Unity (called when Unity starts)
     public func registerPersistedMotionsToUnity() {
-#if FEATURE_3
+#if FEATURE_VRMA
         for record in store.records {
             UniBridge.registerImportedMotion(
                 id: record.motionID,

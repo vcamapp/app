@@ -22,8 +22,6 @@ public struct TrackingDeviceView: View {
     @State private var audioDevice: AudioDevice? = AvatarAudioManager.shared.currentInputDevice
 
     public var body: some View {
-        @Bindable var state = uniState
-
         if Camera.hasCamera, let currentDevice = captureDevice {
             Picker(selection: Binding(
                 get: { currentDevice },
@@ -68,10 +66,7 @@ public struct TrackingDeviceView: View {
         }
         Picker(selection: Binding(
             get: { uniState.currentLipSync },
-            set: { newValue in
-                state.currentLipSync = newValue
-                Tracking.shared.setLipSyncType(newValue)
-            }
+            set: { Tracking.shared.setLipSyncType($0) }
         )) {
             ForEach(LipSyncType.allCases) { type in
                 Text(type.name).tag(type)

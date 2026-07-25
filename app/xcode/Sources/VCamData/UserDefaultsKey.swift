@@ -14,7 +14,7 @@ public extension UserDefaults.Key {
     static var skipThisVersion: Key<Version> { .init("vc_skip_version", default: "0.0.0") }
     static var previousVersion: Key<String> { .init("vc_prev_version", default: "") }
     static var useHMirror: Key<Bool> { .init("vc_use_hmirror", default: false) }
-    static var useAutoConvertVRM1: Key<Bool> { .init("vc_use_auto_convert_vrm1", default: false) }
+    static var useAutoConvertVRM1: Key<Bool> { .init("vc_use_auto_convert_vrm1", default: true) }
     static var useVowelEstimation: Key<Bool> { .init("vc_use_vowel_estimation", default: false) }
     static var useEyeTracking: Key<Bool> { .init("vc_use_eye_tracking", default: true) }
     static var useEmotion: Key<Bool> { .init("vc_use_emotion", default: false) }

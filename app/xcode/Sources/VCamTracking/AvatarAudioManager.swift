@@ -15,7 +15,7 @@ public final class AvatarAudioManager {
     private let audioManager = AudioManager()
     private let audioExpressionEstimator = AudioExpressionEstimator()
     private var usage = Usage()
-    private var isConfiguring = false
+    private var startTask: Task<Void, Never>?
 
     public var currentInputDevice: AudioDevice? {
         guard let uid = UserDefaults.standard.value(for: .audioDeviceUid) else { return .defaultDevice() }
@@ -23,51 +23,6 @@ public final class AvatarAudioManager {
     }
 
     init() {
-        NotificationCenter.default.addObserver(
-            self, selector: #selector(onConfigurationChange), name: .AVAudioEngineConfigurationChange,
-            object: nil)
-
-        if let device = currentInputDevice {
-            setAudioDevice(device)
-        }
-    }
-
-    public func startIfNeeded() {
-        guard UserDefaults.standard.value(for: .lipSyncType) != 1 else { return }
-        AvatarAudioManager.shared.start(usage: .lipSync)
-    }
-
-    public func start(usage: Usage, isSystemSoundRecording: Bool = false) {
-        reconfigureIfNeeded()
-        Logger.log("\(isConfiguring), \(audioManager.isRunning)")
-        if !isConfiguring, !audioManager.isRunning {
-            // There's a delay in AudioManager::startRecording, so don't allow consecutive calls (it causes a crash in installTap)
-            isConfiguring = true
-
-            if isSystemSoundRecording {
-                AudioDevice.device(forUid: "vcam-audio-device-001")?.setAsDefaultDevice()
-            } else {
-                currentInputDevice?.setAsDefaultDevice()
-            }
-            audioManager.startRecording { [weak self] inputFormat in
-                Task { @MainActor in
-                    self?.audioExpressionEstimator.configure(format: inputFormat)
-                    self?.isConfiguring = false
-                }
-            }
-        }
-        self.usage.insert(usage)
-    }
-
-    public func stop(usage: Usage) {
-        self.usage.remove(usage)
-        guard self.usage.isEmpty else { return }
-        audioManager.stopRecording()
-        audioExpressionEstimator.reset()
-    }
-
-    private func reconfigureIfNeeded() {
-        setEmotionEnabled(UserDefaults.standard.value(for: .useEmotion))
         audioExpressionEstimator.setOnAudioLevelUpdate { level in
             // analyze() is always called on the main thread (see setOnUpdateAudioBuffer below)
             // and invokes this callback synchronously
@@ -87,6 +42,38 @@ public final class AvatarAudioManager {
                 self.videoRecorderRenderAudioFrame(unsafeBuffer, time, latency, self.currentInputDevice)
             }
         }
+
+        if let device = currentInputDevice {
+            setAudioDevice(device)
+        }
+    }
+
+    public func start(usage: Usage, isSystemSoundRecording: Bool = false) {
+        self.usage.insert(usage)
+
+        // The startup is asynchronous, so don't allow consecutive calls (it causes a crash in installTap)
+        guard startTask == nil, !audioManager.isRunning else { return }
+
+        setEmotionEnabled(UserDefaults.standard.value(for: .useEmotion))
+
+        if isSystemSoundRecording {
+            AudioDevice.device(forUid: "vcam-audio-device-001")?.setAsDefaultDevice()
+        } else {
+            currentInputDevice?.setAsDefaultDevice()
+        }
+
+        startTask = Task {
+            defer { startTask = nil }
+            guard let inputFormat = await audioManager.startRecording() else { return }
+            audioExpressionEstimator.configure(format: inputFormat)
+        }
+    }
+
+    public func stop(usage: Usage) {
+        self.usage.remove(usage)
+        guard self.usage.isEmpty else { return }
+        audioManager.stopRecording()
+        audioExpressionEstimator.reset()
     }
 
     public func setEmotionEnabled(_ isEnabled: Bool) {
@@ -109,19 +96,9 @@ public final class AvatarAudioManager {
         if audioManager.isRunning {
             let usage = self.usage
             stop(usage: usage)
-            Task { @MainActor in
-                try? await Task.sleep(for: .milliseconds(500))
-                self.start(usage: usage)
-            }
+            // start() waits before installing the tap, so the new device is applied without an extra delay here
+            start(usage: usage)
         }
-    }
-
-    @objc private func onConfigurationChange(notification: Notification) {
-//        guard audioManager.isRunning else { return }
-//        stop()
-//        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [self] in
-//            start()
-//        }
     }
 
     public struct Usage: OptionSet, Sendable {

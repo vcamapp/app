@@ -54,7 +54,7 @@ struct VisionTrackingConfigurationSnapshot: Sendable, Equatable {
     }
 
     var needsFaceLandmarks: Bool {
-        usage.contains(.faceTracking) || usage.contains(.lipTracking) || isEmotionEnabled
+        shouldOutputFace || isEmotionEnabled
     }
 
     var needsHandPose: Bool {
@@ -66,7 +66,7 @@ struct VisionTrackingConfigurationSnapshot: Sendable, Equatable {
     }
 
     var needsCameraCapture: Bool {
-        usage.contains(.faceTracking) || usage.contains(.lipTracking) || needsHandPose
+        shouldOutputFace || needsHandPose
     }
 }
 

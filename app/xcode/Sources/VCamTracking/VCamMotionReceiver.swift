@@ -22,6 +22,7 @@ public final class VCamMotionReceiver {
     @ObservationIgnored private var listener: NWListener?
     @ObservationIgnored private var connection: NWConnection?
     @ObservationIgnored private weak var tracking: VCamMotionTracking?
+    @ObservationIgnored private var settings: (@MainActor () -> VCamMotionTrackingSettings)?
     @ObservationIgnored private var motionV1Receiver: MotionV1Receiver?
 
     public private(set) var connectionStatus = ConnectionStatus.disconnected
@@ -37,13 +38,14 @@ public final class VCamMotionReceiver {
 
     /// Throws only when the listener cannot be created. Failures after
     /// startup are handled by the state handlers, which restart the listener.
-    func start(with tracking: VCamMotionTracking) throws {
+    func start(with tracking: VCamMotionTracking, settings: @escaping @MainActor () -> VCamMotionTrackingSettings) throws {
         guard listener == nil else { return }
 
         self.tracking = tracking
+        self.settings = settings
         motionV1Receiver = MotionV1Receiver(
-            onFace: { [weak tracking] data in tracking?.applyFace(data, tracking: Tracking.shared) },
-            onHands: { [weak tracking] data in tracking?.applyHandsV1(data, tracking: Tracking.shared) }
+            onFace: { [weak tracking] data in tracking?.applyFace(data, settings: settings()) },
+            onHands: { [weak tracking] data in tracking?.applyHandsV1(data, settings: settings()) }
         )
         shouldAutoReconnect = true
         connectionStatus = .connecting
@@ -135,9 +137,9 @@ public final class VCamMotionReceiver {
             }
         }
 
-        guard data.count == MemoryLayout<VCamMotion>.size else { return }
+        guard data.count == MemoryLayout<VCamMotion>.size, let settings else { return }
         markDataReceived(protocolVersion: .v0)
-        tracking?.applyLegacyMotion(VCamMotion(rawData: data), tracking: Tracking.shared)
+        tracking?.applyLegacyMotion(VCamMotion(rawData: data), settings: settings())
     }
 
     /// Only handled packets keep the connection alive. If nothing but
@@ -195,13 +197,13 @@ public final class VCamMotionReceiver {
     }
 
     private func restartIfNeeded() {
-        guard shouldAutoReconnect, let tracking else {
+        guard shouldAutoReconnect, let tracking, let settings else {
             stopInternal()
             return
         }
         stopInternal()
         do {
-            try start(with: tracking)
+            try start(with: tracking, settings: settings)
         } catch {
             Logger.log("Restart failed: \(error.localizedDescription)")
         }

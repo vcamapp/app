@@ -65,7 +65,6 @@ public final class AvatarWebCamera {
         public static let faceTracking = Usage(rawValue: 1)
         public static let handTracking = Usage(rawValue: 2)
         public static let fingerTracking = Usage(rawValue: 4)
-        public static let lipTracking = Usage(rawValue: 8)
     }
 
     public var usage: Usage = [] {

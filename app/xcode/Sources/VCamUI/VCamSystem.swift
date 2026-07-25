@@ -65,7 +65,6 @@ public final class VCamSystem {
         guard !isStarted else { return }
         isStarted = true
         Tracking.shared.configure()
-        AvatarAudioManager.shared.startIfNeeded()
         RenderTextureManager.shared.resume()
         PasteboardObserver.shared.observe()
         UniBridge.shared.resumeApp()

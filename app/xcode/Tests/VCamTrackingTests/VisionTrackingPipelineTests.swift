@@ -4,9 +4,8 @@ import Testing
 @Suite
 struct VisionTrackingPipelineTests {
     @Test
-    func configurationNeedsFaceLandmarksForFaceOrLipTracking() {
+    func configurationNeedsFaceLandmarksForFaceTrackingOrEmotion() {
         #expect(makeConfiguration(usage: .faceTracking).needsFaceLandmarks)
-        #expect(makeConfiguration(usage: .lipTracking).needsFaceLandmarks)
         #expect(makeConfiguration(usage: .disabled, isEmotionEnabled: true).needsFaceLandmarks)
         #expect(!makeConfiguration(usage: .handTracking).needsFaceLandmarks)
     }
@@ -21,7 +20,6 @@ struct VisionTrackingPipelineTests {
 
     @Test(arguments: [
         (usage: AvatarWebCamera.Usage.faceTracking, isEmotionEnabled: false, needsCameraCapture: true),
-        (usage: .lipTracking, isEmotionEnabled: false, needsCameraCapture: true),
         (usage: .handTracking, isEmotionEnabled: false, needsCameraCapture: true),
         (usage: .fingerTracking, isEmotionEnabled: false, needsCameraCapture: true),
         // Emotion alone is covered by the mic, so it must not turn the camera on

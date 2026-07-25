@@ -1,6 +1,16 @@
 import Foundation
 import VCamBridge
 
+/// The `Tracking` state a VCamMotion packet needs when it is applied.
+/// Read per packet so setting changes take effect without restarting the receiver.
+struct VCamMotionTrackingSettings {
+    let isFaceTrackingEnabled: Bool
+    let isHandTrackingEnabled: Bool
+    let useEyeTracking: Bool
+    let useVowelEstimation: Bool
+    let handConfiguration: FingerTrackingConfiguration
+}
+
 @MainActor
 public final class VCamMotionTracking {
     private let blendShapeResampler: TrackingResampler
@@ -51,37 +61,37 @@ public final class VCamMotionTracking {
         }
     }
 
-    func applyLegacyMotion(_ data: VCamMotion, tracking: Tracking) {
-        applyFace(data, tracking: tracking)
-        applyLegacyHands(data, tracking: tracking)
+    func applyLegacyMotion(_ data: VCamMotion, settings: VCamMotionTrackingSettings) {
+        applyFace(data, settings: settings)
+        applyLegacyHands(data, settings: settings)
     }
 
-    func applyFace(_ data: VCamMotion, tracking: Tracking) {
-        guard tracking.faceTrackingMethod == .vcamMocap else { return }
+    func applyFace(_ data: VCamMotion, settings: VCamMotionTrackingSettings) {
+        guard settings.isFaceTrackingEnabled else { return }
 
         if UniBridge.shared.hasPerfectSyncBlendShape {
-            let values = data.perfectSync(useEyeTracking: tracking.useEyeTracking)
+            let values = data.perfectSync(useEyeTracking: settings.useEyeTracking)
             perfectSyncResampler.send(values, smoothed: smoothingStorage.isEnabled)
             return
         }
 
         let values = data.vcamHeadTransform(
-            useEyeTracking: tracking.useEyeTracking,
-            useVowelEstimation: tracking.useVowelEstimation
+            useEyeTracking: settings.useEyeTracking,
+            useVowelEstimation: settings.useVowelEstimation
         )
         blendShapeResampler.send(values, smoothed: smoothingStorage.isEnabled)
     }
 
     /// Unity retargets v1 hand packets itself, but whether this tracking
     /// source may drive the avatar at all is decided here, like the legacy path.
-    func applyHandsV1(_ packet: Data, tracking: Tracking) {
-        guard tracking.usesVCamMocapHandTracking else { return }
+    func applyHandsV1(_ packet: Data, settings: VCamMotionTrackingSettings) {
+        guard settings.isHandTrackingEnabled else { return }
         UniBridge.sendHandPacketV1(packet)
     }
 
-    private func applyLegacyHands(_ data: VCamMotion, tracking: Tracking) {
-        guard tracking.usesVCamMocapHandTracking else { return }
-        let handOutput = makeHandOutput(data, tracking: tracking)
+    private func applyLegacyHands(_ data: VCamMotion, settings: VCamMotionTrackingSettings) {
+        guard settings.isHandTrackingEnabled else { return }
+        let handOutput = makeHandOutput(data, configuration: settings.handConfiguration)
         if smoothingStorage.isEnabled, handOutput.hasMissingHand {
             handsResampler.reset(with: handOutput.hands)
             fingersResampler.reset(with: handOutput.fingers)
@@ -91,9 +101,7 @@ public final class VCamMotionTracking {
         fingersResampler.send(handOutput.fingers, smoothed: smoothingStorage.isEnabled)
     }
 
-    private func makeHandOutput(_ data: VCamMotion, tracking: Tracking) -> HandOutput {
-        let config = tracking.webCamera.handTracking.configuration
-
+    private func makeHandOutput(_ data: VCamMotion, configuration config: FingerTrackingConfiguration) -> HandOutput {
         let hands = VCamHands(
             left: .init(hand: data.hands.left, isRight: false, configuration: config),
             right: .init(hand: data.hands.right, isRight: true, configuration: config)

@@ -21,40 +21,38 @@ public final class AudioManager {
         onUpdateAudioBuffer = handler
     }
 
-    public func startRecording(onStart: @Sendable @escaping (AVAudioFormat) -> Void) {
-        guard Self.isMicrophoneAuthorized() else {
+    /// Returns the recording format, or nil when the microphone is unavailable
+    public func startRecording() async -> AVAudioFormat? {
+        if !Self.isMicrophoneAuthorized() {
             Logger.log("requestAuthorization")
-            Task {
-                guard await Self.requestMicrophonePermission() else { return }
-                startRecording(onStart: onStart)
-            }
-            return
+            guard await Self.requestMicrophonePermission() else { return nil }
         }
 
-        Task { @MainActor in
-            // After changing settings with CoreAudio, a delay is needed to prevent installTap failures
-            try? await Task.sleep(for: .milliseconds(500))
+        // After changing settings with CoreAudio, a delay is needed to prevent installTap failures
+        try? await Task.sleep(for: .milliseconds(500))
 
-            audioEngine = AVAudioEngine()
-            guard audioEngine.inputNode.inputFormat(forBus: 0).sampleRate != 0 else {
-                return
-            }
-
-            let inputNode = audioEngine.inputNode
-            let recordingFormat = inputNode.inputFormat(forBus: 0)
-
-            Logger.log("installTap")
-            inputNode.installTap(onBus: 0,
-                                 bufferSize: 1024,
-                                 format: recordingFormat,
-                                 block: makeAudioTapBlock(
-                                    onUpdateAudioBuffer: self.onUpdateAudioBuffer,
-                                    presentationLatency: inputNode.presentationLatency
-                                 ))
-
-            try? audioEngine.start()
-            onStart(recordingFormat)
+        audioEngine = AVAudioEngine()
+        let inputNode = audioEngine.inputNode
+        let recordingFormat = inputNode.inputFormat(forBus: 0)
+        guard recordingFormat.sampleRate != 0 else {
+            return nil
         }
+
+        Logger.log("installTap")
+        inputNode.installTap(onBus: 0,
+                             bufferSize: 1024,
+                             format: recordingFormat,
+                             block: makeAudioTapBlock(
+                                onUpdateAudioBuffer: onUpdateAudioBuffer,
+                                presentationLatency: inputNode.presentationLatency
+                             ))
+
+        do {
+            try audioEngine.start()
+        } catch {
+            Logger.log("Failed to start the audio engine: \(error.localizedDescription)")
+        }
+        return recordingFormat
     }
 
     public func stopRecording() {

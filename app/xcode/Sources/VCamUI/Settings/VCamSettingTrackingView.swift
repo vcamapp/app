@@ -37,7 +37,7 @@ public struct VCamSettingTrackingView: View {
             }
 
             Section {
-                if uniState.currentLipSync == .mic {
+                if uniState.currentLipSync == .mic, !Tracking.shared.micLipSyncDisabled {
                     ValueEditField(.lipSyncSensitivity, value: $state.lipSyncMicIntensity, type: .slider(0.1...3))
                 }
                 ValueEditField(.fpsCamera, value: $cameraFps.map(), type: .slider(1...60) {
