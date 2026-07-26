@@ -197,6 +197,7 @@
 				en,
 				Base,
 				ja,
+				ko,
 			);
 			mainGroup = 061238592ADE9A8300B67618;
 			productRefGroup = 061238632ADE9A8300B67618 /* Products */;

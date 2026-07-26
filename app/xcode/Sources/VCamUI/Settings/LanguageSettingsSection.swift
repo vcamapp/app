@@ -6,7 +6,7 @@ enum VCamSupportURL {
 }
 
 enum SupportedLanguages {
-    static let codes = ["ja", "en"]
+    static let codes = ["ja", "en", "ko"]
 
     static var displayNames: String {
         let names = codes.compactMap { code in

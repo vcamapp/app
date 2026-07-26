@@ -13,7 +13,13 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "このアプリについて"
+            "value": "%@について"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@에 관하여"
           }
         }
       }
@@ -32,6 +38,12 @@
             "state": "translated",
             "value": "アカウント管理..."
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "계정 관리..."
+          }
         }
       }
     },
@@ -48,6 +60,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "ライセンスを取得する..."
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "라이선스 취득..."
           }
         }
       }
@@ -66,6 +84,12 @@
             "state": "translated",
             "value": "アクション"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "동작"
+          }
         }
       }
     },
@@ -82,6 +106,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "追加"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "추가"
           }
         }
       }
@@ -100,6 +130,12 @@
             "state": "translated",
             "value": "画像を追加"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이미지 추가"
+          }
         }
       }
     },
@@ -116,6 +152,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "画面キャプチャを追加"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "화면 캡처 추가"
           }
         }
       }
@@ -134,6 +176,12 @@
             "state": "translated",
             "value": "macOSのメニューバーに追加する"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS 메뉴 막대에 아이콘 추가"
+          }
         }
       }
     },
@@ -150,6 +198,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "映像キャプチャを追加"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "영상 캡처 추가"
           }
         }
       }
@@ -168,6 +222,12 @@
             "state": "translated",
             "value": "ウェブを追加"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "웹 추가"
+          }
         }
       }
     },
@@ -184,6 +244,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "風を追加"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "바람 추가"
           }
         }
       }
@@ -202,6 +268,12 @@
             "state": "translated",
             "value": "%@へのアクセスを許可してください"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@에 대한 접근을 허용해 주세요"
+          }
         }
       }
     },
@@ -218,6 +290,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "ウィンドウを常に最前面にする"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "윈도우를 항상 맨 앞에 표시"
           }
         }
       }
@@ -236,6 +314,12 @@
             "state": "translated",
             "value": "環境光の色"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "환경광 색상"
+          }
         }
       }
     },
@@ -252,6 +336,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "環境光の強さ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "환경광 세기"
           }
         }
       }
@@ -270,6 +360,12 @@
             "state": "translated",
             "value": "歪み (アナモルフィック)"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "왜곡 (아나모픽)"
+          }
         }
       }
     },
@@ -286,6 +382,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "適用"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "적용"
           }
         }
       }
@@ -304,6 +406,12 @@
             "state": "translated",
             "value": "(横長)"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "(가로)"
+          }
         }
       }
     },
@@ -320,6 +428,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "(縦長)"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "(세로)"
           }
         }
       }
@@ -338,6 +452,12 @@
             "state": "translated",
             "value": "背景"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "배경"
+          }
         }
       }
     },
@@ -354,6 +474,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "ブルーム (Bloom)"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "블룸 (Bloom)"
           }
         }
       }
@@ -372,6 +498,12 @@
             "state": "translated",
             "value": "ブラー / ぼかし"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "블러 / 흐림"
+          }
         }
       }
     },
@@ -388,6 +520,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "バイバイ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "바이바이"
           }
         }
       }
@@ -406,6 +544,12 @@
             "state": "translated",
             "value": "キャリブレーション"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "캘리브레이션"
+          }
         }
       }
     },
@@ -422,6 +566,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "カメラ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "카메라"
           }
         }
       }
@@ -440,6 +590,12 @@
             "state": "translated",
             "value": "カメラの露出 (EV)"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "카메라 노출 (EV)"
+          }
         }
       }
     },
@@ -456,6 +612,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "仮想カメラが許可されていません。設定アプリの「一般」→「ログイン項目と拡張機能」から許可してください。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "가상 카메라가 허용되지 않았습니다. 설정 앱의 '일반' → '로그인 항목 및 확장 프로그램'에서 허용해 주세요."
           }
         }
       }
@@ -474,6 +636,12 @@
             "state": "translated",
             "value": "仮想カメラは動作していません。"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "가상 카메라가 동작하지 않습니다."
+          }
         }
       }
     },
@@ -490,6 +658,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "仮想カメラは動作しています。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "가상 카메라가 동작 중입니다."
           }
         }
       }
@@ -508,6 +682,12 @@
             "state": "translated",
             "value": "キャンセル"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "취소"
+          }
         }
       }
     },
@@ -524,6 +704,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "キャプチャ設定"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "캡처 설정"
           }
         }
       }
@@ -542,6 +728,12 @@
             "state": "translated",
             "value": "キャプチャ方法"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "캡처 방식"
+          }
         }
       }
     },
@@ -558,6 +750,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "サムネイルを変更"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "썸네일 변경"
           }
         }
       }
@@ -576,6 +774,12 @@
             "state": "translated",
             "value": "風の向きを変える (ランダム)"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "바람의 방향을 무작위로 바꾸기"
+          }
         }
       }
     },
@@ -592,6 +796,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "アップデート確認"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "업데이트 확인..."
           }
         }
       }
@@ -610,6 +820,12 @@
             "state": "translated",
             "value": "ライセンスの確認中..."
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "라이선스 확인 중..."
+          }
         }
       }
     },
@@ -626,6 +842,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "エイエイオー！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "파이팅!"
           }
         }
       }
@@ -644,6 +866,12 @@
             "state": "translated",
             "value": "クロマキー合成"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "크로마키 합성"
+          }
         }
       }
     },
@@ -660,6 +888,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "クリップボード"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "클립보드"
           }
         }
       }
@@ -678,6 +912,12 @@
             "state": "translated",
             "value": "閉じる"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "닫기"
+          }
         }
       }
     },
@@ -694,6 +934,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "色"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "색상"
           }
         }
       }
@@ -712,6 +958,12 @@
             "state": "translated",
             "value": "色フィルタ"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "색상 필터"
+          }
         }
       }
     },
@@ -728,6 +980,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "色温度"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "색온도"
           }
         }
       }
@@ -746,6 +1004,12 @@
             "state": "translated",
             "value": "商用利用ライセンスが有効です。"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "상업적 이용 라이선스가 유효합니다."
+          }
         }
       }
     },
@@ -762,6 +1026,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "商用利用ライセンスが有効ではありません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "상업적 이용 라이선스가 유효하지 않습니다."
           }
         }
       }
@@ -780,6 +1050,12 @@
             "state": "translated",
             "value": "商用利用にはライセンスの取得が必要です。"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "상업적으로 이용하려면 라이선스가 필요합니다."
+          }
         }
       }
     },
@@ -796,6 +1072,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "アンインストールが完了しました"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "제거가 완료되었습니다."
           }
         }
       }
@@ -814,6 +1096,12 @@
             "state": "translated",
             "value": "「%@」を削除してもよろしいですか？"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "\"%@\"을(를) 삭제하시겠습니까?"
+          }
         }
       }
     },
@@ -830,6 +1118,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "ログアウトしても良いですか?"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "로그아웃하시겠습니까?"
           }
         }
       }
@@ -848,6 +1142,12 @@
             "state": "translated",
             "value": "接続"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "연결"
+          }
         }
       }
     },
@@ -864,6 +1164,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "接続済"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "연결됨"
           }
         }
       }
@@ -882,6 +1188,12 @@
             "state": "translated",
             "value": "接続中..."
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "연결 중..."
+          }
         }
       }
     },
@@ -898,6 +1210,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "コントラスト"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "대비"
           }
         }
       }
@@ -916,6 +1234,12 @@
             "state": "translated",
             "value": "コピー"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "복사하기"
+          }
         }
       }
     },
@@ -932,6 +1256,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "ショートカット作成"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "단축어 만들기"
           }
         }
       }
@@ -950,6 +1280,12 @@
             "state": "translated",
             "value": "現在のバージョン: %@"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "현재 버전: %@"
+          }
         }
       }
     },
@@ -966,6 +1302,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "カスタム (.vrma)"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "사용자 지정 (.vrma)"
           }
         }
       }
@@ -984,6 +1326,12 @@
             "state": "translated",
             "value": "切り取り"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "오려두기"
+          }
         }
       }
     },
@@ -1000,6 +1348,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "デフォルト"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "기본값"
           }
         }
       }
@@ -1018,6 +1372,12 @@
             "state": "translated",
             "value": "削除"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "삭제"
+          }
         }
       }
     },
@@ -1034,6 +1394,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "削除済みのモーション"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "삭제된 모션"
           }
         }
       }
@@ -1052,6 +1418,12 @@
             "state": "translated",
             "value": "古い仮想カメラの削除"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이전 가상 카메라 삭제"
+          }
         }
       }
     },
@@ -1068,6 +1440,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "古い仮想カメラはサポート終了となりましたので、削除します。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이전 가상 카메라는 더 이상 지원되지 않으므로 지금 삭제합니다."
           }
         }
       }
@@ -1086,6 +1464,12 @@
             "state": "translated",
             "value": "%@が削除されます"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@을(를) 삭제합니다"
+          }
         }
       }
     },
@@ -1102,6 +1486,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "仮想カメラプラグインを削除します"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "가상 카메라 플러그인을 삭제합니다"
           }
         }
       }
@@ -1120,6 +1510,12 @@
             "state": "translated",
             "value": "保存先"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "저장 위치"
+          }
         }
       }
     },
@@ -1136,6 +1532,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "光の拡散"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "빛 확산"
           }
         }
       }
@@ -1154,6 +1556,12 @@
             "state": "translated",
             "value": "接続解除"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "연결 해제"
+          }
         }
       }
     },
@@ -1170,6 +1578,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "未接続"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "연결 안 됨"
           }
         }
       }
@@ -1188,6 +1602,12 @@
             "state": "translated",
             "value": "ディスプレイ"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "디스플레이"
+          }
         }
       }
     },
@@ -1204,6 +1624,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "https://docs.vcamapp.com/virtual-camera/virtualcamera"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "https://docs.vcamapp.com/v/ko/virtual-camera/virtualcamera"
           }
         }
       }
@@ -1222,6 +1648,12 @@
             "state": "translated",
             "value": "完了"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "완료"
+          }
         }
       }
     },
@@ -1238,6 +1670,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "ダウンロード"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다운로드"
           }
         }
       }
@@ -1256,6 +1694,12 @@
             "state": "translated",
             "value": "サポーター版のダウンロード"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "후원자 버전 다운로드"
+          }
         }
       }
     },
@@ -1272,6 +1716,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "複製"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "복제"
           }
         }
       }
@@ -1290,6 +1740,12 @@
             "state": "translated",
             "value": "指の閉じやすさ"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "손가락 닫힘 감도"
+          }
         }
       }
     },
@@ -1306,6 +1762,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "指の開きやすさ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "손가락 열림 감도"
           }
         }
       }
@@ -1324,6 +1786,12 @@
             "state": "translated",
             "value": "編集"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "편집"
+          }
         }
       }
     },
@@ -1340,6 +1808,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "入力範囲を編集"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "입력 범위 편집"
           }
         }
       }
@@ -1358,6 +1832,12 @@
             "state": "translated",
             "value": "入力範囲の最小値と最大値を設定します。"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "입력 범위의 최솟값과 최댓값을 설정합니다."
+          }
         }
       }
     },
@@ -1374,6 +1854,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "モデルの編集"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모델 편집"
           }
         }
       }
@@ -1392,6 +1878,12 @@
             "state": "translated",
             "value": "出力範囲を編集"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "출력 범위 편집"
+          }
         }
       }
     },
@@ -1408,6 +1900,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "出力範囲の最小値と最大値を設定します。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "출력 범위의 최솟값과 최댓값을 설정합니다."
           }
         }
       }
@@ -1426,6 +1924,12 @@
             "state": "translated",
             "value": "絵文字"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이모지"
+          }
         }
       }
     },
@@ -1442,6 +1946,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "有効にする"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "활성화"
           }
         }
       }
@@ -1460,6 +1970,12 @@
             "state": "translated",
             "value": "VRM0.x系のモデルを1.0系に自動変換する"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VRM 0.x 모델을 VRM 1.x로 자동 변환"
+          }
         }
       }
     },
@@ -1476,6 +1992,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "全画面"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "전체 화면"
           }
         }
       }
@@ -1494,6 +2016,12 @@
             "state": "translated",
             "value": "画面収録の権限がありません。システム環境設定のセキュリティとプライバシーにて画面収録を許可してください。"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "권한이 없습니다. 시스템 환경설정의 보안 및 개인 정보 보호에서 화면 기록을 허용해 주세요."
+          }
         }
       }
     },
@@ -1510,6 +2038,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "新しいバージョン %@ があります"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "새로운 버전 %@ 사용 가능!"
           }
         }
       }
@@ -1528,6 +2062,12 @@
             "state": "translated",
             "value": "実験的な機能"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "실험적 기능"
+          }
         }
       }
     },
@@ -1544,6 +2084,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "有効期限: "
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "만료일: "
           }
         }
       }
@@ -1562,6 +2108,12 @@
             "state": "translated",
             "value": "仮想カメラをインストールします。\n「システム設定を開く」をクリックして、「許可」をクリックしてください。"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "가상 카메라를 설치합니다.\n'시스템 설정 열기'를 클릭한 다음 '허용'을 클릭해 주세요."
+          }
         }
       }
     },
@@ -1578,6 +2130,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "仮想カメラの更新のため、仮想カメラの再インストールを行います"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "업데이트를 위해 가상 카메라를 다시 설치합니다"
           }
         }
       }
@@ -1596,6 +2154,12 @@
             "state": "translated",
             "value": "目の左右の動きの感度"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "좌우 감도"
+          }
         }
       }
     },
@@ -1612,6 +2176,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "目の上下の動きの感度"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "상하 감도"
           }
         }
       }
@@ -1630,6 +2200,12 @@
             "state": "translated",
             "value": "顔・目・口"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "얼굴 / 눈 / 입"
+          }
         }
       }
     },
@@ -1646,6 +2222,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "表情"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "표정"
           }
         }
       }
@@ -1664,6 +2246,12 @@
             "state": "translated",
             "value": "仮想カメラのインストールに失敗しました。利用する場合はこのアプリの設定からインストールしてください。"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "가상 카메라 설치에 실패했습니다. 사용하려면 이 앱의 설정에서 설치해 주세요."
+          }
         }
       }
     },
@@ -1680,6 +2268,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "モーションの読み込みに失敗しました。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모션을 불러오지 못했습니다."
           }
         }
       }
@@ -1698,6 +2292,12 @@
             "state": "translated",
             "value": "ごめんなさい"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "실패"
+          }
         }
       }
     },
@@ -1714,6 +2314,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "ファイル"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "파일"
           }
         }
       }
@@ -1732,6 +2338,12 @@
             "state": "translated",
             "value": "フィルタ"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "필터"
+          }
         }
       }
     },
@@ -1748,6 +2360,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "指"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "손가락"
           }
         }
       }
@@ -1766,6 +2384,12 @@
             "state": "translated",
             "value": "仮想カメラの画面を左右反転する"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "가상 카메라의 화면을 좌우 반전"
+          }
         }
       }
     },
@@ -1782,6 +2406,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "カメラFPS (トラッキングの更新頻度)"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "카메라 FPS (트래킹 갱신 빈도)"
           }
         }
       }
@@ -1800,6 +2430,12 @@
             "state": "translated",
             "value": "FPS (画面の更新頻度)"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "FPS (화면 갱신 빈도)"
+          }
         }
       }
     },
@@ -1816,6 +2452,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "一般"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "일반"
           }
         }
       }
@@ -1834,6 +2476,12 @@
             "state": "translated",
             "value": "手"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "손"
+          }
         }
       }
     },
@@ -1850,6 +2498,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "高さ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "높이"
           }
         }
       }
@@ -1868,6 +2522,12 @@
             "state": "translated",
             "value": "ヘルプ"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "도움말"
+          }
         }
       }
     },
@@ -1884,6 +2544,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "実際の動きとずれている場合は、カメラに対して正面を向いた状態でカメラ目線でこのボタンを押してください"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "실제 움직임과 어긋나는 경우, 카메라 정면을 향해 카메라를 바라본 상태에서 이 버튼을 눌러 주세요"
           }
         }
       }
@@ -1902,6 +2568,12 @@
             "state": "translated",
             "value": "メッシュの結合等によりアプリの負荷を大幅に下げられます。モデルの表示に問題がある場合はオフにした後、モデルを再読込してください。"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "메시 결합 등을 통해 앱의 부하를 크게 줄일 수 있습니다. 모델 표시에 문제가 있는 경우에는 끈 다음 모델을 다시 불러와 주세요."
+          }
         }
       }
     },
@@ -1918,6 +2590,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "mocopi側のPC接続設定でのポートは「12351」にしてください"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "mocopi 쪽 PC 연결 설정의 포트는 '12351'로 설정해 주세요"
           }
         }
       }
@@ -1936,6 +2614,12 @@
             "state": "translated",
             "value": "こんにちは"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "안녕"
+          }
         }
       }
     },
@@ -1952,6 +2636,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "非表示にする"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "숨기기"
           }
         }
       }
@@ -1970,6 +2660,12 @@
             "state": "translated",
             "value": "色相シフト (Hue Shift)"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "색상 시프트 (Hue Shift)"
+          }
         }
       }
     },
@@ -1986,6 +2682,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "画像"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이미지"
           }
         }
       }
@@ -2004,6 +2706,12 @@
             "state": "translated",
             "value": "特定のウィンドウ"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "특정 윈도우"
+          }
         }
       }
     },
@@ -2020,6 +2728,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "インストール"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "설치"
           }
         }
       }
@@ -2038,6 +2752,12 @@
             "state": "translated",
             "value": "%@が設置されます"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@을(를) 설치합니다"
+          }
         }
       }
     },
@@ -2054,6 +2774,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "仮想カメラプラグインを%@します"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "가상 카메라 플러그인을 %@합니다"
           }
         }
       }
@@ -2072,6 +2798,12 @@
             "state": "translated",
             "value": "仮想カメラのインストール"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "가상 카메라 설치"
+          }
         }
       }
     },
@@ -2088,6 +2820,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "連携"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "연동"
           }
         }
       }
@@ -2106,6 +2844,12 @@
             "state": "translated",
             "value": "強さ"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "강도"
+          }
         }
       }
     },
@@ -2122,6 +2866,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "操作"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "조작"
           }
         }
       }
@@ -2140,6 +2890,12 @@
             "state": "translated",
             "value": "%@が見つかりません"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@를 찾을 수 없습니다"
+          }
         }
       }
     },
@@ -2156,6 +2912,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@が設定されていません"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@이(가) 설정되지 않았습니다"
           }
         }
       }
@@ -2174,6 +2936,12 @@
             "state": "translated",
             "value": "ジャンプ"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "점프"
+          }
         }
       }
     },
@@ -2190,6 +2958,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "言語"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "언어"
           }
         }
       }
@@ -2208,6 +2982,12 @@
             "state": "translated",
             "value": "レンズフレア"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "렌즈 플레어"
+          }
         }
       }
     },
@@ -2224,6 +3004,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "レンズフレアの強さ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "렌즈 플레어 세기"
           }
         }
       }
@@ -2242,6 +3028,12 @@
             "state": "translated",
             "value": "ライセンス"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "라이선스"
+          }
         }
       }
     },
@@ -2258,6 +3050,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "すでに商用利用ライセンスを取得している場合は、ライセンスの状態を確認してください。 [ライセンスの状態を確認する...](vcam2d://auth/checkLicense)"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이미 상업적 이용 라이선스를 취득한 경우에는 라이선스 상태를 확인해 주세요. [라이선스 상태 확인...](vcam2d://auth/checkLicense)"
           }
         }
       }
@@ -2276,6 +3074,12 @@
             "state": "translated",
             "value": "ライセンスの有効期限が切れています。"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "라이선스가 만료되었습니다."
+          }
         }
       }
     },
@@ -2292,6 +3096,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "リップシンク"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "립싱크"
           }
         }
       }
@@ -2310,6 +3120,12 @@
             "state": "translated",
             "value": "リップシンクの感度 (マイク)"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "립싱크 감도 (마이크)"
+          }
         }
       }
     },
@@ -2326,6 +3142,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "読み込む"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "불러오기"
           }
         }
       }
@@ -2344,6 +3166,12 @@
             "state": "translated",
             "value": "モーションを読み込む"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모션 불러오기"
+          }
         }
       }
     },
@@ -2360,6 +3188,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "VRoid Hubからモデルを選ぶ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VRoid Hub에서 아바타 불러오기"
           }
         }
       }
@@ -2378,6 +3212,12 @@
             "state": "translated",
             "value": "シーン読み込み"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "씬 불러오기"
+          }
         }
       }
     },
@@ -2394,6 +3234,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "ローカルファイル"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "로컬 파일"
           }
         }
       }
@@ -2412,6 +3258,12 @@
             "state": "translated",
             "value": "ロックする"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "잠그기"
+          }
         }
       }
     },
@@ -2428,6 +3280,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "ループ再生"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "반복 재생"
           }
         }
       }
@@ -2446,6 +3304,12 @@
             "state": "translated",
             "value": "メイン"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "메인"
+          }
         }
       }
     },
@@ -2462,6 +3326,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "アカウントとサブスクリプションの管理"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "계정 및 구독 관리"
           }
         }
       }
@@ -2480,6 +3350,12 @@
             "state": "translated",
             "value": "最大値"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "최댓값"
+          }
         }
       }
     },
@@ -2496,6 +3372,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "メッセージ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "메시지"
           }
         }
       }
@@ -2514,6 +3396,12 @@
             "state": "translated",
             "value": "マイク"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "마이크"
+          }
         }
       }
     },
@@ -2530,6 +3418,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "マイク音の同期オフセット (ミリ秒)"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "마이크 소리의 동기화 오프셋 [ms]"
           }
         }
       }
@@ -2548,6 +3442,12 @@
             "state": "translated",
             "value": "新しい仮想カメラへの移行"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "새로운 가상 카메라로 이전"
+          }
         }
       }
     },
@@ -2564,6 +3464,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "最新のmacOSに最適化した仮想カメラへ移行します。\n古いプラグインを削除し、新しい仮想カメラをインストールしてください。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 앱은 최신 macOS에 최적화된 가상 카메라로 이전합니다.\n안내에 따라 이전 플러그인을 삭제하고 새로운 가상 카메라를 설치해 주세요."
           }
         }
       }
@@ -2582,6 +3488,12 @@
             "state": "translated",
             "value": "最小値"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "최솟값"
+          }
         }
       }
     },
@@ -2598,6 +3510,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "通信補間"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "통신 보간"
           }
         }
       }
@@ -2616,6 +3534,12 @@
             "state": "translated",
             "value": "通信途切れのカクつきを緩和します（遅延が増えます）。VCamMocapとiFacialMocapに適用されます。"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "통신이 끊길 때 생기는 끊김을 완화합니다 (지연이 늘어납니다). VCamMocap과 iFacialMocap에 적용됩니다."
+          }
         }
       }
     },
@@ -2632,6 +3556,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "モデル"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모델"
           }
         }
       }
@@ -2650,6 +3580,12 @@
             "state": "translated",
             "value": "モデル一覧"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모델 목록"
+          }
         }
       }
     },
@@ -2666,6 +3602,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "見つかりません"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "찾을 수 없음"
           }
         }
       }
@@ -2684,6 +3626,12 @@
             "state": "translated",
             "value": "モーション"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모션"
+          }
         }
       }
     },
@@ -2700,6 +3648,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "モーション名"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모션 이름"
           }
         }
       }
@@ -2718,6 +3672,12 @@
             "state": "translated",
             "value": "このモーションは%lld個のショートカットに割り当てられています。"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 모션은 %lld개의 단축어에 할당되어 있습니다."
+          }
         }
       }
     },
@@ -2734,6 +3694,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "カメラを初期位置に戻す"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "카메라 위치 초기화"
           }
         }
       }
@@ -2752,6 +3718,12 @@
             "state": "translated",
             "value": "新しいプリセット"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "새 프리셋"
+          }
         }
       }
     },
@@ -2768,6 +3740,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "首を振る"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "도리도리"
           }
         }
       }
@@ -2786,6 +3764,12 @@
             "state": "translated",
             "value": "うんうん"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "끄덕끄덕"
+          }
         }
       }
     },
@@ -2802,6 +3786,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "モデルが見つかりません"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모델을 찾을 수 없습니다"
           }
         }
       }
@@ -2820,6 +3810,12 @@
             "state": "translated",
             "value": "なし"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "없음"
+          }
         }
       }
     },
@@ -2836,6 +3832,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "通常"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "일반"
           }
         }
       }
@@ -2854,6 +3856,12 @@
             "state": "translated",
             "value": "インストール後はアプリを一度再起動してください"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "설치 후에는 앱을 한 번 재실행해 주세요"
+          }
         }
       }
     },
@@ -2870,6 +3878,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "タイトルなし"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "제목 없음"
           }
         }
       }
@@ -2888,6 +3902,12 @@
             "state": "translated",
             "value": "サポートされていません"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "지원되지 않음"
+          }
         }
       }
     },
@@ -2904,6 +3924,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "オブジェクト"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "오브젝트"
           }
         }
       }
@@ -2922,6 +3948,12 @@
             "state": "translated",
             "value": "OK"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "확인"
+          }
         }
       }
     },
@@ -2938,6 +3970,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "ファイルを開く"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "파일 열기"
           }
         }
       }
@@ -2956,6 +3994,12 @@
             "state": "translated",
             "value": "macOSの言語設定を開く"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS 언어 설정 열기"
+          }
         }
       }
     },
@@ -2972,6 +4016,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "モデル一覧を開く"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모델 목록 열기"
           }
         }
       }
@@ -2990,6 +4040,12 @@
             "state": "translated",
             "value": "設定を開く"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "설정 열기"
+          }
         }
       }
     },
@@ -3006,6 +4062,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@を開く"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 열기"
           }
         }
       }
@@ -3024,6 +4086,12 @@
             "state": "translated",
             "value": "モデルのメッシュを最適化する (推奨)"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모델의 메시 최적화 (권장)"
+          }
         }
       }
     },
@@ -3040,6 +4108,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "貼り付け"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "붙여넣기"
           }
         }
       }
@@ -3058,6 +4132,12 @@
             "state": "translated",
             "value": "選択"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "선택"
+          }
         }
       }
     },
@@ -3074,6 +4154,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "待機モーションをランダム再生する"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "대기 모션을 무작위로 재생"
           }
         }
       }
@@ -3092,6 +4178,12 @@
             "state": "translated",
             "value": "再認証してください。"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다시 인증해 주세요."
+          }
         }
       }
     },
@@ -3108,6 +4200,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Macを再起動すると不具合が改善される場合があります。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac을 재시동하면 문제가 개선되는 경우가 있습니다."
           }
         }
       }
@@ -3126,6 +4224,12 @@
             "state": "translated",
             "value": "やったね"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "포즈"
+          }
         }
       }
     },
@@ -3142,6 +4246,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "プリセット"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "프리셋"
           }
         }
       }
@@ -3160,6 +4270,12 @@
             "state": "translated",
             "value": "映像をプレビューする"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "영상 미리보기"
+          }
         }
       }
     },
@@ -3176,6 +4292,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "高品質"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "고품질"
           }
         }
       }
@@ -3194,6 +4316,12 @@
             "state": "translated",
             "value": "最高品質"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "최고 품질"
+          }
         }
       }
     },
@@ -3210,6 +4338,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "低負荷"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "낮은 부하"
           }
         }
       }
@@ -3228,6 +4362,12 @@
             "state": "translated",
             "value": "最低負荷"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "최저 부하"
+          }
         }
       }
     },
@@ -3244,6 +4384,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "良品質"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "좋은 품질"
           }
         }
       }
@@ -3262,6 +4408,12 @@
             "state": "translated",
             "value": "普通"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "보통"
+          }
         }
       }
     },
@@ -3278,6 +4430,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@を終了"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 종료"
           }
         }
       }
@@ -3296,6 +4454,12 @@
             "state": "translated",
             "value": "再認証する..."
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다시 인증..."
+          }
         }
       }
     },
@@ -3312,6 +4476,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "PCの音声を録音 [β]"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PC 소리 녹음 [β]"
           }
         }
       }
@@ -3330,6 +4500,12 @@
             "state": "translated",
             "value": "撮影"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "촬영"
+          }
         }
       }
     },
@@ -3346,6 +4522,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "修飾キーと文字を入力してください"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "수정자 키와 문자를 입력해 주세요"
           }
         }
       }
@@ -3364,6 +4546,12 @@
             "state": "translated",
             "value": "一つ以上の修飾キーと文字を組み合わせてください"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "수정자 키를 하나 이상 조합해 주세요"
+          }
         }
       }
     },
@@ -3380,6 +4568,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "画面を更新"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "화면 새로 고침"
           }
         }
       }
@@ -3398,6 +4592,12 @@
             "state": "translated",
             "value": "再インストール"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "재설치"
+          }
         }
       }
     },
@@ -3414,6 +4614,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "リリースノート："
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "릴리스 노트:"
           }
         }
       }
@@ -3432,6 +4638,12 @@
             "state": "translated",
             "value": "再読み込み"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다시 불러오기"
+          }
         }
       }
     },
@@ -3448,6 +4660,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "画面キャプチャからこのアプリを除外"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "화면 캡처에서 이 앱 제외"
           }
         }
       }
@@ -3466,6 +4684,12 @@
             "state": "translated",
             "value": "名前を変更"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이름 변경"
+          }
         }
       }
     },
@@ -3482,6 +4706,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "レンダリング"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "렌더링"
           }
         }
       }
@@ -3500,6 +4730,12 @@
             "state": "translated",
             "value": "描画品質"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "렌더링 품질"
+          }
         }
       }
     },
@@ -3516,6 +4752,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "すべてを初期値に戻す"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모두 기본값으로 되돌리기"
           }
         }
       }
@@ -3534,6 +4776,12 @@
             "state": "translated",
             "value": "モデルの位置をリセット"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모델 위치 초기화"
+          }
         }
       }
     },
@@ -3550,6 +4798,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "初期値に戻す"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "기본값으로 되돌리기"
           }
         }
       }
@@ -3568,6 +4822,12 @@
             "state": "translated",
             "value": "ウィンドウサイズを初期値に戻す"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "윈도우 크기를 기본값으로 되돌리기"
+          }
         }
       }
     },
@@ -3584,6 +4844,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "セットアップが完了しました、Zoom等のクライアントを再起動してください"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "설정이 완료되었습니다. Zoom 등의 클라이언트를 다시 실행해 주세요"
           }
         }
       }
@@ -3602,6 +4868,12 @@
             "state": "translated",
             "value": "入力の向きを反転"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "입력 방향 반전"
+          }
         }
       }
     },
@@ -3618,6 +4890,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "出力の向きを反転"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "출력 방향 반전"
           }
         }
       }
@@ -3636,6 +4914,12 @@
             "state": "translated",
             "value": "丸み"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "둥글기"
+          }
         }
       }
     },
@@ -3652,6 +4936,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "走る"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "달리기"
           }
         }
       }
@@ -3670,6 +4960,12 @@
             "state": "translated",
             "value": "実行"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "실행"
+          }
         }
       }
     },
@@ -3686,6 +4982,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "彩度"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "채도"
           }
         }
       }
@@ -3704,6 +5006,12 @@
             "state": "translated",
             "value": "上書き保存"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "저장"
+          }
         }
       }
     },
@@ -3720,6 +5028,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "シーン"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "씬"
           }
         }
       }
@@ -3738,6 +5052,12 @@
             "state": "translated",
             "value": "画面"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "화면"
+          }
         }
       }
     },
@@ -3754,6 +5074,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "画面効果"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "화면 효과"
           }
         }
       }
@@ -3772,6 +5098,12 @@
             "state": "translated",
             "value": "画面解像度"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "화면 해상도"
+          }
         }
       }
     },
@@ -3788,6 +5120,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "秒"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "초"
           }
         }
       }
@@ -3806,6 +5144,12 @@
             "state": "translated",
             "value": "詳細はこちらのページをご覧ください。"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "자세한 내용은 이 페이지를 참고해 주세요."
+          }
         }
       }
     },
@@ -3822,6 +5166,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "すべてを選択"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "전체 선택"
           }
         }
       }
@@ -3840,6 +5190,12 @@
             "state": "translated",
             "value": "背景に設定する"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "배경으로 설정"
+          }
         }
       }
     },
@@ -3856,6 +5212,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "設定"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "설정"
           }
         }
       }
@@ -3874,6 +5236,12 @@
             "state": "translated",
             "value": "ショートカットキー"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "단축키"
+          }
         }
       }
     },
@@ -3890,6 +5258,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "肩の回転の大きさ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "어깨 회전의 크기"
           }
         }
       }
@@ -3908,6 +5282,12 @@
             "state": "translated",
             "value": "表示する"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "표시"
+          }
         }
       }
     },
@@ -3924,6 +5304,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "変更方法を見る"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "변경 방법 보기"
           }
         }
       }
@@ -3942,6 +5328,12 @@
             "state": "translated",
             "value": "ブルブル"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "부들부들"
+          }
         }
       }
     },
@@ -3958,6 +5350,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "ログアウト"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "로그아웃"
           }
         }
       }
@@ -3976,6 +5374,12 @@
             "state": "translated",
             "value": "ログアウトに失敗しました: "
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "로그아웃에 실패했습니다: "
+          }
         }
       }
     },
@@ -3992,6 +5396,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "このバージョンはスキップ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 버전은 건너뛰기"
           }
         }
       }
@@ -4010,6 +5420,12 @@
             "state": "translated",
             "value": "スムージング"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "스무딩"
+          }
         }
       }
     },
@@ -4026,6 +5442,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "滑らかさ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "매끄러움"
           }
         }
       }
@@ -4044,6 +5466,12 @@
             "state": "translated",
             "value": "柔らかさ (Soft Knee)"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "부드러움 (Soft Knee)"
+          }
         }
       }
     },
@@ -4060,6 +5488,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "録画開始 [β]"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "녹화 시작 [β]"
           }
         }
       }
@@ -4078,6 +5512,12 @@
             "state": "translated",
             "value": "録画停止"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "녹화 중지"
+          }
         }
       }
     },
@@ -4094,6 +5534,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "やったね"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "성공"
           }
         }
       }
@@ -4112,6 +5558,12 @@
             "state": "translated",
             "value": "対応言語"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "지원 언어"
+          }
         }
       }
     },
@@ -4128,6 +5580,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "肘の調整"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "팔꿈치 조정"
           }
         }
       }
@@ -4146,6 +5604,12 @@
             "state": "translated",
             "value": "写真を撮る"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "사진 촬영"
+          }
         }
       }
     },
@@ -4162,6 +5626,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "しきい値"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "임계값"
           }
         }
       }
@@ -4180,6 +5650,12 @@
             "state": "translated",
             "value": "閾値 (適用する輝度の最小値)"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "임계값 (적용할 최소 밝기)"
+          }
         }
       }
     },
@@ -4196,6 +5672,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "撮影までの待ち時間"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "촬영까지의 대기 시간"
           }
         }
       }
@@ -4214,6 +5696,12 @@
             "state": "translated",
             "value": "色合い"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "색조"
+          }
         }
       }
     },
@@ -4230,6 +5718,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "タイトル"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "제목"
           }
         }
       }
@@ -4248,6 +5742,12 @@
             "state": "translated",
             "value": "目をトラッキングする"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "눈을 트래킹"
+          }
         }
       }
     },
@@ -4264,6 +5764,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "トラッキング"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "트래킹"
           }
         }
       }
@@ -4282,6 +5788,12 @@
             "state": "translated",
             "value": "トラッキング調整"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "트래킹 조정"
+          }
         }
       }
     },
@@ -4298,6 +5810,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "反応"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "반응"
           }
         }
       }
@@ -4316,6 +5834,12 @@
             "state": "translated",
             "value": "なめらかさ"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "부드러움"
+          }
         }
       }
     },
@@ -4332,6 +5856,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "まばたき 左"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "왼쪽 눈 깜박임"
           }
         }
       }
@@ -4350,6 +5880,12 @@
             "state": "translated",
             "value": "まばたき 右"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "오른쪽 눈 깜박임"
+          }
         }
       }
     },
@@ -4366,6 +5902,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "目の動き X"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "눈 움직임 X"
           }
         }
       }
@@ -4384,6 +5926,12 @@
             "state": "translated",
             "value": "目の動き Y"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "눈 움직임 Y"
+          }
         }
       }
     },
@@ -4400,6 +5948,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "頭の回転 X"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "머리 회전 X"
           }
         }
       }
@@ -4418,6 +5972,12 @@
             "state": "translated",
             "value": "頭の回転 Y"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "머리 회전 Y"
+          }
         }
       }
     },
@@ -4434,6 +5994,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "頭の回転 Z"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "머리 회전 Z"
           }
         }
       }
@@ -4452,6 +6018,12 @@
             "state": "translated",
             "value": "口"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "입"
+          }
         }
       }
     },
@@ -4468,6 +6040,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "位置 X"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "위치 X"
           }
         }
       }
@@ -4486,6 +6064,12 @@
             "state": "translated",
             "value": "位置 Y"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "위치 Y"
+          }
         }
       }
     },
@@ -4502,6 +6086,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "位置 Z"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "위치 Z"
           }
         }
       }
@@ -4520,6 +6110,12 @@
             "state": "translated",
             "value": "母音"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모음"
+          }
         }
       }
     },
@@ -4536,6 +6132,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "入力"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "입력"
           }
         }
       }
@@ -4554,6 +6156,12 @@
             "state": "translated",
             "value": "出力"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "출력"
+          }
         }
       }
     },
@@ -4570,6 +6178,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "設定の保存機能は今後追加されます"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "설정 저장 기능은 향후 추가될 예정입니다"
           }
         }
       }
@@ -4588,6 +6202,12 @@
             "state": "translated",
             "value": "トラッキングモード"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "트래킹 모드"
+          }
         }
       }
     },
@@ -4604,6 +6224,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "動きの滑らかさ (スムージング)"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "움직임의 부드러움 (스무딩)"
           }
         }
       }
@@ -4622,6 +6248,12 @@
             "state": "translated",
             "value": "移動"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이동"
+          }
         }
       }
     },
@@ -4638,6 +6270,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "タイプ %@"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "타입 %@"
           }
         }
       }
@@ -4656,6 +6294,12 @@
             "state": "translated",
             "value": "アンインストール"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "제거"
+          }
         }
       }
     },
@@ -4672,6 +6316,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "プラグインのアンインストール"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "가상 카메라 플러그인 제거"
           }
         }
       }
@@ -4690,6 +6340,12 @@
             "state": "translated",
             "value": "ロックを解除する"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "잠금 해제"
+          }
         }
       }
     },
@@ -4706,6 +6362,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "更新"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "업데이트"
           }
         }
       }
@@ -4724,6 +6386,12 @@
             "state": "translated",
             "value": "最新版です"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "최신 버전입니다"
+          }
         }
       }
     },
@@ -4740,6 +6408,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ は最新バージョンです。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "현재 %@ 버전이 최신입니다."
           }
         }
       }
@@ -4758,6 +6432,12 @@
             "state": "translated",
             "value": "カメラで母音を推定する"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "카메라로 모음 추정"
+          }
         }
       }
     },
@@ -4774,6 +6454,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "映像キャプチャ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "영상 캡처"
           }
         }
       }
@@ -4792,6 +6478,12 @@
             "state": "translated",
             "value": "映像デバイス"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "영상 장치"
+          }
         }
       }
     },
@@ -4808,6 +6500,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "形式"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "형식"
           }
         }
       }
@@ -4826,6 +6524,12 @@
             "state": "translated",
             "value": "HEVC（アルファ付き）"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HEVC (알파 채널 포함)"
+          }
         }
       }
     },
@@ -4842,6 +6546,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "使い方を見る"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "사용법 보기"
           }
         }
       }
@@ -4860,6 +6570,12 @@
             "state": "translated",
             "value": "ビネット効果"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "비네트"
+          }
         }
       }
     },
@@ -4876,6 +6592,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "仮想カメラ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "가상 카메라"
           }
         }
       }
@@ -4894,6 +6616,12 @@
             "state": "translated",
             "value": "VRMAを再生するには、このモデルをVRM 1.0へ自動変換して読み込む必要があります。設定を有効にしてモデルを再読み込みしてください。"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VRMA를 재생하려면 이 모델을 VRM 1.0으로 자동 변환하여 불러와야 합니다. 설정을 활성화한 후 모델을 다시 불러와 주세요."
+          }
         }
       }
     },
@@ -4910,6 +6638,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "待機"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "대기"
           }
         }
       }
@@ -4928,6 +6662,12 @@
             "state": "translated",
             "value": "ウェブ"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "웹"
+          }
         }
       }
     },
@@ -4944,6 +6684,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "What!?"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "뭐라고!?"
           }
         }
       }
@@ -4962,6 +6708,12 @@
             "state": "translated",
             "value": "ホワイトバランス"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "화이트 밸런스"
+          }
         }
       }
     },
@@ -4978,6 +6730,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "幅"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "너비"
           }
         }
       }
@@ -4996,6 +6754,12 @@
             "state": "translated",
             "value": "風"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "바람"
+          }
         }
       }
     },
@@ -5012,6 +6776,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "ウィンドウ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "윈도우"
           }
         }
       }
