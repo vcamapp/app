@@ -48,11 +48,17 @@ public final class AvatarAudioManager {
         }
     }
 
+    /// Whether the microphone is running or about to. The tap is installed asynchronously,
+    /// so the audio engine alone does not describe the whole lifecycle.
+    private var isRecording: Bool {
+        startTask != nil || audioManager.isRunning
+    }
+
     public func start(usage: Usage, isSystemSoundRecording: Bool = false) {
         self.usage.insert(usage)
 
         // The startup is asynchronous, so don't allow consecutive calls (it causes a crash in installTap)
-        guard startTask == nil, !audioManager.isRunning else { return }
+        guard !isRecording else { return }
 
         setEmotionEnabled(UserDefaults.standard.value(for: .useEmotion))
 
@@ -63,8 +69,13 @@ public final class AvatarAudioManager {
         }
 
         startTask = Task {
-            defer { startTask = nil }
-            guard let inputFormat = await audioManager.startRecording() else { return }
+            // A cancelled startup has already been replaced or cleared by stop()
+            defer {
+                if !Task.isCancelled {
+                    startTask = nil
+                }
+            }
+            guard let inputFormat = try? await audioManager.startRecording() else { return }
             audioExpressionEstimator.configure(format: inputFormat)
         }
     }
@@ -72,6 +83,8 @@ public final class AvatarAudioManager {
     public func stop(usage: Usage) {
         self.usage.remove(usage)
         guard self.usage.isEmpty else { return }
+        startTask?.cancel()
+        startTask = nil
         audioManager.stopRecording()
         audioExpressionEstimator.reset()
     }
@@ -93,7 +106,7 @@ public final class AvatarAudioManager {
         Logger.log(audioDevice.name())
         UserDefaults.standard.set(audioDevice.uid, for: .audioDeviceUid)
         
-        if audioManager.isRunning {
+        if isRecording {
             let usage = self.usage
             stop(usage: usage)
             // start() waits before installing the tap, so the new device is applied without an extra delay here

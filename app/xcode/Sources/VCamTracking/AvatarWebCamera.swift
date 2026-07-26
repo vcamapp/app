@@ -155,7 +155,7 @@ public final class AvatarWebCamera {
     private func tearDownPipeline() async {
         configurationRevision &+= 1
         await cameraSession.setFrameHandler(nil, revision: configurationRevision)
-        _ = await cameraSession.stop()
+        await cameraSession.stop()
         await activePipeline?.pipeline.stop()
         activePipeline = nil
     }

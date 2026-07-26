@@ -21,15 +21,17 @@ public final class AudioManager {
         onUpdateAudioBuffer = handler
     }
 
-    /// Returns the recording format, or nil when the microphone is unavailable
-    public func startRecording() async -> AVAudioFormat? {
+    /// Returns the recording format, or nil when the microphone is unavailable.
+    /// Throws when cancelled before the engine starts, so a stop during the startup delay
+    /// does not leave the microphone running afterwards.
+    public func startRecording() async throws -> AVAudioFormat? {
         if !Self.isMicrophoneAuthorized() {
             Logger.log("requestAuthorization")
             guard await Self.requestMicrophonePermission() else { return nil }
         }
 
         // After changing settings with CoreAudio, a delay is needed to prevent installTap failures
-        try? await Task.sleep(for: .milliseconds(500))
+        try await Task.sleep(for: .milliseconds(500))
 
         audioEngine = AVAudioEngine()
         let inputNode = audioEngine.inputNode

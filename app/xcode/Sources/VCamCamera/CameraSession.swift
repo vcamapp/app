@@ -1,5 +1,4 @@
 @preconcurrency import AVFoundation
-import CoreGraphics
 import Foundation
 import VCamLogger
 
@@ -32,19 +31,6 @@ public enum CameraSessionError: LocalizedError, Sendable {
     }
 }
 
-public struct CameraSessionSnapshot: Sendable, Equatable {
-    public enum State: Sendable, Equatable {
-        case idle
-        case configured
-        case running
-    }
-
-    public let state: State
-    public let deviceID: String?
-    public let captureSize: CGSize
-    public let requestedFPS: Int
-}
-
 public actor CameraSession {
     private let session = AVCaptureSession()
     private let videoOutput: AVCaptureVideoDataOutput
@@ -56,9 +42,6 @@ public actor CameraSession {
     private var frameHandlerRevision: UInt64 = 0
     private var deviceInput: AVCaptureDeviceInput?
     private var captureDevice: AVCaptureDevice?
-    private var selectedFormat: AVCaptureDevice.Format?
-    private var lockedDevice: AVCaptureDevice?
-    private var captureSize = CGSize.zero
     private var requestedFPS: Int
 
     public init(initialFPS: Int = 24) {
@@ -86,7 +69,7 @@ public actor CameraSession {
         }
     }
 
-    @discardableResult public func configure(deviceID: String?, fps: Int) throws -> CameraSessionSnapshot {
+    public func configure(deviceID: String?, fps: Int) throws {
         guard fps > 0 else { throw CameraSessionError.invalidFPS(fps) }
         guard let device = (deviceID.flatMap(Camera.camera(id:)) ?? Camera.defaultCaptureDevice) else {
             throw CameraSessionError.deviceNotFound(deviceID)
@@ -101,35 +84,31 @@ public actor CameraSession {
         } catch {
             throw CameraSessionError.cannotCreateInput(device.uniqueID, error.localizedDescription)
         }
-        let needsLock = lockedDevice !== device
-        if needsLock {
-            do { 
-                try device.lockForConfiguration()
-            } catch {
-                throw CameraSessionError.cannotLockDevice(device.uniqueID, error.localizedDescription)
-            }
-        }
-        device.activeFormat = result.format
         let rate = FrameRateSelector.recommendedFrameRate(
             targetFPS: Float64(fps),
             supportedFrameRateRanges: result.format.videoSupportedFrameRateRanges
         )
         guard rate.minFrameDuration.isValid, rate.maxFrameDuration.isValid else {
-            if needsLock {
-                device.unlockForConfiguration()
-            }
             throw CameraSessionError.unsupportedFrameRate(device.uniqueID, fps)
         }
+
+        do {
+            try device.lockForConfiguration()
+        } catch {
+            throw CameraSessionError.cannotLockDevice(device.uniqueID, error.localizedDescription)
+        }
+        // Hold the lock only while writing the configuration. Keeping it degrades the
+        // capture quality of other apps sharing the camera.
+        // see: https://developer.apple.com/documentation/avfoundation/avcapturedevice/lockforconfiguration()
+        device.activeFormat = result.format
         device.activeVideoMinFrameDuration = rate.minFrameDuration
         device.activeVideoMaxFrameDuration = rate.maxFrameDuration
+        device.unlockForConfiguration()
 
         session.beginConfiguration()
         if !session.outputs.contains(where: { $0 === videoOutput }) {
             guard session.canAddOutput(videoOutput) else {
                 session.commitConfiguration()
-                if needsLock {
-                    device.unlockForConfiguration()
-                }
                 throw CameraSessionError.cannotAddOutput
             }
             session.addOutput(videoOutput)
@@ -148,76 +127,46 @@ public actor CameraSession {
                 }
             }
             session.commitConfiguration()
-            if needsLock {
-                device.unlockForConfiguration()
-            }
             if !restored {
                 deviceInput = nil
                 captureDevice = nil
-                selectedFormat = nil
-                captureSize = .zero
-                if let lockedDevice {
-                    lockedDevice.unlockForConfiguration()
-                }
-                self.lockedDevice = nil
                 throw CameraSessionError.cannotRestorePreviousInput
             }
             throw CameraSessionError.cannotAddInput(device.uniqueID)
         }
         session.addInput(input)
         session.commitConfiguration()
-        if let old = lockedDevice, old !== device {
-            old.unlockForConfiguration()
-        }
 
         deviceInput = input
         captureDevice = device
-        selectedFormat = result.format
-        lockedDevice = device
-        captureSize = result.resolution
         requestedFPS = fps
         videoOutput.connection(with: .video)?.isEnabled = true
 
         Logger.log(
             "Configured camera \(device.uniqueID), \(Int(result.resolution.width))x\(Int(result.resolution.height)), \(fps) FPS"
         )
-        return snapshot()
     }
 
-    @discardableResult
-    public func setDevice(id: String?) throws -> CameraSessionSnapshot {
+    public func setDevice(id: String?) throws {
         try configure(deviceID: id, fps: requestedFPS)
     }
 
-    @discardableResult
-    public func setFPS(_ fps: Int) throws -> CameraSessionSnapshot {
+    public func setFPS(_ fps: Int) throws {
         try configure(deviceID: captureDevice?.uniqueID, fps: fps)
     }
 
-    @discardableResult
-    public func start() throws -> CameraSessionSnapshot {
+    public func start() throws {
         guard deviceInput != nil else {
             throw CameraSessionError.notConfigured
         }
         if !session.isRunning {
             session.startRunning()
         }
-        return snapshot()
     }
 
-    public func stop() -> CameraSessionSnapshot {
+    public func stop() {
         if session.isRunning {
             session.stopRunning()
         }
-        return snapshot()
-    }
-
-    public func snapshot() -> CameraSessionSnapshot {
-        CameraSessionSnapshot(
-            state: session.isRunning ? .running : (deviceInput == nil ? .idle : .configured),
-            deviceID: captureDevice?.uniqueID,
-            captureSize: captureSize,
-            requestedFPS: requestedFPS
-        )
     }
 }

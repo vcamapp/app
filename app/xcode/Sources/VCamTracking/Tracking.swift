@@ -1,6 +1,4 @@
 import Foundation
-import Accelerate
-import simd
 import Combine
 import VCamEntity
 import VCamData
@@ -63,10 +61,10 @@ public final class Tracking {
             if mappings.perfectSync.isEmpty {
                 mappings.perfectSync = TrackingMappingEntry.defaultMappings(for: .perfectSync)
             }
-            applyMappingsToUnity(for: .perfectSync)
         } else {
             mappings.perfectSync = []
         }
+        applyFaceMappingsToUnity()
     }
 
     public func configure() {
@@ -87,8 +85,6 @@ public final class Tracking {
         if UserDefaults.standard.value(for: .integrationVCamMocap) {
             try? startVCamMotionReceiver()
         }
-
-        reconcileLipSyncState()
     }
 
     public func addMapping(_ entry: TrackingMappingEntry, for mode: TrackingMode) {
@@ -175,8 +171,16 @@ public final class Tracking {
 
         reconcileLipSyncState()
 
-        let mode: TrackingMode = method.supportsPerfectSync ? .perfectSync : .blendShape
-        applyMappingsToUnity(for: mode)
+        applyFaceMappingsToUnity()
+    }
+
+    /// Unity owns one mapping set per mode, and which one actually receives the face data is
+    /// decided per packet by the model's Perfect Sync support. A Perfect Sync capable method
+    /// falls back to the blend shape mode for a model without those blend shapes, so both sets
+    /// are kept in sync instead of only the one of the current tracking method.
+    private func applyFaceMappingsToUnity() {
+        applyMappingsToUnity(for: .blendShape)
+        applyMappingsToUnity(for: .perfectSync)
     }
 
     /// Whether VCamMocap drives the hands. Checks both methods to guard
