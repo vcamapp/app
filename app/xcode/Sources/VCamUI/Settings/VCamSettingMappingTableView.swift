@@ -61,24 +61,10 @@ struct VCamSettingMappingTableView: NSViewRepresentable {
         tableView.columnAutoresizingStyle = .uniformColumnAutoresizingStyle
         tableView.delegate = context.coordinator
 
+        // The items depend on the column the menu is opened on, so they are built in menuNeedsUpdate(_:)
         let menu = NSMenu()
         menu.autoenablesItems = true
-
-        let editBoundsItem = NSMenuItem(title: String(localized: .editOutputBounds), action: #selector(Coordinator.editOutputBounds(_:)), keyEquivalent: "")
-        editBoundsItem.target = context.coordinator
-        menu.addItem(editBoundsItem)
-
-        menu.addItem(.separator())
-
-        let resetItem = NSMenuItem(title: String(localized: .resetToDefault), action: #selector(Coordinator.resetToDefault(_:)), keyEquivalent: "")
-        resetItem.target = context.coordinator
-        menu.addItem(resetItem)
-
-        menu.addItem(.separator())
-
-        let deleteItem = NSMenuItem(title: String(localized: .delete), action: #selector(Coordinator.deleteSelected(_:)), keyEquivalent: "")
-        deleteItem.target = context.coordinator
-        menu.addItem(deleteItem)
+        menu.delegate = context.coordinator
         tableView.menu = menu
 
         context.coordinator.configureTableView(tableView)
@@ -96,10 +82,10 @@ struct VCamSettingMappingTableView: NSViewRepresentable {
     }
 
     @MainActor
-    final class Coordinator: NSObject, NSTableViewDelegate, NSUserInterfaceValidations {
+    final class Coordinator: NSObject, NSTableViewDelegate, NSMenuDelegate, NSUserInterfaceValidations {
         var store: MappingDataStore
         var hasBlendShapeNames: Bool
-        weak var tableView: NSTableView?
+        fileprivate weak var tableView: MappingTableView?
 
         private var dataSource: NSTableViewDiffableDataSource<MappingTableSection, UUID>?
         private var itemIndexByID: [UUID: Int] = [:]
@@ -116,7 +102,7 @@ struct VCamSettingMappingTableView: NSViewRepresentable {
             self.hasBlendShapeNames = hasBlendShapeNames
         }
 
-        func configureTableView(_ tableView: NSTableView) {
+        fileprivate func configureTableView(_ tableView: MappingTableView) {
             self.tableView = tableView
             let dataSource = NSTableViewDiffableDataSource<MappingTableSection, UUID>(tableView: tableView) { [weak self] tableView, tableColumn, row, itemID in
                 guard let self else { return NSView() }
@@ -271,6 +257,7 @@ struct VCamSettingMappingTableView: NSViewRepresentable {
             }
             let cell = make()
             cell.identifier = identifier
+            cell.assignContextMenu(tableView.menu)
             return cell
         }
 
@@ -320,25 +307,25 @@ struct VCamSettingMappingTableView: NSViewRepresentable {
             store.applyMappings()
         }
 
-        private func updateOutputBounds(row: Int, min: Float, max: Float) {
-            guard row >= 0, row < store.mappings.count else { return }
-            store.mappings[row].outputKey.bounds = min...max
-            var clampedMin = Swift.max(store.mappings[row].outputKey.rangeMin, min)
-            var clampedMax = Swift.min(store.mappings[row].outputKey.rangeMax, max)
-            if clampedMin > clampedMax {
-                clampedMin = min
-                clampedMax = max
-            }
-            store.mappings[row].outputKey.rangeMin = clampedMin
-            store.mappings[row].outputKey.rangeMax = clampedMax
-            store.applyMappings()
-            reloadRow(row)
-        }
-
         private func filterChanged(row: Int, filter: TrackingFilter) {
             guard row >= 0, row < store.mappings.count else { return }
             store.mappings[row].filter = filter
             store.applyMappings()
+        }
+
+        @objc func reverseInputDirection(_ sender: Any?) {
+            reverseDirection(.input)
+        }
+
+        @objc func reverseOutputDirection(_ sender: Any?) {
+            reverseDirection(.output)
+        }
+
+        private func reverseDirection(_ side: TrackingMappingEntry.Side) {
+            guard let tableView else { return }
+            store.reverseDirection(side, at: tableView.selectedRowIndexes)
+            let columns = IndexSet(integersIn: 0..<tableView.tableColumns.count)
+            tableView.reloadData(forRowIndexes: tableView.selectedRowIndexes, columnIndexes: columns)
         }
 
         @objc func resetToDefault(_ sender: Any?) {
@@ -359,57 +346,110 @@ struct VCamSettingMappingTableView: NSViewRepresentable {
             let selectedCount = tableView.selectedRowIndexes.count
 
             switch item.action {
-            case #selector(editOutputBounds(_:)):
+            case #selector(editInputBounds(_:)), #selector(editOutputBounds(_:)):
                 return selectedCount == 1
-            case #selector(resetToDefault(_:)), #selector(deleteSelected(_:)):
+            case #selector(reverseInputDirection(_:)), #selector(reverseOutputDirection(_:)),
+                #selector(resetToDefault(_:)), #selector(deleteSelected(_:)):
                 return selectedCount > 0
             default:
                 return true
             }
         }
 
-        @objc func editOutputBounds(_ sender: Any?) {
-            guard let tableView else { return }
-            let selected = tableView.selectedRowIndexes
-            guard selected.count == 1, let row = selected.first else { return }
-            guard row >= 0, row < store.mappings.count else { return }
-
-            let entry = store.mappings[row]
-            let alert = NSAlert()
-            alert.messageText = String(localized: .editOutputBounds)
-            alert.informativeText = String(localized: .editOutputBoundsMessage)
-            alert.addButton(withTitle: String(localized: .ok))
-            alert.addButton(withTitle: String(localized: .cancel))
-
-            let minField = NSTextField(string: String(format: "%.2f", entry.outputKey.bounds.lowerBound))
-            minField.placeholderString = String(localized: .minimum)
-            let maxField = NSTextField(string: String(format: "%.2f", entry.outputKey.bounds.upperBound))
-            maxField.placeholderString = String(localized: .maximum)
-            minField.translatesAutoresizingMaskIntoConstraints = false
-            maxField.translatesAutoresizingMaskIntoConstraints = false
-
-            let stackView = NSStackView(views: [minField, maxField])
-            stackView.orientation = .vertical
-            stackView.spacing = 8
-            stackView.frame = NSRect(x: 0, y: 0, width: 200, height: 60)
-            alert.accessoryView = stackView
-
-            NSLayoutConstraint.activate([
-                minField.widthAnchor.constraint(equalToConstant: 160),
-                maxField.widthAnchor.constraint(equalToConstant: 160)
-            ])
-
-            let response = alert.runModal()
-            if response == .alertFirstButtonReturn {
-                guard let min = Float(userInput: minField.stringValue),
-                      let max = Float(userInput: maxField.stringValue),
-                      min < max else {
-                    return
-                }
-                updateOutputBounds(row: row, min: min, max: max)
-            }
+        @objc func editInputBounds(_ sender: Any?) {
+            editBounds(for: .input)
         }
 
+        @objc func editOutputBounds(_ sender: Any?) {
+            editBounds(for: .output)
+        }
+
+        private func editBounds(for side: TrackingMappingEntry.Side) {
+            guard let tableView else { return }
+            let selected = tableView.selectedRowIndexes
+            guard selected.count == 1, let row = selected.first, row < store.mappings.count else { return }
+            guard let bounds = MappingBoundsAlert.run(for: store.mappings[row], side: side) else { return }
+            store.updateBounds(bounds, for: side, at: row)
+        }
+
+        func menuNeedsUpdate(_ menu: NSMenu) {
+            menu.removeAllItems()
+            tableView?.prepareContextMenu()
+
+            // Right clicking the input or output column narrows the actions down to that side
+            let side = tableView?.contextMenuSide
+            if side != .output {
+                menu.addItem(menuItem(.editInputBounds, action: #selector(editInputBounds(_:))))
+                menu.addItem(menuItem(.reverseInputDirection, action: #selector(reverseInputDirection(_:))))
+            }
+            if side == nil {
+                menu.addItem(.separator())
+            }
+            if side != .input {
+                menu.addItem(menuItem(.editOutputBounds, action: #selector(editOutputBounds(_:))))
+                menu.addItem(menuItem(.reverseOutputDirection, action: #selector(reverseOutputDirection(_:))))
+            }
+
+            menu.addItem(.separator())
+            menu.addItem(menuItem(.resetToDefault, action: #selector(resetToDefault(_:))))
+            menu.addItem(.separator())
+            menu.addItem(menuItem(.delete, action: #selector(deleteSelected(_:))))
+        }
+
+        private func menuItem(_ title: LocalizedStringResource, action: Selector) -> NSMenuItem {
+            let item = NSMenuItem(title: String(localized: title), action: action, keyEquivalent: "")
+            item.target = self
+            return item
+        }
+
+        func tableViewSelectionDidChange(_ notification: Notification) {
+            guard let tableView, store.selectedIndices != tableView.selectedRowIndexes else { return }
+            let selectedIndices = tableView.selectedRowIndexes
+            // Defer the update so that the store is not modified while SwiftUI is updating this view
+            Task { @MainActor [store] in
+                store.selectedIndices = selectedIndices
+            }
+        }
+    }
+}
+
+/// Modal alert to edit the bounds of one side of a mapping entry.
+enum MappingBoundsAlert {
+    /// Returns the new bounds, or nil when the alert is cancelled or the input is invalid.
+    @MainActor
+    static func run(for entry: TrackingMappingEntry, side: TrackingMappingEntry.Side) -> ClosedRange<Float>? {
+        let bounds = entry.bounds(for: side)
+        let alert = NSAlert()
+        alert.messageText = String(localized: side == .input ? .editInputBounds : .editOutputBounds)
+        alert.informativeText = String(localized: side == .input ? .editInputBoundsMessage : .editOutputBoundsMessage)
+        alert.addButton(withTitle: String(localized: .ok))
+        alert.addButton(withTitle: String(localized: .cancel))
+
+        let minField = NSTextField(string: String(format: "%.2f", bounds.lowerBound))
+        minField.placeholderString = String(localized: .minimum)
+        let maxField = NSTextField(string: String(format: "%.2f", bounds.upperBound))
+        maxField.placeholderString = String(localized: .maximum)
+        minField.translatesAutoresizingMaskIntoConstraints = false
+        maxField.translatesAutoresizingMaskIntoConstraints = false
+
+        let stackView = NSStackView(views: [minField, maxField])
+        stackView.orientation = .vertical
+        stackView.spacing = 8
+        stackView.frame = NSRect(x: 0, y: 0, width: 200, height: 60)
+        alert.accessoryView = stackView
+
+        NSLayoutConstraint.activate([
+            minField.widthAnchor.constraint(equalToConstant: 160),
+            maxField.widthAnchor.constraint(equalToConstant: 160)
+        ])
+
+        guard alert.runModal() == .alertFirstButtonReturn,
+              let min = Float(userInput: minField.stringValue),
+              let max = Float(userInput: maxField.stringValue),
+              min < max else {
+            return nil
+        }
+        return min...max
     }
 }
 
@@ -428,8 +468,22 @@ private extension NSUserInterfaceItemIdentifier {
 }
 
 private final class MappingTableView: NSTableView {
-    override func menu(for event: NSEvent) -> NSMenu? {
-        let location = convert(event.locationInWindow, from: nil)
+    /// The side of the column the context menu was opened on, or nil when it is not the input or output column
+    private(set) var contextMenuSide: TrackingMappingEntry.Side?
+
+    /// Selects the row under the pointer and remembers the column the menu is opened on.
+    ///
+    /// The menu is shown by the view under the pointer, which may be a cell view instead of the table
+    /// view, so the location is taken from the event rather than from menu(for:).
+    func prepareContextMenu() {
+        guard let window else { return }
+        let windowPoint = if let event = NSApp.currentEvent, event.window === window {
+            event.locationInWindow
+        } else {
+            window.convertPoint(fromScreen: NSEvent.mouseLocation)
+        }
+
+        let location = convert(windowPoint, from: nil)
         let row = row(at: location)
         if row >= 0 {
             if !selectedRowIndexes.contains(row) {
@@ -438,7 +492,17 @@ private final class MappingTableView: NSTableView {
         } else {
             deselectAll(nil)
         }
-        return super.menu(for: event)
+        contextMenuSide = side(at: location)
+    }
+
+    private func side(at location: NSPoint) -> TrackingMappingEntry.Side? {
+        let column = column(at: location)
+        guard tableColumns.indices.contains(column) else { return nil }
+        switch tableColumns[column].identifier {
+        case .input: return .input
+        case .output: return .output
+        default: return nil
+        }
     }
 }
 

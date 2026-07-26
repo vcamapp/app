@@ -1327,6 +1327,40 @@
         }
       }
     },
+    "editInputBounds": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit Input Bounds"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "入力範囲を編集"
+          }
+        }
+      }
+    },
+    "editInputBoundsMessage": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set the minimum and maximum values for the input range."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "入力範囲の最小値と最大値を設定します。"
+          }
+        }
+      }
+    },
     "editModel": {
       "extractionState": "manual",
       "localizations": {
@@ -3550,6 +3584,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "セットアップが完了しました、Zoom等のクライアントを再起動してください"
+          }
+        }
+      }
+    },
+    "reverseInputDirection": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reverse Input Direction"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "入力の向きを反転"
+          }
+        }
+      }
+    },
+    "reverseOutputDirection": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reverse Output Direction"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "出力の向きを反転"
           }
         }
       }

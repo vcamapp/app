@@ -28,6 +28,68 @@ struct VCamMotionTests {
     }
 
     @Test
+    func reverseDirectionFlipsOnlyTheGivenSide() {
+        var entry = TrackingMappingEntry(
+            input: .init(key: "_posY", bounds: -1...1, rangeMin: -1, rangeMax: 1),
+            outputKey: .init(key: "_posY", bounds: -1...1, rangeMin: -1, rangeMax: 1)
+        )
+
+        entry.reverseDirection(.input)
+
+        #expect(entry.input.rangeMin == 1)
+        #expect(entry.input.rangeMax == -1)
+        #expect(entry.outputKey.rangeMin == -1)
+        #expect(entry.outputKey.rangeMax == 1)
+
+        entry.reverseDirection(.output)
+
+        #expect(entry.outputKey.rangeMin == 1)
+        #expect(entry.outputKey.rangeMax == -1)
+    }
+
+    @Test
+    func updateBoundsKeepsInvertedRange() {
+        var entry = TrackingMappingEntry(
+            input: .init(key: "_posY", bounds: -1...1, rangeMin: 1, rangeMax: -1),
+            outputKey: .init(key: "_posY", bounds: -1...1, rangeMin: -1, rangeMax: 1)
+        )
+
+        entry.updateBounds(-0.5...0.5, for: .input)
+
+        #expect(entry.input.bounds == -0.5...0.5)
+        #expect(entry.input.rangeMin == 0.5)
+        #expect(entry.input.rangeMax == -0.5)
+        #expect(entry.outputKey.bounds == -1...1)
+    }
+
+    @Test
+    func updateBoundsKeepsCollapsedRangeDisabled() {
+        var entry = TrackingMappingEntry(
+            input: .init(key: "_posY", bounds: -1...1),
+            outputKey: .init(key: "_posY", bounds: -1...1, rangeMin: 0, rangeMax: 0)
+        )
+
+        entry.updateBounds(-0.5...0.5, for: .output)
+
+        #expect(entry.outputKey.bounds == -0.5...0.5)
+        #expect(entry.outputKey.rangeMin == 0)
+        #expect(entry.outputKey.rangeMax == 0)
+    }
+
+    @Test
+    func updateBoundsKeepsInvertedDirectionWhenClamped() {
+        var entry = TrackingMappingEntry(
+            input: .init(key: "_posY", bounds: -1...1, rangeMin: 1, rangeMax: -1),
+            outputKey: .init(key: "_posY", bounds: -1...1)
+        )
+
+        entry.updateBounds(2...3, for: .input)
+
+        #expect(entry.input.rangeMin == 3)
+        #expect(entry.input.rangeMax == 2)
+    }
+
+    @Test
     func perfectSyncPositionYAndZDefaultOutputRangeIsDisabled() throws {
         let mappings = TrackingMappingEntry.defaultMappings(for: .perfectSync)
 

@@ -29,6 +29,28 @@ public struct TrackingMappingEntry: Codable, Sendable, Hashable, Identifiable {
         outputKey.resetToDefault(for: mode)
         filter = .none
     }
+
+    public func bounds(for side: Side) -> ClosedRange<Float> {
+        switch side {
+        case .input: input.bounds
+        case .output: outputKey.bounds
+        }
+    }
+
+    /// Reverses the mapping direction by swapping the range of the given side
+    public mutating func reverseDirection(_ side: Side) {
+        switch side {
+        case .input: swap(&input.rangeMin, &input.rangeMax)
+        case .output: swap(&outputKey.rangeMin, &outputKey.rangeMax)
+        }
+    }
+
+    public mutating func updateBounds(_ bounds: ClosedRange<Float>, for side: Side) {
+        switch side {
+        case .input: input.updateBounds(bounds)
+        case .output: outputKey.updateBounds(bounds)
+        }
+    }
 }
 
 /// Mapping entries kept per tracking mode
@@ -60,8 +82,17 @@ public struct TrackingMappings: Sendable {
 }
 
 public extension TrackingMappingEntry {
+    /// The side of a mapping an operation applies to
+    enum Side: Sendable, Hashable {
+        case input
+        case output
+    }
+
     protocol Key: Identifiable, Sendable, Hashable, Codable {
         var key: String { get }
+        var bounds: ClosedRange<Float> { get set }
+        var rangeMin: Float { get set }
+        var rangeMax: Float { get set }
     }
 
     struct InputKey: Key {
@@ -133,6 +164,24 @@ public extension TrackingMappingEntry {
 
 public extension TrackingMappingEntry.Key {
     var id: String { key }
+
+    /// Applies new bounds, keeping the current range inside them
+    mutating func updateBounds(_ newBounds: ClosedRange<Float>) {
+        let wasReversed = rangeMin > rangeMax
+        let wasCollapsed = rangeMin == rangeMax
+        bounds = newBounds
+        rangeMin = simd_clamp(rangeMin, newBounds.lowerBound, newBounds.upperBound)
+        rangeMax = simd_clamp(rangeMax, newBounds.lowerBound, newBounds.upperBound)
+        if rangeMin == rangeMax, !wasCollapsed {
+            if wasReversed {
+                rangeMin = newBounds.upperBound
+                rangeMax = newBounds.lowerBound
+            } else {
+                rangeMin = newBounds.lowerBound
+                rangeMax = newBounds.upperBound
+            }
+        }
+    }
 }
 
 private enum RangeKeyCodingKeys: String, CodingKey {

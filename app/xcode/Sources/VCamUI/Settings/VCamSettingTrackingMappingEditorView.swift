@@ -60,13 +60,7 @@ public struct VCamSettingTrackingMappingEditorView: View {
 
             ToolbarItem(placement: .automatic) {
                 Menu {
-                    Button(role: .destructive) {
-                        store.resetAllMappings()
-                    } label: {
-                        Image(systemName: "arrow.uturn.backward")
-                        Text(.resetAllToDefault)
-                    }
-                    .foregroundStyle(.red)
+                    actionMenuContent
                 } label: {
                     Image(systemName: "ellipsis")
                 }
@@ -74,6 +68,80 @@ public struct VCamSettingTrackingMappingEditorView: View {
             }
         }
         .frame(minWidth: 840, minHeight: 400)
+    }
+
+    @ViewBuilder
+    private var actionMenuContent: some View {
+        let selectedIndices = store.selectedIndices
+
+        Button {
+            editSelectedBounds(for: .input)
+        } label: {
+            Image(systemName: "ruler")
+            Text(.editInputBounds)
+        }
+        .disabled(selectedIndices.count != 1)
+
+        Button {
+            store.reverseDirection(.input, at: selectedIndices)
+        } label: {
+            Image(systemName: "arrow.left.arrow.right")
+            Text(.reverseInputDirection)
+        }
+        .disabled(selectedIndices.isEmpty)
+
+        Divider()
+
+        Button {
+            editSelectedBounds(for: .output)
+        } label: {
+            Image(systemName: "ruler")
+            Text(.editOutputBounds)
+        }
+        .disabled(selectedIndices.count != 1)
+
+        Button {
+            store.reverseDirection(.output, at: selectedIndices)
+        } label: {
+            Image(systemName: "arrow.left.arrow.right")
+            Text(.reverseOutputDirection)
+        }
+        .disabled(selectedIndices.isEmpty)
+
+        Divider()
+
+        Button {
+            store.resetToDefault(at: selectedIndices)
+        } label: {
+            Image(systemName: "arrow.uturn.backward")
+            Text(.resetToDefault)
+        }
+        .disabled(selectedIndices.isEmpty)
+
+        Button(role: .destructive) {
+            store.deleteMapping(at: selectedIndices)
+        } label: {
+            Image(systemName: "trash")
+            Text(.delete)
+        }
+        .disabled(selectedIndices.isEmpty)
+
+        Divider()
+
+        Button(role: .destructive) {
+            store.resetAllMappings()
+        } label: {
+            Image(systemName: "arrow.uturn.backward")
+            Text(.resetAllToDefault)
+        }
+        .foregroundStyle(.red)
+    }
+
+    private func editSelectedBounds(for side: TrackingMappingEntry.Side) {
+        guard store.selectedIndices.count == 1, let index = store.selectedIndices.first,
+              index < store.mappings.count else { return }
+        guard let bounds = MappingBoundsAlert.run(for: store.mappings[index], side: side) else { return }
+        store.updateBounds(bounds, for: side, at: index)
     }
 
     private var supportsIPhoneTrackingMapping: Bool {
@@ -119,6 +187,7 @@ extension VCamSettingTrackingMappingEditorView: MacWindow {
 @Observable
 final class MappingDataStore {
     var selectedMode: TrackingMode = .blendShape
+    var selectedIndices = IndexSet()
     var mappingsRevision = 0
     private(set) var isInitialized = false
 
@@ -175,14 +244,27 @@ final class MappingDataStore {
         }
     }
 
+    func reverseDirection(_ side: TrackingMappingEntry.Side, at indices: IndexSet) {
+        update(at: indices) { $0.reverseDirection(side) }
+    }
+
+    func updateBounds(_ bounds: ClosedRange<Float>, for side: TrackingMappingEntry.Side, at index: Int) {
+        update(at: IndexSet(integer: index)) { $0.updateBounds(bounds, for: side) }
+    }
+
     func resetToDefault(at indices: IndexSet) {
-        for index in indices {
-            tracking.mappings[selectedMode][index].resetToDefault(for: selectedMode)
+        let mode = selectedMode
+        update(at: indices) { $0.resetToDefault(for: mode) }
+    }
+
+    private func update(at indices: IndexSet, _ body: (inout TrackingMappingEntry) -> Void) {
+        let targets = indices.filter(mappings.indices.contains)
+        guard !targets.isEmpty else { return }
+        for index in targets {
+            body(&tracking.mappings[selectedMode][index])
         }
-        if !indices.isEmpty {
-            tracking.applyMappings(for: selectedMode)
-            mappingsRevision &+= 1
-        }
+        applyMappings()
+        mappingsRevision &+= 1
     }
 
     func resetAllMappings() {
