@@ -4,7 +4,7 @@ import VCamEntity
 import VCamLogger
 
 struct VCamSettingLicenseView: View {
-    @State var errorMessage: Text?
+    @State private var errorMessage: Text?
     @State private var isSignOutAlertPresented = false
 
     @Environment(\.licenseManager) private var licenseManager

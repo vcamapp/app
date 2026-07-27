@@ -17,10 +17,10 @@ public struct ImageFilterView: View {
     let close: () -> Void
     let completion: (ImageFilter) -> Void
 
-    @State var filters: [ImageFilterConfiguration.Filter] = []
+    @State private var filters: [ImageFilterConfiguration.Filter] = []
     @State private var selectedFilterId: UUID?
     @State private var preview = NSImage()
-    
+
     public var body: some View {
         ModalSheet(doneTitle: String(localized: .apply)) {
             dismiss()

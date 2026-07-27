@@ -66,15 +66,8 @@ public struct FlatButtonStyle: Sendable {
     }
 }
 
-private struct FlatButtonStyleKey: EnvironmentKey {
-    static let defaultValue = FlatButtonStyle()
-}
-
 public extension EnvironmentValues {
-    var flatButtonStyle: FlatButtonStyle {
-        get { self[FlatButtonStyleKey.self] }
-        set { self[FlatButtonStyleKey.self] = newValue }
-    }
+    @Entry var flatButtonStyle = FlatButtonStyle()
 }
 
 struct FlatButton_Previews: PreviewProvider {

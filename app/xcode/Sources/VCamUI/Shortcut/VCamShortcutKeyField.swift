@@ -4,7 +4,7 @@ import VCamEntity
 struct VCamShortcutKeyField: View {
     @Binding var shortcutKey: VCamShortcut.ShortcutKey?
 
-    @State var isKeyRecordingPresented = false
+    @State private var isKeyRecordingPresented = false
 
     var keyCombination: KeyCombination? {
         shortcutKey.map { .init(key: $0.character, modifiers: .init(rawValue: $0.modifiers)) }

@@ -211,7 +211,7 @@ private struct DraggableEdge<Content: View>: View {
 
 private struct ScalableViewModifierDemoView: View {
     public init() {}
-    @State var rect = CGRect.null
+    @State private var rect = CGRect.null
 
     public var body: some View {
         Color.red

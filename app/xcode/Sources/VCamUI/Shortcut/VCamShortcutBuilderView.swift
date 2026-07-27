@@ -9,7 +9,7 @@ public struct VCamShortcutBuilderView: View {
         self._sourceShortcut = shortcut
     }
 
-    @State var shortcut: VCamShortcut
+    @State private var shortcut: VCamShortcut
     @Binding var sourceShortcut: VCamShortcut
 
     public var body: some View {

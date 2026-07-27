@@ -65,7 +65,7 @@ public struct VCamSettingView: View {
         }
     }
 
-    @State var tab: Tab = .general
+    @State private var tab: Tab = .general
 
     @Bindable private var recorder = VideoRecorder.shared
 

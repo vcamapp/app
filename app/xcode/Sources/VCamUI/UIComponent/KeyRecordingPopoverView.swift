@@ -21,9 +21,9 @@ public struct KeyRecordingPopoverView: View {
         self.completion = { _ in }
     }
 
-    @State var keys = KeyCombination.empty
-    @State var isError = false
-    @State var isCompleted = false
+    @State private var keys = KeyCombination.empty
+    @State private var isError = false
+    @State private var isCompleted = false
     let completion: (KeyCombination) -> Void
 
     @Environment(\.dismiss) var dismiss

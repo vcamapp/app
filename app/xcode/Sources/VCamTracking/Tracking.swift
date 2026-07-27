@@ -242,9 +242,12 @@ public final class Tracking {
 
     /// The camera lip sync reuses the values of the camera face tracking, so it never
     /// starts the camera by itself. Only the mic lip sync owns a resource to manage here.
-    public func setLipSyncType(_ type: LipSyncType) {
-        UniState.shared.currentLipSync = type
-        reconcileLipSyncState()
+    public var lipSyncType: LipSyncType {
+        get { UniState.shared.currentLipSync }
+        set {
+            UniState.shared.currentLipSync = newValue
+            reconcileLipSyncState()
+        }
     }
 
     public var micLipSyncDisabled: Bool {

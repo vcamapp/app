@@ -16,12 +16,15 @@ import VCamData
 public struct TrackingDeviceView: View {
     public init() {}
 
-    @Environment(UniState.self) private var uniState
+    @Bindable private var tracking = Tracking.shared
 
     @State private var captureDevice: AVCaptureDevice? = Tracking.shared.webCamera.currentCaptureDevice
     @State private var audioDevice: AudioDevice? = AvatarAudioManager.shared.currentInputDevice
 
     public var body: some View {
+        let cameras = Camera.cameras()
+        let audioDevices = AudioDevice.devices()
+
         if Camera.hasCamera, let currentDevice = captureDevice {
             Picker(selection: Binding(
                 get: { currentDevice },
@@ -30,7 +33,7 @@ public struct TrackingDeviceView: View {
                     Tracking.shared.webCamera.setCaptureDevice(id: newDevice.uniqueID)
                 }
             )) {
-                ForEach(Camera.cameras()) { device in
+                ForEach(cameras) { device in
                     Text(device.localizedName).tag(device)
                 }
             } label: {
@@ -43,7 +46,7 @@ public struct TrackingDeviceView: View {
                 Text(.camera)
             }
         }
-        if let firstDevice = AudioDevice.devices().first {
+        if let firstDevice = audioDevices.first {
             Picker(selection: Binding(
                 get: { audioDevice ?? firstDevice },
                 set: { newDevice in
@@ -51,7 +54,7 @@ public struct TrackingDeviceView: View {
                     AvatarAudioManager.shared.setAudioDevice(newDevice)
                 }
             )) {
-                ForEach(AudioDevice.devices()) { device in
+                ForEach(audioDevices) { device in
                     Text(device.name()).tag(device)
                 }
             } label: {
@@ -64,17 +67,14 @@ public struct TrackingDeviceView: View {
                 Text(.mic)
             }
         }
-        Picker(selection: Binding(
-            get: { uniState.currentLipSync },
-            set: { Tracking.shared.setLipSyncType($0) }
-        )) {
+        Picker(selection: $tracking.lipSyncType) {
             ForEach(LipSyncType.allCases) { type in
                 Text(type.name).tag(type)
             }
         } label: {
             Text(.lipSync)
         }
-        .disabled(Tracking.shared.micLipSyncDisabled)
+        .disabled(tracking.micLipSyncDisabled)
         .onReceive(NotificationCenter.default.publisher(for: .deviceWasChanged)) { _ in
             // Refresh device list
             captureDevice = Tracking.shared.webCamera.currentCaptureDevice

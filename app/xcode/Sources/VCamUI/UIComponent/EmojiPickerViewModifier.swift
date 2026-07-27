@@ -22,21 +22,16 @@ public extension View {
     }
 }
 
-private struct OpenEmojiPickerKey: EnvironmentKey {
-    static let defaultValue = OpenEmojiPicker.Action(textFieldId: .random(in: 0..<Int.max))
-}
-
 public extension EnvironmentValues {
-    var openEmojiPicker: OpenEmojiPicker.Action {
-        get { self[OpenEmojiPickerKey.self] }
-        set { self[OpenEmojiPickerKey.self] = newValue }
-    }
+    // Backed by a stored constant so the default resolves to the same value on every read.
+    @Entry var openEmojiPicker = _defaultOpenEmojiPicker
+    private static let _defaultOpenEmojiPicker = OpenEmojiPicker.Action(textFieldId: .random(in: 0..<Int.max))
 }
 
 @propertyWrapper public struct OpenEmojiPicker {
     public init() {}
 
-    @State var textFieldId = Int.random(in: 0..<Int.max)
+    @State private var textFieldId = Int.random(in: 0..<Int.max)
 
     static let idKey = "id"
 
