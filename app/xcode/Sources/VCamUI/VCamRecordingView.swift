@@ -6,22 +6,15 @@ import VCamBridge
 public struct VCamRecordingView: View {
     public init() {}
 
-    @Environment(UniState.self) private var uniState
-    @Bindable private var recorder = VideoRecorder.shared
-    @State private var restWaitTime: CGFloat = 0
     @State private var screenshotDestinationString = ""
 
-    @AppStorage(key: .screenshotWaitTime) var screenshotWaitTime
-    @AppStorage(key: .recordingVideoFormat) var recordingVideoFormat
     @AppStorage(key: .screenshotDestination) var screenshotDestination
-    @AppStorage(key: .recordSystemSound) var recordSystemSound
-    @AppStorage(key: .recordMicSyncOffset) var recordMicSyncOffset
 
     public var body: some View {
         VStack {
             HStack {
-                takePhotoView
-                recordVideoView
+                TakePhotoView(destinationURL: setDestinationURL)
+                RecordVideoView(destinationURL: setDestinationURL)
             }
 
             GroupBox {
@@ -47,8 +40,16 @@ public struct VCamRecordingView: View {
             }
         }
     }
+}
 
-    private var takePhotoView: some View {
+private struct TakePhotoView: View {
+    let destinationURL: () throws -> URL
+
+    @State private var restWaitTime: CGFloat = 0
+
+    @AppStorage(key: .screenshotWaitTime) var screenshotWaitTime
+
+    var body: some View {
         GroupBox {
             VStack {
                 Button {
@@ -81,7 +82,51 @@ public struct VCamRecordingView: View {
         .fixedSize()
     }
 
-    private var recordVideoView: some View {
+    // TODO: Move it to VCamDomain
+    private func takeScreenshot() {
+        guard let destination = try? destinationURL() else { return }
+        let image = MainTexture.shared.texture.nsImage()
+
+        _ = destination.startAccessingSecurityScopedResource()
+        defer {
+            destination.stopAccessingSecurityScopedResource()
+        }
+
+        restWaitTime = screenshotWaitTime
+        let save = {
+            let url = destination.appending(path: "vcam_\(Date().yyyyMMddHHmmss).png")
+            do {
+                try image.writeAsPNG(to: url)
+            } catch {
+                print(error)
+                UserDefaults.standard.remove(for: .screenshotDestination)
+            }
+        }
+        if restWaitTime > 0 {
+            Timer.scheduledTimerOnMain(withTimeInterval: 1, repeats: true) { timer in
+                restWaitTime -= 1
+                if restWaitTime <= 0 {
+                    timer.invalidate()
+                    save()
+                }
+            }
+        } else {
+            save()
+        }
+    }
+}
+
+private struct RecordVideoView: View {
+    let destinationURL: () throws -> URL
+
+    @Environment(UniState.self) private var uniState
+    @Bindable private var recorder = VideoRecorder.shared
+
+    @AppStorage(key: .recordingVideoFormat) var recordingVideoFormat
+    @AppStorage(key: .recordSystemSound) var recordSystemSound
+    @AppStorage(key: .recordMicSyncOffset) var recordMicSyncOffset
+
+    var body: some View {
         GroupBox {
             VStack {
                 HStack {
@@ -138,7 +183,7 @@ public struct VCamRecordingView: View {
         do {
             let ext = recordingVideoFormat
             let format = VideoFormat(rawValue: ext) ?? .mp4
-            let destination = try setDestinationURL()
+            let destination = try destinationURL()
             try recorder.start(
                 with: destination,
                 name: "vcam_\(Date().yyyyMMddHHmmss)",
@@ -154,38 +199,6 @@ public struct VCamRecordingView: View {
 
 // TODO: Move it to VCamDomain
 extension VCamRecordingView {
-    private func takeScreenshot() {
-        guard let destination = try? setDestinationURL() else { return }
-        let image = MainTexture.shared.texture.nsImage()
-
-        _ = destination.startAccessingSecurityScopedResource()
-        defer {
-            destination.stopAccessingSecurityScopedResource()
-        }
-
-        restWaitTime = screenshotWaitTime
-        let save = {
-            let url = destination.appending(path: "vcam_\(Date().yyyyMMddHHmmss).png")
-            do {
-                try image.writeAsPNG(to: url)
-            } catch {
-                print(error)
-                UserDefaults.standard.remove(for: .screenshotDestination)
-            }
-        }
-        if restWaitTime > 0 {
-            Timer.scheduledTimerOnMain(withTimeInterval: 1, repeats: true) { timer in
-                restWaitTime -= 1
-                if restWaitTime <= 0 {
-                    timer.invalidate()
-                    save()
-                }
-            }
-        } else {
-            save()
-        }
-    }
-
     @discardableResult
     private func setDestinationURL() throws -> URL {
         let destination: URL

@@ -43,91 +43,54 @@ public struct ScreenRecorderPreferenceView: View {
             screenRecorder.cropRect = cropRect.applying(.init(scaleX: 1 / cropPreviewWidth, y: 1 / cropPreviewWidth))
             capture(screenRecorder)
         } content: {
-            content
+            ScrollView {
+                ScreenRecorderConfigForm(captureConfig: $captureConfig,
+                                         displays: availableContent?.displays ?? [],
+                                         windows: filteredWindows ?? [])
+
+                if let error = screenRecorder.error {
+                    Text(error.localizedDescription)
+                        .foregroundStyle(.red)
+                }
+
+                if let error = error {
+                    Group {
+                        if error._code == -3801 {
+                            Text(.errorScreenCapturePermission)
+                        } else {
+                            Text(error.localizedDescription)
+                        }
+                    }
+                    .foregroundStyle(.red)
+                }
+
+                if let frame = screenRecorder.latestFrame {
+                    ScreenRecorderCapturePreview(frame: frame, cropRect: $cropRect, cropPreviewWidth: $cropPreviewWidth)
+                }
+            }
+            .onAppear {
+                timer = RunLoop.current.schedule(after: .init(.now),
+                                                 interval: .seconds(3)) {
+                    refreshAvailableContent()
+                }
+            }
+            .onChange(of: captureConfig.captureType) { _, _ in
+                Task {
+                    await screenRecorder.update(with: captureConfig)
+                }
+            }
+            .onChange(of: captureConfig.display) { _, _ in
+                Task {
+                    await screenRecorder.update(with: captureConfig)
+                }
+            }
+            .onChange(of: captureConfig.window) { _, _ in
+                Task {
+                    await screenRecorder.update(with: captureConfig)
+                }
+            }
         }
         .frame(minWidth: 640, minHeight: 480)
-    }
-
-    var content: some View {
-        ScrollView {
-            Form {
-                Picker(.captureType, selection: $captureConfig.captureType) {
-                    Text(.entireDisplay)
-                        .tag(ScreenRecorder.CaptureType.display)
-                    Text(.independentWindow)
-                        .tag(ScreenRecorder.CaptureType.independentWindow)
-                }
-
-                switch captureConfig.captureType {
-                case .display:
-                Picker(.display, selection: $captureConfig.display) {
-                        ForEach(availableContent?.displays ?? []) { display in
-                            Text(verbatim: "\(display.width) x \(display.height)")
-                                .tag(SCDisplay?.some(display))
-                        }
-                    }
-
-                Toggle(.removeVCamFromCapture, isOn: $captureConfig.filterOutOwningApplication)
-
-                case .independentWindow:
-                Picker(.window, selection: $captureConfig.window) {
-                        ForEach(filteredWindows ?? []) { window in
-                            Text(window.displayName)
-                                .tag(SCWindow?.some(window))
-                        }
-                    }
-                }
-            }
-
-            if let error = screenRecorder.error {
-                Text(error.localizedDescription)
-                    .foregroundStyle(.red)
-            }
-
-            if let error = error {
-                Group {
-                    if error._code == -3801 {
-                        Text(.errorScreenCapturePermission)
-                    } else {
-                        Text(error.localizedDescription)
-                    }
-                }
-                .foregroundStyle(.red)
-            }
-
-            if let frame = screenRecorder.latestFrame {
-                ScreenCaptureContentView(frame: frame.croppedCIImage.nsImage())
-                    .aspectRatio(frame.contentRect.size, contentMode: .fit)
-                    .modifier(CropViewModifier(rect: $cropRect))
-                    .overlay(GeometryReader { proxy in
-                        Color.clear
-                            .onAppear {
-                                cropPreviewWidth = proxy.size.width
-                            }
-                    })
-            }
-        }
-        .onAppear {
-            timer = RunLoop.current.schedule(after: .init(.now),
-                                             interval: .seconds(3)) {
-                refreshAvailableContent()
-            }
-        }
-        .onChange(of: captureConfig.captureType) { _, _ in
-            Task {
-                await screenRecorder.update(with: captureConfig)
-            }
-        }
-        .onChange(of: captureConfig.display) { _, _ in
-            Task {
-                await screenRecorder.update(with: captureConfig)
-            }
-        }
-        .onChange(of: captureConfig.window) { _, _ in
-            Task {
-                await screenRecorder.update(with: captureConfig)
-            }
-        }
     }
 
     private func refreshAvailableContent() {
@@ -158,6 +121,61 @@ public struct ScreenRecorderPreferenceView: View {
         close()
         timer?.cancel()
         timer = nil
+    }
+}
+
+private struct ScreenRecorderConfigForm: View {
+    @Binding var captureConfig: ScreenRecorder.CaptureConfiguration
+    let displays: [SCDisplay]
+    let windows: [SCWindow]
+
+    var body: some View {
+        Form {
+            Picker(.captureType, selection: $captureConfig.captureType) {
+                Text(.entireDisplay)
+                    .tag(ScreenRecorder.CaptureType.display)
+                Text(.independentWindow)
+                    .tag(ScreenRecorder.CaptureType.independentWindow)
+            }
+
+            switch captureConfig.captureType {
+            case .display:
+                Picker(.display, selection: $captureConfig.display) {
+                    ForEach(displays) { display in
+                        Text(verbatim: "\(display.width) x \(display.height)")
+                            .tag(SCDisplay?.some(display))
+                    }
+                }
+
+                Toggle(.removeVCamFromCapture, isOn: $captureConfig.filterOutOwningApplication)
+
+            case .independentWindow:
+                Picker(.window, selection: $captureConfig.window) {
+                    ForEach(windows) { window in
+                        Text(window.displayName)
+                            .tag(SCWindow?.some(window))
+                    }
+                }
+            }
+        }
+    }
+}
+
+private struct ScreenRecorderCapturePreview: View {
+    let frame: ScreenRecorder.CapturedFrame
+    @Binding var cropRect: CGRect
+    @Binding var cropPreviewWidth: CGFloat
+
+    var body: some View {
+        ScreenCaptureContentView(frame: frame.croppedCIImage.nsImage())
+            .aspectRatio(frame.contentRect.size, contentMode: .fit)
+            .modifier(CropViewModifier(rect: $cropRect))
+            .overlay(GeometryReader { proxy in
+                Color.clear
+                    .onAppear {
+                        cropPreviewWidth = proxy.size.width
+                    }
+            })
     }
 }
 

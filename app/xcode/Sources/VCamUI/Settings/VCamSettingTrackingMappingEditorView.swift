@@ -26,7 +26,7 @@ public struct VCamSettingTrackingMappingEditorView: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
                 Divider()
-                footerView
+                MappingEditorFooterView()
             }
         }
         .task {
@@ -60,7 +60,7 @@ public struct VCamSettingTrackingMappingEditorView: View {
 
             ToolbarItem(placement: .automatic) {
                 Menu {
-                    actionMenuContent
+                    MappingActionMenuContent(store: store)
                 } label: {
                     Image(systemName: "ellipsis")
                 }
@@ -70,8 +70,19 @@ public struct VCamSettingTrackingMappingEditorView: View {
         .frame(minWidth: 840, minHeight: 400)
     }
 
-    @ViewBuilder
-    private var actionMenuContent: some View {
+    private var supportsIPhoneTrackingMapping: Bool {
+#if FEATURE_3
+        uniState.hasPerfectSyncBlendShape
+#else
+        true
+#endif
+    }
+}
+
+private struct MappingActionMenuContent: View {
+    let store: MappingDataStore
+
+    var body: some View {
         let selectedIndices = store.selectedIndices
 
         Button {
@@ -143,16 +154,10 @@ public struct VCamSettingTrackingMappingEditorView: View {
         guard let bounds = MappingBoundsAlert.run(for: store.mappings[index], side: side) else { return }
         store.updateBounds(bounds, for: side, at: index)
     }
+}
 
-    private var supportsIPhoneTrackingMapping: Bool {
-#if FEATURE_3
-        uniState.hasPerfectSyncBlendShape
-#else
-        true
-#endif
-    }
-
-    private var footerView: some View {
+private struct MappingEditorFooterView: View {
+    var body: some View {
         HStack(spacing: 8) {
             HStack {
                 Image(systemName: "info.circle")

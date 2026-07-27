@@ -13,10 +13,6 @@ struct VCamSettingLicenseView: View {
         licenseManager.licenseState
     }
 
-    private var expiryDate: Date? {
-        licenseManager.expiryDate
-    }
-
     init(errorMessage: Text? = nil) {
         self._errorMessage = State(initialValue: errorMessage)
     }
@@ -35,9 +31,9 @@ struct VCamSettingLicenseView: View {
 
             Section {
                 HStack {
-                    statusLabelView
+                    LicenseStatusLabel()
                     Spacer()
-                    statusContentView
+                    LicenseStatusActionView()
                 }
             } footer: {
                 if licenseState == .notLoggedIn {
@@ -100,8 +96,29 @@ struct VCamSettingLicenseView: View {
         }
     }
 
-    @ViewBuilder
-    private var statusLabelView: some View {
+    private func signOut() {
+        do {
+            try licenseManager.signOut()
+            errorMessage = nil
+        } catch {
+            Logger.error(error)
+            errorMessage = Text(.signOutFailed)
+        }
+    }
+}
+
+private struct LicenseStatusLabel: View {
+    @Environment(\.licenseManager) private var licenseManager
+
+    private var licenseState: LicenseState {
+        licenseManager.licenseState
+    }
+
+    private var expiryDate: Date? {
+        licenseManager.expiryDate
+    }
+
+    var body: some View {
         switch licenseState {
         case .loading:
             HStack {
@@ -172,10 +189,13 @@ struct VCamSettingLicenseView: View {
             }
         }
     }
+}
 
-    @ViewBuilder
-    private var statusContentView: some View {
-        switch licenseState {
+private struct LicenseStatusActionView: View {
+    @Environment(\.licenseManager) private var licenseManager
+
+    var body: some View {
+        switch licenseManager.licenseState {
         case .loading:
             EmptyView()
         case .notLoggedIn:
@@ -194,16 +214,6 @@ struct VCamSettingLicenseView: View {
                 }
             }
             .buttonStyle(.bordered)
-        }
-    }
-
-    private func signOut() {
-        do {
-            try licenseManager.signOut()
-            errorMessage = nil
-        } catch {
-            Logger.error(error)
-            errorMessage = Text(.signOutFailed)
         }
     }
 }

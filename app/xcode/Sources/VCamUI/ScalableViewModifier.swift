@@ -26,22 +26,25 @@ public struct CropViewModifier: ViewModifier {
 }
 
 public struct ScalableViewModifier: ViewModifier {
+    @Binding var rect: CGRect
+
+    public func body(content: Content) -> some View {
+        content
+            .overlay(ScalableEdgesView(rect: $rect).frame(maxWidth: .infinity, maxHeight: .infinity))
+    }
+}
+
+private struct ScalableEdgesView: View {
+    @Binding var rect: CGRect
+
     @State private var topOffset = CGSize.zero
     @State private var bottomOffset = CGSize.zero
     @State private var leadingOffset = CGSize.zero
     @State private var trailingOffset = CGSize.zero
 
-    @Binding var rect: CGRect
-
     private let width: CGFloat = 12
 
-    public func body(content: Content) -> some View {
-        content
-            .overlay(borders.frame(maxWidth: .infinity, maxHeight: .infinity))
-    }
-
-    @ViewBuilder
-    var borders: some View {
+    var body: some View {
         let lineWidth = width * 0.2
         let color = Color.white
         let dot = color.frame(width: 5, height: 5).border(.black, width: 0.5)

@@ -28,7 +28,10 @@ public struct ImageFilterView: View {
             dismiss()
             completion(ImageFilter(configuration: .init(filters: filters)))
         } content: {
-            content
+            HStack {
+                ImageFilterListPane(filters: $filters, selectedFilterId: $selectedFilterId)
+                ImageFilterPreviewPane(preview: preview, filters: $filters, selectedFilterId: selectedFilterId)
+            }
         }
         .frame(minWidth: 640, minHeight: 480)
         .onAppear {
@@ -40,82 +43,91 @@ public struct ImageFilterView: View {
         }
     }
 
-    var content: some View {
-        HStack {
-            GroupBox {
-                VStack {
-                    List(selection: $selectedFilterId) {
-                        ForEach(filters) { filter in
-                            Text(filter.type.name)
-                                .tag(filter.id)
-                        }
-                        .onMove { source, destination in
-                            filters.move(fromOffsets: source, toOffset: destination)
-                        }
-                    }
-                    .frame(maxHeight: .infinity)
-                    .frame(width: 200)
-                    .layoutPriority(1)
-
-                    HStack {
-                        Menu {
-                            ForEach(ImageFilterConfiguration.FilterType.allCases) { filterType in
-                                Button {
-                                    let filter = ImageFilterConfiguration.Filter(type: filterType)
-                                    filters.append(filter)
-                                    selectedFilterId = filter.id
-                                } label: {
-                                    Text(filterType.name)
-                                }
-                            }
-
-                        } label: {
-                            Image(systemName: "plus").background(Color.clear)
-                        }
-                        .menuStyle(.borderlessButton)
-                        .menuIndicator(.hidden)
-                        .contentShape(Rectangle())
-                        .fixedSize()
-
-                        Group {
-                            Button {
-                                if let selectedFilterId = selectedFilterId {
-                                    self.selectedFilterId = nil
-                                    filters.remove(byId: selectedFilterId)
-                                }
-                            } label: {
-                                Image(systemName: "minus").background(Color.clear).frame(height: 14)
-                            }
-                            .contentShape(Rectangle())
-                        }
-                        .disabled(selectedFilterId == nil)
-                        .buttonStyle(.borderless)
-                    }
-                }
-            }
-
-            VStack {
-                GroupBox {
-                    Image(nsImage: preview)
-                        .resizable()
-                        .scaledToFit()
-                }
-
-                if let id = selectedFilterId {
-                    GroupBox {
-                        ImageFilterParameterView(filter: $filters[id: id])
-                    }
-                }
-            }
-        }
-    }
-
     private func dismiss() { // Can't use onDisappear with this implementation, so call this explicitly
         close()
     }
 
     private func updatePreview() {
         preview = ImageFilter(configuration: .init(filters: filters)).apply(to: image).nsImage()
+    }
+}
+
+private struct ImageFilterListPane: View {
+    @Binding var filters: [ImageFilterConfiguration.Filter]
+    @Binding var selectedFilterId: UUID?
+
+    var body: some View {
+        GroupBox {
+            VStack {
+                List(selection: $selectedFilterId) {
+                    ForEach(filters) { filter in
+                        Text(filter.type.name)
+                            .tag(filter.id)
+                    }
+                    .onMove { source, destination in
+                        filters.move(fromOffsets: source, toOffset: destination)
+                    }
+                }
+                .frame(maxHeight: .infinity)
+                .frame(width: 200)
+                .layoutPriority(1)
+
+                HStack {
+                    Menu {
+                        ForEach(ImageFilterConfiguration.FilterType.allCases) { filterType in
+                            Button {
+                                let filter = ImageFilterConfiguration.Filter(type: filterType)
+                                filters.append(filter)
+                                selectedFilterId = filter.id
+                            } label: {
+                                Text(filterType.name)
+                            }
+                        }
+
+                    } label: {
+                        Image(systemName: "plus").background(Color.clear)
+                    }
+                    .menuStyle(.borderlessButton)
+                    .menuIndicator(.hidden)
+                    .contentShape(Rectangle())
+                    .fixedSize()
+
+                    Button {
+                        if let selectedFilterId = selectedFilterId {
+                            self.selectedFilterId = nil
+                            filters.remove(byId: selectedFilterId)
+                        }
+                    } label: {
+                        Image(systemName: "minus").background(Color.clear).frame(height: 14)
+                    }
+                    .contentShape(Rectangle())
+                    .disabled(selectedFilterId == nil)
+                    .buttonStyle(.borderless)
+                }
+            }
+        }
+    }
+}
+
+private struct ImageFilterPreviewPane: View {
+    let preview: NSImage
+    @Binding var filters: [ImageFilterConfiguration.Filter]
+    let selectedFilterId: UUID?
+
+    var body: some View {
+        VStack {
+            GroupBox {
+                Image(nsImage: preview)
+                    .resizable()
+                    .scaledToFit()
+            }
+
+            if let id = selectedFilterId {
+                GroupBox {
+                    ImageFilterParameterView(filter: $filters[id: id])
+                }
+            }
+        }
     }
 }
 

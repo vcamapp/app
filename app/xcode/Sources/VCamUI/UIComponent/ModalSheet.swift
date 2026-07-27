@@ -8,26 +8,26 @@ public struct ModalSheet<Content: View>: View {
         doneDisabled: Bool = false,
         cancel: (() -> Void)? = nil,
         done: @escaping () -> Void,
-        content: @escaping () -> Content
+        @ViewBuilder content: () -> Content
     ) {
         self.cancelTitle = cancelTitle ?? String(localized: .cancel)
         self.doneTitle = doneTitle
         self.doneDisabled = doneDisabled
         self.cancel = cancel
         self.done = done
-        self.content = content
+        self.content = content()
     }
 
-    var cancelTitle = String(localized: .cancel)
+    let cancelTitle: String
     let doneTitle: String
-    var doneDisabled = false
+    let doneDisabled: Bool
     let cancel: (() -> Void)?
     let done: () -> Void
-    @ViewBuilder let content: () -> Content
+    let content: Content
 
     public var body: some View {
         VStack {
-            content()
+            content
                 .padding()
             Spacer()
             HStack {

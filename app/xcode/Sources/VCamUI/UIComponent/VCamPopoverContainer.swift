@@ -1,20 +1,20 @@
 import SwiftUI
 
 public struct VCamPopoverContainer<Content: View>: View {
-    public init(_ title: LocalizedStringResource, @ViewBuilder content: @escaping () -> Content) {
+    public init(_ title: LocalizedStringResource, @ViewBuilder content: () -> Content) {
         self.title = title
-        self.content = content
+        self.content = content()
     }
 
     let title: LocalizedStringResource
-    let content: () -> Content
+    let content: Content
 
     public var body: some View {
         VStack(spacing: 1) {
             Text(title)
                 .font(.caption)
 
-            content()
+            content
         }
         .padding([.horizontal, .bottom], 8)
         .padding(.top, 4)
@@ -22,15 +22,15 @@ public struct VCamPopoverContainer<Content: View>: View {
 }
 
 public struct VCamPopoverContainerWithButton<Content: View, ButtonContent: View>: View {
-    public init(_ title: LocalizedStringResource, @ViewBuilder button: @escaping () -> ButtonContent, @ViewBuilder content: @escaping () -> Content) {
+    public init(_ title: LocalizedStringResource, @ViewBuilder button: () -> ButtonContent, @ViewBuilder content: () -> Content) {
         self.title = title
-        self.button = button
-        self.content = content
+        self.button = button()
+        self.content = content()
     }
 
     let title: LocalizedStringResource
-    let button: () -> ButtonContent
-    let content: () -> Content
+    let button: ButtonContent
+    let content: Content
 
     public var body: some View {
         VStack(spacing: 1) {
@@ -38,12 +38,12 @@ public struct VCamPopoverContainerWithButton<Content: View, ButtonContent: View>
                 .font(.caption)
                 .frame(maxWidth: .infinity)
                 .background(alignment: .topTrailing) {
-                    button()
+                    button
                 }
                 .buttonStyle(.plain)
                 .controlSize(.mini)
 
-            content()
+            content
         }
         .padding([.horizontal, .bottom], 8)
         .padding(.top, 4)
@@ -52,23 +52,23 @@ public struct VCamPopoverContainerWithButton<Content: View, ButtonContent: View>
 
 
 public struct VCamPopoverContainerWithWindow<Content: MacWindow>: View {
-    public init(_ title: LocalizedStringResource, @ViewBuilder content: @escaping () -> Content) {
+    public init(_ title: LocalizedStringResource, @ViewBuilder content: () -> Content) {
         self.title = title
-        self.content = content
+        self.content = content()
     }
 
     let title: LocalizedStringResource
-    let content: () -> Content
+    let content: Content
 
     public var body: some View {
         VCamPopoverContainerWithButton(title) {
             Button {
-                MacWindowManager.shared.open(content())
+                MacWindowManager.shared.open(content)
             } label: {
                 Image(systemName: "macwindow")
             }
         } content: {
-            content()
+            content
         }
     }
 }

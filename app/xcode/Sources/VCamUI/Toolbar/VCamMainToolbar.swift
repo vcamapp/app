@@ -69,13 +69,13 @@ public struct VCamMainToolbar: View {
 
     private struct Item<Label: View>: View {
         let action: () -> Void
-        let label: () -> Label
+        @ViewBuilder let label: Label
 
         private let size: CGFloat = 18
 
         var body: some View {
             Button(action: action) {
-                label()
+                label
                     .frame(width: size, height: size)
                     .macHoverEffect()
             }

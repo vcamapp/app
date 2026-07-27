@@ -5,9 +5,6 @@ import VCamBridge
 public struct ModelListView: View {
     @Bindable private var modelManager: ModelManager
     @State private var selectedModel: ModelItem?
-    @State private var showDeleteConfirmation = false
-    @State private var modelToDelete: ModelItem?
-    @State private var modelToRename: ModelItem?
 
     public init(modelManager: ModelManager = .shared) {
         self.modelManager = modelManager
@@ -15,9 +12,9 @@ public struct ModelListView: View {
 
     public var body: some View {
         VStack(spacing: 0) {
-            modelList
+            ModelListContent(modelManager: modelManager, selectedModel: $selectedModel, loadModel: loadSelectedModel)
             Divider()
-            footer
+            ModelListFooter(isLoadDisabled: selectedModel == nil || selectedModel?.status == .missing, loadModel: loadSelectedModel)
         }
         .frame(minWidth: 400, minHeight: 300)
         .toolbar {
@@ -45,6 +42,117 @@ public struct ModelListView: View {
                 selectedModel = lastModel
             }
         }
+    }
+
+    private func loadSelectedModel() {
+        guard let item = selectedModel,
+              item.status == .valid else { return }
+        let url = item.model.modelURL
+#if FEATURE_3
+        UniBridge.shared.loadVRM(url.path)
+#else
+        UniBridge.shared.loadModel(url.path)
+#endif
+        modelManager.setLastLoadedModel(item)
+        MacWindowManager.shared.close(ModelListView.self)
+    }
+
+    private func addNewModel() {
+#if FEATURE_3
+        guard let url = FileUtility.openFile(type: .vrm) else { return }
+#else
+        guard let url = FileUtility.pickDirectory(canCreateDirectories: false) else { return }
+#endif
+
+        Task {
+            do {
+                let model = try await modelManager.saveModel(from: url)
+                selectedModel = model
+            } catch {
+                print("Failed to add model: \(error)")
+            }
+        }
+    }
+}
+
+private struct ModelListContent: View {
+    @Bindable var modelManager: ModelManager
+    @Binding var selectedModel: ModelItem?
+    let loadModel: () -> Void
+
+    @State private var showDeleteConfirmation = false
+    @State private var modelToDelete: ModelItem?
+    @State private var modelToRename: ModelItem?
+
+    var body: some View {
+        Group {
+            if modelManager.modelItems.isEmpty {
+                ContentUnavailableView {
+                    Label {
+                        Text(.noModelsFound)
+                    } icon: {
+                        Image(systemName: "figure.arms.open")
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                List(selection: $selectedModel) {
+                    ForEach(modelManager.modelItems) { item in
+                        ModelRowView(item: item, isRenaming: modelToRename?.id == item.id) {
+                            modelToRename = nil
+                        }
+                        .tag(item)
+                    }
+                    .onMove { source, destination in
+                        modelManager.moveModel(fromOffsets: source, toOffset: destination)
+                    }
+                }
+                .listStyle(.inset)
+                .onDeleteCommand {
+                    guard let model = selectedModel, modelManager.modelItems.count > 1 else { return }
+                    modelToDelete = model
+                    showDeleteConfirmation = true
+                }
+                .contextMenu(forSelectionType: ModelItem.self) { items in
+                    if let item = items.first {
+                        Button {
+                            modelToRename = item
+                        } label: {
+                            Image(systemName: "pencil")
+                            Text(.rename)
+                        }
+                        Button {
+                            changeThumbnail(item)
+                        } label: {
+                            Image(systemName: "photo")
+                            Text(.changeThumbnail)
+                        }
+                        if item.status == .valid {
+                            Button {
+                                duplicateModel(item)
+                            } label: {
+                                Image(systemName: "doc.on.doc")
+                                Text(.duplicate)
+                            }
+                        }
+                        Divider()
+                        Button(role: .destructive) {
+                            modelToDelete = item
+                            showDeleteConfirmation = true
+                        } label: {
+                            Image(systemName: "trash")
+                            Text(.delete)
+                        }
+                        .disabled(modelManager.modelItems.count <= 1)
+                    }
+                } primaryAction: { items in
+                    // Double click to load
+                    guard let item = items.first, item.status == .valid else { return }
+                    selectedModel = item
+                    loadModel()
+                }
+            }
+        }
         .alert(.delete, isPresented: $showDeleteConfirmation) {
             Button(role: .cancel) {
                 modelToDelete = nil
@@ -63,104 +171,6 @@ public struct ModelListView: View {
                 Text(.confirmDeleteModel(model.model.localizedName))
             }
         }
-    }
-
-    @ViewBuilder
-    private var modelList: some View {
-        if modelManager.modelItems.isEmpty {
-            ContentUnavailableView {
-                Label {
-                    Text(.noModelsFound)
-                } icon: {
-                    Image(systemName: "figure.arms.open")
-                }
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-        } else {
-            List(selection: $selectedModel) {
-                ForEach(modelManager.modelItems) { item in
-                    ModelRowView(item: item, isRenaming: modelToRename?.id == item.id) {
-                        modelToRename = nil
-                    }
-                    .tag(item)
-                }
-                .onMove { source, destination in
-                    modelManager.moveModel(fromOffsets: source, toOffset: destination)
-                }
-            }
-            .listStyle(.inset)
-            .onDeleteCommand {
-                guard let model = selectedModel, modelManager.modelItems.count > 1 else { return }
-                modelToDelete = model
-                showDeleteConfirmation = true
-            }
-            .contextMenu(forSelectionType: ModelItem.self) { items in
-                if let item = items.first {
-                    Button {
-                        modelToRename = item
-                    } label: {
-                        Image(systemName: "pencil")
-                        Text(.rename)
-                    }
-                    Button {
-                        changeThumbnail(item)
-                    } label: {
-                        Image(systemName: "photo")
-                        Text(.changeThumbnail)
-                    }
-                    if item.status == .valid {
-                        Button {
-                            duplicateModel(item)
-                        } label: {
-                            Image(systemName: "doc.on.doc")
-                            Text(.duplicate)
-                        }
-                    }
-                    Divider()
-                    Button(role: .destructive) {
-                        modelToDelete = item
-                        showDeleteConfirmation = true
-                    } label: {
-                        Image(systemName: "trash")
-                        Text(.delete)
-                    }
-                    .disabled(modelManager.modelItems.count <= 1)
-                }
-            } primaryAction: { items in
-                // Double click to load
-                guard let item = items.first, item.status == .valid else { return }
-                selectedModel = item
-                loadSelectedModel()
-            }
-        }
-    }
-
-    private var footer: some View {
-        HStack {
-            Spacer()
-            
-            Button {
-                loadSelectedModel()
-            } label: {
-                Text(.loadModel)
-            }
-            .disabled(selectedModel == nil || selectedModel?.status == .missing)
-            .keyboardShortcut(.return, modifiers: [])
-        }
-        .padding()
-    }
-
-    private func loadSelectedModel() {
-        guard let item = selectedModel,
-              item.status == .valid else { return }
-        let url = item.model.modelURL
-#if FEATURE_3
-        UniBridge.shared.loadVRM(url.path)
-#else
-        UniBridge.shared.loadModel(url.path)
-#endif
-        modelManager.setLastLoadedModel(item)
-        MacWindowManager.shared.close(ModelListView.self)
     }
 
     private func deleteModel(_ item: ModelItem) {
@@ -190,22 +200,25 @@ public struct ModelListView: View {
         guard let url = FileUtility.openFile(type: .image) else { return }
         try? modelManager.setThumbnail(for: item, from: url)
     }
+}
 
-    private func addNewModel() {
-#if FEATURE_3
-        guard let url = FileUtility.openFile(type: .vrm) else { return }
-#else
-        guard let url = FileUtility.pickDirectory(canCreateDirectories: false) else { return }
-#endif
+private struct ModelListFooter: View {
+    let isLoadDisabled: Bool
+    let loadModel: () -> Void
 
-        Task {
-            do {
-                let model = try await modelManager.saveModel(from: url)
-                selectedModel = model
-            } catch {
-                print("Failed to add model: \(error)")
+    var body: some View {
+        HStack {
+            Spacer()
+
+            Button {
+                loadModel()
+            } label: {
+                Text(.loadModel)
             }
+            .disabled(isLoadDisabled)
+            .keyboardShortcut(.return, modifiers: [])
         }
+        .padding()
     }
 }
 
@@ -224,7 +237,7 @@ struct ModelRowView: View {
 
     var body: some View {
         HStack {
-            thumbnailView
+            ModelRowThumbnail(thumbnail: item.thumbnail, isMissing: item.status == .missing)
                 .frame(width: 40, height: 40)
                 .clipShape(RoundedRectangle(cornerRadius: 6))
 
@@ -290,16 +303,20 @@ struct ModelRowView: View {
         guard !editingName.isEmpty, editingName != item.model.localizedName else { return }
         modelManager.renameModel(item, to: editingName)
     }
+}
 
-    @ViewBuilder
-    private var thumbnailView: some View {
-        if let thumbnail = item.thumbnail, let image = NSImage(data: thumbnail) {
+private struct ModelRowThumbnail: View {
+    let thumbnail: Data?
+    let isMissing: Bool
+
+    var body: some View {
+        if let thumbnail, let image = NSImage(data: thumbnail) {
             Image(nsImage: image)
                 .resizable()
                 .aspectRatio(contentMode: .fill)
         } else {
-            Image(systemName: item.status == .missing ? "exclamationmark.triangle.fill" : "person.2.fill")
-                .foregroundStyle(item.status == .missing ? .red : .pink)
+            Image(systemName: isMissing ? "exclamationmark.triangle.fill" : "person.2.fill")
+                .foregroundStyle(isMissing ? .red : .pink)
                 .font(.title2)
         }
     }

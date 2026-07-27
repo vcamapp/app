@@ -9,16 +9,20 @@ public struct VCamMainToolbarExpressionPicker: View {
     @Environment(UniState.self) var uniState
 
     public var body: some View {
+        let currentExpressionName = uniState.currentExpressionIndex.flatMap { index in
+            uniState.expressions.indices.contains(index) ? uniState.expressions[index].name : nil
+        }
         ScrollView(.vertical, showsIndicators: true) {
             GroupBox {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 60))]) {
-                    ForEach(Array(uniState.expressions.enumerated()), id: \.element.name) { (index, expression) in
+                    ForEach(uniState.expressions, id: \.name) { expression in
                         VCamMainToolbarButton(
-                            isSelected: uniState.currentExpressionIndex == index) {
+                            isSelected: expression.name == currentExpressionName,
+                            action: {
                                 UniBridge.applyExpression(name: expression.name)
-                            } label: {
-                                Text(expression.name)
-                            }
+                            },
+                            label: Text(expression.name)
+                        )
                     }
                 }
             }

@@ -1,21 +1,21 @@
 import SwiftUI
 
 public struct FlatButton<LabelItem: View>: View {
-    public init(action: @escaping () -> Void, doubleTapAction: @escaping () -> Void = {}, @ViewBuilder label: @escaping () -> LabelItem) {
+    public init(action: @escaping () -> Void, doubleTapAction: @escaping () -> Void = {}, @ViewBuilder label: () -> LabelItem) {
         self.action = action
         self.doubleTapAction = doubleTapAction
-        self.label = label
+        self.label = label()
     }
 
     let action: () -> Void
     let doubleTapAction: () -> Void
-    @ViewBuilder var label: () -> LabelItem
+    let label: LabelItem
 
     @Environment(\.flatButtonStyle) var flatButtonStyle
 
     public var body: some View {
         container {
-            label()
+            label
         }
         .background(flatButtonStyle.backgroundColor)
         .cornerRadius(flatButtonStyle.cornerRadius)

@@ -7,88 +7,76 @@ public struct VCamShortcutGridView: View {
         self.shortcutManager = shortcutManager
     }
 
-    @State private var dragging: VCamShortcut?
-    @State private var runningShortcut: VCamShortcut?
-
     @Bindable var shortcutManager = VCamShortcutManager.shared
 
     public var body: some View {
         GroupBox {
-            Group {
-                if shortcutManager.shortcuts.isEmpty {
-                    addButton
-                } else {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        LazyHGrid(rows: Array(repeating: .init(.fixed(36)), count: 1), spacing: 4) {
-                            gridContent
-                        }
-                    }
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            ShortcutGridContent(shortcutManager: shortcutManager)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
         .animation(.default, value: shortcutManager.shortcuts)
     }
+}
 
-    @ViewBuilder @MainActor var gridContent: some View {
-        addButton
+private struct ShortcutGridContent: View {
+    @Bindable var shortcutManager: VCamShortcutManager
 
-        ForEach($shortcutManager.shortcuts) { $shortcut in
-            let isRunning = runningShortcut == shortcut
+    @State private var dragging: VCamShortcut?
+    @State private var runningShortcut: VCamShortcut?
 
-            FlatButton {
-                runShortcut(shortcut)
-            } doubleTapAction: {
-                editShortcut($shortcut)
-            } label: {
-                VStack(spacing: 2) {
-                    shortcut.icon
-                    Group {
-                        if shortcut.title.isEmpty {
-                            Text(.notitle)
-                        } else {
-                            Text(shortcut.title)
+    var body: some View {
+        if shortcutManager.shortcuts.isEmpty {
+            addButton
+        } else {
+            ScrollView(.horizontal, showsIndicators: false) {
+                LazyHGrid(rows: Array(repeating: .init(.fixed(36)), count: 1), spacing: 4) {
+                    addButton
+
+                    ForEach($shortcutManager.shortcuts) { $shortcut in
+                        let isRunning = runningShortcut == shortcut
+
+                        FlatButton {
+                            runShortcut(shortcut)
+                        } doubleTapAction: {
+                            editShortcut($shortcut)
+                        } label: {
+                            VStack(spacing: 2) {
+                                shortcut.icon
+                                Text(shortcut.title.isEmpty ? String(localized: .notitle) : shortcut.title)
+                                    .font(.footnote)
+                            }
+                            .opacity(isRunning ? 0 : 1)
+                            .overlay {
+                                if isRunning {
+                                    ProgressView()
+                                        .controlSize(.small)
+                                }
+                            }
+                        }
+                        .flatButtonStyle(.filled())
+                        .contextMenu {
+                            Button {
+                                editShortcut($shortcut)
+                            } label: {
+                                Image(systemName: "pencil")
+                                Text(.edit)
+                            }
+                            Divider()
+                            Button {
+                                VCamShortcutManager.shared.remove(shortcut)
+                            } label: {
+                                Image(systemName: "trash")
+                                Text(.delete)
+                            }
+                        }
+                        .onDragMove(item: shortcut, items: $shortcutManager.shortcuts, dragging: $dragging, onMove: shortcutManager.move)
+                        .keyboardShortcut(shortcut.shortcutKey) {
+                            guard !isRunning else { return }
+                            runShortcut(shortcut)
                         }
                     }
-                    .font(.footnote)
-                }
-                .opacity(isRunning ? 0 : 1)
-                .overlay {
-                    if isRunning {
-                        ProgressView()
-                            .controlSize(.small)
-                    }
                 }
             }
-            .flatButtonStyle(.filled())
-            .contextMenu {
-                Button {
-                    editShortcut($shortcut)
-                } label: {
-                    Image(systemName: "pencil")
-                    Text(.edit)
-                }
-                Divider()
-                Button {
-                    VCamShortcutManager.shared.remove(shortcut)
-                } label: {
-                    Image(systemName: "trash")
-                    Text(.delete)
-                }
-            }
-            .onDragMove(item: shortcut, items: $shortcutManager.shortcuts, dragging: $dragging, onMove: shortcutManager.move)
-            .keyboardShortcut(shortcut.shortcutKey) {
-                guard !isRunning else { return }
-                runShortcut(shortcut)
-            }
-        }
-    }
-
-    private func runShortcut(_ shortcut: VCamShortcut) {
-        Task { @MainActor in
-            runningShortcut = shortcut
-            await VCamShortcutRunner.shared.run(shortcut)
-            runningShortcut = nil
         }
     }
 
@@ -99,6 +87,14 @@ public struct VCamShortcutGridView: View {
             Image(systemName: "plus")
         }
         .flatButtonStyle(.filled())
+    }
+
+    private func runShortcut(_ shortcut: VCamShortcut) {
+        Task { @MainActor in
+            runningShortcut = shortcut
+            await VCamShortcutRunner.shared.run(shortcut)
+            runningShortcut = nil
+        }
     }
 
     private func addShortcut() {

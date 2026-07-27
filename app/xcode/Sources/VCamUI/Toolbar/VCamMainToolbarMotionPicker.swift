@@ -116,10 +116,9 @@ public struct VCamMainToolbarMotionPicker: View {
                 } else {
                     UniBridge.playMotion(id: motion.id, isLoop: isLoop)
                 }
-            }
-        ) {
-            Text(motion.localizedDisplayName)
-        }
+            },
+            label: Text(motion.localizedDisplayName)
+        )
     }
 
     private func loopBinding(motionID: String) -> Binding<Bool> {

@@ -39,7 +39,7 @@ public struct KeyRecordingPopoverView: View {
 
     public var body: some View {
         VStack {
-            keyView
+            KeyCombinationView(keys: keys, isCompleted: isCompleted)
 
             if let helpMessage {
                 Text(helpMessage)
@@ -56,33 +56,6 @@ public struct KeyRecordingPopoverView: View {
             onKeyDown(KeyCombination(key: event.charactersIgnoringModifiers ?? "", keyCode: event.keyCode, modifiers: event.modifierFlags))
         } keyUp: { _ in
             onKeyUp()
-        }
-    }
-
-    @ViewBuilder var keyView: some View {
-        HStack {
-            Group {
-                ForEach(KeyCombination.Modifier.allCases) { modifier in
-                    let isInput = keys.modifiers.contains(modifier.flag)
-                    if isInput || !isCompleted {
-                        Text(modifier.keySymbol)
-                            .opacity(isInput ? 1 : 0.3)
-                    }
-                }
-                if isCompleted {
-                    Text(keys.readableKeyName)
-                }
-            }
-            .font(.body.bold())
-            .padding(4)
-            .background {
-                if isCompleted {
-                    Color.blue.opacity(0.1)
-                } else {
-                    Color.clear.background()
-                }
-            }
-            .cornerRadiusConcentric(4)
         }
     }
 
@@ -109,6 +82,38 @@ public struct KeyRecordingPopoverView: View {
             try? await Task.sleep(nanoseconds: NSEC_PER_MSEC * 1500)
             isError = false
             keys = .empty
+        }
+    }
+}
+
+private struct KeyCombinationView: View {
+    let keys: KeyCombination
+    let isCompleted: Bool
+
+    var body: some View {
+        HStack {
+            Group {
+                ForEach(KeyCombination.Modifier.allCases) { modifier in
+                    let isInput = keys.modifiers.contains(modifier.flag)
+                    if isInput || !isCompleted {
+                        Text(modifier.keySymbol)
+                            .opacity(isInput ? 1 : 0.3)
+                    }
+                }
+                if isCompleted {
+                    Text(keys.readableKeyName)
+                }
+            }
+            .font(.body.bold())
+            .padding(4)
+            .background {
+                if isCompleted {
+                    Color.blue.opacity(0.1)
+                } else {
+                    Color.clear.background()
+                }
+            }
+            .cornerRadiusConcentric(4)
         }
     }
 }
