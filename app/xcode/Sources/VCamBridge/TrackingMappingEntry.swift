@@ -54,7 +54,7 @@ public struct TrackingMappingEntry: Codable, Sendable, Hashable, Identifiable {
 }
 
 /// Mapping entries kept per tracking mode
-public struct TrackingMappings: Sendable {
+public struct TrackingMappings: Equatable, Sendable {
     public var blendShape: [TrackingMappingEntry]
     /// Filled in once the avatar turns out to support Perfect Sync
     public var perfectSync: [TrackingMappingEntry]

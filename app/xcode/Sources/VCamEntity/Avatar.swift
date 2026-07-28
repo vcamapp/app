@@ -11,7 +11,7 @@ public enum Avatar {
         }
     }
 
-    public struct Motion: Identifiable, Sendable {
+    public struct Motion: Identifiable, Equatable, Sendable {
         public let id: String
         public var displayName: String
 

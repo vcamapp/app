@@ -27,7 +27,7 @@ public struct VCamShortcutBuilderView: View {
 
                 ForEach($shortcut.configurations) { $configuration in
                     VStack(spacing: 0) {
-                        VCamShortcutBuilderActionItemView(shortcut: shortcut, configuration: $configuration) {
+                        VCamShortcutBuilderActionItemView(shortcutID: shortcut.id, configuration: $configuration) {
                             configuration.action().deleteResources(shortcut: shortcut)
                             shortcut.configurations.remove(byId: configuration.id)
                         }
@@ -91,7 +91,7 @@ public struct VCamShortcutBuilderView: View {
 }
 
 struct VCamShortcutBuilderActionItemView: View {
-    let shortcut: VCamShortcut
+    let shortcutID: UUID
     @Binding var configuration: AnyVCamActionConfiguration
 
     let onDelete: () -> Void
@@ -124,7 +124,7 @@ struct VCamShortcutBuilderActionItemView: View {
                     .buttonStyle(.plain)
                 }
 
-                VCamShortcutBuilderActionItemEditView(shortcut: shortcut, configuration: $configuration)
+                VCamShortcutBuilderActionItemEditView(shortcutID: shortcutID, configuration: $configuration)
                     .padding([.horizontal, .bottom], 4)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -133,7 +133,7 @@ struct VCamShortcutBuilderActionItemView: View {
 }
 
 struct VCamShortcutBuilderActionItemEditView: View {
-    let shortcut: VCamShortcut
+    let shortcutID: UUID
     @Binding var configuration: AnyVCamActionConfiguration
 
     var body: some View {
@@ -153,7 +153,7 @@ struct VCamShortcutBuilderActionItemEditView: View {
         case let .loadScene(configuration):
             VCamActionEditorPicker(item: .init(configuration, keyPath: \.sceneId, to: $configuration), items: SceneManager.shared.scenes, mapValue: \.id, displayName: \.localizedDisplayName)
         case let .appleScript(configuration):
-            VCamActionEditorCodeEditor(id: shortcut.id, actionId: configuration.id, name: VCamAppleScriptAction.scriptName)
+            VCamActionEditorCodeEditor(id: shortcutID, actionId: configuration.id, name: VCamAppleScriptAction.scriptName)
         }
     }
 }

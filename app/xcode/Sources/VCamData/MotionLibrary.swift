@@ -14,6 +14,8 @@ public enum MotionPlaybackTrigger: Sendable {
 public final class MotionLibrary {
     public static let shared = MotionLibrary()
 
+    private static let fallbackBuiltInMotions = VCamAvatarMotion.allCases.map { Avatar.Motion.builtIn(name: $0.rawValue) }
+
     public let store: ImportedMotionStore
 
     /// Session-scoped loop settings of built-in motions (not persisted)
@@ -38,9 +40,7 @@ public final class MotionLibrary {
     /// Falls back to the known built-in motions until the list arrives from Unity,
     /// so that the shortcut editor always has candidates
     public var allMotions: [Avatar.Motion] {
-        let builtIn = builtInMotions.isEmpty
-            ? VCamAvatarMotion.allCases.map { Avatar.Motion.builtIn(name: $0.rawValue) }
-            : builtInMotions
+        let builtIn = builtInMotions.isEmpty ? Self.fallbackBuiltInMotions : builtInMotions
         return builtIn + importedMotions
     }
 

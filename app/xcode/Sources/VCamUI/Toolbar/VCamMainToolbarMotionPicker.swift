@@ -6,20 +6,18 @@ import VCamData
 public struct VCamMainToolbarMotionPicker: View {
     public init() {}
 
-    @Environment(UniState.self) var uniState
-
     public var body: some View {
         VStack(spacing: 8) {
             GroupBox {
-                motionGrid {
+                MotionGrid {
                     ForEach(MotionLibrary.shared.builtInMotions) { motion in
-                        builtInMotionItem(motion)
+                        BuiltInMotionItem(motion: motion)
                     }
                 }
             }
 
 #if FEATURE_VRMA
-            customMotionSection
+            CustomMotionSection()
 #endif
         }
         .modifierOnMacWindow { content, _ in
@@ -32,16 +30,32 @@ public struct VCamMainToolbarMotionPicker: View {
             .background(.regularMaterial)
         }
     }
+}
 
-    private var customMotionSection: some View {
+private struct MotionGrid<Content: View>: View {
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        LazyVGrid(columns: [GridItem(.adaptive(minimum: 80))], spacing: 2) {
+            content
+        }
+    }
+}
+
+private struct CustomMotionSection: View {
+    var body: some View {
         GroupBox {
             VStack(alignment: .leading, spacing: 4) {
-                sectionTitle(.customMotions)
-                motionGrid {
+                Text(.customMotions)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                MotionGrid {
                     ForEach(MotionLibrary.shared.importedMotions) { motion in
-                        importedMotionItem(motion)
+                        ImportedMotionItem(motion: motion)
                     }
                 }
+
                 Button {
                     startImport()
                 } label: {
@@ -58,105 +72,57 @@ public struct VCamMainToolbarMotionPicker: View {
         }
     }
 
-    private func sectionTitle(_ title: LocalizedStringResource) -> some View {
-        Text(title)
-            .font(.caption)
-            .foregroundStyle(.secondary)
-    }
-
-    private func motionGrid(@ViewBuilder content: () -> some View) -> some View {
-        LazyVGrid(columns: [GridItem(.adaptive(minimum: 80))], spacing: 2) {
-            content()
-        }
-    }
-
-    private func builtInMotionItem(_ motion: Avatar.Motion) -> some View {
-        HStack(spacing: 2) {
-            let isLoopOn = loopBinding(motionID: motion.id)
-
-            playButton(motion: motion, isLoop: isLoopOn.wrappedValue)
-
-#if !FEATURE_3
-            loopToggle(isOn: isLoopOn)
-#endif
-        }
-    }
-
-    private func importedMotionItem(_ motion: Avatar.Motion) -> some View {
-        HStack(spacing: 2) {
-            let record = MotionLibrary.shared.record(for: motion.id)
-            let isLoopOn = loopBinding(motionID: motion.id)
-
-            playButton(motion: motion, isLoop: isLoopOn.wrappedValue)
-                .contextMenu {
-                    Button {
-                        openSettings(record: record)
-                    } label: {
-                        Text(.settings)
-                    }
-                    Divider()
-                    Button(role: .destructive) {
-                        delete(motion)
-                    } label: {
-                        Text(.delete)
-                    }
-                }
-
-            loopToggle(isOn: isLoopOn)
-        }
-    }
-
-    private func playButton(motion: Avatar.Motion, isLoop: Bool) -> some View {
-        let isPlaying = uniState.isMotionPlaying[motion.id, default: false]
-        return VCamMainToolbarButton(
-            isSelected: isPlaying,
-            action: {
-                if isPlaying {
-                    UniBridge.stopMotion(id: motion.id)
-                } else {
-                    UniBridge.playMotion(id: motion.id, isLoop: isLoop)
-                }
-            },
-            label: Text(motion.localizedDisplayName)
-        )
-    }
-
-    private func loopBinding(motionID: String) -> Binding<Bool> {
-        Binding {
-            MotionLibrary.shared.isLoopEnabled(for: motionID, trigger: .toolbar)
-        } set: { newValue in
-            do {
-                try MotionLibrary.shared.setLoopEnabled(newValue, for: motionID)
-            } catch {
-                Task { @MainActor in
-                    await VCamAlert.showModal(title: String(localized: .failure), message: error.localizedDescription, canCancel: false)
-                }
-            }
-        }
-    }
-
-    private func loopToggle(isOn: Binding<Bool>) -> some View {
-        Toggle(isOn: isOn) {
-            Image(systemName: "repeat")
-                .foregroundStyle(isOn.wrappedValue ? Color.accentColor : .primary)
-                .contentShape(Rectangle())
-        }
-        .toggleStyle(.button)
-        .buttonStyle(.plain)
-    }
-
     private func startImport() {
         guard let url = FileUtility.openFile(type: .vrma) else { return }
         // The popover closes when the file dialog opens, so present these in standalone windows
         MacWindowManager.shared.reopen(VCamMotionImportView(sourceURL: url))
     }
+}
 
-    private func openSettings(record: ImportedMotionRecord?) {
-        guard let record else { return }
+private struct BuiltInMotionItem: View {
+    let motion: Avatar.Motion
+
+    var body: some View {
+        HStack(spacing: 2) {
+            MotionPlayButton(motion: motion)
+
+#if !FEATURE_3
+            MotionLoopToggle(motionID: motion.id)
+#endif
+        }
+    }
+}
+
+private struct ImportedMotionItem: View {
+    let motion: Avatar.Motion
+
+    var body: some View {
+        HStack(spacing: 2) {
+            MotionPlayButton(motion: motion)
+                .contextMenu {
+                    Button {
+                        openSettings()
+                    } label: {
+                        Text(.settings)
+                    }
+                    Divider()
+                    Button(role: .destructive) {
+                        delete()
+                    } label: {
+                        Text(.delete)
+                    }
+                }
+
+            MotionLoopToggle(motionID: motion.id)
+        }
+    }
+
+    private func openSettings() {
+        guard let record = MotionLibrary.shared.record(for: motion.id) else { return }
         MacWindowManager.shared.reopen(VCamImportedMotionSettingsView(record: record))
     }
 
-    private func delete(_ motion: Avatar.Motion) {
+    private func delete() {
         Task { @MainActor in
             let shortcutCount = VCamShortcutManager.shared.shortcuts.count { shortcut in
                 shortcut.configurations.contains {
@@ -175,6 +141,56 @@ public struct VCamMainToolbarMotionPicker: View {
                 try MotionLibrary.shared.remove(motionID: motion.id)
             } catch {
                 await VCamAlert.showModal(title: String(localized: .failure), message: error.localizedDescription, canCancel: false)
+            }
+        }
+    }
+}
+
+private struct MotionPlayButton: View {
+    let motion: Avatar.Motion
+
+    @Environment(UniState.self) private var uniState
+
+    var body: some View {
+        let isPlaying = uniState.isMotionPlaying[motion.id, default: false]
+        VCamMainToolbarButton(
+            isSelected: isPlaying,
+            action: {
+                if isPlaying {
+                    UniBridge.stopMotion(id: motion.id)
+                } else {
+                    UniBridge.playMotion(id: motion.id, isLoop: MotionLibrary.shared.isLoopEnabled(for: motion.id, trigger: .toolbar))
+                }
+            },
+            label: Text(motion.localizedDisplayName)
+        )
+    }
+}
+
+private struct MotionLoopToggle: View {
+    let motionID: String
+
+    var body: some View {
+        let isOn = loopBinding
+        Toggle(isOn: isOn) {
+            Image(systemName: "repeat")
+                .foregroundStyle(isOn.wrappedValue ? Color.accentColor : .primary)
+                .contentShape(Rectangle())
+        }
+        .toggleStyle(.button)
+        .buttonStyle(.plain)
+    }
+
+    private var loopBinding: Binding<Bool> {
+        Binding {
+            MotionLibrary.shared.isLoopEnabled(for: motionID, trigger: .toolbar)
+        } set: { newValue in
+            do {
+                try MotionLibrary.shared.setLoopEnabled(newValue, for: motionID)
+            } catch {
+                Task { @MainActor in
+                    await VCamAlert.showModal(title: String(localized: .failure), message: error.localizedDescription, canCancel: false)
+                }
             }
         }
     }

@@ -8,9 +8,10 @@ struct VCamActionEditorPicker<Item: Hashable & Sendable, Candidate: Sendable>: V
 
     var body: some View {
         Picker(selection: $item) {
-            ForEach(items.map(PickerItem.init)) { item in
-                Text(verbatim: displayName(item.value))
-                    .tag(mapValue(item.value))
+            // Identified by the tag value so the row identity survives body evaluations.
+            ForEach(items.map { PickerItem(id: mapValue($0), name: displayName($0)) }) { item in
+                Text(verbatim: item.name)
+                    .tag(item.id)
             }
         } label: {
             EmptyView()
@@ -27,9 +28,9 @@ extension VCamActionEditorPicker where Item == Candidate {
     }
 }
 
-private struct PickerItem<Value>: Identifiable {
-    let id = UUID()
-    let value: Value
+private struct PickerItem<ID: Hashable>: Identifiable {
+    let id: ID
+    let name: String
 }
 
 struct VCamActionEditorPicker_Previews: PreviewProvider {

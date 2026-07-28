@@ -15,7 +15,7 @@ public struct VCamMainToolbarExpressionPicker: View {
         ScrollView(.vertical, showsIndicators: true) {
             GroupBox {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 60))]) {
-                    ForEach(uniState.expressions, id: \.name) { expression in
+                    ForEach(uniState.expressions) { expression in
                         VCamMainToolbarButton(
                             isSelected: expression.name == currentExpressionName,
                             action: {
