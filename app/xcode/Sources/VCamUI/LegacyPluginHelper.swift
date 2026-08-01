@@ -1,10 +1,3 @@
-//
-//  LegacyPluginHelper.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/03/13.
-//
-
 import Foundation
 import AppKit
 import VCamLogger
@@ -12,57 +5,10 @@ import VCamLogger
 
 private let dalPath = URL(fileURLWithPath: "/Library/CoreMediaIO/Plug-Ins/DAL/")
 private let pluginPath = dalPath.appending(path: "VCam.plugin")
-private let sourcePluginPath = URL(fileURLWithPath: Bundle.main.bundlePath).appending(path: "Contents/VCam.plugin")
 
 public struct LegacyPluginHelper {
-    private static var pluginVersion: String {
-        let plistURL = sourcePluginPath.appending(path: "Contents/Info.plist")
-        let plist = NSDictionary(contentsOf: plistURL)
-        return plist?["CFBundleShortVersionString"] as? String ?? ""
-    }
-
     public static func isPluginInstalled() -> Bool {
         FileManager.default.fileExists(atPath: pluginPath.path)
-    }
-
-    @MainActor
-    public static func checkUpdate() async {
-        let pluginInstalled = isPluginInstalled()
-        var pluginUpdateNeeded = false
-
-        if pluginInstalled {
-            pluginUpdateNeeded = pluginVersion != UserDefaults.standard.value(for: .pluginVersion)
-        }
-
-        if !pluginInstalled || pluginUpdateNeeded {
-            await installPlugin(isUpdate: pluginUpdateNeeded)
-        }
-    }
-
-    @MainActor
-    public static func installPlugin(isUpdate: Bool) async {
-        Logger.log(event: .installPlugin)
-
-        guard await VCamAlert.showModal(
-            title: String(localized: .installPlugin(isUpdate ? String(localized: .update) : String(localized: .add))),
-            message: String(localized: .installOne(pluginPath.path)), canCancel: true) == .ok
-        else {
-            Logger.log("cancel")
-            return
-        }
-
-        do {
-            // Get the necessary permissions for installation by AppleScript
-            let rm = "rm -rf \\\"\(pluginPath.path)\\\""
-            let cp = "cp -r \\\"\(sourcePluginPath.path)\\\" \\\"\(pluginPath.path)\\\""
-            try await NSAppleScript.execute("do shell script \"\(rm) && \(cp)\" with administrator privileges")
-
-            await VCamAlert.showModal(title: String(localized: .success), message: String(localized: .restartAfterInstalling), canCancel: false)
-            UserDefaults.standard.set(pluginVersion, for: .pluginVersion)
-        } catch {
-            await VCamAlert.showModal(title: String(localized: .failure), message: error.localizedDescription, canCancel: false)
-            Logger.log("error")
-        }
     }
 
     @MainActor

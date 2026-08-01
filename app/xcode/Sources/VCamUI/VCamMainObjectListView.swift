@@ -198,13 +198,15 @@ private struct EditSceneObjectButton: View {
 
 private struct FilterSceneObjectButton: View {
     let object: SceneObject
-    let configuration: ImageFilterConfiguration?
+    // Resolved when tapped: the cached context menu can outlive a filter change,
+    // so capturing the configuration at build time would show a stale filter list
+    let configuration: () -> ImageFilterConfiguration?
     let filter: (ImageFilter) -> Void
     var body: some View {
         Button {
             Task { @MainActor in
                 let image = await RenderTextureManager.shared.drawer(id: object.id)?.croppedSnapshot() ?? .init()
-                showImageFilterView(image: image, configuration: configuration) { filter in
+                showImageFilterView(image: image, configuration: configuration()) { filter in
                     RenderTextureManager.shared.drawer(id: object.id)?.filter = filter
                     self.filter(filter)
                 }
@@ -311,7 +313,7 @@ private struct EditSceneObjectViewModifier: ViewModifier {
                             SceneObjectManager.shared.update(object)
                         }
                     }
-                    filterAndDeleteItems(configuration: image.filter?.configuration) { image.filter = $0 }
+                    filterAndDeleteItems(configuration: { image.filter?.configuration }) { image.filter = $0 }
                 }
         case let .screen(screen):
             content
@@ -324,7 +326,7 @@ private struct EditSceneObjectViewModifier: ViewModifier {
                             SceneObjectManager.shared.replaceRenderer(recorder, of: object)
                         }
                     }
-                    filterAndDeleteItems(configuration: screen.filter?.configuration) { screen.filter = $0 }
+                    filterAndDeleteItems(configuration: { screen.filter?.configuration }) { screen.filter = $0 }
                 }
         case let .videoCapture(videoCapture):
             content
@@ -336,7 +338,7 @@ private struct EditSceneObjectViewModifier: ViewModifier {
                             SceneObjectManager.shared.replaceRenderer(drawer, of: object)
                         }
                     }
-                    filterAndDeleteItems(configuration: videoCapture.filter?.configuration) { videoCapture.filter = $0 }
+                    filterAndDeleteItems(configuration: { videoCapture.filter?.configuration }) { videoCapture.filter = $0 }
                 }
         case let .web(web):
             content
@@ -354,7 +356,7 @@ private struct EditSceneObjectViewModifier: ViewModifier {
                         Image(systemName: "network")
                         Text(.interact)
                     }
-                    filterAndDeleteItems(configuration: web.filter?.configuration) { web.filter = $0 }
+                    filterAndDeleteItems(configuration: { web.filter?.configuration }) { web.filter = $0 }
                 }
         case let .wind(wind):
             content
@@ -380,7 +382,7 @@ private struct EditSceneObjectViewModifier: ViewModifier {
 
     /// Shared menu footer for filterable objects
     @ViewBuilder
-    private func filterAndDeleteItems(configuration: ImageFilterConfiguration?, setFilter: @escaping (ImageFilter) -> Void) -> some View {
+    private func filterAndDeleteItems(configuration: @escaping () -> ImageFilterConfiguration?, setFilter: @escaping (ImageFilter) -> Void) -> some View {
         FilterSceneObjectButton(object: object, configuration: configuration) { filter in
             setFilter(filter)
             SceneObjectManager.shared.didChange(object)

@@ -21,7 +21,6 @@ public extension UserDefaults.Key {
     static var cameraFps: Key<Int> { .init("vc_camera_fps", default: 24) }
     static var captureDeviceId: Key<String?> { .init("vc_capture_device_id", default: nil) }
     static var audioDeviceUid: Key<String?> { .init("vc_audio_device_uid", default: nil) }
-    static var pluginVersion: Key<String> { .init("vc_plugin_ver", default: "") }
     static var alwaysOnTopEnabled: Key<Bool> { .init("vc_alwaysontop_enabled", default: false) }
     static var trackingMethodFace: Key<TrackingMethod.Face> { .init("vc_tracking_method_face", default: .default) }
 #if FEATURE_3

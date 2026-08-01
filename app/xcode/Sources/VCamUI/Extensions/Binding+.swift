@@ -15,18 +15,10 @@ public extension Binding where Value == Double {
     func map<T: BinaryFloatingPoint & Sendable>() -> Binding<T> {
         self.map(get: { T.init($0) }, set: Value.init)
     }
-
-    func map() -> Binding<String> {
-        self.map(get: { $0.description }, set: { Value($0) ?? 0 })
-    }
 }
 
 public extension Binding where Value == Int {
     func map<T: BinaryFloatingPoint & Sendable>() -> Binding<T> {
         self.map(get: { T.init($0) }, set: Value.init)
-    }
-
-    func map() -> Binding<String> {
-        self.map(get: { $0.description }, set: { Value($0) ?? 0 })
     }
 }

@@ -214,20 +214,17 @@ private struct WebRendererSizeForm: View {
                 HStack {
                     Text(.width)
                     Spacer()
-                    TextField(text: $width.map()) { EmptyView() }
-                        .acceptNumberOnly($width.map())
+                    TextField(value: $width, format: .number.grouping(.never)) { EmptyView() }
                 }
                 HStack {
                     Text(.height)
                     Spacer()
-                    TextField(text: $height.map()) { EmptyView() }
-                        .acceptNumberOnly($height.map())
+                    TextField(value: $height, format: .number.grouping(.never)) { EmptyView() }
                 }
                 HStack {
                     Text(verbatim: "FPS")
                     Spacer()
-                    TextField(text: $fps.map()) { EmptyView() }
-                        .acceptNumberOnly($fps.map())
+                    TextField(value: $fps, format: .number.grouping(.never)) { EmptyView() }
                 }
             }
         }
@@ -270,16 +267,5 @@ private struct WebRendererScriptEditors: View {
             }
         }
         .frame(height: 200)
-    }
-}
-
-private extension TextField {
-    func acceptNumberOnly(_ text: Binding<String>) -> some View {
-        self.onReceive(Just(text.wrappedValue)) { newValue in
-            let filtered = newValue.filter { "0123456789".contains($0) }
-            if filtered != newValue {
-                text.wrappedValue = filtered
-            }
-        }
     }
 }

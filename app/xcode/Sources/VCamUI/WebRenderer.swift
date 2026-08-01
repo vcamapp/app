@@ -23,6 +23,9 @@ public final class WebRenderer {
 
     private let viewHolder = NSWindow()
 
+    // A unique key so that each web object can open its own interact window
+    private let interactWindowId = "WebRendererInteract-\(UUID().uuidString)"
+
     public var css: String? {
         didSet {
             applyCurrentCSS()
@@ -77,7 +80,6 @@ public final class WebRenderer {
         let webView = Self.makeWebView(url: resource.url, size: size, window: viewHolder)
         self.webView = webView
 
-        render = { _ in }
         timer = makeTimer()
 
         delegator = WebViewDelegator { [weak self] in
@@ -178,19 +180,17 @@ public final class WebRenderer {
     }
 
     public func showWindow() {
-        let size = size
         let webView = self.webView
         let containerView = webView.superview
         webView.removeFromSuperview()
 
-        VCamWindow.showWindow(title: String(localized: .interact)) { close in
-            ModalSheet(doneTitle: String(localized: .done), done: close) {
-                NSViewRepresentableBuilder {
-                    webView
-                }
-                .frame(width: size.width, height: size.height)
-            }
-        } close: { [weak self] in
+        let windowId = interactWindowId
+        MacWindowManager.shared.open(
+            WebRendererInteractView(webView: webView, size: size) {
+                MacWindowManager.shared.close(id: windowId)
+            },
+            id: windowId
+        ) { [weak self] in
             self?.renderWebViewTexture()
             containerView?.addSubview(webView)
         }
@@ -231,6 +231,23 @@ private extension WKWebView {
     }
 }
 
+private struct WebRendererInteractView: MacWindow {
+    let webView: WKWebView
+    let size: CGSize
+    let close: () -> Void
+
+    var windowTitle: String { String(localized: .interact) }
+
+    var body: some View {
+        ModalSheet(doneTitle: String(localized: .done), done: close) {
+            NSViewRepresentableBuilder {
+                webView
+            }
+            .frame(width: size.width, height: size.height)
+        }
+    }
+}
+
 struct NSViewRepresentableBuilder<Content: NSView>: NSViewRepresentable {
     init(content: @escaping () -> Content, update: ((Content, Context) -> Void)? = nil) {
         self.content = content
@@ -258,7 +275,15 @@ extension WebRenderer: RenderTextureRenderer {
     }
 
     public func snapshot() async -> CIImage {
-        lastFrame
+        if !lastFrame.extent.isEmpty {
+            return lastFrame
+        }
+        // Take a single frame on demand while no consumer has rendered one yet
+        return await withCheckedContinuation { continuation in
+            webView.takeSnapshot(with: nil) { image, _ in
+                continuation.resume(returning: image?.ciImage ?? .empty())
+            }
+        }
     }
 
     public func disableRenderTexture() {
@@ -275,6 +300,7 @@ extension WebRenderer: RenderTextureRenderer {
     }
 
     public func stopRendering() {
+        MacWindowManager.shared.close(id: interactWindowId)
         render = nil
         timer?.invalidate()
         timer = nil

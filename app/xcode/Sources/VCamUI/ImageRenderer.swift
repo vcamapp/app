@@ -18,40 +18,30 @@ public final class ImageRenderer: RenderTextureRenderer {
 
     public init(image: CIImage, filter: ImageFilter?) {
         self.image = image
+        self.filter = filter
         size = image.extent.size
         cropRect = .init(x: 0, y: 0, width: 1, height: size.height / size.width)
-
-        if let filter = filter {
-            self.filter = filter
-            applyFilter(filter)
-        }
     }
 
     private let image: CIImage
     private var render: ((CIImage) -> Void) = { _ in }
+
+    private var outputImage: CIImage {
+        filter?.apply(to: image) ?? image
+    }
 
     public var size: CGSize
     public var cropRect: CGRect
 
     public var filter: ImageFilter? {
         didSet {
-            guard let filter = filter else { return }
-            applyFilter(filter)
+            render(outputImage)
         }
     }
 
     public func setRenderTexture(updator: @escaping (CIImage) -> Void) {
         render = updator
-        if let filter = filter {
-            applyFilter(filter)
-        } else {
-            updator(image)
-        }
-    }
-
-    private func applyFilter(_ filter: ImageFilter) {
-        let filteredImage = filter.apply(to: self.image)
-        self.render(filteredImage)
+        updator(outputImage)
     }
 
     public func snapshot() -> CIImage {

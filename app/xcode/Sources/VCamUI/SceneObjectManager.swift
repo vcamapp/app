@@ -145,6 +145,9 @@ public final class SceneObjectManager {
             RenderTextureManager.shared.remove(id: object.id)
         }
         objects.remove(byId: object.id)
+        // The Unity side deletes the currently selected item, so select the target first;
+        // otherwise removing an unselected object (e.g. from the context menu) leaves it on screen
+        UniBridge.shared.objectSelected.wrappedValue = object.id
         UniBridge.shared.deleteObject()
         try? SceneManager.shared.saveCurrentSceneAndObjects()
     }

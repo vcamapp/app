@@ -57,7 +57,12 @@ struct MacWindowViewModifier<Content: View, ModifiedContent: View>: View {
 public final class MacWindowManager {
     public static let shared = MacWindowManager()
 
-    private var openWindows: [ObjectIdentifier: NSWindow] = [:]
+    private enum WindowKey: Hashable, Sendable {
+        case type(ObjectIdentifier)
+        case id(String)
+    }
+
+    private var openWindows: [WindowKey: NSWindow] = [:]
 
     public var openCredits: () -> Void = {}
 
@@ -69,8 +74,16 @@ public final class MacWindowManager {
     }
 
     public func open<T: MacWindow>(_ windowView: T) {
-        let id = self.id(T.self)
-        if let window = openWindows[id] {
+        open(windowView, key: .type(id(T.self)), onClose: nil)
+    }
+
+    /// Opens a window keyed by an instance id, allowing multiple windows of the same view type
+    public func open<T: MacWindow>(_ windowView: T, id: String, onClose: (@MainActor () -> Void)? = nil) {
+        open(windowView, key: .id(id), onClose: onClose)
+    }
+
+    private func open<T: MacWindow>(_ windowView: T, key: WindowKey, onClose: (@MainActor () -> Void)?) {
+        if let window = openWindows[key] {
             window.makeKeyAndOrderFront(nil)
             return
         }
@@ -94,24 +107,32 @@ public final class MacWindowManager {
         }())
 
         window.makeKeyAndOrderFront(nil)
-        openWindows[id] = window
+        openWindows[key] = window
 
         let observer = NotificationObserver()
         observer.value = NotificationCenter.default.addObserver(forName: NSWindow.willCloseNotification, object: window, queue: .main) { [weak self] _ in
             MainActor.assumeIsolated {
-                self?.openWindows.removeValue(forKey: id)
+                self?.openWindows.removeValue(forKey: key)
                 if let token = observer.value {
                     NotificationCenter.default.removeObserver(token)
                 }
+                onClose?()
             }
         }
     }
 
     public func close<T: MacWindow>(_ window: T.Type) {
-        let id = self.id(T.self)
-        guard let window = openWindows[id] else { return }
+        close(key: .type(id(T.self)))
+    }
+
+    public func close(id: String) {
+        close(key: .id(id))
+    }
+
+    private func close(key: WindowKey) {
+        guard let window = openWindows[key] else { return }
         window.close()
-        openWindows.removeValue(forKey: id)
+        openWindows.removeValue(forKey: key)
     }
 
     private func id<T: MacWindow>(_ window: T.Type) -> ObjectIdentifier {
