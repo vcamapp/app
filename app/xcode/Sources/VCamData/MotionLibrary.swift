@@ -26,11 +26,7 @@ public final class MotionLibrary {
     }
 
     public var importedMotions: [Avatar.Motion] {
-#if FEATURE_VRMA
         store.records.map { .imported(record: $0) }
-#else
-        []
-#endif
     }
 
     public var builtInMotions: [Avatar.Motion] {
@@ -112,7 +108,6 @@ public final class MotionLibrary {
 
     /// Registers the persisted VRMA motions to Unity (called when Unity starts)
     public func registerPersistedMotionsToUnity() {
-#if FEATURE_VRMA
         for record in store.records {
             UniBridge.registerImportedMotion(
                 id: record.motionID,
@@ -122,7 +117,6 @@ public final class MotionLibrary {
                 requestID: UUID()
             )
         }
-#endif
     }
 
     // MARK: - Settings

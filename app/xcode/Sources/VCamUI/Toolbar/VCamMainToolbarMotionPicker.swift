@@ -16,9 +16,7 @@ public struct VCamMainToolbarMotionPicker: View {
                 }
             }
 
-#if FEATURE_VRMA
             CustomMotionSection()
-#endif
         }
         .modifierOnMacWindow { content, _ in
             ScrollView {

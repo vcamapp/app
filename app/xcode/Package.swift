@@ -59,7 +59,6 @@ for target in package.targets {
         swiftSettings.append(contentsOf: [
             .define("FEATURE_3"),
         ])
-//        swiftSettings.append(.define("FEATURE_VRMA")) // not supported yet
     } else {
         swiftSettings.append(contentsOf: [
             .define("ENABLE_ACCOUNT"),
