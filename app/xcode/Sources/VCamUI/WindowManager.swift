@@ -18,7 +18,6 @@ public final class WindowManager {
 
     @ObservationIgnored public private(set) var isConfigured = false
     @ObservationIgnored public fileprivate(set) var isWindowClosed = false
-    @ObservationIgnored public var isEnabled = false
 
     private let containerView = VCamRootContainerView()
     @ObservationIgnored private var statusItem: NSStatusItem?

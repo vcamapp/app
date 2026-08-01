@@ -231,7 +231,7 @@ public final class AvatarWebCamera {
         return .init(
             revision: configurationRevision,
             usage: usage,
-            isEmotionEnabled: isEmotionEnabled,
+            isEmotionEnabled: isEmotionEnabled && UniState.shared.isEnabled,
             finger: .init(
                 open: configuration.open,
                 close: configuration.close,

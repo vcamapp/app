@@ -60,7 +60,7 @@ public final class AvatarAudioManager {
         // The startup is asynchronous, so don't allow consecutive calls (it causes a crash in installTap)
         guard !isRecording else { return }
 
-        setEmotionEnabled(UserDefaults.standard.value(for: .useEmotion))
+        setEmotionEnabled(UniState.shared.value(for: .useEmotion))
 
         if isSystemSoundRecording {
             AudioDevice.device(forUid: "vcam-audio-device-001")?.setAsDefaultDevice()

@@ -46,6 +46,7 @@ public extension UserDefaults.Key {
     static var useAddToMacOSMenuBar: Key<Bool> { .init("vc_use_add_to_macos_menubar", default: true) }
 
     static var renderingQuality: Key<Int> { .init("vc_rendering_quality", default: 5) }
+    static var useURP: Key<Bool> { .init("vc_use_urp", default: false) }
     static var lipSyncType: Key<Int> { .init("vc_lipsync_type", default: 1) }
     static var vSyncCount: Key<Int> { .init("vc_vsync_count", default: 0) }
     static var lipSyncMicIntensity: Key<Double> { .init("vc_lipsync_mic_intensity", default: 1.0) }

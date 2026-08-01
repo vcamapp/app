@@ -295,6 +295,14 @@ public final class CoreMediaSinkStream: NSObject {
                             kCVPixelFormatType_32BGRA,
                             attrs as CFDictionary,
                             &pixelBuffer)
+        if let pixelBuffer {
+            // Tag the buffer as sRGB so that consumers (OBS, Zoom, etc.) don't have to guess the color space
+            let colorAttachments: [CFString: Any] = [
+                kCVImageBufferColorPrimariesKey: kCVImageBufferColorPrimaries_ITU_R_709_2,
+                kCVImageBufferTransferFunctionKey: kCVImageBufferTransferFunction_sRGB,
+            ]
+            CVBufferSetAttachments(pixelBuffer, colorAttachments as CFDictionary, .shouldPropagate)
+        }
         return pixelBuffer
     }
 }

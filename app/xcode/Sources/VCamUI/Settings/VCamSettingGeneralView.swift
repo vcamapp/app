@@ -21,8 +21,17 @@ public struct VCamSettingGeneralView: View {
                     Text(.optimizeMeshes)
                 }
                 .help(.helpMesh)
-                Toggle(isOn: $useAutoConvertVRM1) {
-                    Text(.enableAutoConvertingToVRM1)
+                if uniState.value(for: .useURP) {
+                    // URP doesn't support MToon of VRM 0.x, so the conversion is always enabled
+                    Toggle(isOn: .constant(true)) {
+                        Text(.enableAutoConvertingToVRM1)
+                    }
+                    .disabled(true)
+                    .help(.alwaysEnabledWhileUsingURP)
+                } else {
+                    Toggle(isOn: $useAutoConvertVRM1) {
+                        Text(.enableAutoConvertingToVRM1)
+                    }
                 }
 #endif
                 Toggle(isOn: $useHMirror) {

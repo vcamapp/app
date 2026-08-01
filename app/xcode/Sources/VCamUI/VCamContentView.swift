@@ -1,12 +1,6 @@
-//
-//  VCamContentView.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2022/04/09.
-//
-
 import Foundation
 import SwiftUI
+import VCamData
 
 public struct VCamContentView: View {
     public init() {}
@@ -27,7 +21,11 @@ public struct VCamContentView: View {
             VCamMainView()
 #if FEATURE_3
         case .screenEffect:
-            VCamDisplayView()
+            if UniState.shared.value(for: .useURP) {
+                VCamScreenEffectURPView()
+            } else {
+                VCamDisplayView()
+            }
 #endif
         case .recording:
             VCamRecordingView()

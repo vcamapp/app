@@ -82,6 +82,15 @@ public final class VCamSystem {
         UniBridge.shared.reset()
     }
 
+    public func relaunch() {
+        // Launch the new instance after this instance has exited to avoid conflicts over the virtual camera
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/bin/sh")
+        process.arguments = ["-c", "sleep 1; open -n \"$0\"", Bundle.main.bundlePath]
+        try? process.run()
+        NSApp.terminate(nil)
+    }
+
     private func stopSubsystems() {
         isStarted = false
         Tracking.shared.stop()

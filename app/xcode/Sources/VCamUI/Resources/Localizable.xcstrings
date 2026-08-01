@@ -277,6 +277,29 @@
         }
       }
     },
+    "alwaysEnabledWhileUsingURP": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This setting is always enabled while URP is enabled."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "URP有効時は常に有効になります"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "URP 사용 시 항상 활성화됩니다"
+          }
+        }
+      }
+    },
     "alwaysOnTop": {
       "extractionState": "manual",
       "localizations": {
@@ -5080,6 +5103,52 @@
           "stringUnit": {
             "state": "translated",
             "value": "화면 효과"
+          }
+        }
+      }
+    },
+    "screenEffectURPHowToUse": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "To use screen effects, disable URP in the experimental features settings."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "画面効果を使用するには、実験的な機能の設定でURPを無効にしてください"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "화면 효과를 사용하려면 실험적 기능 설정에서 URP를 비활성화하세요"
+          }
+        }
+      }
+    },
+    "screenEffectURPInDevelopment": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Screen effects for URP are currently in development."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "URP用の画面効果は現在開発中です"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "URP용 화면 효과는 현재 개발 중입니다"
           }
         }
       }

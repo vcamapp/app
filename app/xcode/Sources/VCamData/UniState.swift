@@ -3,6 +3,7 @@ import struct SwiftUI.Color
 import AppKit
 import VCamEntity
 import VCamBridge
+import VCamDefaults
 
 @MainActor
 @Observable
@@ -10,6 +11,12 @@ public final class UniState {
     public static let shared = UniState()
 
     public init() {}
+
+    public var isEnabled = false
+
+    public func value<T: UserDefaultsValue>(for key: UserDefaults.Key<T>) -> T {
+        isEnabled ? UserDefaults.standard.value(for: key) : key.defaultValue
+    }
 
 #if FEATURE_3
     @ObservationIgnored public private(set) lazy var displayParameters = DisplayParameterController(state: self)

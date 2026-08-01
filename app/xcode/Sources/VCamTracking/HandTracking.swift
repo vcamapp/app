@@ -10,7 +10,11 @@ public final class HandTracking {
     private struct Configuration: Sendable, Equatable {
         var open: Float = 0
         var close: Float = 0
-        var fingerTrackingEnabled: Bool = true
+#if FEATURE_3
+        var fingerTrackingEnabled = true
+#else
+        var fingerTrackingEnabled = false
+#endif
     }
 
     private struct State: Sendable {
@@ -43,12 +47,14 @@ public final class HandTracking {
         UserDefaults.standard.publisher(for: \.vc_ftracking_close_intensity, options: [.initial, .new])
             .sink { [weak self] value in self?.updateConfiguration { $0.close = Float(value) } }
             .store(in: &cancellables)
+#if FEATURE_3
         UserDefaults.standard.publisher(for: \.vc_tracking_method_finger, options: [.initial, .new])
             .sink { [weak self] value in
                 let method = TrackingMethod.Finger(rawValue: value) ?? .default
                 self?.updateConfiguration { $0.fingerTrackingEnabled = method != .disabled }
             }
             .store(in: &cancellables)
+#endif
     }
 
     private func updateConfiguration(_ update: (inout Configuration) -> Void) {
@@ -65,5 +71,7 @@ public final class HandTracking {
 private extension UserDefaults {
     @objc dynamic var vc_ftracking_open_intensity: Double { value(for: .fingerTrackingOpenIntensity) }
     @objc dynamic var vc_ftracking_close_intensity: Double { value(for: .fingerTrackingCloseIntensity) }
+#if FEATURE_3
     @objc dynamic var vc_tracking_method_finger: String { value(for: .trackingMethodFinger).rawValue }
+#endif
 }
