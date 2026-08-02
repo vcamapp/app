@@ -21,7 +21,9 @@ public enum FrameRateSelector {
             if let range = ranges.filter({ $0.maxFrameRate <= fps }).max(by: { $0.maxFrameRate < $1.maxFrameRate }) {
                 return (range.minFrameDuration, range.minFrameDuration)
             }
-            let range = ranges.min { $0.maxFrameRate < $1.maxFrameRate }
+            // Every remaining range exceeds the request, so the closest
+            // achievable rate is the smallest minFrameRate among them
+            let range = ranges.min { $0.minFrameRate < $1.minFrameRate }
             return (range?.maxFrameDuration ?? .invalid, range?.maxFrameDuration ?? .invalid)
         }
 

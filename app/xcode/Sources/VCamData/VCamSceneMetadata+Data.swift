@@ -24,7 +24,7 @@ public extension VCamSceneMetadata {
 
     func save() throws {
         let data = try JSONEncoder().encode(self)
-        try data.write(to: .sceneMetadata)
+        try data.write(to: .sceneMetadata, options: .atomic)
     }
 
     mutating func remove(sceneId: Int32) {

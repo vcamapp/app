@@ -107,6 +107,23 @@ struct FrameRateSelectorTests {
     }
 
     @Test
+    func belowAllOverlappingRanges() throws {
+        // With 30-60 fps and 15-120 fps, a request below both must pick the range
+        // that can go lowest (15 fps), not the one with the smallest maximum (30 fps)
+        let ranges: [MockAVFrameRateRange] = [
+            MockAVFrameRateRange(
+                minFrameDuration: CMTime(value: 1, timescale: 60),
+                maxFrameDuration: CMTime(value: 1, timescale: 30)
+            ),
+            MockAVFrameRateRange(
+                minFrameDuration: CMTime(value: 1, timescale: 120),
+                maxFrameDuration: CMTime(value: 1, timescale: 15)
+            ),
+        ]
+        expectRecommendedFrameRate(targetFPS: 10, ranges: ranges, min: ranges[1].maxFrameDuration, max: ranges[1].maxFrameDuration)
+    }
+
+    @Test
     func supportsFrameRate() throws {
         let range = MockAVFrameRateRange(
             minFrameDuration: CMTime(value: 1, timescale: 60),

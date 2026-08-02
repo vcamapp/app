@@ -1,15 +1,10 @@
-//
-//  CaptureDeviceRenderer.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/03/25.
-//
-
 import AVFoundation
 import CoreImage
+import Synchronization
 import VCamCamera
 import VCamEntity
 
+@MainActor
 public final class CaptureDeviceRenderer {
     private let previewer: CaptureDevicePreviewer
 
@@ -21,6 +16,16 @@ public final class CaptureDeviceRenderer {
 
     private var lastFrame = CIImage.empty()
     private let isCropped: Bool
+    private var didFrameOutput: ((CIImage) -> Void)?
+
+    // CIImage is immutable, so it is safe to hand across threads
+    private struct PendingFrame: @unchecked Sendable {
+        let image: CIImage
+    }
+
+    // Frames arrive on the capture queue; only the newest one is kept while a
+    // MainActor hop is pending so that all mutable state stays on the main actor
+    private let pendingFrame = Mutex<PendingFrame?>(nil)
 
     public init(device: AVCaptureDevice, cropRect: CGRect) throws {
         previewer = try CaptureDevicePreviewer(device: device)
@@ -40,12 +45,25 @@ public final class CaptureDeviceRenderer {
 
 extension CaptureDeviceRenderer: RenderTextureRenderer {
     public func setRenderTexture(updator: @escaping (CIImage) -> Void) {
-        previewer.didOutput = { [weak self] image in
-            guard let self = self else { return }
-            self.lastFrame = image.ciImage
-
-            let filteredImage = self.filter?.apply(to: self.lastFrame) ?? self.lastFrame
-            updator(filteredImage)
+        didFrameOutput = updator
+        previewer.didOutput = { [weak self] frame in
+            guard let self else { return }
+            let isFirstPendingFrame = pendingFrame.withLock { pending in
+                let isFirst = pending == nil
+                pending = PendingFrame(image: frame.ciImage)
+                return isFirst
+            }
+            // A task is already scheduled; it will pick up the replaced frame
+            guard isFirstPendingFrame else { return }
+            Task { @MainActor in
+                guard let frame = self.pendingFrame.withLock({ pending -> PendingFrame? in
+                    defer { pending = nil }
+                    return pending
+                }) else { return }
+                self.lastFrame = frame.image
+                let filteredImage = self.filter?.apply(to: frame.image) ?? frame.image
+                self.didFrameOutput?(filteredImage)
+            }
         }
     }
 
@@ -54,7 +72,7 @@ extension CaptureDeviceRenderer: RenderTextureRenderer {
     }
 
     public func updateTextureSizeIfNeeded(imageWidth width: CGFloat, imageHeight height: CGFloat) -> Bool {
-        guard width != size.width, height != size.height else { return false }
+        guard width != size.width || height != size.height else { return false }
 
         // Update the crop size for iPhone screen
         size = .init(width: width, height: height)
@@ -63,11 +81,12 @@ extension CaptureDeviceRenderer: RenderTextureRenderer {
             // This will break the texture size when rotating the screen on the iPhone.
             cropRect.size = .init(width: 1, height: size.height / size.width)
         }
-        
+
         return true
     }
 
     public func disableRenderTexture() {
+        didFrameOutput = nil
         previewer.didOutput = nil
     }
 
@@ -80,7 +99,7 @@ extension CaptureDeviceRenderer: RenderTextureRenderer {
     }
 
     public func stopRendering() {
-        previewer.didOutput = nil
+        didFrameOutput = nil
         previewer.dispose()
     }
 }

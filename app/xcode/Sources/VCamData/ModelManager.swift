@@ -49,13 +49,16 @@ public final class ModelManager {
         let modelDirectory = Models.modelDirectory(ofName: directoryName)
         let destinationURL = modelDirectory.appending(path: Models.modelFileName)
         // Copy off the main actor so that large models do not block the UI
-        try await Task.detached(priority: .utility) {
-            try FileManager.default.createDirectoryIfNeeded(at: modelDirectory)
-            if FileManager.default.fileExists(atPath: destinationURL.path) {
-                try FileManager.default.removeItem(at: destinationURL)
-            }
-            try FileManager.default.copyItem(at: source, to: destinationURL)
-        }.value
+        do {
+            try await Task.detached(priority: .utility) {
+                try FileManager.default.createDirectoryIfNeeded(at: modelDirectory)
+                try FileManager.default.copyItem(at: source, to: destinationURL)
+            }.value
+        } catch {
+            // The directory was created solely for this import, so don't leave it behind
+            try? FileManager.default.removeItem(at: modelDirectory)
+            throw error
+        }
 
         let modelInfo = Models.Model(name: directoryName, type: Models.modelType)
         await saveThumbnail(for: modelInfo)
@@ -123,7 +126,7 @@ public final class ModelManager {
 
     private func generateUniqueDirectoryName(baseName: String) -> String {
         var name = baseName
-        var counter = 1
+        var counter = 0
         while modelItems.contains(where: { $0.model.name == name }) || FileManager.default.fileExists(atPath: Models.modelDirectory(ofName: name).path) {
             counter += 1
             name = "\(baseName)_\(counter)"
@@ -135,10 +138,28 @@ public final class ModelManager {
         modelItems = modelItems.map { item in
             let url = item.model.modelURL
             let status: ModelItem.ModelStatus = FileManager.default.fileExists(atPath: url.path) ? .valid : .missing
-            return ModelItem(model: item.model, status: status, thumbnail: item.thumbnail ?? item.model.loadThumbnail()?.pngData())
+            return ModelItem(model: item.model, status: status, thumbnail: item.thumbnail)
         }
         scanForNewModels()
         saveMeta()
+        loadMissingThumbnails()
+    }
+
+    /// Thumbnail decoding is the heavy part of startup, so run it off the main actor
+    /// and fill in the items as the results arrive.
+    private func loadMissingThumbnails() {
+        let models = modelItems.filter { $0.thumbnail == nil }.map(\.model)
+        guard !models.isEmpty else { return }
+        Task {
+            let thumbnails = await Task.detached(priority: .utility) {
+                models.map { ($0.id, $0.loadThumbnail()?.pngData()) }
+            }.value
+            for (id, thumbnail) in thumbnails {
+                guard let thumbnail, let index = modelItems.firstIndex(where: { $0.id == id }) else { continue }
+                let item = modelItems[index]
+                modelItems[index] = ModelItem(model: item.model, status: item.status, thumbnail: thumbnail)
+            }
+        }
     }
 
     private func scanForNewModels() {
@@ -163,7 +184,7 @@ public final class ModelManager {
                 let attributes = try? FileManager.default.attributesOfItem(atPath: modelFile.path)
                 let createdAt = attributes?[.creationDate] as? Date ?? .now
                 let modelInfo = Models.Model(name: name, type: Models.modelType, createdAt: createdAt)
-                modelItems.append(ModelItem(model: modelInfo, status: .valid, thumbnail: modelInfo.loadThumbnail()?.pngData()))
+                modelItems.append(ModelItem(model: modelInfo, status: .valid, thumbnail: nil))
             }
         } catch {
             Logger.error(error)
@@ -188,13 +209,20 @@ public final class ModelManager {
     }
 
     private func loadMeta() {
-        guard FileManager.default.fileExists(atPath: Models.metaURL.path),
-              let data = try? Data(contentsOf: Models.metaURL),
-              let meta = try? JSONDecoder().decode(Models.self, from: data) else {
-            return
+        guard FileManager.default.fileExists(atPath: Models.metaURL.path) else { return }
+        do {
+            let data = try Data(contentsOf: Models.metaURL)
+            let meta = try JSONDecoder().decode(Models.self, from: data)
+            modelItems = meta.models.map { ModelItem(model: $0, status: .valid, thumbnail: nil) }
+            lastLoadedModelId = meta.lastModelId
+        } catch {
+            Logger.error(error)
+            // The next save would overwrite the unreadable file and destroy the display names
+            // and ordering it still contains, so keep it recoverable as a backup
+            let backupURL = Models.metaURL.appendingPathExtension("corrupted")
+            try? FileManager.default.removeItem(at: backupURL)
+            try? FileManager.default.moveItem(at: Models.metaURL, to: backupURL)
         }
-        modelItems = meta.models.map { ModelItem(model: $0, status: .valid, thumbnail: $0.loadThumbnail()?.pngData()) }
-        lastLoadedModelId = meta.lastModelId
     }
 
     private func saveMeta() {
@@ -203,7 +231,7 @@ public final class ModelManager {
             let meta = Models(models: modelItems.map(\.model), lastModelId: lastLoadedModelId)
             let encoder = JSONEncoder()
             let data = try encoder.encode(meta)
-            try data.write(to: Models.metaURL)
+            try data.write(to: Models.metaURL, options: .atomic)
         } catch {
             Logger.error(error)
         }

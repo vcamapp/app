@@ -109,7 +109,7 @@ public struct ScreenRecorderPreferenceView: View {
                 }
 
                 if isFirstTime {
-                    await screenRecorder.startCapture(with: captureConfig)
+                    try await screenRecorder.startCapture(with: captureConfig)
                 }
             } catch {
                 self.error = error

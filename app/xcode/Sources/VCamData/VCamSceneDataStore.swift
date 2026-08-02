@@ -30,9 +30,11 @@ public struct VCamSceneDataStore {
         let url = sceneURL
         let encoder = JSONEncoder()
         let data = try encoder.encode(scene)
-        try data.write(to: url, options: .atomic)
-        // Registered together with the file so that a saved scene is never missing from the metadata
+        // Register the ID before writing the file: a registered ID whose file is missing
+        // is repaired by loadAndRepair at launch, but an unregistered scene file
+        // would never be discovered again
         try addSceneIdIfNeeded()
+        try data.write(to: url, options: .atomic)
         uniDebugLog("scene saved: " + url.path)
     }
 

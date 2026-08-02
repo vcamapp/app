@@ -49,7 +49,6 @@ public enum VideoConverter { // TODO: Migrate to new API for macOS 26+
     public enum ConversionError: LocalizedError {
         case noVideoTrack
         case noAudioTracks
-        case invalidVideoOutputSettings
         case failedToAddReaderOutput
         case failedToAddWriterInput(AVMediaType)
         case readerFailed(Error?)
@@ -62,7 +61,6 @@ public enum VideoConverter { // TODO: Migrate to new API for macOS 26+
             switch self {
             case .noVideoTrack: "The asset does not contain a video track."
             case .noAudioTracks: "The asset does not contain an audio track."
-            case .invalidVideoOutputSettings: "The video output settings do not contain valid dimensions."
             case .failedToAddReaderOutput: "Failed to add an output to the asset reader."
             case let .failedToAddWriterInput(mediaType): "Failed to add the \(mediaType.rawValue) input to the asset writer."
             case let .readerFailed(error): "The asset reader failed: \(error?.localizedDescription ?? "unknown error")"
@@ -80,7 +78,6 @@ public enum VideoConverter { // TODO: Migrate to new API for macOS 26+
         asset: AVAsset,
         outputURL: URL,
         fileType: AVFileType,
-        videoOutputSettings: sending [String: Any],
         audioOutputSettings: sending [String: Any]
     ) async throws {
         let videoTracks = try await asset.loadTracks(withMediaType: .video)
@@ -89,10 +86,8 @@ public enum VideoConverter { // TODO: Migrate to new API for macOS 26+
         let audioTracks = try await asset.loadTracks(withMediaType: .audio)
         guard !audioTracks.isEmpty else { throw ConversionError.noAudioTracks }
 
-        guard let width = videoOutputSettings[AVVideoWidthKey] as? Int,
-              let height = videoOutputSettings[AVVideoHeightKey] as? Int else {
-            throw ConversionError.invalidVideoOutputSettings
-        }
+        // The video is passed through, so the hint must be the source track's own format
+        let videoFormatHint = try await videoTrack.load(.formatDescriptions).first
 
         nonisolated(unsafe) let reader = try AVAssetReader(asset: asset)
         nonisolated(unsafe) let audioOutput = AVAssetReaderAudioMixOutput(audioTracks: audioTracks, audioSettings: nil)
@@ -113,8 +108,7 @@ public enum VideoConverter { // TODO: Migrate to new API for macOS 26+
             }
         }
 
-        let formatHint = try CMFormatDescription(videoCodecType: .h264, width: width, height: height)
-        nonisolated(unsafe) let videoInput = AVAssetWriterInput(mediaType: .video, outputSettings: nil, sourceFormatHint: formatHint)
+        nonisolated(unsafe) let videoInput = AVAssetWriterInput(mediaType: .video, outputSettings: nil, sourceFormatHint: videoFormatHint)
         nonisolated(unsafe) let audioInput = AVAssetWriterInput(mediaType: .audio, outputSettings: audioOutputSettings)
         guard writer.canAdd(videoInput) else { throw ConversionError.failedToAddWriterInput(.video) }
         guard writer.canAdd(audioInput) else { throw ConversionError.failedToAddWriterInput(.audio) }

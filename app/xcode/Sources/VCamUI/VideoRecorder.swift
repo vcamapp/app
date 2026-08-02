@@ -51,7 +51,6 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
     @ObservationIgnored private var sampleCount = CMTimeValue(0)
     @ObservationIgnored private var pcSampleCount = CMTimeValue(0)
     @ObservationIgnored private var baseHostTime = mach_absolute_time()
-    @ObservationIgnored private var pixelBuffer: CVPixelBuffer?
     private let context = CIContext(options: [.cacheIntermediates: false, .name: "VideoRecorder"])
     @ObservationIgnored private var outputURL: URL!
     @ObservationIgnored private var temporaryOutputURL: URL!
@@ -83,7 +82,15 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
         let assetwriter = try AVAssetWriter(outputURL: temporaryOutputURL, fileType: format.fileType)
         let outputSettings = screenResolution.videoOutputSettings(format: format)
         let assetVideoWriterInput = AVAssetWriterInput(mediaType: .video, outputSettings: outputSettings)
-        let assetVideoWriterAdaptor = AVAssetWriterInputPixelBufferAdaptor(assetWriterInput: assetVideoWriterInput, sourcePixelBufferAttributes: nil)
+        // Provide the attributes so that the adaptor exposes a pixel buffer pool;
+        // rendering into a single reused buffer could corrupt frames the encoder still holds
+        let assetVideoWriterAdaptor = AVAssetWriterInputPixelBufferAdaptor(assetWriterInput: assetVideoWriterInput, sourcePixelBufferAttributes: [
+            kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA,
+            kCVPixelBufferWidthKey as String: screenResolution.size.width,
+            kCVPixelBufferHeightKey as String: screenResolution.size.height,
+            kCVPixelBufferCGImageCompatibilityKey as String: true,
+            kCVPixelBufferCGBitmapContextCompatibilityKey as String: true,
+        ])
 
         let assetAudioWriterInput = AVAssetWriterInput(mediaType: .audio, outputSettings: [
             AVFormatIDKey: kAudioFormatMPEG4AAC,
@@ -103,8 +110,8 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
         ]) : nil
 
         assetVideoWriterInput.expectsMediaDataInRealTime = true
-        assetAudioWriterInput.expectsMediaDataInRealTime = false
-        assetPCAudioWriterInput?.expectsMediaDataInRealTime = false
+        assetAudioWriterInput.expectsMediaDataInRealTime = true
+        assetPCAudioWriterInput?.expectsMediaDataInRealTime = true
 
         guard assetwriter.canAdd(assetVideoWriterInput) else { throw RecordingError.cannotAddInput(.video) }
         assetwriter.add(assetVideoWriterInput)
@@ -113,21 +120,6 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
         if let assetPCAudioWriterInput {
             guard assetwriter.canAdd(assetPCAudioWriterInput) else { throw RecordingError.cannotAddInput(.audio) }
             assetwriter.add(assetPCAudioWriterInput)
-        }
-
-        let attrs = [kCVPixelBufferCGImageCompatibilityKey: kCFBooleanTrue,
-             kCVPixelBufferCGBitmapContextCompatibilityKey: kCFBooleanTrue] as CFDictionary
-        var pixelBuffer: CVPixelBuffer?
-        let pixelBufferStatus = CVPixelBufferCreate(
-            kCFAllocatorDefault,
-            screenResolution.size.width,
-            screenResolution.size.height,
-            kCVPixelFormatType_32BGRA,
-            attrs,
-            &pixelBuffer
-        )
-        guard pixelBufferStatus == kCVReturnSuccess, let pixelBuffer else {
-            throw RecordingError.cannotCreatePixelBuffer(pixelBufferStatus)
         }
 
         guard assetwriter.startWriting() else {
@@ -140,7 +132,6 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
         self.assetVideoWriterAdaptor = assetVideoWriterAdaptor
         self.assetAudioWriterInput = assetAudioWriterInput
         self.assetPCAudioWriterInput = assetPCAudioWriterInput
-        self.pixelBuffer = pixelBuffer
 
         state = .recording
         frameCount = 0
@@ -183,11 +174,12 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
         debugTimer?.invalidate()
         debugTimer = nil
 #endif
-        let videoOutputSettings = assetVideoWriterAdaptor?.assetWriterInput.outputSettings as? [String: any Sendable] ?? [:]
         let audioOutputSettings = assetAudioWriterInput?.outputSettings as? [String: any Sendable] ?? [:]
+        let capturedSystemAudio = assetPCAudioWriterInput != nil
 
         assetVideoWriterAdaptor = nil
         assetAudioWriterInput = nil
+        assetPCAudioWriterInput = nil
         converter = nil
         Task { @MainActor in
             AvatarAudioManager.shared.stop(usage: .record)
@@ -208,17 +200,25 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
             }
 
             await assetwriter.finishWriting()
-            self.pixelBuffer = nil
             self.assetwriter = nil
 
             do {
-                try await VideoConverter.mergeAudioTracks(
-                    asset: AVURLAsset(url: self.temporaryOutputURL),
-                    outputURL: self.outputURL,
-                    fileType: assetwriter.outputFileType,
-                    videoOutputSettings: videoOutputSettings,
-                    audioOutputSettings: audioOutputSettings
-                )
+                if capturedSystemAudio {
+                    do {
+                        try await VideoConverter.mergeAudioTracks(
+                            asset: AVURLAsset(url: self.temporaryOutputURL),
+                            outputURL: self.outputURL,
+                            fileType: assetwriter.outputFileType,
+                            audioOutputSettings: audioOutputSettings
+                        )
+                    } catch VideoConverter.ConversionError.noAudioTracks {
+                        // Keep the video even when no audio sample arrived
+                        try FileManager.default.moveItem(at: self.temporaryOutputURL, to: self.outputURL)
+                    }
+                } else {
+                    // The mic track is already AAC, so the first-pass file is final as is
+                    try FileManager.default.moveItem(at: self.temporaryOutputURL, to: self.outputURL)
+                }
                 self.state = .idle
             } catch {
                 self.failRecording(error)
@@ -228,8 +228,18 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
 
     public func renderFrame(_ frame: CIImage) async {
         guard case .recording = state,
-              let assetWriterAdaptor = assetVideoWriterAdaptor,
-              let pixelBuffer else { return }
+              let assetWriterAdaptor = assetVideoWriterAdaptor else { return }
+
+        // The input is real-time, so drop the frame when the writer can't keep up
+        guard assetWriterAdaptor.assetWriterInput.isReadyForMoreMediaData,
+              let pixelBufferPool = assetWriterAdaptor.pixelBufferPool else { return }
+
+        var pixelBuffer: CVPixelBuffer?
+        let pixelBufferStatus = CVPixelBufferPoolCreatePixelBuffer(kCFAllocatorDefault, pixelBufferPool, &pixelBuffer)
+        guard pixelBufferStatus == kCVReturnSuccess, let pixelBuffer else {
+            failRecording(RecordingError.cannotCreatePixelBuffer(pixelBufferStatus))
+            return
+        }
 
         context.render(frame, to: pixelBuffer)
 
@@ -237,13 +247,16 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
             startDate = Date()
             baseHostTime = mach_absolute_time()
 
-            // Start the session just before appending to avoid latency, 
+            // Start the session just before appending to avoid latency,
             // as the video's expectsMediaDataInRealTime is true
             assetwriter?.startSession(atSourceTime: CMTime.zero)
         }
 
         guard assetWriterAdaptor.append(pixelBuffer, withPresentationTime: currentPresentationTime) else {
-            failRecording(assetwriter?.error ?? RecordingError.appendFailed(.video))
+            // Distinguish a failed writer from transient backpressure; only the former ends the recording
+            if let assetwriter, assetwriter.status != .writing {
+                failRecording(assetwriter.error ?? RecordingError.appendFailed(.video))
+            }
             return
         }
         frameCount += 1
@@ -283,8 +296,13 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
               let buffer = createSampleBuffer(pcmBuffer: convertedBuffer, sampleCount: &sampleCount) else {
             return
         }
-        guard assetAudioWriterInput?.append(buffer) == true else {
-            failRecording(assetwriter?.error ?? RecordingError.appendFailed(.audio))
+        // createSampleBuffer has already advanced sampleCount, so a dropped
+        // buffer leaves a silent gap instead of desyncing the rest of the audio
+        guard let assetAudioWriterInput, assetAudioWriterInput.isReadyForMoreMediaData else { return }
+        guard assetAudioWriterInput.append(buffer) else {
+            if let assetwriter, assetwriter.status != .writing {
+                failRecording(assetwriter.error ?? RecordingError.appendFailed(.audio))
+            }
             return
         }
     }
@@ -325,12 +343,18 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
         var newSampleBuffer: CMSampleBuffer?
         CMSampleBufferCreateCopyWithNewTiming(allocator: kCFAllocatorDefault, sampleBuffer: sampleBuffer, sampleTimingEntryCount: entryCount, sampleTimingArray: &sampleTimingInfo, sampleBufferOut: &newSampleBuffer)
 
-        guard assetPCAudioWriterInput?.append(newSampleBuffer ?? sampleBuffer) == true else {
-            failRecording(assetwriter?.error ?? RecordingError.appendFailed(.audio))
-            return
+        // Advance the sample count even for dropped buffers so later audio stays in sync
+        defer {
+            pcSampleCount += CMTimeValue(sampleBuffer.duration.seconds * sampleRate)
         }
 
-        pcSampleCount += CMTimeValue(sampleBuffer.duration.seconds * sampleRate)
+        guard let assetPCAudioWriterInput, assetPCAudioWriterInput.isReadyForMoreMediaData else { return }
+        guard assetPCAudioWriterInput.append(newSampleBuffer ?? sampleBuffer) else {
+            if let assetwriter, assetwriter.status != .writing {
+                failRecording(assetwriter.error ?? RecordingError.appendFailed(.audio))
+            }
+            return
+        }
     }
 
     var currentPresentationTime: CMTime {
@@ -353,7 +377,6 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
         assetVideoWriterAdaptor = nil
         assetAudioWriterInput = nil
         assetPCAudioWriterInput = nil
-        pixelBuffer = nil
         converter = nil
         if let systemAudioRecorder {
             Task { await systemAudioRecorder.stopCapture() }

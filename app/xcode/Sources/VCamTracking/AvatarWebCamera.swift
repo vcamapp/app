@@ -125,8 +125,10 @@ public final class AvatarWebCamera {
         }
         activePipeline = ActivePipeline(stream: stream, pipeline: pipeline)
         do {
-            try await cameraSession.configure(
+            let actualFPS = try await cameraSession.configure(
                 deviceID: currentCaptureDeviceID, fps: currentFPS)
+            // Store what the device actually runs at so the UI matches reality
+            UserDefaults.standard.set(actualFPS, for: .cameraFps)
             let configuration = makeConfigurationSnapshot()
             let handler = Self.makeFrameHandler(frameStream: stream, configuration: configuration)
             await cameraSession.setFrameHandler(handler, revision: configuration.revision)
@@ -163,7 +165,9 @@ public final class AvatarWebCamera {
     public func setCaptureDevice(id: String?) {
         Task {
             do {
-                try await cameraSession.setDevice(id: id)
+                // Store what the device actually runs at so the UI matches reality
+                let actualFPS = try await cameraSession.setDevice(id: id)
+                UserDefaults.standard.set(actualFPS, for: .cameraFps)
                 if let id {
                     UserDefaults.standard.set(id, for: .captureDeviceId)
                 } else {

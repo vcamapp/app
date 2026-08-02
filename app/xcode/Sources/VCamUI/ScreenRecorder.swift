@@ -24,13 +24,15 @@ public final class ScreenRecorder: NSObject {
             display: SCDisplay? = nil,
             window: SCWindow? = nil,
             filterOutOwningApplication: Bool = true,
-            capturesAudio: Bool = true,
+            capturesVideo: Bool = true,
+            capturesAudio: Bool = false,
             minimumFrameInterval: CMTime? = nil
         ) {
             self.captureType = captureType
             self.display = display
             self.window = window
             self.filterOutOwningApplication = filterOutOwningApplication
+            self.capturesVideo = capturesVideo
             self.capturesAudio = capturesAudio
             self.minimumFrameInterval = minimumFrameInterval
         }
@@ -39,7 +41,8 @@ public final class ScreenRecorder: NSObject {
         public var display: SCDisplay?
         public var window: SCWindow?
         public var filterOutOwningApplication = true
-        public var capturesAudio = true
+        public var capturesVideo = true
+        public var capturesAudio = false
         public var minimumFrameInterval: CMTime?
 
         public var id: String? {
@@ -85,8 +88,8 @@ public final class ScreenRecorder: NSObject {
             return .init(width: 1024, height: 640)
         }
         if config.captureType == .display, let display = config.display {
-            let size = CGDisplayScreenSize(display.displayID)
-            return .init(width: Int(size.width), height: Int(size.height))
+            // SCDisplay's width/height are in points; match the pixel size requested in streamConfiguration
+            return .init(width: display.width * 2, height: display.height * 2)
         } else if let window = config.window {
             let scale = NSApp.window(withWindowNumber: Int(window.windowID))?.backingScaleFactor ?? 2
             let frame = window.frame
@@ -109,7 +112,7 @@ public final class ScreenRecorder: NSObject {
     private let audioSampleBufferQueue = DispatchQueue(label: "com.github.tattn.vcam.queue.screenrecorder.audio")
 
     @MainActor
-    public func startCapture(with captureConfig: CaptureConfiguration) async {
+    public func startCapture(with captureConfig: CaptureConfiguration) async throws {
         error = nil
         isRecording = false
         self.captureConfig = captureConfig
@@ -122,23 +125,26 @@ public final class ScreenRecorder: NSObject {
             let streamConfig = streamConfiguration(for: captureConfig)
 
             // Create a capture stream with the filter and stream configuration.
-            stream = SCStream(filter: filter, configuration: streamConfig, delegate: self)
+            let stream = SCStream(filter: filter, configuration: streamConfig, delegate: self)
+            self.stream = stream
 
-            // Add a stream output to capture screen content.
-            try stream?.addStreamOutput(self, type: .screen, sampleHandlerQueue: videoSampleBufferQueue)
+            if captureConfig.capturesVideo {
+                try stream.addStreamOutput(self, type: .screen, sampleHandlerQueue: videoSampleBufferQueue)
+            }
             if captureConfig.capturesAudio {
-                try stream?.addStreamOutput(self, type: .audio, sampleHandlerQueue: audioSampleBufferQueue)
+                try stream.addStreamOutput(self, type: .audio, sampleHandlerQueue: audioSampleBufferQueue)
             }
 
             // Start the capture session.
-            try await stream?.startCapture()
+            try await stream.startCapture()
 
             isRecording = true
-
-            await update(with: captureConfig)
         } catch {
             uniDebugLog("ScreenCapture error: \(error)")
             self.error = error
+            try? await stream?.stopCapture()
+            stream = nil
+            throw error
         }
     }
 
@@ -351,7 +357,8 @@ extension ScreenRecorder: RenderTextureRenderer {
     public func resumeRendering() {
         guard let captureConfig = captureConfig else { return }
         Task {
-            await startCapture(with: captureConfig)
+            // Failures are kept in self.error for the UI
+            try? await startCapture(with: captureConfig)
         }
     }
 
@@ -381,7 +388,7 @@ public extension ScreenRecorder {
         let screenRecorder = ScreenRecorder()
         screenRecorder.cropRect = screenCapture.texture.crop.rect
         screenRecorder.filter = screenCapture.texture.filter.map(ImageFilter.init(configuration:))
-        await screenRecorder.startCapture(with: configuration)
+        try await screenRecorder.startCapture(with: configuration)
         uniDebugLog("ScreenRecorder.create: \(screenRecorder)")
         return screenRecorder
     }
@@ -396,9 +403,11 @@ public extension ScreenRecorder {
             let configuration = ScreenRecorder.CaptureConfiguration(
                 captureType: .display,
                 display: availableContent.displays.first, // If not set to display, sound will not be recorded.
+                capturesVideo: false,
+                capturesAudio: true,
                 minimumFrameInterval: .init(value: 1, timescale: 10) // https://developer.apple.com/forums/thread/718279
             )
-            await audioCapture.startCapture(with: configuration)
+            try await audioCapture.startCapture(with: configuration)
         }
         audioCapture.didAudioOutput = { buffer in
             output(buffer)

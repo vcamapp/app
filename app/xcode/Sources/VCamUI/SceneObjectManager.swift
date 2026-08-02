@@ -17,7 +17,17 @@ public final class SceneObjectManager {
         Logger.log("")
         configure(object)
         objects.append(object)
-        try? SceneManager.shared.saveCurrentSceneAndObjects()
+        persistScene()
+    }
+
+    /// The scene JSON stores the whole state, so a failed save here only leaves the disk
+    /// stale until the next successful save; the in-memory state stays consistent.
+    private func persistScene() {
+        do {
+            try SceneManager.shared.saveCurrentSceneAndObjects()
+        } catch {
+            Logger.error(error)
+        }
     }
 
     private func configure(_ object: SceneObject) {
@@ -99,7 +109,7 @@ public final class SceneObjectManager {
     /// reference types, so a change made through them stays invisible until it's pushed back here.
     public func didChange(_ object: SceneObject) {
         objects.update(object)
-        try? SceneManager.shared.saveCurrentSceneAndObjects()
+        persistScene()
     }
 
     public func setHidden(_ isHidden: Bool, id: Int32) {
@@ -134,22 +144,34 @@ public final class SceneObjectManager {
 
     private func remove(_ object: SceneObject) {
         Logger.log("\(object.type)")
-        switch object.type {
-        case .avatar:
+        if case .avatar = object.type {
             return
-        case .wind: ()
+        }
+
+        // Persist the removal before touching any state so that a failed save can't
+        // leave the saved scene referencing data files deleted below
+        var newObjects = objects
+        newObjects.remove(byId: object.id)
+        do {
+            try SceneManager.shared.saveCurrentScene(objects: newObjects)
+        } catch {
+            Logger.error(error)
+            return
+        }
+        objects = newObjects
+
+        switch object.type {
+        case .avatar, .wind: ()
         case let .image(image):
-            VCamSceneDataStore(sceneId: SceneManager.shared.currentSceneId).removeManagedDataIfNeeded(at: image.url)
             RenderTextureManager.shared.remove(id: object.id)
+            VCamSceneDataStore(sceneId: SceneManager.shared.currentSceneId).removeManagedDataIfNeeded(at: image.url)
         case .screen, .videoCapture, .web:
             RenderTextureManager.shared.remove(id: object.id)
         }
-        objects.remove(byId: object.id)
         // The Unity side deletes the currently selected item, so select the target first;
         // otherwise removing an unselected object (e.g. from the context menu) leaves it on screen
         UniBridge.shared.objectSelected.wrappedValue = object.id
         UniBridge.shared.deleteObject()
-        try? SceneManager.shared.saveCurrentSceneAndObjects()
     }
 
     public func move(byId id: Int32, up: Bool) {
@@ -185,7 +207,7 @@ public final class SceneObjectManager {
     func updateObjectOrder(persist: Bool = true) {
         UniBridge.shared.updateObjectOrder(objects.map(\.id) + [-1])
         if persist {
-            try? SceneManager.shared.saveCurrentSceneAndObjects()
+            persistScene()
         }
     }
 

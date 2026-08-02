@@ -115,12 +115,12 @@ public final class SceneManager {
             return
         }
         scenes.remove(byId: scene.id)
-        try? VCamSceneDataStore(sceneId: scene.id).delete()
-        try? save()
+        logAnyError { try VCamSceneDataStore(sceneId: scene.id).delete() }
+        logAnyError { try save() }
         if currentSceneId == scene.id, let nextScene = scenes.first {
             try? await loadScene(id: nextScene.id)
         } else {
-            try? saveCurrentSceneAndObjects()
+            logAnyError { try saveCurrentSceneAndObjects() }
         }
     }
 
@@ -132,18 +132,29 @@ public final class SceneManager {
         let destination = index + (up ? 1 : -1)
         if 0 <= destination && destination < scenes.count {
             scenes.swapAt(index, destination)
-            try? save()
+            logAnyError { try save() }
         }
     }
 
     public func move(fromOffsets source: IndexSet, toOffset destination: Int) {
         scenes.move(fromOffsets: source, toOffset: destination)
-        try? save()
+        logAnyError { try save() }
+    }
+
+    /// Persistence failures here can't be recovered by the caller, but they must not be silent
+    private func logAnyError(_ body: () throws -> Void) {
+        do {
+            try body()
+        } catch {
+            Logger.error(error)
+        }
     }
 
     public func loadScene(id: Int32) async throws {
-        if currentSceneId != id {
-            try? saveCurrentSceneAndObjects() // Save when switching scenes
+        // Abort the switch when saving fails so the current scene's edits are not lost.
+        // The current scene no longer exists right after its removal; nothing to save then.
+        if currentSceneId != id, scenes.find(byId: currentSceneId) != nil {
+            try saveCurrentSceneAndObjects()
         }
         let scene = try scenes.find(byId: id).orThrow(NSError.vcam(message: "invalid scene id: \(id)"))
         uniDebugLog("\(scene.id) \(scene.objects.count)")
@@ -157,8 +168,14 @@ public final class SceneManager {
     }
 
     public func saveCurrentSceneAndObjects() throws {
+        try saveCurrentScene(objects: SceneObjectManager.shared.objects)
+    }
+
+    /// Persists the given objects as the current scene's content. Callers can save a
+    /// new object list before applying it to memory, so a failed save changes nothing.
+    public func saveCurrentScene(objects: [SceneObject]) throws {
         let dataStore = VCamSceneDataStore(sceneId: currentSceneId)
-        let scene = try dataStore.makeScene(name: currentScene.name, objects: SceneObjectManager.shared.objects)
+        let scene = try dataStore.makeScene(name: currentScene.name, objects: objects)
         try dataStore.save(scene)
         update(scene)
     }
