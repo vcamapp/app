@@ -67,12 +67,15 @@ extension AppUpdateInformationView: MacWindow {
 extension AppUpdater {
     @MainActor
     func presentUpdateAlert() async {
-        guard let release = try? await check() else {
-        await VCamAlert.showModal(title: String(localized: .upToDate), message: String(localized: .upToDateMessage(Version.current.description)), canCancel: false)
-            return
+        do {
+            guard let release = try await check() else {
+                await VCamAlert.showModal(title: String(localized: .upToDate), message: String(localized: .upToDateMessage(Version.current.description)), canCancel: false)
+                return
+            }
+            MacWindowManager.shared.open(AppUpdateInformationView(release: release))
+        } catch {
+            await VCamAlert.showModal(title: String(localized: .failure), message: error.localizedDescription, canCancel: false)
         }
-
-        MacWindowManager.shared.open(AppUpdateInformationView(release: release))
     }
 
     public func presentUpdateAlertIfAvailable() {

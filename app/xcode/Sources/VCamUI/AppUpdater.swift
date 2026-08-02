@@ -11,10 +11,6 @@ public struct AppUpdater: Sendable {
 
     @concurrent
     func check() async throws -> LatestRelease? {
-        guard Bundle.main.executableURL != nil else {
-            throw Error.invalidExecutableURL
-        }
-
         let (data, _) = try await URLSession.shared.data(from: repository.releasesURL)
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
@@ -53,29 +49,26 @@ public struct AppUpdater: Sendable {
     public struct LatestRelease {
         let version: Version
         let body: String
-        let assetName: String
-        let htmlUrl: URL
         let downloadURL: URL
 
         fileprivate init(releases: [Release]) throws {
-            guard let release = releases.first(where: { $0.dmgURL != nil }) else {
+            guard let (release, dmgURL) = releases.lazy
+                .filter({ !$0.prerelease })
+                .compactMap({ release in release.dmgURL.map { (release, $0) } })
+                .first else {
                 throw Error.noRelease
             }
             version = release.tagName
             body = release.body
-            assetName = release.assets[0].name
-            htmlUrl = release.htmlUrl
-            downloadURL = release.assets[0].browserDownloadUrl
+            downloadURL = dmgURL
         }
     }
 
     public enum Error: Swift.Error {
-        case invalidExecutableURL
         case noRelease
     }
 
     fileprivate struct Release: Decodable {
-        let htmlUrl: URL
         let tagName: Version
         let prerelease: Bool
         let assets: [Asset]
@@ -86,7 +79,6 @@ public struct AppUpdater: Sendable {
         }
 
         struct Asset: Decodable {
-            let name: String
             let browserDownloadUrl: URL
         }
     }

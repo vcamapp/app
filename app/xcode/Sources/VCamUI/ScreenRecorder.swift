@@ -1,5 +1,4 @@
 import ScreenCaptureKit
-import AVFAudio
 import VCamBridge
 import VCamEntity
 
@@ -53,14 +52,11 @@ public final class ScreenRecorder: NSObject {
     }
 
     struct CapturedFrame: @unchecked Sendable {
-        var sampleBuffer: CMSampleBuffer
+        // surfaceRef is unretained, so keep the sample buffer to extend the IOSurface's lifetime
+        let retainedSampleBuffer: CMSampleBuffer
         var surfaceRef: IOSurfaceRef
         var contentRect: CGRect
         var scaleFactor: Double
-        var surface: IOSurface {
-            // Force-cast the IOSurfaceRef to IOSurface.
-            return unsafeBitCast(surfaceRef, to: IOSurface.self)
-        }
 
         var croppedCIImage: CIImage {
             CIImage(ioSurface: surfaceRef).cropped(to: contentRect.applying(.init(scaleX: scaleFactor, y: scaleFactor)))
@@ -255,9 +251,6 @@ extension ScreenRecorder: SCStreamOutput {
                 didVideoOutput?(frame)
             }
         } else if type == .audio {
-//            guard let buffer = createPCMBuffer(for: sampleBuffer) else {
-//                return
-//            }
             Task { @MainActor in
                 self.didAudioOutput?(sampleBuffer)
             }
@@ -293,21 +286,10 @@ extension ScreenRecorder: SCStreamOutput {
             return nil
         }
 
-        return CapturedFrame(sampleBuffer: sampleBuffer,
+        return CapturedFrame(retainedSampleBuffer: sampleBuffer,
                              surfaceRef: surfaceRef,
                              contentRect: contentRect,
                              scaleFactor: scaleFactor)
-    }
-
-    nonisolated private func createPCMBuffer(for sampleBuffer: CMSampleBuffer) -> AVAudioPCMBuffer? {
-        var ablPointer: UnsafePointer<AudioBufferList>?
-        try? sampleBuffer.withAudioBufferList(flags: .audioBufferListAssure16ByteAlignment) { audioBufferList, blockBuffer in
-            ablPointer = audioBufferList.unsafePointer
-        }
-        guard let audioBufferList = ablPointer,
-              let absd = sampleBuffer.formatDescription?.audioStreamBasicDescription,
-              let format = AVAudioFormat(standardFormatWithSampleRate: absd.mSampleRate, channels: absd.mChannelsPerFrame) else { return nil }
-        return AVAudioPCMBuffer(pcmFormat: format, bufferListNoCopy: audioBufferList)
     }
 }
 

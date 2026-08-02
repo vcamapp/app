@@ -1,7 +1,6 @@
 import Foundation
 import SwiftUI
 import CoreImage
-import Combine
 
 public extension WebRenderer {
     static func showPreferences(url: String?, bookmarkData: Data?, width: Int?, height: Int?, fps: Int?, css: String?, js: String?, completion: @escaping (WebRenderer) -> Void) {
@@ -61,7 +60,6 @@ public struct WebRendererPreferenceView: View {
     @State private var js: String
 
     @State private var renderer: WebRenderer?
-    @State private var previewObserver: AnyPublisher<CIImage, Never> = Empty().eraseToAnyPublisher()
     @State private var isLocalFile: Bool
     @State private var path: String
     @State private var pathBookmarkData: Data
@@ -123,9 +121,6 @@ public struct WebRendererPreferenceView: View {
                     }
                 }
             }
-            .onReceive(previewObserver) { image in
-                preview = image
-            }
             .onChange(of: css) { _, newValue in
                 renderer?.css = newValue
             }
@@ -147,11 +142,15 @@ public struct WebRendererPreferenceView: View {
 
     private func refreshScreen(resource: WebRenderer.Resource) {
         renderer = nil // Stop the timer first
-        (renderer, previewObserver) = WebRenderer.snapshot(resource: resource, size: .init(width: width, height: height), fps: fps, css: css, js: js) { meta in
+        let newRenderer = WebRenderer(resource: resource, size: .init(width: width, height: height), fps: fps, css: css, js: js) { meta in
             width = meta.width ?? width
             height = meta.height ?? height
             fps = meta.fps ?? fps
         }
+        newRenderer.setRenderTexture { image in
+            preview = image
+        }
+        renderer = newRenderer
     }
 }
 

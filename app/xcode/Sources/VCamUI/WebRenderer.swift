@@ -1,7 +1,6 @@
 import Foundation
 import CoreImage
 import WebKit
-import Combine
 import SwiftUI
 import VCamEntity
 
@@ -135,17 +134,6 @@ public final class WebRenderer {
         window.setFrame(.init(x: 0, y: 0, width: 1, height: 1), display: true, animate: false) // A size of more than 1pt is required to make it visible.
         window.makeKeyAndOrderFront(nil) // If not visible, processes on view-in won't work & JS execution priority decreases, causing issues like the clock's second hand stuttering
         return webView
-    }
-
-    public static func snapshot(resource: Resource, size: CGSize, fps: Int, css: String?, js: String?, onFetchMetadata: ((VCamTagMetadata) -> Void)? = nil) -> (WebRenderer, AnyPublisher<CIImage, Never>) {
-        let renderer = WebRenderer(resource: resource, size: size, fps: fps, css: css, js: js, onFetchMetadata: onFetchMetadata)
-        let publisher = PassthroughSubject<CIImage, Never>()
-
-        renderer.setRenderTexture { image in
-            publisher.send(image)
-        }
-
-        return (renderer, publisher.eraseToAnyPublisher())
     }
 
     private func makeTimer() -> Timer? {

@@ -13,11 +13,7 @@ public struct Migration {
             UserDefaults.standard.set(Bundle.main.version, for: .previousVersion)
         }
 
-        do {
-            try await migrationFirst(previousVersion: previousVersion)
-        } catch {
-            Logger.error(error)
-        }
+        await migrationFirst(previousVersion: previousVersion)
 
         let version = previousVersion.components(separatedBy: ".").compactMap(Int.init)
         guard version.count == 3 else { return }
@@ -38,7 +34,7 @@ public struct Migration {
 
 extension Migration {
     @concurrent
-    static func migrationFirst(previousVersion: String) async throws {
+    static func migrationFirst(previousVersion: String) async {
         guard previousVersion.isEmpty else { return }
         await VCamAlert.showModal(title: String(localized: .installVirtualCamera), message: String(localized: .explainAboutInstallingCameraExtension), canCancel: false)
         Task {
