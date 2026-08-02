@@ -179,8 +179,9 @@ public final class AvatarWebCamera {
     public func setFPS(_ fps: Int) {
         Task {
             do {
-                try await cameraSession.setFPS(fps)
-                UserDefaults.standard.set(fps, for: .cameraFps)
+                // Store what the device actually runs at so the UI matches reality
+                let actualFPS = try await cameraSession.setFPS(fps)
+                UserDefaults.standard.set(actualFPS, for: .cameraFps)
             } catch {
                 Logger.log("Failed to set web camera FPS: \(error.localizedDescription)")
             }

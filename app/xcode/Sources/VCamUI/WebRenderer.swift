@@ -16,6 +16,9 @@ public final class WebRenderer {
     private var timer: Timer?
     private var render: ((CIImage) -> Void)?
 
+    // Prevent overlapping snapshots when rasterization is slower than the timer interval
+    private var isSnapshotInFlight = false
+
     private var lastFrame = CIImage.empty()
 
     private var delegator: WebViewDelegator?
@@ -101,7 +104,7 @@ public final class WebRenderer {
 
         if let fps = metadata.fps, self.fps != fps {
             self.fps = fps
-            timer = makeTimer()
+            restartTimer()
         }
 
         onFetchMetadata?(metadata)
@@ -144,10 +147,20 @@ public final class WebRenderer {
         }
     }
 
+    // The old timer stays scheduled on the RunLoop unless invalidated, so always replace it here
+    private func restartTimer() {
+        timer?.invalidate()
+        timer = makeTimer()
+    }
+
     private func renderWebViewTexture() {
         // Skip the expensive web-view rasterization while no consumer is registered
-        guard render != nil else { return }
-        webView.takeWebViewSnapshot(filter: self.filter) { raw, filtered in
+        guard render != nil, !isSnapshotInFlight else { return }
+        isSnapshotInFlight = true
+        webView.takeWebViewSnapshot(filter: filter) { [weak self] raw, filtered in
+            guard let self else { return }
+            self.isSnapshotInFlight = false
+            guard let raw, let filtered else { return }
             self.lastFrame = raw
             self.render?(filtered)
         }
@@ -208,13 +221,14 @@ public final class WebRenderer {
 }
 
 private extension WKWebView {
-    func takeWebViewSnapshot(filter: ImageFilter?, render: ((CIImage, CIImage) -> Void)?) {
-        takeSnapshot(with: nil) { image, error in
+    // The completion is always called so that the caller can track in-flight snapshots
+    func takeWebViewSnapshot(filter: ImageFilter?, completion: @escaping (CIImage?, CIImage?) -> Void) {
+        takeSnapshot(with: nil) { image, _ in
             guard let rawImage = image?.ciImage else {
+                completion(nil, nil)
                 return
             }
-            let filteredImage = filter?.apply(to: rawImage) ?? rawImage
-            render?(rawImage, filteredImage)
+            completion(rawImage, filter?.apply(to: rawImage) ?? rawImage)
         }
     }
 }
@@ -284,7 +298,7 @@ extension WebRenderer: RenderTextureRenderer {
     }
 
     public func resumeRendering() {
-        timer = makeTimer()
+        restartTimer()
     }
 
     public func stopRendering() {

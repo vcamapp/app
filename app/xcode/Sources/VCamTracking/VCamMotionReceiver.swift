@@ -41,14 +41,6 @@ public final class VCamMotionReceiver {
     func start(with tracking: VCamMotionTracking, settings: @escaping @MainActor () -> VCamMotionTrackingSettings) throws {
         guard listener == nil else { return }
 
-        self.tracking = tracking
-        self.settings = settings
-        motionV1Receiver = MotionV1Receiver(
-            onFace: { [weak tracking] data in tracking?.applyFace(data, settings: settings()) },
-            onHands: { [weak tracking] data in tracking?.applyHandsV1(data, settings: settings()) }
-        )
-        shouldAutoReconnect = true
-        connectionStatus = .connecting
         let parameters = NWParameters.udp
         parameters.allowLocalEndpointReuse = true
 
@@ -57,6 +49,17 @@ public final class VCamMotionReceiver {
 #else
         let listener = try NWListener(using: parameters, on: 34963)
 #endif
+
+        // Mutate the state only after the listener is created, so a failed start
+        // (e.g. the port is already in use) doesn't leave the status stuck at .connecting
+        self.tracking = tracking
+        self.settings = settings
+        motionV1Receiver = MotionV1Receiver(
+            onFace: { [weak tracking] data in tracking?.applyFace(data, settings: settings()) },
+            onHands: { [weak tracking] data in tracking?.applyHandsV1(data, settings: settings()) }
+        )
+        shouldAutoReconnect = true
+        connectionStatus = .connecting
         if #available(macOS 26.0, *) {
             listener.service = .init(type: "_vcammocap._udp", domain: "local",
                                       txtRecord: .init([MotionPacketV1Constants.motionProtocolsTXTRecordKey: "0,1"]))

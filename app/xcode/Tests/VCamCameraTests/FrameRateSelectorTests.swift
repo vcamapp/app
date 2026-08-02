@@ -106,6 +106,38 @@ struct FrameRateSelectorTests {
         expectRecommendedFrameRate(targetFPS: 29, ranges: ranges, min: ranges[1].minFrameDuration, max: ranges[1].maxFrameDuration)
     }
 
+    @Test
+    func supportsFrameRate() throws {
+        let range = MockAVFrameRateRange(
+            minFrameDuration: CMTime(value: 1, timescale: 60),
+            maxFrameDuration: CMTime(value: 1, timescale: 30)
+        )
+        #expect(FrameRateSelector.supportsFrameRate(30, ranges: [range]))
+        #expect(FrameRateSelector.supportsFrameRate(45, ranges: [range]))
+        #expect(FrameRateSelector.supportsFrameRate(60, ranges: [range]))
+        #expect(!FrameRateSelector.supportsFrameRate(24, ranges: [range]))
+        #expect(!FrameRateSelector.supportsFrameRate(120, ranges: [range]))
+        #expect(!FrameRateSelector.supportsFrameRate(30, ranges: [MockAVFrameRateRange]()))
+    }
+
+    @Test
+    func effectiveFrameRate() throws {
+        #expect(FrameRateSelector.effectiveFrameRate(of: CMTime(value: 1, timescale: 30)) == 30)
+        #expect(FrameRateSelector.effectiveFrameRate(of: CMTime(value: 1000000, timescale: 30000030)) == 30)
+        #expect(FrameRateSelector.effectiveFrameRate(of: .invalid) == nil)
+    }
+
+    @Test
+    func effectiveFrameRateOfClampedResult() throws {
+        // 60 FPS requested on a format capped at 30 FPS results in an actual 30 FPS
+        let range = MockAVFrameRateRange(
+            minFrameDuration: CMTime(value: 1000000, timescale: 30000000),
+            maxFrameDuration: CMTime(value: 1000000, timescale: 15000000)
+        )
+        let rate = FrameRateSelector.recommendedFrameRate(targetFPS: 60, supportedFrameRateRanges: [range])
+        #expect(FrameRateSelector.effectiveFrameRate(of: rate.maxFrameDuration) == 30)
+    }
+
     private func expectRecommendedFrameRate(
         targetFPS: Float64,
         ranges: [MockAVFrameRateRange],

@@ -16,10 +16,16 @@ public enum RecordingState {
 
 private enum RecordingError: LocalizedError {
     case appendFailed(AVMediaType)
+    case cannotAddInput(AVMediaType)
+    case cannotStartWriting
+    case cannotCreatePixelBuffer(CVReturn)
 
     var errorDescription: String? {
         switch self {
         case let .appendFailed(mediaType): "Failed to append \(mediaType.rawValue) media."
+        case let .cannotAddInput(mediaType): "Failed to add the \(mediaType.rawValue) input."
+        case .cannotStartWriting: "Failed to start writing."
+        case let .cannotCreatePixelBuffer(status): "Failed to create a pixel buffer. (\(status))"
         }
     }
 }
@@ -96,24 +102,23 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
             AVLinearPCMIsBigEndianKey: false
         ]) : nil
 
-        self.assetwriter = assetwriter
-        self.assetVideoWriterAdaptor = assetVideoWriterAdaptor
-        self.assetAudioWriterInput = assetAudioWriterInput
-        self.assetPCAudioWriterInput = assetPCAudioWriterInput
-
         assetVideoWriterInput.expectsMediaDataInRealTime = true
         assetAudioWriterInput.expectsMediaDataInRealTime = false
         assetPCAudioWriterInput?.expectsMediaDataInRealTime = false
 
+        guard assetwriter.canAdd(assetVideoWriterInput) else { throw RecordingError.cannotAddInput(.video) }
         assetwriter.add(assetVideoWriterInput)
+        guard assetwriter.canAdd(assetAudioWriterInput) else { throw RecordingError.cannotAddInput(.audio) }
         assetwriter.add(assetAudioWriterInput)
         if let assetPCAudioWriterInput {
+            guard assetwriter.canAdd(assetPCAudioWriterInput) else { throw RecordingError.cannotAddInput(.audio) }
             assetwriter.add(assetPCAudioWriterInput)
         }
 
         let attrs = [kCVPixelBufferCGImageCompatibilityKey: kCFBooleanTrue,
              kCVPixelBufferCGBitmapContextCompatibilityKey: kCFBooleanTrue] as CFDictionary
-        CVPixelBufferCreate(
+        var pixelBuffer: CVPixelBuffer?
+        let pixelBufferStatus = CVPixelBufferCreate(
             kCFAllocatorDefault,
             screenResolution.size.width,
             screenResolution.size.height,
@@ -121,8 +126,21 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
             attrs,
             &pixelBuffer
         )
+        guard pixelBufferStatus == kCVReturnSuccess, let pixelBuffer else {
+            throw RecordingError.cannotCreatePixelBuffer(pixelBufferStatus)
+        }
 
-        assetwriter.startWriting()
+        guard assetwriter.startWriting() else {
+            throw assetwriter.error ?? RecordingError.cannotStartWriting
+        }
+
+        // Commit to the fields only after every step above has succeeded,
+        // so a failed setup never leaves the recorder half-initialized in the recording state
+        self.assetwriter = assetwriter
+        self.assetVideoWriterAdaptor = assetVideoWriterAdaptor
+        self.assetAudioWriterInput = assetAudioWriterInput
+        self.assetPCAudioWriterInput = assetPCAudioWriterInput
+        self.pixelBuffer = pixelBuffer
 
         state = .recording
         frameCount = 0
@@ -327,7 +345,10 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
     }
 
     private func failRecording(_ error: Error) {
-        assetwriter?.cancelWriting()
+        // cancelWriting raises an exception unless the writer is actually writing
+        if let assetwriter, assetwriter.status == .writing {
+            assetwriter.cancelWriting()
+        }
         assetwriter = nil
         assetVideoWriterAdaptor = nil
         assetAudioWriterInput = nil

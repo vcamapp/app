@@ -1,4 +1,5 @@
 import ScreenCaptureKit
+import Synchronization
 import VCamBridge
 import VCamEntity
 
@@ -71,8 +72,12 @@ public final class ScreenRecorder: NSObject {
         }
     }
 
-    @ObservationIgnored private var didVideoOutput: ((CapturedFrame) -> Void)?
+    @ObservationIgnored private var didVideoOutput: (@MainActor (CapturedFrame) -> Void)?
     @ObservationIgnored private var didAudioOutput: ((CMSampleBuffer) -> Void)?
+
+    // Stale frames have no value for rendering, so only the newest one is kept
+    // while a MainActor hop is pending; this also caps the number of in-flight tasks at one
+    private let pendingVideoFrame = Mutex<CapturedFrame?>(nil)
 
     @MainActor
     @ObservationIgnored public var size: CGSize {
@@ -246,7 +251,18 @@ extension ScreenRecorder: SCStreamOutput {
             guard let frame = createCapturedFrame(for: sampleBuffer) else {
                 return
             }
+            let isFirstPendingFrame = pendingVideoFrame.withLock { pending in
+                let isFirst = pending == nil
+                pending = frame
+                return isFirst
+            }
+            // A task is already scheduled; it will pick up the replaced frame
+            guard isFirstPendingFrame else { return }
             Task { @MainActor in
+                guard let frame = pendingVideoFrame.withLock({ pending -> CapturedFrame? in
+                    defer { pending = nil }
+                    return pending
+                }) else { return }
                 latestFrame = frame
                 didVideoOutput?(frame)
             }
@@ -277,8 +293,8 @@ extension ScreenRecorder: SCStreamOutput {
             return nil
         }
 
-        guard let contentRectDict = attachments[.contentRect],
-              let contentRect = CGRect(dictionaryRepresentation: contentRectDict as! CFDictionary) else {
+        guard let contentRectDict = attachments[.contentRect] as? NSDictionary,
+              let contentRect = CGRect(dictionaryRepresentation: contentRectDict as CFDictionary) else {
             return nil
         }
 
@@ -307,11 +323,9 @@ extension ScreenRecorder: RenderTextureRenderer {
     public func setRenderTexture(updator: @escaping (CIImage) -> Void) {
         didVideoOutput = { [weak self] frame in
             guard let self = self else { return }
-            Task { @MainActor in
-                var image = frame.croppedCIImage
-                image = filter?.apply(to: image) ?? image
-                updator(image)
-            }
+            var image = frame.croppedCIImage
+            image = filter?.apply(to: image) ?? image
+            updator(image)
         }
         Task {
             await refreshScreen() // Call this because if not updated, the screen may become transparent when added.

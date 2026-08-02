@@ -68,23 +68,35 @@ public enum Camera {
     }
 
     public static func searchHighestResolutionFormat(for device: AVCaptureDevice) -> (format: AVCaptureDevice.Format, resolution: CGSize)? {
-        searchResolutionFormat(for: device) { candidate, result in
+        searchResolutionFormat(in: device.formats) { candidate, result in
             candidate > result
         }
     }
 
     public static func searchLowestResolutionFormat(for device: AVCaptureDevice) -> (format: AVCaptureDevice.Format, resolution: CGSize)? {
-        searchResolutionFormat(for: device) { candidate, result in
+        searchResolutionFormat(in: device.formats) { candidate, result in
             candidate < result
         }
     }
 
-    private static func searchResolutionFormat(for device: AVCaptureDevice, compare: (Int32, Int32) -> Bool) -> (format: AVCaptureDevice.Format, resolution: CGSize)? {
-        guard var resultFormat = device.formats.first else {
+    /// Prefers the lowest-resolution format that can run at the requested FPS,
+    /// so a low-resolution-but-low-FPS format doesn't silently cap the frame rate.
+    /// Falls back to the lowest-resolution format when no format supports the FPS.
+    public static func searchLowestResolutionFormat(for device: AVCaptureDevice, supportingFPS fps: Float64) -> (format: AVCaptureDevice.Format, resolution: CGSize)? {
+        let formats = device.formats.filter {
+            FrameRateSelector.supportsFrameRate(fps, ranges: $0.videoSupportedFrameRateRanges)
+        }
+        return searchResolutionFormat(in: formats) { candidate, result in
+            candidate < result
+        } ?? searchLowestResolutionFormat(for: device)
+    }
+
+    private static func searchResolutionFormat(in formats: [AVCaptureDevice.Format], compare: (Int32, Int32) -> Bool) -> (format: AVCaptureDevice.Format, resolution: CGSize)? {
+        guard var resultFormat = formats.first else {
             return nil
         }
 
-        for format in device.formats.dropFirst() {
+        for format in formats.dropFirst() {
             let candidateDimensions = format.formatDescription.dimensions
             if compare(candidateDimensions.width, resultFormat.formatDescription.dimensions.width) {
                 resultFormat = format

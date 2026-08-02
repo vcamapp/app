@@ -2,6 +2,7 @@ import SwiftUI
 import VCamTracking
 import VCamBridge
 import VCamData
+import VCamLogger
 import Network
 
 public struct VCamSettingsIntegrationView: View {
@@ -45,7 +46,13 @@ public struct VCamSettingsIntegrationView: View {
                 }
                 .onChange(of: integrationVCamMocap) { _, newValue in
                     if newValue {
-                        try? Tracking.shared.startVCamMotionReceiver()
+                        do {
+                            try Tracking.shared.startVCamMotionReceiver()
+                        } catch {
+                            // Roll the toggle back so the UI doesn't claim the receiver is running
+                            Logger.error(error)
+                            integrationVCamMocap = false
+                        }
                     } else {
                         Tracking.shared.vcamMotionReceiver.stop()
                     }

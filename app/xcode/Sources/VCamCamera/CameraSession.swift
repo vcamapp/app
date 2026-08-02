@@ -69,12 +69,15 @@ public actor CameraSession {
         }
     }
 
-    public func configure(deviceID: String?, fps: Int) throws {
+    /// - Returns: The frame rate the device actually runs at, which can be lower
+    ///   than the requested one when no format supports it.
+    @discardableResult
+    public func configure(deviceID: String?, fps: Int) throws -> Int {
         guard fps > 0 else { throw CameraSessionError.invalidFPS(fps) }
         guard let device = (deviceID.flatMap(Camera.camera(id:)) ?? Camera.defaultCaptureDevice) else {
             throw CameraSessionError.deviceNotFound(deviceID)
         }
-        guard let result = Camera.searchLowestResolutionFormat(for: device) else {
+        guard let result = Camera.searchLowestResolutionFormat(for: device, supportingFPS: Float64(fps)) else {
             throw CameraSessionError.formatNotFound(device.uniqueID)
         }
 
@@ -88,7 +91,8 @@ public actor CameraSession {
             targetFPS: Float64(fps),
             supportedFrameRateRanges: result.format.videoSupportedFrameRateRanges
         )
-        guard rate.minFrameDuration.isValid, rate.maxFrameDuration.isValid else {
+        guard rate.minFrameDuration.isValid, rate.maxFrameDuration.isValid,
+              let actualFPS = FrameRateSelector.effectiveFrameRate(of: rate.maxFrameDuration) else {
             throw CameraSessionError.unsupportedFrameRate(device.uniqueID, fps)
         }
 
@@ -143,15 +147,18 @@ public actor CameraSession {
         videoOutput.connection(with: .video)?.isEnabled = true
 
         Logger.log(
-            "Configured camera \(device.uniqueID), \(Int(result.resolution.width))x\(Int(result.resolution.height)), \(fps) FPS"
+            "Configured camera \(device.uniqueID), \(Int(result.resolution.width))x\(Int(result.resolution.height)), \(actualFPS) FPS (requested \(fps))"
         )
+        return actualFPS
     }
 
-    public func setDevice(id: String?) throws {
+    @discardableResult
+    public func setDevice(id: String?) throws -> Int {
         try configure(deviceID: id, fps: requestedFPS)
     }
 
-    public func setFPS(_ fps: Int) throws {
+    @discardableResult
+    public func setFPS(_ fps: Int) throws -> Int {
         try configure(deviceID: captureDevice?.uniqueID, fps: fps)
     }
 

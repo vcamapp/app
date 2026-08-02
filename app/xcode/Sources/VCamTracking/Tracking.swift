@@ -3,6 +3,7 @@ import Combine
 import VCamEntity
 import VCamData
 import VCamBridge
+import VCamLogger
 
 @Observable
 @MainActor
@@ -83,7 +84,13 @@ public final class Tracking {
 #endif
 
         if UserDefaults.standard.value(for: .integrationVCamMocap) {
-            try? startVCamMotionReceiver()
+            do {
+                try startVCamMotionReceiver()
+            } catch {
+                // Roll the setting back so the UI doesn't claim the receiver is running
+                Logger.error(error)
+                UserDefaults.standard.set(false, for: .integrationVCamMocap)
+            }
         }
     }
 

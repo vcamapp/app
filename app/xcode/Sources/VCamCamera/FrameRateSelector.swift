@@ -1,14 +1,17 @@
-//
-//  FrameRateSelector.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2023/04/22.
-//
-
 import CoreMedia
 import AVFoundation
 
 public enum FrameRateSelector {
+    public static func supportsFrameRate(_ fps: Float64, ranges: [some AVFrameRateRangeProtocol]) -> Bool {
+        ranges.contains { $0.minFrameRate <= fps && fps <= $0.maxFrameRate }
+    }
+
+    /// The frame rate that actually results from the durations returned by `recommendedFrameRate`
+    public static func effectiveFrameRate(of frameDuration: CMTime) -> Int? {
+        guard frameDuration.isValid, frameDuration.seconds > 0 else { return nil }
+        return Int((1 / frameDuration.seconds).rounded())
+    }
+
     public static func recommendedFrameRate(targetFPS fps: Float64, supportedFrameRateRanges ranges: [some AVFrameRateRangeProtocol]) -> (minFrameDuration: CMTime, maxFrameDuration: CMTime) {
         if ranges.isEmpty {
             return (.invalid, .invalid)
