@@ -114,8 +114,17 @@ public final class SceneManager {
         guard scenes.count > 1, let scene = scenes.find(byId: id) else {
             return
         }
+        // Delete the directory before dropping the scene from memory and metadata;
+        // otherwise a failed deletion leaves a directory no launch can ever clean up
+        // (loadAndRepair only scans IDs registered in the metadata). In the reverse
+        // failure case, the startup repair drops the metadata entry with no directory.
+        do {
+            try VCamSceneDataStore(sceneId: scene.id).delete()
+        } catch {
+            Logger.error(error)
+            return
+        }
         scenes.remove(byId: scene.id)
-        logAnyError { try VCamSceneDataStore(sceneId: scene.id).delete() }
         logAnyError { try save() }
         if currentSceneId == scene.id, let nextScene = scenes.first {
             try? await loadScene(id: nextScene.id)

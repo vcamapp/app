@@ -73,6 +73,7 @@ public struct VCamSceneDataStore {
     }
 
     public func delete() throws {
+        guard FileManager.default.fileExists(atPath: sceneRootURL.path) else { return }
         try FileManager.default.removeItem(at: sceneRootURL)
     }
 }

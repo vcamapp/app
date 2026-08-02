@@ -149,16 +149,14 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
 
 #if DEBUG
         debugTimer = Timer.scheduledTimer(withTimeInterval: 1 / 30, repeats: true) { _ in
-            Task {
+            Task { @MainActor in
                 let debugImage = NSImage(color: .red, size: CGSize(width: 1920, height: 1080)).ciImage!
-                await Self.shared.renderFrame(debugImage)
+                Self.shared.renderFrame(debugImage)
             }
         }
 #endif
 
-        Task { @MainActor in
-            AvatarAudioManager.shared.start(usage: .record)
-        }
+        AvatarAudioManager.shared.start(usage: .record)
     }
 
     public func stop() {
@@ -177,13 +175,8 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
         let audioOutputSettings = assetAudioWriterInput?.outputSettings as? [String: any Sendable] ?? [:]
         let capturedSystemAudio = assetPCAudioWriterInput != nil
 
-        assetVideoWriterAdaptor = nil
-        assetAudioWriterInput = nil
-        assetPCAudioWriterInput = nil
-        converter = nil
-        Task { @MainActor in
-            AvatarAudioManager.shared.stop(usage: .record)
-        }
+        releaseWriterInputs()
+        AvatarAudioManager.shared.stop(usage: .record)
 
         guard let assetwriter else {
             state = .idle
@@ -226,7 +219,9 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
         }
     }
 
-    public func renderFrame(_ frame: CIImage) async {
+    // Synchronous on purpose: this runs for every rendered frame and awaits nothing,
+    // so wrapping it in a Task would only add allocations and ordering delays
+    public func renderFrame(_ frame: CIImage) {
         guard case .recording = state,
               let assetWriterAdaptor = assetVideoWriterAdaptor else { return }
 
@@ -368,21 +363,29 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
         return try? CMSampleBuffer.create(pcmBuffer: pcmBuffer, sampleCount: sampleCount)
     }
 
+    private func releaseWriterInputs() {
+        assetVideoWriterAdaptor = nil
+        assetAudioWriterInput = nil
+        assetPCAudioWriterInput = nil
+        converter = nil
+    }
+
     private func failRecording(_ error: Error) {
         // cancelWriting raises an exception unless the writer is actually writing
         if let assetwriter, assetwriter.status == .writing {
             assetwriter.cancelWriting()
         }
         assetwriter = nil
-        assetVideoWriterAdaptor = nil
-        assetAudioWriterInput = nil
-        assetPCAudioWriterInput = nil
-        converter = nil
+        releaseWriterInputs()
         if let systemAudioRecorder {
             Task { await systemAudioRecorder.stopCapture() }
         }
         systemAudioRecorder = nil
         AvatarAudioManager.shared.stop(usage: .record)
+        // The writer may have already created the file (setup failures included)
+        if let temporaryOutputURL {
+            try? FileManager.default.removeItem(at: temporaryOutputURL)
+        }
         state = .idle
         Logger.error(error)
     }

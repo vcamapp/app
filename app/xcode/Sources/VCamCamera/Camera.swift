@@ -91,14 +91,19 @@ public enum Camera {
         } ?? searchLowestResolutionFormat(for: device)
     }
 
-    private static func searchResolutionFormat(in formats: [AVCaptureDevice.Format], compare: (Int32, Int32) -> Bool) -> (format: AVCaptureDevice.Format, resolution: CGSize)? {
+    private static func searchResolutionFormat(in formats: [AVCaptureDevice.Format], compare: (Int, Int) -> Bool) -> (format: AVCaptureDevice.Format, resolution: CGSize)? {
         guard var resultFormat = formats.first else {
             return nil
         }
 
+        // Compare by pixel count so formats sharing a width but differing in height
+        // are ordered correctly; ties fall back to the width
         for format in formats.dropFirst() {
-            let candidateDimensions = format.formatDescription.dimensions
-            if compare(candidateDimensions.width, resultFormat.formatDescription.dimensions.width) {
+            let candidate = format.formatDescription.dimensions
+            let result = resultFormat.formatDescription.dimensions
+            let candidatePixels = Int(candidate.width) * Int(candidate.height)
+            let resultPixels = Int(result.width) * Int(result.height)
+            if compare(candidatePixels, resultPixels) || (candidatePixels == resultPixels && compare(Int(candidate.width), Int(result.width))) {
                 resultFormat = format
             }
         }

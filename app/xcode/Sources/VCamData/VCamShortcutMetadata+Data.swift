@@ -19,7 +19,7 @@ public extension VCamShortcutMetadata {
 
     func save() throws {
         let data = try JSONEncoder().encode(self)
-        try data.write(to: .shortcutMetadata)
+        try data.write(to: .shortcutMetadata, options: .atomic)
     }
 
     mutating func remove(id: UUID) {

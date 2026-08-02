@@ -53,7 +53,11 @@ public struct ModelListView: View {
 #else
         UniBridge.shared.loadModel(url.path)
 #endif
-        modelManager.setLastLoadedModel(item)
+        do {
+            try modelManager.setLastLoadedModel(item)
+        } catch {
+            print("Failed to save the last loaded model: \(error)")
+        }
         MacWindowManager.shared.close(ModelListView.self)
     }
 
@@ -104,7 +108,11 @@ private struct ModelListContent: View {
                         .tag(item)
                     }
                     .onMove { source, destination in
-                        modelManager.moveModel(fromOffsets: source, toOffset: destination)
+                        do {
+                            try modelManager.moveModel(fromOffsets: source, toOffset: destination)
+                        } catch {
+                            print("Failed to move model: \(error)")
+                        }
                     }
                 }
                 .listStyle(.inset)
@@ -301,7 +309,11 @@ struct ModelRowView: View {
         isEditing = false
         onRenameEnd()
         guard !editingName.isEmpty, editingName != item.model.localizedName else { return }
-        modelManager.renameModel(item, to: editingName)
+        do {
+            try modelManager.renameModel(item, to: editingName)
+        } catch {
+            print("Failed to rename model: \(error)")
+        }
     }
 }
 

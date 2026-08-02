@@ -22,41 +22,41 @@ public final class VCamShortcutManager {
         return newShortcut
     }
 
+    // Each operation persists first and mutates the in-memory array only on success,
+    // so the UI never shows a state that failed to save
+
     public func add(_ shortcut: VCamShortcut) {
         guard !shortcuts.contains(where: { $0.id == shortcut.id }) else { return }
-        shortcuts.insert(shortcut, at: 0)
-
         do {
             try dataStore.save(shortcut)
+            shortcuts.insert(shortcut, at: 0)
         } catch {
             showError(error)
         }
     }
 
     public func update(_ shortcut: VCamShortcut) {
-        shortcuts[id: shortcut.id] = shortcut
-
         do {
             try dataStore.save(shortcut)
+            shortcuts[id: shortcut.id] = shortcut
         } catch {
             showError(error)
         }
     }
 
     public func move(fromOffsets source: IndexSet, toOffset destination: Int) {
-        shortcuts.move(fromOffsets: source, toOffset: destination)
         do {
             try dataStore.move(fromOffsets: source, toOffset: destination)
+            shortcuts.move(fromOffsets: source, toOffset: destination)
         } catch {
             showError(error)
         }
     }
 
     public func remove(_ shortcut: VCamShortcut) {
-        shortcuts.removeAll { $0.id == shortcut.id }
-
         do {
             try dataStore.remove(shortcut)
+            shortcuts.removeAll { $0.id == shortcut.id }
         } catch {
             showError(error)
         }
