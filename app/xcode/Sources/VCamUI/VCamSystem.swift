@@ -88,8 +88,8 @@ public final class VCamSystem {
         process.executableURL = URL(fileURLWithPath: "/bin/sh")
         process.arguments = ["-c", "while /bin/kill -0 \(ProcessInfo.processInfo.processIdentifier) 2>/dev/null; do sleep 0.2; done; sleep 0.5; open -n \"$0\"", Bundle.main.bundlePath]
         try? process.run()
-        if UniBridge.isUnity {
-            // NSApp.terminate is canceled by Unity to keep the app in the menu bar, so quit through Unity instead
+        if UniBridge.shared.triggerMapper.isRegistered {
+            // While the bridge is attached, the app quits only through it
             UniBridge.shared.quitApp()
         } else {
             NSApp.terminate(nil)

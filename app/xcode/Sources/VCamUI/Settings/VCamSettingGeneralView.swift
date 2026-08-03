@@ -24,10 +24,14 @@ public struct VCamSettingGeneralView: View {
                 if uniState.value(for: .useURP) {
                     // URP doesn't support MToon of VRM 0.x, so the conversion is always enabled
                     Toggle(isOn: .constant(true)) {
-                        Text(.enableAutoConvertingToVRM1)
+                        VStack(alignment: .leading) {
+                            Text(.enableAutoConvertingToVRM1)
+                            Text(.alwaysEnabledWhileUsingURP)
+                                .font(.footnote)
+                                .opacity(0.5)
+                        }
                     }
                     .disabled(true)
-                    .help(.alwaysEnabledWhileUsingURP)
                 } else {
                     Toggle(isOn: $useAutoConvertVRM1) {
                         Text(.enableAutoConvertingToVRM1)
