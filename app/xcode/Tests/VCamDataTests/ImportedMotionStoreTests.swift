@@ -91,6 +91,24 @@ struct ImportedMotionStoreTests {
     }
 
     @Test
+    func movePersistsOrder() throws {
+        let directory = try makeTemporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: directory) }
+
+        let store = makeStore(in: directory)
+        let records = ["A", "B", "C"].map { ImportedMotionRecord(displayName: $0) }
+        for record in records {
+            try store.addRecord(record)
+        }
+
+        try store.move(fromOffsets: IndexSet(integer: 0), toOffset: 3)
+        #expect(store.records.map(\.displayName) == ["B", "C", "A"])
+
+        let restored = makeStore(in: directory)
+        #expect(restored.records.map(\.displayName) == ["B", "C", "A"])
+    }
+
+    @Test
     func removeDeletesRecordAndFile() async throws {
         let directory = try makeTemporaryDirectory()
         defer { try? FileManager.default.removeItem(at: directory) }

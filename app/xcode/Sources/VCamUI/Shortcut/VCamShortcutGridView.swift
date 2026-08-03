@@ -69,7 +69,7 @@ private struct ShortcutGridContent: View {
                                 Text(.delete)
                             }
                         }
-                        .onDragMove(item: shortcut, items: $shortcutManager.shortcuts, dragging: $dragging, onMove: shortcutManager.move)
+                        .onDragMove(item: shortcut, items: { shortcutManager.shortcuts }, dragging: $dragging, onMove: shortcutManager.move)
                         .keyboardShortcut(shortcut.shortcutKey) {
                             guard !isRunning else { return }
                             runShortcut(shortcut)

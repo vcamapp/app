@@ -33,7 +33,7 @@ public extension View {
 public extension View {
     @ViewBuilder func onDragMove<Item: Identifiable>(
         item: Item,
-        items: Binding<[Item]>,
+        items: @escaping () -> [Item],
         dragging: Binding<Item?>,
         onMove: @escaping (IndexSet, Int) -> Void
     ) -> some View where Item.ID == UUID {
@@ -43,11 +43,10 @@ public extension View {
 
 struct OnDragMoveModifier<Item: Identifiable>: ViewModifier where Item.ID == UUID {
     let item: Item
+    let items: () -> [Item]
 
-    @Binding var items: [Item]
     @Binding var dragging: Item?
     let onMove: (IndexSet, Int) -> Void
-
 
     func body(content: Content) -> some View {
         content
@@ -61,7 +60,7 @@ struct OnDragMoveModifier<Item: Identifiable>: ViewModifier where Item.ID == UUI
                 of: [UTType.text],
                 delegate: DragReorderDelegate(
                     item: item,
-                    listItems: $items,
+                    listItems: items,
                     current: $dragging,
                     onMove: onMove
                 )
@@ -71,7 +70,7 @@ struct OnDragMoveModifier<Item: Identifiable>: ViewModifier where Item.ID == UUI
 
 struct DragReorderDelegate<Item: Identifiable>: DropDelegate where Item.ID == UUID {
     let item: Item
-    @Binding var listItems: [Item]
+    let listItems: () -> [Item]
     @Binding var current: Item?
     let onMove: (IndexSet, Int) -> Void
 
@@ -80,13 +79,10 @@ struct DragReorderDelegate<Item: Identifiable>: DropDelegate where Item.ID == UU
             current = item
         }
 
+        let listItems = listItems()
         guard let current, item.id != current.id,
               let from = listItems.index(ofId: current.id),
               let to = listItems.index(ofId: item.id) else {
-            return
-        }
-
-        guard listItems[to].id != current.id else {
             return
         }
 

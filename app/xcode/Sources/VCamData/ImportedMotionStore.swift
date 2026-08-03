@@ -87,6 +87,12 @@ public final class ImportedMotionStore {
         try updateRecord(id: id) { $0.isLoop = isLoop }
     }
 
+    public func move(fromOffsets source: IndexSet, toOffset destination: Int) throws {
+        try update { records in
+            records.move(fromOffsets: source, toOffset: destination)
+        }
+    }
+
     public func remove(id: UUID) throws {
         guard let record = record(id: id) else { return }
         try update { records in

@@ -41,6 +41,8 @@ private struct MotionGrid<Content: View>: View {
 }
 
 private struct CustomMotionSection: View {
+    @State private var dragging: ImportedMotionRecord?
+
     var body: some View {
         GroupBox {
             VStack(alignment: .leading, spacing: 4) {
@@ -49,8 +51,9 @@ private struct CustomMotionSection: View {
                     .foregroundStyle(.secondary)
 
                 MotionGrid {
-                    ForEach(MotionLibrary.shared.importedMotions) { motion in
-                        ImportedMotionItem(motion: motion)
+                    ForEach(MotionLibrary.shared.store.records) { record in
+                        ImportedMotionItem(motion: .imported(record: record))
+                            .onDragMove(item: record, items: { MotionLibrary.shared.store.records }, dragging: $dragging, onMove: move)
                     }
                 }
 
@@ -67,6 +70,15 @@ private struct CustomMotionSection: View {
                 .buttonStyle(.plain)
                 .padding(.top, 2)
             }
+        }
+        .animation(.default, value: MotionLibrary.shared.store.records)
+    }
+
+    private func move(fromOffsets source: IndexSet, toOffset destination: Int) {
+        do {
+            try MotionLibrary.shared.moveImportedMotions(fromOffsets: source, toOffset: destination)
+        } catch {
+            VCamAlert.showError(title: String(localized: .failure), message: error.localizedDescription)
         }
     }
 

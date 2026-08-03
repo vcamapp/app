@@ -130,6 +130,10 @@ public final class MotionLibrary {
         }
     }
 
+    public func moveImportedMotions(fromOffsets source: IndexSet, toOffset destination: Int) throws {
+        try store.move(fromOffsets: source, toOffset: destination)
+    }
+
     public func remove(motionID: String) throws {
         guard case .imported(let id) = MotionID(rawValue: motionID) else { return }
         // Commit the manifest update first, then unregister from Unity (Unity stops the motion if it is playing)
