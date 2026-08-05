@@ -46,6 +46,13 @@ public struct VCamHands {
                 return 0
             }
         }
+
+        // Converts from the capture's normalized bottom-left-origin space to a
+        // coordinate system where the center of the body is the origin and
+        // left-right is the positive direction (0.0 to 1.0)
+        static func bodyCenteredPoint(_ point: SIMD2<Float>, isRight: Bool) -> SIMD2<Float> {
+            isRight ? SIMD2(x: 1 - point.x * 2, y: point.y) : SIMD2(x: point.x * 2 - 1, y: point.y)
+        }
     }
 }
 
@@ -160,17 +167,9 @@ public extension VCamHands.Hand {
         }
         
         // Originally, the origin is the bottom right, with the top left being positive (opposite of a mirror)
-        // Convert to a coordinate system where the center of the body is the origin and left-right is the positive direction (0.0 to 1.0)
-        let wrist: SIMD2<Float>, thumbCMC: SIMD2<Float>, littleMCP: SIMD2<Float>
-        if isRight {
-            wrist = SIMD2(x: 1 - hand.wrist.x * 2, y: hand.wrist.y)
-            thumbCMC = SIMD2(x: 1 - hand.thumbCMC.x * 2, y: hand.thumbCMC.y)
-            littleMCP = SIMD2(x: 1 - hand.littleMCP.x * 2, y: hand.littleMCP.y)
-        } else {
-            wrist = SIMD2(x: hand.wrist.x * 2 - 1, y: hand.wrist.y)
-            thumbCMC = SIMD2(x: hand.thumbCMC.x * 2 - 1, y: hand.thumbCMC.y)
-            littleMCP = SIMD2(x: hand.littleMCP.x * 2 - 1, y: hand.littleMCP.y)
-        }
+        let wrist = Self.bodyCenteredPoint(hand.wrist, isRight: isRight)
+        let thumbCMC = Self.bodyCenteredPoint(hand.thumbCMC, isRight: isRight)
+        let littleMCP = Self.bodyCenteredPoint(hand.littleMCP, isRight: isRight)
 
         guard config.isFingerEnabled else {
             self.init(wrist: wrist, thumbCMC: thumbCMC, littleMCP: littleMCP, thumbTip: 0.7, indexTip: 0.7, middleTip: 0.7, ringTip: 0.7, littleTip: 0.7)

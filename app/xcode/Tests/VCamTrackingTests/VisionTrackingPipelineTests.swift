@@ -1,4 +1,6 @@
+import CoreVideo
 import Testing
+import VCamCamera
 @testable import VCamTracking
 
 @Suite
@@ -16,6 +18,65 @@ struct VisionTrackingPipelineTests {
         #expect(makeConfiguration(usage: .fingerTracking).needsHandPose)
         #expect(makeConfiguration(usage: [.handTracking, .fingerTracking]).needsHandPose)
         #expect(!makeConfiguration(usage: .faceTracking).needsHandPose)
+    }
+
+    @Test
+    func configurationUsesAlternativeHandMapperOnlyForHandOutput() {
+        var handConfiguration = makeConfiguration(usage: .handTracking)
+        handConfiguration.usesAlternativeHandMapper = true
+        #expect(handConfiguration.shouldUseAlternativeHandMapper)
+
+        var fingerConfiguration = makeConfiguration(usage: .fingerTracking)
+        fingerConfiguration.usesAlternativeHandMapper = true
+        #expect(!fingerConfiguration.shouldUseAlternativeHandMapper)
+
+        var disabledConfiguration = makeConfiguration(usage: .handTracking)
+        disabledConfiguration.usesAlternativeHandMapper = false
+        #expect(!disabledConfiguration.shouldUseAlternativeHandMapper)
+    }
+
+    @Test
+    func alternativeHandMapperRequiresFaceLandmarksForItsFaceAnchor() {
+        var configuration = makeConfiguration(usage: .handTracking)
+        configuration.usesAlternativeHandMapper = true
+        #expect(configuration.needsFaceLandmarks)
+        #expect(!makeConfiguration(usage: .handTracking).needsFaceLandmarks)
+    }
+
+    @Test
+    func captureUsesBGRAOnlyWhileAlternativeHandMapperIsActive() {
+        var configuration = makeConfiguration(usage: .handTracking)
+        configuration.usesAlternativeHandMapper = true
+        #expect(configuration.capturePixelFormat == kCVPixelFormatType_32BGRA)
+
+        #expect(makeConfiguration(usage: .handTracking).capturePixelFormat == CameraSession.defaultPixelFormat)
+
+        // Vision-only finger tracking must not pay for the BGRA conversion
+        var fingerConfiguration = makeConfiguration(usage: .fingerTracking)
+        fingerConfiguration.usesAlternativeHandMapper = true
+        #expect(fingerConfiguration.capturePixelFormat == CameraSession.defaultPixelFormat)
+    }
+
+    @Test
+    func configurationBuildsFaceGeometryOnlyForFaceOutputOrAlternativeHandAnchor() {
+        #expect(makeConfiguration(usage: .faceTracking).needsFaceGeometry)
+        #expect(!makeConfiguration(usage: .disabled, isEmotionEnabled: true).needsFaceGeometry)
+
+        var configuration = makeConfiguration(usage: .handTracking)
+        configuration.usesAlternativeHandMapper = true
+        #expect(configuration.needsFaceGeometry)
+    }
+
+    @Test
+    func trackingOutputReportsWhetherItContainsValues() {
+        #expect(TrackingOutput(face: nil, hands: nil, emotion: nil).isEmpty)
+        #expect(!TrackingOutput(face: .init(blendShapeValues: []), hands: nil, emotion: nil).isEmpty)
+        #expect(!TrackingOutput(
+            face: nil,
+            hands: .init(handsValues: [], fingersValues: nil),
+            emotion: nil
+        ).isEmpty)
+        #expect(!TrackingOutput(face: nil, hands: nil, emotion: 0).isEmpty)
     }
 
     @Test(arguments: [

@@ -44,22 +44,27 @@ public actor CameraSession {
     private var captureDevice: AVCaptureDevice?
     private var requestedFPS: Int
 
+    /// The lightest format cameras deliver natively; consumers that need another
+    /// format request it per configuration via `setFrameHandler`.
+    // see: https://developer.apple.com/documentation/technotes/tn3121-selecting-a-pixel-format-for-an-avcapturevideodataoutput
+    // see: https://developer.apple.com/documentation/vision/recognizing_objects_in_live_capture
+    public static let defaultPixelFormat = kCVPixelFormatType_420YpCbCr8BiPlanarFullRange
+
     public init(initialFPS: Int = 24) {
         let output = AVCaptureVideoDataOutput()
         output.alwaysDiscardsLateVideoFrames = true
-        // Set it to reduce the load.
-        // see: https://developer.apple.com/documentation/technotes/tn3121-selecting-a-pixel-format-for-an-avcapturevideodataoutput
-        // see: https://developer.apple.com/documentation/vision/recognizing_objects_in_live_capture
         output.videoSettings = [
-            kCVPixelBufferPixelFormatTypeKey as String: Int(
-                kCVPixelFormatType_420YpCbCr8BiPlanarFullRange
-            )
+            kCVPixelBufferPixelFormatTypeKey as String: Int(Self.defaultPixelFormat)
         ]
         videoOutput = output
         requestedFPS = initialFPS > 0 ? initialFPS : 24
     }
 
-    public func setFrameHandler(_ handler: CameraFrameHandler?, revision: UInt64) {
+    public func setFrameHandler(
+        _ handler: CameraFrameHandler?,
+        pixelFormat: OSType = CameraSession.defaultPixelFormat,
+        revision: UInt64
+    ) {
         guard revision >= frameHandlerRevision else { return }
         frameHandlerRevision = revision
         videoOutput.setSampleBufferDelegate(nil, queue: nil)
@@ -67,6 +72,15 @@ public actor CameraSession {
         if let delegate = videoOutputDelegate {
             videoOutput.setSampleBufferDelegate(delegate, queue: videoOutputQueue)
         }
+        applyPixelFormat(pixelFormat)
+    }
+
+    private func applyPixelFormat(_ pixelFormat: OSType) {
+        let key = kCVPixelBufferPixelFormatTypeKey as String
+        guard videoOutput.videoSettings?[key] as? Int != Int(pixelFormat) else { return }
+        session.beginConfiguration()
+        videoOutput.videoSettings = [key: Int(pixelFormat)]
+        session.commitConfiguration()
     }
 
     /// - Returns: The frame rate the device actually runs at, which can be lower

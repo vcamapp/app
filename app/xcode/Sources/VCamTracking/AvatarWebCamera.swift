@@ -43,6 +43,10 @@ public final class AvatarWebCamera {
 
     public var permissionProvider: CameraPermissionProvider = .denied
 
+    /// An alternative hand tracking backend, injected by an external module.
+    /// nil means only the built-in Vision-based hand tracking is available.
+    public var handPoseMapperFactory: (@Sendable () -> any HandPoseMapper)?
+
     private var lifecycleGeneration: UInt64 = 0
     private var lifecycleTask: Task<Void, Never>?
 
@@ -78,6 +82,9 @@ public final class AvatarWebCamera {
             applyVisionConfiguration()
         }
     }
+
+    // Persisted by the module that injects handPoseMapperFactory
+    private var isAlternativeHandTrackingEnabled = false
 
     public var currentCaptureDevice: AVCaptureDevice? {
         Camera.camera(id: currentCaptureDeviceID) ?? Camera.defaultCaptureDevice
@@ -120,7 +127,10 @@ public final class AvatarWebCamera {
         state = .starting
 
         let stream = VisionFrameStream()
-        let pipeline = VisionTrackingPipeline(frameStream: stream) { output in
+        let pipeline = VisionTrackingPipeline(
+            frameStream: stream,
+            alternativeHandMapper: handPoseMapperFactory?()
+        ) { output in
             Self.apply(output)
         }
         activePipeline = ActivePipeline(stream: stream, pipeline: pipeline)
@@ -131,7 +141,8 @@ public final class AvatarWebCamera {
             UserDefaults.standard.set(actualFPS, for: .cameraFps)
             let configuration = makeConfigurationSnapshot()
             let handler = Self.makeFrameHandler(frameStream: stream, configuration: configuration)
-            await cameraSession.setFrameHandler(handler, revision: configuration.revision)
+            await cameraSession.setFrameHandler(
+                handler, pixelFormat: configuration.capturePixelFormat, revision: configuration.revision)
             await pipeline.start()
             try await cameraSession.start()
             state = .running
@@ -197,6 +208,11 @@ public final class AvatarWebCamera {
         UserDefaults.standard.set(isEnabled, for: .useEmotion)
     }
 
+    public func setAlternativeHandTrackingEnabled(_ isEnabled: Bool) {
+        isAlternativeHandTrackingEnabled = isEnabled
+        applyVisionConfiguration()
+    }
+
     public func resetCalibration() {
         guard let pipeline = activePipeline?.pipeline else { return }
         Task {
@@ -226,7 +242,8 @@ public final class AvatarWebCamera {
         guard state == .starting || state == .running, let stream = activePipeline?.stream else { return }
         let handler = Self.makeFrameHandler(frameStream: stream, configuration: configuration)
         Task { [cameraSession] in
-            await cameraSession.setFrameHandler(handler, revision: configuration.revision)
+            await cameraSession.setFrameHandler(
+                handler, pixelFormat: configuration.capturePixelFormat, revision: configuration.revision)
         }
     }
 
@@ -241,7 +258,10 @@ public final class AvatarWebCamera {
                 open: configuration.open,
                 close: configuration.close,
                 isFingerEnabled: configuration.isFingerEnabled
-            )
+            ),
+            usesAlternativeHandMapper: isAlternativeHandTrackingEnabled
+                && UniState.shared.isEnabled
+                && handPoseMapperFactory != nil
         )
     }
 

@@ -40,6 +40,7 @@ struct VisionTrackingConfigurationSnapshot: Sendable, Equatable {
     var usage: AvatarWebCamera.Usage
     var isEmotionEnabled: Bool
     var finger: FingerTrackingConfigurationSnapshot
+    var usesAlternativeHandMapper = false
 
     var shouldOutputFace: Bool {
         usage.contains(.faceTracking)
@@ -54,11 +55,21 @@ struct VisionTrackingConfigurationSnapshot: Sendable, Equatable {
     }
 
     var needsFaceLandmarks: Bool {
-        shouldOutputFace || isEmotionEnabled
+        // The alternative hand backend anchors hands to the face observation,
+        // so face landmarks must run even when face output itself is off
+        shouldOutputFace || isEmotionEnabled || shouldUseAlternativeHandMapper
+    }
+
+    var needsFaceGeometry: Bool {
+        shouldOutputFace || shouldUseAlternativeHandMapper
     }
 
     var needsHandPose: Bool {
         shouldOutputHands || shouldOutputFingers
+    }
+
+    var shouldUseAlternativeHandMapper: Bool {
+        usesAlternativeHandMapper && shouldOutputHands
     }
 
     var needsVisionProcessing: Bool {
@@ -68,12 +79,26 @@ struct VisionTrackingConfigurationSnapshot: Sendable, Equatable {
     var needsCameraCapture: Bool {
         shouldOutputFace || needsHandPose
     }
+
+    /// The alternative hand backend consumes BGRA frames; capturing in BGRA
+    /// moves the conversion into the capture pipeline instead of a per-frame
+    /// GPU render. Vision performs the same on either format, so the default
+    /// stays 420f as recommended by TN3121.
+    var capturePixelFormat: OSType {
+        shouldUseAlternativeHandMapper
+            ? kCVPixelFormatType_32BGRA
+            : CameraSession.defaultPixelFormat
+    }
 }
 
 struct TrackingOutput: Sendable {
     var face: FaceTrackingOutput?
     var hands: HandTrackingOutput?
     var emotion: Int32?
+
+    var isEmpty: Bool {
+        face == nil && hands == nil && emotion == nil
+    }
 }
 
 struct FaceTrackingOutput: Sendable {
@@ -85,19 +110,48 @@ struct HandTrackingOutput: Sendable {
     var fingersValues: [Float]?
 }
 
+/// Hand inference runs on its own actor so it can execute concurrently with
+/// the face inference on the pipeline actor; the per-frame latency becomes
+/// max(face, hands) instead of their sum, which raises the effective frame
+/// rate of both trackers.
+actor HandProcessor {
+    private var handMapper = HandObservationMapper()
+    private let alternativeHandMapper: (any HandPoseMapper)?
+
+    init(alternativeHandMapper: (any HandPoseMapper)?) {
+        self.alternativeHandMapper = alternativeHandMapper
+    }
+
+    func process(_ frame: VisionFrame, face: HandPoseFaceContext?) throws -> HandTrackingOutput? {
+        let configuration = frame.configuration
+        if configuration.shouldUseAlternativeHandMapper, let alternativeHandMapper {
+            // The mapper delivers its output through its own channel
+            alternativeHandMapper.map(sampleBuffer: frame.sampleBuffer.value, face: face)
+            return nil
+        }
+        return try handMapper.map(
+            sampleBuffer: frame.sampleBuffer.value,
+            orientation: frame.orientation,
+            configuration: configuration
+        )
+    }
+}
+
 actor VisionTrackingPipeline {
     private let frameStream: VisionFrameStream
     private var processingTask: Task<Void, Never>?
     private var faceMapper = FaceObservationMapper()
-    private var handMapper = HandObservationMapper()
+    private let handProcessor: HandProcessor
 
     private let outputHandler: @MainActor @Sendable (TrackingOutput) -> Void
 
     init(
         frameStream: VisionFrameStream,
+        alternativeHandMapper: (any HandPoseMapper)? = nil,
         outputHandler: @escaping @MainActor @Sendable (TrackingOutput) -> Void
     ) {
         self.frameStream = frameStream
+        handProcessor = HandProcessor(alternativeHandMapper: alternativeHandMapper)
         self.outputHandler = outputHandler
     }
 
@@ -142,15 +196,29 @@ actor VisionTrackingPipeline {
         let configuration = frame.configuration
         guard configuration.needsVisionProcessing else { return nil }
 
-        let face = configuration.needsFaceLandmarks
-            ? try await processFace(frame, configuration: configuration)
-            : (output: nil, emotion: nil)
+        if configuration.needsHandPose {
+            guard configuration.needsFaceLandmarks else {
+                let hands = try await handProcessor.process(frame, face: nil)
+                return makeOutput(face: (nil, nil), hands: hands)
+            }
+            // The hand backend anchors to the previous frame's face observation;
+            // the anchor is smoothed and gated, so the one-frame lag is negligible
+            let latestFace = faceMapper.latestFace
+            async let hands = handProcessor.process(frame, face: latestFace)
+            let face = try await processFace(frame, configuration: configuration)
+            return makeOutput(face: face, hands: try await hands)
+        }
 
-        let hands = configuration.needsHandPose
-            ? try processHands(frame, configuration: configuration)
-            : nil
+        let face = try await processFace(frame, configuration: configuration)
+        return makeOutput(face: face, hands: nil)
+    }
 
-        return TrackingOutput(face: face.output, hands: hands, emotion: face.emotion)
+    private func makeOutput(
+        face: (output: FaceTrackingOutput?, emotion: Int32?),
+        hands: HandTrackingOutput?
+    ) -> TrackingOutput? {
+        let output = TrackingOutput(face: face.output, hands: hands, emotion: face.emotion)
+        return output.isEmpty ? nil : output
     }
 
     private func processFace(
@@ -163,17 +231,6 @@ actor VisionTrackingPipeline {
         return (
             faceMapper.map(observations: observations, captureSize: frame.captureSize, configuration: configuration),
             faceMapper.mapEmotionIfNeeded(observations: observations, configuration: configuration)
-        )
-    }
-
-    private func processHands(
-        _ frame: VisionFrame,
-        configuration: VisionTrackingConfigurationSnapshot
-    ) throws -> HandTrackingOutput? {
-        try handMapper.map(
-            sampleBuffer: frame.sampleBuffer.value,
-            orientation: frame.orientation,
-            configuration: configuration
         )
     }
 }
