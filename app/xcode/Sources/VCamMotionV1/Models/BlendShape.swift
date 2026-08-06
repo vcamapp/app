@@ -54,6 +54,10 @@ public struct BlendShape: Equatable, Sendable {
     public var noseSneerLeft: Float = 0
     public var noseSneerRight: Float = 0
     public var tongueOut: Float = 0
+
+    public init(lookAtPoint: SIMD2<Float> = .zero) {
+        self.lookAtPoint = lookAtPoint
+    }
 }
 
 public extension BlendShape {

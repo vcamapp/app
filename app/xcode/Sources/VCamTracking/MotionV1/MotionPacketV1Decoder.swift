@@ -1,5 +1,6 @@
 import Foundation
 import simd
+import VCamMotionV1
 
 enum MotionPacketV1Decoder {
     enum Error: Swift.Error {

@@ -1,5 +1,6 @@
 import Foundation
 import VCamBridge
+import VCamMotionV1
 
 /// The `Tracking` state a VCamMotion packet needs when it is applied.
 /// Read per packet so setting changes take effect without restarting the receiver.

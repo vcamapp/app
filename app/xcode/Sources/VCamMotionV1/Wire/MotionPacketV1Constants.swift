@@ -1,4 +1,5 @@
-// Keep these values synchronized with VCamMocap and MotionPacketV1Layout.
+// Keep these values synchronized with MotionPacketV1Layout and any
+// out-of-tree implementations of this protocol.
 public enum MotionPacketV1Constants {
     public static let magic: UInt32 = 0x314D4356
     public static let version: UInt16 = 1

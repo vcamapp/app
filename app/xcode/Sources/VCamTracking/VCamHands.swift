@@ -1,6 +1,7 @@
 import Foundation
 import simd
 import Vision
+import VCamMotionV1
 
 public typealias FingerTrackingConfiguration = (open: Float, close: Float, isFingerEnabled: Bool)
 

@@ -2,7 +2,19 @@ import simd
 import Vision
 
 struct FaceObservationMapper {
-    let request = DetectFaceLandmarksRequest()
+    private let request = DetectFaceLandmarksRequest()
+
+    /// Reusing the previous observation via `inputFaceObservations` skips the
+    /// full-frame face detector, which costs several times the landmark stage
+    /// alone. Landmarks are still recomputed on reused frames, so expressions,
+    /// eyes, and mouth keep the full frame rate; roll/yaw/pitch/boundingBox are
+    /// copied from the input unchanged (verified empirically), so head pose
+    /// updates only on full detections. Alternating keeps that staleness to
+    /// one frame.
+    private static let framesBetweenFullDetections = 2
+    private var reusableObservation: FaceObservation?
+    private var framesSinceFullDetection = 0
+    private var lastRequestWasFullDetection = true
 
     /// The most recent eye positions, kept for hand backends that anchor
     /// hand positions to the face.
@@ -25,6 +37,31 @@ struct FaceObservationMapper {
 
     mutating func configure(size: CGSize) {
         poseEstimator.configure(size: size)
+    }
+
+    mutating func nextRequest() -> DetectFaceLandmarksRequest {
+        var request = self.request
+        if let reusableObservation, framesSinceFullDetection < Self.framesBetweenFullDetections - 1 {
+            framesSinceFullDetection += 1
+            lastRequestWasFullDetection = false
+            request.inputFaceObservations = [reusableObservation]
+        } else {
+            framesSinceFullDetection = 0
+            lastRequestWasFullDetection = true
+        }
+        return request
+    }
+
+    mutating func noteObservations(_ observations: [FaceObservation]) {
+        guard observations.contains(where: { $0.landmarks != nil }) else {
+            // Once the face is lost, reused input would pin the search to the
+            // stale box; fall back to full detections until it is found again
+            reusableObservation = nil
+            return
+        }
+        if lastRequestWasFullDetection {
+            reusableObservation = observations.first { $0.landmarks != nil }
+        }
     }
 
     mutating func calibrate() {

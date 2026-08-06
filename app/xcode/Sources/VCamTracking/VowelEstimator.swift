@@ -1,13 +1,7 @@
-//
-//  VowelEstimator.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2023/01/07.
-//
-
 import Foundation
 import simd
 import VCamEntity
+import VCamMotionV1
 
 public enum VowelEstimator {
     public static func estimate(_ landmarks: VisionLandmarks) -> Vowel {

@@ -1,5 +1,6 @@
 import simd
 import VCamEntity
+import VCamMotionV1
 
 /// Shared builders for the face tracking arrays sent over UniBridge.
 /// FacialMocapData passes its euler rotation directly while VCamMotion

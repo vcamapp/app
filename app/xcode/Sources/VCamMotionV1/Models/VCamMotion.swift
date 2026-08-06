@@ -7,7 +7,19 @@ public struct VCamMotion: Equatable, Sendable {
     public var hands: Hands
     public var blendShape: BlendShape
 
+    public init(version: UInt32, head: Head, hands: Hands, blendShape: BlendShape) {
+        self.version = version
+        self.head = head
+        self.hands = hands
+        self.blendShape = blendShape
+    }
+
     public struct Head: Equatable, Sendable {
+        public init(translation: SIMD3<Float>, rotation: simd_quatf) {
+            self.translation = translation
+            self.rotation = rotation
+        }
+
         public var translation: SIMD3<Float>
         public var rotation: simd_quatf
     }

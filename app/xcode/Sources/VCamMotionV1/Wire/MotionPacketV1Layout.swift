@@ -1,5 +1,6 @@
-// VCamMocap also uses tha same source file for its decoder, 
-// so the layout definitions are shared between the two.
+// Single source of truth for the V1 packet layout, shared by the encoders
+// and the decoders. Any out-of-tree implementation of this protocol must be
+// kept synchronized with changes here.
 public enum MotionPacketV1Layout {
     public enum Header {
         public static let magic = 0

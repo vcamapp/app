@@ -227,7 +227,8 @@ actor VisionTrackingPipeline {
     ) async throws -> (output: FaceTrackingOutput?, emotion: Int32?) {
         faceMapper.configure(size: frame.captureSize)
         let handler = ImageRequestHandler(frame.sampleBuffer.value)
-        let observations = try await handler.perform(faceMapper.request)
+        let observations = try await handler.perform(faceMapper.nextRequest())
+        faceMapper.noteObservations(observations)
         return (
             faceMapper.map(observations: observations, captureSize: frame.captureSize, configuration: configuration),
             faceMapper.mapEmotionIfNeeded(observations: observations, configuration: configuration)

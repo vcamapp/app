@@ -1,5 +1,6 @@
 import Foundation
 import simd
+import VCamMotionV1
 
 public struct FacialMocapData: Equatable, Sendable {
     public let blendShape: BlendShape
@@ -16,6 +17,21 @@ public struct FacialMocapData: Equatable, Sendable {
 }
 
 public extension FacialMocapData {
+    private static let rawBlendShapeNames = [
+        "browDown_L", "browDown_R", "browInnerUp", "browOuterUp_L", "browOuterUp_R",
+        "cheekPuff", "cheekSquint_L", "cheekSquint_R", "eyeBlink_L", "eyeBlink_R",
+        "eyeLookDown_L", "eyeLookDown_R", "eyeLookIn_L", "eyeLookIn_R",
+        "eyeLookOut_L", "eyeLookOut_R", "eyeLookUp_L", "eyeLookUp_R",
+        "eyeSquint_L", "eyeSquint_R", "eyeWide_L", "eyeWide_R",
+        "jawForward", "jaw_L", "jawOpen", "jaw_R", "mouthClose", "mouthDimple_L",
+        "mouthDimple_R", "mouthFrown_L", "mouthFrown_R", "mouthFunnel", "mouth_L",
+        "mouthLowerDown_L", "mouthLowerDown_R", "mouthPress_L", "mouthPress_R",
+        "mouthPucker", "mouth_R", "mouthRollLower", "mouthRollUpper", "mouthShrugLower",
+        "mouthShrugUpper", "mouthSmile_L", "mouthSmile_R", "mouthStretch_L",
+        "mouthStretch_R", "mouthUpperUp_L", "mouthUpperUp_R", "noseSneer_L",
+        "noseSneer_R", "tongueOut",
+    ]
+
     init?(rawData: String) {
         let blendShapeAndTransformRawData = rawData.components(separatedBy: "=")
         guard blendShapeAndTransformRawData.count == 2 else {
@@ -50,61 +66,12 @@ public extension FacialMocapData {
             ((transforms[9] + transforms[6]) * 0.5) / 13 // skip 8
         ).clamped(lowerBound: -SIMD2.one, upperBound: .one)
 
-        blendShape = .init(
-            lookAtPoint: lookAtPoint,
-            browDownLeft: blendShapes["browDown_L"] ?? 0,
-            browDownRight: blendShapes["browDown_R"] ?? 0,
-            browInnerUp: blendShapes["browInnerUp"] ?? 0,
-            browOuterUpLeft: blendShapes["browOuterUp_L"] ?? 0,
-            browOuterUpRight: blendShapes["browOuterUp_R"] ?? 0,
-            cheekPuff: blendShapes["cheekPuff"] ?? 0,
-            cheekSquintLeft: blendShapes["cheekSquint_L"] ?? 0,
-            cheekSquintRight: blendShapes["cheekSquint_R"] ?? 0,
-            eyeBlinkLeft: blendShapes["eyeBlink_L"] ?? 0,
-            eyeBlinkRight: blendShapes["eyeBlink_R"] ?? 0,
-            eyeLookDownLeft: blendShapes["eyeLookDown_L"] ?? 0,
-            eyeLookDownRight: blendShapes["eyeLookDown_R"] ?? 0,
-            eyeLookInLeft: blendShapes["eyeLookIn_L"] ?? 0,
-            eyeLookInRight: blendShapes["eyeLookIn_R"] ?? 0,
-            eyeLookOutLeft: blendShapes["eyeLookOut_L"] ?? 0,
-            eyeLookOutRight: blendShapes["eyeLookOut_R"] ?? 0,
-            eyeLookUpLeft: blendShapes["eyeLookUp_L"] ?? 0,
-            eyeLookUpRight: blendShapes["eyeLookUp_R"] ?? 0,
-            eyeSquintLeft: blendShapes["eyeSquint_L"] ?? 0,
-            eyeSquintRight: blendShapes["eyeSquint_R"] ?? 0,
-            eyeWideLeft: blendShapes["eyeWide_L"] ?? 0,
-            eyeWideRight: blendShapes["eyeWide_R"] ?? 0,
-            jawForward: blendShapes["jawForward"] ?? 0,
-            jawLeft: blendShapes["jaw_L"] ?? 0,
-            jawOpen: blendShapes["jawOpen"] ?? 0,
-            jawRight: blendShapes["jaw_R"] ?? 0,
-            mouthClose: blendShapes["mouthClose"] ?? 0,
-            mouthDimpleLeft: blendShapes["mouthDimple_L"] ?? 0,
-            mouthDimpleRight: blendShapes["mouthDimple_R"] ?? 0,
-            mouthFrownLeft: blendShapes["mouthFrown_L"] ?? 0,
-            mouthFrownRight: blendShapes["mouthFrown_R"] ?? 0,
-            mouthFunnel: blendShapes["mouthFunnel"] ?? 0,
-            mouthLeft: blendShapes["mouth_L"] ?? 0,
-            mouthLowerDownLeft: blendShapes["mouthLowerDown_L"] ?? 0,
-            mouthLowerDownRight: blendShapes["mouthLowerDown_R"] ?? 0,
-            mouthPressLeft: blendShapes["mouthPress_L"] ?? 0,
-            mouthPressRight: blendShapes["mouthPress_R"] ?? 0,
-            mouthPucker: blendShapes["mouthPucker"] ?? 0,
-            mouthRight: blendShapes["mouth_R"] ?? 0,
-            mouthRollLower: blendShapes["mouthRollLower"] ?? 0,
-            mouthRollUpper: blendShapes["mouthRollUpper"] ?? 0,
-            mouthShrugLower: blendShapes["mouthShrugLower"] ?? 0,
-            mouthShrugUpper: blendShapes["mouthShrugUpper"] ?? 0,
-            mouthSmileLeft: blendShapes["mouthSmile_L"] ?? 0,
-            mouthSmileRight: blendShapes["mouthSmile_R"] ?? 0,
-            mouthStretchLeft: blendShapes["mouthStretch_L"] ?? 0,
-            mouthStretchRight: blendShapes["mouthStretch_R"] ?? 0,
-            mouthUpperUpLeft: blendShapes["mouthUpperUp_L"] ?? 0,
-            mouthUpperUpRight: blendShapes["mouthUpperUp_R"] ?? 0,
-            noseSneerLeft: blendShapes["noseSneer_L"] ?? 0,
-            noseSneerRight: blendShapes["noseSneer_R"] ?? 0,
-            tongueOut: blendShapes["tongueOut"] ?? 0
-        )
+        assert(Self.rawBlendShapeNames.count == BlendShape.wireOrder.count)
+        var blendShape = BlendShape(lookAtPoint: lookAtPoint)
+        for (name, keyPath) in zip(Self.rawBlendShapeNames, BlendShape.wireOrder) {
+            blendShape[keyPath: keyPath] = blendShapes[name] ?? 0
+        }
+        self.blendShape = blendShape
 
         self.head = .init(
             rotation: SIMD3(transforms[0...2]),

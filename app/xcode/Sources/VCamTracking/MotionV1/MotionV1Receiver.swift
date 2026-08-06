@@ -1,4 +1,5 @@
 import Foundation
+import VCamMotionV1
 
 @MainActor
 final class MotionV1Receiver {

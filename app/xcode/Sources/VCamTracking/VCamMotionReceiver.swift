@@ -1,6 +1,7 @@
 import Foundation
 import Network
 import Observation
+import VCamMotionV1
 import VCamLogger
 
 public enum VCamMotionProtocolVersion: Equatable, Sendable {
