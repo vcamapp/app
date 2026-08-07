@@ -126,7 +126,11 @@ actor HandProcessor {
         let configuration = frame.configuration
         if configuration.shouldUseAlternativeHandMapper, let alternativeHandMapper {
             // The mapper delivers its output through its own channel
-            alternativeHandMapper.map(sampleBuffer: frame.sampleBuffer.value, face: face)
+            alternativeHandMapper.map(
+                sampleBuffer: frame.sampleBuffer.value,
+                face: face,
+                fingersEnabled: configuration.shouldOutputFingers
+            )
             return nil
         }
         return try handMapper.map(

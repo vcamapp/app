@@ -21,7 +21,9 @@ public struct HandPoseFaceContext: Sendable {
 /// Implementations receive raw camera frames and deliver their output through
 /// their own channel. `face` carries the most recent face observation and is
 /// nil until face landmarks have been processed (face tracking and emotion
-/// detection both feed it). Instances are used from a single pipeline actor.
+/// detection both feed it). `fingersEnabled` mirrors the finger tracking
+/// setting; when false the backend must keep tracking wrists but omit finger
+/// data from its output. Instances are used from a single pipeline actor.
 public protocol HandPoseMapper: AnyObject, Sendable {
-    func map(sampleBuffer: CMSampleBuffer, face: HandPoseFaceContext?)
+    func map(sampleBuffer: CMSampleBuffer, face: HandPoseFaceContext?, fingersEnabled: Bool)
 }
