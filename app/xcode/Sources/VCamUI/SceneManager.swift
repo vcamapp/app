@@ -85,7 +85,7 @@ public final class SceneManager {
 
     private static func createAndSaveNewScene() -> VCamScene {
         let scene = createNewScene()
-        try? VCamSceneDataStore(sceneId: scene.id).save(scene)
+        try? VCamSceneDataStore(sceneId: scene.id).saveNew(scene)
         return scene
     }
 
@@ -98,7 +98,7 @@ public final class SceneManager {
     public func add(_ scene: VCamScene) throws {
         Logger.log("")
         let dataStore = VCamSceneDataStore(sceneId: scene.id)
-        try dataStore.save(scene)
+        try dataStore.saveNew(scene)
         scenes.append(scene)
     }
 

@@ -22,10 +22,7 @@ public final class FacialMocapReceiver {
 
     @ObservationIgnored private var shouldAutoReconnect = true
     @ObservationIgnored private var lastConnectedIP: String?
-    @ObservationIgnored private var timeoutWatchdogTask: Task<Void, Never>?
-    @ObservationIgnored private var lastDataReceivedAt = ContinuousClock.now
-
-    private static let dataTimeout: Duration = .seconds(2)
+    @ObservationIgnored private let timeoutWatchdog = DataTimeoutWatchdog(timeout: .seconds(2))
 
 #if FEATURE_3
     nonisolated private static let port = NWEndpoint.Port(integerLiteral: 49983)
@@ -65,8 +62,7 @@ public final class FacialMocapReceiver {
 
     private func stopInternal() {
         handshakeGeneration.withLock { $0 += 1 }
-        timeoutWatchdogTask?.cancel()
-        timeoutWatchdogTask = nil
+        timeoutWatchdog.stop()
 
         session.stop()
         connectionStatus = .disconnected
@@ -74,24 +70,18 @@ public final class FacialMocapReceiver {
         stopResamplers()
     }
 
-    /// A single long-lived task checks the last receive time periodically, so
-    /// each incoming packet only has to update a timestamp instead of
-    /// cancelling and recreating a timer task at packet rate.
     private func startTimeoutWatchdog() {
-        guard timeoutWatchdogTask == nil else { return }
-        timeoutWatchdogTask = Task { [weak self] in
-            while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(1))
-                guard let self, !Task.isCancelled else { return }
+        timeoutWatchdog.start(
+            isActive: { [weak self] in
+                guard let self else { return false }
                 // Not `== .connected`: a connection stuck in .waiting never
                 // reaches .ready and has to be restarted too.
-                guard self.connectionStatus != .disconnected,
-                      ContinuousClock.now - self.lastDataReceivedAt > Self.dataTimeout else { continue }
-                Logger.log("Data timeout - resetting listener")
-                await self.restartIfNeeded()
-                return
+                return self.connectionStatus != .disconnected
+            },
+            onTimeout: { [weak self] in
+                await self?.restartIfNeeded()
             }
-        }
+        )
     }
 
     private func restartIfNeeded() async {
@@ -152,20 +142,18 @@ extension FacialMocapReceiver {
             },
             onConnectionStarted: { [weak self] in
                 guard let self else { return }
-                self.lastDataReceivedAt = .now
                 self.startTimeoutWatchdog()
             },
             onReady: { [weak self] in
                 guard let self else { return }
                 self.connectionStatus = .connected
-                self.lastDataReceivedAt = .now
                 self.startTimeoutWatchdog()
             },
             onData: { [weak self] data in
                 guard let self,
                       let rawData = String(data: data, encoding: .utf8),
                       let mocapData = FacialMocapData(rawData: rawData) else { return }
-                self.lastDataReceivedAt = .now
+                self.timeoutWatchdog.markDataReceived()
                 self.oniFacialMocapReceived(mocapData)
             }
         )

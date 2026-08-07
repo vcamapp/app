@@ -105,8 +105,14 @@ public final class Tracking {
         applyMappingsToUnity(for: mode)
     }
 
-    public func deleteMapping(at index: Int, for mode: TrackingMode) {
-        mappings[mode].remove(at: index)
+    public func deleteMappings(at indices: IndexSet, for mode: TrackingMode) {
+        var updatedMappings = mappings[mode]
+        let targets = indices.filter(updatedMappings.indices.contains)
+        guard !targets.isEmpty else { return }
+        for index in targets.reversed() {
+            updatedMappings.remove(at: index)
+        }
+        mappings[mode] = updatedMappings
         applyMappingsToUnity(for: mode)
     }
 

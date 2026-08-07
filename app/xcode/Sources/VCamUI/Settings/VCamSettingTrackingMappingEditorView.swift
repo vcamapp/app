@@ -241,9 +241,7 @@ final class MappingDataStore {
     }
 
     func deleteMapping(at indices: IndexSet) {
-        for index in indices.sorted(by: >) {
-            tracking.deleteMapping(at: index, for: selectedMode)
-        }
+        tracking.deleteMappings(at: indices, for: selectedMode)
         if !indices.isEmpty {
             mappingsRevision &+= 1
         }

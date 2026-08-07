@@ -4,6 +4,7 @@ import VCamBridge
 import VCamData
 import VCamLogger
 import AVFoundation
+import ScreenCaptureKit
 
 @MainActor
 @Observable
@@ -131,10 +132,6 @@ public final class SceneObjectManager {
         didChange(object)
     }
 
-    func remove(byIndex index: Int) {
-        remove(objects[index])
-    }
-
     public func remove(byId id: Int32) {
         guard let object = objects.find(byId: id) else {
             return
@@ -259,6 +256,8 @@ extension SceneObjectManager {
         UniBridge.shared.resetAllObjects()
 
         self.objects = []
+        var availableContent: SCShareableContent?
+        var availableContentError: (any Error)?
 
         for object in scene.objects {
             let sceneObject = object.sceneObject(dataStore: dataStore)
@@ -281,7 +280,22 @@ extension SceneObjectManager {
                 }
             case let .screen(id, state):
                 do {
-                    let recorder = try await ScreenRecorder.create(id: id, screenCapture: state)
+                    if availableContent == nil, availableContentError == nil {
+                        do {
+                            availableContent = try await ScreenRecorder.availableContent()
+                        } catch {
+                            availableContentError = error
+                        }
+                    }
+                    if let availableContentError {
+                        throw availableContentError
+                    }
+                    guard let availableContent else { continue }
+                    let recorder = try await ScreenRecorder.create(
+                        id: id,
+                        screenCapture: state,
+                        availableContent: availableContent
+                    )
                     guard generation == loadGeneration else { return }
                     recorder.filter = state.texture.filter.map(ImageFilter.init(configuration:))
                     RenderTextureManager.shared.set(recorder, id: object.id)

@@ -93,6 +93,8 @@ public extension TrackingMappingEntry {
         var bounds: ClosedRange<Float> { get set }
         var rangeMin: Float { get set }
         var rangeMax: Float { get set }
+
+        init(key: String, bounds: ClosedRange<Float>?, rangeMin: Float?, rangeMax: Float?)
     }
 
     struct InputKey: Key {
@@ -165,6 +167,25 @@ public extension TrackingMappingEntry {
 public extension TrackingMappingEntry.Key {
     var id: String { key }
 
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: RangeKeyCodingKeys.self)
+        let key = try container.decode(String.self, forKey: .key)
+        let boundsMin = try container.decode(Float.self, forKey: .boundsMin)
+        let boundsMax = try container.decode(Float.self, forKey: .boundsMax)
+        let rangeMin = try container.decode(Float.self, forKey: .rangeMin)
+        let rangeMax = try container.decode(Float.self, forKey: .rangeMax)
+        self.init(key: key, bounds: boundsMin...boundsMax, rangeMin: rangeMin, rangeMax: rangeMax)
+    }
+
+    func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: RangeKeyCodingKeys.self)
+        try container.encode(key, forKey: .key)
+        try container.encode(bounds.lowerBound, forKey: .boundsMin)
+        try container.encode(bounds.upperBound, forKey: .boundsMax)
+        try container.encode(rangeMin, forKey: .rangeMin)
+        try container.encode(rangeMax, forKey: .rangeMax)
+    }
+
     /// Applies new bounds, keeping the current range inside them
     mutating func updateBounds(_ newBounds: ClosedRange<Float>) {
         let wasReversed = rangeMin > rangeMax
@@ -186,48 +207,6 @@ public extension TrackingMappingEntry.Key {
 
 private enum RangeKeyCodingKeys: String, CodingKey {
     case key, boundsMin, boundsMax, rangeMin, rangeMax
-}
-
-extension TrackingMappingEntry.InputKey: Codable {
-    public init(from decoder: any Decoder) throws {
-        let container = try decoder.container(keyedBy: RangeKeyCodingKeys.self)
-        let key = try container.decode(String.self, forKey: .key)
-        let boundsMin = try container.decode(Float.self, forKey: .boundsMin)
-        let boundsMax = try container.decode(Float.self, forKey: .boundsMax)
-        let rangeMin = try container.decode(Float.self, forKey: .rangeMin)
-        let rangeMax = try container.decode(Float.self, forKey: .rangeMax)
-        self.init(key: key, bounds: boundsMin...boundsMax, rangeMin: rangeMin, rangeMax: rangeMax)
-    }
-
-    public func encode(to encoder: any Encoder) throws {
-        var container = encoder.container(keyedBy: RangeKeyCodingKeys.self)
-        try container.encode(key, forKey: .key)
-        try container.encode(bounds.lowerBound, forKey: .boundsMin)
-        try container.encode(bounds.upperBound, forKey: .boundsMax)
-        try container.encode(rangeMin, forKey: .rangeMin)
-        try container.encode(rangeMax, forKey: .rangeMax)
-    }
-}
-
-extension TrackingMappingEntry.OutputKey: Codable {
-    public init(from decoder: any Decoder) throws {
-        let container = try decoder.container(keyedBy: RangeKeyCodingKeys.self)
-        let key = try container.decode(String.self, forKey: .key)
-        let boundsMin = try container.decode(Float.self, forKey: .boundsMin)
-        let boundsMax = try container.decode(Float.self, forKey: .boundsMax)
-        let rangeMin = try container.decode(Float.self, forKey: .rangeMin)
-        let rangeMax = try container.decode(Float.self, forKey: .rangeMax)
-        self.init(key: key, bounds: boundsMin...boundsMax, rangeMin: rangeMin, rangeMax: rangeMax)
-    }
-
-    public func encode(to encoder: any Encoder) throws {
-        var container = encoder.container(keyedBy: RangeKeyCodingKeys.self)
-        try container.encode(key, forKey: .key)
-        try container.encode(bounds.lowerBound, forKey: .boundsMin)
-        try container.encode(bounds.upperBound, forKey: .boundsMax)
-        try container.encode(rangeMin, forKey: .rangeMin)
-        try container.encode(rangeMax, forKey: .rangeMax)
-    }
 }
 
 public extension TrackingMappingEntry.DefaultMappingDefinition {

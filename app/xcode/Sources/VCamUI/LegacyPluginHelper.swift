@@ -1,6 +1,5 @@
 import Foundation
 import AppKit
-import VCamLogger
 
 
 private let dalPath = URL(fileURLWithPath: "/Library/CoreMediaIO/Plug-Ins/DAL/")

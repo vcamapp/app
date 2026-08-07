@@ -1,7 +1,4 @@
 import SwiftUI
-import VCamEntity
-import VCamCamera
-import AVFoundation
 
 public struct VCamSettingView: View {
     public enum Tab: Hashable, Identifiable, CaseIterable {

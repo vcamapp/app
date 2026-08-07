@@ -25,15 +25,25 @@ public struct VCamSceneDataStore {
     }
 
     public func save(_ scene: VCamScene) throws {
+        try save(scene, registeringSceneID: false)
+    }
+
+    public func saveNew(_ scene: VCamScene) throws {
+        try save(scene, registeringSceneID: true)
+    }
+
+    private func save(_ scene: VCamScene, registeringSceneID: Bool) throws {
         try FileManager.default.createDirectoryIfNeeded(at: sceneRootURL)
 
         let url = sceneURL
         let encoder = JSONEncoder()
         let data = try encoder.encode(scene)
-        // Register the ID before writing the file: a registered ID whose file is missing
-        // is repaired by loadAndRepair at launch, but an unregistered scene file
-        // would never be discovered again
-        try addSceneIdIfNeeded()
+        if registeringSceneID {
+            // Register the ID before writing the file: a registered ID whose file is missing
+            // is repaired by loadAndRepair at launch, but an unregistered scene file
+            // would never be discovered again
+            try addSceneIdIfNeeded()
+        }
         try data.write(to: url, options: .atomic)
         uniDebugLog("scene saved: " + url.path)
     }

@@ -267,50 +267,46 @@ struct VCamSettingMappingTableView: NSViewRepresentable {
         }
 
         private func toggleEnabled(row: Int, state: Bool) {
-            guard row >= 0, row < store.mappings.count else { return }
-            store.mappings[row].isEnabled = state
-            store.applyMappings()
-            reloadRow(row)
+            updateMapping(at: row, reload: true) { $0.isEnabled = state }
         }
 
         private func inputKeyChanged(row: Int, key: TrackingMappingEntry.InputKey) {
-            guard row >= 0, row < store.mappings.count else { return }
-            store.mappings[row].input = key
-            store.applyMappings()
-            reloadRow(row)
+            updateMapping(at: row, reload: true) { $0.input = key }
         }
 
         private func updateInputRange(row: Int, min: Float, max: Float) {
-            guard row >= 0, row < store.mappings.count else { return }
-            store.mappings[row].input.rangeMin = min
-            store.mappings[row].input.rangeMax = max
-            store.applyMappings()
+            updateMapping(at: row) {
+                $0.input.rangeMin = min
+                $0.input.rangeMax = max
+            }
         }
 
         private func outputKeyChanged(row: Int, key: TrackingMappingEntry.OutputKey) {
-            guard row >= 0, row < store.mappings.count else { return }
-            store.mappings[row].outputKey = key
-            store.applyMappings()
-            reloadRow(row)
+            updateMapping(at: row, reload: true) { $0.outputKey = key }
         }
 
         private func outputTextChanged(row: Int, text: String) {
-            guard row >= 0, row < store.mappings.count else { return }
-            store.mappings[row].outputKey.key = text
-            store.applyMappings()
+            updateMapping(at: row) { $0.outputKey.key = text }
         }
 
         private func updateOutputRange(row: Int, min: Float, max: Float) {
-            guard row >= 0, row < store.mappings.count else { return }
-            store.mappings[row].outputKey.rangeMin = min
-            store.mappings[row].outputKey.rangeMax = max
-            store.applyMappings()
+            updateMapping(at: row) {
+                $0.outputKey.rangeMin = min
+                $0.outputKey.rangeMax = max
+            }
         }
 
         private func filterChanged(row: Int, filter: TrackingFilter) {
+            updateMapping(at: row) { $0.filter = filter }
+        }
+
+        private func updateMapping(at row: Int, reload: Bool = false, _ body: (inout TrackingMappingEntry) -> Void) {
             guard row >= 0, row < store.mappings.count else { return }
-            store.mappings[row].filter = filter
+            body(&store.mappings[row])
             store.applyMappings()
+            if reload {
+                reloadRow(row)
+            }
         }
 
         @objc func reverseInputDirection(_ sender: Any?) {
@@ -324,13 +320,16 @@ struct VCamSettingMappingTableView: NSViewRepresentable {
         private func reverseDirection(_ side: TrackingMappingEntry.Side) {
             guard let tableView else { return }
             store.reverseDirection(side, at: tableView.selectedRowIndexes)
-            let columns = IndexSet(integersIn: 0..<tableView.tableColumns.count)
-            tableView.reloadData(forRowIndexes: tableView.selectedRowIndexes, columnIndexes: columns)
+            reloadSelectedRows(in: tableView)
         }
 
         @objc func resetToDefault(_ sender: Any?) {
             guard let tableView else { return }
             store.resetToDefault(at: tableView.selectedRowIndexes)
+            reloadSelectedRows(in: tableView)
+        }
+
+        private func reloadSelectedRows(in tableView: NSTableView) {
             let columns = IndexSet(integersIn: 0..<tableView.tableColumns.count)
             tableView.reloadData(forRowIndexes: tableView.selectedRowIndexes, columnIndexes: columns)
         }
@@ -568,62 +567,28 @@ private final class ArrowCell: NSView {
     }
 }
 
-private final class InputCell: NSView {
+private final class MappingRangeControl: NSView {
     private let iconView: NSImageView
-    private let popupButton: NSPopUpButton
     private let slider: AppKitMinMaxSlider
 
-    private var onInputKeyChanged: ((Int, TrackingMappingEntry.InputKey) -> Void)?
-    private var onRangeChanged: ((Int, Float, Float) -> Void)?
-    private var inputKeys: [TrackingMappingEntry.InputKey] = []
-    private var inputKeyIDs: [String] = []
-    private var row: Int = 0
-
-    init() {
+    init(symbolName: String, keyControl: NSView) {
         iconView = NSImageView()
-        if let image = NSImage(systemSymbolName: "camera", accessibilityDescription: nil) {
-            iconView.image = image
-        }
+        iconView.image = NSImage(systemSymbolName: symbolName, accessibilityDescription: nil)
         iconView.contentTintColor = .secondaryLabelColor
 
-        popupButton = NSPopUpButton(frame: .zero, pullsDown: false)
-        slider = AppKitMinMaxSlider(
-            minValue: 0,
-            maxValue: 1,
-            min: -1,
-            max: 1
-        )
-
+        slider = AppKitMinMaxSlider(minValue: 0, maxValue: 1, min: -1, max: 1)
         super.init(frame: .zero)
 
-        popupButton.target = self
-        popupButton.action = #selector(popupButtonChanged)
-
-        slider.setOnEditingEnded { [weak self] min, max in
-            guard let self else { return }
-            self.onRangeChanged?(self.row, min, max)
-        }
-
-        setupLayout()
-    }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
-    private func setupLayout() {
-        for view in [iconView, popupButton, slider] {
+        for view in [iconView, keyControl, slider] {
             view.translatesAutoresizingMaskIntoConstraints = false
             addSubview(view)
         }
 
-        popupButton.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        popupButton.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        keyControl.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        keyControl.setContentHuggingPriority(.defaultLow, for: .horizontal)
 
-        let popupMinWidth = popupButton.widthAnchor.constraint(greaterThanOrEqualToConstant: 90)
-        let popupMaxWidth = popupButton.widthAnchor.constraint(lessThanOrEqualToConstant: 150)
-        popupMaxWidth.priority = .defaultHigh
-
+        let keyControlMaxWidth = keyControl.widthAnchor.constraint(lessThanOrEqualToConstant: 150)
+        keyControlMaxWidth.priority = .defaultHigh
         let sliderTrailing = slider.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8)
         sliderTrailing.priority = .defaultHigh
 
@@ -633,17 +598,92 @@ private final class InputCell: NSView {
             iconView.widthAnchor.constraint(equalToConstant: 16),
             iconView.heightAnchor.constraint(equalToConstant: 16),
 
-            popupButton.leadingAnchor.constraint(equalTo: iconView.trailingAnchor, constant: 8),
-            popupButton.centerYAnchor.constraint(equalTo: centerYAnchor),
-            popupMinWidth,
-            popupMaxWidth,
+            keyControl.leadingAnchor.constraint(equalTo: iconView.trailingAnchor, constant: 8),
+            keyControl.centerYAnchor.constraint(equalTo: centerYAnchor),
+            keyControl.widthAnchor.constraint(greaterThanOrEqualToConstant: 90),
+            keyControlMaxWidth,
 
-            slider.leadingAnchor.constraint(equalTo: popupButton.trailingAnchor, constant: 8),
+            slider.leadingAnchor.constraint(equalTo: keyControl.trailingAnchor, constant: 8),
             sliderTrailing,
             slider.centerYAnchor.constraint(equalTo: centerYAnchor),
             slider.heightAnchor.constraint(equalToConstant: 32),
             slider.widthAnchor.constraint(greaterThanOrEqualToConstant: AppKitMinMaxSlider.minimumWidth)
         ])
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    func setOnRangeChanged(_ handler: @escaping (Float, Float) -> Void) {
+        slider.setOnEditingEnded(handler)
+    }
+
+    func configure(min: Float, max: Float, bounds: ClosedRange<Float>, isEnabled: Bool) {
+        slider.update(
+            minValue: min,
+            maxValue: max,
+            min: bounds.lowerBound,
+            max: bounds.upperBound
+        )
+        alphaValue = isEnabled ? 1.0 : 0.5
+    }
+}
+
+@MainActor
+private func configurePopup(
+    _ popupButton: NSPopUpButton,
+    itemIDs: [String],
+    itemTitles: [String],
+    selectedID: String,
+    previousItemIDs: inout [String]
+) {
+    if itemIDs != previousItemIDs {
+        previousItemIDs = itemIDs
+        popupButton.removeAllItems()
+        popupButton.addItems(withTitles: itemTitles)
+    }
+    if let index = itemIDs.firstIndex(of: selectedID) {
+        popupButton.selectItem(at: index)
+    }
+}
+
+private final class InputCell: NSView {
+    private let popupButton: NSPopUpButton
+    private let rangeControl: MappingRangeControl
+
+    private var onInputKeyChanged: ((Int, TrackingMappingEntry.InputKey) -> Void)?
+    private var onRangeChanged: ((Int, Float, Float) -> Void)?
+    private var inputKeys: [TrackingMappingEntry.InputKey] = []
+    private var inputKeyIDs: [String] = []
+    private var row: Int = 0
+
+    init() {
+        popupButton = NSPopUpButton(frame: .zero, pullsDown: false)
+        rangeControl = MappingRangeControl(symbolName: "camera", keyControl: popupButton)
+
+        super.init(frame: .zero)
+
+        popupButton.target = self
+        popupButton.action = #selector(popupButtonChanged)
+
+        rangeControl.setOnRangeChanged { [weak self] min, max in
+            guard let self else { return }
+            self.onRangeChanged?(self.row, min, max)
+        }
+
+        rangeControl.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(rangeControl)
+        NSLayoutConstraint.activate([
+            rangeControl.leadingAnchor.constraint(equalTo: leadingAnchor),
+            rangeControl.trailingAnchor.constraint(equalTo: trailingAnchor),
+            rangeControl.topAnchor.constraint(equalTo: topAnchor),
+            rangeControl.bottomAnchor.constraint(equalTo: bottomAnchor)
+        ])
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 
     @objc private func popupButtonChanged() {
@@ -665,39 +705,31 @@ private final class InputCell: NSView {
         self.onInputKeyChanged = onInputKeyChanged
         self.onRangeChanged = onRangeChanged
 
-        let newKeyIDs = inputKeys.map(\.key)
+        let itemIDs = inputKeys.map(\.key)
         let titles = inputKeyTitles.count == inputKeys.count ? inputKeyTitles : inputKeys.map { key in
             key.localizedTitle
         }
-
-        if newKeyIDs != inputKeyIDs {
-            inputKeyIDs = newKeyIDs
-            self.inputKeys = inputKeys
-            popupButton.removeAllItems()
-            popupButton.addItems(withTitles: titles)
-        } else {
-            self.inputKeys = inputKeys
-        }
-
-        if let index = inputKeys.firstIndex(where: { $0.key == entry.input.key }) {
-            popupButton.selectItem(at: index)
-        }
-
-        slider.update(
-            minValue: entry.input.rangeMin,
-            maxValue: entry.input.rangeMax,
-            min: entry.input.bounds.lowerBound,
-            max: entry.input.bounds.upperBound
+        self.inputKeys = inputKeys
+        configurePopup(
+            popupButton,
+            itemIDs: itemIDs,
+            itemTitles: titles,
+            selectedID: entry.input.key,
+            previousItemIDs: &inputKeyIDs
         )
-        alphaValue = isEnabled ? 1.0 : 0.5
+        rangeControl.configure(
+            min: entry.input.rangeMin,
+            max: entry.input.rangeMax,
+            bounds: entry.input.bounds,
+            isEnabled: isEnabled
+        )
     }
 }
 
 private final class OutputCell: NSView {
-    private let iconView: NSImageView
     private let popupButton: NSPopUpButton?
     private let textField: NSTextField?
-    private let slider: AppKitMinMaxSlider
+    private let rangeControl: MappingRangeControl
 
     private var onOutputKeyChanged: ((Int, TrackingMappingEntry.OutputKey) -> Void)?
     private var onOutputTextChanged: ((Int, String) -> Void)?
@@ -712,27 +744,20 @@ private final class OutputCell: NSView {
     ) {
         self.hasBlendShapeNames = hasBlendShapeNames
 
-        iconView = NSImageView()
-        if let image = NSImage(systemSymbolName: "figure", accessibilityDescription: nil) {
-            iconView.image = image
-        }
-        iconView.contentTintColor = .secondaryLabelColor
-
+        let keyControl: NSView
         if hasBlendShapeNames {
-            popupButton = NSPopUpButton(frame: .zero, pullsDown: false)
+            let popupButton = NSPopUpButton(frame: .zero, pullsDown: false)
+            self.popupButton = popupButton
             textField = nil
+            keyControl = popupButton
         } else {
             popupButton = nil
-            textField = NSTextField(frame: .zero)
-            textField?.bezelStyle = .roundedBezel
+            let textField = NSTextField(frame: .zero)
+            textField.bezelStyle = .roundedBezel
+            self.textField = textField
+            keyControl = textField
         }
-
-        slider = AppKitMinMaxSlider(
-            minValue: 0,
-            maxValue: 1,
-            min: -1,
-            max: 1
-        )
+        rangeControl = MappingRangeControl(symbolName: "figure", keyControl: keyControl)
 
         super.init(frame: .zero)
 
@@ -741,7 +766,7 @@ private final class OutputCell: NSView {
             popupButton.action = #selector(popupButtonChanged)
         }
 
-        slider.setOnEditingEnded { [weak self] min, max in
+        rangeControl.setOnRangeChanged { [weak self] min, max in
             guard let self else { return }
             self.onRangeChanged?(self.row, min, max)
         }
@@ -750,73 +775,18 @@ private final class OutputCell: NSView {
             textField.delegate = self
         }
 
-        setupLayout()
+        rangeControl.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(rangeControl)
+        NSLayoutConstraint.activate([
+            rangeControl.leadingAnchor.constraint(equalTo: leadingAnchor),
+            rangeControl.trailingAnchor.constraint(equalTo: trailingAnchor),
+            rangeControl.topAnchor.constraint(equalTo: topAnchor),
+            rangeControl.bottomAnchor.constraint(equalTo: bottomAnchor)
+        ])
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
-    }
-
-    private func setupLayout() {
-        iconView.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(iconView)
-
-        var leadingView: NSView = iconView
-
-        if let popupButton {
-            popupButton.translatesAutoresizingMaskIntoConstraints = false
-            addSubview(popupButton)
-            popupButton.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-            popupButton.setContentHuggingPriority(.defaultLow, for: .horizontal)
-
-            let popupMinWidth = popupButton.widthAnchor.constraint(greaterThanOrEqualToConstant: 90)
-            let popupMaxWidth = popupButton.widthAnchor.constraint(lessThanOrEqualToConstant: 150)
-            popupMaxWidth.priority = .defaultHigh
-            NSLayoutConstraint.activate([
-                popupButton.leadingAnchor.constraint(equalTo: iconView.trailingAnchor, constant: 8),
-                popupButton.centerYAnchor.constraint(equalTo: centerYAnchor),
-                popupMinWidth,
-                popupMaxWidth
-            ])
-            leadingView = popupButton
-        }
-
-        if let textField {
-            textField.translatesAutoresizingMaskIntoConstraints = false
-            addSubview(textField)
-            textField.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-            textField.setContentHuggingPriority(.defaultLow, for: .horizontal)
-
-            let textMinWidth = textField.widthAnchor.constraint(greaterThanOrEqualToConstant: 90)
-            let textMaxWidth = textField.widthAnchor.constraint(lessThanOrEqualToConstant: 150)
-            textMaxWidth.priority = .defaultHigh
-            NSLayoutConstraint.activate([
-                textField.leadingAnchor.constraint(equalTo: iconView.trailingAnchor, constant: 8),
-                textField.centerYAnchor.constraint(equalTo: centerYAnchor),
-                textMinWidth,
-                textMaxWidth
-            ])
-            leadingView = textField
-        }
-
-        slider.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(slider)
-
-        let sliderTrailing = slider.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8)
-        sliderTrailing.priority = .defaultHigh
-
-        NSLayoutConstraint.activate([
-            iconView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 8),
-            iconView.centerYAnchor.constraint(equalTo: centerYAnchor),
-            iconView.widthAnchor.constraint(equalToConstant: 16),
-            iconView.heightAnchor.constraint(equalToConstant: 16),
-
-            slider.leadingAnchor.constraint(equalTo: leadingView.trailingAnchor, constant: 8),
-            sliderTrailing,
-            slider.centerYAnchor.constraint(equalTo: centerYAnchor),
-            slider.heightAnchor.constraint(equalToConstant: 32),
-            slider.widthAnchor.constraint(greaterThanOrEqualToConstant: AppKitMinMaxSlider.minimumWidth)
-        ])
     }
 
     @objc private func popupButtonChanged() {
@@ -841,34 +811,28 @@ private final class OutputCell: NSView {
         self.onRangeChanged = onRangeChanged
 
         if hasBlendShapeNames, let popupButton {
-            let newKeyIDs = outputKeys.map(\.key)
+            let itemIDs = outputKeys.map(\.key)
             let titles = outputKeyTitles.count == outputKeys.count ? outputKeyTitles : outputKeys.map { key in
                 key.localizedTitle
             }
-
-            if newKeyIDs != outputKeyIDs {
-                outputKeyIDs = newKeyIDs
-                self.outputKeys = outputKeys
-                popupButton.removeAllItems()
-                popupButton.addItems(withTitles: titles)
-            } else {
-                self.outputKeys = outputKeys
-            }
-
-            if let index = outputKeys.firstIndex(where: { $0.key == entry.outputKey.key }) {
-                popupButton.selectItem(at: index)
-            }
+            self.outputKeys = outputKeys
+            configurePopup(
+                popupButton,
+                itemIDs: itemIDs,
+                itemTitles: titles,
+                selectedID: entry.outputKey.key,
+                previousItemIDs: &outputKeyIDs
+            )
         } else if let textField, textField.currentEditor() == nil {
             textField.stringValue = entry.outputKey.key
         }
 
-        slider.update(
-            minValue: entry.outputKey.rangeMin,
-            maxValue: entry.outputKey.rangeMax,
-            min: entry.outputKey.bounds.lowerBound,
-            max: entry.outputKey.bounds.upperBound
+        rangeControl.configure(
+            min: entry.outputKey.rangeMin,
+            max: entry.outputKey.rangeMax,
+            bounds: entry.outputKey.bounds,
+            isEnabled: isEnabled
         )
-        alphaValue = isEnabled ? 1.0 : 0.5
     }
 }
 

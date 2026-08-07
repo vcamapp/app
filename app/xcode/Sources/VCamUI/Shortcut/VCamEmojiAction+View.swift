@@ -1,12 +1,4 @@
-//
-//  VCamEmojiAction+View.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2023/03/25.
-//
-
 import SwiftUI
-import VCamEntity
 
 struct VCamActionEditorEmojiPicker: View {
     @Binding var emoji: String

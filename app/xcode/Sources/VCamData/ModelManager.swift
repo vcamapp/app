@@ -26,11 +26,11 @@ public final class ModelManager {
 
     public var lastLoadedModel: ModelItem? {
         guard let id = lastLoadedModelId else { return nil }
-        return modelItems.first { $0.id == id }
+        return modelItems.find(byId: id)
     }
 
     public func model(for modelId: UUID) -> Models.Model? {
-        modelItems.first { $0.id == modelId }?.model
+        modelItems.find(byId: modelId)?.model
     }
 
     public func setLastLoadedModel(_ model: ModelItem) throws {
@@ -86,7 +86,7 @@ public final class ModelManager {
         // Update the metadata first; if removing the directory fails afterwards,
         // the leftover model is re-registered by the scan on the next launch
         try commit { items, lastModelId in
-            items.removeAll { $0.id == item.id }
+            items.remove(byId: item.id)
             if lastModelId == item.id {
                 lastModelId = nil
             }
@@ -114,7 +114,7 @@ public final class ModelManager {
         guard !trimmedName.isEmpty, trimmedName != item.model.localizedName else { return }
 
         try commit { items, _ in
-            guard let index = items.firstIndex(where: { $0.id == item.id }) else { return }
+            guard let index = items.index(ofId: item.id) else { return }
             var model = items[index].model
             model.displayName = trimmedName
             items[index] = ModelItem(model: model, status: items[index].status, thumbnail: items[index].thumbnail)
@@ -130,7 +130,7 @@ public final class ModelManager {
     }
 
     private func updateThumbnail(for item: ModelItem, image: Data) {
-        guard let index = modelItems.firstIndex(where: { $0.id == item.id }) else { return }
+        guard let index = modelItems.index(ofId: item.id) else { return }
         modelItems[index] = ModelItem(model: item.model, status: item.status, thumbnail: image)
     }
 
@@ -162,7 +162,7 @@ public final class ModelManager {
                 models.map { ($0.id, $0.loadThumbnailData()) }
             }.value
             for (id, thumbnail) in thumbnails {
-                guard let thumbnail, let index = modelItems.firstIndex(where: { $0.id == id }) else { continue }
+                guard let thumbnail, let index = modelItems.index(ofId: id) else { continue }
                 let item = modelItems[index]
                 modelItems[index] = ModelItem(model: item.model, status: item.status, thumbnail: thumbnail)
             }
@@ -200,7 +200,7 @@ public final class ModelManager {
 
     private func addModel(_ model: Models.Model) throws -> ModelItem {
         let item = ModelItem(model: model, status: .valid, thumbnail: model.loadThumbnailData())
-        guard !modelItems.contains(where: { $0.id == model.id }) else { return item }
+        guard modelItems.find(byId: model.id) == nil else { return item }
         try commit { items, _ in
             items.insert(item, at: 0)
         }

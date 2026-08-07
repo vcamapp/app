@@ -29,10 +29,7 @@ public final class VCamMotionReceiver {
     public private(set) var motionProtocolVersion: VCamMotionProtocolVersion?
 
     @ObservationIgnored private var shouldAutoReconnect = true
-    @ObservationIgnored private var timeoutWatchdogTask: Task<Void, Never>?
-    @ObservationIgnored private var lastDataReceivedAt = ContinuousClock.now
-
-    private static let dataTimeout: Duration = .seconds(2)
+    @ObservationIgnored private let timeoutWatchdog = DataTimeoutWatchdog(timeout: .seconds(2))
 
     public init() {}
 
@@ -75,7 +72,6 @@ public final class VCamMotionReceiver {
             onReady: { [weak self] in
                 guard let self else { return }
                 self.connectionStatus = .connected
-                self.lastDataReceivedAt = .now
                 self.startTimeoutWatchdog()
             },
             onData: { [weak self] data in
@@ -113,7 +109,7 @@ public final class VCamMotionReceiver {
     /// sender restarted), the watchdog resets the listener, which also
     /// resets the sequence/session state via `resetForNewConnection()`.
     private func markDataReceived(protocolVersion version: VCamMotionProtocolVersion) {
-        lastDataReceivedAt = .now
+        timeoutWatchdog.markDataReceived()
         if motionProtocolVersion != version {
             motionProtocolVersion = version
         }
@@ -125,8 +121,7 @@ public final class VCamMotionReceiver {
     }
 
     private func stopInternal() {
-        timeoutWatchdogTask?.cancel()
-        timeoutWatchdogTask = nil
+        timeoutWatchdog.stop()
 
         session.stop()
         motionV1Receiver = nil
@@ -135,22 +130,15 @@ public final class VCamMotionReceiver {
         tracking?.stop()
     }
 
-    /// A single long-lived task checks the last receive time periodically, so
-    /// each incoming packet only has to update a timestamp instead of
-    /// cancelling and recreating a timer task at packet rate.
     private func startTimeoutWatchdog() {
-        guard timeoutWatchdogTask == nil else { return }
-        timeoutWatchdogTask = Task { [weak self] in
-            while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(1))
-                guard let self, !Task.isCancelled else { return }
-                guard self.connectionStatus == .connected,
-                      ContinuousClock.now - self.lastDataReceivedAt > Self.dataTimeout else { continue }
-                Logger.log("Data timeout - resetting listener")
-                self.restartIfNeeded()
-                return
+        timeoutWatchdog.start(
+            isActive: { [weak self] in
+                self?.connectionStatus == .connected
+            },
+            onTimeout: { [weak self] in
+                self?.restartIfNeeded()
             }
-        }
+        )
     }
 
     private func restartIfNeeded() {

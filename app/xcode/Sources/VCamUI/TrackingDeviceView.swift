@@ -1,17 +1,9 @@
-//
-//  TrackingDeviceView.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2023/02/14.
-//
-
 import SwiftUI
 import AVFoundation
 import VCamTracking
 import VCamBridge
 import VCamCamera
 import VCamEntity
-import VCamData
 
 public struct TrackingDeviceView: View {
     public init() {}

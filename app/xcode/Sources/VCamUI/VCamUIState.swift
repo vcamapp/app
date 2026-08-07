@@ -1,12 +1,4 @@
-//
-//  VCamUIState.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/03/20.
-//
-
 import SwiftUI
-import VCamEntity
 
 @MainActor
 @Observable

@@ -1,13 +1,5 @@
-//
-//  View+KeyEvent.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2023/04/06.
-//
-
 import AppKit
 import SwiftUI
-import VCamEntity
 
 public extension View {
     @ViewBuilder func onKeyEvent(

@@ -1,12 +1,4 @@
-//
-//  VCamTrackingView.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/03/24.
-//
-
 import SwiftUI
-import AVFoundation
 import VCamEntity
 import VCamTracking
 
@@ -14,7 +6,6 @@ public struct VCamTrackingView: View {
     public init() {}
 
     @Bindable private var tracking = Tracking.shared
-    @Bindable private var recorder = VideoRecorder.shared
 #if ENABLE_MOCOPI
     @AppStorage(key: .integrationMocopi) private var integrationMocopi
 #endif

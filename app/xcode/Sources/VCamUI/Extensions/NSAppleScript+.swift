@@ -1,50 +1,21 @@
-//
-//  NSAppleScript+.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2023/04/17.
-//
-
 import Foundation
 
 extension NSAppleScript {
     @concurrent
     static func execute(_ source: String) async throws {
-        return try await withCheckedThrowingContinuation { continuation in
-            DispatchQueue.global().async {
-                guard let script = NSAppleScript(source: source) else {
-                    continuation.resume(throwing: NSError(domain: "tattn.vcam", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to load this file"]))
-                    return
-                }
-
-                do {
-                    try execute(script)
-                    continuation.resume()
-                } catch {
-                    continuation.resume(throwing: error)
-                }
-            }
+        guard let script = NSAppleScript(source: source) else {
+            throw NSError(domain: "tattn.vcam", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to load this file"])
         }
+        try execute(script)
     }
 
     @concurrent
     static func execute(contentsOf url: URL) async throws {
-        return try await withCheckedThrowingContinuation { continuation in
-            DispatchQueue.global().async {
-                var error: NSDictionary?
-                guard let script = NSAppleScript(contentsOf: url, error: &error) else {
-                    continuation.resume(throwing: NSError(error))
-                    return
-                }
-
-                do {
-                    try execute(script)
-                    continuation.resume()
-                } catch {
-                    continuation.resume(throwing: error)
-                }
-            }
+        var error: NSDictionary?
+        guard let script = NSAppleScript(contentsOf: url, error: &error) else {
+            throw NSError(error)
         }
+        try execute(script)
     }
 
     private static func execute(_ script: NSAppleScript) throws {

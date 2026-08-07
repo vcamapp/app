@@ -1,14 +1,12 @@
-//
-//  AppKitMinMaxSlider.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2026/01/20.
-//
-
 import AppKit
 import simd
 
 public final class AppKitMinMaxSlider: NSView, NSTextFieldDelegate {
+    private enum Endpoint {
+        case minimum
+        case maximum
+    }
+
     static let textFieldWidth: CGFloat = 60
     static let minimumWidth: CGFloat = textFieldWidth * 2 + 4
     private let minKnob: NSView
@@ -25,16 +23,12 @@ public final class AppKitMinMaxSlider: NSView, NSTextFieldDelegate {
     private let step: Float
     private var onEditingEnded: ((Float, Float) -> Void)?
 
-    private var isMinKnobDragging = false
-    private var isMaxKnobDragging = false
-
     private var minKnobCenterXConstraint: NSLayoutConstraint!
     private var maxKnobCenterXConstraint: NSLayoutConstraint!
     private var activeTrackLeadingConstraint: NSLayoutConstraint!
     private var activeTrackWidthConstraint: NSLayoutConstraint!
 
-    private var currentMinTextFieldValue: Float?
-    private var currentMaxTextFieldValue: Float?
+    private var valueBeforeTextEditing: Float?
     private var lastLayoutWidth: CGFloat = 0
     private var lastLayoutMinValue: Float = .nan
     private var lastLayoutMaxValue: Float = .nan
@@ -162,66 +156,65 @@ public final class AppKitMinMaxSlider: NSView, NSTextFieldDelegate {
     }
 
     private func setupGestures() {
-        let minGestureRecognizer = NSPanGestureRecognizer(target: self, action: #selector(handleMinKnobDrag(_:)))
-        let maxGestureRecognizer = NSPanGestureRecognizer(target: self, action: #selector(handleMaxKnobDrag(_:)))
+        addDragGesture(to: minKnob, action: #selector(handleMinKnobDrag(_:)))
+        addDragGesture(to: maxKnob, action: #selector(handleMaxKnobDrag(_:)))
+    }
 
-        let minTapArea = NSView(frame: .zero)
-        minTapArea.translatesAutoresizingMaskIntoConstraints = false
-        minTapArea.wantsLayer = true
-        minTapArea.layer?.backgroundColor = NSColor.clear.cgColor
-        addSubview(minTapArea)
+    private func addDragGesture(to knob: NSView, action: Selector) {
+        let tapArea = NSView(frame: .zero)
+        tapArea.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(tapArea)
         NSLayoutConstraint.activate([
-            minTapArea.centerYAnchor.constraint(equalTo: minKnob.centerYAnchor),
-            minTapArea.centerXAnchor.constraint(equalTo: minKnob.centerXAnchor),
-            minTapArea.widthAnchor.constraint(equalToConstant: 16),
-            minTapArea.heightAnchor.constraint(equalToConstant: 16)
+            tapArea.centerYAnchor.constraint(equalTo: knob.centerYAnchor),
+            tapArea.centerXAnchor.constraint(equalTo: knob.centerXAnchor),
+            tapArea.widthAnchor.constraint(equalToConstant: 16),
+            tapArea.heightAnchor.constraint(equalToConstant: 16)
         ])
-        minTapArea.addGestureRecognizer(minGestureRecognizer)
-
-        let maxTapArea = NSView(frame: .zero)
-        maxTapArea.translatesAutoresizingMaskIntoConstraints = false
-        maxTapArea.wantsLayer = true
-        maxTapArea.layer?.backgroundColor = NSColor.clear.cgColor
-        addSubview(maxTapArea)
-        NSLayoutConstraint.activate([
-            maxTapArea.centerYAnchor.constraint(equalTo: maxKnob.centerYAnchor),
-            maxTapArea.centerXAnchor.constraint(equalTo: maxKnob.centerXAnchor),
-            maxTapArea.widthAnchor.constraint(equalToConstant: 16),
-            maxTapArea.heightAnchor.constraint(equalToConstant: 16)
-        ])
-        maxTapArea.addGestureRecognizer(maxGestureRecognizer)
+        tapArea.addGestureRecognizer(NSPanGestureRecognizer(target: self, action: action))
     }
 
     @objc private func handleMinKnobDrag(_ gesture: NSPanGestureRecognizer) {
+        handleKnobDrag(gesture, endpoint: .minimum)
+    }
+
+    @objc private func handleMaxKnobDrag(_ gesture: NSPanGestureRecognizer) {
+        handleKnobDrag(gesture, endpoint: .maximum)
+    }
+
+    private func handleKnobDrag(_ gesture: NSPanGestureRecognizer, endpoint: Endpoint) {
         guard bounds.width > 0 else { return }
 
-        let translation = gesture.translation(in: self)
         let width = Float(bounds.width)
-        let knobHalfWidth: Float = 2
+        let knob = knob(for: endpoint)
 
         switch gesture.state {
         case .began:
-            isMinKnobDragging = true
-            minKnob.layer?.transform = CATransform3DMakeScale(1.5, 1.5, 1.0)
+            knob.layer?.transform = CATransform3DMakeScale(1.5, 1.5, 1.0)
 
         case .changed:
             let range = max - min
-            let currentMinOffset = ((minValue - min) / range) * width
-            let newMinOffset = Swift.max(0, Swift.min(currentMinOffset + Float(translation.x), width - knobHalfWidth * 2)) + knobHalfWidth
-            let normalizedX = (newMinOffset - knobHalfWidth) / width
+            let currentValue = value(for: endpoint)
+            let currentOffset = ((currentValue - min) / range) * width
+            let translatedOffset = currentOffset + Float(gesture.translation(in: self).x)
+            let offset = switch endpoint {
+            case .minimum:
+                simd_clamp(translatedOffset, 0, width - 4)
+            case .maximum:
+                simd_clamp(translatedOffset, 4, width)
+            }
+            let normalizedX = offset / width
             let scaledValue = normalizedX * range + min
             let clampedValue = simd_clamp(scaledValue, min, max)
             let steppedValue = (clampedValue / step).rounded() * step
 
-            if abs(minValue - steppedValue) >= step / 2 {
-                minValue = steppedValue
+            if abs(currentValue - steppedValue) >= step / 2 {
+                setValue(steppedValue, for: endpoint)
                 updateLayout()
             }
             gesture.setTranslation(.zero, in: self)
 
         case .ended, .cancelled:
-            isMinKnobDragging = false
-            minKnob.layer?.transform = CATransform3DIdentity
+            knob.layer?.transform = CATransform3DIdentity
             onEditingEnded?(minValue, maxValue)
 
         default:
@@ -229,40 +222,18 @@ public final class AppKitMinMaxSlider: NSView, NSTextFieldDelegate {
         }
     }
 
-    @objc private func handleMaxKnobDrag(_ gesture: NSPanGestureRecognizer) {
-        guard bounds.width > 0 else { return }
+    private func knob(for endpoint: Endpoint) -> NSView {
+        endpoint == .minimum ? minKnob : maxKnob
+    }
 
-        let translation = gesture.translation(in: self)
-        let width = Float(bounds.width)
-        let knobHalfWidth: Float = 2
+    private func value(for endpoint: Endpoint) -> Float {
+        endpoint == .minimum ? minValue : maxValue
+    }
 
-        switch gesture.state {
-        case .began:
-            isMaxKnobDragging = true
-            maxKnob.layer?.transform = CATransform3DMakeScale(1.5, 1.5, 1.0)
-
-        case .changed:
-            let range = max - min
-            let currentMaxOffset = ((maxValue - min) / range) * width
-            let newMaxOffset = Swift.max(knobHalfWidth * 2, Swift.min(currentMaxOffset + Float(translation.x), width)) - knobHalfWidth
-            let normalizedX = (newMaxOffset + knobHalfWidth) / width
-            let scaledValue = normalizedX * range + min
-            let clampedValue = simd_clamp(scaledValue, min, max)
-            let steppedValue = (clampedValue / step).rounded() * step
-
-            if abs(maxValue - steppedValue) >= step / 2 {
-                maxValue = steppedValue
-                updateLayout()
-            }
-            gesture.setTranslation(.zero, in: self)
-
-        case .ended, .cancelled:
-            isMaxKnobDragging = false
-            maxKnob.layer?.transform = CATransform3DIdentity
-            onEditingEnded?(minValue, maxValue)
-
-        default:
-            break
+    private func setValue(_ value: Float, for endpoint: Endpoint) {
+        switch endpoint {
+        case .minimum: minValue = value
+        case .maximum: maxValue = value
         }
     }
 
@@ -322,10 +293,6 @@ public final class AppKitMinMaxSlider: NSView, NSTextFieldDelegate {
         updateLayout()
     }
 
-    func update(minValue: Float, maxValue: Float) {
-        update(minValue: minValue, maxValue: maxValue, min: nil, max: nil)
-    }
-
     public override var intrinsicContentSize: NSSize {
         NSSize(width: Self.minimumWidth, height: NSView.noIntrinsicMetric)
     }
@@ -342,56 +309,39 @@ public final class AppKitMinMaxSlider: NSView, NSTextFieldDelegate {
 
 extension AppKitMinMaxSlider {
     public func controlTextDidBeginEditing(_ obj: Notification) {
-        guard let textField = obj.object as? NSTextField else { return }
-        if textField == minTextField {
-            currentMinTextFieldValue = minValue
-        } else if textField == maxTextField {
-            currentMaxTextFieldValue = maxValue
-        }
+        guard let textField = obj.object as? NSTextField,
+              let endpoint = endpoint(for: textField) else { return }
+        valueBeforeTextEditing = value(for: endpoint)
     }
 
     public func controlTextDidEndEditing(_ obj: Notification) {
-        guard let textField = obj.object as? NSTextField else { return }
+        guard let textField = obj.object as? NSTextField,
+              let endpoint = endpoint(for: textField) else { return }
 
-        if textField == minTextField {
-            guard let newValue = Float(userInput: textField.stringValue) else {
-                if let fallback = currentMinTextFieldValue {
-                    minValue = fallback
-                    minTextField.stringValue = formatValue(minValue)
-                    updateLayout()
-                }
-                currentMinTextFieldValue = nil
-                currentMaxTextFieldValue = nil
-                return
+        guard let newValue = Float(userInput: textField.stringValue) else {
+            if let valueBeforeTextEditing {
+                setValue(valueBeforeTextEditing, for: endpoint)
+                textField.stringValue = formatValue(valueBeforeTextEditing)
+                updateLayout()
             }
-            let clampedValue = simd_clamp(newValue, min, max)
-            minValue = clampedValue
-            minTextField.stringValue = formatValue(minValue)
-            updateLayout()
-            onEditingEnded?(minValue, maxValue)
-        } else if textField == maxTextField {
-            guard let newValue = Float(userInput: textField.stringValue) else {
-                if let fallback = currentMaxTextFieldValue {
-                    maxValue = fallback
-                    maxTextField.stringValue = formatValue(maxValue)
-                    updateLayout()
-                }
-                currentMinTextFieldValue = nil
-                currentMaxTextFieldValue = nil
-                return
-            }
-            let clampedValue = simd_clamp(newValue, min, max)
-            maxValue = clampedValue
-            maxTextField.stringValue = formatValue(maxValue)
-            updateLayout()
-            onEditingEnded?(minValue, maxValue)
+            valueBeforeTextEditing = nil
+            return
         }
 
-        currentMinTextFieldValue = nil
-        currentMaxTextFieldValue = nil
+        let clampedValue = simd_clamp(newValue, min, max)
+        setValue(clampedValue, for: endpoint)
+        textField.stringValue = formatValue(clampedValue)
+        updateLayout()
+        onEditingEnded?(minValue, maxValue)
+        valueBeforeTextEditing = nil
     }
 
-    public func controlTextDidChange(_ obj: Notification) {
+    private func endpoint(for textField: NSTextField) -> Endpoint? {
+        switch textField {
+        case minTextField: .minimum
+        case maxTextField: .maximum
+        default: nil
+        }
     }
 
     private func formatValue(_ value: Float) -> String {

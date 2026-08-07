@@ -1,5 +1,4 @@
 import SwiftUI
-import VCamData
 
 public struct ModalSheet<Content: View>: View {
     public init(

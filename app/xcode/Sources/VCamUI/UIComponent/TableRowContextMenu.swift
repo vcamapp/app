@@ -14,16 +14,4 @@ extension NSView {
             subview.assignContextMenu(menu)
         }
     }
-
-    /// The context menu of the enclosing table view, if any
-    var enclosingTableContextMenu: NSMenu? {
-        sequence(first: self, next: \.superview)
-            .lazy
-            .compactMap { ($0 as? NSTableView)?.menu }
-            .first
-    }
-
-    func popUpContextMenu(_ menu: NSMenu, with event: NSEvent) {
-        menu.popUp(positioning: nil, at: convert(event.locationInWindow, from: nil), in: self)
-    }
 }

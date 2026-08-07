@@ -371,13 +371,26 @@ extension ScreenRecorder: RenderTextureRenderer {
 }
 
 public extension ScreenRecorder {
-    // Use the main thread for size since the Unity side's Canvas size is required
-    @MainActor
-    static func create(id: String, screenCapture: VCamScene.ScreenCapture) async throws -> ScreenRecorder {
-        let availableContent = try await SCShareableContent.excludingDesktopWindows(
+    static func availableContent() async throws -> SCShareableContent {
+        try await SCShareableContent.excludingDesktopWindows(
             false,
             onScreenWindowsOnly: true
         )
+    }
+
+    // Use the main thread for size since the Unity side's Canvas size is required
+    @MainActor
+    static func create(id: String, screenCapture: VCamScene.ScreenCapture) async throws -> ScreenRecorder {
+        let availableContent = try await ScreenRecorder.availableContent()
+        return try await create(id: id, screenCapture: screenCapture, availableContent: availableContent)
+    }
+
+    @MainActor
+    static func create(
+        id: String,
+        screenCapture: VCamScene.ScreenCapture,
+        availableContent: SCShareableContent
+    ) async throws -> ScreenRecorder {
         uniDebugLog("ScreenRecorder.create: \(availableContent)")
         let configuration = CaptureConfiguration(
             captureType: .init(type: screenCapture.captureType),
@@ -396,10 +409,7 @@ public extension ScreenRecorder {
     static func audioOnly(output: @escaping (CMSampleBuffer) -> Void) -> ScreenRecorder {
         let audioCapture = ScreenRecorder()
         Task {
-            let availableContent = try await SCShareableContent.excludingDesktopWindows(
-                false,
-                onScreenWindowsOnly: true
-            )
+            let availableContent = try await ScreenRecorder.availableContent()
             let configuration = ScreenRecorder.CaptureConfiguration(
                 captureType: .display,
                 display: availableContent.displays.first, // If not set to display, sound will not be recorded.

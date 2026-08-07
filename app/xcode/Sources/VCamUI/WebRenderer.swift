@@ -242,31 +242,21 @@ private struct WebRendererInteractView: MacWindow {
 
     var body: some View {
         ModalSheet(doneTitle: String(localized: .done), done: close) {
-            NSViewRepresentableBuilder {
-                webView
-            }
+            WebViewContainer(webView: webView)
             .frame(width: size.width, height: size.height)
         }
     }
 }
 
-struct NSViewRepresentableBuilder<Content: NSView>: NSViewRepresentable {
-    init(content: @escaping () -> Content, update: ((Content, Context) -> Void)? = nil) {
-        self.content = content
-        self.update = update
+private struct WebViewContainer: NSViewRepresentable {
+    let webView: WKWebView
+
+    func makeNSView(context: Context) -> WKWebView {
+        webView
     }
 
-    let content: () -> Content
-    let update: ((Content, Context) -> Void)?
-
-    func makeNSView(context: Context) -> Content {
-        content()
+    func updateNSView(_ nsView: WKWebView, context: Context) {
     }
-
-    func updateNSView(_ nsView: Content, context: Context) {
-        update?(nsView, context)
-    }
-
 }
 
 @MainActor

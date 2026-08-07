@@ -56,7 +56,7 @@ public final class VCamShortcutManager {
     public func remove(_ shortcut: VCamShortcut) {
         do {
             try dataStore.remove(shortcut)
-            shortcuts.removeAll { $0.id == shortcut.id }
+            shortcuts.remove(byId: shortcut.id)
         } catch {
             showError(error)
         }

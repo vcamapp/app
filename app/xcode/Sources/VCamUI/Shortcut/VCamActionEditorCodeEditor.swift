@@ -1,5 +1,4 @@
 import SwiftUI
-import VCamEntity
 
 struct VCamActionEditorCodeEditor: View {
     let id: UUID

@@ -38,7 +38,7 @@ public final class ImportedMotionStore {
     }
 
     public func record(id: UUID) -> ImportedMotionRecord? {
-        records.first { $0.id == id }
+        records.find(byId: id)
     }
 
     public func fileURL(for record: ImportedMotionRecord) -> URL {
@@ -69,7 +69,7 @@ public final class ImportedMotionStore {
 
     public func addRecord(_ record: ImportedMotionRecord) throws {
         try update { records in
-            records.removeAll { $0.id == record.id }
+            records.remove(byId: record.id)
             records.append(record)
         }
     }
@@ -96,7 +96,7 @@ public final class ImportedMotionStore {
     public func remove(id: UUID) throws {
         guard let record = record(id: id) else { return }
         try update { records in
-            records.removeAll { $0.id == id }
+            records.remove(byId: id)
         }
         try? FileManager.default.removeItem(at: fileURL(for: record))
     }
@@ -122,7 +122,7 @@ public final class ImportedMotionStore {
 
     private func updateRecord(id: UUID, _ transform: (inout ImportedMotionRecord) -> Void) throws {
         try update { records in
-            guard let index = records.firstIndex(where: { $0.id == id }) else {
+            guard let index = records.index(ofId: id) else {
                 throw ImportedMotionStoreError.motionNotFound
             }
             transform(&records[index])

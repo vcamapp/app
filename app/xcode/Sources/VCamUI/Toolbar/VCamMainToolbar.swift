@@ -11,7 +11,6 @@ public struct VCamMainToolbar: View {
     @State private var isBlendShapePickerPopover = false
 
     @Environment(UniState.self) var uniState
-    @OpenEmojiPicker var openEmojiPicker
 
     public var body: some View {
         VStack(spacing: 2) {

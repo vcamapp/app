@@ -108,17 +108,6 @@ private struct UnityView: View {
     }
 }
 
-extension View {
-    @ViewBuilder
-    func glassEffectRegular(in shape: some Shape) -> some View {
-        if #available(macOS 26, *) {
-            glassEffect(.regular, in: shape)
-        } else {
-            self
-        }
-    }
-}
-
 extension UnityView: @MainActor Equatable {
     static func == (lhs: Self, rhs: Self) -> Bool {
         true
