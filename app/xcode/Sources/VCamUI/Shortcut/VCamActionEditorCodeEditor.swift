@@ -52,8 +52,6 @@ struct VCamActionEditorCodeEditor: View {
     }
 }
 
-struct VCamActionEditorCodeEditor_Previews: PreviewProvider {
-    static var previews: some View {
-        VCamActionEditorCodeEditor(id: UUID(), actionId: UUID(), name: "script.js")
-    }
+#Preview {
+    VCamActionEditorCodeEditor(id: UUID(), actionId: UUID(), name: "script.js")
 }

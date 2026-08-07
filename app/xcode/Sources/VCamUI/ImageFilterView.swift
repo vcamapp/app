@@ -171,10 +171,7 @@ struct ImageFilterParameterView: View {
     }
 }
 
-struct ImageFilterView_Previews: PreviewProvider {
-    static var previews: some View {
-        ImageFilterView(image: .init(), configuration: nil, close: {}) { filter in
-
-        }
+#Preview {
+    ImageFilterView(image: .init(), configuration: nil, close: {}) { _ in
     }
 }

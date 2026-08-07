@@ -33,8 +33,6 @@ private struct PickerItem<ID: Hashable>: Identifiable {
     let name: String
 }
 
-struct VCamActionEditorPicker_Previews: PreviewProvider {
-    static var previews: some View {
-        VCamActionEditorPicker(item: .constant(""), items: ["hello"], displayName: { $0 })
-    }
+#Preview {
+    VCamActionEditorPicker(item: .constant(""), items: ["hello"], displayName: { $0 })
 }

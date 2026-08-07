@@ -4,13 +4,11 @@ import VCamBridge
 import VCamData
 
 public struct VCamShortcutBuilderView: View {
-    public init(shortcut: Binding<VCamShortcut>) {
-        self._shortcut = State(initialValue: shortcut.wrappedValue)
-        self._sourceShortcut = shortcut
+    public init(shortcut: VCamShortcut) {
+        self._shortcut = State(initialValue: shortcut)
     }
 
     @State private var shortcut: VCamShortcut
-    @Binding var sourceShortcut: VCamShortcut
 
     public var body: some View {
         HSplitView {
@@ -75,7 +73,6 @@ public struct VCamShortcutBuilderView: View {
             .frame(minWidth: 180)
         }
         .onChange(of: shortcut) { _, newValue in
-            sourceShortcut = newValue
             VCamShortcutManager.shared.update(newValue)
         }
         .frame(minWidth: 540, minHeight: 200)
@@ -195,11 +192,9 @@ extension VCamShortcutBuilderView: MacWindow {
     }
 }
 
-struct VCamShortcutBuilderView_Previews: PreviewProvider {
-    static var previews: some View {
-        VCamShortcutBuilderView(shortcut: .constant(.create(configurations: [
-            .emoji(configuration: .default),
-            .appleScript(configuration: .default)
-        ])))
-    }
+#Preview {
+    VCamShortcutBuilderView(shortcut: .create(configurations: [
+        .emoji(configuration: .default),
+        .appleScript(configuration: .default)
+    ]))
 }

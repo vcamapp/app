@@ -9,8 +9,6 @@ struct VCamActionEditorTextField: View {
     }
 }
 
-struct VCamActionEditorTextField_Previews: PreviewProvider {
-    static var previews: some View {
-        VCamActionEditorTextField(value: .constant("hello"))
-    }
+#Preview {
+    VCamActionEditorTextField(value: .constant("hello"))
 }

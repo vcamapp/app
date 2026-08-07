@@ -29,6 +29,7 @@ public final class VCamMotionReceiver {
     public private(set) var motionProtocolVersion: VCamMotionProtocolVersion?
 
     @ObservationIgnored private var shouldAutoReconnect = true
+    @ObservationIgnored private var restartRetryTask: Task<Void, Never>?
     @ObservationIgnored private let timeoutWatchdog = DataTimeoutWatchdog(timeout: .seconds(2))
 
     public init() {}
@@ -117,6 +118,7 @@ public final class VCamMotionReceiver {
 
     public func stop() {
         shouldAutoReconnect = false
+        cancelRestartRetry()
         stopInternal()
     }
 
@@ -142,6 +144,7 @@ public final class VCamMotionReceiver {
     }
 
     private func restartIfNeeded() {
+        cancelRestartRetry()
         guard shouldAutoReconnect, let tracking, let settings else {
             stopInternal()
             return
@@ -150,7 +153,19 @@ public final class VCamMotionReceiver {
         do {
             try start(with: tracking, settings: settings)
         } catch {
+            // A failed restart leaves no listener or watchdog to trigger
+            // another reconnect, so retry after a delay.
             Logger.log("Restart failed: \(error.localizedDescription)")
+            restartRetryTask = Task { [weak self] in
+                try? await Task.sleep(for: .seconds(1))
+                guard !Task.isCancelled else { return }
+                self?.restartIfNeeded()
+            }
         }
+    }
+
+    private func cancelRestartRetry() {
+        restartRetryTask?.cancel()
+        restartRetryTask = nil
     }
 }

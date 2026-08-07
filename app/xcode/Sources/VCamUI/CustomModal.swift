@@ -3,15 +3,12 @@ import SwiftUI
 
 @MainActor
 public func showSheet<Content: View>(title: String, view: (@escaping () -> Void) -> Content) {
-    var panel: NSPanel?
-    panel = NSPanel(contentViewController: NSHostingController(rootView: view({
+    let panel = NSPanel()
+    panel.contentViewController = NSHostingController(rootView: view { [weak panel] in
         panel?.close()
-        panel = nil
-    })))
-    panel!.title = title
-    panel!.isReleasedWhenClosed = true
+    })
+    panel.title = title
+    panel.isReleasedWhenClosed = false
 
-    if let window = NSApp.vcamWindow {
-        window.beginSheet(panel!)
-    }
+    NSApp.vcamWindow?.beginSheet(panel)
 }

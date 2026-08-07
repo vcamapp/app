@@ -223,8 +223,6 @@ private struct ScalableViewModifierDemoView: View {
     }
 }
 
-struct ScalableViewModifierDemoView_Previews: PreviewProvider {
-    static var previews: some View {
-        ScalableViewModifierDemoView()
-    }
+#Preview {
+    ScalableViewModifierDemoView()
 }

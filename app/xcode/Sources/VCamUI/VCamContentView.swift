@@ -33,10 +33,8 @@ public struct VCamContentView: View {
     }
 }
 
-struct VCamUI_Preview: PreviewProvider {
-    static var previews: some View {
-        return VCamContentView()
-            .frame(width: 500, height: 300)
-            .background(Color.white)
-    }
+#Preview {
+    VCamContentView()
+        .frame(width: 500, height: 300)
+        .background(Color.white)
 }

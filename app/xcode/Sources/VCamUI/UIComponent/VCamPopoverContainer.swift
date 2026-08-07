@@ -73,10 +73,8 @@ public struct VCamPopoverContainerWithWindow<Content: MacWindow>: View {
     }
 }
 
-struct VCamMainToolbarContainer_Previews: PreviewProvider {
-    static var previews: some View {
-        VCamPopoverContainer("hello") {
-            Text(verbatim: "world")
-        }
+#Preview {
+    VCamPopoverContainer("hello") {
+        Text(verbatim: "world")
     }
 }

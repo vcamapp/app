@@ -19,8 +19,6 @@ struct VCamActionEditorEmojiPicker: View {
     }
 }
 
-struct VCamActionEditorEmojiPicker_Previews: PreviewProvider {
-    static var previews: some View {
-        VCamActionEditorEmojiPicker(emoji: .constant("😀"))
-    }
+#Preview {
+    VCamActionEditorEmojiPicker(emoji: .constant("😀"))
 }

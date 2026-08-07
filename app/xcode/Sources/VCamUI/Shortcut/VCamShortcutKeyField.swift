@@ -47,8 +47,6 @@ struct VCamShortcutKeyField: View {
     }
 }
 
-struct VCamShortcutKeyField_Previews: PreviewProvider {
-    static var previews: some View {
-        VCamShortcutKeyField(shortcutKey: .constant(VCamShortcut.ShortcutKey(character: "a", modifiers: 0)))
-    }
+#Preview {
+    VCamShortcutKeyField(shortcutKey: .constant(VCamShortcut.ShortcutKey(character: "a", modifiers: 0)))
 }

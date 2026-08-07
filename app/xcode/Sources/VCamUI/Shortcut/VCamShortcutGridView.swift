@@ -7,7 +7,7 @@ public struct VCamShortcutGridView: View {
         self.shortcutManager = shortcutManager
     }
 
-    @Bindable var shortcutManager = VCamShortcutManager.shared
+    let shortcutManager: VCamShortcutManager
 
     public var body: some View {
         GroupBox {
@@ -19,7 +19,7 @@ public struct VCamShortcutGridView: View {
 }
 
 private struct ShortcutGridContent: View {
-    @Bindable var shortcutManager: VCamShortcutManager
+    let shortcutManager: VCamShortcutManager
 
     @State private var dragging: VCamShortcut?
     @State private var runningShortcut: VCamShortcut?
@@ -32,13 +32,13 @@ private struct ShortcutGridContent: View {
                 LazyHGrid(rows: Array(repeating: .init(.fixed(36)), count: 1), spacing: 4) {
                     addButton
 
-                    ForEach($shortcutManager.shortcuts) { $shortcut in
+                    ForEach(shortcutManager.shortcuts) { shortcut in
                         let isRunning = runningShortcut == shortcut
 
                         FlatButton {
                             runShortcut(shortcut)
                         } doubleTapAction: {
-                            editShortcut($shortcut)
+                            editShortcut(shortcut)
                         } label: {
                             VStack(spacing: 2) {
                                 shortcut.icon
@@ -56,14 +56,14 @@ private struct ShortcutGridContent: View {
                         .flatButtonStyle(.filled())
                         .contextMenu {
                             Button {
-                                editShortcut($shortcut)
+                                editShortcut(shortcut)
                             } label: {
                                 Image(systemName: "pencil")
                                 Text(.edit)
                             }
                             Divider()
                             Button {
-                                VCamShortcutManager.shared.remove(shortcut)
+                                shortcutManager.remove(shortcut)
                             } label: {
                                 Image(systemName: "trash")
                                 Text(.delete)
@@ -99,11 +99,10 @@ private struct ShortcutGridContent: View {
 
     private func addShortcut() {
         Logger.log("")
-        shortcutManager.create()
-        editShortcut($shortcutManager.shortcuts[0])
+        editShortcut(shortcutManager.create())
     }
 
-    private func editShortcut(_ shortcut: Binding<VCamShortcut>) {
+    private func editShortcut(_ shortcut: VCamShortcut) {
         Logger.log("")
         MacWindowManager.shared.reopen(VCamShortcutBuilderView(shortcut: shortcut))
     }

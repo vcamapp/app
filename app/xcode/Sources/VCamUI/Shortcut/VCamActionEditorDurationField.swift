@@ -14,8 +14,6 @@ struct VCamActionEditorDurationField: View {
     }
 }
 
-struct VCamActionEditorNumberField_Previews: PreviewProvider {
-    static var previews: some View {
-        VCamActionEditorDurationField(value: .constant(100))
-    }
+#Preview {
+    VCamActionEditorDurationField(value: .constant(100))
 }

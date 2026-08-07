@@ -70,20 +70,19 @@ public extension EnvironmentValues {
     @Entry var flatButtonStyle = FlatButtonStyle()
 }
 
-struct FlatButton_Previews: PreviewProvider {
-    static var previews: some View {
-        FlatButton {
-        } label: {
-            Text(verbatim: "Hello")
-        }
-        .padding()
-
-        FlatButton {
-        } label: {
-            Text(verbatim: "Hello")
-        }
-        .flatButtonStyle(.filled())
-        .padding()
-        .previewDisplayName("filled")
+#Preview {
+    FlatButton {
+    } label: {
+        Text(verbatim: "Hello")
     }
+    .padding()
+}
+
+#Preview("filled") {
+    FlatButton {
+    } label: {
+        Text(verbatim: "Hello")
+    }
+    .flatButtonStyle(.filled())
+    .padding()
 }

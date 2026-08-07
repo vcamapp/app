@@ -118,9 +118,10 @@ private struct KeyCombinationView: View {
     }
 }
 
-struct KeyRecordingPopoverView_Previews: PreviewProvider {
-    static var previews: some View {
-        KeyRecordingPopoverView()
-        KeyRecordingPopoverView(keys: .init(key: "t", modifiers: [.control]), isCompleted: true)
-    }
+#Preview("Recording") {
+    KeyRecordingPopoverView()
+}
+
+#Preview("Completed") {
+    KeyRecordingPopoverView(keys: .init(key: "t", modifiers: [.control]), isCompleted: true)
 }
