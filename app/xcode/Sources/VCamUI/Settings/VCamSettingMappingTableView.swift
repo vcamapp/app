@@ -919,11 +919,15 @@ private final class FilterCell: NSView {
         smoothSlider.action = #selector(smoothSliderChanged)
         smoothSlider.isContinuous = true
         smoothSlider.controlSize = .mini
+        smoothSlider.minValue = 0
+        smoothSlider.maxValue = 100
 
         responseSlider.target = self
         responseSlider.action = #selector(responseSliderChanged)
         responseSlider.isContinuous = true
         responseSlider.controlSize = .mini
+        responseSlider.minValue = 0
+        responseSlider.maxValue = 100
 
         smoothLabel.font = .systemFont(ofSize: 10)
         smoothLabel.textColor = .secondaryLabelColor
@@ -995,11 +999,8 @@ private final class FilterCell: NSView {
 
     @objc private func filterToggleChanged() {
         if filterToggle.state == .on {
-            if case .oneEuro = currentFilter {
-            } else if case .oneEuro = lastOneEuro {
+            if case .none = currentFilter {
                 currentFilter = lastOneEuro
-            } else {
-                currentFilter = .defaultOneEuro
             }
         } else {
             if case .oneEuro = currentFilter {
@@ -1038,12 +1039,6 @@ private final class FilterCell: NSView {
         switch currentFilter {
         case .none:
             parameterStack.isHidden = true
-            smoothLabel.isHidden = true
-            smoothSlider.isHidden = true
-            smoothValueLabel.isHidden = true
-            responseLabel.isHidden = true
-            responseSlider.isHidden = true
-            responseValueLabel.isHidden = true
 
         case .oneEuro(let minCutoff, let beta):
             parameterStack.isHidden = false
@@ -1051,22 +1046,12 @@ private final class FilterCell: NSView {
             let responsePercent = percentFromUnit(beta)
 
             smoothLabel.stringValue = String(localized: .trackingFilterSmooth)
-            smoothLabel.isHidden = false
-            smoothSlider.minValue = 0
-            smoothSlider.maxValue = 100
             smoothSlider.doubleValue = Double(smoothPercent)
-            smoothSlider.isHidden = false
             smoothValueLabel.stringValue = formatPercent(smoothPercent)
-            smoothValueLabel.isHidden = false
 
             responseLabel.stringValue = String(localized: .trackingFilterResponse)
-            responseLabel.isHidden = false
-            responseSlider.minValue = 0
-            responseSlider.maxValue = 100
             responseSlider.doubleValue = Double(responsePercent)
-            responseSlider.isHidden = false
             responseValueLabel.stringValue = formatPercent(responsePercent)
-            responseValueLabel.isHidden = false
         }
     }
 

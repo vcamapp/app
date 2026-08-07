@@ -15,7 +15,8 @@ public func showScreenRecorderPreferenceView(capture: @escaping (ScreenRecorder)
 
 public struct ScreenRecorderPreferenceView: View {
     @State private var screenRecorder = ScreenRecorder()
-    @State private var availableContent: SCShareableContent?
+    @State private var displays: [SCDisplay] = []
+    @State private var windows: [SCWindow] = []
     @State private var captureConfig = ScreenRecorder.CaptureConfiguration()
     @State private var error: (any Error)?
     @State private var timer: (any Cancellable)?
@@ -24,15 +25,6 @@ public struct ScreenRecorderPreferenceView: View {
 
     let close: () -> Void
     let capture: (ScreenRecorder) -> Void
-
-    var filteredWindows: [SCWindow]? {
-        availableContent?.windows.sorted {
-            $0.owningApplication?.applicationName ?? "" < $1.owningApplication?.applicationName ?? ""
-        }
-        .filter {
-            $0.owningApplication != nil && $0.owningApplication?.applicationName != ""
-        }
-    }
 
     public var body: some View {
         ModalSheet(doneTitle: String(localized: .addScreenCapture), doneDisabled: !screenRecorder.isRecording) {
@@ -45,8 +37,8 @@ public struct ScreenRecorderPreferenceView: View {
         } content: {
             ScrollView {
                 ScreenRecorderConfigForm(captureConfig: $captureConfig,
-                                         displays: availableContent?.displays ?? [],
-                                         windows: filteredWindows ?? [])
+                                         displays: displays,
+                                         windows: windows)
 
                 if let error = screenRecorder.error {
                     Text(error.localizedDescription)
@@ -64,9 +56,11 @@ public struct ScreenRecorderPreferenceView: View {
                     .foregroundStyle(.red)
                 }
 
-                if let frame = screenRecorder.latestFrame {
-                    ScreenRecorderCapturePreview(frame: frame, cropRect: $cropRect, cropPreviewWidth: $cropPreviewWidth)
-                }
+                ScreenRecorderCapturePreviewContainer(
+                    screenRecorder: screenRecorder,
+                    cropRect: $cropRect,
+                    cropPreviewWidth: $cropPreviewWidth
+                )
             }
             .onAppear {
                 timer = RunLoop.current.schedule(after: .init(.now),
@@ -96,16 +90,24 @@ public struct ScreenRecorderPreferenceView: View {
     private func refreshAvailableContent() {
         Task {
             do {
-                availableContent = try await SCShareableContent.excludingDesktopWindows(false,
-                                                                                        onScreenWindowsOnly: true)
+                let availableContent = try await SCShareableContent.excludingDesktopWindows(
+                    false,
+                    onScreenWindowsOnly: true
+                )
+                displays = availableContent.displays
+                windows = availableContent.windows
+                    .filter { $0.owningApplication?.applicationName.isEmpty == false }
+                    .sorted {
+                        $0.owningApplication?.applicationName ?? "" < $1.owningApplication?.applicationName ?? ""
+                    }
 
                 let isFirstTime = captureConfig.display == nil && captureConfig.window == nil
                 if captureConfig.display == nil {
-                    captureConfig.display = availableContent?.displays.first
+                    captureConfig.display = displays.first
                 }
 
                 if captureConfig.window == nil {
-                    captureConfig.window = availableContent?.windows.first
+                    captureConfig.window = windows.first
                 }
 
                 if isFirstTime {
@@ -121,6 +123,22 @@ public struct ScreenRecorderPreferenceView: View {
         close()
         timer?.cancel()
         timer = nil
+    }
+}
+
+private struct ScreenRecorderCapturePreviewContainer: View {
+    let screenRecorder: ScreenRecorder
+    @Binding var cropRect: CGRect
+    @Binding var cropPreviewWidth: CGFloat
+
+    var body: some View {
+        if let frame = screenRecorder.latestFrame {
+            ScreenRecorderCapturePreview(
+                frame: frame,
+                cropRect: $cropRect,
+                cropPreviewWidth: $cropPreviewWidth
+            )
+        }
     }
 }
 

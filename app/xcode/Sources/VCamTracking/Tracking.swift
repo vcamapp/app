@@ -22,6 +22,8 @@ public final class Tracking {
     @ObservationIgnored public private(set) var useEyeTracking = false
     @ObservationIgnored public private(set) var useVowelEstimation = false
 
+    public private(set) var usesAlternativeHandTracking = false
+
     public var mappings = TrackingMappings()
 
     public let webCamera = AvatarWebCamera()
@@ -207,6 +209,11 @@ public final class Tracking {
         } else {
             setHandAndFingerTrackingMethods(hand: method, finger: fingerTrackingMethod)
         }
+    }
+
+    public func setAlternativeHandTrackingEnabled(_ isEnabled: Bool) {
+        usesAlternativeHandTracking = isEnabled
+        webCamera.setAlternativeHandTrackingEnabled(isEnabled)
     }
 
     public func setFingerTrackingMethod(_ method: TrackingMethod.Finger) {

@@ -19,7 +19,7 @@ public final class ModelManager {
 
     #if DEBUG
     public init(models: [Models.Model], lastLoadedModelId: UUID? = nil) {
-        self.modelItems = models.map { ModelItem(model: $0, status: .valid, thumbnail: $0.loadThumbnail()?.pngData()) }
+        self.modelItems = models.map { ModelItem(model: $0, status: .valid, thumbnail: $0.loadThumbnailData()) }
         self.lastLoadedModelId = lastLoadedModelId
     }
     #endif
@@ -153,14 +153,13 @@ public final class ModelManager {
         loadMissingThumbnails()
     }
 
-    /// Thumbnail decoding is the heavy part of startup, so run it off the main actor
-    /// and fill in the items as the results arrive.
+    /// Thumbnail file I/O runs off the main actor and fills in items as results arrive.
     private func loadMissingThumbnails() {
         let models = modelItems.filter { $0.thumbnail == nil }.map(\.model)
         guard !models.isEmpty else { return }
         Task {
             let thumbnails = await Task.detached(priority: .utility) {
-                models.map { ($0.id, $0.loadThumbnail()?.pngData()) }
+                models.map { ($0.id, $0.loadThumbnailData()) }
             }.value
             for (id, thumbnail) in thumbnails {
                 guard let thumbnail, let index = modelItems.firstIndex(where: { $0.id == id }) else { continue }
@@ -200,7 +199,7 @@ public final class ModelManager {
     }
 
     private func addModel(_ model: Models.Model) throws -> ModelItem {
-        let item = ModelItem(model: model, status: .valid, thumbnail: model.loadThumbnail()?.pngData())
+        let item = ModelItem(model: model, status: .valid, thumbnail: model.loadThumbnailData())
         guard !modelItems.contains(where: { $0.id == model.id }) else { return item }
         try commit { items, _ in
             items.insert(item, at: 0)

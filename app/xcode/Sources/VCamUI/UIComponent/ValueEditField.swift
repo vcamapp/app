@@ -34,7 +34,7 @@ public struct ValueEditField<ValueLabel: View>: View {
             case let .slider(range, onEditingChanged):
                 Slider(value: $value, in: range, onEditingChanged: onEditingChanged)
             case .stepper:
-                TextField(value: $value, formatter: NumberFormatter()) { EmptyView() }
+                TextField(value: $value, format: FloatingPointFormatStyle<CGFloat>()) { EmptyView() }
                     .textFieldStyle(.roundedBorder)
             }
         }

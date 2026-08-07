@@ -8,8 +8,7 @@ import Synchronization
 @Observable
 @MainActor
 public final class FacialMocapReceiver {
-    @ObservationIgnored private var listener: NWListener?
-    @ObservationIgnored private var connection: NWConnection?
+    @ObservationIgnored private let session = UDPDatagramSession()
     @ObservationIgnored private var facialMocapLastValues: [Float] = Array(repeating: 0, count: 12)
     @ObservationIgnored private var blendShapeResampler: TrackingResampler
     @ObservationIgnored private var perfectSyncResampler: TrackingResampler
@@ -69,16 +68,7 @@ public final class FacialMocapReceiver {
         timeoutWatchdogTask?.cancel()
         timeoutWatchdogTask = nil
 
-        if let listener = listener {
-            listener.stateUpdateHandler = nil
-            listener.newConnectionHandler = nil
-            listener.cancel()
-            self.listener = nil
-        }
-
-        connection?.stateUpdateHandler = nil
-        connection?.cancel()
-        connection = nil
+        session.stop()
         connectionStatus = .disconnected
 
         stopResamplers()
@@ -150,90 +140,36 @@ public final class FacialMocapReceiver {
     }
 }
 
-private extension NWConnection {
-    func receiveData(with oniFacialMocapReceived: @escaping @Sendable (FacialMocapData) -> Void) {
-        receive(minimumIncompleteLength: 1, maximumLength: 8192) { [weak self] content, _, _, error in
-            // A failed or cancelled connection must not re-arm the receive;
-            // it would spin against a dead connection.
-            guard let self, error == nil else { return }
-            if let content,
-               let rawData = String(data: content, encoding: .utf8),
-               let mocapData = FacialMocapData(rawData: rawData) {
-                oniFacialMocapReceived(mocapData)
-            }
-            self.receiveData(with: oniFacialMocapReceived)
-        }
-    }
-}
-
 extension FacialMocapReceiver {
     private func startServer() throws {
-        connectionStatus = .connecting
-
-        let parameters = NWParameters.udp
-        parameters.allowLocalEndpointReuse = true
-
-        let listener = try NWListener(using: parameters, on: Self.port)
-        self.listener = listener
-
-        listener.stateUpdateHandler = { [weak self, weak listener] newState in
-            switch newState {
-            case .failed(let error):
-                Logger.log("Listener failed: \(error.localizedDescription)")
-            case .cancelled:
-                Logger.log("Listener cancelled")
-            default:
-                return
-            }
-            Task { @MainActor in
-                guard let self, let listener, self.listener === listener else { return }
-                await self.restartIfNeeded()
-            }
-        }
-        listener.newConnectionHandler = { [weak self] connection in
-            Task { @MainActor in
+        try session.start(
+            on: Self.port,
+            queue: Self.queue,
+            onEnded: { [weak self] in
+                Task {
+                    await self?.restartIfNeeded()
+                }
+            },
+            onConnectionStarted: { [weak self] in
                 guard let self else { return }
-                // Cancel the stale connection so its late .failed/.cancelled
-                // cannot restart the listener under the new one.
-                self.connection?.stateUpdateHandler = nil
-                self.connection?.cancel()
-                self.connection = connection
                 self.lastDataReceivedAt = .now
                 self.startTimeoutWatchdog()
-                connection.stateUpdateHandler = { [weak self, weak connection] state in
-                    Task { @MainActor in
-                        guard let self, let connection, self.connection === connection else { return }
-                        switch state {
-                        case .setup, .preparing: ()
-                        case .waiting(let error):
-                            Logger.log("Connection waiting: \(error.localizedDescription)")
-                        case .ready:
-                            Logger.log("Connection ready")
-                            self.connectionStatus = .connected
-                            self.lastDataReceivedAt = .now
-                            self.startTimeoutWatchdog()
-                            connection.receiveData { [weak self, weak connection] data in
-                                Task { @MainActor in
-                                    guard let self, let connection, self.connection === connection else { return }
-                                    self.lastDataReceivedAt = .now
-                                    self.oniFacialMocapReceived(data)
-                                }
-                            }
-                        case .cancelled:
-                            Logger.log("Connection cancelled")
-                            await self.restartIfNeeded()
-                        case .failed(let error):
-                            Logger.log("Connection failed: \(error.localizedDescription)")
-                            await self.restartIfNeeded()
-                        @unknown default: ()
-                        }
-                    }
-                }
-
-                connection.start(queue: Self.queue)
+            },
+            onReady: { [weak self] in
+                guard let self else { return }
+                self.connectionStatus = .connected
+                self.lastDataReceivedAt = .now
+                self.startTimeoutWatchdog()
+            },
+            onData: { [weak self] data in
+                guard let self,
+                      let rawData = String(data: data, encoding: .utf8),
+                      let mocapData = FacialMocapData(rawData: rawData) else { return }
+                self.lastDataReceivedAt = .now
+                self.oniFacialMocapReceived(mocapData)
             }
-        }
-        listener.start(queue: Self.queue)
+        )
+        connectionStatus = .connecting
     }
 }
 

@@ -20,8 +20,7 @@ public enum VCamMotionProtocolVersion: Equatable, Sendable {
 @MainActor
 public final class VCamMotionReceiver {
     private static let queue = DispatchQueue(label: "com.github.tattn.vcam.vcammotionreceiver")
-    @ObservationIgnored private var listener: NWListener?
-    @ObservationIgnored private var connection: NWConnection?
+    @ObservationIgnored private let session = UDPDatagramSession()
     @ObservationIgnored private weak var tracking: VCamMotionTracking?
     @ObservationIgnored private var settings: (@MainActor () -> VCamMotionTrackingSettings)?
     @ObservationIgnored private var motionV1Receiver: MotionV1Receiver?
@@ -40,91 +39,54 @@ public final class VCamMotionReceiver {
     /// Throws only when the listener cannot be created. Failures after
     /// startup are handled by the state handlers, which restart the listener.
     func start(with tracking: VCamMotionTracking, settings: @escaping @MainActor () -> VCamMotionTrackingSettings) throws {
-        guard listener == nil else { return }
-
-        let parameters = NWParameters.udp
-        parameters.allowLocalEndpointReuse = true
+        guard !session.isRunning else { return }
 
 #if FEATURE_3
-        let listener = try NWListener(using: parameters, on: 34962)
+        let port = NWEndpoint.Port(integerLiteral: 34962)
 #else
-        let listener = try NWListener(using: parameters, on: 34963)
+        let port = NWEndpoint.Port(integerLiteral: 34963)
 #endif
 
-        // Mutate the state only after the listener is created, so a failed start
-        // (e.g. the port is already in use) doesn't leave the status stuck at .connecting
-        self.tracking = tracking
-        self.settings = settings
-        motionV1Receiver = MotionV1Receiver(
+        let service: NWListener.Service
+        if #available(macOS 26.0, *) {
+            service = .init(
+                type: "_vcammocap._udp",
+                domain: "local",
+                txtRecord: .init([MotionPacketV1Constants.motionProtocolsTXTRecordKey: "0,1"])
+            )
+        } else {
+            service = .init(type: "_vcammocap._udp", domain: "local")
+        }
+
+        let motionV1Receiver = MotionV1Receiver(
             onFace: { [weak tracking] data in tracking?.applyFace(data, settings: settings()) },
             onHands: { [weak tracking] data in tracking?.applyHandsV1(data, settings: settings()) }
         )
+        try session.start(
+            on: port,
+            service: service,
+            queue: Self.queue,
+            onEnded: { [weak self] in
+                self?.restartIfNeeded()
+            },
+            onConnectionStarted: { [weak self] in
+                self?.motionV1Receiver?.resetForNewConnection()
+            },
+            onReady: { [weak self] in
+                guard let self else { return }
+                self.connectionStatus = .connected
+                self.lastDataReceivedAt = .now
+                self.startTimeoutWatchdog()
+            },
+            onData: { [weak self] data in
+                self?.handleData(data)
+            }
+        )
+        self.tracking = tracking
+        self.settings = settings
+        self.motionV1Receiver = motionV1Receiver
         shouldAutoReconnect = true
         connectionStatus = .connecting
-        if #available(macOS 26.0, *) {
-            listener.service = .init(type: "_vcammocap._udp", domain: "local",
-                                      txtRecord: .init([MotionPacketV1Constants.motionProtocolsTXTRecordKey: "0,1"]))
-        } else {
-            listener.service = .init(type: "_vcammocap._udp", domain: "local")
-        }
-        self.listener = listener
-
-        listener.stateUpdateHandler = { [weak self, weak listener] newState in
-            switch newState {
-            case .failed(let error):
-                Logger.log("Listener failed: \(error.localizedDescription)")
-            case .cancelled:
-                Logger.log("Listener cancelled")
-            default:
-                return
-            }
-            Task { @MainActor in
-                guard let self, let listener, self.listener === listener else { return }
-                self.restartIfNeeded()
-            }
-        }
-        listener.newConnectionHandler = { [weak self] connection in
-            Task { @MainActor in
-                guard let self else { return }
-                // Cancel the stale connection so its late .failed/.cancelled
-                // cannot restart the listener under the new one.
-                self.connection?.stateUpdateHandler = nil
-                self.connection?.cancel()
-                self.connection = connection
-                self.motionV1Receiver?.resetForNewConnection()
-                connection.stateUpdateHandler = { [weak self, weak connection] state in
-                     Task { @MainActor in
-                        guard let self, let connection, self.connection === connection else { return }
-                        switch state {
-                        case .setup, .preparing: ()
-                        case .waiting(let error):
-                            Logger.log("Connection waiting: \(error.localizedDescription)")
-                        case .ready:
-                            Logger.log("Connection ready")
-                            self.connectionStatus = .connected
-                            self.lastDataReceivedAt = .now
-                            self.startTimeoutWatchdog()
-                            connection.receiveData { [weak self, weak connection] data in
-                                Task { @MainActor in
-                                    guard let self, let connection, self.connection === connection else { return }
-                                    self.handleData(data)
-                                }
-                            }
-                        case .cancelled:
-                            Logger.log("Connection cancelled")
-                            self.restartIfNeeded()
-                        case .failed(let error):
-                            Logger.log("Connection failed: \(error.localizedDescription)")
-                            self.restartIfNeeded()
-                        @unknown default: ()
-                        }
-                    }
-                }
-
-                connection.start(queue: Self.queue)
-            }
-        }
-        listener.start(queue: Self.queue)
     }
 
     private func handleData(_ data: Data) {
@@ -166,16 +128,7 @@ public final class VCamMotionReceiver {
         timeoutWatchdogTask?.cancel()
         timeoutWatchdogTask = nil
 
-        if let listener = listener {
-            listener.stateUpdateHandler = nil
-            listener.newConnectionHandler = nil
-            listener.cancel()
-            self.listener = nil
-        }
-
-        connection?.stateUpdateHandler = nil
-        connection?.cancel()
-        connection = nil
+        session.stop()
         motionV1Receiver = nil
         motionProtocolVersion = nil
         connectionStatus = .disconnected
@@ -210,20 +163,6 @@ public final class VCamMotionReceiver {
             try start(with: tracking, settings: settings)
         } catch {
             Logger.log("Restart failed: \(error.localizedDescription)")
-        }
-    }
-}
-
-private extension NWConnection {
-    func receiveData(with dataHandler: @escaping @Sendable (Data) -> Void) {
-        receive(minimumIncompleteLength: 1, maximumLength: 8192) { [weak self] content, _, _, error in
-            // A failed or cancelled connection must not re-arm the receive;
-            // it would spin against a dead connection.
-            guard let self, error == nil else { return }
-            if let content, !content.isEmpty {
-                dataHandler(content)
-            }
-            self.receiveData(with: dataHandler)
         }
     }
 }

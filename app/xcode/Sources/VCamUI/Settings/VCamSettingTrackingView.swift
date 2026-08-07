@@ -73,9 +73,11 @@ public struct VCamSettingTrackingView: View {
                 .opacity(useEyeTracking ? 1.0 : 0.5)
             }
 #if FEATURE_3
-            Section {
-                ValueEditField(.easeOfOpeningFingers, value: $fingerTrackingOpenIntensity.map(), type: .slider(0.1...3))
-                ValueEditField(.easeOfCloseFingers, value: $fingerTrackingCloseIntensity.map(), type: .slider(0.1...3))
+            if !Tracking.shared.usesAlternativeHandTracking {
+                Section {
+                    ValueEditField(.easeOfOpeningFingers, value: $fingerTrackingOpenIntensity.map(), type: .slider(0.1...3))
+                    ValueEditField(.easeOfCloseFingers, value: $fingerTrackingCloseIntensity.map(), type: .slider(0.1...3))
+                }
             }
 #endif
         }

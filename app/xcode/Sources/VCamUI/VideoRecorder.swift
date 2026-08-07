@@ -7,7 +7,7 @@ import VCamMedia
 import VCamTracking
 import VCamLogger
 
-public enum RecordingState {
+public enum RecordingState: Equatable {
     case idle
     case preparing
     case recording
@@ -37,8 +37,7 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
 
     public private(set) var state: RecordingState = .idle
     public var isRecording: Bool {
-        if case .recording = state { return true }
-        return false
+        state == .recording
     }
 
     @ObservationIgnored private var assetwriter: AVAssetWriter?

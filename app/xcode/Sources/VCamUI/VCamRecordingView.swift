@@ -143,15 +143,7 @@ private struct RecordVideoView: View {
                         }
                     }
                     .controlSize(.large)
-                    .disabled({
-                        if case .preparing = recorder.state {
-                            return true
-                        }
-                        if case .finishing = recorder.state {
-                            return true
-                        }
-                        return false
-                    }())
+                    .disabled(recorder.state == .preparing || recorder.state == .finishing)
                     .accessibilityIdentifier("recording.startButton")
                     Spacer()
                     Picker(selection: $recordingVideoFormat) {

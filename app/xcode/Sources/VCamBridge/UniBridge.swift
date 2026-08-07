@@ -74,11 +74,10 @@ public final class UniBridge {
         case useCombineMesh = 3
         case useAddToMacOSMenuBar = 4
         case useVSync = 5
-        case useNewTracking = 6
-        case useBlinker = 7
-        case useFullTracking = 8
-        case lipSyncWebCam = 9
-        case hasPerfectSyncBlendShape = 10
+        case useBlinker = 6
+        case useFullTracking = 7
+        case lipSyncWebCam = 8
+        case hasPerfectSyncBlendShape = 9
     }
     public let boolMapper = ValueBinding<Bool, BoolType>()
     public private(set) lazy var useAutoMode = boolMapper.set(.useAutoMode)
@@ -87,7 +86,6 @@ public final class UniBridge {
     public private(set) lazy var useCombineMesh = boolMapper.set(.useCombineMesh)
     public private(set) lazy var useAddToMacOSMenuBar = boolMapper.set(.useAddToMacOSMenuBar)
     public private(set) lazy var useVSync = boolMapper.set(.useVSync)
-    public private(set) lazy var useNewTracking = boolMapper.set(.useNewTracking)
     public private(set) lazy var useBlinker = boolMapper.set(.useBlinker)
     public private(set) lazy var useFullTracking = boolMapper.set(.useFullTracking)
     public private(set) lazy var lipSyncWebCam = boolMapper.set(.lipSyncWebCam)

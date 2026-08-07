@@ -1,4 +1,4 @@
-import AppKit
+import Foundation
 import VCamEntity
 
 public struct Models: Codable, Sendable {
@@ -81,7 +81,7 @@ extension Models.Model {
         rootURL.appending(path: Self.thumbnailFileName)
     }
 
-    public func loadThumbnail() -> NSImage? {
-        NSImage(contentsOfFile: thumbnailURL.path)
+    public func loadThumbnailData() -> Data? {
+        try? Data(contentsOf: thumbnailURL)
     }
 }
