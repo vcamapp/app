@@ -140,9 +140,7 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
 
         if capturesSystemAudio {
             systemAudioRecorder = ScreenRecorder.audioOnly { buffer in
-                Task {
-                    await Self.shared.renderPCAudioFrame(buffer)
-                }
+                Self.shared.renderPCAudioFrame(buffer)
             }
         }
 
@@ -301,7 +299,7 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
         }
     }
 
-    func renderPCAudioFrame(_ sampleBuffer: CMSampleBuffer) async {
+    func renderPCAudioFrame(_ sampleBuffer: CMSampleBuffer) {
         guard case .recording = state, frameCount > 0,
                 let formatDescription = sampleBuffer.formatDescription,
               let sampleRate = (formatDescription.audioStreamBasicDescription?.mSampleRate).flatMap(TimeInterval.init),

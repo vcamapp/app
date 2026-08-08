@@ -240,21 +240,6 @@ extension AudioDevice {
 }
 
 extension AudioUnit {
-    public func getDeviceId() -> AudioDeviceID {
-        var outputID: AudioDeviceID = 0
-        var propsize = UInt32(MemoryLayout<AudioDeviceID>.size)
-        let error = AudioUnitGetProperty(self,
-                                         kAudioOutputUnitProperty_CurrentDevice,
-                                         kAudioUnitScope_Global,
-                                         0,
-                                         &outputID,
-                                         &propsize)
-        if error != noErr {
-            Logger.log("getDeviceID error: \(error)")
-        }
-        return outputID
-    }
-
     public func set(_ device: AudioDevice) {
         // https://www.hackingwithswift.com/forums/macos/how-do-you-specify-the-audio-output-device-on-a-mac-in-swift/13177
         var inputDeviceID = device.id

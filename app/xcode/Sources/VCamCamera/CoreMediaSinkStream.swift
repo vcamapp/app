@@ -46,7 +46,7 @@ public final class CoreMediaSinkStream: NSObject {
         }
         self.deviceId = deviceId
         self.streamId = streamId
-        queue = createQueue(deviceId: deviceId, streamId: streamId)
+        queue = createQueue(streamId: streamId)
 
         CMIOObjectGetPropertyDataSize(deviceId, &scntAddress, 0, nil, &scntDataSize)
 
@@ -262,7 +262,7 @@ public final class CoreMediaSinkStream: NSObject {
         }
     }
 
-    private func createQueue(deviceId: CMIOObjectID, streamId: CMIOStreamID) -> CMSimpleQueue? {
+    private func createQueue(streamId: CMIOStreamID) -> CMSimpleQueue? {
         var status: OSStatus = 0
 
         let queuePointer = UnsafeMutablePointer<Unmanaged<CMSimpleQueue>?>.allocate(capacity: 1)

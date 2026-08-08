@@ -672,14 +672,8 @@ private final class InputCell: NSView {
             self.onRangeChanged?(self.row, min, max)
         }
 
-        rangeControl.translatesAutoresizingMaskIntoConstraints = false
         addSubview(rangeControl)
-        NSLayoutConstraint.activate([
-            rangeControl.leadingAnchor.constraint(equalTo: leadingAnchor),
-            rangeControl.trailingAnchor.constraint(equalTo: trailingAnchor),
-            rangeControl.topAnchor.constraint(equalTo: topAnchor),
-            rangeControl.bottomAnchor.constraint(equalTo: bottomAnchor)
-        ])
+        rangeControl.fillToParent(self)
     }
 
     required init?(coder: NSCoder) {
@@ -775,14 +769,8 @@ private final class OutputCell: NSView {
             textField.delegate = self
         }
 
-        rangeControl.translatesAutoresizingMaskIntoConstraints = false
         addSubview(rangeControl)
-        NSLayoutConstraint.activate([
-            rangeControl.leadingAnchor.constraint(equalTo: leadingAnchor),
-            rangeControl.trailingAnchor.constraint(equalTo: trailingAnchor),
-            rangeControl.topAnchor.constraint(equalTo: topAnchor),
-            rangeControl.bottomAnchor.constraint(equalTo: bottomAnchor)
-        ])
+        rangeControl.fillToParent(self)
     }
 
     required init?(coder: NSCoder) {

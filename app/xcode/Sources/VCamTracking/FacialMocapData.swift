@@ -32,30 +32,29 @@ public extension FacialMocapData {
         "noseSneer_R", "tongueOut",
     ]
 
+    // This runs for every UDP packet, so parse with substrings and
+    // write into BlendShape directly instead of building interim collections
+    private static let blendShapeKeyPaths: [Substring: WritableKeyPath<BlendShape, Float> & Sendable] = {
+        assert(rawBlendShapeNames.count == BlendShape.wireOrder.count)
+        return Dictionary(uniqueKeysWithValues: zip(rawBlendShapeNames.map { $0[...] }, BlendShape.wireOrder))
+    }()
+
     init?(rawData: String) {
-        let blendShapeAndTransformRawData = rawData.components(separatedBy: "=")
+        let blendShapeAndTransformRawData = rawData.split(separator: "=", omittingEmptySubsequences: false)
         guard blendShapeAndTransformRawData.count == 2 else {
             return nil
         }
-        let blendShapeRawData = blendShapeAndTransformRawData[0]
-        let transformRawData = blendShapeAndTransformRawData[1]
 
-        var blendShapes: [String: Float] = [:]
-
-        for blendShape in blendShapeRawData.components(separatedBy: "|").filter({ !$0.isEmpty }) {
-            let blendShapeAndValue = blendShape.components(separatedBy: "&")
-            guard blendShapeAndValue.count == 2, let value = Int(blendShapeAndValue[1]) else {
-                return nil
+        var transforms: [Float] = []
+        transforms.reserveCapacity(12)
+        for transform in blendShapeAndTransformRawData[1].split(separator: "|") {
+            let values = transform.lastIndex(of: "#").map { transform[transform.index(after: $0)...] } ?? transform
+            for value in values.split(separator: ",") {
+                if let float = Float(value) {
+                    transforms.append(float)
+                }
             }
-            blendShapes[blendShapeAndValue[0]] = Float(value) / 100
         }
-
-        let transforms: [Float] = transformRawData
-            .components(separatedBy: "|")
-            .filter { !$0.isEmpty }
-            .flatMap {
-                $0.components(separatedBy: "#").last?.components(separatedBy: ",").compactMap(Float.init) ?? []
-            }
 
         guard transforms.count == 12 else {
             return nil
@@ -66,10 +65,15 @@ public extension FacialMocapData {
             ((transforms[9] + transforms[6]) * 0.5) / 13 // skip 8
         ).clamped(lowerBound: -SIMD2.one, upperBound: .one)
 
-        assert(Self.rawBlendShapeNames.count == BlendShape.wireOrder.count)
         var blendShape = BlendShape(lookAtPoint: lookAtPoint)
-        for (name, keyPath) in zip(Self.rawBlendShapeNames, BlendShape.wireOrder) {
-            blendShape[keyPath: keyPath] = blendShapes[name] ?? 0
+        for entry in blendShapeAndTransformRawData[0].split(separator: "|") {
+            let nameAndValue = entry.split(separator: "&", omittingEmptySubsequences: false)
+            guard nameAndValue.count == 2, let value = Int(nameAndValue[1]) else {
+                return nil
+            }
+            if let keyPath = Self.blendShapeKeyPaths[nameAndValue[0]] {
+                blendShape[keyPath: keyPath] = Float(value) / 100
+            }
         }
         self.blendShape = blendShape
 

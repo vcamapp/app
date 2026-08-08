@@ -40,10 +40,6 @@ public struct Keychain {
 
     // MARK: - Save
 
-    public func save(_ value: String, forKey key: Key<String>) throws(KeychainError) {
-        try saveData(Data(value.utf8), rawKey: key.rawValue)
-    }
-
     public func save<Value: Codable>(_ value: Value, forKey key: Key<Value>) throws(KeychainError) {
         let encoder = JSONEncoder()
         do {
@@ -78,11 +74,6 @@ public struct Keychain {
     }
 
     // MARK: - Load
-
-    public func loadString(forKey key: Key<String>) throws(KeychainError) -> String {
-        let data = try loadData(rawKey: key.rawValue)
-        return String(decoding: data, as: UTF8.self)
-    }
 
     public func load<Value: Codable>(forKey key: Key<Value>) throws(KeychainError) -> Value {
         let data = try loadData(rawKey: key.rawValue)

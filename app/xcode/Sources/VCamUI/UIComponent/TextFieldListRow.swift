@@ -38,7 +38,7 @@ public struct TextFieldListRow<ID: Equatable>: View {
             } else if selectedId == id {
                 Text(verbatim: text.isEmpty ? placeholder : text)
                     .font(.subheadline)
-                    .onTapGestureWithKeyboardShortcut(.defaultAction) {
+                    .onTapGestureWithDefaultActionShortcut {
                         editingId = id
                     }
             } else {

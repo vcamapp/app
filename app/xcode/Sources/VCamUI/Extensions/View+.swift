@@ -16,7 +16,7 @@ public extension View {
 
 public extension View {
     @ViewBuilder
-    @inlinable func onTapGestureWithKeyboardShortcut(_ keyboardShortcut: KeyboardShortcut, perform: @escaping () -> Void) -> some View {
+    @inlinable func onTapGestureWithDefaultActionShortcut(perform: @escaping () -> Void) -> some View {
         onTapGesture(perform: perform)
             .background(
                 Button {

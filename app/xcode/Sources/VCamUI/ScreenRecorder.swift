@@ -76,7 +76,7 @@ public final class ScreenRecorder: NSObject {
     }
 
     @ObservationIgnored private var didVideoOutput: (@MainActor (CapturedFrame) -> Void)?
-    @ObservationIgnored private var didAudioOutput: ((CMSampleBuffer) -> Void)?
+    @ObservationIgnored private var didAudioOutput: (@MainActor (CMSampleBuffer) -> Void)?
 
     // Stale frames have no value for rendering, so only the newest one is kept
     // while a MainActor hop is pending; this also caps the number of in-flight tasks at one
@@ -406,7 +406,7 @@ public extension ScreenRecorder {
         return screenRecorder
     }
 
-    static func audioOnly(output: @escaping (CMSampleBuffer) -> Void) -> ScreenRecorder {
+    static func audioOnly(output: @escaping @MainActor (CMSampleBuffer) -> Void) -> ScreenRecorder {
         let audioCapture = ScreenRecorder()
         Task {
             let availableContent = try await ScreenRecorder.availableContent()
@@ -419,9 +419,7 @@ public extension ScreenRecorder {
             )
             try await audioCapture.startCapture(with: configuration)
         }
-        audioCapture.didAudioOutput = { buffer in
-            output(buffer)
-        }
+        audioCapture.didAudioOutput = output
         return audioCapture
     }
 }
