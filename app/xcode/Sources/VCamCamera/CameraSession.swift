@@ -43,6 +43,13 @@ public actor CameraSession {
     private var deviceInput: AVCaptureDeviceInput?
     private var captureDevice: AVCaptureDevice?
     private var requestedFPS: Int
+    private var desiredFormat: DeviceFormat?
+
+    private struct DeviceFormat {
+        let format: AVCaptureDevice.Format
+        let minFrameDuration: CMTime
+        let maxFrameDuration: CMTime
+    }
 
     /// The lightest format cameras deliver natively; consumers that need another
     /// format request it per configuration via `setFrameHandler`.
@@ -110,19 +117,6 @@ public actor CameraSession {
             throw CameraSessionError.unsupportedFrameRate(device.uniqueID, fps)
         }
 
-        do {
-            try device.lockForConfiguration()
-        } catch {
-            throw CameraSessionError.cannotLockDevice(device.uniqueID, error.localizedDescription)
-        }
-        // Hold the lock only while writing the configuration. Keeping it degrades the
-        // capture quality of other apps sharing the camera.
-        // see: https://developer.apple.com/documentation/avfoundation/avcapturedevice/lockforconfiguration()
-        device.activeFormat = result.format
-        device.activeVideoMinFrameDuration = rate.minFrameDuration
-        device.activeVideoMaxFrameDuration = rate.maxFrameDuration
-        device.unlockForConfiguration()
-
         session.beginConfiguration()
         if !session.outputs.contains(where: { $0 === videoOutput }) {
             guard session.canAddOutput(videoOutput) else {
@@ -158,6 +152,12 @@ public actor CameraSession {
         deviceInput = input
         captureDevice = device
         requestedFPS = fps
+        desiredFormat = DeviceFormat(
+            format: result.format,
+            minFrameDuration: rate.minFrameDuration,
+            maxFrameDuration: rate.maxFrameDuration
+        )
+        try applyDesiredFormat()
         videoOutput.connection(with: .video)?.isEnabled = true
 
         Logger.log(
@@ -182,7 +182,28 @@ public actor CameraSession {
         }
         if !session.isRunning {
             session.startRunning()
+            // Starting the session resets the device to the format its preset implies,
+            // so the chosen one has to be written back once it is running.
+            try applyDesiredFormat()
         }
+    }
+
+    /// Applies the format chosen in `configure`. The session only keeps it while it is
+    /// running, so before that the format is remembered and written in `start`.
+    private func applyDesiredFormat() throws {
+        guard session.isRunning, let device = captureDevice, let desiredFormat else { return }
+        do {
+            try device.lockForConfiguration()
+        } catch {
+            throw CameraSessionError.cannotLockDevice(device.uniqueID, error.localizedDescription)
+        }
+        // Hold the lock only while writing the configuration. Keeping it degrades the
+        // capture quality of other apps sharing the camera.
+        // see: https://developer.apple.com/documentation/avfoundation/avcapturedevice/lockforconfiguration()
+        device.activeFormat = desiredFormat.format
+        device.activeVideoMinFrameDuration = desiredFormat.minFrameDuration
+        device.activeVideoMaxFrameDuration = desiredFormat.maxFrameDuration
+        device.unlockForConfiguration()
     }
 
     public func stop() {

@@ -61,7 +61,7 @@ public struct BlendShape: Equatable, Sendable {
 }
 
 public extension BlendShape {
-    /// Alphabetical ARKit blend shape order shared by the perfect sync bridge
+    /// Alphabetical blend shape order shared by the perfect sync bridge
     /// array and the MotionV1 face packet. This list is the wire contract:
     /// encoder and decoder both derive their index mapping from it.
     static let wireOrder: [WritableKeyPath<BlendShape, Float> & Sendable] = [

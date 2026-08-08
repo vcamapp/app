@@ -233,7 +233,7 @@ public extension TrackingMappingEntry.DefaultMappingDefinition {
     static let iPhoneBlinkR = Self(key: "_blinkR", bounds: 0...1)
     static let iPhoneMouth = Self(key: "_mouth", bounds: 0...1)
 
-    // ARKit BlendShapes
+    // Perfect Sync BlendShapes
     static let browDownLeft = Self(key: "BrowDownLeft", bounds: 0...1)
     static let browDownRight = Self(key: "BrowDownRight", bounds: 0...1)
     static let browInnerUp = Self(key: "BrowInnerUp", bounds: 0...1)
@@ -293,7 +293,7 @@ public extension TrackingMappingEntry.DefaultMappingDefinition {
         .eyeX, .eyeY,
         .blinkL, .blinkR,
         .mouth,
-        // ARKit BlendShapes
+        // Perfect Sync BlendShapes
         .browDownLeft, .browDownRight, .browInnerUp, .browOuterUpLeft, .browOuterUpRight,
         .cheekPuff, .cheekSquintLeft, .cheekSquintRight,
         .eyeBlinkLeft, .eyeBlinkRight,
@@ -336,7 +336,7 @@ public extension TrackingMappingEntry {
         .iPhonePosX, .iPhonePosY, .iPhonePosZ,
         .iPhoneHeadX, .iPhoneHeadY, .iPhoneHeadZ,
         .iPhoneEyeX, .iPhoneEyeY,
-        // ARKit BlendShapes
+        // Perfect Sync BlendShapes
         .browDownLeft, .browDownRight, .browInnerUp,
         .browOuterUpLeft, .browOuterUpRight,
         .cheekPuff, .cheekSquintLeft, .cheekSquintRight,

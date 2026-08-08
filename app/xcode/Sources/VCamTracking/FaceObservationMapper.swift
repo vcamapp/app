@@ -104,7 +104,7 @@ struct FaceObservationMapper {
             facial.eyeball.y,
             Float(facial.vowel.rawValue)
         )
-        return FaceTrackingOutput(blendShapeValues: values)
+        return .vcamBlendShape(values)
     }
 
     private mutating func updateLatestFace(_ landmarks: VisionLandmarks, captureSize: CGSize) {

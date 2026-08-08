@@ -23,6 +23,7 @@ public final class Tracking {
     @ObservationIgnored public private(set) var useVowelEstimation = false
 
     public private(set) var usesAlternativeHandTracking = false
+    public private(set) var usesHighPrecisionFaceTracking = false
 
     public var mappings = TrackingMappings()
 
@@ -222,6 +223,16 @@ public final class Tracking {
         webCamera.setAlternativeHandTrackingEnabled(isEnabled)
     }
 
+    /// Swaps the Mac camera face backend for the experimental full-blend-shape
+    /// one. It drives Perfect Sync, so the lip sync and mapping state are
+    /// reconciled the same way a Perfect Sync tracking method would.
+    public func setHighPrecisionFaceTrackingEnabled(_ isEnabled: Bool) {
+        usesHighPrecisionFaceTracking = isEnabled
+        webCamera.setHighPrecisionFaceTrackingEnabled(isEnabled)
+        reconcileLipSyncState()
+        applyFaceMappingsToUnity()
+    }
+
     public func setFingerTrackingMethod(_ method: TrackingMethod.Finger) {
         if method == .vcamMocap {
             setHandAndFingerTrackingMethods(hand: .vcamMocap, finger: .vcamMocap)
@@ -270,8 +281,15 @@ public final class Tracking {
         }
     }
 
+    /// Whether the active face tracking can drive Perfect Sync. The camera
+    /// `.default` method can when the experimental full-blend-shape backend is on,
+    /// on top of the methods whose enum already declares support.
+    public var faceTrackingSupportsPerfectSync: Bool {
+        faceTrackingMethod.supportsPerfectSync || (faceTrackingMethod == .default && usesHighPrecisionFaceTracking)
+    }
+
     public var micLipSyncDisabled: Bool {
-        faceTrackingMethod.supportsPerfectSync && UniBridge.shared.hasPerfectSyncBlendShape
+        faceTrackingSupportsPerfectSync && UniBridge.shared.hasPerfectSyncBlendShape
     }
 
     private var supportsIPhoneTrackingMapping: Bool {

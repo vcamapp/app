@@ -41,6 +41,7 @@ struct VisionTrackingConfigurationSnapshot: Sendable, Equatable {
     var isEmotionEnabled: Bool
     var finger: FingerTrackingConfigurationSnapshot
     var usesAlternativeHandMapper = false
+    var usesAlternativeFaceProvider = false
 
     var shouldOutputFace: Bool {
         usage.contains(.faceTracking)
@@ -54,10 +55,17 @@ struct VisionTrackingConfigurationSnapshot: Sendable, Equatable {
         usage.contains(.fingerTracking) && finger.isFingerEnabled
     }
 
-    var needsFaceLandmarks: Bool {
-        // The alternative hand backend anchors hands to the face observation,
-        // so face landmarks must run even when face output itself is off
+    /// Whether Vision landmarks are needed when the alternative face backend is
+    /// not driving the face. The alternative hand backend anchors hands to the
+    /// face observation, so landmarks must run even when face output itself is off.
+    var needsVisionFaceLandmarks: Bool {
         shouldOutputFace || isEmotionEnabled || shouldUseAlternativeHandMapper
+    }
+
+    var needsFaceLandmarks: Bool {
+        // The alternative face backend replaces the Vision face path entirely and
+        // supplies its own hand anchor, so Vision landmarks are not needed then.
+        shouldUseAlternativeFaceProvider ? false : needsVisionFaceLandmarks
     }
 
     var needsFaceGeometry: Bool {
@@ -72,8 +80,12 @@ struct VisionTrackingConfigurationSnapshot: Sendable, Equatable {
         usesAlternativeHandMapper && shouldOutputHands
     }
 
+    var shouldUseAlternativeFaceProvider: Bool {
+        usesAlternativeFaceProvider && shouldOutputFace
+    }
+
     var needsVisionProcessing: Bool {
-        needsFaceLandmarks || needsHandPose
+        needsFaceLandmarks || needsHandPose || shouldUseAlternativeFaceProvider
     }
 
     var needsCameraCapture: Bool {
@@ -82,10 +94,12 @@ struct VisionTrackingConfigurationSnapshot: Sendable, Equatable {
 
     /// The alternative hand backend consumes BGRA frames; capturing in BGRA
     /// moves the conversion into the capture pipeline instead of a per-frame
-    /// GPU render. Vision performs the same on either format, so the default
-    /// stays 420f as recommended by TN3121.
+    /// GPU render. The alternative face backend only accepts the biplanar
+    /// default, so it wins when both are active and the hand backend converts
+    /// per frame instead. Vision performs the same on either format, so the
+    /// default stays 420f as recommended by TN3121.
     var capturePixelFormat: OSType {
-        shouldUseAlternativeHandMapper
+        shouldUseAlternativeHandMapper && !shouldUseAlternativeFaceProvider
             ? kCVPixelFormatType_32BGRA
             : CameraSession.defaultPixelFormat
     }
@@ -101,8 +115,11 @@ struct TrackingOutput: Sendable {
     }
 }
 
-struct FaceTrackingOutput: Sendable {
-    var blendShapeValues: [Float]
+enum FaceTrackingOutput: Sendable {
+    /// The 12 element array from the standard face tracking.
+    case vcamBlendShape([Float])
+    /// The full blend shape result from an alternative backend, for Perfect Sync.
+    case cameraFace(CameraFaceTrackingResult)
 }
 
 struct HandTrackingOutput: Sendable {
@@ -146,16 +163,22 @@ actor VisionTrackingPipeline {
     private var processingTask: Task<Void, Never>?
     private var faceMapper = FaceObservationMapper()
     private let handProcessor: HandProcessor
+    private let alternativeFaceProvider: (any FaceTrackingProvider)?
+    /// The most recent eye anchor produced by the alternative face backend, kept
+    /// so hands can anchor to the previous frame's face like the Vision path.
+    private var latestAlternativeFaceContext: HandPoseFaceContext?
 
     private let outputHandler: @MainActor @Sendable (TrackingOutput) -> Void
 
     init(
         frameStream: VisionFrameStream,
         alternativeHandMapper: (any HandPoseMapper)? = nil,
+        alternativeFaceProvider: (any FaceTrackingProvider)? = nil,
         outputHandler: @escaping @MainActor @Sendable (TrackingOutput) -> Void
     ) {
         self.frameStream = frameStream
         handProcessor = HandProcessor(alternativeHandMapper: alternativeHandMapper)
+        self.alternativeFaceProvider = alternativeFaceProvider
         self.outputHandler = outputHandler
     }
 
@@ -190,6 +213,7 @@ actor VisionTrackingPipeline {
 
     func calibrate() {
         faceMapper.calibrate()
+        alternativeFaceProvider?.calibrate()
     }
 
     func previousRawEyeballY() -> Float {
@@ -200,8 +224,21 @@ actor VisionTrackingPipeline {
         let configuration = frame.configuration
         guard configuration.needsVisionProcessing else { return nil }
 
+        if configuration.shouldUseAlternativeFaceProvider, let alternativeFaceProvider {
+            // The alternative face backend replaces the Vision face path and also
+            // supplies the hand anchor, so Vision face landmarks are skipped.
+            guard configuration.needsHandPose else {
+                return makeOutput(face: processAlternativeFace(frame, provider: alternativeFaceProvider), hands: nil)
+            }
+            // Hands anchor to the previous frame's face like the Vision path.
+            let anchor = latestAlternativeFaceContext
+            async let hands = handProcessor.process(frame, face: anchor)
+            let face = processAlternativeFace(frame, provider: alternativeFaceProvider)
+            return makeOutput(face: face, hands: try await hands)
+        }
+
         if configuration.needsHandPose {
-            guard configuration.needsFaceLandmarks else {
+            guard configuration.needsVisionFaceLandmarks else {
                 let hands = try await handProcessor.process(frame, face: nil)
                 return makeOutput(face: (nil, nil), hands: hands)
             }
@@ -213,8 +250,21 @@ actor VisionTrackingPipeline {
             return makeOutput(face: face, hands: try await hands)
         }
 
+        guard configuration.needsVisionFaceLandmarks else { return nil }
         let face = try await processFace(frame, configuration: configuration)
         return makeOutput(face: face, hands: nil)
+    }
+
+    private func processAlternativeFace(
+        _ frame: VisionFrame,
+        provider: any FaceTrackingProvider
+    ) -> (output: FaceTrackingOutput?, emotion: Int32?) {
+        let result = provider.process(sampleBuffer: frame.sampleBuffer.value, captureSize: frame.captureSize)
+        if let context = result?.faceContext {
+            latestAlternativeFaceContext = context
+        }
+        guard let result else { return (nil, nil) }
+        return (.cameraFace(result), nil)
     }
 
     private func makeOutput(

@@ -44,8 +44,14 @@ public final class AvatarWebCamera {
     public var permissionProvider: CameraPermissionProvider = .denied
 
     /// An alternative hand tracking backend, injected by an external module.
-    /// nil means only the built-in Vision-based hand tracking is available.
+    /// nil means only the standard hand tracking is available.
     public var handPoseMapperFactory: (@Sendable () -> any HandPoseMapper)?
+
+    /// An alternative face tracking backend, injected by an external module.
+    /// When active it produces the full set of blend shapes so the camera can
+    /// drive Perfect Sync. nil means only the standard face tracking is
+    /// available.
+    public var faceTrackingProviderFactory: (@Sendable () -> any FaceTrackingProvider)?
 
     private var lifecycleGeneration: UInt64 = 0
     private var lifecycleTask: Task<Void, Never>?
@@ -85,6 +91,9 @@ public final class AvatarWebCamera {
 
     // Persisted by the module that injects handPoseMapperFactory
     private var isAlternativeHandTrackingEnabled = false
+
+    // Persisted by the module that injects faceTrackingProviderFactory
+    private var isHighPrecisionFaceTrackingEnabled = false
 
     public var currentCaptureDevice: AVCaptureDevice? {
         Camera.camera(id: currentCaptureDeviceID) ?? Camera.defaultCaptureDevice
@@ -129,7 +138,8 @@ public final class AvatarWebCamera {
         let stream = VisionFrameStream()
         let pipeline = VisionTrackingPipeline(
             frameStream: stream,
-            alternativeHandMapper: handPoseMapperFactory?()
+            alternativeHandMapper: handPoseMapperFactory?(),
+            alternativeFaceProvider: faceTrackingProviderFactory?()
         ) { output in
             Self.apply(output)
         }
@@ -213,6 +223,11 @@ public final class AvatarWebCamera {
         applyVisionConfiguration()
     }
 
+    public func setHighPrecisionFaceTrackingEnabled(_ isEnabled: Bool) {
+        isHighPrecisionFaceTrackingEnabled = isEnabled
+        applyVisionConfiguration()
+    }
+
     public func resetCalibration() {
         guard let pipeline = activePipeline?.pipeline else { return }
         Task {
@@ -261,7 +276,10 @@ public final class AvatarWebCamera {
             ),
             usesAlternativeHandMapper: isAlternativeHandTrackingEnabled
                 && UniState.shared.isEnabled
-                && handPoseMapperFactory != nil
+                && handPoseMapperFactory != nil,
+            usesAlternativeFaceProvider: isHighPrecisionFaceTrackingEnabled
+                && UniState.shared.isEnabled
+                && faceTrackingProviderFactory != nil
         )
     }
 
@@ -282,8 +300,13 @@ public final class AvatarWebCamera {
 
     @MainActor
     private static func apply(_ output: TrackingOutput) {
-        if let face = output.face {
-            UniBridge.shared.receiveVCamBlendShape(face.blendShapeValues)
+        switch output.face {
+        case .vcamBlendShape(let values):
+            UniBridge.shared.receiveVCamBlendShape(values)
+        case .cameraFace(let result):
+            applyCameraFace(result)
+        case nil:
+            break
         }
         if let emotion = output.emotion {
             UniBridge.shared.facialExpression(emotion)
@@ -293,6 +316,30 @@ public final class AvatarWebCamera {
         }
         if let fingers = output.hands?.fingersValues {
             UniBridge.shared.fingers(fingers)
+        }
+    }
+
+    /// Routes an alternative backend's full blend shape result the same way a
+    /// VCamMotion face packet is routed: Perfect Sync when the model supports it,
+    /// otherwise the legacy blend shape array with an estimated vowel.
+    @MainActor
+    private static func applyCameraFace(_ result: CameraFaceTrackingResult) {
+        let useEyeTracking = UserDefaults.standard.value(for: .useEyeTracking)
+        if UniBridge.shared.hasPerfectSyncBlendShape {
+            UniBridge.shared.receivePerfectSync(FaceTransformValues.perfectSync(
+                translation: result.headTranslation,
+                rotationEuler: result.headRotationEuler,
+                blendShape: result.blendShape,
+                useEyeTracking: useEyeTracking
+            ))
+        } else {
+            UniBridge.shared.receiveVCamBlendShape(FaceTransformValues.vcamHeadTransform(
+                translation: result.headTranslation,
+                rotationEuler: result.headRotationEuler,
+                blendShape: result.blendShape,
+                useEyeTracking: useEyeTracking,
+                vowel: VowelEstimator.estimate(blendShape: result.blendShape)
+            ))
         }
     }
 }

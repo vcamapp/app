@@ -58,6 +58,39 @@ struct VisionTrackingPipelineTests {
     }
 
     @Test
+    func configurationUsesAlternativeFaceProviderOnlyForFaceOutput() {
+        var faceConfiguration = makeConfiguration(usage: .faceTracking)
+        faceConfiguration.usesAlternativeFaceProvider = true
+        #expect(faceConfiguration.shouldUseAlternativeFaceProvider)
+
+        var handConfiguration = makeConfiguration(usage: .handTracking)
+        handConfiguration.usesAlternativeFaceProvider = true
+        #expect(!handConfiguration.shouldUseAlternativeFaceProvider)
+    }
+
+    @Test
+    func alternativeFaceProviderReplacesVisionLandmarksButStillProcessesFrames() {
+        var configuration = makeConfiguration(usage: .faceTracking)
+        configuration.usesAlternativeFaceProvider = true
+        // The provider replaces the Vision face path, so its landmarks are skipped,
+        #expect(!configuration.needsFaceLandmarks)
+        // but frames must still be delivered for the provider to run.
+        #expect(configuration.needsVisionProcessing)
+        // The provider consumes the biplanar capture format, unlike the hand backend
+        #expect(configuration.capturePixelFormat == CameraSession.defaultPixelFormat)
+    }
+
+    @Test
+    func alternativeFaceProviderKeepsBiplanarCaptureEvenWithTheAlternativeHandMapper() {
+        var configuration = makeConfiguration(usage: [.faceTracking, .handTracking])
+        configuration.usesAlternativeHandMapper = true
+        configuration.usesAlternativeFaceProvider = true
+        // The face backend cannot consume BGRA, so it decides the capture format
+        // and the hand backend converts each frame instead.
+        #expect(configuration.capturePixelFormat == CameraSession.defaultPixelFormat)
+    }
+
+    @Test
     func configurationBuildsFaceGeometryOnlyForFaceOutputOrAlternativeHandAnchor() {
         #expect(makeConfiguration(usage: .faceTracking).needsFaceGeometry)
         #expect(!makeConfiguration(usage: .disabled, isEmotionEnabled: true).needsFaceGeometry)
@@ -70,7 +103,7 @@ struct VisionTrackingPipelineTests {
     @Test
     func trackingOutputReportsWhetherItContainsValues() {
         #expect(TrackingOutput(face: nil, hands: nil, emotion: nil).isEmpty)
-        #expect(!TrackingOutput(face: .init(blendShapeValues: []), hands: nil, emotion: nil).isEmpty)
+        #expect(!TrackingOutput(face: .vcamBlendShape([]), hands: nil, emotion: nil).isEmpty)
         #expect(!TrackingOutput(
             face: nil,
             hands: .init(handsValues: [], fingersValues: nil),
