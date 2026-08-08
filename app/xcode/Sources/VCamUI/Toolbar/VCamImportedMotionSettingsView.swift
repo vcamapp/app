@@ -52,9 +52,7 @@ struct VCamImportedMotionSettingsView: View {
             )
             nsWindow?.close()
         } catch {
-            Task { @MainActor in
-                await VCamAlert.showModal(title: String(localized: .failure), message: error.localizedDescription, canCancel: false)
-            }
+            VCamAlert.showError(title: String(localized: .failure), message: error.localizedDescription)
         }
     }
 }

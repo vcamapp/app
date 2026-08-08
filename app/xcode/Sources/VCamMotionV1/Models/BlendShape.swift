@@ -87,6 +87,44 @@ public extension BlendShape {
     /// pins this range to the wire order.
     private static let eyeTrackingRange = 10..<22
 
+    /// Pairs of sided shapes, as `wireOrder` key paths. Directional shapes such as
+    /// `jawLeft` / `mouthRight` belong here too: mirroring moves the jaw the other way.
+    /// The shapes missing from this list are the ones without a side.
+    static let sidedPairs: [(WritableKeyPath<BlendShape, Float> & Sendable, WritableKeyPath<BlendShape, Float> & Sendable)] = [
+        (\.browDownLeft, \.browDownRight),
+        (\.browOuterUpLeft, \.browOuterUpRight),
+        (\.cheekSquintLeft, \.cheekSquintRight),
+        (\.eyeBlinkLeft, \.eyeBlinkRight),
+        (\.eyeLookDownLeft, \.eyeLookDownRight),
+        (\.eyeLookInLeft, \.eyeLookInRight),
+        (\.eyeLookOutLeft, \.eyeLookOutRight),
+        (\.eyeLookUpLeft, \.eyeLookUpRight),
+        (\.eyeSquintLeft, \.eyeSquintRight),
+        (\.eyeWideLeft, \.eyeWideRight),
+        (\.jawLeft, \.jawRight),
+        (\.mouthDimpleLeft, \.mouthDimpleRight),
+        (\.mouthFrownLeft, \.mouthFrownRight),
+        (\.mouthLeft, \.mouthRight),
+        (\.mouthLowerDownLeft, \.mouthLowerDownRight),
+        (\.mouthPressLeft, \.mouthPressRight),
+        (\.mouthSmileLeft, \.mouthSmileRight),
+        (\.mouthStretchLeft, \.mouthStretchRight),
+        (\.mouthUpperUpLeft, \.mouthUpperUpRight),
+        (\.noseSneerLeft, \.noseSneerRight),
+    ]
+
+    /// Swaps every sided shape and flips the horizontal gaze, turning values named
+    /// after the subject's own left and right into the screen's left and right.
+    func mirrored() -> BlendShape {
+        var mirrored = self
+        for (left, right) in Self.sidedPairs {
+            mirrored[keyPath: left] = self[keyPath: right]
+            mirrored[keyPath: right] = self[keyPath: left]
+        }
+        mirrored.lookAtPoint.x = -lookAtPoint.x
+        return mirrored
+    }
+
     func appendWireOrderValues(to values: inout [Float], useEyeTracking: Bool) {
         values.reserveCapacity(values.count + Self.wireOrder.count)
         for (index, keyPath) in Self.wireOrder.enumerated() {

@@ -43,4 +43,47 @@ struct BlendShapeTests {
 
         #expect(values.allSatisfy { $0 == 0.5 })
     }
+
+    @Test
+    func mirroringSwapsSidedShapesAndFlipsGaze() {
+        var blend = BlendShape(lookAtPoint: .init(0.4, 0.7))
+        blend.eyeBlinkLeft = 1
+        blend.mouthSmileRight = 0.8
+        blend.jawLeft = 0.3
+        blend.jawOpen = 0.6
+
+        let mirrored = blend.mirrored()
+
+        #expect(mirrored.eyeBlinkRight == 1)
+        #expect(mirrored.eyeBlinkLeft == 0)
+        #expect(mirrored.mouthSmileLeft == 0.8)
+        #expect(mirrored.jawRight == 0.3)
+        // A shape without a side, and the vertical gaze, stay as they are
+        #expect(mirrored.jawOpen == 0.6)
+        #expect(mirrored.lookAtPoint == .init(-0.4, 0.7))
+    }
+
+    @Test
+    func mirroringTwiceRestoresTheOriginal() {
+        var blend = BlendShape(lookAtPoint: .init(-0.2, 0.5))
+        for (index, keyPath) in BlendShape.wireOrder.enumerated() {
+            blend[keyPath: keyPath] = Float(index) / 100
+        }
+
+        #expect(blend.mirrored().mirrored() == blend)
+    }
+
+    /// Every shape whose name carries a side has to be listed as a pair, or mirroring
+    /// would silently leave it on the wrong side of the avatar's face.
+    @Test
+    func everySidedShapeIsPaired() {
+        let paired = Set(BlendShape.sidedPairs.flatMap { [$0.0, $0.1] })
+        for keyPath in BlendShape.wireOrder {
+            var probe = BlendShape()
+            probe[keyPath: keyPath] = 1
+            let movedByMirroring = probe.mirrored()[keyPath: keyPath] == 0
+            #expect(movedByMirroring == paired.contains(keyPath))
+        }
+        #expect(BlendShape.sidedPairs.count == 20)
+    }
 }

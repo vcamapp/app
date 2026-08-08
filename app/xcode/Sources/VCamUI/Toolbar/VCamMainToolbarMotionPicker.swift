@@ -199,7 +199,7 @@ private struct MotionLoopToggle: View {
                 try MotionLibrary.shared.setLoopEnabled(newValue, for: motionID)
             } catch {
                 Task { @MainActor in
-                    await VCamAlert.showModal(title: String(localized: .failure), message: error.localizedDescription, canCancel: false)
+                    VCamAlert.showError(title: String(localized: .failure), message: error.localizedDescription)
                 }
             }
         }

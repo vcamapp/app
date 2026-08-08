@@ -324,7 +324,7 @@ public final class AvatarWebCamera {
     /// otherwise the legacy blend shape array with an estimated vowel.
     @MainActor
     private static func applyCameraFace(_ result: CameraFaceTrackingResult) {
-        let useEyeTracking = UserDefaults.standard.value(for: .useEyeTracking)
+        let useEyeTracking = Tracking.shared.useEyeTracking
         if UniBridge.shared.hasPerfectSyncBlendShape {
             UniBridge.shared.receivePerfectSync(FaceTransformValues.perfectSync(
                 translation: result.headTranslation,

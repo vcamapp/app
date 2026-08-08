@@ -58,10 +58,6 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
     private let expectedFormat = AVAudioFormat(standardFormatWithSampleRate: 48000, channels: 1)!
     @ObservationIgnored private var systemAudioRecorder: ScreenRecorder?
 
-#if DEBUG
-    @ObservationIgnored private var debugTimer: Timer?
-#endif
-
     public func start(with outputDirectory: URL, name: String, format: VideoFormat, screenResolution: ScreenResolution, capturesSystemAudio: Bool) throws {
         Logger.log("")
         guard case .idle = state else { return }
@@ -144,15 +140,6 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
             }
         }
 
-#if DEBUG
-        debugTimer = Timer.scheduledTimer(withTimeInterval: 1 / 30, repeats: true) { _ in
-            Task { @MainActor in
-                let debugImage = NSImage(color: .red, size: CGSize(width: 1920, height: 1080)).ciImage!
-                Self.shared.renderFrame(debugImage)
-            }
-        }
-#endif
-
         AvatarAudioManager.shared.start(usage: .record)
     }
 
@@ -165,10 +152,6 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
             return
         }
         state = .finishing
-#if DEBUG
-        debugTimer?.invalidate()
-        debugTimer = nil
-#endif
         let audioOutputSettings = assetAudioWriterInput?.outputSettings as? [String: any Sendable] ?? [:]
         let capturedSystemAudio = assetPCAudioWriterInput != nil
 
@@ -318,17 +301,7 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
         let newTimeStamp = CMTime(value: pcSampleCount, timescale: CMTimeScale(sampleRate))
 
         // Optimize by assuming an implementation where entryCount is always 1
-        let entryCount = 1 // CMItemCount((try? sampleBuffer.sampleTimingInfos())?.count ?? 0)
-//        var infoPointer = UnsafeMutablePointer<CMSampleTimingInfo>.allocate(capacity: entryCount)
-//        defer {
-//            infoPointer.deallocate()
-//        }
-//        CMSampleBufferGetSampleTimingInfoArray(sampleBuffer, entryCount: entryCount, arrayToFill: infoPointer, entriesNeededOut: &entryCount)
-
-//        for i in 0..<entryCount {
-//            infoPointer[i].decodeTimeStamp = .invalid
-//            infoPointer[i].presentationTimeStamp = newTimeStamp
-//        }
+        let entryCount = 1
         sampleTimingInfo.decodeTimeStamp = .invalid
         sampleTimingInfo.presentationTimeStamp = newTimeStamp
 

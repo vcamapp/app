@@ -246,6 +246,7 @@ struct ModelRowView: View {
     var body: some View {
         HStack {
             ModelRowThumbnail(thumbnail: item.thumbnail, isMissing: item.status == .missing)
+                .equatable()
                 .frame(width: 40, height: 40)
                 .clipShape(RoundedRectangle(cornerRadius: 6))
 
@@ -317,7 +318,8 @@ struct ModelRowView: View {
     }
 }
 
-private struct ModelRowThumbnail: View {
+// Equatable so unchanged rows skip body re-evaluation and the NSImage re-decode
+private struct ModelRowThumbnail: View, Equatable {
     let thumbnail: Data?
     let isMissing: Bool
 

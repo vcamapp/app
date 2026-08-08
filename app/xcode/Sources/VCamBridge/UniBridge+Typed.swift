@@ -8,8 +8,6 @@ public struct UniBridgeMethodId: RawRepresentable, Sendable {
     static let sendHandPacketV1 = Self.init(rawValue: 3)
 
     static let addTrackingMapping = Self.init(rawValue: 11)
-    static let updateTrackingMapping = Self.init(rawValue: 12)
-    static let deleteTrackingMapping = Self.init(rawValue: 13)
     static let clearTrackingMapping = Self.init(rawValue: 14)
 
     static let setScreenResolution = Self.init(rawValue: 20)
@@ -69,7 +67,6 @@ public struct TrackingChannelEnabledPayload {
 
 public struct TrackingMappingPayload {
     public var mode: Int32
-    public var index: Int32
     public var inputKeyPtr: UnsafePointer<CChar>?
     public var outputKeyPtr: UnsafePointer<CChar>?
     public var inputRangeMin: Float
@@ -170,19 +167,10 @@ public extension UniBridge {
     }
 
     static func addTrackingMapping(mode: TrackingMode, inputKey: String, outputKey: String, inputRangeMin: Float, inputRangeMax: Float, outputRangeMin: Float, outputRangeMax: Float, filter: TrackingFilter = .none) {
-        sendTrackingMapping(.addTrackingMapping, mode: mode, index: 0, inputKey: inputKey, outputKey: outputKey, inputRangeMin: inputRangeMin, inputRangeMax: inputRangeMax, outputRangeMin: outputRangeMin, outputRangeMax: outputRangeMax, filter: filter)
-    }
-
-    static func updateTrackingMapping(mode: TrackingMode, at index: Int, inputKey: String, outputKey: String, inputRangeMin: Float, inputRangeMax: Float, outputRangeMin: Float, outputRangeMax: Float, filter: TrackingFilter = .none) {
-        sendTrackingMapping(.updateTrackingMapping, mode: mode, index: Int32(index), inputKey: inputKey, outputKey: outputKey, inputRangeMin: inputRangeMin, inputRangeMax: inputRangeMax, outputRangeMin: outputRangeMin, outputRangeMax: outputRangeMax, filter: filter)
-    }
-
-    private static func sendTrackingMapping(_ method: UniBridgeMethodId, mode: TrackingMode, index: Int32, inputKey: String, outputKey: String, inputRangeMin: Float, inputRangeMax: Float, outputRangeMin: Float, outputRangeMax: Float, filter: TrackingFilter) {
         inputKey.withCString { inputKeyPtr in
             outputKey.withCString { outputKeyPtr in
                 var payload = TrackingMappingPayload(
                     mode: mode.rawValue,
-                    index: index,
                     inputKeyPtr: inputKeyPtr,
                     outputKeyPtr: outputKeyPtr,
                     inputRangeMin: inputRangeMin,
@@ -193,26 +181,9 @@ public extension UniBridge {
                     filterParam0: filter.parameters.count > 0 ? filter.parameters[0] : 0,
                     filterParam1: filter.parameters.count > 1 ? filter.parameters[1] : 0
                 )
-                send(method, payload: &payload)
+                send(.addTrackingMapping, payload: &payload)
             }
         }
-    }
-
-    static func deleteTrackingMapping(mode: TrackingMode, at index: Int) {
-        var payload = TrackingMappingPayload(
-            mode: mode.rawValue,
-            index: Int32(index),
-            inputKeyPtr: nil,
-            outputKeyPtr: nil,
-            inputRangeMin: 0,
-            inputRangeMax: 0,
-            outputRangeMin: 0,
-            outputRangeMax: 0,
-            filterType: 0,
-            filterParam0: 0,
-            filterParam1: 0
-        )
-        send(.deleteTrackingMapping, payload: &payload)
     }
 
     static func clearTrackingMapping(mode: TrackingMode) {

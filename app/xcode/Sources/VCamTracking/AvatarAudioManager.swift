@@ -17,6 +17,10 @@ public final class AvatarAudioManager {
     private var usage = Usage()
     private var startTask: Task<Void, Never>?
 
+    // Resolved once per recording session; looking the device up per audio buffer
+    // would repeat a UserDefaults read and a device scan dozens of times per second
+    private var activeInputDevice: AudioDevice?
+
     public var currentInputDevice: AudioDevice? {
         guard let uid = UserDefaults.standard.value(for: .audioDeviceUid) else { return .defaultDevice() }
         return AudioDevice.device(forUid: uid)
@@ -39,7 +43,7 @@ public final class AvatarAudioManager {
                 if self.usage.contains(.lipSync) { // Ensure no malfunctions during recording
                     self.audioExpressionEstimator.analyze(buffer: unsafeBuffer, time: time)
                 }
-                self.videoRecorderRenderAudioFrame(unsafeBuffer, time, latency, self.currentInputDevice)
+                self.videoRecorderRenderAudioFrame(unsafeBuffer, time, latency, self.activeInputDevice)
             }
         }
 
@@ -60,6 +64,7 @@ public final class AvatarAudioManager {
         // The startup is asynchronous, so don't allow consecutive calls (it causes a crash in installTap)
         guard !isRecording else { return }
 
+        activeInputDevice = currentInputDevice
         setEmotionEnabled(UniState.shared.value(for: .useEmotion))
 
         if isSystemSoundRecording {

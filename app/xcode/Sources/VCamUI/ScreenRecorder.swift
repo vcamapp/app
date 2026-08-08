@@ -118,13 +118,8 @@ public final class ScreenRecorder: NSObject {
         self.captureConfig = captureConfig
 
         do {
-            // Create the content filter with the sample app settings.
             let filter = try await contentFilter(for: captureConfig)
-
-            // Create the stream configuration with the sample app settings.
             let streamConfig = streamConfiguration(for: captureConfig)
-
-            // Create a capture stream with the filter and stream configuration.
             let stream = SCStream(filter: filter, configuration: streamConfig, delegate: self)
             self.stream = stream
 
@@ -135,7 +130,6 @@ public final class ScreenRecorder: NSObject {
                 try stream.addStreamOutput(self, type: .audio, sampleHandlerQueue: audioSampleBufferQueue)
             }
 
-            // Start the capture session.
             try await stream.startCapture()
 
             isRecording = true
@@ -183,36 +177,25 @@ public final class ScreenRecorder: NSObject {
         switch config.captureType {
         case .display:
             if let display = config.display {
-
-                // Create a content filter that includes all content from the display,
-                // excluding the sample app's window.
                 if config.filterOutOwningApplication {
-
-                    // Get the content that's available to capture.
                     let content = try await SCShareableContent.excludingDesktopWindows(false,
                                                                                        onScreenWindowsOnly: true)
 
-                    // Exclude the sample app by matching the bundle identifier.
+                    // Exclude VCam's own windows so the capture doesn't show the app itself
                     let excludedApps = content.applications.filter { app in
                         Bundle.main.bundleIdentifier == app.bundleIdentifier
                     }
 
-                    // Create a content filter that excludes the sample app.
                     return SCContentFilter(display: display,
                                            excludingApplications: excludedApps,
                                            exceptingWindows: [])
-
                 } else {
-                    // Create a content filter that includes the entire display.
                     return SCContentFilter(display: display, excludingWindows: [])
                 }
             }
         case .independentWindow:
             if let window = config.window {
-
-                // Create a content filter that includes a single window.
                 return SCContentFilter(desktopIndependentWindow: window)
-
             }
         }
         throw ScreenRecorderError("The configuration doesn't provide a display or window.")
@@ -225,7 +208,6 @@ public final class ScreenRecorder: NSObject {
         streamConfig.capturesAudio = captureConfig.capturesAudio
         streamConfig.sampleRate = 48000
         streamConfig.channelCount = 1
-//            streamConfig.excludesCurrentProcessAudio = isAppAudioExcluded // if excludes
 
         streamConfig.minimumFrameInterval =
             captureConfig.minimumFrameInterval
