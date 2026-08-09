@@ -1,13 +1,7 @@
-//
-//  CoreMediaSinkStream.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2023/02/16.
-//
-
 import AppKit
 import CoreMediaIO
 import AVFoundation
+import VCamAppExtension
 import VCamEntity
 
 public final class CoreMediaSinkStream: NSObject {
@@ -177,11 +171,15 @@ public final class CoreMediaSinkStream: NSObject {
     }
 
     private static func findCameraExtensionDeviceID() -> CMIOObjectID? {
-        let extDevice = AVCaptureDevice.DiscoverySession(
+        let extensionDeviceUID = CameraExtensionDevice.deviceID.uuidString
+        let isExtensionDeviceAvailable = AVCaptureDevice.DiscoverySession(
             deviceTypes: [.external],
             mediaType: .video,
             position: .unspecified
-        ).devices.first { $0.localizedName.contains("CameraExtension") }
+        ).devices.contains { $0.uniqueID == extensionDeviceUID }
+        guard isExtensionDeviceAvailable else {
+            return nil
+        }
 
         var dataSize: UInt32 = 0
         var dataUsed: UInt32 = 0
@@ -228,7 +226,7 @@ public final class CoreMediaSinkStream: NSObject {
                 )
             }
 
-            return cfUID as String? == extDevice?.uniqueID
+            return cfUID as String? == extensionDeviceUID
         }
 
         return deviceId

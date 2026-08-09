@@ -11,7 +11,8 @@ public struct VCamSettingTrackingMappingEditorView: View {
     public init() {}
 
     public var body: some View {
-        let supportsIPhoneMode = supportsIPhoneTrackingMapping
+        let supportsPerfectSyncMode = supportsPerfectSyncMapping
+        let activeMode = Tracking.shared.activeFaceMappingMode(hasPerfectSyncBlendShape: uniState.hasPerfectSyncBlendShape)
 
         NavigationStack {
             VStack(spacing: 0) {
@@ -26,11 +27,11 @@ public struct VCamSettingTrackingMappingEditorView: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
                 Divider()
-                MappingEditorFooterView()
+                MappingEditorFooterView(activeMode: activeMode, showsModeInUse: supportsPerfectSyncMode)
             }
         }
         .task {
-            store.initialize(blendShapeNames: uniState.blendShapeNames, supportsIPhoneMode: supportsIPhoneMode)
+            store.initialize(blendShapeNames: uniState.blendShapeNames, supportsPerfectSyncMode: supportsPerfectSyncMode, activeMode: activeMode)
         }
         .onChange(of: uniState.blendShapeNames) { _, newValue in
             store.updateBlendShapeNames(newValue)
@@ -44,11 +45,11 @@ public struct VCamSettingTrackingMappingEditorView: View {
                 }
             }
 
-            if supportsIPhoneMode {
+            if supportsPerfectSyncMode {
                 ToolbarItem(placement: .automatic) {
                     Picker(.trackingMode, selection: $store.selectedMode) {
-                        Text(.normal).tag(TrackingMode.blendShape)
-                        Text(verbatim: "iPhone").tag(TrackingMode.perfectSync)
+                        modeLabel(.blendShape, activeMode: activeMode).tag(TrackingMode.blendShape)
+                        modeLabel(.perfectSync, activeMode: activeMode).tag(TrackingMode.perfectSync)
                     }
                     .pickerStyle(.segmented)
                 }
@@ -70,7 +71,14 @@ public struct VCamSettingTrackingMappingEditorView: View {
         .frame(minWidth: 840, minHeight: 400)
     }
 
-    private var supportsIPhoneTrackingMapping: Bool {
+    /// Marks the mode that actually receives the face data, which is decided by the loaded
+    /// model and the face tracking method rather than by the selection
+    private func modeLabel(_ mode: TrackingMode, activeMode: TrackingMode?) -> Text {
+        // A segmented picker renders either text or an image per segment, so the mark is a glyph
+        Text(verbatim: mode == activeMode ? "✓ \(mode.name)" : mode.name)
+    }
+
+    private var supportsPerfectSyncMapping: Bool {
 #if FEATURE_3
         uniState.hasPerfectSyncBlendShape
 #else
@@ -157,17 +165,28 @@ private struct MappingActionMenuContent: View {
 }
 
 private struct MappingEditorFooterView: View {
+    let activeMode: TrackingMode?
+    /// The mode in use is only worth stating while both mapping sets are reachable
+    let showsModeInUse: Bool
+
     var body: some View {
         HStack(spacing: 8) {
             HStack {
                 Image(systemName: "info.circle")
-                    .foregroundStyle(.secondary)
                 Text(.trackingMappingSaveComingSoon)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
             }
             Spacer()
+            if showsModeInUse {
+                if let activeMode {
+                    Text(.trackingMappingModeInUse(activeMode.name))
+                } else {
+                    Text(.trackingMappingNoModeInUse)
+                }
+            }
         }
+        .font(.caption)
+        .foregroundStyle(.secondary)
+        .lineLimit(1)
         .padding(.horizontal)
         .padding(.vertical, 4)
     }
@@ -210,17 +229,22 @@ final class MappingDataStore {
         set { tracking.mappings[selectedMode] = newValue }
     }
 
-    func initialize(blendShapeNames: [String], supportsIPhoneMode: Bool) {
+    func initialize(blendShapeNames: [String], supportsPerfectSyncMode: Bool, activeMode: TrackingMode?) {
         guard !isInitialized else { return }
 
         outputKeys = blendShapeNames.map { TrackingMappingEntry.OutputKey(key: $0) }
 
         var modes: [TrackingMode] = [.blendShape]
-        if supportsIPhoneMode {
+        if supportsPerfectSyncMode {
             modes.append(.perfectSync)
         }
         for mode in modes {
             inputKeysByMode[mode] = TrackingMappingEntry.availableInputKeys(for: mode)
+        }
+
+        // Open on the mapping set that currently drives the avatar
+        if let activeMode, modes.contains(activeMode) {
+            selectedMode = activeMode
         }
 
         isInitialized = true
@@ -279,8 +303,19 @@ final class MappingDataStore {
 #if DEBUG
 
 #Preview {
-    VCamSettingTrackingMappingEditorView()
-        .environment(UniState.preview())
+    MappingEditorPreview()
+}
+
+/// Mocks a loaded model that supports Perfect Sync, which is what makes the mode picker appear
+private struct MappingEditorPreview: View {
+    init() {
+        Tracking.shared.mappings.perfectSync = TrackingMappingEntry.defaultMappings(for: .perfectSync)
+    }
+
+    var body: some View {
+        VCamSettingTrackingMappingEditorView()
+            .environment(UniState.preview(hasPerfectSyncBlendShape: true))
+    }
 }
 
 #endif

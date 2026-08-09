@@ -2669,6 +2669,29 @@
         }
       }
     },
+    "highPrecision": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "High Precision"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "高精度"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "고정밀"
+          }
+        }
+      }
+    },
     "hueShift": {
       "extractionState": "manual",
       "localizations": {
@@ -6207,6 +6230,52 @@
           "stringUnit": {
             "state": "translated",
             "value": "입력"
+          }
+        }
+      }
+    },
+    "trackingMappingModeInUse %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The \"%@\" settings are used with the current model and tracking settings"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "現在のモデルとトラッキング設定では「%@」の設定が使用されます"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "현재 모델과 트래킹 설정에서는 '%@' 설정이 사용됩니다"
+          }
+        }
+      }
+    },
+    "trackingMappingNoModeInUse": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Face tracking is off, so no settings are used"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "顔トラッキングがオフのため、どの設定も使用されません"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "얼굴 트래킹이 꺼져 있어 어떤 설정도 사용되지 않습니다"
           }
         }
       }

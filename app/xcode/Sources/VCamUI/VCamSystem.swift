@@ -17,7 +17,7 @@ public final class VCamSystem {
     public private(set) var isStarted = false
     public var isUniVCamSystemEnabled = false {
         didSet {
-            NSApp.vcamWindow?.backgroundColor = isUniVCamSystemEnabled ? .clear : .windowBackgroundColor
+            windowManager.window?.backgroundColor = isUniVCamSystemEnabled ? .clear : .windowBackgroundColor
         }
     }
 
@@ -57,7 +57,7 @@ public final class VCamSystem {
 
     public func configure() {
         guard UniBridge.isUnity else { return }
-        NSApp.vcamWindow?.orderFront(nil)
+        windowManager.window?.orderFront(nil)
     }
 
     public func startSystem() {

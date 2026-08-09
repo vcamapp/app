@@ -61,7 +61,7 @@ public final class Tracking {
     public func syncPerfectSyncAvailability() {
         stopFaceResamplers()
         reconcileLipSyncState()
-        if supportsIPhoneTrackingMapping {
+        if supportsPerfectSyncMapping {
             if mappings.perfectSync.isEmpty {
                 mappings.perfectSync = TrackingMappingEntry.defaultMappings(for: .perfectSync)
             }
@@ -118,7 +118,7 @@ public final class Tracking {
     }
 
     public func resetMappings(for mode: TrackingMode) {
-        if mode == .perfectSync, !supportsIPhoneTrackingMapping {
+        if mode == .perfectSync, !supportsPerfectSyncMapping {
             return
         }
         mappings[mode] = TrackingMappingEntry.defaultMappings(for: mode)
@@ -292,7 +292,15 @@ public final class Tracking {
         faceTrackingSupportsPerfectSync && UniBridge.shared.hasPerfectSyncBlendShape
     }
 
-    private var supportsIPhoneTrackingMapping: Bool {
+    /// The mapping mode the face data is routed to, or nil while no face tracking runs.
+    /// Mirrors the routing every face tracking source performs per packet, and takes the
+    /// model's Perfect Sync support as an argument so an observable state can drive it.
+    public func activeFaceMappingMode(hasPerfectSyncBlendShape: Bool) -> TrackingMode? {
+        guard faceTrackingMethod != .disabled else { return nil }
+        return faceTrackingSupportsPerfectSync && hasPerfectSyncBlendShape ? .perfectSync : .blendShape
+    }
+
+    private var supportsPerfectSyncMapping: Bool {
 #if FEATURE_3
         UniBridge.shared.hasPerfectSyncBlendShape
 #else

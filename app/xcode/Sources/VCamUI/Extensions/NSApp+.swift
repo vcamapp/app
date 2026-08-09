@@ -1,10 +1,3 @@
-//
-//  NSApp+.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2022/05/25.
-//
-
 import AppKit
 
 public extension NSApplication {
@@ -13,9 +6,8 @@ public extension NSApplication {
         mainWindow ?? windows.first
     }
 
+    @MainActor
     var vcamWindow: NSWindow? {
-        Self._vcamWindow
+        VCamSystem.shared.windowManager.window
     }
-
-    private static var _vcamWindow = NSApp.windows.first { $0.title.hasPrefix("VCam") && !$0.title.contains("Unity") } // for Unity
 }

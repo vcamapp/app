@@ -1,10 +1,3 @@
-//
-//  WindowManager.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/03/12.
-//
-
 import AppKit
 import VCamLogger
 import VCamCamera
@@ -16,6 +9,7 @@ import VCamData
 public final class WindowManager {
     public private(set) var size = NSSize(width: 1280, height: 720)
 
+    @ObservationIgnored public private(set) var window: NSWindow?
     @ObservationIgnored public private(set) var isConfigured = false
     @ObservationIgnored public fileprivate(set) var isWindowClosed = false
 
@@ -51,13 +45,14 @@ public final class WindowManager {
         if UniBridge.isUnity {
             uniDebugLog("WindowManager.setUpWindow()")
             let windowRef = NSWindow()
-            windowRef.title = UniBridge.isUnity ? "VCam" : Bundle.main.displayName
+            windowRef.title = "VCam"
             windowRef.styleMask = [.titled, .closable, .resizable]
             windowRef.backingType = .buffered
             windowRef.level = .floating
             windowRef.isReleasedWhenClosed = false
             windowRef.setFrameAutosaveName("UnityPlayerVCamUI")
             windowRef.makeKeyAndOrderFront(nil)
+            self.window = windowRef
         } else if let window = NSApp.mainOrFirstWindow {
             window.appearance = NSAppearance(named: .darkAqua)
             window.title = Bundle.main.displayName
@@ -75,13 +70,14 @@ public final class WindowManager {
             window.titleVisibility = .visible
             window.minSize = .init(width: 800, height: 450)
             window.contentAspectRatio = NSSize(width: 1280, height: 720)
+            self.window = window
         }
     }
 
     public func setUpView() {
         Logger.log("")
 
-        guard !isConfigured, containerView.subviews.isEmpty, let window = NSApp.vcamWindow, let unityView = window.contentView else {
+        guard !isConfigured, containerView.subviews.isEmpty, let window, let unityView = window.contentView else {
             return
         }
 
@@ -138,7 +134,7 @@ public final class WindowManager {
     @objc public func hide() {
         guard !isWindowClosed else { return }
         isWindowClosed = true
-        NSApp.vcamWindow?.setIsVisible(false)
+        window?.setIsVisible(false)
         NSApp.setActivationPolicy(.accessory)
         if VirtualCameraManager.shared.sinkStream.streamingCount() == 0 {
             VCamSystem.shared.stopSystem()
@@ -149,7 +145,7 @@ public final class WindowManager {
         guard isWindowClosed else { return }
         isWindowClosed = false
         NSApp.setActivationPolicy(.regular)
-        NSApp.vcamWindow?.setIsVisible(true)
+        window?.setIsVisible(true)
         NSApp.activate(ignoringOtherApps: true)
         VCamSystem.shared.startSystem()
     }
@@ -162,7 +158,7 @@ public final class WindowManager {
         if UniBridge.isUnity {
             uniDebugLog("WindowManager.dispose()")
             SceneObjectManager.shared.dispose()
-            NSApp.vcamWindow?.orderOut(nil)
+            window?.orderOut(nil)
         } else {
             NSApp.stop(nil)
         }
@@ -170,11 +166,11 @@ public final class WindowManager {
 
     public func setAlwaysOnTopEnabled(_ enabled: Bool) {
         UserDefaults.standard.set(enabled, for: .alwaysOnTopEnabled)
-        NSApp.vcamWindow?.level = enabled ? .floating : .normal
+        window?.level = enabled ? .floating : .normal
     }
 
     public func resetWindowSize() {
-        guard let window = NSApp.vcamWindow else { return }
+        guard let window else { return }
         let defaultSize = window.minSize
         window.setContentSize(defaultSize)
         size = defaultSize
