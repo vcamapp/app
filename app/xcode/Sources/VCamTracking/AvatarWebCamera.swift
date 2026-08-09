@@ -45,13 +45,13 @@ public final class AvatarWebCamera {
 
     /// An alternative hand tracking backend, injected by an external module.
     /// nil means only the standard hand tracking is available.
-    public var handPoseMapperFactory: (@Sendable () -> any HandPoseMapper)?
+    public var handPoseMapperFactory: (@Sendable () -> sending any HandPoseMapper)?
 
     /// An alternative face tracking backend, injected by an external module.
     /// When active it produces the full set of blend shapes so the camera can
     /// drive Perfect Sync. nil means only the standard face tracking is
     /// available.
-    public var faceTrackingProviderFactory: (@Sendable () -> any FaceTrackingProvider)?
+    public var faceTrackingProviderFactory: (@Sendable () -> sending any FaceTrackingProvider)?
 
     private var lifecycleGeneration: UInt64 = 0
     private var lifecycleTask: Task<Void, Never>?

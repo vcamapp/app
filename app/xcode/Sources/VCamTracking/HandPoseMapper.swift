@@ -24,6 +24,6 @@ public struct HandPoseFaceContext: Sendable {
 /// detection both feed it). `fingersEnabled` mirrors the finger tracking
 /// setting; when false the backend must keep tracking wrists but omit finger
 /// data from its output. Instances are used from a single pipeline actor.
-public protocol HandPoseMapper: AnyObject, Sendable {
+public protocol HandPoseMapper: AnyObject {
     func map(sampleBuffer: CMSampleBuffer, face: HandPoseFaceContext?, fingersEnabled: Bool)
 }

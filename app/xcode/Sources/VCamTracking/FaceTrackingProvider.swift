@@ -34,7 +34,7 @@ public struct CameraFaceTrackingResult: Sendable {
 /// standard face tracking it produces the full set of blend shapes, so the
 /// Mac camera can drive Perfect Sync. `process` returns nil when no face is
 /// present in the frame. Instances are used from a single pipeline actor.
-public protocol FaceTrackingProvider: AnyObject, Sendable {
+public protocol FaceTrackingProvider: AnyObject {
     func process(sampleBuffer: CMSampleBuffer, captureSize: CGSize) -> CameraFaceTrackingResult?
     func calibrate()
 }

@@ -135,7 +135,7 @@ actor HandProcessor {
     private var handMapper = HandObservationMapper()
     private let alternativeHandMapper: (any HandPoseMapper)?
 
-    init(alternativeHandMapper: (any HandPoseMapper)?) {
+    init(alternativeHandMapper: sending (any HandPoseMapper)?) {
         self.alternativeHandMapper = alternativeHandMapper
     }
 
@@ -172,8 +172,8 @@ actor VisionTrackingPipeline {
 
     init(
         frameStream: VisionFrameStream,
-        alternativeHandMapper: (any HandPoseMapper)? = nil,
-        alternativeFaceProvider: (any FaceTrackingProvider)? = nil,
+        alternativeHandMapper: sending (any HandPoseMapper)? = nil,
+        alternativeFaceProvider: sending (any FaceTrackingProvider)? = nil,
         outputHandler: @escaping @MainActor @Sendable (TrackingOutput) -> Void
     ) {
         self.frameStream = frameStream
