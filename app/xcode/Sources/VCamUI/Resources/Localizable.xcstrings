@@ -576,6 +576,29 @@
         }
       }
     },
+    "calibrationCompleted": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calibration complete"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "キャリブレーションが完了しました"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "캘리브레이션이 완료되었습니다"
+          }
+        }
+      }
+    },
     "camera": {
       "extractionState": "manual",
       "localizations": {
@@ -2232,6 +2255,29 @@
         }
       }
     },
+    "faceTracking": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Face Tracking"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "フェイストラッキング"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "페이스 트래킹"
+          }
+        }
+      }
+    },
     "facialExpression": {
       "extractionState": "manual",
       "localizations": {
@@ -2504,6 +2550,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "손"
+          }
+        }
+      }
+    },
+    "handTracking": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hand Tracking"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ハンドトラッキング"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "핸드 트래킹"
           }
         }
       }
@@ -5563,6 +5632,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "부드러움 (Soft Knee)"
+          }
+        }
+      }
+    },
+    "start": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "開始"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "시작"
           }
         }
       }

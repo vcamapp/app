@@ -16,7 +16,13 @@ public struct VCamMainView: View {
 
     @Environment(UniState.self) private var uniState
 
+    private enum CalibrationTarget: String, Identifiable {
+        case face, hand
+        var id: String { rawValue }
+    }
+
     @State private var isCameraExtensionDisallow = false
+    @State private var calibrationTarget: CalibrationTarget?
 
     public var body: some View {
         @Bindable var state = uniState
@@ -33,15 +39,42 @@ public struct VCamMainView: View {
                 .frame(maxWidth: .infinity, alignment: .trailing)
             }
 
-            let calibrateButton = FlatButton {
-                Tracking.shared.resetCalibration()
+            let calibrateButton = Menu {
+                Button {
+                    calibrationTarget = .face
+                } label: {
+                    Text(.faceTracking)
+                }
+                let handAvailability = HandTrackingCalibrationView.availability()
+                Button {
+                    calibrationTarget = .hand
+                } label: {
+                    Text(.handTracking)
+                }
+                .disabled(!handAvailability.isAvailable)
+                if case .unavailable(let reason?) = handAvailability {
+                    Text(verbatim: reason)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             } label: {
                 Text(.calibrate)
                     .font(.callout)
                     .foregroundStyle(.secondary)
             }
-            .flatButtonStyle(.label)
+            .menuStyle(.borderlessButton)
+            .menuIndicator(.hidden)
+            .contentShape(Rectangle())
+            .fixedSize()
             .help(.helpCalibrate)
+            .popover(item: $calibrationTarget, arrowEdge: .bottom) { target in
+                switch target {
+                case .face:
+                    FaceTrackingCalibrationView()
+                case .hand:
+                    HandTrackingCalibrationView.make()
+                }
+            }
 
             HStack {
                 if #available(macOS 26.0, *) {
@@ -51,8 +84,9 @@ public struct VCamMainView: View {
                     }
 
                     GroupBox {
+                        // controlSizeはメニュー項目のフォントまで縮めてしまうため、
+                        // 高さの調整は余白だけで行う
                         calibrateButton
-                            .controlSize(.mini)
                             .padding(.vertical, -1.5)
                     }
                 } else {
