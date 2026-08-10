@@ -20,7 +20,6 @@ public final class ImageRenderer: RenderTextureRenderer {
         self.image = image
         self.filter = filter
         size = image.extent.size
-        cropRect = .init(x: 0, y: 0, width: 1, height: size.height / size.width)
     }
 
     private let image: CIImage
@@ -31,7 +30,7 @@ public final class ImageRenderer: RenderTextureRenderer {
     }
 
     public var size: CGSize
-    public var cropRect: CGRect
+    public let cropRect = CGRect(x: 0, y: 0, width: 1, height: 1)
 
     public var filter: ImageFilter? {
         didSet {

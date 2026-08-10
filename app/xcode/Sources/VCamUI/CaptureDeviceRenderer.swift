@@ -10,12 +10,11 @@ public final class CaptureDeviceRenderer {
 
     public let id: String
     public private(set) var size: CGSize
-    public private(set) var cropRect: CGRect = .init(x: 0, y: 0, width: 1, height: 1)
+    public let cropRect: CGRect
 
     public var filter: ImageFilter?
 
     private var lastFrame = CIImage.empty()
-    private let isCropped: Bool
     private var didFrameOutput: ((CIImage) -> Void)?
 
     // CIImage is immutable, so it is safe to hand across threads
@@ -32,14 +31,13 @@ public final class CaptureDeviceRenderer {
         id = device.id
         let width = CGFloat(device.activeFormat.formatDescription.dimensions.width)
         let height = CGFloat(device.activeFormat.formatDescription.dimensions.height)
-        isCropped = cropRect.width != 1 || cropRect.height != 1
 
         size = CGSize(
             // iPhone's screen size is zero, so temporarily fix the size.
             width: width == 0 ? 512 : width,
             height: height == 0 ? 512 : height
         )
-        self.cropRect = isCropped ? cropRect : .init(x: 0, y: 0, width: 1, height: size.height / size.width)
+        self.cropRect = cropRect
     }
 }
 
@@ -74,14 +72,9 @@ extension CaptureDeviceRenderer: RenderTextureRenderer {
     public func updateTextureSizeIfNeeded(imageWidth width: CGFloat, imageHeight height: CGFloat) -> Bool {
         guard width != size.width || height != size.height else { return false }
 
-        // Update the crop size for iPhone screen
+        // Update the size for the iPhone screen; the crop is a unit rect,
+        // so it stays valid even when the screen rotates
         size = .init(width: width, height: height)
-        if !isCropped {
-            // If the texture is already cropped, use it.
-            // This will break the texture size when rotating the screen on the iPhone.
-            cropRect.size = .init(width: 1, height: size.height / size.width)
-        }
-
         return true
     }
 

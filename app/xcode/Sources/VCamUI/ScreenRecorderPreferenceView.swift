@@ -21,7 +21,7 @@ public struct ScreenRecorderPreferenceView: View {
     @State private var error: (any Error)?
     @State private var timer: (any Cancellable)?
     @State private var cropRect = CGRect.null
-    @State private var cropPreviewWidth: CGFloat = 1
+    @State private var cropPreviewSize = CGSize(width: 1, height: 1)
 
     let close: () -> Void
     let capture: (ScreenRecorder) -> Void
@@ -32,7 +32,9 @@ public struct ScreenRecorderPreferenceView: View {
         } done: {
             error = nil
             dismiss()
-            screenRecorder.cropRect = cropRect.applying(.init(scaleX: 1 / cropPreviewWidth, y: 1 / cropPreviewWidth))
+            if !cropRect.isNull { // The rect stays .null until the first preview frame arrives
+                screenRecorder.cropRect = cropRect.applying(.init(scaleX: 1 / cropPreviewSize.width, y: 1 / cropPreviewSize.height))
+            }
             capture(screenRecorder)
         } content: {
             ScrollView {
@@ -59,7 +61,7 @@ public struct ScreenRecorderPreferenceView: View {
                 ScreenRecorderCapturePreviewContainer(
                     screenRecorder: screenRecorder,
                     cropRect: $cropRect,
-                    cropPreviewWidth: $cropPreviewWidth
+                    cropPreviewSize: $cropPreviewSize
                 )
             }
             .onAppear {
@@ -129,14 +131,14 @@ public struct ScreenRecorderPreferenceView: View {
 private struct ScreenRecorderCapturePreviewContainer: View {
     let screenRecorder: ScreenRecorder
     @Binding var cropRect: CGRect
-    @Binding var cropPreviewWidth: CGFloat
+    @Binding var cropPreviewSize: CGSize
 
     var body: some View {
         if let frame = screenRecorder.latestFrame {
             ScreenRecorderCapturePreview(
                 frame: frame,
                 cropRect: $cropRect,
-                cropPreviewWidth: $cropPreviewWidth
+                cropPreviewSize: $cropPreviewSize
             )
         }
     }
@@ -165,8 +167,6 @@ private struct ScreenRecorderConfigForm: View {
                     }
                 }
 
-                Toggle(.removeVCamFromCapture, isOn: $captureConfig.filterOutOwningApplication)
-
             case .independentWindow:
                 Picker(.window, selection: $captureConfig.window) {
                     ForEach(windows) { window in
@@ -182,7 +182,7 @@ private struct ScreenRecorderConfigForm: View {
 private struct ScreenRecorderCapturePreview: View {
     let frame: ScreenRecorder.CapturedFrame
     @Binding var cropRect: CGRect
-    @Binding var cropPreviewWidth: CGFloat
+    @Binding var cropPreviewSize: CGSize
 
     var body: some View {
         ScreenCaptureContentView(frame: frame.croppedCIImage.nsImage())
@@ -191,7 +191,7 @@ private struct ScreenRecorderCapturePreview: View {
             .overlay(GeometryReader { proxy in
                 Color.clear
                     .onAppear {
-                        cropPreviewWidth = proxy.size.width
+                        cropPreviewSize = proxy.size
                     }
             })
     }

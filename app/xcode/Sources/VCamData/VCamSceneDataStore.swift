@@ -21,7 +21,9 @@ public struct VCamSceneDataStore {
     public func load() throws -> VCamScene {
         let data = try Data(contentsOf: sceneURL)
         let decoder = JSONDecoder()
-        return try decoder.decode(VCamScene.self, from: data)
+        var scene = try decoder.decode(VCamScene.self, from: data)
+        scene.migrateToCurrentVersion()
+        return scene
     }
 
     public func save(_ scene: VCamScene) throws {

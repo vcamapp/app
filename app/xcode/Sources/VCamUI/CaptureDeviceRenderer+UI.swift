@@ -24,7 +24,7 @@ private struct CaptureDeviceSelectView: View {
     @State private var captureDevice = Camera.defaultCaptureDevice!
     @State private var previewable = false
     @State private var cropRect = CGRect(x: 0, y: 0, width: 1, height: 1)
-    @State private var cropPreviewWidth: CGFloat = 1
+    @State private var cropPreviewSize = CGSize(width: 1, height: 1)
 
     var body: some View {
         ModalSheet(doneTitle: String(localized: .addVideoCapture)) {
@@ -34,7 +34,7 @@ private struct CaptureDeviceSelectView: View {
             Task{ @MainActor in
                 // A wait is needed to make the start work during the stop or start of the previewer.
                 try? await Task.sleep(for: .milliseconds(300))
-                didSelect(captureDevice, cropRect.applying(.init(scaleX: 1 / cropPreviewWidth, y: 1 / cropPreviewWidth)))
+                didSelect(captureDevice, cropRect.applying(.init(scaleX: 1 / cropPreviewSize.width, y: 1 / cropPreviewSize.height)))
             }
         } content: {
             VStack {
@@ -54,10 +54,10 @@ private struct CaptureDeviceSelectView: View {
                         .background(GeometryReader { proxy in
                             Color.clear
                                 .onAppear {
-                                    cropPreviewWidth = proxy.size.width
+                                    cropPreviewSize = proxy.size
                                 }
                                 .onChange(of: preview.size) { _, _ in
-                                    cropPreviewWidth = proxy.size.width
+                                    cropPreviewSize = proxy.size
                                 }
                         })
                 }

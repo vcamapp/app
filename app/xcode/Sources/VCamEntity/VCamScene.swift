@@ -1,24 +1,19 @@
-//
-//  VCamScene.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/05/01.
-//
-
 import Foundation
 
 public struct VCamScene: Codable, Identifiable, Sendable {
-    public init(id: Int32, name: String, objects: [VCamScene.Object], aspectRatio: Float) {
+    public init(id: Int32, name: String, objects: [VCamScene.Object], aspectRatio: Float, version: Int = VCamScene.currentVersion) {
         self.id = id
         self.name = name
         self.objects = objects
         self.aspectRatio = aspectRatio
+        self.version = version
     }
 
     public var id: Int32
     public var name: String
     public var objects: [Object]
     public var aspectRatio: Float?
+    public var version: Int? // [Added 0.14.8] nil = version 1. See VCamScene.currentVersion for the format history.
 }
 
 extension VCamScene: CustomStringConvertible {
@@ -39,7 +34,7 @@ public extension VCamScene {
 
         public let id: Int32
         public var name: String
-        public let type: ObjectType
+        public var type: ObjectType
         public var isHidden: Bool? // [Added 0.9.4]
         public var isLocked: Bool? // [Added 0.9.7]
     }
@@ -138,7 +133,7 @@ public extension VCamScene {
         public var width: Float  // number of horizontal pixels of the rendertexture
         public var height: Float // number of vertical pixels of the rendertexture
         public var region: Plane
-        public var crop: Plane
+        public var crop: Plane // unit rect relative to the texture; (0, 0, 1, 1) = the whole texture
         public var filter: ImageFilterConfiguration?
 
         public var textureSize: CGSize {

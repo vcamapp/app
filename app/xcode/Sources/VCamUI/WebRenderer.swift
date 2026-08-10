@@ -9,7 +9,7 @@ public final class WebRenderer {
     public let resource: Resource
     public var size: CGSize
     public var fps: Int
-    public var cropRect: CGRect = .init(x: 0, y: 0, width: 1, height: 1)
+    public let cropRect = CGRect(x: 0, y: 0, width: 1, height: 1)
     public var filter: ImageFilter?
 
     private let webView: WKWebView
@@ -77,7 +77,6 @@ public final class WebRenderer {
         self.css = css
         self.javaScript = js
         self.onFetchMetadata = onFetchMetadata
-        cropRect = Self.makeCropRect(with: size)
 
         let webView = Self.makeWebView(url: resource.url, size: size, window: viewHolder)
         self.webView = webView
@@ -99,7 +98,6 @@ public final class WebRenderer {
             size = .init(width: metadata.width ?? Int(size.width), height: metadata.height ?? Int(size.height))
             webView.frame.size = size
             viewHolder.contentView?.frame.size = size
-            cropRect = Self.makeCropRect(with: size)
         }
 
         if let fps = metadata.fps, self.fps != fps {
@@ -110,13 +108,6 @@ public final class WebRenderer {
         onFetchMetadata?(metadata)
     }
 
-    private static func makeCropRect(with size: CGSize) -> CGRect {
-        if size.width < size.height {
-            return .init(origin: .zero, size: .init(width: size.width / size.height, height: 1))
-        } else {
-            return .init(origin: .zero, size: .init(width: 1, height: size.height / size.width))
-        }
-    }
 
     private static func makeWebView(url: URL?, size: CGSize, window: NSWindow) -> WKWebView {
         let webView = WKWebView(frame: .init(origin: .zero, size: size))

@@ -23,7 +23,6 @@ public final class ScreenRecorder: NSObject {
             captureType: ScreenRecorder.CaptureType = .display,
             display: SCDisplay? = nil,
             window: SCWindow? = nil,
-            filterOutOwningApplication: Bool = true,
             capturesVideo: Bool = true,
             capturesAudio: Bool = false,
             minimumFrameInterval: CMTime? = nil
@@ -31,7 +30,6 @@ public final class ScreenRecorder: NSObject {
             self.captureType = captureType
             self.display = display
             self.window = window
-            self.filterOutOwningApplication = filterOutOwningApplication
             self.capturesVideo = capturesVideo
             self.capturesAudio = capturesAudio
             self.minimumFrameInterval = minimumFrameInterval
@@ -40,7 +38,6 @@ public final class ScreenRecorder: NSObject {
         public var captureType: CaptureType = .display
         public var display: SCDisplay?
         public var window: SCWindow?
-        public var filterOutOwningApplication = true
         public var capturesVideo = true
         public var capturesAudio = false
         public var minimumFrameInterval: CMTime?
@@ -48,7 +45,7 @@ public final class ScreenRecorder: NSObject {
         public var id: String? {
             switch captureType {
             case .independentWindow:
-                return window?.id
+                return window?.persistentID
             case .display:
                 return display?.id
             }
@@ -98,7 +95,7 @@ public final class ScreenRecorder: NSObject {
         return .init(width: 1024, height: 640)
     }
 
-    @ObservationIgnored public var cropRect = CGRect(x: 0, y: 0, width: 1024, height: 640)
+    @ObservationIgnored public var cropRect = CGRect(x: 0, y: 0, width: 1, height: 1)
 
     @ObservationIgnored public var filter: ImageFilter?
 
@@ -177,21 +174,17 @@ public final class ScreenRecorder: NSObject {
         switch config.captureType {
         case .display:
             if let display = config.display {
-                if config.filterOutOwningApplication {
-                    let content = try await SCShareableContent.excludingDesktopWindows(false,
-                                                                                       onScreenWindowsOnly: true)
+                let content = try await SCShareableContent.excludingDesktopWindows(false,
+                                                                                   onScreenWindowsOnly: true)
 
-                    // Exclude VCam's own windows so the capture doesn't show the app itself
-                    let excludedApps = content.applications.filter { app in
-                        Bundle.main.bundleIdentifier == app.bundleIdentifier
-                    }
-
-                    return SCContentFilter(display: display,
-                                           excludingApplications: excludedApps,
-                                           exceptingWindows: [])
-                } else {
-                    return SCContentFilter(display: display, excludingWindows: [])
+                // Exclude VCam's own windows so the capture doesn't show the app itself
+                let excludedApps = content.applications.filter { app in
+                    Bundle.main.bundleIdentifier == app.bundleIdentifier
                 }
+
+                return SCContentFilter(display: display,
+                                       excludingApplications: excludedApps,
+                                       exceptingWindows: [])
             }
         case .independentWindow:
             if let window = config.window {
@@ -377,7 +370,7 @@ public extension ScreenRecorder {
         let configuration = CaptureConfiguration(
             captureType: .init(type: screenCapture.captureType),
             display: availableContent.displays.first { $0.id == id },
-            window: availableContent.windows.first { $0.id == id }
+            window: availableContent.windows.first { $0.persistentID == id }
         )
 
         let screenRecorder = ScreenRecorder()
@@ -388,18 +381,25 @@ public extension ScreenRecorder {
         return screenRecorder
     }
 
-    static func audioOnly(output: @escaping @MainActor (CMSampleBuffer) -> Void) -> ScreenRecorder {
+    static func audioOnly(
+        output: @escaping @MainActor (CMSampleBuffer) -> Void,
+        onStartFailure: @escaping @MainActor (any Error) -> Void
+    ) -> ScreenRecorder {
         let audioCapture = ScreenRecorder()
         Task {
-            let availableContent = try await ScreenRecorder.availableContent()
-            let configuration = ScreenRecorder.CaptureConfiguration(
-                captureType: .display,
-                display: availableContent.displays.first, // If not set to display, sound will not be recorded.
-                capturesVideo: false,
-                capturesAudio: true,
-                minimumFrameInterval: .init(value: 1, timescale: 10) // https://developer.apple.com/forums/thread/718279
-            )
-            try await audioCapture.startCapture(with: configuration)
+            do {
+                let availableContent = try await ScreenRecorder.availableContent()
+                let configuration = ScreenRecorder.CaptureConfiguration(
+                    captureType: .display,
+                    display: availableContent.displays.first, // If not set to display, sound will not be recorded.
+                    capturesVideo: false,
+                    capturesAudio: true,
+                    minimumFrameInterval: .init(value: 1, timescale: 10) // https://developer.apple.com/forums/thread/718279
+                )
+                try await audioCapture.startCapture(with: configuration)
+            } catch {
+                onStartFailure(error)
+            }
         }
         audioCapture.didAudioOutput = output
         return audioCapture
@@ -413,7 +413,16 @@ extension SCDisplay: @retroactive Identifiable {
 }
 
 extension SCWindow: @retroactive Identifiable  {
-    public var id: String {
+    public var id: CGWindowID {
+        windowID
+    }
+}
+
+extension SCWindow {
+    /// Identity used to find the same window again when restoring a scene after a relaunch.
+    /// windowID doesn't survive a relaunch, so the owner name and title are used instead;
+    /// the format must stay stable because it is persisted in scenes.
+    public var persistentID: String {
         guard let infoList = CGWindowListCopyWindowInfo(.optionIncludingWindow, windowID) as? [NSDictionary],
               let info = infoList.first,
               let ownerName = info[kCGWindowOwnerName] as? String,

@@ -50,7 +50,7 @@ public final class RenderTextureManager {
                 }
             }
 
-            let (camWidth, camHeight) = (Int(width * recorder.cropRect.width), Int(width * recorder.cropRect.height))
+            let (camWidth, camHeight) = (Int(width * recorder.cropRect.width), Int(height * recorder.cropRect.height))
             if texture.width == camWidth, texture.height == camHeight {
                 let croppedImage = recorder.cropped(of: image)
                 ciContext.render(croppedImage, to: texture, commandBuffer: nil, bounds: croppedImage.extent, colorSpace: .sRGB)

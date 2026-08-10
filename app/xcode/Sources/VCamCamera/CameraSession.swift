@@ -149,15 +149,34 @@ public actor CameraSession {
         session.addInput(input)
         session.commitConfiguration()
 
-        deviceInput = input
-        captureDevice = device
-        requestedFPS = fps
-        desiredFormat = DeviceFormat(
+        let format = DeviceFormat(
             format: result.format,
             minFrameDuration: rate.minFrameDuration,
             maxFrameDuration: rate.maxFrameDuration
         )
-        try applyDesiredFormat()
+        do {
+            try apply(format, to: device)
+        } catch {
+            // The caller treats a throw as "nothing changed" (e.g. it keeps the persisted
+            // device), so restore the previous input instead of leaving the new one active
+            session.beginConfiguration()
+            session.removeInput(input)
+            if let oldInput, session.canAddInput(oldInput) {
+                session.addInput(oldInput)
+                session.commitConfiguration()
+            } else {
+                session.commitConfiguration()
+                deviceInput = nil
+                captureDevice = nil
+                desiredFormat = nil
+            }
+            throw error
+        }
+
+        deviceInput = input
+        captureDevice = device
+        requestedFPS = fps
+        desiredFormat = format
         videoOutput.connection(with: .video)?.isEnabled = true
 
         Logger.log(
@@ -191,7 +210,12 @@ public actor CameraSession {
     /// Applies the format chosen in `configure`. The session only keeps it while it is
     /// running, so before that the format is remembered and written in `start`.
     private func applyDesiredFormat() throws {
-        guard session.isRunning, let device = captureDevice, let desiredFormat else { return }
+        guard let captureDevice, let desiredFormat else { return }
+        try apply(desiredFormat, to: captureDevice)
+    }
+
+    private func apply(_ desiredFormat: DeviceFormat, to device: AVCaptureDevice) throws {
+        guard session.isRunning else { return }
         do {
             try device.lockForConfiguration()
         } catch {

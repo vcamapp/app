@@ -12,6 +12,8 @@ public enum HandTrackingCalibrationView {
         }
     }
 
+    /// Called while a view body builds the menu, so the implementation has to read observable
+    /// state only; a value read from elsewhere leaves the menu stale until the view is recreated.
     @MainActor public static var availability: () -> Availability = { .unavailable(reason: nil) }
     @MainActor public static var make: () -> AnyView = { AnyView(EmptyView()) }
 }

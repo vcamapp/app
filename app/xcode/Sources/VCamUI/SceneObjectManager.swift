@@ -59,18 +59,22 @@ public final class SceneObjectManager {
                 region = .init(origin: .init(x: CGFloat(image.offset.x), y: CGFloat(image.offset.y)), size: image.size)
             }
 
-            let rect = textureRect(region: region, crop: .init(x: 0, y: 0, width: 1, height: canvasSize.height * image.size.height / (canvasSize.width * image.size.width)))
+            let rect = textureRect(
+                region: region,
+                crop: .init(x: 0, y: 0, width: 1, height: 1),
+                textureSize: .init(width: canvasSize.width * image.size.width, height: canvasSize.height * image.size.height)
+            )
             image.offset = .init(x: Float(rect[0]) / Float(canvasSize.width), y: Float(rect[1]) / Float(canvasSize.height))
             image.size = .init(width: CGFloat(rect[2]) / canvasSize.width, height: CGFloat(rect[3]) / canvasSize.height)
             uniBridge.addRenderTexture([object.id, RenderTextureType.photo.rawValue, rect[2], rect[3]] + rect)
         case let .screen(screen):
-            let rect = textureRect(region: screen.region, crop: screen.crop)
+            let rect = textureRect(region: screen.region, crop: screen.crop, textureSize: screen.textureSize)
             uniBridge.addRenderTexture([object.id, RenderTextureType.screen.rawValue, rect[2], rect[3]] + rect)
         case let .videoCapture(videoCapture):
-            let rect = textureRect(region: videoCapture.region, crop: videoCapture.crop)
+            let rect = textureRect(region: videoCapture.region, crop: videoCapture.crop, textureSize: videoCapture.textureSize)
             uniBridge.addRenderTexture([object.id, RenderTextureType.captureDevice.rawValue, rect[2], rect[3]] + rect)
         case let .web(web):
-            let rect = textureRect(region: web.region, crop: web.crop)
+            let rect = textureRect(region: web.region, crop: web.crop, textureSize: web.textureSize)
             uniBridge.addRenderTexture([object.id, RenderTextureType.web.rawValue, rect[2], rect[3]] + rect)
         case let .wind(wind):
             let direction = wind.direction
@@ -207,13 +211,15 @@ public final class SceneObjectManager {
         RenderTextureManager.shared.removeAll()
     }
 
-    private func textureRect(region: CGRect, crop: CGRect) -> [Int32] {
+    private func textureRect(region: CGRect, crop: CGRect, textureSize: CGSize) -> [Int32] {
         let canvasSize = UniBridge.shared.canvasCGSize
         uniDebugLog("textureRect: r\(region), c\(crop), s\(canvasSize)")
         let x = Int32(canvasSize.width * region.origin.x)
         let y = Int32(canvasSize.height * region.origin.y)
 
-        let estimatedSize = fitSize(crop.size, regionSize: region.size)
+        // The crop is a unit rect, so convert it to pixels to give fitSize the real aspect ratio
+        let cropPixelSize = CGSize(width: crop.width * textureSize.width, height: crop.height * textureSize.height)
+        let estimatedSize = fitSize(cropPixelSize, regionSize: region.size)
 
         return [x, y, Int32(estimatedSize.width), Int32(estimatedSize.height)]
     }

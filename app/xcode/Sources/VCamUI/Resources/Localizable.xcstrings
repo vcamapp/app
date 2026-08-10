@@ -2347,6 +2347,29 @@
         }
       }
     },
+    "failedToRecordDesktopAudio": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failed to record desktop audio."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PCの音声の録音に失敗しました。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PC 소리를 녹음하지 못했습니다."
+          }
+        }
+      }
+    },
     "failure": {
       "extractionState": "manual",
       "localizations": {
@@ -4758,29 +4781,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "다시 불러오기"
-          }
-        }
-      }
-    },
-    "removeVCamFromCapture": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Remove this app from the capture"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "画面キャプチャからこのアプリを除外"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "화면 캡처에서 이 앱 제외"
           }
         }
       }

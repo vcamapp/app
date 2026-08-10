@@ -31,7 +31,7 @@ public extension RenderTextureRenderer {
     }
 
     func cropped(of image: CIImage) -> CIImage {
-        var cropRect = cropRect.applying(.init(scaleX: image.extent.width, y: image.extent.width))
+        var cropRect = cropRect.applying(.init(scaleX: image.extent.width, y: image.extent.height))
         cropRect.origin.y = image.extent.height - cropRect.height - cropRect.origin.y // Convert to bottom-left-origin coordinate system
         return image.cropped(to: cropRect)
     }

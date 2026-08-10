@@ -137,6 +137,10 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
         if capturesSystemAudio {
             systemAudioRecorder = ScreenRecorder.audioOnly { buffer in
                 Self.shared.renderPCAudioFrame(buffer)
+            } onStartFailure: { error in
+                // The video keeps recording without desktop audio, so tell the user
+                // instead of finishing a recording that is silently missing it
+                VCamAlert.showError(title: String(localized: .failedToRecordDesktopAudio), message: error.localizedDescription)
             }
         }
 
