@@ -1,10 +1,3 @@
-//
-//  Array+.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/05/07.
-//
-
 import Foundation
 
 public extension Array where Element: Identifiable {
@@ -34,5 +27,13 @@ public extension Array where Element: Identifiable {
         guard let index = index(ofId: element.id) else { return }
         self[index] = element
     }
-}
 
+    @discardableResult
+    mutating func move(byId id: Element.ID, up: Bool) -> Bool {
+        guard let index = index(ofId: id) else { return false }
+        let destination = index + (up ? 1 : -1)
+        guard indices.contains(destination) else { return false }
+        swapAt(index, destination)
+        return true
+    }
+}

@@ -14,19 +14,23 @@ public struct KeyRecordingPopoverView: View {
         self.completion = completion
     }
 
-    internal init(keys: KeyCombination = .empty, isError: Bool = false, isCompleted: Bool = false) {
+    internal init(keys: KeyCombination = .empty) {
         self._keys = .init(initialValue: keys)
-        self._isError = .init(initialValue: isError)
-        self._isCompleted = .init(initialValue: isCompleted)
         self.completion = { _ in }
     }
 
     @State private var keys = KeyCombination.empty
-    @State private var isError = false
-    @State private var isCompleted = false
     let completion: (KeyCombination) -> Void
 
     @Environment(\.dismiss) var dismiss
+
+    private var isError: Bool {
+        !keys.key.isEmpty && !keys.isEnabled
+    }
+
+    private var isCompleted: Bool {
+        keys.isEnabled
+    }
 
     var helpMessage: LocalizedStringResource? {
         if keys.key.isEmpty {
@@ -63,13 +67,11 @@ public struct KeyRecordingPopoverView: View {
         guard !isError && !isCompleted else { return }
         self.keys = keys
 
-        isError = !keys.key.isEmpty && !keys.isEnabled
         guard !isError else { return }
 
-        isCompleted = keys.isEnabled
         if isCompleted {
             Task { @MainActor in
-                try? await Task.sleep(nanoseconds: NSEC_PER_MSEC * 1000)
+                try? await Task.sleep(for: .seconds(1))
                 NSApp.vcamWindow?.makeFirstResponder(nil) // Workaround for "not legal to call -layoutSubtreeIfNeeded"
                 dismiss()
                 completion(keys)
@@ -79,8 +81,7 @@ public struct KeyRecordingPopoverView: View {
 
     private func onKeyUp() {
         Task { @MainActor in
-            try? await Task.sleep(nanoseconds: NSEC_PER_MSEC * 1500)
-            isError = false
+            try? await Task.sleep(for: .milliseconds(1500))
             keys = .empty
         }
     }
@@ -123,5 +124,5 @@ private struct KeyCombinationView: View {
 }
 
 #Preview("Completed") {
-    KeyRecordingPopoverView(keys: .init(key: "t", modifiers: [.control]), isCompleted: true)
+    KeyRecordingPopoverView(keys: .init(key: "t", modifiers: [.control]))
 }

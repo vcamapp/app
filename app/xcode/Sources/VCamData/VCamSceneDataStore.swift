@@ -89,6 +89,17 @@ public struct VCamSceneDataStore {
 }
 
 extension VCamSceneDataStore {
+    public static func saveSceneOrder(_ loadedSceneIds: [Int32]) throws {
+        var metadata = try VCamSceneMetadata.loadOrCreate()
+        let loadedSceneIdSet = Set(loadedSceneIds)
+        let unavailableSceneIds = metadata.sceneIds.filter {
+            !loadedSceneIdSet.contains($0)
+                && FileManager.default.fileExists(atPath: URL.scene(sceneId: $0).path)
+        }
+        metadata.sceneIds = loadedSceneIds + unavailableSceneIds
+        try metadata.save()
+    }
+
     public static var defaultObjects: [SceneObject] {
         [
             .init(id: SceneObject.avatarID, type: .avatar(.init()), isHidden: false, isLocked: false)
@@ -114,7 +125,7 @@ extension VCamSceneDataStore {
     }
 
     private func addSceneIdIfNeeded() throws {
-        var metadata = VCamSceneMetadata.loadOrCreate()
+        var metadata = try VCamSceneMetadata.loadOrCreate()
         if !metadata.sceneIds.contains(sceneId) {
             metadata.sceneIds.append(sceneId)
             try metadata.save()

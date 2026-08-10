@@ -45,7 +45,8 @@ public struct VCamRecordingView: View {
 private struct TakePhotoView: View {
     let destinationURL: () throws -> URL
 
-    @State private var restWaitTime: CGFloat = 0
+    @State private var restWaitTime = 0
+    @State private var screenshotTask: Task<Void, Never>?
 
     @AppStorage(key: .screenshotWaitTime) var screenshotWaitTime
 
@@ -57,10 +58,11 @@ private struct TakePhotoView: View {
                 } label: {
                     HStack(spacing: 4) {
                         Image(systemName: "camera.circle")
-                        restWaitTime < 1 ? Text(.takePhoto) : Text(Int(restWaitTime).description)
+                        restWaitTime < 1 ? Text(.takePhoto) : Text(restWaitTime.description)
                     }
                 }
                 .controlSize(.large)
+                .disabled(screenshotTask != nil)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 Form {
                     VStack(alignment: .leading) {
@@ -80,39 +82,58 @@ private struct TakePhotoView: View {
             .frame(maxHeight: .infinity, alignment: .top)
         }
         .fixedSize()
+        .onDisappear {
+            screenshotTask?.cancel()
+            screenshotTask = nil
+        }
     }
 
     // TODO: Move it to VCamDomain
     private func takeScreenshot() {
-        guard let destination = try? destinationURL() else { return }
-        let image = MainTexture.shared.texture.nsImage()
+        screenshotTask?.cancel()
+        restWaitTime = Int(screenshotWaitTime)
+        screenshotTask = Task { @MainActor in
+            defer {
+                restWaitTime = 0
+                screenshotTask = nil
+            }
 
-        _ = destination.startAccessingSecurityScopedResource()
-        defer {
-            destination.stopAccessingSecurityScopedResource()
-        }
-
-        restWaitTime = screenshotWaitTime
-        let save = {
-            let url = destination.appending(path: "vcam_\(Date().yyyyMMddHHmmss).png")
             do {
+                while restWaitTime > 0 {
+                    try await Task.sleep(for: .seconds(1))
+                    restWaitTime -= 1
+                }
+                try Task.checkCancellation()
+
+                let destination = try destinationURL()
+                let image = MainTexture.shared.texture.nsImage()
+                let isAccessing = destination.startAccessingSecurityScopedResource()
+                defer {
+                    if isAccessing {
+                        destination.stopAccessingSecurityScopedResource()
+                    }
+                }
+
+                let url = nextScreenshotURL(in: destination)
                 try image.writeAsPNG(to: url)
             } catch {
-                print(error)
-                UserDefaults.standard.remove(for: .screenshotDestination)
-            }
-        }
-        if restWaitTime > 0 {
-            Timer.scheduledTimerOnMain(withTimeInterval: 1, repeats: true) { timer in
-                restWaitTime -= 1
-                if restWaitTime <= 0 {
-                    timer.invalidate()
-                    save()
+                if !Task.isCancelled {
+                    print(error)
+                    UserDefaults.standard.remove(for: .screenshotDestination)
                 }
             }
-        } else {
-            save()
         }
+    }
+
+    private func nextScreenshotURL(in destination: URL) -> URL {
+        let baseName = "vcam_\(Date().yyyyMMddHHmmss)"
+        var url = destination.appending(path: "\(baseName).png")
+        var suffix = 2
+        while FileManager.default.fileExists(atPath: url.path) {
+            url = destination.appending(path: "\(baseName)-\(suffix).png")
+            suffix += 1
+        }
+        return url
     }
 }
 

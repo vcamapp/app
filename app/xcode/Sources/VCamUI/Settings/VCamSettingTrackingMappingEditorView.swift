@@ -36,6 +36,9 @@ public struct VCamSettingTrackingMappingEditorView: View {
         .onChange(of: uniState.blendShapeNames) { _, newValue in
             store.updateBlendShapeNames(newValue)
         }
+        .onChange(of: supportsPerfectSyncMode) { _, isSupported in
+            store.updatePerfectSyncSupport(isSupported)
+        }
         .toolbar {
             ToolbarItem(placement: .automatic) {
                 Button {
@@ -215,13 +218,12 @@ final class MappingDataStore {
     var mappingsRevision = 0
     private(set) var isInitialized = false
 
-    private var inputKeysByMode: [TrackingMode: [TrackingMappingEntry.InputKey]] = [:]
     private(set) var outputKeys: [TrackingMappingEntry.OutputKey] = []
 
     private var tracking: Tracking { Tracking.shared }
 
     var inputKeys: [TrackingMappingEntry.InputKey] {
-        inputKeysByMode[selectedMode] ?? []
+        TrackingMappingEntry.availableInputKeys(for: selectedMode)
     }
 
     var mappings: [TrackingMappingEntry] {
@@ -238,10 +240,6 @@ final class MappingDataStore {
         if supportsPerfectSyncMode {
             modes.append(.perfectSync)
         }
-        for mode in modes {
-            inputKeysByMode[mode] = TrackingMappingEntry.availableInputKeys(for: mode)
-        }
-
         // Open on the mapping set that currently drives the avatar
         if let activeMode, modes.contains(activeMode) {
             selectedMode = activeMode
@@ -254,12 +252,19 @@ final class MappingDataStore {
         outputKeys = names.map { TrackingMappingEntry.OutputKey(key: $0) }
     }
 
+    func updatePerfectSyncSupport(_ isSupported: Bool) {
+        if !isSupported && selectedMode == .perfectSync {
+            selectedMode = .blendShape
+            selectedIndices.removeAll()
+        }
+    }
+
     func applyMappings() {
         tracking.applyMappings(for: selectedMode)
     }
 
     func addMapping() {
-        let input = TrackingMappingEntry.availableInputKeys(for: selectedMode).first ?? TrackingMappingEntry.DefaultMappingDefinition.posX.inputKey
+        let input = inputKeys.first ?? TrackingMappingEntry.DefaultMappingDefinition.posX.inputKey
         tracking.addMapping(.init(input: input, outputKey: .empty), for: selectedMode)
         mappingsRevision &+= 1
     }

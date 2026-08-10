@@ -1,38 +1,26 @@
-//
-//  DisplayParameterController.swift
-//
-//
-//  Created by tattn on 2026/01/23.
-//
-
 #if FEATURE_3
 
 import Foundation
+import Observation
 import VCamBridge
 
 @MainActor
+@Observable
 public final class DisplayParameterController {
     private unowned let state: UniState
+    @ObservationIgnored
     private var storedParameterId = UserDefaults.standard.value(for: .displayParameterId)
 
     init(state: UniState) {
         self.state = state
     }
 
-    var currentPreset: DisplayParameterPreset {
+    public var selectedParameterId: String {
         get {
-            DisplayParameterPresets.shared.currentParameter.map {
-                DisplayParameterPreset(id: $0.id, description: $0.name)
-            } ?? .newPreset
+            DisplayParameterPresets.shared.currentParameterId ?? ""
         }
         set {
-            if let current = DisplayParameterPresets.shared.currentParameter,
-               current.id == newValue.id,
-               current.name != newValue.description {
-                DisplayParameterPresets.shared.updateCurrentParameterName(newValue.description)
-            }
-
-            let selectedId = newValue.id.isEmpty ? nil : newValue.id
+            let selectedId = newValue.isEmpty ? nil : newValue
             storeParameterId(selectedId)
 
             guard state.usePostEffect else { return }
@@ -40,6 +28,14 @@ public final class DisplayParameterController {
                 DisplayParameterPresets.shared.currentParameterId = selectedId
                 applyCurrentParameter()
             }
+        }
+    }
+
+    public var currentParameterName: String {
+        get { DisplayParameterPresets.shared.currentParameter?.name ?? "" }
+        set {
+            guard DisplayParameterPresets.shared.currentParameter?.name != newValue else { return }
+            DisplayParameterPresets.shared.updateCurrentParameterName(newValue)
         }
     }
 
@@ -88,7 +84,7 @@ public final class DisplayParameterController {
     }
 
     public func addParameter() {
-        let newParam = DisplayParameterPresets.shared.addParameter()
+        guard let newParam = DisplayParameterPresets.shared.addParameter() else { return }
         storeParameterId(newParam.id)
 
         if state.usePostEffect {

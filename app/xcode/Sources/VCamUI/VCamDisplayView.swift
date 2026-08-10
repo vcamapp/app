@@ -1,10 +1,3 @@
-//
-//  VCamDisplayView.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2022/02/22.
-//
-
 #if FEATURE_3
 
 import SwiftUI
@@ -20,10 +13,7 @@ public struct VCamDisplayView: View {
 
     public var body: some View {
         @Bindable var state = uniState
-
-        let presetItems = presets.parameters.map {
-            DisplayParameterPreset(id: $0.id, description: $0.name)
-        }
+        @Bindable var displayParameters = uniState.displayParameters
 
         VStack {
             HStack {
@@ -34,16 +24,16 @@ public struct VCamDisplayView: View {
                 }
                 GroupBox {
                     HStack {
-                        Picker(selection: $state.currentDisplayParameterPreset) {
-                            ForEach(presetItems) { item in
-                                Text(verbatim: item.description.isEmpty ? String(localized: .newPreset) : item.description)
+                        Picker(selection: $displayParameters.selectedParameterId) {
+                            ForEach(presets.parameters) { parameter in
+                                Text(verbatim: parameter.name.isEmpty ? String(localized: .newPreset) : parameter.name)
                                     .frame(minWidth: 120, alignment: .leading)
-                                    .tag(item)
+                                    .tag(parameter.id)
                             }
                         } label: {
                             Text(.preset)
                         }
-                        TextField(text: $state.currentDisplayParameterPreset.description) {
+                        TextField(text: $displayParameters.currentParameterName) {
                             Text(.newPreset)
                         }
                         .frame(minWidth: 120)
@@ -63,6 +53,7 @@ public struct VCamDisplayView: View {
                             Image(systemName: "trash")
                                 .foregroundStyle(.red)
                         }
+                        .disabled(presets.parameters.count <= 1)
                     }
                 }
                 .disabled(!uniState.usePostEffect)

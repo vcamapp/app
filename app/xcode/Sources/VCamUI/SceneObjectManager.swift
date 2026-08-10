@@ -172,14 +172,8 @@ public final class SceneObjectManager {
     }
 
     public func move(byId id: Int32, up: Bool) {
-        guard let index = objects.index(ofId: id) else {
-            return
-        }
-        Logger.log("\(id), \(up), \(index)")
-
-        let destination = index + (up ? 1 : -1)
-        if 0 <= destination && destination < objects.count {
-            objects.swapAt(index, destination)
+        Logger.log("\(id), \(up)")
+        if objects.move(byId: id, up: up) {
             updateObjectOrder()
         }
     }

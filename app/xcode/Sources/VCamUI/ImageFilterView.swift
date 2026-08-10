@@ -36,9 +36,10 @@ public struct ImageFilterView: View {
         .frame(minWidth: 640, minHeight: 480)
         .onAppear {
             filters = configuration?.filters ?? []
-            updatePreview()
         }
-        .onChange(of: filters) { _, newValue in
+        .task(id: filters) {
+            try? await Task.sleep(for: .milliseconds(150))
+            guard !Task.isCancelled else { return }
             updatePreview()
         }
     }
@@ -134,17 +135,14 @@ private struct ImageFilterPreviewPane: View {
 struct ImageFilterParameterView: View {
     @Binding var filter: ImageFilterConfiguration.Filter?
 
-    @State private var color = Color.green
-
     var body: some View {
         switch filter?.type {
         case let .chromaKey(chromaKey):
             Form {
-                ColorEditField(.color, value: .init(value: color) { color in
+                ColorEditField(.color, value: .init(value: chromaKey.color.color) { color in
                     var chromaKey = chromaKey
                     chromaKey.color = VCamColor(color: color)
                     filter?.type = .chromaKey(chromaKey)
-                    self.color = color
                 })
                 ValueEditField(.threshold, value: .init(value: CGFloat(chromaKey.threshold), set: { threshold in
                     var chromaKey = chromaKey
@@ -153,9 +151,6 @@ struct ImageFilterParameterView: View {
                 }), type: .slider(0...1))
             }
             .frame(maxWidth: .infinity)
-            .onAppear {
-                color = chromaKey.color.color
-            }
         case let .blur(blur):
             Form {
                 ValueEditField(.intensity, value: .init(value: CGFloat(blur.radius), set: { radius in

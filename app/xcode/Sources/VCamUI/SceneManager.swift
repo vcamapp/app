@@ -36,7 +36,6 @@ public final class SceneManager {
     }
 
     private var scenesByOrientation: OrientedScenes
-
     // The slice for the current orientation, so the working copy never drifts from the backing store.
     public var scenes: [VCamScene] {
         get { scenesByOrientation[isLandscape: MainTexture.shared.isLandscape] }
@@ -59,7 +58,8 @@ public final class SceneManager {
         let loadedScenes: [VCamScene]
         do {
             let metadata = try VCamSceneMetadata.load()
-            (loadedScenes, _) = try VCamSceneDataStore.loadAndRepair(metadata: metadata)
+            let repaired = try VCamSceneDataStore.loadAndRepair(metadata: metadata)
+            loadedScenes = repaired.scenes
         } catch {
             uniDebugLog(error.localizedDescription)
             loadedScenes = []
@@ -134,13 +134,7 @@ public final class SceneManager {
     }
 
     public func move(byId id: Int32, up: Bool) {
-        guard let index = scenes.index(ofId: id) else {
-            return
-        }
-
-        let destination = index + (up ? 1 : -1)
-        if 0 <= destination && destination < scenes.count {
-            scenes.swapAt(index, destination)
+        if scenes.move(byId: id, up: up) {
             logAnyError { try save() }
         }
     }
@@ -190,9 +184,8 @@ public final class SceneManager {
     }
 
     private func save() throws {
-        var metadata = VCamSceneMetadata.loadOrCreate()
-        metadata.sceneIds = (scenesByOrientation.landscape + scenesByOrientation.portrait).map(\.id)
-        try metadata.save()
+        let loadedIds = (scenesByOrientation.landscape + scenesByOrientation.portrait).map(\.id)
+        try VCamSceneDataStore.saveSceneOrder(loadedIds)
     }
 
     func changeAspectRatio() {

@@ -4,17 +4,19 @@ import VCamBridge
 
 public struct ModelListView: View {
     @Bindable private var modelManager: ModelManager
-    @State private var selectedModel: ModelItem?
+    @State private var selectedModelId: UUID?
 
     public init(modelManager: ModelManager = .shared) {
         self.modelManager = modelManager
     }
 
     public var body: some View {
+        let selectedModel = selectedModel
+
         VStack(spacing: 0) {
-            ModelListContent(modelManager: modelManager, selectedModel: $selectedModel, loadModel: loadSelectedModel)
+            ModelListContent(modelManager: modelManager, selectedModelId: $selectedModelId, loadModel: loadSelectedModel)
             Divider()
-            ModelListFooter(isLoadDisabled: selectedModel == nil || selectedModel?.status == .missing, loadModel: loadSelectedModel)
+            ModelListFooter(isLoadDisabled: selectedModel?.status != .valid, loadModel: loadSelectedModel)
         }
         .frame(minWidth: 400, minHeight: 300)
         .toolbar {
@@ -39,9 +41,14 @@ public struct ModelListView: View {
         .onAppear {
             modelManager.refresh()
             if let lastModel = modelManager.lastLoadedModel {
-                selectedModel = lastModel
+                selectedModelId = lastModel.id
             }
         }
+    }
+
+    private var selectedModel: ModelItem? {
+        guard let selectedModelId else { return nil }
+        return modelManager.modelItems.find(byId: selectedModelId)
     }
 
     private func loadSelectedModel() {
@@ -71,7 +78,7 @@ public struct ModelListView: View {
         Task {
             do {
                 let model = try await modelManager.saveModel(from: url)
-                selectedModel = model
+                selectedModelId = model.id
             } catch {
                 print("Failed to add model: \(error)")
             }
@@ -81,7 +88,7 @@ public struct ModelListView: View {
 
 private struct ModelListContent: View {
     @Bindable var modelManager: ModelManager
-    @Binding var selectedModel: ModelItem?
+    @Binding var selectedModelId: UUID?
     let loadModel: () -> Void
 
     @State private var showDeleteConfirmation = false
@@ -100,12 +107,12 @@ private struct ModelListContent: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
-                List(selection: $selectedModel) {
+                List(selection: $selectedModelId) {
                     ForEach(modelManager.modelItems) { item in
                         ModelRowView(item: item, isRenaming: modelToRename?.id == item.id) {
                             modelToRename = nil
                         }
-                        .tag(item)
+                        .tag(item.id)
                     }
                     .onMove { source, destination in
                         do {
@@ -121,8 +128,8 @@ private struct ModelListContent: View {
                     modelToDelete = model
                     showDeleteConfirmation = true
                 }
-                .contextMenu(forSelectionType: ModelItem.self) { items in
-                    if let item = items.first {
+                .contextMenu(forSelectionType: UUID.self) { ids in
+                    if let id = ids.first, let item = modelManager.modelItems.find(byId: id) {
                         Button {
                             modelToRename = item
                         } label: {
@@ -153,39 +160,42 @@ private struct ModelListContent: View {
                         }
                         .disabled(modelManager.modelItems.count <= 1)
                     }
-                } primaryAction: { items in
+                } primaryAction: { ids in
                     // Double click to load
-                    guard let item = items.first, item.status == .valid else { return }
-                    selectedModel = item
+                    guard let id = ids.first,
+                          let item = modelManager.modelItems.find(byId: id),
+                          item.status == .valid else { return }
+                    selectedModelId = id
                     loadModel()
                 }
             }
         }
-        .alert(.delete, isPresented: $showDeleteConfirmation) {
+        .alert(.delete, isPresented: $showDeleteConfirmation, presenting: modelToDelete) { model in
             Button(role: .cancel) {
                 modelToDelete = nil
             } label: {
                 Text(.cancel)
             }
             Button(role: .destructive) {
-                if let model = modelToDelete {
-                    deleteModel(model)
-                }
+                deleteModel(model)
             } label: {
                 Text(.delete)
             }
-        } message: {
-            if let model = modelToDelete {
-                Text(.confirmDeleteModel(model.model.localizedName))
-            }
+        } message: { model in
+            Text(.confirmDeleteModel(model.model.localizedName))
         }
+    }
+
+    private var selectedModel: ModelItem? {
+        guard let selectedModelId else { return nil }
+        return modelManager.modelItems.find(byId: selectedModelId)
     }
 
     private func deleteModel(_ item: ModelItem) {
         do {
             try modelManager.deleteModel(item)
-            if selectedModel?.id == item.id {
-                selectedModel = nil
+            if selectedModelId == item.id {
+                selectedModelId = nil
             }
         } catch {
             print("Failed to delete model: \(error)")
@@ -197,7 +207,7 @@ private struct ModelListContent: View {
         Task {
             do {
                 let newItem = try await modelManager.duplicateModel(item)
-                selectedModel = newItem
+                selectedModelId = newItem.id
             } catch {
                 print("Failed to duplicate model: \(error)")
             }

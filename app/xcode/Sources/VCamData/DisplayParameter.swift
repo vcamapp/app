@@ -1,5 +1,6 @@
 import Foundation
 import VCamLogger
+import VCamEntity
 import SwiftUI
 import AppKit
 
@@ -83,89 +84,108 @@ public final class DisplayParameterPresets {
     public static let shared = DisplayParameterPresets()
 
     public private(set) var parameters: [DisplayParameter] = []
+    private(set) var isLoadFailed = false
     public var currentParameterId: String?
 
     public var currentParameter: DisplayParameter? {
         guard let currentParameterId else { return nil }
-        return parameters.first { $0.id == currentParameterId }
+        return parameters.find(byId: currentParameterId)
     }
 
-    public var currentParameterIndex: Int? {
-        guard let currentParameterId else { return nil }
-        return parameters.firstIndex { $0.id == currentParameterId }
-    }
-
-    private static var fileURL: URL {
+    private static var defaultFileURL: URL {
         URL.applicationSupportDirectory.appending(path: "tattn/VCam/dparam")
     }
 
-    private init() {
+    private let fileURL: URL
+
+    init(fileURL: URL? = nil) {
+        self.fileURL = fileURL ?? Self.defaultFileURL
         load()
     }
 
-    public func load() {
+    private func load() {
+        guard FileManager.default.fileExists(atPath: fileURL.path) else {
+            parameters = [DisplayParameter()]
+            isLoadFailed = false
+            return
+        }
+
         do {
-            let data = try Data(contentsOf: Self.fileURL)
+            let data = try Data(contentsOf: fileURL)
             let file = try JSONDecoder().decode(DisplayParameterPresetsFile.self, from: data)
             parameters = file.parameters.isEmpty ? [DisplayParameter()] : file.parameters
+            isLoadFailed = false
         } catch {
-            // File doesn't exist or decoding failed - use default
             parameters = [DisplayParameter()]
-        }
-    }
-
-    public func save() {
-        do {
-            let file = DisplayParameterPresetsFile(parameters: parameters)
-            let data = try JSONEncoder().encode(file)
-            let directory = Self.fileURL.deletingLastPathComponent()
-            try FileManager.default.createDirectoryIfNeeded(at: directory)
-            try data.write(to: Self.fileURL)
-        } catch {
+            isLoadFailed = true
             Logger.error(error)
         }
     }
 
     public func updateCurrentParameterName(_ name: String) {
-        guard let index = currentParameterIndex else { return }
-        parameters[index].name = name
-        save()
+        update { parameters, currentParameterId in
+            guard let currentParameterId,
+                  let index = parameters.index(ofId: currentParameterId) else { return }
+            parameters[index].name = name
+        }
     }
 
     public func saveCurrentParameterValue(_ value: DisplayParameter.Value) {
-        guard let index = currentParameterIndex else { return }
-        parameters[index].value = value
-        save()
+        update { parameters, currentParameterId in
+            guard let currentParameterId,
+                  let index = parameters.index(ofId: currentParameterId) else { return }
+            parameters[index].value = value
+        }
     }
 
-    public func addParameter() -> DisplayParameter {
+    public func addParameter() -> DisplayParameter? {
         let newParam = DisplayParameter()
-        parameters.append(newParam)
-        currentParameterId = newParam.id
-        save()
+        guard update({ parameters, currentParameterId in
+            parameters.append(newParam)
+            currentParameterId = newParam.id
+        }) else { return nil }
         return newParam
     }
 
     public func deleteCurrentParameter() {
-        guard let index = currentParameterIndex, parameters.count > 1 else { return }
-        parameters.remove(at: index)
-        // Select next or previous
-        let newIndex = min(index, parameters.count - 1)
-        currentParameterId = parameters[newIndex].id
-        save()
+        update { parameters, currentParameterId in
+            guard let selectedParameterId = currentParameterId,
+                  let index = parameters.index(ofId: selectedParameterId),
+                  parameters.count > 1 else { return }
+            parameters.remove(at: index)
+            currentParameterId = parameters[min(index, parameters.count - 1)].id
+        }
     }
-}
 
-// MARK: - DisplayParameterPreset (for UI compatibility)
+    @discardableResult
+    private func update(_ transform: (inout [DisplayParameter], inout String?) -> Void) -> Bool {
+        guard prepareForWriting() else { return false }
 
-public struct DisplayParameterPreset: Hashable, Identifiable, CustomStringConvertible, Sendable {
-    public static let newPreset = Self.init(id: "", description: "")
+        do {
+            var newParameters = parameters
+            var newCurrentParameterId = currentParameterId
+            transform(&newParameters, &newCurrentParameterId)
+            guard newParameters != parameters || newCurrentParameterId != currentParameterId else { return true }
+            try save(newParameters)
+            parameters = newParameters
+            currentParameterId = newCurrentParameterId
+            return true
+        } catch {
+            Logger.error(error)
+            return false
+        }
+    }
 
-    public let id: String
-    public var description: String
+    private func prepareForWriting() -> Bool {
+        guard isLoadFailed else { return true }
+        load()
+        return !isLoadFailed
+    }
 
-    public init(id: String, description: String) {
-        self.id = id
-        self.description = description
+    private func save(_ parameters: [DisplayParameter]) throws {
+        let file = DisplayParameterPresetsFile(parameters: parameters)
+        let data = try JSONEncoder().encode(file)
+        try FileManager.default.createDirectoryIfNeeded(at: fileURL.deletingLastPathComponent())
+        try data.write(to: fileURL, options: .atomic)
     }
 }

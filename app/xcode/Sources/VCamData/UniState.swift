@@ -66,7 +66,7 @@ public final class UniState {
         state.__useAddToMacOSMenuBar = useAddToMacOSMenuBar
         state.__useVSync = useVSync
         state.__lipSyncWebCam = lipSyncWebCam
-        state._hasPerfectSyncBlendShape = hasPerfectSyncBlendShape
+        state.hasPerfectSyncBlendShape = hasPerfectSyncBlendShape
         state.__fps = fps
         state.__qualityLevel = qualityLevel
         state.__message = message
@@ -130,8 +130,7 @@ public final class UniState {
     @ObservationIgnored @UniStateValue(\.__lipSyncWebCam, persistAsInt: .lipSyncType, bridge: .lipSyncWebCam)
     public var lipSyncWebCam: Bool
 
-    private var _hasPerfectSyncBlendShape: Bool = false
-    public var hasPerfectSyncBlendShape: Bool { _hasPerfectSyncBlendShape }
+    public private(set) var hasPerfectSyncBlendShape = false
 
     // MARK: - Float Properties
 
@@ -292,15 +291,6 @@ public final class UniState {
         }
     }
 
-    // MARK: - Computed Properties for Custom Types
-
-#if FEATURE_3
-    public var currentDisplayParameterPreset: DisplayParameterPreset {
-        get { displayParameters.currentPreset }
-        set { displayParameters.currentPreset = newValue }
-    }
-#endif
-
     public var currentLipSync: LipSyncType {
         get { lipSyncWebCam ? .camera : .mic }
         set { lipSyncWebCam = newValue == .camera }
@@ -338,7 +328,7 @@ public final class UniState {
     /// Read values from Unity that are not managed by Swift storage
     public func initializeFromUnity() {
         let bridge = UniBridge.shared
-        _hasPerfectSyncBlendShape = bridge.boolMapper.get(.hasPerfectSyncBlendShape)
+        hasPerfectSyncBlendShape = bridge.boolMapper.get(.hasPerfectSyncBlendShape)
         __objectSelected = bridge.intMapper.get(.objectSelected)
     }
 

@@ -1,5 +1,6 @@
 import Foundation
 import Network
+import VCamBridge
 import VCamLogger
 
 @MainActor
@@ -95,7 +96,7 @@ final class UDPDatagramSession {
         case .ready:
             onReady()
             connection.receiveDatagrams { [weak self, weak connection] data in
-                Task { @MainActor in
+                DispatchQueue.runOnMain {
                     guard let self, let connection, self.connection === connection else { return }
                     onData(data)
                 }

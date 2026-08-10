@@ -360,8 +360,16 @@ public extension TrackingMappingEntry {
         .eyeX, .eyeY
     ]
 
+    private static let perfectSyncInputKeys = perfectSyncMappingDefinitions.map(\.inputKey)
+    private static let blendShapeInputKeys = blendShapeMappingDefinitions.map(\.inputKey)
+
     static func availableInputKeys(for mode: TrackingMode) -> [InputKey] {
-        mappingDefinitions(for: mode).map { $0.inputKey }
+        switch mode {
+        case .perfectSync:
+            perfectSyncInputKeys
+        case .blendShape:
+            blendShapeInputKeys
+        }
     }
 
     static func defaultMappingDefinition(for key: String, mode: TrackingMode) -> DefaultMappingDefinition? {

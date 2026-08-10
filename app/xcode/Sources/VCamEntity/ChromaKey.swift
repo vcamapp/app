@@ -23,9 +23,12 @@ enum ChromaKey {
         for blue in range {
             for green in range {
                 for red in range {
-                    let distance = pow(red - targetRed, 2)
-                        + pow(green - targetGreen, 2)
-                        + pow(blue - targetBlue, 2)
+                    let redDifference = red - targetRed
+                    let greenDifference = green - targetGreen
+                    let blueDifference = blue - targetBlue
+                    let distance = redDifference * redDifference
+                        + greenDifference * greenDifference
+                        + blueDifference * blueDifference
                     let alpha: Float = distance < threshold ? 0.0 : 1.0
 
                     buffer[offset    ] = red * alpha
