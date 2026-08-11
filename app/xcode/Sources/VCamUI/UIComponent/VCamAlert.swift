@@ -18,25 +18,33 @@ public struct VCamAlert: View {
 
     @MainActor @discardableResult
     public static func showModal(title: String, message: String, canCancel: Bool, okTitle: String = "OK") async -> Result {
-        return await withCheckedContinuation { continuation in
-            let alert = VCamAlert(windowTitle: title, message: message, canCancel: canCancel, okTitle: okTitle) {
-                NSApp.vcamWindow?.becomeMain()
-                continuation.resume(returning: .ok)
-            } onCancel: {
-                NSApp.vcamWindow?.becomeMain()
-                continuation.resume(returning: .cancel)
+        await withCheckedContinuation { continuation in
+            present(title: title, message: message, canCancel: canCancel, okTitle: okTitle) {
+                continuation.resume(returning: $0)
             }
-            MacWindowManager.shared.open(alert)
         }
     }
 
     /// Shows an error alert without waiting for it to be dismissed
     @MainActor
     public static func showError(title: String, message: String) {
-        let alert = VCamAlert(windowTitle: title, message: message, canCancel: false, okTitle: "OK") {
+        present(title: title, message: message, canCancel: false, okTitle: "OK") { _ in }
+    }
+
+    @MainActor
+    private static func present(
+        title: String,
+        message: String,
+        canCancel: Bool,
+        okTitle: String,
+        onResult: @escaping (Result) -> Void
+    ) {
+        let alert = VCamAlert(windowTitle: title, message: message, canCancel: canCancel, okTitle: okTitle) {
             NSApp.vcamWindow?.becomeMain()
+            onResult(.ok)
         } onCancel: {
             NSApp.vcamWindow?.becomeMain()
+            onResult(.cancel)
         }
         MacWindowManager.shared.open(alert)
     }

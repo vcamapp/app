@@ -9,6 +9,7 @@ public struct VCamSection<Content: View>: View {
     let title: LocalizedStringResource
     let content: Content
     @State private var isExpanded = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     public var body: some View {
         DisclosureGroup.init(isExpanded: $isExpanded) {
@@ -22,7 +23,7 @@ public struct VCamSection<Content: View>: View {
                 .bold()
                 .contentShape(Rectangle())
                 .onTapGesture {
-                    withAnimation {
+                    withAnimation(reduceMotion ? nil : .default) {
                         isExpanded.toggle()
                     }
                 }

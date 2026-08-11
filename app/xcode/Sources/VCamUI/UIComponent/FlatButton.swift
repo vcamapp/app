@@ -20,12 +20,20 @@ public struct FlatButton<LabelItem: View>: View {
         .background(flatButtonStyle.backgroundColor)
         .cornerRadius(flatButtonStyle.cornerRadius)
         .macHoverEffect(padding: 0)
-        .gesture(TapGesture(count: 2).onEnded {
-            doubleTapAction()
-        })
-        .simultaneousGesture(TapGesture().onEnded {
+        .gesture(
+            TapGesture(count: 2)
+                .exclusively(before: TapGesture())
+                .onEnded { value in
+                    switch value {
+                    case .first: doubleTapAction()
+                    case .second: action()
+                    }
+                }
+        )
+        .accessibilityAddTraits(.isButton)
+        .accessibilityAction {
             action()
-        })
+        }
     }
 
     @ViewBuilder func container(content: () -> some View) -> some View {

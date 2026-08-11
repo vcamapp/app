@@ -57,9 +57,6 @@ public enum FileUtility {
 
     @MainActor
     private static func openFile(withExtensions extensions: [String]) -> URL? {
-        let openPanel = makeOpenSingleFilePanel()
-        openPanel.allowedContentTypes = extensions.map { UTType(filenameExtension: $0)! }
-        openPanel.runModal()
-        return openPanel.url
+        openFile(with: extensions.compactMap { UTType(filenameExtension: $0) })
     }
 }

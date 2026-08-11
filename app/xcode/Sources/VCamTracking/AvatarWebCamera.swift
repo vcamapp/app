@@ -325,7 +325,9 @@ public final class AvatarWebCamera {
     @MainActor
     private static func applyCameraFace(_ result: CameraFaceTrackingResult) {
         let useEyeTracking = Tracking.shared.useEyeTracking
-        if UniBridge.shared.hasPerfectSyncBlendShape {
+        if Tracking.shared.activeFaceMappingMode(
+            hasPerfectSyncBlendShape: UniBridge.shared.hasPerfectSyncBlendShape
+        ) == .perfectSync {
             UniBridge.shared.receivePerfectSync(FaceTransformValues.perfectSync(
                 translation: result.headTranslation,
                 rotationEuler: result.headRotationEuler,

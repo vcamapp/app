@@ -312,7 +312,19 @@ extension SceneObjectManager {
                 }
                 configure(sceneObject)
             case let .web(state):
-                let renderer = WebRenderer(resource: state.url != nil ? .url(state.url!) : .path(bookmark: state.path ?? .init()), size: state.texture.textureSize, fps: state.fps, css: state.css, js: state.js)
+                let resource: WebRenderer.Resource
+                if let url = state.url {
+                    resource = .url(url)
+                } else {
+                    resource = .path(bookmark: state.path ?? .init())
+                }
+                let renderer = WebRenderer(
+                    resource: resource,
+                    size: state.texture.textureSize,
+                    fps: state.fps,
+                    css: state.css,
+                    js: state.js
+                )
                 renderer.filter = state.texture.filter.map(ImageFilter.init(configuration:))
                 RenderTextureManager.shared.set(renderer, id: object.id)
                 configure(sceneObject)

@@ -281,13 +281,7 @@ public extension TrackingMappingEntry.DefaultMappingDefinition {
     static let noseSneerRight = Self(key: "NoseSneerRight", bounds: 0...1)
     static let tongueOut = Self(key: "TongueOut", bounds: 0...1)
 
-    static let allKeys: [Self] = [
-        .posX, .posY, .posZ,
-        .headX, .headY, .headZ,
-        .eyeX, .eyeY,
-        .blinkL, .blinkR,
-        .mouth,
-        // Perfect Sync BlendShapes
+    static let perfectSyncFacialDefinitions: [Self] = [
         .browDownLeft, .browDownRight, .browInnerUp, .browOuterUpLeft, .browOuterUpRight,
         .cheekPuff, .cheekSquintLeft, .cheekSquintRight,
         .eyeBlinkLeft, .eyeBlinkRight,
@@ -304,6 +298,14 @@ public extension TrackingMappingEntry.DefaultMappingDefinition {
         .mouthUpperUpLeft, .mouthUpperUpRight,
         .noseSneerLeft, .noseSneerRight, .tongueOut,
     ]
+
+    static let allKeys: [Self] = [
+        .posX, .posY, .posZ,
+        .headX, .headY, .headZ,
+        .eyeX, .eyeY,
+        .blinkL, .blinkR,
+        .mouth,
+    ] + perfectSyncFacialDefinitions
 }
 
 public extension TrackingMappingEntry {
@@ -321,27 +323,7 @@ public extension TrackingMappingEntry {
         .posX, .posY, .iPhonePosZ,
         .headX, .headY, .headZ,
         .iPhoneEyeX, .iPhoneEyeY,
-        // Perfect Sync BlendShapes
-        .browDownLeft, .browDownRight, .browInnerUp,
-        .browOuterUpLeft, .browOuterUpRight,
-        .cheekPuff, .cheekSquintLeft, .cheekSquintRight,
-        .eyeBlinkLeft, .eyeBlinkRight,
-        .eyeLookDownLeft, .eyeLookDownRight,
-        .eyeLookInLeft, .eyeLookInRight,
-        .eyeLookOutLeft, .eyeLookOutRight,
-        .eyeLookUpLeft, .eyeLookUpRight,
-        .eyeSquintLeft, .eyeSquintRight,
-        .eyeWideLeft, .eyeWideRight,
-        .jawForward, .jawLeft, .jawOpen, .jawRight,
-        .mouthClose, .mouthDimpleLeft, .mouthDimpleRight,
-        .mouthFrownLeft, .mouthFrownRight, .mouthFunnel, .mouthLeft,
-        .mouthLowerDownLeft, .mouthLowerDownRight,
-        .mouthPressLeft, .mouthPressRight, .mouthPucker, .mouthRight,
-        .mouthRollLower, .mouthRollUpper, .mouthShrugLower, .mouthShrugUpper,
-        .mouthSmileLeft, .mouthSmileRight, .mouthStretchLeft, .mouthStretchRight,
-        .mouthUpperUpLeft, .mouthUpperUpRight,
-        .noseSneerLeft, .noseSneerRight, .tongueOut
-    ]
+    ] + DefaultMappingDefinition.perfectSyncFacialDefinitions
 #else
     private static let perfectSyncMappingDefinitions: [DefaultMappingDefinition] = [
         .posX, .posY, .iPhonePosZ,

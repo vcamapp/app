@@ -102,6 +102,36 @@ public final class SceneManager {
         scenes.append(scene)
     }
 
+    public func duplicate(_ scene: VCamScene) async throws {
+        var duplicatedScene = scene
+        duplicatedScene.id = Int32.random(in: 0..<Int32.max)
+        let sourceSceneID = scene.id
+        let duplicatedSceneID = duplicatedScene.id
+        let imageIDs: [String] = scene.objects.compactMap { object -> String? in
+            guard case let .image(id, _) = object.type else { return nil }
+            return id
+        }
+
+        do {
+            try await Task.detached(priority: .userInitiated) {
+                let sourceDataStore = VCamSceneDataStore(sceneId: sourceSceneID)
+                let duplicatedDataStore = VCamSceneDataStore(sceneId: duplicatedSceneID)
+                for imageID in imageIDs {
+                    _ = try duplicatedDataStore.copyData(
+                        fromURL: sourceDataStore.dataURL(id: imageID),
+                        newUUID: imageID
+                    )
+                }
+            }.value
+            try add(duplicatedScene)
+        } catch {
+            await Task.detached {
+                try? VCamSceneDataStore(sceneId: duplicatedSceneID).delete()
+            }.value
+            throw error
+        }
+    }
+
     public func update(_ scene: VCamScene) {
         guard let index = scenes.index(ofId: scene.id) else {
             return

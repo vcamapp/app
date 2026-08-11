@@ -292,9 +292,8 @@ public final class Tracking {
         faceTrackingSupportsPerfectSync && UniBridge.shared.hasPerfectSyncBlendShape
     }
 
-    /// The mapping mode the face data is routed to, or nil while no face tracking runs.
-    /// Mirrors the routing every face tracking source performs per packet, and takes the
-    /// model's Perfect Sync support as an argument so an observable state can drive it.
+    /// The mapping mode every face tracking source routes data to, or nil while no face tracking runs.
+    /// Takes the model's Perfect Sync support as an argument so an observable state can drive it.
     public func activeFaceMappingMode(hasPerfectSyncBlendShape: Bool) -> TrackingMode? {
         guard faceTrackingMethod != .disabled else { return nil }
         return faceTrackingSupportsPerfectSync && hasPerfectSyncBlendShape ? .perfectSync : .blendShape

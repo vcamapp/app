@@ -8,13 +8,14 @@ public struct VCamShortcutGridView: View {
     }
 
     let shortcutManager: VCamShortcutManager
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     public var body: some View {
         GroupBox {
             ShortcutGridContent(shortcutManager: shortcutManager)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .animation(.default, value: shortcutManager.shortcuts)
+        .animation(reduceMotion ? nil : .default, value: shortcutManager.shortcuts)
     }
 }
 

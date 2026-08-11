@@ -37,10 +37,14 @@ public struct ScalableViewModifier: ViewModifier {
 private struct ScalableEdgesView: View {
     @Binding var rect: CGRect
 
-    @State private var topOffset = CGSize.zero
-    @State private var bottomOffset = CGSize.zero
-    @State private var leadingOffset = CGSize.zero
-    @State private var trailingOffset = CGSize.zero
+    private struct EdgeOffsets: Equatable {
+        var top = CGSize.zero
+        var bottom = CGSize.zero
+        var leading = CGSize.zero
+        var trailing = CGSize.zero
+    }
+
+    @State private var offsets = EdgeOffsets()
 
     private let width: CGFloat = 12
 
@@ -53,36 +57,36 @@ private struct ScalableEdgesView: View {
 
         GeometryReader { geometry in
             let size = geometry.size
-            let trailingPadding = size.width - trailingOffset.width - lineWidth / 2
-            let bottomPadding = size.height - bottomOffset.height - lineWidth / 2
+            let trailingPadding = size.width - offsets.trailing.width - lineWidth / 2
+            let bottomPadding = size.height - offsets.bottom.height - lineWidth / 2
 
             let top = DraggableEdge(
                 horizontalLine,
                 edge: .top,
-                range: 0...max(0, bottomOffset.height),
-                offset: $topOffset)
-                .padding(.leading, leadingOffset.width)
+                range: 0...max(0, offsets.bottom.height),
+                offset: $offsets.top)
+                .padding(.leading, offsets.leading.width)
                 .padding(.trailing, trailingPadding)
             let bottom = DraggableEdge(
                 horizontalLine,
                 edge: .bottom,
-                range: min(topOffset.height, size.height)...size.height,
-                offset: $bottomOffset)
-                .padding(.leading, leadingOffset.width)
+                range: min(offsets.top.height, size.height)...size.height,
+                offset: $offsets.bottom)
+                .padding(.leading, offsets.leading.width)
                 .padding(.trailing, trailingPadding)
             let leading = DraggableEdge(
                 verticalLine,
                 edge: .leading,
-                range: 0...max(0, trailingOffset.width),
-                offset: $leadingOffset)
-                .padding(.top, topOffset.height)
+                range: 0...max(0, offsets.trailing.width),
+                offset: $offsets.leading)
+                .padding(.top, offsets.top.height)
                 .padding(.bottom, bottomPadding)
             let trailing = DraggableEdge(
                 verticalLine,
                 edge: .trailing,
-                range: min(leadingOffset.width, size.width)...size.width,
-                offset: $trailingOffset)
-                .padding(.top, topOffset.height)
+                range: min(offsets.leading.width, size.width)...size.width,
+                offset: $offsets.trailing)
+                .padding(.top, offsets.top.height)
                 .padding(.bottom, bottomPadding)
 
             Color.clear
@@ -96,35 +100,26 @@ private struct ScalableEdgesView: View {
                 .onChange(of: size) { _, size in
                     initializeRect(size: size)
                 }
-                .onChange(of: topOffset) { _, _ in
-                    updateRect()
-                }
-                .onChange(of: bottomOffset) { _, _ in
-                    updateRect()
-                }
-                .onChange(of: leadingOffset) { _, _ in
-                    updateRect()
-                }
-                .onChange(of: trailingOffset) { _, _ in
+                .onChange(of: offsets) { _, _ in
                     updateRect()
                 }
         }
     }
 
     private func initializeRect(size: CGSize) {
-        topOffset = .init(width: 0, height: 0)
-        bottomOffset = .init(width: 0, height: size.height)
-        leadingOffset = .init(width: 0, height: 0)
-        trailingOffset = .init(width: size.width, height: 0)
+        offsets = EdgeOffsets(
+            bottom: .init(width: 0, height: size.height),
+            trailing: .init(width: size.width, height: 0)
+        )
         updateRect()
     }
 
     private func updateRect() {
         rect = .init(
-            x: leadingOffset.width,
-            y: topOffset.height,
-            width: trailingOffset.width - leadingOffset.width,
-            height: bottomOffset.height - topOffset.height
+            x: offsets.leading.width,
+            y: offsets.top.height,
+            width: offsets.trailing.width - offsets.leading.width,
+            height: offsets.bottom.height - offsets.top.height
         )
     }
 }

@@ -20,9 +20,12 @@ public struct KeyRecordingPopoverView: View {
     }
 
     @State private var keys = KeyCombination.empty
+    @State private var completionTask: Task<Void, Never>?
+    @State private var resetTask: Task<Void, Never>?
     let completion: (KeyCombination) -> Void
 
     @Environment(\.dismiss) var dismiss
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var isError: Bool {
         !keys.key.isEmpty && !keys.isEnabled
@@ -53,7 +56,7 @@ public struct KeyRecordingPopoverView: View {
         }
         .foregroundStyle(isCompleted ? .blue : .init(.labelColor))
         .padding()
-        .animation(.default, value: isError)
+        .animation(reduceMotion ? nil : .default, value: isError)
         .onKeyEvent { event in
             onKeyDown(KeyCombination(modifiers: event.modifierFlags))
         } keyDown: { event in
@@ -61,17 +64,27 @@ public struct KeyRecordingPopoverView: View {
         } keyUp: { _ in
             onKeyUp()
         }
+        .onDisappear {
+            completionTask?.cancel()
+            resetTask?.cancel()
+        }
     }
 
     private func onKeyDown(_ keys: KeyCombination) {
         guard !isError && !isCompleted else { return }
+        resetTask?.cancel()
+        resetTask = nil
         self.keys = keys
 
         guard !isError else { return }
 
         if isCompleted {
-            Task { @MainActor in
-                try? await Task.sleep(for: .seconds(1))
+            completionTask = Task { @MainActor in
+                do {
+                    try await Task.sleep(for: .seconds(1))
+                } catch {
+                    return
+                }
                 NSApp.vcamWindow?.makeFirstResponder(nil) // Workaround for "not legal to call -layoutSubtreeIfNeeded"
                 dismiss()
                 completion(keys)
@@ -80,8 +93,13 @@ public struct KeyRecordingPopoverView: View {
     }
 
     private func onKeyUp() {
-        Task { @MainActor in
-            try? await Task.sleep(for: .milliseconds(1500))
+        resetTask?.cancel()
+        resetTask = Task { @MainActor in
+            do {
+                try await Task.sleep(for: .milliseconds(1500))
+            } catch {
+                return
+            }
             keys = .empty
         }
     }

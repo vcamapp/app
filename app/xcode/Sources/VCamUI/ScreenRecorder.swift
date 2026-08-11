@@ -35,11 +35,11 @@ public final class ScreenRecorder: NSObject {
             self.minimumFrameInterval = minimumFrameInterval
         }
 
-        public var captureType: CaptureType = .display
+        public var captureType: CaptureType
         public var display: SCDisplay?
         public var window: SCWindow?
-        public var capturesVideo = true
-        public var capturesAudio = false
+        public var capturesVideo: Bool
+        public var capturesAudio: Bool
         public var minimumFrameInterval: CMTime?
 
         public var id: String? {
@@ -76,7 +76,7 @@ public final class ScreenRecorder: NSObject {
     @ObservationIgnored private var didAudioOutput: (@MainActor (CMSampleBuffer) -> Void)?
 
     // Stale frames have no value for rendering, so only the newest one is kept
-    // while a MainActor hop is pending; this also caps the number of in-flight tasks at one
+    // while a MainActor hop is pending; this also caps the number of in-flight callbacks at one
     private let pendingVideoFrame = Mutex<CapturedFrame?>(nil)
 
     @MainActor
@@ -237,18 +237,18 @@ extension ScreenRecorder: SCStreamOutput {
                 pending = frame
                 return isFirst
             }
-            // A task is already scheduled; it will pick up the replaced frame
+            // A callback is already scheduled; it will pick up the replaced frame
             guard isFirstPendingFrame else { return }
-            Task { @MainActor in
-                guard let frame = pendingVideoFrame.withLock({ pending -> CapturedFrame? in
+            DispatchQueue.runOnMain {
+                guard let frame = self.pendingVideoFrame.withLock({ pending -> CapturedFrame? in
                     defer { pending = nil }
                     return pending
                 }) else { return }
-                latestFrame = frame
-                didVideoOutput?(frame)
+                self.latestFrame = frame
+                self.didVideoOutput?(frame)
             }
         } else if type == .audio {
-            Task { @MainActor in
+            DispatchQueue.runOnMain {
                 self.didAudioOutput?(sampleBuffer)
             }
         }

@@ -1,6 +1,7 @@
 import AVFoundation
 import CoreImage
 import Synchronization
+import VCamBridge
 import VCamCamera
 import VCamEntity
 
@@ -51,9 +52,9 @@ extension CaptureDeviceRenderer: RenderTextureRenderer {
                 pending = PendingFrame(image: frame.ciImage)
                 return isFirst
             }
-            // A task is already scheduled; it will pick up the replaced frame
+            // A callback is already scheduled; it will pick up the replaced frame
             guard isFirstPendingFrame else { return }
-            Task { @MainActor in
+            DispatchQueue.runOnMain {
                 guard let frame = self.pendingFrame.withLock({ pending -> PendingFrame? in
                     defer { pending = nil }
                     return pending

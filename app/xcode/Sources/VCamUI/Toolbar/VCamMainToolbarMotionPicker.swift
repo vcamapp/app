@@ -42,6 +42,7 @@ private struct MotionGrid<Content: View>: View {
 
 private struct CustomMotionSection: View {
     @State private var dragging: ImportedMotionRecord?
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         GroupBox {
@@ -71,7 +72,7 @@ private struct CustomMotionSection: View {
                 .padding(.top, 2)
             }
         }
-        .animation(.default, value: MotionLibrary.shared.store.records)
+        .animation(reduceMotion ? nil : .default, value: MotionLibrary.shared.store.records)
     }
 
     private func move(fromOffsets source: IndexSet, toOffset destination: Int) {

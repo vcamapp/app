@@ -1,10 +1,3 @@
-//
-//  RootView.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2022/06/25.
-//
-
 import SwiftUI
 import VCamBridge
 import VCamData
@@ -15,13 +8,15 @@ public struct RootView: View {
     let uniState: UniState
 
     @State private var isLaunchScreenPresented = true
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     public var body: some View {
         RootViewContent(unityView: unityView)
             .background(.regularMaterial)
             .overlay {
                 if isLaunchScreenPresented {
                     LaunchScreen {
-                        withAnimation(.easeOut(duration: 0.2)) {
+                        withAnimation(reduceMotion ? nil : .easeOut(duration: 0.2)) {
                             isLaunchScreenPresented = false
                         }
                     }

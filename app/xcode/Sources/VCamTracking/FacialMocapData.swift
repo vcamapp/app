@@ -9,10 +9,6 @@ public struct FacialMocapData: Equatable, Sendable {
     public struct Head: Equatable, Sendable {
         public let rotation: SIMD3<Float>
         public let translation: SIMD3<Float>
-
-        public var rotationRadian: SIMD3<Float> {
-            .init(rotation.x * .pi / 180, rotation.y * .pi / 180, rotation.z * .pi / 180)
-        }
     }
 }
 
