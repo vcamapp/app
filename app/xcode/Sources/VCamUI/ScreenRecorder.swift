@@ -18,7 +18,7 @@ public final class ScreenRecorder: NSObject {
         }
     }
 
-    public struct CaptureConfiguration {
+    public struct CaptureConfiguration: Equatable {
         public init(
             captureType: ScreenRecorder.CaptureType = .display,
             display: SCDisplay? = nil,

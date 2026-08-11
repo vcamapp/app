@@ -109,9 +109,7 @@ public final class FacialMocapReceiver {
         guard Tracking.shared.faceTrackingMethod == .iFacialMocap else { return }
 
         let smoothingEnabled = smoothingStorage.isEnabled
-        if Tracking.shared.activeFaceMappingMode(
-            hasPerfectSyncBlendShape: UniBridge.shared.hasPerfectSyncBlendShape
-        ) == .perfectSync {
+        if Tracking.shared.activeFaceMappingMode == .perfectSync {
             let perfectSync = data.perfectSync(useEyeTracking: Tracking.shared.useEyeTracking)
             perfectSyncResampler.send(perfectSync, smoothed: smoothingEnabled)
         } else {

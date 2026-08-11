@@ -73,18 +73,13 @@ public struct KeyRecordingPopoverView: View {
     private func onKeyDown(_ keys: KeyCombination) {
         guard !isError && !isCompleted else { return }
         resetTask?.cancel()
-        resetTask = nil
         self.keys = keys
 
         guard !isError else { return }
 
         if isCompleted {
             completionTask = Task { @MainActor in
-                do {
-                    try await Task.sleep(for: .seconds(1))
-                } catch {
-                    return
-                }
+                guard (try? await Task.sleep(for: .seconds(1))) != nil else { return }
                 NSApp.vcamWindow?.makeFirstResponder(nil) // Workaround for "not legal to call -layoutSubtreeIfNeeded"
                 dismiss()
                 completion(keys)
@@ -95,11 +90,7 @@ public struct KeyRecordingPopoverView: View {
     private func onKeyUp() {
         resetTask?.cancel()
         resetTask = Task { @MainActor in
-            do {
-                try await Task.sleep(for: .milliseconds(1500))
-            } catch {
-                return
-            }
+            guard (try? await Task.sleep(for: .milliseconds(1500))) != nil else { return }
             keys = .empty
         }
     }

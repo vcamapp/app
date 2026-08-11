@@ -70,7 +70,7 @@ public struct ScreenRecorderPreferenceView: View {
                     refreshAvailableContent()
                 }
             }
-            .onChange(of: captureConfig.id) { _, _ in
+            .onChange(of: captureConfig) { _, _ in
                 Task {
                     await screenRecorder.update(with: captureConfig)
                 }

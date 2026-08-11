@@ -70,9 +70,7 @@ public final class VCamMotionTracking {
     func applyFace(_ data: VCamMotion, settings: VCamMotionTrackingSettings) {
         guard settings.isFaceTrackingEnabled else { return }
 
-        if Tracking.shared.activeFaceMappingMode(
-            hasPerfectSyncBlendShape: UniBridge.shared.hasPerfectSyncBlendShape
-        ) == .perfectSync {
+        if Tracking.shared.activeFaceMappingMode == .perfectSync {
             let values = data.perfectSync(useEyeTracking: settings.useEyeTracking)
             perfectSyncResampler.send(values, smoothed: smoothingStorage.isEnabled)
             return

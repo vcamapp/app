@@ -18,11 +18,7 @@ public struct LaunchScreen: View {
     public var body: some View {
         Self.content()
             .task {
-                do {
-                    try await Task.sleep(for: Self.duration)
-                } catch {
-                    return
-                }
+                guard (try? await Task.sleep(for: Self.duration)) != nil else { return }
                 onDismiss()
             }
     }

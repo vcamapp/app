@@ -1,14 +1,14 @@
 import SwiftUI
 
 public struct FlatButton<LabelItem: View>: View {
-    public init(action: @escaping () -> Void, doubleTapAction: @escaping () -> Void = {}, @ViewBuilder label: () -> LabelItem) {
+    public init(action: @escaping () -> Void, doubleTapAction: (() -> Void)? = nil, @ViewBuilder label: () -> LabelItem) {
         self.action = action
         self.doubleTapAction = doubleTapAction
         self.label = label()
     }
 
     let action: () -> Void
-    let doubleTapAction: () -> Void
+    let doubleTapAction: (() -> Void)?
     let label: LabelItem
 
     @Environment(\.flatButtonStyle) var flatButtonStyle
@@ -20,16 +20,7 @@ public struct FlatButton<LabelItem: View>: View {
         .background(flatButtonStyle.backgroundColor)
         .cornerRadius(flatButtonStyle.cornerRadius)
         .macHoverEffect(padding: 0)
-        .gesture(
-            TapGesture(count: 2)
-                .exclusively(before: TapGesture())
-                .onEnded { value in
-                    switch value {
-                    case .first: doubleTapAction()
-                    case .second: action()
-                    }
-                }
-        )
+        .modifier(TapGestureModifier(action: action, doubleTapAction: doubleTapAction))
         .accessibilityAddTraits(.isButton)
         .accessibilityAction {
             action()
@@ -46,6 +37,30 @@ public struct FlatButton<LabelItem: View>: View {
             content()
                 .padding(.horizontal, 4)
                 .padding(.vertical, 2)
+        }
+    }
+}
+
+// exclusively(before:) delays single taps by the double-tap window,
+// so attach it only when a double-tap action actually exists
+private struct TapGestureModifier: ViewModifier {
+    let action: () -> Void
+    let doubleTapAction: (() -> Void)?
+
+    func body(content: Content) -> some View {
+        if let doubleTapAction {
+            content.gesture(
+                TapGesture(count: 2)
+                    .exclusively(before: TapGesture())
+                    .onEnded { value in
+                        switch value {
+                        case .first: doubleTapAction()
+                        case .second: action()
+                        }
+                    }
+            )
+        } else {
+            content.onTapGesture(perform: action)
         }
     }
 }
