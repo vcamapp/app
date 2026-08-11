@@ -304,11 +304,7 @@ public final class Tracking {
     }
 
     private var supportsPerfectSyncMapping: Bool {
-#if FEATURE_3
         UniBridge.shared.hasPerfectSyncBlendShape
-#else
-        true
-#endif
     }
 
     /// The single owner of the mic lip sync lifecycle. Perfect Sync drives the mouth on its

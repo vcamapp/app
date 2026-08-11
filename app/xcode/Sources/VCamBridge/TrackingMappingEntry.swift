@@ -224,8 +224,6 @@ public extension TrackingMappingEntry.DefaultMappingDefinition {
     static let iPhonePosZ = Self(key: "_posZ", bounds: -1...1, rangeMin: -1, rangeMax: 0, outputRangeMin: 0, outputRangeMax: 0)
     static let iPhoneEyeX = Self(key: "_eyeX", bounds: -1...1)
     static let iPhoneEyeY = Self(key: "_eyeY", bounds: -1...1)
-    static let iPhoneBlinkL = Self(key: "_blinkL", bounds: 0...1)
-    static let iPhoneBlinkR = Self(key: "_blinkR", bounds: 0...1)
 
     // Perfect Sync BlendShapes
     static let browDownLeft = Self(key: "BrowDownLeft", bounds: 0...1)
@@ -318,21 +316,11 @@ public extension TrackingMappingEntry {
         }
     }
 
-#if FEATURE_3
     private static let perfectSyncMappingDefinitions: [DefaultMappingDefinition] = [
         .posX, .posY, .iPhonePosZ,
         .headX, .headY, .headZ,
         .iPhoneEyeX, .iPhoneEyeY,
     ] + DefaultMappingDefinition.perfectSyncFacialDefinitions
-#else
-    private static let perfectSyncMappingDefinitions: [DefaultMappingDefinition] = [
-        .posX, .posY, .iPhonePosZ,
-        .headX, .headY, .headZ,
-        .iPhoneBlinkL, .iPhoneBlinkR,
-        .mouth,
-        .iPhoneEyeX, .iPhoneEyeY
-    ]
-#endif
 
     private static let blendShapeMappingDefinitions: [DefaultMappingDefinition] = [
         .posX, .posY, .posZ,

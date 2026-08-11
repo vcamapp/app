@@ -11,7 +11,7 @@ public struct VCamSettingTrackingMappingEditorView: View {
     public init() {}
 
     public var body: some View {
-        let supportsPerfectSyncMode = supportsPerfectSyncMapping
+        let supportsPerfectSyncMode = uniState.hasPerfectSyncBlendShape
         let activeMode = Tracking.shared.activeFaceMappingMode(hasPerfectSyncBlendShape: uniState.hasPerfectSyncBlendShape)
 
         NavigationStack {
@@ -36,7 +36,7 @@ public struct VCamSettingTrackingMappingEditorView: View {
         .onChange(of: uniState.blendShapeNames) { _, newValue in
             store.updateBlendShapeNames(newValue)
         }
-        .onChange(of: supportsPerfectSyncMode) { _, isSupported in
+        .onChange(of: uniState.hasPerfectSyncBlendShape) { _, isSupported in
             store.updatePerfectSyncSupport(isSupported)
         }
         .toolbar {
@@ -79,14 +79,6 @@ public struct VCamSettingTrackingMappingEditorView: View {
     private func modeLabel(_ mode: TrackingMode, activeMode: TrackingMode?) -> Text {
         // A segmented picker renders either text or an image per segment, so the mark is a glyph
         Text(verbatim: mode == activeMode ? "✓ \(mode.name)" : mode.name)
-    }
-
-    private var supportsPerfectSyncMapping: Bool {
-#if FEATURE_3
-        uniState.hasPerfectSyncBlendShape
-#else
-        true
-#endif
     }
 }
 

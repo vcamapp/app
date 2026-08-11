@@ -49,7 +49,7 @@ let package = Package(
     swiftLanguageModes: [.v6]
 )
 
-let isThree = true
+let isThree = Context.environment["VCAM_VARIANT"] != "2"
 
 for target in package.targets {
     var swiftSettings = (target.swiftSettings ?? []) + [

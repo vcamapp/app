@@ -6,7 +6,7 @@ public struct VCamTrackingView: View {
     public init() {}
 
     @Bindable private var tracking = Tracking.shared
-#if ENABLE_MOCOPI
+#if FEATURE_3 && ENABLE_MOCOPI
     @AppStorage(key: .integrationMocopi) private var integrationMocopi
 #endif
 
@@ -46,10 +46,8 @@ public struct VCamTrackingView: View {
                     .frame(maxWidth: .infinity, alignment: .trailing)
 #endif
             }
-#if ENABLE_MOCOPI
-            .disabled(integrationMocopi)
-            .opacity(integrationMocopi ? 0.5 : 1.0)
-#endif
+            .trackingSectionLocked(isHandSectionLocked)
+
             Divider()
 
             VStack(spacing: 8) {
@@ -71,11 +69,11 @@ public struct VCamTrackingView: View {
                     .frame(maxWidth: .infinity, alignment: .trailing)
 #endif
             }
-            .disabled(isFingerPickerLocked)
-            .opacity(isFingerPickerLocked ? 0.5 : 1.0)
+            .trackingSectionLocked(isFingerSectionLocked)
         }
     }
 
+#if FEATURE_3
     // VCamMocap owns wrist and fingers as one method, so the finger picker
     // never offers it as a choice. While the hand picker selects VCamMocap the
     // current value is still included so the locked picker can display it.
@@ -84,9 +82,24 @@ public struct VCamTrackingView: View {
             ? TrackingMethod.Finger.allCases
             : TrackingMethod.Finger.allCases.filter { $0 != .vcamMocap }
     }
+#endif
 
-    private var isFingerPickerLocked: Bool {
+    private var isHandSectionLocked: Bool {
+#if !FEATURE_3
+        true
+#elseif ENABLE_MOCOPI
+        integrationMocopi
+#else
+        false
+#endif
+    }
+
+    private var isFingerSectionLocked: Bool {
+#if FEATURE_3
         tracking.handTrackingMethod == .disabled || tracking.handTrackingMethod == .vcamMocap
+#else
+        true
+#endif
     }
 
     var faceTrackingMethod: Binding<TrackingMethod.Face> {
@@ -111,6 +124,13 @@ public struct VCamTrackingView: View {
         } set: {
             tracking.setFingerTrackingMethod($0)
         }
+    }
+}
+
+private extension View {
+    func trackingSectionLocked(_ locked: Bool) -> some View {
+        disabled(locked)
+            .opacity(locked ? 0.5 : 1.0)
     }
 }
 

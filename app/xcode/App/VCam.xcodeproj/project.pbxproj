@@ -11,7 +11,6 @@
 		061238682ADE9A8300B67618 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 061238672ADE9A8300B67618 /* ContentView.swift */; };
 		0612386A2ADE9A8400B67618 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 061238692ADE9A8400B67618 /* Assets.xcassets */; };
 		0612386D2ADE9A8400B67618 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0612386C2ADE9A8400B67618 /* Preview Assets.xcassets */; };
-		061238752ADE9C6D00B67618 /* xcode in Resources */ = {isa = PBXBuildFile; fileRef = 061238742ADE9C6D00B67618 /* xcode */; };
 		061238782ADE9CEE00B67618 /* VCam in Frameworks */ = {isa = PBXBuildFile; productRef = 061238772ADE9CEE00B67618 /* VCam */; };
 		06A72E8B2AE4305D000D0B25 /* XCUIApplication+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06A72E8A2AE4305D000D0B25 /* XCUIApplication+.swift */; };
 		06A72E8D2AE4359E000D0B25 /* VCam in Frameworks */ = {isa = PBXBuildFile; productRef = 06A72E8C2AE4359E000D0B25 /* VCam */; };
@@ -215,7 +214,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				061238752ADE9C6D00B67618 /* xcode in Resources */,
 				0612386D2ADE9A8400B67618 /* Preview Assets.xcassets in Resources */,
 				0612386A2ADE9A8400B67618 /* Assets.xcassets in Resources */,
 			);
