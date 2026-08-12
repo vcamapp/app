@@ -1,6 +1,7 @@
 import SwiftUI
 import VCamEntity
 import VCamBridge
+import VCamControl
 import VCamData
 
 public struct VCamMainObjectListView: View {
@@ -139,7 +140,7 @@ private struct VCamMainObjectListBottomBar: View {
                 let isLocked = selectedId.flatMap(objectManager.objects.find(byId:))?.isLocked ?? false
                 if selectedId == SceneObject.avatarID {
                     Button {
-                        UniBridge.shared.resetCamera()
+                        CameraControl.resetCamera()
                     } label: {
                         Image(systemName: "arrow.uturn.backward")
                     }
@@ -276,7 +277,7 @@ private struct EditSceneObjectViewModifier: ViewModifier {
                     }
                     Divider()
                     Button {
-                        UniBridge.shared.resetCamera()
+                        CameraControl.resetCamera()
                     } label: {
                         Image(systemName: "arrow.uturn.backward")
                         Text(.moveInitialPosition)

@@ -1,6 +1,7 @@
 import Foundation
 import AppKit
 import VCamBridge
+import VCamControl
 import VCamData
 import VCamCamera
 import VCamTracking
@@ -200,7 +201,7 @@ private extension AppMenu {
     }
 
     @objc private func resetModelPosition() {
-        UniBridge.shared.resetCamera()
+        CameraControl.resetCamera()
     }
 }
 

@@ -1,6 +1,6 @@
 import Foundation
 import VCamEntity
-import VCamBridge
+import VCamControl
 import struct SwiftUI.Image
 
 public struct VCamResetCameraAction: VCamAction {
@@ -14,6 +14,6 @@ public struct VCamResetCameraAction: VCamAction {
 
     @MainActor
     public func callAsFunction(context: VCamActionContext) async throws {
-        UniBridge.shared.resetCamera()
+        CameraControl.resetCamera()
     }
 }

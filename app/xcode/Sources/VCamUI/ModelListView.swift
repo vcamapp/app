@@ -1,6 +1,6 @@
 import SwiftUI
 import VCamData
-import VCamBridge
+import VCamControl
 
 public struct ModelListView: View {
     @Bindable private var modelManager: ModelManager
@@ -52,16 +52,9 @@ public struct ModelListView: View {
     }
 
     private func loadSelectedModel() {
-        guard let item = selectedModel,
-              item.status == .valid else { return }
-        let url = item.model.modelURL
-#if FEATURE_3
-        UniBridge.shared.loadVRM(url.path)
-#else
-        UniBridge.shared.loadModel(url.path)
-#endif
+        guard let item = selectedModel else { return }
         do {
-            try modelManager.setLastLoadedModel(item)
+            try AvatarControl.load(item, modelManager: modelManager)
         } catch {
             print("Failed to save the last loaded model: \(error)")
         }

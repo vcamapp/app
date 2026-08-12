@@ -1,5 +1,5 @@
 import SwiftUI
-import VCamBridge
+import VCamControl
 import VCamEntity
 import VCamData
 
@@ -19,7 +19,7 @@ public struct VCamMainToolbarExpressionPicker: View {
                         VCamMainToolbarButton(
                             isSelected: expression.name == currentExpressionName,
                             action: {
-                                UniBridge.applyExpression(name: expression.name)
+                                ExpressionControl.apply(name: expression.name)
                             },
                             label: Text(expression.name)
                         )

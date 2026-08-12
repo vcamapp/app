@@ -1,6 +1,6 @@
 import AppKit
 import VCamEntity
-import VCamBridge
+import VCamControl
 import struct SwiftUI.Image
 
 public struct VCamBlendShapeAction: VCamAction {
@@ -18,6 +18,6 @@ public struct VCamBlendShapeAction: VCamAction {
             throw VCamActionError(String(localized: .isNotSetYet(String(localized: .facialExpression))))
         }
 
-        UniBridge.applyExpression(name: configuration.blendShape)
+        ExpressionControl.apply(name: configuration.blendShape)
     }
 }

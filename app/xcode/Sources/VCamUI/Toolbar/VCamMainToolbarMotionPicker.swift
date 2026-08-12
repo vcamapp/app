@@ -1,6 +1,6 @@
 import SwiftUI
 import VCamEntity
-import VCamBridge
+import VCamControl
 import VCamData
 
 public struct VCamMainToolbarMotionPicker: View {
@@ -163,15 +163,10 @@ private struct MotionPlayButton: View {
     @Environment(UniState.self) private var uniState
 
     var body: some View {
-        let isPlaying = uniState.isMotionPlaying[motion.id, default: false]
         VCamMainToolbarButton(
-            isSelected: isPlaying,
+            isSelected: uniState.isMotionPlaying[motion.id, default: false],
             action: {
-                if isPlaying {
-                    UniBridge.stopMotion(id: motion.id)
-                } else {
-                    UniBridge.playMotion(id: motion.id, isLoop: MotionLibrary.shared.isLoopEnabled(for: motion.id, trigger: .toolbar))
-                }
+                MotionControl.toggle(id: motion.id, trigger: .toolbar, state: uniState)
             },
             label: Text(motion.localizedDisplayName)
         )

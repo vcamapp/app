@@ -1,6 +1,7 @@
 import SwiftUI
 import VCamEntity
 import VCamBridge
+import VCamControl
 import VCamData
 import VCamLogger
 import AVFoundation
@@ -265,7 +266,7 @@ extension SceneObjectManager {
             case let .avatar(avatar):
                 Logger.log("load avatar \(avatar == .zero)")
                 if avatar == .zero {
-                    UniBridge.shared.resetCamera()
+                    CameraControl.resetCamera()
                 } else {
                     UniBridge.shared.objectAvatarTransform([
                         avatar.position.x, avatar.position.y, avatar.position.z,

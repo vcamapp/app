@@ -1,13 +1,6 @@
-//
-//  VCamRootContainerView.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2022/04/18.
-//
-
 import AppKit
 import SwiftUI
-import VCamBridge
+import VCamControl
 
 public final class VCamRootContainerView: NSView {
     public override init(frame frameRect: NSRect) {
@@ -59,7 +52,7 @@ public extension VCamRootContainerView {
 #if !FEATURE_3
         var isDirectory: ObjCBool = false
         if FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory), isDirectory.boolValue {
-            UniBridge.shared.loadModel(url.path)
+            AvatarControl.load(modelDirectoryURL: url)
             return true
         }
 #endif
@@ -70,7 +63,7 @@ public extension VCamRootContainerView {
         
         switch type {
         case .vrm:
-            UniBridge.shared.loadVRM(url.path)
+            AvatarControl.load(vrmFileURL: url)
         case .image:
             SceneObjectManager.shared.addImage(url: url)
         case .html:

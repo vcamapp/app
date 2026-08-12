@@ -1,7 +1,6 @@
 import AppKit
 import VCamEntity
-import VCamBridge
-import VCamData
+import VCamControl
 import SwiftUI
 
 public struct VCamMotionAction: VCamAction {
@@ -15,14 +14,6 @@ public struct VCamMotionAction: VCamAction {
 
     @MainActor
     public func callAsFunction(context: VCamActionContext) async throws {
-        let motionID = configuration.motionID
-        guard MotionLibrary.shared.motionExists(motionID) else {
-            return // Safely ignore motions that have been deleted
-        }
-        if UniState.shared.isMotionPlaying[motionID, default: false] {
-            UniBridge.stopMotion(id: motionID)
-        } else {
-            UniBridge.playMotion(id: motionID, isLoop: MotionLibrary.shared.isLoopEnabled(for: motionID, trigger: .shortcut))
-        }
+        MotionControl.toggle(id: configuration.motionID, trigger: .shortcut)
     }
 }

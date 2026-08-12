@@ -22,10 +22,11 @@ let package = Package(
     ],
     targets: [
         .target(name: "VCamUI", dependencies: [
-            "VCamTracking", "VCamCamera", "VCamData", "VCamBridge",
+            "VCamTracking", "VCamCamera", "VCamData", "VCamBridge", "VCamControl",
         ], resources: [
             .process("Resources"),
         ]),
+        .target(name: "VCamControl", dependencies: ["VCamData", "VCamBridge"]),
         .target(name: "VCamData", dependencies: ["VCamBridge", "VCamEntity", "VCamLogger"]),
         .target(name: "VCamEntity", dependencies: ["VCamDefaults"]),
         .target(name: "VCamMedia", dependencies: ["VCamEntity", "VCamAppExtension", "VCamLogger"]),
@@ -41,6 +42,7 @@ let package = Package(
         .target(name: "VCamStub", dependencies: ["VCamUI"]),
 
         .testTarget(name: "VCamEntityTests", dependencies: ["VCamEntity"]),
+        .testTarget(name: "VCamControlTests", dependencies: ["VCamControl", "VCamBridge"]),
         .testTarget(name: "VCamDataTests", dependencies: ["VCamData"]),
         .testTarget(name: "VCamTrackingTests", dependencies: ["VCamTracking"]),
         .testTarget(name: "VCamCameraTests", dependencies: ["VCamCamera"]),
