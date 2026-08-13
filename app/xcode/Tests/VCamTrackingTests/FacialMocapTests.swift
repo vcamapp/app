@@ -13,7 +13,7 @@ struct FacialMocapTests {
             rotation: .init(-21.488958, -6.038993, -6.6019735),
             translation: .init(-0.030653415, -0.10287084, -0.6584072)
         ))
-        #expect(decoded.blendShape.lookAtPoint == .init(-0.020375613, 0.46402508))
+        #expect(decoded.blendShape.lookAtPoint == .init(-0.020375613, -0.46402508))
     }
 
     @Test

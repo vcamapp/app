@@ -56,10 +56,11 @@ public extension FacialMocapData {
             return nil
         }
 
-        let lookAtPoint = SIMD2(
-            -((transforms[10] + transforms[7]) * 0.5) / 19, // skip 11
-            ((transforms[9] + transforms[6]) * 0.5) / 13 // skip 8
-        ).clamped(lowerBound: -SIMD2.one, upperBound: .one)
+        // Eye pitch is positive looking down while lookAtPoint is positive looking up
+        let eyeYaw: Float = (transforms[10] + transforms[7]) * 0.5 // skip 11
+        let eyePitch: Float = (transforms[9] + transforms[6]) * 0.5 // skip 8
+        let lookAtPoint = SIMD2(-eyeYaw / 19, -eyePitch / 13)
+            .clamped(lowerBound: -SIMD2.one, upperBound: .one)
 
         var blendShape = BlendShape(lookAtPoint: lookAtPoint)
         for entry in blendShapeAndTransformRawData[0].split(separator: "|") {

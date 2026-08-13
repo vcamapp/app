@@ -6,6 +6,7 @@ import VCamBridge
 public enum MotionPlaybackTrigger: Sendable {
     case toolbar
     case shortcut
+    case api
 }
 
 /// Provides unified access to built-in motions and imported VRMA motions

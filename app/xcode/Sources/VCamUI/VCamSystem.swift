@@ -1,6 +1,7 @@
 import AppKit
 import VCamAppExtension
 import VCamBridge
+import VCamControl
 import VCamTracking
 import VCamLogger
 import VCamCamera
@@ -22,6 +23,8 @@ public final class VCamSystem {
     }
 
     private init() {
+        SceneControl.provider = SceneManager.shared
+
         ExtensionNotificationCenter.default.setObserver(for: .startCameraExtensionStream) { [weak self] in
             Task { @MainActor in
                 self?.startSystem()

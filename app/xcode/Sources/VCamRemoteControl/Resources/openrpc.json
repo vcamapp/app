@@ -1,0 +1,401 @@
+{
+  "openrpc": "1.3.2",
+  "info": {
+    "title": "VCam RPC",
+    "version": "0.1.0",
+    "description": "The public JSON-RPC 2.0 API of VCam, served over a localhost WebSocket. Methods marked with the `Events` tag are notifications VCam pushes to subscribed clients (`x-direction: serverToClient`); subscribe to them with `events.subscribe`."
+  },
+  "methods": [
+    {
+      "name": "app.getInfo",
+      "summary": "Returns the app version, API version, and capabilities",
+      "paramStructure": "by-name",
+      "params": [],
+      "result": {
+        "name": "info",
+        "schema": {
+          "type": "object",
+          "required": ["apiVersion", "appVersion", "capabilities"],
+          "properties": {
+            "apiVersion": {
+              "type": "string",
+              "description": "The version of this API specification."
+            },
+            "appVersion": {
+              "type": "string",
+              "description": "The version of the running VCam app."
+            },
+            "capabilities": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Feature areas this VCam build supports, e.g. \"vrma\" when VRMA motions are available."
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "state.get",
+      "summary": "Returns the current avatar, playing motions, and expression",
+      "paramStructure": "by-name",
+      "params": [],
+      "result": {
+        "name": "state",
+        "schema": {
+          "type": "object",
+          "required": ["playingMotionIds"],
+          "properties": {
+            "avatarId": {
+              "type": "string",
+              "format": "uuid",
+              "description": "The last loaded avatar from the avatar library; absent when the current avatar was loaded directly from a file."
+            },
+            "playingMotionIds": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "expressionName": {
+              "type": "string",
+              "description": "The currently applied expression; absent when none is applied."
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "avatar.list",
+      "summary": "Lists the avatars registered in the avatar library",
+      "paramStructure": "by-name",
+      "params": [],
+      "result": {
+        "name": "avatars",
+        "schema": {
+          "type": "array",
+          "items": { "$ref": "#/components/schemas/Avatar" }
+        }
+      }
+    },
+    {
+      "name": "avatar.load",
+      "summary": "Loads an avatar from the avatar library",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "avatarId",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
+        }
+      ],
+      "result": {
+        "name": "success",
+        "schema": { "type": "boolean" }
+      },
+      "errors": [
+        { "$ref": "#/components/errors/avatarNotFound" }
+      ]
+    },
+    {
+      "name": "expression.list",
+      "summary": "Lists the expressions of the current avatar",
+      "paramStructure": "by-name",
+      "params": [],
+      "result": {
+        "name": "expressions",
+        "schema": {
+          "type": "array",
+          "items": { "$ref": "#/components/schemas/Expression" }
+        }
+      }
+    },
+    {
+      "name": "expression.set",
+      "summary": "Applies an expression to the current avatar",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "name",
+          "required": true,
+          "schema": { "type": "string" }
+        }
+      ],
+      "result": {
+        "name": "success",
+        "schema": { "type": "boolean" }
+      },
+      "errors": [
+        { "$ref": "#/components/errors/expressionNotFound" }
+      ]
+    },
+    {
+      "name": "motion.list",
+      "summary": "Lists the available motions (built-in and imported)",
+      "paramStructure": "by-name",
+      "params": [],
+      "result": {
+        "name": "motions",
+        "schema": {
+          "type": "array",
+          "items": { "$ref": "#/components/schemas/Motion" }
+        }
+      }
+    },
+    {
+      "name": "motion.play",
+      "summary": "Plays a motion",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "motionId",
+          "required": true,
+          "schema": { "type": "string" }
+        },
+        {
+          "name": "loop",
+          "schema": { "type": "boolean" },
+          "description": "Overrides the motion's loop setting for this playback; the stored setting is used when omitted."
+        }
+      ],
+      "result": {
+        "name": "success",
+        "schema": { "type": "boolean" }
+      },
+      "errors": [
+        { "$ref": "#/components/errors/motionNotFound" }
+      ]
+    },
+    {
+      "name": "motion.stop",
+      "summary": "Stops a playing motion",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "motionId",
+          "required": true,
+          "schema": { "type": "string" }
+        }
+      ],
+      "result": {
+        "name": "success",
+        "schema": { "type": "boolean" }
+      },
+      "errors": [
+        { "$ref": "#/components/errors/motionNotFound" }
+      ]
+    },
+    {
+      "name": "scene.get",
+      "summary": "Returns the current scene",
+      "paramStructure": "by-name",
+      "params": [],
+      "result": {
+        "name": "scene",
+        "schema": { "$ref": "#/components/schemas/Scene" }
+      },
+      "errors": [
+        { "$ref": "#/components/errors/notReady" }
+      ]
+    },
+    {
+      "name": "scene.load",
+      "summary": "Loads a scene",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "sceneId",
+          "required": true,
+          "schema": { "type": "integer" }
+        }
+      ],
+      "result": {
+        "name": "success",
+        "schema": { "type": "boolean" }
+      },
+      "errors": [
+        { "$ref": "#/components/errors/sceneNotFound" },
+        { "$ref": "#/components/errors/notReady" }
+      ]
+    },
+    {
+      "name": "camera.reset",
+      "summary": "Resets the avatar and camera to the initial position",
+      "paramStructure": "by-name",
+      "params": [],
+      "result": {
+        "name": "success",
+        "schema": { "type": "boolean" }
+      }
+    },
+    {
+      "name": "events.subscribe",
+      "summary": "Subscribes this connection to server-pushed events",
+      "description": "Connections receive no events until they subscribe. Omit `events` to subscribe to all events.",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "events",
+          "schema": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "description": "Event method names to receive, e.g. [\"motion.started\"]. Omit to receive all events."
+        }
+      ],
+      "result": {
+        "name": "success",
+        "schema": { "type": "boolean" }
+      }
+    },
+    {
+      "name": "rpc.discover",
+      "summary": "Returns the OpenRPC document describing this API",
+      "paramStructure": "by-name",
+      "params": [],
+      "result": {
+        "name": "openrpcDocument",
+        "schema": { "type": "object" }
+      }
+    },
+    {
+      "name": "app.ready",
+      "summary": "VCam has finished launching and is ready to accept requests",
+      "x-direction": "serverToClient",
+      "tags": [{ "name": "Events" }],
+      "paramStructure": "by-name",
+      "params": []
+    },
+    {
+      "name": "avatar.loaded",
+      "summary": "An avatar has been loaded",
+      "x-direction": "serverToClient",
+      "tags": [{ "name": "Events" }],
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "avatarId",
+          "schema": { "type": "string", "format": "uuid" },
+          "description": "Absent when the avatar was loaded directly from a file instead of the avatar library."
+        }
+      ]
+    },
+    {
+      "name": "motion.started",
+      "summary": "A motion has started playing",
+      "x-direction": "serverToClient",
+      "tags": [{ "name": "Events" }],
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "motionId",
+          "required": true,
+          "schema": { "type": "string" }
+        }
+      ]
+    },
+    {
+      "name": "motion.stopped",
+      "summary": "A motion has stopped playing",
+      "x-direction": "serverToClient",
+      "tags": [{ "name": "Events" }],
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "motionId",
+          "required": true,
+          "schema": { "type": "string" }
+        }
+      ]
+    },
+    {
+      "name": "expression.changed",
+      "summary": "The applied expression has changed",
+      "x-direction": "serverToClient",
+      "tags": [{ "name": "Events" }],
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "name",
+          "required": true,
+          "schema": { "type": "string" }
+        }
+      ]
+    },
+    {
+      "name": "scene.loaded",
+      "summary": "A scene has been loaded",
+      "x-direction": "serverToClient",
+      "tags": [{ "name": "Events" }],
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "sceneId",
+          "required": true,
+          "schema": { "type": "integer" }
+        }
+      ]
+    }
+  ],
+  "components": {
+    "schemas": {
+      "Avatar": {
+        "type": "object",
+        "required": ["id", "name"],
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" }
+        }
+      },
+      "Expression": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string" }
+        }
+      },
+      "Motion": {
+        "type": "object",
+        "required": ["id", "name", "isLoop"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "A stable motion ID: \"builtin:<name>\" or \"vrma:<UUID>\"."
+          },
+          "name": { "type": "string" },
+          "isLoop": {
+            "type": "boolean",
+            "description": "The motion's current loop setting."
+          }
+        }
+      },
+      "Scene": {
+        "type": "object",
+        "required": ["id", "name"],
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" }
+        }
+      }
+    },
+    "errors": {
+      "notReady": {
+        "code": 1000,
+        "message": "VCam is not ready."
+      },
+      "avatarNotFound": {
+        "code": 1001,
+        "message": "Avatar was not found."
+      },
+      "motionNotFound": {
+        "code": 1002,
+        "message": "Motion was not found."
+      },
+      "expressionNotFound": {
+        "code": 1003,
+        "message": "Expression was not found."
+      },
+      "sceneNotFound": {
+        "code": 1004,
+        "message": "Scene was not found."
+      }
+    }
+  }
+}

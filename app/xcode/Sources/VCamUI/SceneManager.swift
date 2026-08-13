@@ -1,6 +1,7 @@
 import SwiftUI
 import VCamEntity
 import VCamBridge
+import VCamControl
 import VCamData
 import VCamLogger
 
@@ -234,6 +235,16 @@ public final class SceneManager {
             }
             try? await self.loadScene(id: scene.id)
         }
+    }
+}
+
+extension SceneManager: SceneControlling {
+    public var sceneList: [SceneControl.Scene] {
+        scenes.map { .init(id: $0.id, name: $0.name) }
+    }
+
+    public var activeScene: SceneControl.Scene? {
+        scenes.find(byId: currentSceneId).map { .init(id: $0.id, name: $0.name) }
     }
 }
 

@@ -1,6 +1,11 @@
 all: build test-ui-preview
 build: test-package build-ui-preview
 
+# Regenerate the public API code after editing openrpc.json.
+# Install the generator: brew install tattn/openrpc/swift-openrpc-generator
+generate-openrpc:
+	swift-openrpc-generator app/xcode/Sources/VCamRemoteControl/Resources/openrpc.json -o app/xcode/Sources/VCamRemoteControl/Generated -n VCam -a package
+
 test-package:
 	cd app/xcode && xcodebuild -scheme VCam-Package test -destination 'platform=macOS'
 

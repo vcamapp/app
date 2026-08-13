@@ -22,11 +22,14 @@ let package = Package(
     ],
     targets: [
         .target(name: "VCamUI", dependencies: [
-            "VCamTracking", "VCamCamera", "VCamData", "VCamBridge", "VCamControl",
+            "VCamTracking", "VCamCamera", "VCamData", "VCamBridge", "VCamControl", "VCamRemoteControl",
         ], resources: [
             .process("Resources"),
         ]),
         .target(name: "VCamControl", dependencies: ["VCamData", "VCamBridge"]),
+        .target(name: "VCamRemoteControl", dependencies: ["VCamControl"], resources: [
+            .copy("Resources/openrpc.json"),
+        ]),
         .target(name: "VCamData", dependencies: ["VCamBridge", "VCamEntity", "VCamLogger"]),
         .target(name: "VCamEntity", dependencies: ["VCamDefaults"]),
         .target(name: "VCamMedia", dependencies: ["VCamEntity", "VCamAppExtension", "VCamLogger"]),
@@ -43,6 +46,7 @@ let package = Package(
 
         .testTarget(name: "VCamEntityTests", dependencies: ["VCamEntity"]),
         .testTarget(name: "VCamControlTests", dependencies: ["VCamControl", "VCamBridge"]),
+        .testTarget(name: "VCamRemoteControlTests", dependencies: ["VCamRemoteControl", "VCamBridge"]),
         .testTarget(name: "VCamDataTests", dependencies: ["VCamData"]),
         .testTarget(name: "VCamTrackingTests", dependencies: ["VCamTracking"]),
         .testTarget(name: "VCamCameraTests", dependencies: ["VCamCamera"]),

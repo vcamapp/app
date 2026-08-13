@@ -74,6 +74,56 @@ struct FaceTransformValuesTests {
     }
 
     @Test
+    func downwardGazeReducesTheLidFollowShareOfTheBlink() {
+        var blend = BlendShape()
+        blend.eyeBlinkLeft = 0.4
+        blend.eyeBlinkRight = 0.4
+        blend.eyeLookDownLeft = 0.8
+        blend.eyeLookDownRight = 0.8
+
+        let values = FaceTransformValues.vcamHeadTransform(
+            translation: .zero, rotationEuler: .zero,
+            blendShape: blend, useEyeTracking: true, vowel: .a
+        )
+
+        // The 0.4 blink is entirely lid follow of the 0.8 downward gaze
+        #expect(values[6] == 0)
+        #expect(values[7] == 0)
+    }
+
+    @Test
+    func intentionalBlinkStillClosesTheEyesWhileLookingDown() {
+        var blend = BlendShape()
+        blend.eyeBlinkLeft = 1
+        blend.eyeBlinkRight = 1
+        blend.eyeLookDownLeft = 1
+        blend.eyeLookDownRight = 1
+
+        let values = FaceTransformValues.vcamHeadTransform(
+            translation: .zero, rotationEuler: .zero,
+            blendShape: blend, useEyeTracking: true, vowel: .a
+        )
+
+        #expect(values[6] == 1)
+        #expect(values[7] == 1)
+    }
+
+    @Test
+    func blinkIsUntouchedWithoutDownwardGaze() {
+        var blend = BlendShape()
+        blend.eyeBlinkLeft = 0.4
+        blend.eyeBlinkRight = 0.4
+
+        let values = FaceTransformValues.vcamHeadTransform(
+            translation: .zero, rotationEuler: .zero,
+            blendShape: blend, useEyeTracking: true, vowel: .a
+        )
+
+        #expect(values[6] == 0.4)
+        #expect(values[7] == 0.4)
+    }
+
+    @Test
     func disablingEyeTrackingZeroesTheEyeChannelsOfTheShortArray() {
         let values = FaceTransformValues.vcamHeadTransform(
             translation: .zero, rotationEuler: .zero,
