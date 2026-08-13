@@ -23,6 +23,7 @@ package final class ExternalControlServer {
 
     @ObservationIgnored private var listener: NWListener?
     @ObservationIgnored private var connections: [UUID: ExternalControlConnection] = [:]
+    @ObservationIgnored private let eventBridge = EventBridge()
 
     package init() {}
 
@@ -75,9 +76,11 @@ package final class ExternalControlServer {
         listener.start(queue: .main)
         self.listener = listener
         isRunning = true
+        eventBridge.start()
     }
 
     package func stop() {
+        eventBridge.stop()
         listener?.cancel()
         listener = nil
         for connection in connections.values {

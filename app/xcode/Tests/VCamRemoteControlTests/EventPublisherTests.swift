@@ -33,12 +33,12 @@ struct EventPublisherTests {
         publisher.connect(id: connectionID) { received.append($0) }
         publisher.subscribe(id: connectionID, events: nil)
 
-        await publisher.publish(.appReady)
+        await publisher.publish(.sceneLoaded(sceneId: 1))
         await publisher.publish(.expressionChanged(name: "Joy"))
         #expect(received.count == 2)
 
         publisher.disconnect(id: connectionID)
-        await publisher.publish(.appReady)
+        await publisher.publish(.sceneLoaded(sceneId: 1))
         #expect(received.count == 2)
     }
 }

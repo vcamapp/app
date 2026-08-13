@@ -256,14 +256,6 @@
       }
     },
     {
-      "name": "app.ready",
-      "summary": "VCam has finished launching and is ready to accept requests",
-      "x-direction": "serverToClient",
-      "tags": [{ "name": "Events" }],
-      "paramStructure": "by-name",
-      "params": []
-    },
-    {
       "name": "avatar.loaded",
       "summary": "An avatar has been loaded",
       "x-direction": "serverToClient",

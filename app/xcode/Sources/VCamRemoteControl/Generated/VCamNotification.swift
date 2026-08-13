@@ -7,8 +7,6 @@ import Foundation
 /// Servers encode one with `body()` and push it over their transport;
 /// clients decode incoming bodies with `decode(_:)`.
 package enum VCamNotification: Hashable, Sendable {
-    /// VCam has finished launching and is ready to accept requests
-    case appReady
     /// An avatar has been loaded
     case avatarLoaded(avatarId: UUID?)
     /// A motion has started playing
@@ -23,7 +21,6 @@ package enum VCamNotification: Hashable, Sendable {
     /// The JSON-RPC method name of the notification.
     package var method: String {
         switch self {
-        case .appReady: return "app.ready"
         case .avatarLoaded: return "avatar.loaded"
         case .motionStarted: return "motion.started"
         case .motionStopped: return "motion.stopped"
@@ -37,8 +34,6 @@ package enum VCamNotification: Hashable, Sendable {
     package func body() throws -> Data {
         let encoder = JSONRPCCoding.encoder()
         switch self {
-        case .appReady:
-            return try encoder.encode(VCamNotificationEnvelope<JSONRPCNoParams>(method: "app.ready", params: nil))
         case .avatarLoaded(let avatarId):
             struct Params: Encodable, Sendable {
                 var avatarId: UUID?
@@ -79,8 +74,6 @@ package enum VCamNotification: Hashable, Sendable {
         let request = try JSONRPCCoding.decoder().decode(JSONRPCServerRequest.self, from: body)
         guard request.id == nil else { return nil }
         switch request.method {
-        case "app.ready":
-            return .appReady
         case "avatar.loaded":
             let params = JSONRPCParameters(request.params)
             return .avatarLoaded(avatarId: try params.optional("avatarId", at: 0))
