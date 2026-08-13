@@ -27,7 +27,7 @@ let package = Package(
             .process("Resources"),
         ]),
         .target(name: "VCamControl", dependencies: ["VCamData", "VCamBridge"]),
-        .target(name: "VCamRemoteControl", dependencies: ["VCamControl"], resources: [
+        .target(name: "VCamRemoteControl", dependencies: ["VCamControl", "VCamData", "VCamBridge", "VCamEntity", "VCamLogger"], resources: [
             .copy("Resources/openrpc.json"),
         ]),
         .target(name: "VCamData", dependencies: ["VCamBridge", "VCamEntity", "VCamLogger"]),

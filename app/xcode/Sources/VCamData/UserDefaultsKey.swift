@@ -40,6 +40,8 @@ public extension UserDefaults.Key {
     static var integrationVCamMocap: Key<Bool> { .init("vc_intg_vcammocap", default: false) }
     static var integrationFacialMocapIp: Key<String> { .init("vc_intg_facialmocap_ip", default: "192.168.0.1") }
     static var integrationMocopi: Key<Bool> { .init("vc_intg_mocopi", default: false) }
+    static var integrationExternalControl: Key<Bool> { .init("vc_intg_external_control", default: false) }
+    static var integrationExternalControlPort: Key<Int> { .init("vc_intg_external_control_port", default: 34965) }
     static var mocapNetworkInterpolation: Key<Double> { .init("vc_mocap_network_interpolation", default: 1.0) }
 
     static var useAddToMacOSMenuBar: Key<Bool> { .init("vc_use_add_to_macos_menubar", default: true) }

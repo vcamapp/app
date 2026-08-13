@@ -2186,6 +2186,29 @@
         }
       }
     },
+    "externalControlHelp": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allows other apps on this Mac to control VCam via WebSocket (JSON-RPC)."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このMac上の他のアプリからWebSocket (JSON-RPC) でVCamを操作できるようにします。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 Mac의 다른 앱에서 WebSocket (JSON-RPC)으로 VCam을 제어할 수 있게 합니다."
+          }
+        }
+      }
+    },
     "eyesHorizontalSensitivity": {
       "extractionState": "manual",
       "localizations": {

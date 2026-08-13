@@ -1,0 +1,55 @@
+import Foundation
+import Testing
+@testable import VCamRemoteControl
+
+@MainActor
+@Suite(.serialized)
+struct ExternalControlServerTests {
+    private static func makeRunningServer() throws -> (server: ExternalControlServer, port: UInt16) {
+        let server = ExternalControlServer()
+        let port = UInt16.random(in: 40000..<60000)
+        try server.start(port: port)
+        return (server, port)
+    }
+
+    @Test
+    func servesRequestsOverWebSocket() async throws {
+        let (server, port) = try Self.makeRunningServer()
+        defer {
+            server.stop()
+        }
+
+        let task = URLSession.shared.webSocketTask(with: URL(string: "ws://127.0.0.1:\(port)")!)
+        task.resume()
+        try await task.send(.string(#"{"jsonrpc":"2.0","id":1,"method":"app.getInfo","params":{}}"#))
+        let message = try await task.receive()
+        task.cancel(with: .goingAway, reason: nil)
+
+        guard case .string(let response) = message else {
+            Issue.record("Unexpected message: \(message)")
+            return
+        }
+        #expect(response.contains(#""apiVersion":"\#(APISpecification.apiVersion)""#))
+    }
+
+    @Test
+    func rejectsHandshakesWithOriginHeader() async throws {
+        let (server, port) = try Self.makeRunningServer()
+        defer {
+            server.stop()
+        }
+
+        var request = URLRequest(url: URL(string: "ws://127.0.0.1:\(port)")!)
+        request.setValue("https://example.com", forHTTPHeaderField: "Origin")
+        // The rejected handshake never completes, so bound the wait
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.timeoutIntervalForRequest = 3
+        let task = URLSession(configuration: configuration).webSocketTask(with: request)
+        task.resume()
+        await #expect(throws: (any Error).self) {
+            try await task.send(.string(#"{"jsonrpc":"2.0","id":1,"method":"app.getInfo","params":{}}"#))
+            _ = try await task.receive()
+        }
+        task.cancel(with: .goingAway, reason: nil)
+    }
+}

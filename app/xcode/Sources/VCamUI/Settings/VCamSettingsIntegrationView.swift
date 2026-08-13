@@ -3,6 +3,7 @@ import VCamTracking
 import VCamBridge
 import VCamData
 import VCamLogger
+import VCamRemoteControl
 import Network
 
 public struct VCamSettingsIntegrationView: View {
@@ -97,8 +98,64 @@ public struct VCamSettingsIntegrationView: View {
             MocopiSettingView()
 #endif
 #endif
+            ExternalControlSettingView()
         }
         .formStyle(.grouped)
+    }
+}
+
+private struct ExternalControlSettingView: View {
+    @AppStorage(key: .integrationExternalControl) private var integrationExternalControl
+    @AppStorage(key: .integrationExternalControlPort) private var integrationExternalControlPort
+
+    var body: some View {
+        VCamSettingsIntegrationView.FeatureView(title: "VCam API") {
+            LabeledContent {
+                if ExternalControlServer.shared.isRunning {
+                    Text(verbatim: "ws://127.0.0.1:\(integrationExternalControlPort)")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                        .textSelection(.enabled)
+                }
+
+                Toggle(isOn: $integrationExternalControl) {
+                    Text(.enable)
+                }
+                .labelsHidden()
+                .toggleStyle(.switch)
+            } label: {
+                Text(.enable)
+            }
+            .onChange(of: integrationExternalControl) { _, newValue in
+                if newValue {
+                    do {
+                        try ExternalControlServer.shared.startWithSavedPort()
+                    } catch {
+                        // Roll the toggle back so the UI doesn't claim the server is running
+                        Logger.error(error)
+                        integrationExternalControl = false
+                    }
+                } else {
+                    ExternalControlServer.shared.stop()
+                }
+            }
+
+            LabeledContent {
+                TextField(value: $integrationExternalControlPort, format: .number.grouping(.never)) {
+                    Text(verbatim: "Port")
+                }
+                .textFieldStyle(.roundedBorder)
+                .labelsHidden()
+                .frame(maxWidth: 100)
+                .disabled(integrationExternalControl)
+            } label: {
+                Text(verbatim: "Port")
+            }
+
+            Text(.externalControlHelp)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+        }
     }
 }
 
