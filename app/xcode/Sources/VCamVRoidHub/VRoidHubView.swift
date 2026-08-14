@@ -7,7 +7,7 @@ public struct VRoidHubView: View {
     /// Called when a model has been loaded into VCam and the window can close
     private let onFinished: () -> Void
 
-    public init(onFinished: @escaping () -> Void = {}) {
+    public init(onFinished: @escaping () -> Void) {
         self.onFinished = onFinished
     }
 

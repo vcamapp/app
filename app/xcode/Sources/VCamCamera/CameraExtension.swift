@@ -16,6 +16,15 @@ public final class CameraExtension: NSObject {
 
     private let identifier = "com.github.tattn.VCam.CameraExtension"
 
+    /// sysextd rejects activation unless the host app is under /Applications; translocated copies also fail this requirement
+    public static var isAppInApplicationsFolder: Bool {
+#if DEBUG
+        true // Debug builds run from the build directory with developer mode (systemextensionsctl developer on), which lifts the location requirement
+#else
+        Bundle.main.bundleURL.path.hasPrefix("/Applications/")
+#endif
+    }
+
     private var activationRequestContinuation: CheckedContinuation<Void, any Error>?
     private var deactivationRequestContinuation: CheckedContinuation<Void, any Error>?
     private var propertiesRequestContinuation: CheckedContinuation<OSSystemExtensionProperties, any Error>?

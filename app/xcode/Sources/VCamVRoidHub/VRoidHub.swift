@@ -11,7 +11,7 @@ import VRoidSDK
 @MainActor
 public enum VRoidHub {
     /// Loads decrypted model data into the running app
-    public typealias ModelInstaller = (_ data: Data, _ reference: VRoidModelReference) async throws -> Void
+    public typealias ModelInstaller = (_ data: Data) async throws -> Void
 
     private struct Integration {
         let credential: VRoidCredential
@@ -56,6 +56,12 @@ public enum VRoidHub {
     }
 
     private static var didAttemptRestore = false
+
+    /// Whether a VRoid Hub model will be installed right after launch, so that
+    /// the engine can skip restoring a model of its own
+    public static var hasPendingRestore: Bool {
+        integration != nil && VRoidModelReference.lastUsed != nil
+    }
 
     /// Reloads the last used VRoid Hub model through the SDK's encrypted cache.
     ///

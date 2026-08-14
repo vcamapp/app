@@ -32,7 +32,7 @@ final class VRoidHubModelLoader {
         defer { isLoading = false }
 
         let (data, reference) = try await decrypt()
-        try await installModel(data, reference)
+        try await installModel(data)
         VRoidModelReference.lastUsed = reference
     }
 }

@@ -100,13 +100,19 @@ extension VCamSettingVirtualCameraView {
             do {
                 try await operation()
             } catch {
-                await VCamAlert.showModal(title: String(localized: .failure), message: error.localizedDescription, canCancel: false)
+                // Include the error domain and code so OS-side failures are identifiable from support inquiries
+                let osError = error as NSError
+                await VCamAlert.showModal(title: String(localized: .failure), message: "\(error.localizedDescription) (\(osError.domain) \(osError.code))", canCancel: false)
             }
         }
     }
 
     @MainActor
     private func installExtension() async throws {
+        guard CameraExtension.isAppInApplicationsFolder else {
+            await VCamAlert.showModal(title: String(localized: .failure), message: String(localized: .moveAppToApplicationsFolder), canCancel: false)
+            return
+        }
         NSWorkspace.shared.open(.cameraExtension)
         try await CameraExtension().installExtension()
         isCameraExtensionInstalled = true

@@ -101,17 +101,15 @@ public final class UniBridge {
     public private(set) lazy var showEmojiStamp = stringMapper.set(.showEmojiStamp)
 
     public enum TriggerType: Int32, Sendable {
-        case openVRoidHub = 0
-        case resetCamera = 1
-        case deleteObject = 2
-        case resetAllObjects = 3
-        case editAvatar = 4
-        case pauseApp = 5
-        case resumeApp = 6
-        case quitApp = 7
+        case resetCamera = 0
+        case deleteObject = 1
+        case resetAllObjects = 2
+        case editAvatar = 3
+        case pauseApp = 4
+        case resumeApp = 5
+        case quitApp = 6
     }
     public let triggerMapper = ValueBinding<Void, TriggerType>()
-    public private(set) lazy var openVRoidHub = triggerMapper.trigger(.openVRoidHub)
     public private(set) lazy var resetCamera = triggerMapper.trigger(.resetCamera)
     public private(set) lazy var deleteObject = triggerMapper.trigger(.deleteObject)
     public private(set) lazy var resetAllObjects = triggerMapper.trigger(.resetAllObjects)

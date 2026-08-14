@@ -3842,6 +3842,29 @@
         }
       }
     },
+    "moveAppToApplicationsFolder": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The virtual camera can't be installed because the app isn't in the Applications folder. Move the app to the Applications folder, relaunch it, and try again."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "アプリが「アプリケーション」フォルダにないため、仮想カメラをインストールできません。アプリを「アプリケーション」フォルダに移動して再起動した後、再度お試しください。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "앱이 \"응용 프로그램(Applications)\" 폴더에 없어 가상 카메라를 설치할 수 없습니다. 앱을 \"응용 프로그램(Applications)\" 폴더로 이동해 다시 실행한 후 다시 시도해 주세요."
+          }
+        }
+      }
+    },
     "moveInitialPosition": {
       "extractionState": "manual",
       "localizations": {
