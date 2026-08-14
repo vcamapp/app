@@ -34,7 +34,7 @@ public final class MotionLibrary {
         UniState.shared.motions
     }
 
-    /// Falls back to the known built-in motions until the list arrives from Unity,
+    /// Falls back to the known built-in motions until the list arrives from the engine,
     /// so that the shortcut editor always has candidates
     public var allMotions: [Avatar.Motion] {
         let builtIn = builtInMotions.isEmpty ? Self.fallbackBuiltInMotions : builtInMotions
@@ -107,8 +107,8 @@ public final class MotionLibrary {
         return record
     }
 
-    /// Registers the persisted VRMA motions to Unity (called when Unity starts)
-    public func registerPersistedMotionsToUnity() {
+    /// Registers the persisted VRMA motions to the engine (called when the engine starts)
+    public func registerPersistedMotionsToEngine() {
         for record in store.records {
             UniBridge.registerImportedMotion(
                 id: record.motionID,
@@ -137,7 +137,7 @@ public final class MotionLibrary {
 
     public func remove(motionID: String) throws {
         guard case .imported(let id) = MotionID(rawValue: motionID) else { return }
-        // Commit the manifest update first, then unregister from Unity (Unity stops the motion if it is playing)
+        // Commit the manifest update first, then unregister from the engine (the engine stops the motion if it is playing)
         try store.remove(id: id)
         UniBridge.removeImportedMotion(id: motionID)
     }

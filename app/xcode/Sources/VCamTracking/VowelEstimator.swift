@@ -9,7 +9,7 @@ public enum VowelEstimator {
         if mouthWide < 0.6 { // Judge 'u' based on the ratio of jaw width to mouth width
             return .u
         } else if mouthWide >= 0.8 {
-            return .i // Determine 'i' or 'e' in Unity based on the mouth's open/close state.
+            return .i // Determine 'i' or 'e' on the engine side based on the mouth's open/close state.
         } else {
             return .a
         }

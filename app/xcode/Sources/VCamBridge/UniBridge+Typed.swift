@@ -18,6 +18,8 @@ public struct UniBridgeMethodId: RawRepresentable, Sendable {
 
     static let setTrackingChannelEnabled = Self.init(rawValue: 40)
 
+    public static let loadVRM = Self.init(rawValue: 50)
+
     public let rawValue: Int32
 
     public init(rawValue: Int32) {
@@ -37,6 +39,14 @@ public enum TrackingChannel: Int32 {
     case blink = 1
     case mouth = 2
     case expression = 3
+}
+
+// MARK: - VRM Load Source Enum
+/// Where a VRM load request originates. The engine decides the avatar metadata
+/// and whether to persist the file for restart restoration based on this.
+public enum VRMLoadSource: Int32, Sendable {
+    case file = 0
+    case vroidHub = 1
 }
 
 // MARK: - Payload Structures
@@ -93,6 +103,29 @@ public struct HandPacketV1Payload {
     public var byteCount: Int32
 }
 
+public struct LoadVRMPayload {
+    public var pathPtr: UnsafePointer<CChar>?
+    /// Empty when the caller does not wait for a completion notification
+    public var requestIDPtr: UnsafePointer<CChar>?
+    public var source: Int32
+}
+
+/// A decoded ``LoadVRMPayload`` with the C strings copied, for stubs and tests
+public struct LoadVRMCall: Equatable, Sendable {
+    public var path: String
+    /// nil when the caller does not wait for a completion notification
+    public var requestID: UUID?
+    public var source: VRMLoadSource
+
+    public init?(method: UniBridgeMethodId, payload: UnsafeMutableRawPointer?) {
+        guard method == .loadVRM, let payload else { return nil }
+        let loadVRM = payload.assumingMemoryBound(to: LoadVRMPayload.self).pointee
+        path = loadVRM.pathPtr.map { String(cString: $0) } ?? ""
+        requestID = loadVRM.requestIDPtr.flatMap { UUID(uuidString: String(cString: $0)) }
+        source = VRMLoadSource(rawValue: loadVRM.source) ?? .file
+    }
+}
+
 // MARK: - Bridge Callback
 public extension UniBridge {
     @MainActor static var methodCallback: (UniBridgeMethodId, UnsafeMutableRawPointer?, UnsafeMutableRawPointer?) -> Void = { _, _, _ in }
@@ -101,9 +134,9 @@ public extension UniBridge {
 // MARK: - Bridge Implementation
 
 public extension UniBridge {
-    static let isUnity = Bundle.main.bundlePath.hasSuffix("Unity.app")
+    static let isEngineApp = Bundle.main.bundlePath.hasSuffix("Unity.app")
 
-    /// The pointer handed to Unity is only valid while `methodCallback` runs synchronously,
+    /// The pointer handed to the engine is only valid while `methodCallback` runs synchronously,
     /// so the receiver must copy anything it needs to keep.
     private static func send<Payload>(_ method: UniBridgeMethodId, payload: inout Payload) {
         withUnsafeMutablePointer(to: &payload) { payloadPtr in
@@ -194,6 +227,15 @@ public extension UniBridge {
     static func setScreenResolution(width: Int32, height: Int32) {
         var payload = ScreenResolutionPayload(width: width, height: height)
         send(.setScreenResolution, payload: &payload)
+    }
+
+    static func loadVRM(path: String, source: VRMLoadSource = .file, requestID: UUID? = nil) {
+        path.withCString { pathPtr in
+            (requestID?.uuidString ?? "").withCString { requestIDPtr in
+                var payload = LoadVRMPayload(pathPtr: pathPtr, requestIDPtr: requestIDPtr, source: source.rawValue)
+                send(.loadVRM, payload: &payload)
+            }
+        }
     }
 
     static func sendHandPacketV1(_ data: Data) {

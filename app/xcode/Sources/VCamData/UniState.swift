@@ -296,9 +296,9 @@ public final class UniState {
         set { lipSyncWebCam = newValue == .camera }
     }
 
-    // MARK: - Unity Initialization
+    // MARK: - Engine Initialization
 
-    public func initializeToUnity() {
+    public func initializeToEngine() {
         let bridge = UniBridge.shared
 #if FEATURE_3
         bridge.boolMapper.setValue(.useAutoMode, __useAutoMode)
@@ -325,16 +325,16 @@ public final class UniState {
 #endif
     }
 
-    /// Read values from Unity that are not managed by Swift storage
-    public func initializeFromUnity() {
+    /// Read values from the engine that are not managed by Swift storage
+    public func initializeFromEngine() {
         let bridge = UniBridge.shared
         hasPerfectSyncBlendShape = bridge.boolMapper.get(.hasPerfectSyncBlendShape)
         __objectSelected = bridge.intMapper.get(.objectSelected)
     }
 
-    // MARK: - Unity → Swift Update Methods (bypasses Unity sync to avoid loops)
+    // MARK: - Engine → Swift Update Methods (bypasses engine sync to avoid loops)
 
-    public func setFromUnity(intType: UniBridge.IntType, value: Int32) {
+    public func setFromEngine(intType: UniBridge.IntType, value: Int32) {
         switch intType {
         case .lensFlare:
 #if FEATURE_3

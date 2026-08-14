@@ -7,6 +7,9 @@ import VCamCamera
 import VCamTracking
 import VCamLogger
 import SystemExtensions
+#if FEATURE_3
+import VCamVRoidHub
+#endif
 
 @MainActor
 public final class AppMenu: NSObject {
@@ -16,7 +19,7 @@ public final class AppMenu: NSObject {
 
     private override init() {
         let mainMenu: NSMenu
-        if UniBridge.isUnity {
+        if UniBridge.isEngineApp {
             menu = Self.makeSubMenu(menu: NSApp.mainMenu!, title: "VCamMenu", items: [])
             mainMenu = NSApp.mainMenu!.items[0].submenu!
         } else {
@@ -109,10 +112,12 @@ private extension AppMenu {
             makeMenuItem(title: String(localized: .openModelList), action: #selector(openModelList)),
         ]
 #if FEATURE_3
-        items.append(contentsOf: [
-            .separator(),
-            makeMenuItem(title: String(localized: .loadOnVRoidHub), action: #selector(openVRoidHub)),
-        ])
+        if VRoidHub.isAvailable {
+            items.append(contentsOf: [
+                .separator(),
+                makeMenuItem(title: String(localized: .loadOnVRoidHub), action: #selector(openVRoidHub)),
+            ])
+        }
 #endif
         Self.makeSubMenu(menu: subMenu, title: String(localized: .file), items: items)
     }
@@ -122,11 +127,13 @@ private extension AppMenu {
         MacWindowManager.shared.open(ModelListView())
     }
 
+#if FEATURE_3
     @objc private func openVRoidHub() {
         Logger.log(event: .openVRoidHub)
         Logger.log("")
-        UniBridge.shared.openVRoidHub()
+        VRoidHubView.openWindow()
     }
+#endif
 }
 
 // MARK: - Object

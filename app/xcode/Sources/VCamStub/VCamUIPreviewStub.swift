@@ -10,15 +10,15 @@ public enum VCamUIPreviewStub {
     public static func stub() {
         MainTexture.shared.setTexture(MTLTextureStub.makeMainTexture())
 
-        let unityView = NSView()
-        unityView.wantsLayer = true
-        unityView.layer?.backgroundColor = NSColor.red.cgColor
-        NSApp.windows.first?.contentView = unityView
+        let engineView = NSView()
+        engineView.wantsLayer = true
+        engineView.layer?.backgroundColor = NSColor.red.cgColor
+        NSApp.windows.first?.contentView = engineView
 
         UniBridgeStub.shared.stub(.shared)
 
-        // Stands in for the model load that fills these from Unity
-        UniState.shared.initializeFromUnity()
+        // Stands in for the model load that fills these from the engine
+        UniState.shared.initializeFromEngine()
         UniState.shared.blendShapeNames = stubBlendShapeNames
         Tracking.shared.mappings.perfectSync = TrackingMappingEntry.defaultMappings(for: .perfectSync)
 

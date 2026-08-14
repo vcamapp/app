@@ -39,7 +39,7 @@ public final class DisplayParameterController {
         }
     }
 
-    func syncState(applyToUnity: Bool = true) {
+    func syncState(applyToEngine: Bool = true) {
         if state.usePostEffect {
             let resolvedId = resolveStoredParameterId()
             DisplayParameterPresets.shared.currentParameterId = resolvedId
@@ -48,7 +48,7 @@ public final class DisplayParameterController {
             DisplayParameterPresets.shared.currentParameterId = nil
         }
 
-        if applyToUnity {
+        if applyToEngine {
             applyCurrentParameter()
         }
     }

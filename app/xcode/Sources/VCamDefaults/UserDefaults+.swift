@@ -1,10 +1,3 @@
-//
-//  UserDefaults+.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/04/23.
-//
-
 import Foundation
 
 public extension UserDefaults {
@@ -13,7 +6,7 @@ public extension UserDefaults {
     }
 
     func set<T: UserDefaultsValue>(_ value: T, for key: Key<T>) {
-        set(value.encodeUserDefaultValue(), forKey: key.rawValue)
+        value.store(in: self, forKey: key.rawValue)
     }
 
     func remove<T: UserDefaultsValue>(for key: Key<T>) {

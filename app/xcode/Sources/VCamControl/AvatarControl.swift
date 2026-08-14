@@ -27,8 +27,19 @@ public enum AvatarControl {
         onLoad?(nil)
     }
 
+#if FEATURE_3
+    /// Loads a VRoid Hub model from a temporary plaintext VRM and waits for the load result.
+    /// The engine neither persists the file nor allows exporting the avatar for this source.
+    /// The stored VRoid reference is left untouched so a transient failure can be retried
+    public static func load(vroidModelFileURL: URL) async throws {
+        onLoad?(nil)
+        try await UniBridge.loadVRM(path: vroidModelFileURL.path, source: .vroidHub)
+    }
+#endif
+
     private static func requestLoad(fileURL: URL) {
-        UniBridge.shared.loadVRM(fileURL.path)
+        VRoidModelReference.lastUsed = nil
+        UniBridge.loadVRM(path: fileURL.path)
     }
 
 #if !FEATURE_3
@@ -39,6 +50,7 @@ public enum AvatarControl {
     }
 
     private static func requestLoad(directoryURL: URL) {
+        VRoidModelReference.lastUsed = nil
         UniBridge.shared.loadModel(directoryURL.path)
     }
 #endif

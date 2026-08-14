@@ -42,7 +42,7 @@ public final class WindowManager {
     public func setUpWindow() {
         Logger.log("")
 
-        if UniBridge.isUnity {
+        if UniBridge.isEngineApp {
             uniDebugLog("WindowManager.setUpWindow()")
             let windowRef = NSWindow()
             windowRef.title = "VCam"
@@ -50,6 +50,7 @@ public final class WindowManager {
             windowRef.backingType = .buffered
             windowRef.level = .floating
             windowRef.isReleasedWhenClosed = false
+            // Persisted autosave key; renaming it would reset users' saved window frames
             windowRef.setFrameAutosaveName("UnityPlayerVCamUI")
             windowRef.makeKeyAndOrderFront(nil)
             self.window = windowRef
@@ -77,23 +78,23 @@ public final class WindowManager {
     public func setUpView() {
         Logger.log("")
 
-        guard !isConfigured, containerView.subviews.isEmpty, let window, let unityView = window.contentView else {
+        guard !isConfigured, containerView.subviews.isEmpty, let window, let engineView = window.contentView else {
             return
         }
 
-        containerView.addFilledView(RootView(unityView: {
-            if UniBridge.isUnity {
+        containerView.addFilledView(RootView(engineView: {
+            if UniBridge.isEngineApp {
                 return NSView()
             } else {
-                NSLayoutConstraint.deactivate(unityView.constraints)
-                unityView.removeFromSuperview()
-                unityView.translatesAutoresizingMaskIntoConstraints = false
-                return unityView
+                NSLayoutConstraint.deactivate(engineView.constraints)
+                engineView.removeFromSuperview()
+                engineView.translatesAutoresizingMaskIntoConstraints = false
+                return engineView
             }
         }()))
         window.contentView = containerView
 
-        if UniBridge.isUnity {
+        if UniBridge.isEngineApp {
             uniDebugLog("WindowManager.setUpView()")
             window.setContentSize(containerView.fittingSize)
         } else {
@@ -155,7 +156,7 @@ public final class WindowManager {
         VCamSystem.shared.dispose()
         isConfigured = false
 
-        if UniBridge.isUnity {
+        if UniBridge.isEngineApp {
             uniDebugLog("WindowManager.dispose()")
             SceneObjectManager.shared.dispose()
             window?.orderOut(nil)

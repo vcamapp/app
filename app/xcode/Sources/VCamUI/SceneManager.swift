@@ -225,7 +225,7 @@ public final class SceneManager {
         guard let scene = scenes.first else { return }
         UniBridge.shared.resetAllObjects() // Since processing is delayed, first remove only the list items from UI.
         Task { @MainActor in
-            // Unity doesn't notify when the canvas finishes resizing, so poll until its
+            // The engine doesn't notify when the canvas finishes resizing, so poll until its
             // orientation matches instead of waiting a fixed time; time out as a fallback.
             let isLandscape = MainTexture.shared.isLandscape
             for _ in 0..<40 {

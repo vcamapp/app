@@ -6,7 +6,7 @@ import VCamMotionV1
 
 @Suite
 struct FaceTransformValuesTests {
-    /// Indices of the Perfect Sync array, which the Unity side maps by position.
+    /// Indices of the Perfect Sync array, which the engine side maps by position.
     private enum Index {
         static let lookAtX = 6
         static let lookAtY = 7

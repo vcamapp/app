@@ -68,7 +68,7 @@ public final class Tracking {
         } else {
             mappings.perfectSync = []
         }
-        applyFaceMappingsToUnity()
+        applyFaceMappingsToEngine()
     }
 
     public func configure() {
@@ -99,11 +99,11 @@ public final class Tracking {
 
     public func addMapping(_ entry: TrackingMappingEntry, for mode: TrackingMode) {
         mappings[mode].append(entry)
-        applyMappingsToUnity(for: mode)
+        applyMappingsToEngine(for: mode)
     }
 
     public func applyMappings(for mode: TrackingMode) {
-        applyMappingsToUnity(for: mode)
+        applyMappingsToEngine(for: mode)
     }
 
     public func deleteMappings(at indices: IndexSet, for mode: TrackingMode) {
@@ -114,7 +114,7 @@ public final class Tracking {
             updatedMappings.remove(at: index)
         }
         mappings[mode] = updatedMappings
-        applyMappingsToUnity(for: mode)
+        applyMappingsToEngine(for: mode)
     }
 
     public func resetMappings(for mode: TrackingMode) {
@@ -122,10 +122,10 @@ public final class Tracking {
             return
         }
         mappings[mode] = TrackingMappingEntry.defaultMappings(for: mode)
-        applyMappingsToUnity(for: mode)
+        applyMappingsToEngine(for: mode)
     }
 
-    private func applyMappingsToUnity(for mode: TrackingMode) {
+    private func applyMappingsToEngine(for mode: TrackingMode) {
         UniBridge.clearTrackingMapping(mode: mode)
         for mapping in mappings[mode] where mapping.isEnabled {
             UniBridge.addTrackingMapping(
@@ -187,16 +187,16 @@ public final class Tracking {
 
         reconcileLipSyncState()
 
-        applyFaceMappingsToUnity()
+        applyFaceMappingsToEngine()
     }
 
-    /// Unity owns one mapping set per mode, and which one actually receives the face data is
+    /// The engine owns one mapping set per mode, and which one actually receives the face data is
     /// decided per packet by the model's Perfect Sync support. A Perfect Sync capable method
     /// falls back to the blend shape mode for a model without those blend shapes, so both sets
     /// are kept in sync instead of only the one of the current tracking method.
-    private func applyFaceMappingsToUnity() {
-        applyMappingsToUnity(for: .blendShape)
-        applyMappingsToUnity(for: .perfectSync)
+    private func applyFaceMappingsToEngine() {
+        applyMappingsToEngine(for: .blendShape)
+        applyMappingsToEngine(for: .perfectSync)
     }
 
     /// Whether VCamMocap drives the hands. Checks both methods to guard
@@ -230,7 +230,7 @@ public final class Tracking {
         usesHighPrecisionFaceTracking = isEnabled
         webCamera.setHighPrecisionFaceTrackingEnabled(isEnabled)
         reconcileLipSyncState()
-        applyFaceMappingsToUnity()
+        applyFaceMappingsToEngine()
     }
 
     public func setFingerTrackingMethod(_ method: TrackingMethod.Finger) {

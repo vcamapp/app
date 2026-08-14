@@ -13,19 +13,11 @@ package enum ModelMetaLoader {
 #if FEATURE_3
     package static func load(from url: URL) throws -> ModelMeta {
         let loader = VRMLoader()
-        do {
-            let vrm1 = try loader.load(VRM1.self, withURL: url)
-            return ModelMeta(
-                name: vrm1.meta.name,
-                image: try? loader.loadThumbnail(from: vrm1).pngData()
-            )
-        } catch {
-            let vrm0 = try loader.load(VRM.self, withURL: url)
-            return ModelMeta(
-                name: vrm0.meta.title ?? url.deletingPathExtension().lastPathComponent,
-                image: try? loader.loadThumbnail(from: vrm0).pngData()
-            )
-        }
+        let vrm = try loader.load(withURL: url)
+        return ModelMeta(
+            name: vrm.meta.title ?? url.deletingPathExtension().lastPathComponent,
+            image: try? loader.loadThumbnail(from: vrm).pngData()
+        )
     }
 #else
     package static func load(from url: URL) throws -> ModelMeta {

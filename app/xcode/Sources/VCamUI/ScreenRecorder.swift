@@ -353,7 +353,7 @@ public extension ScreenRecorder {
         )
     }
 
-    // Use the main thread for size since the Unity side's Canvas size is required
+    // Use the main thread for size since the engine side's canvas size is required
     @MainActor
     static func create(id: String, screenCapture: VCamScene.ScreenCapture) async throws -> ScreenRecorder {
         let availableContent = try await ScreenRecorder.availableContent()

@@ -83,7 +83,7 @@ public final class VCamMotionTracking {
         blendShapeResampler.send(values, smoothed: smoothingStorage.isEnabled)
     }
 
-    /// Unity retargets v1 hand packets itself, but whether this tracking
+    /// The engine retargets v1 hand packets itself, but whether this tracking
     /// source may drive the avatar at all is decided here, like the legacy path.
     func applyHandsV1(_ packet: Data, settings: VCamMotionTrackingSettings) {
         guard settings.isHandTrackingEnabled else { return }

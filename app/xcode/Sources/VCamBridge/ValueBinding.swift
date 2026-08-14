@@ -8,7 +8,7 @@ public final class ValueBinding<Value, Kind: RawRepresentable> where Kind.RawVal
     public var getValue: ((Kind) -> Value)?
     public var setValue: (Kind, Value) -> Void = { _, _ in }
 
-    /// Whether the Unity side has registered its handler (false in the preview app)
+    /// Whether the engine side has registered its handler (false in the preview app)
     public var isRegistered: Bool {
         getValue != nil
     }

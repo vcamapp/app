@@ -57,6 +57,23 @@ let package = Package(
 
 let isThree = Context.environment["VCAM_VARIANT"] != "2"
 
+if isThree {
+    package.dependencies.append(
+        .package(url: "https://github.com/tattn/swift-vroid-sdk", from: "0.1.1")
+    )
+    package.targets.append(
+        .target(name: "VCamVRoidHub", dependencies: [
+            "VCamData",
+            "VCamEntity",
+            "VCamLogger",
+            .product(name: "VRoidSDK", package: "swift-vroid-sdk"),
+            .product(name: "VRMRealityKit", package: "VRMKit"),
+        ], resources: [
+            .process("Resources"),
+        ])
+    )
+}
+
 for target in package.targets {
     var swiftSettings = (target.swiftSettings ?? []) + [
         .enableUpcomingFeature("NonisolatedNonsendingByDefault"),
@@ -81,5 +98,8 @@ if isThree {
         vcamDataTarget.dependencies.append(contentsOf: [
             .product(name: "VRMKit", package: "VRMKit"),
         ])
+    }
+    if let vcamUITarget = package.targets.first(where: { $0.name == "VCamUI" }) {
+        vcamUITarget.dependencies.append("VCamVRoidHub")
     }
 }

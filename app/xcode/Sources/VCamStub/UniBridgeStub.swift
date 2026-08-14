@@ -1,4 +1,4 @@
-import Foundation
+import AppKit
 import VCamBridge
 
 @MainActor
@@ -30,5 +30,19 @@ public final class UniBridgeStub {
         action.intMapper.setValue = { type, value in self.intTypes[type] = value }
         action.arrayMapper.getValue = { type in return self.arrayTypes[type] ?? self.emptyArrayPointer }
         action.arrayMapper.setValue = { type, value in self.arrayTypes[type] = value }
+        action.triggerMapper.getValue = { type in
+            // Quitting normally goes through the engine; without it the app has to terminate itself
+            if type == .quitApp {
+                NSApp.terminate(nil)
+            }
+        }
+        UniBridge.methodCallback = { method, payload, _ in
+            // Callers waiting for the engine's model load result would otherwise time out
+            guard let call = LoadVRMCall(method: method, payload: payload),
+                  let requestID = call.requestID else { return }
+            Task { @MainActor in
+                UniRequestHub.modelLoad.complete(requestID: requestID, errorCode: 0)
+            }
+        }
     }
 }

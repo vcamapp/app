@@ -59,7 +59,7 @@ struct VCamMotionImportView: View {
                 )
                 nsWindow?.close()
             } catch is CancellationError {
-                // The staged file and the Unity registration are cleaned up by importMotion
+                // The staged file and the engine-side registration are cleaned up by importMotion
             } catch {
                 isImporting = false
                 let message = (error as? VrmaMotionError)?.localizedMessage ?? String(localized: .failedToLoadMotion)

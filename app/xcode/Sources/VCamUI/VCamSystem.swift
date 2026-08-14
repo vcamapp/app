@@ -12,7 +12,7 @@ import VCamEntity
 @MainActor
 public final class VCamSystem {
     public static let shared = VCamSystem()
-    public static var initializeToUnity: (() -> Void)?
+    public static var initializeToEngine: (() -> Void)?
 
     public let windowManager = WindowManager()
 
@@ -38,14 +38,14 @@ public final class VCamSystem {
             }
         }
 
-        UniState.shared.initializeToUnity()
-        Self.initializeToUnity?()
+        UniState.shared.initializeToEngine()
+        Self.initializeToEngine?()
         Workaround.fixColorPickerOpacity_macOS14()
         windowManager.setUpWindow()
         windowManager.setUpView()
         AppMenu.shared.configure()
 
-        if !UniBridge.isUnity {
+        if !UniBridge.isEngineApp {
             AppUpdater.vcam.presentUpdateAlertIfAvailable()
         }
 
@@ -60,7 +60,7 @@ public final class VCamSystem {
     }
 
     public func configure() {
-        guard UniBridge.isUnity else { return }
+        guard UniBridge.isEngineApp else { return }
         windowManager.window?.orderFront(nil)
     }
 

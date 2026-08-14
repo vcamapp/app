@@ -170,7 +170,7 @@ public final class SceneObjectManager {
         case .screen, .videoCapture, .web:
             RenderTextureManager.shared.remove(id: object.id)
         }
-        // The Unity side deletes the currently selected item, so select the target first;
+        // The engine side deletes the currently selected item, so select the target first;
         // otherwise removing an unselected object (e.g. from the context menu) leaves it on screen
         UniBridge.shared.objectSelected.wrappedValue = object.id
         UniBridge.shared.deleteObject()
@@ -336,7 +336,7 @@ extension SceneObjectManager {
         }
 
         Logger.log("finish loadObjects")
-        // Loading a scene must not implicitly save it, so only notify the order to Unity
+        // Loading a scene must not implicitly save it, so only notify the order to the engine
         updateObjectOrder(persist: false)
     }
 }

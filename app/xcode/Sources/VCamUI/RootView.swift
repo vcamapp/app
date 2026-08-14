@@ -3,7 +3,7 @@ import VCamBridge
 import VCamData
 
 public struct RootView: View {
-    let unityView: NSView
+    let engineView: NSView
     let state: VCamUIState
     let uniState: UniState
 
@@ -11,7 +11,7 @@ public struct RootView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     public var body: some View {
-        RootViewContent(unityView: unityView)
+        RootViewContent(engineView: engineView)
             .background(.regularMaterial)
             .overlay {
                 if isLaunchScreenPresented {
@@ -27,15 +27,15 @@ public struct RootView: View {
 }
 
 extension RootView {
-    public init(unityView: NSView) {
-        self.unityView = unityView
+    public init(engineView: NSView) {
+        self.engineView = engineView
         self.state = .shared
         self.uniState = .shared
     }
 }
 
 private struct RootViewContent: View {
-    let unityView: NSView
+    let engineView: NSView
 
     @Environment(VCamUIState.self) var state
 
@@ -44,7 +44,7 @@ private struct RootViewContent: View {
             HStack(spacing: 0) {
                 VCamMenu()
                     .onTapGesture {
-                        unityView.window?.makeFirstResponder(nil)
+                        engineView.window?.makeFirstResponder(nil)
                         NotificationCenter.default.post(name: .unfocusObject, object: nil)
                     }
                     .modifier { view in
@@ -59,7 +59,7 @@ private struct RootViewContent: View {
                 VStack(spacing: 0) {
                     HStack(alignment: .bottom, spacing: 0) {
                         VCamMainToolbar()
-                        UnityView(unityView: unityView)
+                        EngineView(engineView: engineView)
                             .equatable()
                             .frame(maxWidth: .infinity)
                     }
@@ -68,34 +68,34 @@ private struct RootViewContent: View {
 
                     VCamContentView()
                         .onTapGesture {
-                            unityView.window?.makeFirstResponder(nil)
+                            engineView.window?.makeFirstResponder(nil)
                             NotificationCenter.default.post(name: .unfocusObject, object: nil)
                         }
                 }
             }
         } else {
-            UnityView(unityView: unityView)
+            EngineView(engineView: engineView)
                 .equatable()
                 .layoutPriority(1)
         }
     }
 }
 
-private struct UnityView: View {
-    let unityView: NSView
+private struct EngineView: View {
+    let engineView: NSView
 
     var body: some View {
-        UnityContainerView(unityView: unityView)
+        EngineContainerView(engineView: engineView)
         //                    .help(String(localized: .helpMouseHover))
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .aspectRatio(1280 / 720, contentMode: .fit)
     }
 
-    private struct UnityContainerView: NSViewRepresentable {
-        let unityView: NSView
+    private struct EngineContainerView: NSViewRepresentable {
+        let engineView: NSView
 
         func makeNSView(context: Context) -> some NSView {
-            unityView
+            engineView
         }
 
         func updateNSView(_ nsView: NSViewType, context: Context) {
@@ -103,7 +103,7 @@ private struct UnityView: View {
     }
 }
 
-extension UnityView: @MainActor Equatable {
+extension EngineView: @MainActor Equatable {
     static func == (lhs: Self, rhs: Self) -> Bool {
         true
     }
@@ -111,13 +111,13 @@ extension UnityView: @MainActor Equatable {
 
 #Preview {
     RootView(
-        unityView: PreviewUnityView(),
+        engineView: PreviewEngineView(),
         state: VCamUIState(interactable: true),
         uniState: UniState()
     )
 }
 
-private class PreviewUnityView: NSView {
+private class PreviewEngineView: NSView {
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
         wantsLayer = true

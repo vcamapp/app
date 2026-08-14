@@ -106,7 +106,7 @@ final class TrackingResampler: @unchecked Sendable {
         let now = ProcessInfo.processInfo.systemUptime
         let renderTime = now - settings.bufferDelay
         guard let sample = sample(at: renderTime, frames: frames, settings: settings) else { return }
-        // Unity requires main thread for data transmission
+        // The engine requires main thread for data transmission
         let output = self.output
         DispatchQueue.runOnMain {
             output(sample)

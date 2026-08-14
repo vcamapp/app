@@ -32,15 +32,22 @@ func recordedTriggers(during body: () -> Void) -> [UniBridge.TriggerType] {
     return triggered
 }
 
+/// Records loadVRM calls and completes each one with `errorCode`, standing in for the engine
 @MainActor
-func recordedStringValues(during body: () -> Void) -> [(type: UniBridge.StringType, value: String)] {
-    var values: [(type: UniBridge.StringType, value: String)] = []
-    let mapper = UniBridge.shared.stringMapper
-    let originalSetValue = mapper.setValue
+func completingModelLoads(errorCode: Int32, during body: () async throws -> Void) async rethrows -> [LoadVRMCall] {
+    nonisolated(unsafe) var calls: [LoadVRMCall] = []
+    let originalCallback = UniBridge.methodCallback
     defer {
-        mapper.setValue = originalSetValue
+        UniBridge.methodCallback = originalCallback
     }
-    mapper.setValue = { values.append((type: $0, value: $1)) }
-    body()
-    return values
+    UniBridge.methodCallback = { method, payload, _ in
+        guard let call = LoadVRMCall(method: method, payload: payload) else { return }
+        calls.append(call)
+        guard let requestID = call.requestID else { return }
+        Task { @MainActor in
+            UniRequestHub.modelLoad.complete(requestID: requestID, errorCode: errorCode)
+        }
+    }
+    try await body()
+    return calls
 }
