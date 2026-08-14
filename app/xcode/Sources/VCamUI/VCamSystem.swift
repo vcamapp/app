@@ -2,7 +2,9 @@ import AppKit
 import VCamAppExtension
 import VCamBridge
 import VCamControl
+#if FEATURE_API
 import VCamRemoteControl
+#endif
 import VCamTracking
 import VCamLogger
 import VCamCamera
@@ -71,7 +73,9 @@ public final class VCamSystem {
         Tracking.shared.configure()
         RenderTextureManager.shared.resume()
         PasteboardObserver.shared.observe()
+#if FEATURE_API
         ExternalControlServer.shared.startIfEnabled()
+#endif
         UniBridge.shared.resumeApp()
     }
 
@@ -108,7 +112,9 @@ public final class VCamSystem {
         VideoRecorder.shared.stop()
         RenderTextureManager.shared.pause()
         PasteboardObserver.shared.dispose()
+#if FEATURE_API
         ExternalControlServer.shared.stop()
+#endif
     }
 }
 

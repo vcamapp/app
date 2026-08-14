@@ -31,10 +31,12 @@ public final class WindowManager {
             }
         }
 
-        NotificationCenter.default.addObserver(forName: NSApplication.didBecomeActiveNotification, object: nil, queue: .main) { _ in
+        NotificationCenter.default.addObserver(forName: NSApplication.didBecomeActiveNotification, object: nil, queue: .main) { [weak self] _ in
             // Display the window when launching the app while it's stored in the menu bar.
-            MainActor.assumeIsolated {
-                VCamSystem.shared.windowManager.unhide()
+            // Use Task instead of assumeIsolated; the synchronous executor check of
+            // assumeIsolated can crash in the runtime when activation races with app termination
+            Task { @MainActor in
+                self?.unhide()
             }
         }
     }

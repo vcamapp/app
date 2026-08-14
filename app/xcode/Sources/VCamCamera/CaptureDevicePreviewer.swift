@@ -1,10 +1,3 @@
-//
-//  CaptureDevicePreviewer.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2022/03/25.
-//
-
 import Foundation
 import AVFoundation
 import VCamEntity
@@ -13,7 +6,8 @@ public final class CaptureDevicePreviewer {
     private let session = AVCaptureSession()
     private let delegator = BufferDelegator()
 
-    public var didOutput: ((CapturedFrame) -> Void)? {
+    // Called on the video data output queue, so the handler must not be actor-isolated
+    public var didOutput: (@Sendable (CapturedFrame) -> Void)? {
         didSet {
             delegator.didOutput = didOutput
         }
@@ -62,7 +56,7 @@ public final class CaptureDevicePreviewer {
     }
 
     private class BufferDelegator: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
-        var didOutput: ((CapturedFrame) -> Void)?
+        var didOutput: (@Sendable (CapturedFrame) -> Void)?
 
         func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
             guard let pixelBuffer = sampleBuffer.imageBuffer else { return }

@@ -1,6 +1,7 @@
 import SwiftUI
 import AVFoundation
 import VideoToolbox
+import VCamBridge
 import VCamCamera
 import VCamLogger
 
@@ -69,6 +70,9 @@ private struct CaptureDeviceSelectView: View {
             previewer?.didOutput = nil
             startPreview()
         }
+        .onChange(of: previewable) { _, _ in
+            updatePreviewOutput()
+        }
         .onAppear {
             startPreview()
         }
@@ -76,15 +80,26 @@ private struct CaptureDeviceSelectView: View {
 
     private func startPreview() {
         previewer = try? CaptureDevicePreviewer(device: captureDevice)
+        updatePreviewOutput()
+    }
+
+    private func updatePreviewOutput() {
+        // Skip the conversion entirely while the preview is hidden
+        guard previewable else {
+            previewer?.didOutput = nil
+            return
+        }
+        // The view itself can't be captured by the nonisolated frame handler,
+        // so hand it a MainActor closure that publishes the converted image
+        let showPreview: @MainActor (NSImage) -> Void = { preview = $0 }
         previewer?.didOutput = { frame in
-            // Skip the conversion entirely while the preview is hidden
-            guard previewable else { return }
             // Using CIImage accumulates memory, so convert to CGImage using VideoToolbox.
             var cgImage: CGImage?
             _ = VTCreateCGImageFromCVPixelBuffer(frame.buffer, options: nil, imageOut: &cgImage)
-            Task { @MainActor in
-                guard let cgImage else { return }
-                preview = NSImage(cgImage: cgImage, size: .init(width: cgImage.width, height: cgImage.height))
+            guard let cgImage else { return }
+            nonisolated(unsafe) let image = NSImage(cgImage: cgImage, size: .init(width: cgImage.width, height: cgImage.height))
+            DispatchQueue.runOnMain {
+                showPreview(image)
             }
         }
     }

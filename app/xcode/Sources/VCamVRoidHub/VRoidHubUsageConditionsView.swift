@@ -1,6 +1,9 @@
 import SwiftUI
 import VRoidSDK
 
+/// Displays a model's conditions of use with the exact labels, values, and
+/// order required by the official guideline:
+/// https://developer.vroid.com/guidelines/conditions_of_use.html
 struct VRoidHubUsageConditionsView: View {
     let conditions: VRoidUsageConditions?
 
@@ -14,16 +17,16 @@ struct VRoidHubUsageConditionsView: View {
                     row(.conditionUseAsAvatar, characterization(conditions.characterization))
                     row(.conditionViolentExpressions, permission(conditions.violentExpression))
                     row(.conditionSexualExpressions, permission(conditions.sexualExpression))
-                    row(.conditionCorporateCommercialUse, permission(conditions.corporateCommercialUse))
-                    row(.conditionPersonalCommercialUse, personalCommercialUse(conditions.personalCommercialUse))
                     if let politicalOrReligiousUsage = conditions.politicalOrReligiousUsage {
                         row(.conditionPoliticalReligiousUse, permission(politicalOrReligiousUsage))
                     }
                     if let antisocialOrHateUsage = conditions.antisocialOrHateUsage {
                         row(.conditionAntisocialHateUse, permission(antisocialOrHateUsage))
                     }
-                    row(.conditionModification, permission(conditions.modification))
+                    row(.conditionCorporateCommercialUse, permission(conditions.corporateCommercialUse))
+                    row(.conditionPersonalCommercialUse, personalCommercialUse(conditions.personalCommercialUse))
                     row(.conditionRedistribution, permission(conditions.redistribution))
+                    row(.conditionModification, permission(conditions.modification))
                     if let modifiedRedistribution = conditions.modifiedRedistribution {
                         row(.conditionModifiedRedistribution, permission(modifiedRedistribution))
                     }
@@ -66,10 +69,10 @@ struct VRoidHubUsageConditionsView: View {
     }
 
     private func characterization(_ characterization: VRoidUsageConditions.CharacterizationPermission) -> Text {
+        // The guideline displays avatar use as a binary: only "everyone" is an allow
         switch characterization {
-        case .authorOnly: Text(.characterizationAuthorOnly)
-        case .separatelyLicensedPersonOnly: Text(.characterizationLicensedOnly)
-        case .everyone: Text(.characterizationEveryone)
+        case .everyone: Text(.permissionAllowed)
+        case .authorOnly, .separatelyLicensedPersonOnly: Text(.permissionDisallowed)
         case .unspecified: Text(.permissionUnspecified)
         case .unknown(let raw): Text(verbatim: raw)
         }
@@ -77,8 +80,7 @@ struct VRoidHubUsageConditionsView: View {
 
     private func personalCommercialUse(_ use: VRoidUsageConditions.PersonalCommercialUse) -> Text {
         switch use {
-        case .allowed: Text(.permissionAllowed)
-        case .profitAllowed: Text(.personalCommercialProfit)
+        case .allowed, .profitAllowed: Text(.permissionAllowed)
         case .nonprofitAllowed: Text(.personalCommercialNonprofit)
         case .disallowed: Text(.permissionDisallowed)
         case .unspecified: Text(.permissionUnspecified)

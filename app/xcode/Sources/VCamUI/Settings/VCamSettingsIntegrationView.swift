@@ -3,7 +3,9 @@ import VCamTracking
 import VCamBridge
 import VCamData
 import VCamLogger
+#if FEATURE_API
 import VCamRemoteControl
+#endif
 import Network
 
 public struct VCamSettingsIntegrationView: View {
@@ -98,12 +100,15 @@ public struct VCamSettingsIntegrationView: View {
             MocopiSettingView()
 #endif
 #endif
+#if FEATURE_API
             ExternalControlSettingView()
+#endif
         }
         .formStyle(.grouped)
     }
 }
 
+#if FEATURE_API
 private struct ExternalControlSettingView: View {
     @AppStorage(key: .integrationExternalControl) private var integrationExternalControl
     @AppStorage(key: .integrationExternalControlPort) private var integrationExternalControlPort
@@ -158,6 +163,7 @@ private struct ExternalControlSettingView: View {
         }
     }
 }
+#endif
 
 private struct ReceiverStatusView: View {
     let connectionStatus: ConnectionStatus

@@ -56,6 +56,7 @@ let package = Package(
 )
 
 let isThree = Context.environment["VCAM_VARIANT"] != "2"
+let isAPIEnabled = Context.environment["VCAM_FEATURE_API"] == "1"
 
 if isThree {
     package.dependencies.append(
@@ -87,6 +88,10 @@ for target in package.targets {
         swiftSettings.append(contentsOf: [
             .define("ENABLE_ACCOUNT"),
         ])
+    }
+
+    if isAPIEnabled {
+        swiftSettings.append(.define("FEATURE_API"))
     }
 
     target.swiftSettings = swiftSettings

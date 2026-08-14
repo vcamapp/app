@@ -5015,6 +5015,29 @@
         }
       }
     },
+    "restartMacToCompleteCameraExtensionSetup": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The virtual camera setup will complete after restarting your Mac."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "仮想カメラのセットアップはMacの再起動後に完了します"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "가상 카메라 설정은 Mac을 재시동한 후에 완료됩니다"
+          }
+        }
+      }
+    },
     "reverseInputDirection": {
       "extractionState": "manual",
       "localizations": {

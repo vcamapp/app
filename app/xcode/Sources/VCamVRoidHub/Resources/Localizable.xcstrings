@@ -1,82 +1,13 @@
 {
   "sourceLanguage": "en",
   "strings": {
-    "characterizationAuthorOnly": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Author only"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "作者のみ"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "작성자만"
-          }
-        }
-      }
-    },
-    "characterizationEveryone": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Everyone"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "誰でも"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "누구나"
-          }
-        }
-      }
-    },
-    "characterizationLicensedOnly": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Licensed individuals only"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "許可された人のみ"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "허가된 사람만"
-          }
-        }
-      }
-    },
     "conditionAntisocialHateUse": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Antisocial or hate expressions"
+            "value": "Antisocial/hateful acts"
           }
         },
         "ja": {
@@ -88,7 +19,7 @@
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "반사회적·혐오 표현에 이용"
+            "value": "반사회적·혐오 표현에서의 이용"
           }
         }
       }
@@ -99,19 +30,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Commercial use by corporations"
+            "value": "Corporate use"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "法人の商用利用"
+            "value": "法人利用"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "법인의 상업적 이용"
+            "value": "법인 이용"
           }
         }
       }
@@ -122,7 +53,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Credit"
+            "value": "Attribution"
           }
         },
         "ja": {
@@ -145,7 +76,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Modification"
+            "value": "Alterations"
           }
         },
         "ja": {
@@ -157,7 +88,7 @@
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "수정"
+            "value": "개변"
           }
         }
       }
@@ -168,7 +99,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Redistribution of modified versions"
+            "value": "Redistribution of altered model"
           }
         },
         "ja": {
@@ -180,7 +111,7 @@
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "수정본 재배포"
+            "value": "개변물의 재배포"
           }
         }
       }
@@ -191,7 +122,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Commercial use by individuals"
+            "value": "Individual commercial use"
           }
         },
         "ja": {
@@ -214,19 +145,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Political or religious use"
+            "value": "Political/religious acts"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "政治・宗教目的での利用"
+            "value": "宗教・政治目的での利用"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "정치·종교 목적 이용"
+            "value": "종교·정치 목적에서의 이용"
           }
         }
       }
@@ -260,7 +191,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Use in sexual expressions"
+            "value": "Sexual acts"
           }
         },
         "ja": {
@@ -272,7 +203,7 @@
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "성적 표현에 이용"
+            "value": "성적 표현에서의 이용"
           }
         }
       }
@@ -283,19 +214,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Use as avatar"
+            "value": "Avatar use"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "アバターとしての利用"
+            "value": "アバター利用"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "아바타로 이용"
+            "value": "아바타 이용"
           }
         }
       }
@@ -306,7 +237,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Use in violent expressions"
+            "value": "Violent acts"
           }
         },
         "ja": {
@@ -318,7 +249,7 @@
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "폭력적 표현에 이용"
+            "value": "폭력 표현에서의 이용"
           }
         }
       }
@@ -467,13 +398,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Allowed"
+            "value": "Allow"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "許可"
+            "value": "OK"
           }
         },
         "ko": {
@@ -490,19 +421,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Not allowed"
+            "value": "Do not allow"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "不許可"
+            "value": "NG"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "불허"
+            "value": "허용 안 함"
           }
         }
       }
@@ -536,7 +467,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nonprofit only"
+            "value": "Non-profit activities only"
           }
         },
         "ja": {
@@ -548,30 +479,7 @@
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "비영리만"
-          }
-        }
-      }
-    },
-    "personalCommercialProfit": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Profit allowed"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "営利利用可"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "영리 이용 가능"
+            "value": "비영리 활동만"
           }
         }
       }
@@ -766,19 +674,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Conditions of Use"
+            "value": "Model Data Conditions of Use"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "利用条件"
+            "value": "モデルデータの利用条件"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "이용 조건"
+            "value": "모델 데이터 이용 조건"
           }
         }
       }

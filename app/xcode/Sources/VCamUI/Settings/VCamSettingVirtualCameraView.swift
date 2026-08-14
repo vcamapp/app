@@ -114,10 +114,11 @@ extension VCamSettingVirtualCameraView {
             return
         }
         NSWorkspace.shared.open(.cameraExtension)
-        try await CameraExtension().installExtension()
+        let result = try await CameraExtension().installExtension()
         isCameraExtensionInstalled = true
         isCameraExtensionStarting = await VirtualCameraManager.shared.installAndStartCameraExtension()
-        await VCamAlert.showModal(title: String(localized: .success), message: String(localized: .restartAfterInstalling), canCancel: false)
+        let message = result == .willCompleteAfterReboot ? String(localized: .restartMacToCompleteCameraExtensionSetup) : String(localized: .restartAfterInstalling)
+        await VCamAlert.showModal(title: String(localized: .success), message: message, canCancel: false)
     }
 
     @MainActor

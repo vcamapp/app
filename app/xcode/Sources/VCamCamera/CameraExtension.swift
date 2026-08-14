@@ -1,10 +1,3 @@
-//
-//  CameraExtension.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2023/02/16.
-//
-
 import Foundation
 import AppKit
 import SystemExtensions
@@ -14,7 +7,7 @@ public final class CameraExtension: NSObject {
         super.init()
     }
 
-    private let identifier = "com.github.tattn.VCam.CameraExtension"
+    private static let identifier = "com.github.tattn.VCam.CameraExtension"
 
     /// sysextd rejects activation unless the host app is under /Applications; translocated copies also fail this requirement
     public static var isAppInApplicationsFolder: Bool {
@@ -25,15 +18,16 @@ public final class CameraExtension: NSObject {
 #endif
     }
 
-    private var activationRequestContinuation: CheckedContinuation<Void, any Error>?
+    private var activationRequestContinuation: CheckedContinuation<OSSystemExtensionRequest.Result, any Error>?
     private var deactivationRequestContinuation: CheckedContinuation<Void, any Error>?
     private var propertiesRequestContinuation: CheckedContinuation<OSSystemExtensionProperties, any Error>?
 
+    @discardableResult
     @concurrent
-    public func installExtension() async throws {
+    public func installExtension() async throws -> OSSystemExtensionRequest.Result {
         return try await withCheckedThrowingContinuation { continuation in
             self.activationRequestContinuation = continuation
-            let activationRequest = OSSystemExtensionRequest.activationRequest(forExtensionWithIdentifier: identifier, queue: .main)
+            let activationRequest = OSSystemExtensionRequest.activationRequest(forExtensionWithIdentifier: Self.identifier, queue: .main)
             activationRequest.delegate = self
             OSSystemExtensionManager.shared.submitRequest(activationRequest)
         }
@@ -43,7 +37,7 @@ public final class CameraExtension: NSObject {
     public func uninstallExtension() async throws {
         return try await withCheckedThrowingContinuation { continuation in
             self.deactivationRequestContinuation = continuation
-            let deactivationRequest = OSSystemExtensionRequest.deactivationRequest(forExtensionWithIdentifier: identifier, queue: .main)
+            let deactivationRequest = OSSystemExtensionRequest.deactivationRequest(forExtensionWithIdentifier: Self.identifier, queue: .main)
             deactivationRequest.delegate = self
             OSSystemExtensionManager.shared.submitRequest(deactivationRequest)
         }
@@ -53,7 +47,7 @@ public final class CameraExtension: NSObject {
     public func extensionProperties() async throws -> OSSystemExtensionProperties {
         return try await withCheckedThrowingContinuation { continuation in
             self.propertiesRequestContinuation = continuation
-            let propertiesRequest = OSSystemExtensionRequest.propertiesRequest(forExtensionWithIdentifier: identifier, queue: .main)
+            let propertiesRequest = OSSystemExtensionRequest.propertiesRequest(forExtensionWithIdentifier: Self.identifier, queue: .main)
             propertiesRequest.delegate = self
             OSSystemExtensionManager.shared.submitRequest(propertiesRequest)
         }
@@ -85,23 +79,22 @@ public final class CameraExtension: NSObject {
         }
         try await installExtension()
     }
+
 }
 
 extension CameraExtension: OSSystemExtensionRequestDelegate {
     public func request(_ request: OSSystemExtensionRequest, didFinishWithResult result: OSSystemExtensionRequest.Result) {
-        if let continuation = activationRequestContinuation ?? deactivationRequestContinuation {
-            continuation.resume()
-            activationRequestContinuation = nil
-            deactivationRequestContinuation = nil
-        }
+        activationRequestContinuation?.resume(returning: result)
+        activationRequestContinuation = nil
+        deactivationRequestContinuation?.resume()
+        deactivationRequestContinuation = nil
     }
 
     public func request(_ request: OSSystemExtensionRequest, didFailWithError error: any Error) {
-        if let continuation = activationRequestContinuation ?? deactivationRequestContinuation {
-            continuation.resume(throwing: error)
-            activationRequestContinuation = nil
-            deactivationRequestContinuation = nil
-        }
+        activationRequestContinuation?.resume(throwing: error)
+        activationRequestContinuation = nil
+        deactivationRequestContinuation?.resume(throwing: error)
+        deactivationRequestContinuation = nil
     }
 
     public func requestNeedsUserApproval(_ request: OSSystemExtensionRequest) {
