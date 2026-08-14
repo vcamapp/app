@@ -16,6 +16,16 @@ package protocol VCamProtocol: Sendable {
     @concurrent func avatarList() async throws -> [Avatar]
     /// Loads an avatar from the avatar library
     @concurrent func avatarLoad(avatarId: UUID) async throws -> Bool
+    /// Starts uploading a VRM file to import into the avatar library
+    /// 
+    /// Returns an importId and prepares a staging area. Send the file content as WebSocket binary frames on the same connection: each frame is the 36-byte importId (its UUID string as ASCII) followed by a chunk of file data. Frames must not exceed 1 MiB in total. Finish with avatar.import.commit, or abort with avatar.import.cancel. Available only when app.getInfo lists the avatarImport capability.
+    @concurrent func avatarImportBegin(filename: String) async throws -> AvatarImportBeginResult
+    /// Registers the uploaded file to the avatar library
+    /// 
+    /// Validates the uploaded data as a VRM and registers it to the avatar library. The staging area is removed regardless of the outcome.
+    @concurrent func avatarImportCommit(importId: UUID, load: Bool?) async throws -> AvatarImportCommitResult
+    /// Aborts an upload and removes its staging area
+    @concurrent func avatarImportCancel(importId: UUID) async throws -> Bool
     /// Lists the expressions of the current avatar
     @concurrent func expressionList() async throws -> [Expression]
     /// Applies an expression to the current avatar
@@ -74,6 +84,49 @@ package struct VCam: VCamProtocol {
         }
         do {
             return try await rpc.call(method: "avatar.load", params: Params(avatarId: avatarId))
+        } catch let JSONRPCError.server(error) {
+            throw VCamError(error) ?? JSONRPCError.server(error)
+        }
+    }
+
+    /// Starts uploading a VRM file to import into the avatar library
+    /// 
+    /// Returns an importId and prepares a staging area. Send the file content as WebSocket binary frames on the same connection: each frame is the 36-byte importId (its UUID string as ASCII) followed by a chunk of file data. Frames must not exceed 1 MiB in total. Finish with avatar.import.commit, or abort with avatar.import.cancel. Available only when app.getInfo lists the avatarImport capability.
+    /// - Parameter filename: The name of the uploaded file including the .vrm extension. Used as the default display name.
+    @concurrent package func avatarImportBegin(filename: String) async throws -> AvatarImportBeginResult {
+        struct Params: Encodable, Sendable {
+            var filename: String
+        }
+        do {
+            return try await rpc.call(method: "avatar.import.begin", params: Params(filename: filename))
+        } catch let JSONRPCError.server(error) {
+            throw VCamError(error) ?? JSONRPCError.server(error)
+        }
+    }
+
+    /// Registers the uploaded file to the avatar library
+    /// 
+    /// Validates the uploaded data as a VRM and registers it to the avatar library. The staging area is removed regardless of the outcome.
+    /// - Parameter load: Loads the imported avatar immediately.
+    @concurrent package func avatarImportCommit(importId: UUID, load: Bool? = nil) async throws -> AvatarImportCommitResult {
+        struct Params: Encodable, Sendable {
+            var importId: UUID
+            var load: Bool?
+        }
+        do {
+            return try await rpc.call(method: "avatar.import.commit", params: Params(importId: importId, load: load))
+        } catch let JSONRPCError.server(error) {
+            throw VCamError(error) ?? JSONRPCError.server(error)
+        }
+    }
+
+    /// Aborts an upload and removes its staging area
+    @concurrent package func avatarImportCancel(importId: UUID) async throws -> Bool {
+        struct Params: Encodable, Sendable {
+            var importId: UUID
+        }
+        do {
+            return try await rpc.call(method: "avatar.import.cancel", params: Params(importId: importId))
         } catch let JSONRPCError.server(error) {
             throw VCamError(error) ?? JSONRPCError.server(error)
         }

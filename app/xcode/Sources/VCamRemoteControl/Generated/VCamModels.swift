@@ -74,12 +74,36 @@ package struct StateGetResult: Codable, Hashable, Sendable {
     }
 }
 
+package struct AvatarImportBeginResult: Codable, Hashable, Sendable {
+    package var importId: UUID
+
+    package init(importId: UUID) {
+        self.importId = importId
+    }
+}
+
+package struct AvatarImportCommitResult: Codable, Hashable, Sendable {
+    package var avatarId: UUID
+
+    package init(avatarId: UUID) {
+        self.avatarId = avatarId
+    }
+}
+
 /// Errors declared in the OpenRPC document, mapped by error code.
 /// Clients catch these; handlers can throw them via the static factories.
 /// Undeclared codes surface as `JSONRPCError.server`.
 package enum VCamError: JSONRPCErrorConvertible, Hashable, Sendable {
     /// Avatar was not found. (code 1001)
     case avatarNotFound(JSONRPCErrorObject)
+    /// This operation is not supported by this VCam. (code 1008)
+    case unsupportedOperation(JSONRPCErrorObject)
+    /// Import failed. (code 1007)
+    case importFailed(JSONRPCErrorObject)
+    /// Import was not found. (code 1005)
+    case importNotFound(JSONRPCErrorObject)
+    /// The uploaded file is not a valid VRM. (code 1006)
+    case invalidVrm(JSONRPCErrorObject)
     /// Expression was not found. (code 1003)
     case expressionNotFound(JSONRPCErrorObject)
     /// Motion was not found. (code 1002)
@@ -92,6 +116,10 @@ package enum VCamError: JSONRPCErrorConvertible, Hashable, Sendable {
     package init?(_ error: JSONRPCErrorObject) {
         switch error.code {
         case 1001: self = .avatarNotFound(error)
+        case 1008: self = .unsupportedOperation(error)
+        case 1007: self = .importFailed(error)
+        case 1005: self = .importNotFound(error)
+        case 1006: self = .invalidVrm(error)
         case 1003: self = .expressionNotFound(error)
         case 1002: self = .motionNotFound(error)
         case 1000: self = .notReady(error)
@@ -104,6 +132,10 @@ package enum VCamError: JSONRPCErrorConvertible, Hashable, Sendable {
     package var errorObject: JSONRPCErrorObject {
         switch self {
         case .avatarNotFound(let error): return error
+        case .unsupportedOperation(let error): return error
+        case .importFailed(let error): return error
+        case .importNotFound(let error): return error
+        case .invalidVrm(let error): return error
         case .expressionNotFound(let error): return error
         case .motionNotFound(let error): return error
         case .notReady(let error): return error
@@ -114,6 +146,26 @@ package enum VCamError: JSONRPCErrorConvertible, Hashable, Sendable {
     /// Avatar was not found. (code 1001)
     package static func avatarNotFound(data: JSONValue? = nil) -> Self {
         .avatarNotFound(JSONRPCErrorObject(code: 1001, message: "Avatar was not found.", data: data))
+    }
+
+    /// This operation is not supported by this VCam. (code 1008)
+    package static func unsupportedOperation(data: JSONValue? = nil) -> Self {
+        .unsupportedOperation(JSONRPCErrorObject(code: 1008, message: "This operation is not supported by this VCam.", data: data))
+    }
+
+    /// Import failed. (code 1007)
+    package static func importFailed(data: JSONValue? = nil) -> Self {
+        .importFailed(JSONRPCErrorObject(code: 1007, message: "Import failed.", data: data))
+    }
+
+    /// Import was not found. (code 1005)
+    package static func importNotFound(data: JSONValue? = nil) -> Self {
+        .importNotFound(JSONRPCErrorObject(code: 1005, message: "Import was not found.", data: data))
+    }
+
+    /// The uploaded file is not a valid VRM. (code 1006)
+    package static func invalidVrm(data: JSONValue? = nil) -> Self {
+        .invalidVrm(JSONRPCErrorObject(code: 1006, message: "The uploaded file is not a valid VRM.", data: data))
     }
 
     /// Expression was not found. (code 1003)

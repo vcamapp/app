@@ -14,6 +14,16 @@ package protocol VCamHandler: Sendable {
     @concurrent func avatarList() async throws -> [Avatar]
     /// Loads an avatar from the avatar library
     @concurrent func avatarLoad(avatarId: UUID) async throws -> Bool
+    /// Starts uploading a VRM file to import into the avatar library
+    /// 
+    /// Returns an importId and prepares a staging area. Send the file content as WebSocket binary frames on the same connection: each frame is the 36-byte importId (its UUID string as ASCII) followed by a chunk of file data. Frames must not exceed 1 MiB in total. Finish with avatar.import.commit, or abort with avatar.import.cancel. Available only when app.getInfo lists the avatarImport capability.
+    @concurrent func avatarImportBegin(filename: String) async throws -> AvatarImportBeginResult
+    /// Registers the uploaded file to the avatar library
+    /// 
+    /// Validates the uploaded data as a VRM and registers it to the avatar library. The staging area is removed regardless of the outcome.
+    @concurrent func avatarImportCommit(importId: UUID, load: Bool?) async throws -> AvatarImportCommitResult
+    /// Aborts an upload and removes its staging area
+    @concurrent func avatarImportCancel(importId: UUID) async throws -> Bool
     /// Lists the expressions of the current avatar
     @concurrent func expressionList() async throws -> [Expression]
     /// Applies an expression to the current avatar
@@ -69,6 +79,18 @@ package struct VCamServer: Sendable {
         case "avatar.load":
             let params = JSONRPCParameters(request.params)
             let result = try await handler.avatarLoad(avatarId: try params.required("avatarId", at: 0))
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "avatar.import.begin":
+            let params = JSONRPCParameters(request.params)
+            let result = try await handler.avatarImportBegin(filename: try params.required("filename", at: 0))
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "avatar.import.commit":
+            let params = JSONRPCParameters(request.params)
+            let result = try await handler.avatarImportCommit(importId: try params.required("importId", at: 0), load: try params.optional("load", at: 1))
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "avatar.import.cancel":
+            let params = JSONRPCParameters(request.params)
+            let result = try await handler.avatarImportCancel(importId: try params.required("importId", at: 0))
             return try JSONRPCServer.resultResponse(id: request.id, result: result)
         case "expression.list":
             let result = try await handler.expressionList()

@@ -15,7 +15,11 @@
         "name": "info",
         "schema": {
           "type": "object",
-          "required": ["apiVersion", "appVersion", "capabilities"],
+          "required": [
+            "apiVersion",
+            "appVersion",
+            "capabilities"
+          ],
           "properties": {
             "apiVersion": {
               "type": "string",
@@ -27,7 +31,9 @@
             },
             "capabilities": {
               "type": "array",
-              "items": { "type": "string" },
+              "items": {
+                "type": "string"
+              },
               "description": "Feature areas this VCam build supports, e.g. \"vrma\" when VRMA motions are available."
             }
           }
@@ -43,7 +49,9 @@
         "name": "state",
         "schema": {
           "type": "object",
-          "required": ["playingMotionIds"],
+          "required": [
+            "playingMotionIds"
+          ],
           "properties": {
             "avatarId": {
               "type": "string",
@@ -52,7 +60,9 @@
             },
             "playingMotionIds": {
               "type": "array",
-              "items": { "type": "string" }
+              "items": {
+                "type": "string"
+              }
             },
             "expressionName": {
               "type": "string",
@@ -71,7 +81,9 @@
         "name": "avatars",
         "schema": {
           "type": "array",
-          "items": { "$ref": "#/components/schemas/Avatar" }
+          "items": {
+            "$ref": "#/components/schemas/Avatar"
+          }
         }
       }
     },
@@ -83,15 +95,137 @@
         {
           "name": "avatarId",
           "required": true,
-          "schema": { "type": "string", "format": "uuid" }
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
         }
       ],
       "result": {
         "name": "success",
-        "schema": { "type": "boolean" }
+        "schema": {
+          "type": "boolean"
+        }
       },
       "errors": [
-        { "$ref": "#/components/errors/avatarNotFound" }
+        {
+          "$ref": "#/components/errors/avatarNotFound"
+        }
+      ]
+    },
+    {
+      "name": "avatar.import.begin",
+      "summary": "Starts uploading a VRM file to import into the avatar library",
+      "description": "Returns an importId and prepares a staging area. Send the file content as WebSocket binary frames on the same connection: each frame is the 36-byte importId (its UUID string as ASCII) followed by a chunk of file data. Frames must not exceed 1 MiB in total. Finish with avatar.import.commit, or abort with avatar.import.cancel. Available only when app.getInfo lists the avatarImport capability.",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "filename",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "The name of the uploaded file including the .vrm extension. Used as the default display name."
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "type": "object",
+          "required": [
+            "importId"
+          ],
+          "properties": {
+            "importId": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/unsupportedOperation"
+        },
+        {
+          "$ref": "#/components/errors/importFailed"
+        }
+      ]
+    },
+    {
+      "name": "avatar.import.commit",
+      "summary": "Registers the uploaded file to the avatar library",
+      "description": "Validates the uploaded data as a VRM and registers it to the avatar library. The staging area is removed regardless of the outcome.",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "importId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        {
+          "name": "load",
+          "schema": {
+            "type": "boolean",
+            "default": false
+          },
+          "description": "Loads the imported avatar immediately."
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "type": "object",
+          "required": [
+            "avatarId"
+          ],
+          "properties": {
+            "avatarId": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/importNotFound"
+        },
+        {
+          "$ref": "#/components/errors/invalidVrm"
+        },
+        {
+          "$ref": "#/components/errors/importFailed"
+        }
+      ]
+    },
+    {
+      "name": "avatar.import.cancel",
+      "summary": "Aborts an upload and removes its staging area",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "importId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "result": {
+        "name": "success",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/importNotFound"
+        }
       ]
     },
     {
@@ -103,7 +237,9 @@
         "name": "expressions",
         "schema": {
           "type": "array",
-          "items": { "$ref": "#/components/schemas/Expression" }
+          "items": {
+            "$ref": "#/components/schemas/Expression"
+          }
         }
       }
     },
@@ -115,15 +251,21 @@
         {
           "name": "name",
           "required": true,
-          "schema": { "type": "string" }
+          "schema": {
+            "type": "string"
+          }
         }
       ],
       "result": {
         "name": "success",
-        "schema": { "type": "boolean" }
+        "schema": {
+          "type": "boolean"
+        }
       },
       "errors": [
-        { "$ref": "#/components/errors/expressionNotFound" }
+        {
+          "$ref": "#/components/errors/expressionNotFound"
+        }
       ]
     },
     {
@@ -135,7 +277,9 @@
         "name": "motions",
         "schema": {
           "type": "array",
-          "items": { "$ref": "#/components/schemas/Motion" }
+          "items": {
+            "$ref": "#/components/schemas/Motion"
+          }
         }
       }
     },
@@ -147,20 +291,28 @@
         {
           "name": "motionId",
           "required": true,
-          "schema": { "type": "string" }
+          "schema": {
+            "type": "string"
+          }
         },
         {
           "name": "loop",
-          "schema": { "type": "boolean" },
+          "schema": {
+            "type": "boolean"
+          },
           "description": "Overrides the motion's loop setting for this playback; the stored setting is used when omitted."
         }
       ],
       "result": {
         "name": "success",
-        "schema": { "type": "boolean" }
+        "schema": {
+          "type": "boolean"
+        }
       },
       "errors": [
-        { "$ref": "#/components/errors/motionNotFound" }
+        {
+          "$ref": "#/components/errors/motionNotFound"
+        }
       ]
     },
     {
@@ -171,15 +323,21 @@
         {
           "name": "motionId",
           "required": true,
-          "schema": { "type": "string" }
+          "schema": {
+            "type": "string"
+          }
         }
       ],
       "result": {
         "name": "success",
-        "schema": { "type": "boolean" }
+        "schema": {
+          "type": "boolean"
+        }
       },
       "errors": [
-        { "$ref": "#/components/errors/motionNotFound" }
+        {
+          "$ref": "#/components/errors/motionNotFound"
+        }
       ]
     },
     {
@@ -189,10 +347,14 @@
       "params": [],
       "result": {
         "name": "scene",
-        "schema": { "$ref": "#/components/schemas/Scene" }
+        "schema": {
+          "$ref": "#/components/schemas/Scene"
+        }
       },
       "errors": [
-        { "$ref": "#/components/errors/notReady" }
+        {
+          "$ref": "#/components/errors/notReady"
+        }
       ]
     },
     {
@@ -203,16 +365,24 @@
         {
           "name": "sceneId",
           "required": true,
-          "schema": { "type": "integer" }
+          "schema": {
+            "type": "integer"
+          }
         }
       ],
       "result": {
         "name": "success",
-        "schema": { "type": "boolean" }
+        "schema": {
+          "type": "boolean"
+        }
       },
       "errors": [
-        { "$ref": "#/components/errors/sceneNotFound" },
-        { "$ref": "#/components/errors/notReady" }
+        {
+          "$ref": "#/components/errors/sceneNotFound"
+        },
+        {
+          "$ref": "#/components/errors/notReady"
+        }
       ]
     },
     {
@@ -222,7 +392,9 @@
       "params": [],
       "result": {
         "name": "success",
-        "schema": { "type": "boolean" }
+        "schema": {
+          "type": "boolean"
+        }
       }
     },
     {
@@ -235,14 +407,18 @@
           "name": "events",
           "schema": {
             "type": "array",
-            "items": { "type": "string" }
+            "items": {
+              "type": "string"
+            }
           },
           "description": "Event method names to receive, e.g. [\"motion.started\"]. Omit to receive all events."
         }
       ],
       "result": {
         "name": "success",
-        "schema": { "type": "boolean" }
+        "schema": {
+          "type": "boolean"
+        }
       }
     },
     {
@@ -252,19 +428,28 @@
       "params": [],
       "result": {
         "name": "openrpcDocument",
-        "schema": { "type": "object" }
+        "schema": {
+          "type": "object"
+        }
       }
     },
     {
       "name": "avatar.loaded",
       "summary": "An avatar has been loaded",
       "x-direction": "serverToClient",
-      "tags": [{ "name": "Events" }],
+      "tags": [
+        {
+          "name": "Events"
+        }
+      ],
       "paramStructure": "by-name",
       "params": [
         {
           "name": "avatarId",
-          "schema": { "type": "string", "format": "uuid" },
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          },
           "description": "Absent when the avatar was loaded directly from a file instead of the avatar library."
         }
       ]
@@ -273,13 +458,19 @@
       "name": "motion.started",
       "summary": "A motion has started playing",
       "x-direction": "serverToClient",
-      "tags": [{ "name": "Events" }],
+      "tags": [
+        {
+          "name": "Events"
+        }
+      ],
       "paramStructure": "by-name",
       "params": [
         {
           "name": "motionId",
           "required": true,
-          "schema": { "type": "string" }
+          "schema": {
+            "type": "string"
+          }
         }
       ]
     },
@@ -287,13 +478,19 @@
       "name": "motion.stopped",
       "summary": "A motion has stopped playing",
       "x-direction": "serverToClient",
-      "tags": [{ "name": "Events" }],
+      "tags": [
+        {
+          "name": "Events"
+        }
+      ],
       "paramStructure": "by-name",
       "params": [
         {
           "name": "motionId",
           "required": true,
-          "schema": { "type": "string" }
+          "schema": {
+            "type": "string"
+          }
         }
       ]
     },
@@ -301,13 +498,19 @@
       "name": "expression.changed",
       "summary": "The applied expression has changed",
       "x-direction": "serverToClient",
-      "tags": [{ "name": "Events" }],
+      "tags": [
+        {
+          "name": "Events"
+        }
+      ],
       "paramStructure": "by-name",
       "params": [
         {
           "name": "name",
           "required": true,
-          "schema": { "type": "string" }
+          "schema": {
+            "type": "string"
+          }
         }
       ]
     },
@@ -315,13 +518,19 @@
       "name": "scene.loaded",
       "summary": "A scene has been loaded",
       "x-direction": "serverToClient",
-      "tags": [{ "name": "Events" }],
+      "tags": [
+        {
+          "name": "Events"
+        }
+      ],
       "paramStructure": "by-name",
       "params": [
         {
           "name": "sceneId",
           "required": true,
-          "schema": { "type": "integer" }
+          "schema": {
+            "type": "integer"
+          }
         }
       ]
     }
@@ -330,28 +539,46 @@
     "schemas": {
       "Avatar": {
         "type": "object",
-        "required": ["id", "name"],
+        "required": [
+          "id",
+          "name"
+        ],
         "properties": {
-          "id": { "type": "string", "format": "uuid" },
-          "name": { "type": "string" }
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          }
         }
       },
       "Expression": {
         "type": "object",
-        "required": ["name"],
+        "required": [
+          "name"
+        ],
         "properties": {
-          "name": { "type": "string" }
+          "name": {
+            "type": "string"
+          }
         }
       },
       "Motion": {
         "type": "object",
-        "required": ["id", "name", "isLoop"],
+        "required": [
+          "id",
+          "name",
+          "isLoop"
+        ],
         "properties": {
           "id": {
             "type": "string",
             "description": "A stable motion ID: \"builtin:<name>\" or \"vrma:<UUID>\"."
           },
-          "name": { "type": "string" },
+          "name": {
+            "type": "string"
+          },
           "isLoop": {
             "type": "boolean",
             "description": "The motion's current loop setting."
@@ -360,10 +587,17 @@
       },
       "Scene": {
         "type": "object",
-        "required": ["id", "name"],
+        "required": [
+          "id",
+          "name"
+        ],
         "properties": {
-          "id": { "type": "integer" },
-          "name": { "type": "string" }
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
         }
       }
     },
@@ -387,6 +621,22 @@
       "sceneNotFound": {
         "code": 1004,
         "message": "Scene was not found."
+      },
+      "importNotFound": {
+        "code": 1005,
+        "message": "Import was not found."
+      },
+      "invalidVrm": {
+        "code": 1006,
+        "message": "The uploaded file is not a valid VRM."
+      },
+      "importFailed": {
+        "code": 1007,
+        "message": "Import failed."
+      },
+      "unsupportedOperation": {
+        "code": 1008,
+        "message": "This operation is not supported by this VCam."
       }
     }
   }

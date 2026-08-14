@@ -77,6 +77,7 @@ package final class ExternalControlServer {
         self.listener = listener
         isRunning = true
         eventBridge.start()
+        AvatarImportManager.shared.removeAllStaging()
     }
 
     package func stop() {
@@ -98,6 +99,7 @@ package final class ExternalControlServer {
         let client = ExternalControlConnection(connection: connection) { [weak self] id in
             self?.connections[id] = nil
             EventPublisher.shared.disconnect(id: id)
+            AvatarImportManager.shared.cancelAll(connectionID: id)
         }
         connections[client.id] = client
         EventPublisher.shared.connect(id: client.id) { [weak client] body in
@@ -150,14 +152,21 @@ private final class ExternalControlConnection {
     }
 
     private func receiveNextMessage() {
-        connection.receiveMessage { content, _, _, error in
+        connection.receiveMessage { content, context, _, error in
+            let metadata = context?.protocolMetadata(definition: NWProtocolWebSocket.definition) as? NWProtocolWebSocket.Metadata
+            let isBinary = metadata?.opcode == .binary
             Task { @MainActor [weak self] in
                 guard let self else { return }
                 guard let content, error == nil else {
                     self.connection.cancel()
                     return
                 }
-                self.handle(content)
+                if isBinary {
+                    // Binary frames carry avatar upload chunks (see avatar.import.begin)
+                    AvatarImportManager.shared.receiveFrame(content, connectionID: self.id)
+                } else {
+                    self.handle(content)
+                }
                 self.receiveNextMessage()
             }
         }

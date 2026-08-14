@@ -18,19 +18,22 @@ package struct VCamAPIService: VCamHandler {
     private let motionLibrary: MotionLibrary
     private let uniState: UniState
     private let eventPublisher: EventPublisher
+    private let importManager: AvatarImportManager
 
     package init(
         connectionID: UUID,
         modelManager: ModelManager = .shared,
         motionLibrary: MotionLibrary = .shared,
         uniState: UniState = .shared,
-        eventPublisher: EventPublisher = .shared
+        eventPublisher: EventPublisher = .shared,
+        importManager: AvatarImportManager = .shared
     ) {
         self.connectionID = connectionID
         self.modelManager = modelManager
         self.motionLibrary = motionLibrary
         self.uniState = uniState
         self.eventPublisher = eventPublisher
+        self.importManager = importManager
     }
 
     @MainActor
@@ -38,6 +41,7 @@ package struct VCamAPIService: VCamHandler {
         var capabilities = ["avatar", "motion", "expression", "scene", "camera", "events"]
 #if FEATURE_3
         capabilities.append("vrma")
+        capabilities.append("avatarImport")
 #endif
         return AppGetInfoResult(
             apiVersion: APISpecification.apiVersion,
@@ -73,6 +77,49 @@ package struct VCamAPIService: VCamHandler {
         }
         try AvatarControl.load(item, modelManager: modelManager)
         return true
+    }
+
+    @MainActor
+    package func avatarImportBegin(filename: String) async throws -> AvatarImportBeginResult {
+#if FEATURE_3
+        do {
+            let importId = try importManager.begin(filename: filename, connectionID: connectionID)
+            return AvatarImportBeginResult(importId: importId)
+        } catch {
+            throw VCamError.importFailed(data: .errorCode("import_failed"))
+        }
+#else
+        throw VCamError.unsupportedOperation(data: .errorCode("unsupported_operation"))
+#endif
+    }
+
+    @MainActor
+    package func avatarImportCommit(importId: UUID, load: Bool?) async throws -> AvatarImportCommitResult {
+        do {
+            let avatarId = try await importManager.commit(
+                importId: importId,
+                connectionID: connectionID,
+                load: load ?? false,
+                modelManager: modelManager
+            )
+            return AvatarImportCommitResult(avatarId: avatarId)
+        } catch AvatarImportManagerError.importNotFound {
+            throw VCamError.importNotFound(data: .errorCode("import_not_found"))
+        } catch AvatarImportManagerError.invalidModel {
+            throw VCamError.invalidVrm(data: .errorCode("invalid_vrm"))
+        } catch {
+            throw VCamError.importFailed(data: .errorCode("import_failed"))
+        }
+    }
+
+    @MainActor
+    package func avatarImportCancel(importId: UUID) async throws -> Bool {
+        do {
+            try importManager.cancel(importId: importId, connectionID: connectionID)
+            return true
+        } catch {
+            throw VCamError.importNotFound(data: .errorCode("import_not_found"))
+        }
     }
 
     @MainActor

@@ -9,9 +9,9 @@ public struct ModelMeta: Hashable, Sendable {
     public var image: Data?
 }
 
-enum ModelMetaLoader {
+package enum ModelMetaLoader {
 #if FEATURE_3
-    static func load(from url: URL) throws -> ModelMeta {
+    package static func load(from url: URL) throws -> ModelMeta {
         let loader = VRMLoader()
         do {
             let vrm1 = try loader.load(VRM1.self, withURL: url)
@@ -28,7 +28,7 @@ enum ModelMetaLoader {
         }
     }
 #else
-    static func load(from url: URL) throws -> ModelMeta {
+    package static func load(from url: URL) throws -> ModelMeta {
         let modelJsonURL = resolveLive2DModelJSON(from: url)
         let name = modelJsonURL.map { live2DModelName(from: $0) } ?? fallbackName(for: url)
         return ModelMeta(name: name)

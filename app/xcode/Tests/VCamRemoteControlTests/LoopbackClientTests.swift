@@ -41,6 +41,26 @@ struct LoopbackClientTests {
     }
 
     @Test
+    func importErrorsAreTyped() async throws {
+        let client = makeClient()
+
+        do {
+            _ = try await client.avatarImportBegin(filename: "not-a-vrm.txt")
+            Issue.record("Expected importFailed")
+        } catch let VCamError.importFailed(error) {
+            #expect(error.code == 1007)
+        }
+
+        do {
+            _ = try await client.avatarImportCommit(importId: UUID())
+            Issue.record("Expected importNotFound")
+        } catch let VCamError.importNotFound(error) {
+            #expect(error.code == 1005)
+            #expect(error.data == .object(["code": .string("import_not_found")]))
+        }
+    }
+
+    @Test
     func declaredErrorsAreTyped() async throws {
         let client = makeClient()
         do {

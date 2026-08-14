@@ -33,6 +33,38 @@ struct ExternalControlServerTests {
     }
 
     @Test
+    func importUploadTravelsOverBinaryFrames() async throws {
+        let (server, port) = try Self.makeRunningServer()
+        defer {
+            server.stop()
+        }
+
+        let task = URLSession.shared.webSocketTask(with: URL(string: "ws://127.0.0.1:\(port)")!)
+        task.resume()
+        defer {
+            task.cancel(with: .goingAway, reason: nil)
+        }
+
+        try await task.send(.string(#"{"jsonrpc":"2.0","id":1,"method":"avatar.import.begin","params":{"filename":"upload.vrm"}}"#))
+        guard case .string(let beginResponse) = try await task.receive(),
+              let importId = beginResponse.split(separator: "\"").last(where: { UUID(uuidString: String($0)) != nil })
+        else {
+            Issue.record("Unexpected begin response")
+            return
+        }
+
+        // Not a VRM, so committing must fail with invalid_vrm after the upload arrives
+        try await task.send(.data(Data("\(importId)".utf8) + Data("not a vrm".utf8)))
+        try await task.send(.string(#"{"jsonrpc":"2.0","id":2,"method":"avatar.import.commit","params":{"importId":"\#(importId)"}}"#))
+        guard case .string(let commitResponse) = try await task.receive() else {
+            Issue.record("Unexpected commit response")
+            return
+        }
+        #expect(commitResponse.contains(#""code":1006"#))
+        #expect(commitResponse.contains("invalid_vrm"))
+    }
+
+    @Test
     func rejectsHandshakesWithOriginHeader() async throws {
         let (server, port) = try Self.makeRunningServer()
         defer {
