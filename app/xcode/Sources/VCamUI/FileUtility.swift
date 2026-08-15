@@ -27,6 +27,21 @@ public enum FileUtility {
     }
 
     @MainActor
+    public static func saveFile(defaultName: String, fileExtension: String) -> URL? {
+        let savePanel = NSSavePanel()
+        savePanel.canCreateDirectories = true
+        if let type = UTType(filenameExtension: fileExtension) {
+            // 拡張子はパネルが付与するため、ファイル名には含めない
+            savePanel.allowedContentTypes = [type]
+            savePanel.nameFieldStringValue = defaultName
+        } else {
+            savePanel.nameFieldStringValue = "\(defaultName).\(fileExtension)"
+        }
+        savePanel.runModal()
+        return savePanel.url
+    }
+
+    @MainActor
     public static func pickDirectory(canCreateDirectories: Bool = true) -> URL? {
         let openPanel = NSOpenPanel()
         openPanel.allowsMultipleSelection = false
@@ -56,7 +71,7 @@ public enum FileUtility {
     }
 
     @MainActor
-    private static func openFile(withExtensions extensions: [String]) -> URL? {
+    public static func openFile(withExtensions extensions: [String]) -> URL? {
         openFile(with: extensions.compactMap { UTType(filenameExtension: $0) })
     }
 }
