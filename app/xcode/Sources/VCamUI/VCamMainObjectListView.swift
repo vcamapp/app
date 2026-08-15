@@ -106,6 +106,12 @@ private struct VCamMainObjectListAddButton: View {
                 Image(systemName: "network")
                 Text(.web)
             }
+            Button {
+                TextRenderer.showPreferencesForAdding()
+            } label: {
+                Image(systemName: "textformat")
+                Text(.text)
+            }
 
 #if FEATURE_3
             Divider()
@@ -358,6 +364,22 @@ private struct EditSceneObjectViewModifier: ViewModifier {
                         Text(.interact)
                     }
                     filterAndDeleteItems(configuration: { web.filter?.configuration }) { web.filter = $0 }
+                }
+        case let .text(text):
+            content
+                .contextMenu {
+                    commonHeaderItems
+                    EditSceneObjectButton(isLocked: object.isLocked) {
+                        TextRenderer.showPreferences(configuration: text.configuration) { configuration in
+                            text.configuration = configuration
+                            if let renderer = renderTextureManager.drawer(id: object.id) as? TextRenderer {
+                                renderer.configuration = configuration
+                            }
+                            SceneObjectManager.shared.update(object)
+                        }
+                    }
+                    Divider()
+                    DeleteSceneObjectButton(object: object)
                 }
         case let .wind(wind):
             content

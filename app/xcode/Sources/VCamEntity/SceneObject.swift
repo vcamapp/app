@@ -34,11 +34,12 @@ public extension SceneObject {
         case screen(ScreenCapture)
         case videoCapture(VideoCapture)
         case web(Web)
+        case text(Text)
         case wind(Wind = .random)
 
         public var croppableTexture: (any SceneObjectCroppableTexture)? {
             switch self {
-            case .avatar, .image, .wind: return nil
+            case .avatar, .image, .text, .wind: return nil
             case .screen(let state): return state
             case .videoCapture(let state): return state
             case .web(let state): return state
@@ -126,6 +127,16 @@ public extension SceneObject {
         public var region: CGRect
         public var crop: CGRect
         public var filter: ImageFilter?
+    }
+
+    final class Text {
+        public init(configuration: TextObjectConfiguration, region: CGRect) {
+            self.configuration = configuration
+            self.region = region
+        }
+
+        public var configuration: TextObjectConfiguration
+        public var region: CGRect // Canvas-relative placement, as the textured objects store it
     }
 
     final class Wind {

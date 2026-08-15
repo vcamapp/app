@@ -45,6 +45,7 @@ public extension VCamScene {
         case screen(id: String, state: ScreenCapture)
         case captureDevice(id: String, state: RenderTexture)
         case web(state: Web)
+        case text(state: Text)
         case wind(state: Solid)
     }
 
@@ -153,6 +154,16 @@ public extension VCamScene {
         public enum CaptureType: String, Codable, Sendable {
             case display, window
         }
+    }
+
+    struct Text: Codable, Sendable {
+        public init(region: VCamScene.Plane, configuration: TextObjectConfiguration) {
+            self.region = region
+            self.configuration = configuration
+        }
+
+        public var region: Plane
+        public var configuration: TextObjectConfiguration
     }
 
     struct Web: Codable, Sendable {

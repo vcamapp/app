@@ -33,7 +33,7 @@ public extension VCamScene {
                 // normalized by the longer side instead, so reset rather than convert
                 state.texture.crop = .init(x: 0, y: 0, width: 1, height: 1)
                 objects[index].type = .web(state: state)
-            case .avatar, .image, .wind:
+            case .avatar, .image, .text, .wind:
                 break
             }
         }

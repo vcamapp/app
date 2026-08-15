@@ -1,14 +1,7 @@
-//
-//  VCamColor.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/06/14.
-//
-
 import Foundation
 
 public struct VCamColor: Codable, Equatable, Hashable, Sendable {
-    public init(red: Float, green: Float, blue: Float, alpha: Float) {
+    public init(red: Float, green: Float, blue: Float, alpha: Float = 1) {
         self.red = red
         self.green = green
         self.blue = blue
@@ -23,4 +16,6 @@ public struct VCamColor: Codable, Equatable, Hashable, Sendable {
 
 public extension VCamColor {
     static let green = VCamColor(red: 0, green: 1, blue: 0, alpha: 1)
+    static let white = VCamColor(red: 1, green: 1, blue: 1, alpha: 1)
+    static let black = VCamColor(red: 0, green: 0, blue: 0, alpha: 1)
 }

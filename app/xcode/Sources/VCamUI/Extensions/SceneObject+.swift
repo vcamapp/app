@@ -14,6 +14,8 @@ extension SceneObject.ObjectType {
             String(localized: .videoCapture)
         case .web:
             String(localized: .web)
+        case .text:
+            String(localized: .text)
         case .wind:
             String(localized: .wind)
         }

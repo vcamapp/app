@@ -53,21 +53,18 @@ public final class SceneObjectManager {
                 image.size = .init(width: image.size.width / canvasSize.width, height: image.size.height / canvasSize.height)
             }
 
-            let region: CGRect
-            if image.offset.x < -1000 { // Set the initial position to be dependent on textureRect
-                region = .init(origin: .zero, size: .invalid)
-            } else {
-                region = .init(origin: .init(x: CGFloat(image.offset.x), y: CGFloat(image.offset.y)), size: image.size)
-            }
-
-            let rect = textureRect(
+            // The offset sentinel asks textureRect to place the object for the first time
+            let region: CGRect = image.offset.x < -1000
+                ? .init(origin: .zero, size: .invalid)
+                : .init(origin: .init(x: CGFloat(image.offset.x), y: CGFloat(image.offset.y)), size: image.size)
+            let placement = addFixedTexture(
+                object.id,
+                type: .photo,
                 region: region,
-                crop: .init(x: 0, y: 0, width: 1, height: 1),
                 textureSize: .init(width: canvasSize.width * image.size.width, height: canvasSize.height * image.size.height)
             )
-            image.offset = .init(x: Float(rect[0]) / Float(canvasSize.width), y: Float(rect[1]) / Float(canvasSize.height))
-            image.size = .init(width: CGFloat(rect[2]) / canvasSize.width, height: CGFloat(rect[3]) / canvasSize.height)
-            uniBridge.addRenderTexture([object.id, RenderTextureType.photo.rawValue, rect[2], rect[3]] + rect)
+            image.offset = .init(x: Float(placement.origin.x), y: Float(placement.origin.y))
+            image.size = placement.size
         case let .screen(screen):
             let rect = textureRect(region: screen.region, crop: screen.crop, textureSize: screen.textureSize)
             uniBridge.addRenderTexture([object.id, RenderTextureType.screen.rawValue, rect[2], rect[3]] + rect)
@@ -77,6 +74,13 @@ public final class SceneObjectManager {
         case let .web(web):
             let rect = textureRect(region: web.region, crop: web.crop, textureSize: web.textureSize)
             uniBridge.addRenderTexture([object.id, RenderTextureType.web.rawValue, rect[2], rect[3]] + rect)
+        case let .text(text):
+            let canvasSize = uniBridge.canvasCGSize
+            // The freshly rendered bitmap carries the aspect ratio the text now has, which is
+            // what refits the object after an edit; the stored size is the fallback for it
+            let textureSize = RenderTextureManager.shared.drawer(id: object.id)?.size
+                ?? .init(width: canvasSize.width * text.region.width, height: canvasSize.height * text.region.height)
+            text.region = addFixedTexture(object.id, type: .text, region: text.region, textureSize: textureSize)
         case let .wind(wind):
             let direction = wind.direction
             let scale: Float = 100000 // Shift the digits by the number of significant figures to send as Int.
@@ -167,7 +171,7 @@ public final class SceneObjectManager {
         case let .image(image):
             RenderTextureManager.shared.remove(id: object.id)
             VCamSceneDataStore(sceneId: SceneManager.shared.currentSceneId).removeManagedDataIfNeeded(at: image.url)
-        case .screen, .videoCapture, .web:
+        case .screen, .videoCapture, .web, .text:
             RenderTextureManager.shared.remove(id: object.id)
         }
         // The engine side deletes the currently selected item, so select the target first;
@@ -210,6 +214,21 @@ public final class SceneObjectManager {
     public func dispose() {
         objects = objects.filter { $0.id == SceneObject.avatarID }
         RenderTextureManager.shared.removeAll()
+    }
+
+    /// Registers an uncropped texture and returns the canvas-relative placement
+    /// textureRect decided, which the object stores as its own geometry.
+    @discardableResult
+    private func addFixedTexture(_ id: Int32, type: RenderTextureType, region: CGRect, textureSize: CGSize) -> CGRect {
+        let canvasSize = UniBridge.shared.canvasCGSize
+        let rect = textureRect(region: region, crop: .init(x: 0, y: 0, width: 1, height: 1), textureSize: textureSize)
+        UniBridge.shared.addRenderTexture([id, type.rawValue, rect[2], rect[3]] + rect)
+        return .init(
+            x: CGFloat(rect[0]) / canvasSize.width,
+            y: CGFloat(rect[1]) / canvasSize.height,
+            width: CGFloat(rect[2]) / canvasSize.width,
+            height: CGFloat(rect[3]) / canvasSize.height
+        )
     }
 
     private func textureRect(region: CGRect, crop: CGRect, textureSize: CGSize) -> [Int32] {
@@ -329,6 +348,9 @@ extension SceneObjectManager {
                 renderer.filter = state.texture.filter.map(ImageFilter.init(configuration:))
                 RenderTextureManager.shared.set(renderer, id: object.id)
                 configure(sceneObject)
+            case let .text(state):
+                RenderTextureManager.shared.set(TextRenderer(configuration: state.configuration), id: object.id)
+                configure(sceneObject)
             case .wind:
                 configure(sceneObject)
             }
@@ -353,6 +375,17 @@ extension SceneObjectManager {
         guard let config = recorder.captureConfig, let screenId = config.id else { return }
         let id = RenderTextureManager.shared.add(recorder)
         add(.init(id: id, type: .screen(.init(id: screenId, captureType: config.captureType.type, textureSize: recorder.size, crop: recorder.cropRect, filter: nil)), isHidden: false, isLocked: false))
+    }
+
+    public func addText(_ configuration: TextObjectConfiguration) {
+        let renderer = TextRenderer(configuration: configuration)
+        let id = RenderTextureManager.shared.add(renderer)
+        // Show at the bitmap's natural size so that short text isn't blown up, but shrink an
+        // oversized bitmap into view; the texture keeps the full resolution for crisp scaling
+        let natural = renderer.size / UniBridge.shared.canvasCGSize
+        let scale = min(1, 0.8 / max(natural.width, natural.height))
+        let region = CGRect(origin: .zero, size: .init(width: natural.width * scale, height: natural.height * scale))
+        add(.init(id: id, type: .text(.init(configuration: configuration, region: region)), isHidden: false, isLocked: false))
     }
 
     public func addVideoCapture(_ drawer: CaptureDeviceRenderer) {

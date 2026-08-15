@@ -34,3 +34,10 @@ public extension VCamColor {
         self.init(nsColor: NSColor(color))
     }
 }
+
+public extension Binding where Value == VCamColor {
+    /// Lets a ColorPicker edit a stored VCamColor directly
+    var color: Binding<Color> {
+        map(get: \.color, set: VCamColor.init(color:))
+    }
+}

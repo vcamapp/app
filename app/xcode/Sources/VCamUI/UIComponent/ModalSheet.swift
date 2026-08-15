@@ -25,10 +25,10 @@ public struct ModalSheet<Content: View>: View {
     let content: Content
 
     public var body: some View {
-        VStack {
+        VStack(spacing: 0) {
             content
-                .padding()
-            Spacer()
+                .padding([.horizontal, .top])
+                .frame(maxHeight: .infinity, alignment: .top)
             HStack {
                 Spacer()
                 if let cancel = cancel {
@@ -43,7 +43,8 @@ public struct ModalSheet<Content: View>: View {
                 .keyboardShortcut(.defaultAction)
                 .disabled(doneDisabled)
             }
-            .padding()
+            .padding(.horizontal)
+            .padding(.vertical, 12)
         }
     }
 }

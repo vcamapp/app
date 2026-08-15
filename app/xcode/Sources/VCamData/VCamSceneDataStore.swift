@@ -151,7 +151,7 @@ extension VCamSceneDataStore {
                 let originalCount = scene.objects.count
                 scene.objects = scene.objects.compactMap {
                     switch $0.type {
-                    case .avatar, .screen, .captureDevice, .web, .wind: ()
+                    case .avatar, .screen, .captureDevice, .web, .text, .wind: ()
                     case let .image(imageId, _):
                         if !FileManager.default.fileExists(atPath: dataStore.dataURL(id: imageId).path) {
                             return nil

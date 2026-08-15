@@ -55,6 +55,11 @@ extension VCamScene.Object {
                 crop: texture.crop.rect,
                 filter: texture.filter.map(ImageFilter.init(configuration:))
             )))
+        case let .text(state):
+            return sceneObject(type: .text(.init(
+                configuration: state.configuration,
+                region: state.region.rect
+            )))
         case let .wind(wind):
             return sceneObject(type: .wind(.init(direction: wind.rotation.simd3)))
         }
@@ -115,6 +120,11 @@ extension SceneObject {
                     crop: .init(rect: web.crop),
                     filter: web.filter?.configuration
                 )
+            )))
+        case let .text(text):
+            return encodeScene(type: .text(state: .init(
+                region: .init(rect: text.region),
+                configuration: text.configuration
             )))
         case let .wind(wind):
             return encodeScene(type: .wind(state: .init(

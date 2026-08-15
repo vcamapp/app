@@ -6,6 +6,7 @@ public enum RenderTextureType: Int32 {
     case screen
     case captureDevice
     case web
+    case text
 }
 
 public final class MainTexture: @unchecked Sendable {
