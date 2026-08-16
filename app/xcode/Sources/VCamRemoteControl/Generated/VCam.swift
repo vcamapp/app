@@ -42,6 +42,12 @@ package protocol VCamProtocol: Sendable {
     @concurrent func sceneLoad(sceneId: Int) async throws -> Bool
     /// Resets the avatar and camera to the initial position
     @concurrent func cameraReset() async throws -> Bool
+    /// Shows text as the subtitle
+    /// 
+    /// Replaces the subtitle with the given text. The subtitle keeps the style and placement configured in the app, and is shared by every scene. Passing an empty string is the same as subtitle.clear.
+    @concurrent func subtitleSet(text: String) async throws -> Bool
+    /// Hides the subtitle
+    @concurrent func subtitleClear() async throws -> Bool
     /// Subscribes this connection to server-pushed events
     /// 
     /// Connections receive no events until they subscribe. Omit `events` to subscribe to all events.
@@ -204,6 +210,21 @@ package struct VCam: VCamProtocol {
     /// Resets the avatar and camera to the initial position
     @concurrent package func cameraReset() async throws -> Bool {
         return try await rpc.call(method: "camera.reset")
+    }
+
+    /// Shows text as the subtitle
+    /// 
+    /// Replaces the subtitle with the given text. The subtitle keeps the style and placement configured in the app, and is shared by every scene. Passing an empty string is the same as subtitle.clear.
+    @concurrent package func subtitleSet(text: String) async throws -> Bool {
+        struct Params: Encodable, Sendable {
+            var text: String
+        }
+        return try await rpc.call(method: "subtitle.set", params: Params(text: text))
+    }
+
+    /// Hides the subtitle
+    @concurrent package func subtitleClear() async throws -> Bool {
+        return try await rpc.call(method: "subtitle.clear")
     }
 
     /// Subscribes this connection to server-pushed events

@@ -54,6 +54,22 @@ struct EventBridgeTests {
     }
 
     @Test
+    func subtitleChangesPublishTheNewText() async throws {
+        let (bridge, uniState, recorder) = makeBridge()
+        bridge.start()
+        defer {
+            bridge.stop()
+        }
+
+        uniState.subtitle = "こんにちは"
+        await drainMainActor()
+        // Clearing is a change like any other, so subscribers see the empty text
+        uniState.subtitle = ""
+        await drainMainActor()
+        #expect(recorder.received == [.subtitleChanged(text: "こんにちは"), .subtitleChanged(text: "")])
+    }
+
+    @Test
     func expressionChangesPublishTheNewName() async throws {
         let (bridge, uniState, recorder) = makeBridge()
         uniState.expressions = [.init(name: "Joy"), .init(name: "Angry")]

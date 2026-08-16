@@ -4,9 +4,9 @@ import VCamControl
 import VCamData
 
 /// Feeds VCam state changes into the EventPublisher while the server runs.
-/// Motion and expression changes are observed on UniState, which reflects
-/// them regardless of the source (the UI, shortcuts, or the API); avatar
-/// loads hook into AvatarControl because there is no completion signal.
+/// Motion, expression and subtitle changes are observed on UniState, which
+/// reflects them regardless of the source (the UI, shortcuts, or the API);
+/// avatar loads hook into AvatarControl because there is no completion signal.
 @MainActor
 final class EventBridge {
     private let uniState: UniState
@@ -27,6 +27,7 @@ final class EventBridge {
         observeMotionPlaying(previous: uniState.isMotionPlaying)
         observeExpression(previous: currentExpressionName)
         observeScene(previous: SceneControl.provider?.activeScene?.id)
+        observeSubtitle(previous: uniState.subtitle)
     }
 
     func stop() {
@@ -79,6 +80,22 @@ final class EventBridge {
                     self.publish(.expressionChanged(name: current))
                 }
                 self.observeExpression(previous: current)
+            }
+        }
+    }
+
+    private func observeSubtitle(previous: String) {
+        guard isActive else { return }
+        withObservationTracking {
+            _ = uniState.subtitle
+        } onChange: {
+            Task { @MainActor [weak self] in
+                guard let self, self.isActive else { return }
+                let current = self.uniState.subtitle
+                if current != previous {
+                    self.publish(.subtitleChanged(text: current))
+                }
+                self.observeSubtitle(previous: current)
             }
         }
     }

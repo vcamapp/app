@@ -38,7 +38,7 @@ package struct VCamAPIService: VCamHandler {
 
     @MainActor
     package func appGetInfo() async throws -> AppGetInfoResult {
-        var capabilities = ["avatar", "motion", "expression", "scene", "camera", "events"]
+        var capabilities = ["avatar", "motion", "expression", "scene", "camera", "subtitle", "events"]
 #if FEATURE_3
         capabilities.append("vrma")
         capabilities.append("avatarImport")
@@ -188,6 +188,18 @@ package struct VCamAPIService: VCamHandler {
     @MainActor
     package func cameraReset() async throws -> Bool {
         CameraControl.resetCamera()
+        return true
+    }
+
+    @MainActor
+    package func subtitleSet(text: String) async throws -> Bool {
+        uniState.subtitle = text
+        return true
+    }
+
+    @MainActor
+    package func subtitleClear() async throws -> Bool {
+        uniState.subtitle = ""
         return true
     }
 

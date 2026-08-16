@@ -59,8 +59,12 @@ struct VCamAPIServiceTests {
             Issue.record("Unexpected response: \(response)")
             return
         }
-        #expect(result["apiVersion"] == .string("0.1.0"))
-        #expect(APISpecification.apiVersion == "0.1.0")
+        #expect(result["apiVersion"] == .string(APISpecification.apiVersion))
+        guard case .array(let capabilities)? = result["capabilities"] else {
+            Issue.record("Unexpected capabilities: \(result)")
+            return
+        }
+        #expect(capabilities.contains(.string("subtitle")))
     }
 
     @Test
@@ -197,6 +201,20 @@ struct VCamAPIServiceTests {
         let failure = try await call(makeService(), method: "scene.load", params: #"{"sceneId": 99}"#)
         #expect(errorObject(of: failure)?.code == 1004)
         #expect(provider.loadedSceneIds == [2])
+    }
+
+    @Test
+    func subtitleSetAndClearDriveTheSharedState() async throws {
+        let uniState = UniState()
+        let service = makeService(uniState: uniState)
+
+        let set = try await call(service, method: "subtitle.set", params: #"{"text": "Hello"}"#)
+        #expect(set["result"] == .bool(true))
+        #expect(uniState.subtitle == "Hello")
+
+        let cleared = try await call(service, method: "subtitle.clear")
+        #expect(cleared["result"] == .bool(true))
+        #expect(uniState.subtitle.isEmpty)
     }
 
     @Test

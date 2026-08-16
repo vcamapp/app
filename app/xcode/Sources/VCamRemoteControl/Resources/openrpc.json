@@ -398,6 +398,39 @@
       }
     },
     {
+      "name": "subtitle.set",
+      "summary": "Shows text as the subtitle",
+      "description": "Replaces the subtitle with the given text. The subtitle keeps the style and placement configured in the app, and is shared by every scene. Passing an empty string is the same as subtitle.clear.",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "text",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "result": {
+        "name": "success",
+        "schema": {
+          "type": "boolean"
+        }
+      }
+    },
+    {
+      "name": "subtitle.clear",
+      "summary": "Hides the subtitle",
+      "paramStructure": "by-name",
+      "params": [],
+      "result": {
+        "name": "success",
+        "schema": {
+          "type": "boolean"
+        }
+      }
+    },
+    {
       "name": "events.subscribe",
       "summary": "Subscribes this connection to server-pushed events",
       "description": "Connections receive no events until they subscribe. Omit `events` to subscribe to all events.",
@@ -530,6 +563,26 @@
           "required": true,
           "schema": {
             "type": "integer"
+          }
+        }
+      ]
+    },
+    {
+      "name": "subtitle.changed",
+      "summary": "The subtitle text has changed",
+      "x-direction": "serverToClient",
+      "tags": [
+        {
+          "name": "Events"
+        }
+      ],
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "text",
+          "required": true,
+          "schema": {
+            "type": "string"
           }
         }
       ]

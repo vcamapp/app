@@ -91,12 +91,10 @@ public final class UniBridge {
     public var hasPerfectSyncBlendShape: Bool { boolMapper.get(.hasPerfectSyncBlendShape) }
 
     public enum StringType: Int32, Sendable {
-        case message = 0
-        case loadModel = 1
-        case showEmojiStamp = 2
+        case loadModel = 0
+        case showEmojiStamp = 1
     }
     public let stringMapper = ValueBinding<String, StringType>()
-    public private(set) lazy var message = stringMapper.set(.message)
     public private(set) lazy var loadModel = stringMapper.set(.loadModel)
     public private(set) lazy var showEmojiStamp = stringMapper.set(.showEmojiStamp)
 

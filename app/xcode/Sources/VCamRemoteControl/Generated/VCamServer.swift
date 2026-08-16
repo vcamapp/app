@@ -40,6 +40,12 @@ package protocol VCamHandler: Sendable {
     @concurrent func sceneLoad(sceneId: Int) async throws -> Bool
     /// Resets the avatar and camera to the initial position
     @concurrent func cameraReset() async throws -> Bool
+    /// Shows text as the subtitle
+    /// 
+    /// Replaces the subtitle with the given text. The subtitle keeps the style and placement configured in the app, and is shared by every scene. Passing an empty string is the same as subtitle.clear.
+    @concurrent func subtitleSet(text: String) async throws -> Bool
+    /// Hides the subtitle
+    @concurrent func subtitleClear() async throws -> Bool
     /// Subscribes this connection to server-pushed events
     /// 
     /// Connections receive no events until they subscribe. Omit `events` to subscribe to all events.
@@ -119,6 +125,13 @@ package struct VCamServer: Sendable {
             return try JSONRPCServer.resultResponse(id: request.id, result: result)
         case "camera.reset":
             let result = try await handler.cameraReset()
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "subtitle.set":
+            let params = JSONRPCParameters(request.params)
+            let result = try await handler.subtitleSet(text: try params.required("text", at: 0))
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "subtitle.clear":
+            let result = try await handler.subtitleClear()
             return try JSONRPCServer.resultResponse(id: request.id, result: result)
         case "events.subscribe":
             let params = JSONRPCParameters(request.params)

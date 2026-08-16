@@ -322,9 +322,6 @@ public final class UniState {
         bridge.floatMapper.setValue(.swivelOffset, __swivelOffset)
 #endif
         bridge.intMapper.setValue(.qualityLevel, __qualityLevel)
-        // Transitional: the engine still has its own message display, which starts with a
-        // placeholder. Clear it until that path is removed.
-        bridge.stringMapper.setValue(.message, "")
         bridge.structMapper.binding(.backgroundColor).wrappedValue = __backgroundColor
         UniBridge.setScreenResolution(width: Int32(_screenResolution.size.width), height: Int32(_screenResolution.size.height))
 #if FEATURE_3

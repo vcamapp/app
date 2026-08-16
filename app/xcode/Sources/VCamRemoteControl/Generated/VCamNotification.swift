@@ -17,6 +17,8 @@ package enum VCamNotification: Hashable, Sendable {
     case expressionChanged(name: String)
     /// A scene has been loaded
     case sceneLoaded(sceneId: Int)
+    /// The subtitle text has changed
+    case subtitleChanged(text: String)
 
     /// The JSON-RPC method name of the notification.
     package var method: String {
@@ -26,6 +28,7 @@ package enum VCamNotification: Hashable, Sendable {
         case .motionStopped: return "motion.stopped"
         case .expressionChanged: return "expression.changed"
         case .sceneLoaded: return "scene.loaded"
+        case .subtitleChanged: return "subtitle.changed"
         }
     }
 
@@ -64,6 +67,12 @@ package enum VCamNotification: Hashable, Sendable {
             }
             let params = Params(sceneId: sceneId)
             return try encoder.encode(VCamNotificationEnvelope(method: "scene.loaded", params: params))
+        case .subtitleChanged(let text):
+            struct Params: Encodable, Sendable {
+                var text: String
+            }
+            let params = Params(text: text)
+            return try encoder.encode(VCamNotificationEnvelope(method: "subtitle.changed", params: params))
         }
     }
 
@@ -89,6 +98,9 @@ package enum VCamNotification: Hashable, Sendable {
         case "scene.loaded":
             let params = JSONRPCParameters(request.params)
             return .sceneLoaded(sceneId: try params.required("sceneId", at: 0))
+        case "subtitle.changed":
+            let params = JSONRPCParameters(request.params)
+            return .subtitleChanged(text: try params.required("text", at: 0))
         default:
             return nil
         }
