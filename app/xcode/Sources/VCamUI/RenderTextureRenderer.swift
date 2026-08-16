@@ -6,6 +6,9 @@ import VCamEntity
 @MainActor
 public protocol RenderTextureRenderer: AnyObject {
     var size: CGSize { get }
+    /// The texture's own pixel size, for a source that is deliberately kept at a different
+    /// resolution than the size it is drawn at (a supersampled text)
+    var textureSize: CGSize { get }
     var cropRect: CGRect { get }
     var filter: ImageFilter? { get set }
 
@@ -21,6 +24,8 @@ public protocol RenderTextureRenderer: AnyObject {
 }
 
 public extension RenderTextureRenderer {
+    var textureSize: CGSize { size }
+
     func updateTextureSizeIfNeeded(imageWidth: CGFloat, imageHeight: CGFloat) -> Bool {
         false
     }

@@ -144,63 +144,110 @@ struct AngleDial: View {
 }
 
 struct TextFontPicker: View {
-    @Binding var fontName: String?
+    @Binding var fontName: String
     @Binding var fontSize: Double
+
+    private var fontSizeBinding: Binding<Double> {
+        .init(
+            get: { fontSize },
+            set: { fontSize = TextObjectConfiguration.normalizedFontSize($0) }
+        )
+    }
+
+    struct Member: Hashable {
+        let name: String // PostScript name
+        let displayName: String
+        let weight: Int
+        let isItalic: Bool
+    }
 
     // Enumerating the installed fonts is too slow to repeat on every body evaluation
     @MainActor private static let fontFamilies = NSFontManager.shared.availableFontFamilies
         .filter { !$0.hasPrefix(".") } // Hidden system fonts are prefixed with a period
-    @MainActor private static var membersCache: [String: [(name: String, displayName: String)]] = [:]
+    @MainActor private static let defaultFamily = NSFont(name: TextObjectConfiguration.defaultFontName, size: NSFont.systemFontSize)?.familyName ?? ""
+    @MainActor private static var membersCache: [String: [Member]] = [:]
 
-    private var selectedFamily: String? {
-        fontName.flatMap { NSFont(name: $0, size: NSFont.systemFontSize)?.familyName }
+    private var family: String {
+        // An uninstalled face falls back to the default family, mirroring the renderer
+        NSFont(name: fontName, size: NSFont.systemFontSize)?.familyName ?? Self.defaultFamily
     }
 
-    private var familyBinding: Binding<String?> {
+    private var familyBinding: Binding<String> {
         .init(
-            get: { selectedFamily },
-            set: { fontName = $0.flatMap { Self.members(ofFamily: $0).first?.name } }
+            get: { family },
+            set: { newFamily in
+                // Switching family lands on its regular face
+                guard let member = Self.regularMember(ofFamily: newFamily) else { return }
+                fontName = member.name
+            }
         )
     }
 
     var body: some View {
-        // Keep the size next to the family so that the row doesn't stretch when
-        // the style picker is absent (the system font has no members to choose from)
+        // Keep the size next to the family so that the row reads as one control
         HStack(spacing: 8) {
             Picker(selection: familyBinding) {
-                Text(.default).tag(String?.none)
                 ForEach(Self.fontFamilies, id: \.self) { family in
-                    Text(verbatim: family).tag(String?.some(family))
+                    Text(verbatim: family).tag(family)
                 }
             } label: { EmptyView() }
                 .help(Text(.font))
 
-            TextField(value: $fontSize, format: .number.grouping(.never)) { EmptyView() }
+            TextField(value: fontSizeBinding, format: .number.grouping(.never)) { EmptyView() }
                 .frame(width: 56)
                 .help(Text(.fontSize))
-            Stepper(value: $fontSize, in: 8...1024, step: 8) { EmptyView() }
+            Stepper(value: fontSizeBinding, in: TextObjectConfiguration.fontSizeRange, step: 8) { EmptyView() }
         }
 
-        if let family = selectedFamily {
-            Picker(selection: $fontName) {
-                ForEach(Self.members(ofFamily: family), id: \.name) { member in
-                    Text(verbatim: member.displayName).tag(String?.some(member.name))
+        // Weights first and italics below a divider, the way Figma arranges faces
+        let members = Self.members(ofFamily: family)
+        Picker(selection: $fontName) {
+            Section {
+                ForEach(members.filter { !$0.isItalic }, id: \.name) { member in
+                    Text(verbatim: member.displayName).tag(member.name)
                 }
-            } label: { EmptyView() }
-                .help(Text(.fontStyle))
-        }
+            }
+            let italics = members.filter(\.isItalic)
+            if !italics.isEmpty {
+                Section {
+                    ForEach(italics, id: \.name) { member in
+                        Text(verbatim: member.displayName).tag(member.name)
+                    }
+                }
+            }
+        } label: { EmptyView() }
+            .help(Text(.fontStyle))
     }
 
     @MainActor
-    private static func members(ofFamily family: String) -> [(name: String, displayName: String)] {
+    private static func members(ofFamily family: String) -> [Member] {
         if let cached = membersCache[family] {
             return cached
         }
-        let members = (NSFontManager.shared.availableMembers(ofFontFamily: family) ?? []).compactMap { member in
-            (member.first as? String).map { ($0, member.dropFirst().first as? String ?? $0) }
-        }
+        // availableMembers returns [postScriptName, styleName, weight, traits]
+        let members = (NSFontManager.shared.availableMembers(ofFontFamily: family) ?? [])
+            .compactMap { member -> Member? in
+                guard let name = member.first as? String else { return nil }
+                let traits = NSFontTraitMask(rawValue: (member.dropFirst(3).first as? NSNumber)?.uintValue ?? 0)
+                return Member(
+                    name: name,
+                    displayName: member.dropFirst(1).first as? String ?? name,
+                    weight: (member.dropFirst(2).first as? NSNumber)?.intValue ?? Self.regularWeight,
+                    isItalic: traits.contains(.italicFontMask)
+                )
+            }
+            .sorted { ($0.isItalic ? 1 : 0, $0.weight) < (($1.isItalic ? 1 : 0), $1.weight) }
         membersCache[family] = members
         return members
+    }
+
+    /// NSFontManager's weight scale puts regular at 5
+    private static let regularWeight = 5
+
+    @MainActor
+    private static func regularMember(ofFamily family: String) -> Member? {
+        let members = members(ofFamily: family)
+        return members.first { !$0.isItalic && $0.weight == regularWeight } ?? members.first
     }
 }
 

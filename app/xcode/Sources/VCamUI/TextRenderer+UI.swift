@@ -2,29 +2,62 @@ import SwiftUI
 import AppKit
 import VCamEntity
 
+/// How an object's placement is handled while its text is edited. Objects that stay
+/// locked on the canvas (the subtitle) hand this over so the window can free them
+/// for as long as it is open, and offer a way back when they end up out of reach.
+public struct TextPlacementSupport {
+    public init(hint: LocalizedStringResource, setEditing: @escaping @MainActor (Bool) -> Void, reset: @escaping @MainActor () -> Void) {
+        self.hint = hint
+        self.setEditing = setEditing
+        self.reset = reset
+    }
+
+    let hint: LocalizedStringResource
+    let setEditing: @MainActor (Bool) -> Void
+    let reset: @MainActor () -> Void
+}
+
 public extension TextRenderer {
-    static func showPreferences(configuration: TextObjectConfiguration, completion: @escaping (TextObjectConfiguration) -> Void) {
-        MacWindowManager.shared.reopen(TextRendererPreferenceView(
-            configuration: configuration,
-            close: { MacWindowManager.shared.close(TextRendererPreferenceView.self) },
-            completion: completion
-        ))
+    static func showPreferences(configuration: TextObjectConfiguration, allowsEmptyText: Bool = false, resetConfiguration: TextObjectConfiguration? = nil, placement: TextPlacementSupport? = nil, completion: @escaping (TextObjectConfiguration) -> Void) {
+        MacWindowManager.shared.reopen(
+            TextRendererPreferenceView(
+                configuration: configuration,
+                allowsEmptyText: allowsEmptyText,
+                resetConfiguration: resetConfiguration,
+                placement: placement,
+                close: { MacWindowManager.shared.close(TextRendererPreferenceView.self) },
+                completion: completion
+            ),
+            // Close the previous editor before marking the replacement as open, so its
+            // onClose callback can't restore the lock after this window takes over
+            onOpen: { placement?.setEditing(true) },
+            // The view's own lifecycle never sees the window's close button, so the lock
+            // has to be restored here
+            onClose: { placement?.setEditing(false) }
+        )
     }
 
     static func showPreferencesForAdding() {
-        showPreferences(configuration: .init(outlines: [.init()])) { configuration in
+        showPreferences(configuration: TextObjectPreset.textDefault, resetConfiguration: TextObjectPreset.textDefault) { configuration in
             SceneObjectManager.shared.addText(configuration)
         }
     }
 }
 
 public struct TextRendererPreferenceView: View {
-    init(configuration: TextObjectConfiguration, close: @escaping () -> Void, completion: @escaping (TextObjectConfiguration) -> Void) {
+    init(configuration: TextObjectConfiguration, allowsEmptyText: Bool = false, resetConfiguration: TextObjectConfiguration? = nil, placement: TextPlacementSupport? = nil, close: @escaping () -> Void, completion: @escaping (TextObjectConfiguration) -> Void) {
         _configuration = State(initialValue: configuration)
+        self.allowsEmptyText = allowsEmptyText
+        self.resetConfiguration = resetConfiguration
+        self.placement = placement
         self.close = close
         self.completion = completion
     }
 
+    let allowsEmptyText: Bool
+    /// What the reset button loads into the form; Cancel and Apply keep their meaning
+    let resetConfiguration: TextObjectConfiguration?
+    let placement: TextPlacementSupport?
     let close: () -> Void
     let completion: (TextObjectConfiguration) -> Void
 
@@ -32,11 +65,31 @@ public struct TextRendererPreferenceView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     public var body: some View {
-        ModalSheet(doneTitle: String(localized: .apply), doneDisabled: configuration.text.isEmpty) {
+        ModalSheet(doneTitle: String(localized: .apply), doneDisabled: !allowsEmptyText && configuration.text.isEmpty) {
             close()
         } done: {
             close()
             completion(configuration)
+        } accessory: {
+            if let resetConfiguration {
+                Button {
+                    var reset = resetConfiguration
+                    reset.text = configuration.text
+                    configuration = reset
+                } label: {
+                    Text(.resetToDefault)
+                }
+            }
+            if let placement {
+                Button {
+                    placement.reset()
+                } label: {
+                    Text(.resetPosition)
+                }
+                Text(placement.hint)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
         } content: {
             VStack(spacing: 10) {
                 TextPreview(configuration: configuration)
@@ -89,8 +142,7 @@ public struct TextRendererPreferenceView: View {
             configuration.outlines.count,
             configuration.fill.gradientFill?.stops.count ?? -1,
             configuration.fill.gradientFill?.kind == .radial ? 1 : 0,
-            configuration.fontName == nil ? 0 : 1,
-            configuration.wrapWidth == nil ? 0 : 1,
+            configuration.wrapCharacters == nil ? 0 : 1,
             configuration.background == nil ? 0 : 1,
         ] + configuration.effects.map(\.kind.style.rawValue)
     }

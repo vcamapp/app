@@ -3,10 +3,43 @@ import VCamEntity
 
 /// Ready-made styles for the text object. Every value is authored against the
 /// configuration's own font size, so `scaled(by:)` renders them at any other size.
+/// A preset that doesn't author a font gets the bold member, the same as a new text object.
 struct TextObjectPreset: Identifiable, Sendable {
+    init(id: String, name: LocalizedStringResource, configuration: TextObjectConfiguration) {
+        self.id = id
+        self.name = name
+        var configuration = configuration
+        if configuration.fontName == TextObjectConfiguration.defaultFontName {
+            configuration.fontName = TextObjectConfiguration.defaultBoldFontName
+        }
+        self.configuration = configuration
+    }
+
     let id: String
     let name: LocalizedStringResource
     let configuration: TextObjectConfiguration
+
+    /// The style a newly added text object starts from, and what resetting restores.
+    /// Leading-aligned so that by default the text hangs from its top-left corner
+    /// and grows rightward as it gets longer.
+    static var textDefault: TextObjectConfiguration {
+        // The outline is authored against the font size, so it has to be a few percent of an
+        // em to read as an outline at the size text starts at
+        .init(fontName: TextObjectConfiguration.defaultBoldFontName, alignment: .leading, outlines: [.init(width: 12)])
+    }
+
+    /// The style a subtitle starts from before the user restyles it
+    static var subtitleDefault: TextObjectConfiguration {
+        redImpact.configuration
+    }
+
+    private static let redImpact = TextObjectPreset(id: "redImpact", name: .presetRedImpact, configuration: .init(
+        fill: .solid(.init(red: 0.93, green: 0.11, blue: 0.14, alpha: 1)),
+        outlines: [
+            .init(width: 14, color: .white),
+            .init(width: 28, color: .black),
+        ]
+    ))
 
     static let all: [TextObjectPreset] = [
         .init(id: "simple", name: .presetSimple, configuration: .init(
@@ -24,13 +57,7 @@ struct TextObjectPreset: Identifiable, Sendable {
                 .init(width: 26, color: .black),
             ]
         )),
-        .init(id: "redImpact", name: .presetRedImpact, configuration: .init(
-            fill: .solid(.init(red: 0.93, green: 0.11, blue: 0.14, alpha: 1)),
-            outlines: [
-                .init(width: 14, color: .white),
-                .init(width: 28, color: .black),
-            ]
-        )),
+        redImpact,
         .init(id: "pink", name: .presetPink, configuration: .init(
             fill: .solid(.init(red: 1, green: 0.33, blue: 0.7, alpha: 1)),
             outlines: [

@@ -2,16 +2,30 @@ import Foundation
 
 public struct TextObjectConfiguration: Codable, Equatable, Hashable, Sendable {
     // Render at a large size by default so that scaling up on the canvas stays sharp
-    public init(text: String = "", fontName: String? = nil, fontSize: Double = 256, fill: Fill = .solid(.white), alignment: Alignment = .center, textTransform: TextTransform = .none, lineHeight: Double = 1, letterSpacing: Double = 0, wrapWidth: Double? = nil, isUnderlined: Bool = false, hasStrikethrough: Bool = false, isVertical: Bool = false, outlines: [Outline] = [], effects: [Effect] = [], background: Background? = nil) {
+    /// The closest bundled face to San Francisco (SF itself is a hidden dot-prefixed font
+    /// that can't be addressed by name, and the public SF Pro isn't preinstalled).
+    /// CJK text cascades to a weight-matched Hiragino (Bold falls back to W6).
+    public static let defaultFontName = "HelveticaNeue"
+    /// Text on a stream sits over arbitrary footage, so the presets start from the bold member
+    public static let defaultBoldFontName = "HelveticaNeue-Bold"
+    public static let defaultFontSize = 256.0
+    public static let fontSizeRange = 8.0...1024.0
+
+    public static func normalizedFontSize(_ value: Double) -> Double {
+        guard value.isFinite else { return defaultFontSize }
+        return min(max(value, fontSizeRange.lowerBound), fontSizeRange.upperBound)
+    }
+
+    public init(text: String = "", fontName: String = defaultFontName, fontSize: Double = defaultFontSize, fill: Fill = .solid(.white), alignment: Alignment = .center, textTransform: TextTransform = .none, lineHeight: Double = 1, letterSpacing: Double = 0, wrapCharacters: Double? = nil, isUnderlined: Bool = false, hasStrikethrough: Bool = false, isVertical: Bool = false, outlines: [Outline] = [], effects: [Effect] = [], background: Background? = nil) {
         self.text = text
         self.fontName = fontName
-        self.fontSize = fontSize
+        self.fontSize = Self.normalizedFontSize(fontSize)
         self.fill = fill
         self.alignment = alignment
         self.textTransform = textTransform
         self.lineHeight = lineHeight
         self.letterSpacing = letterSpacing
-        self.wrapWidth = wrapWidth
+        self.wrapCharacters = wrapCharacters
         self.isUnderlined = isUnderlined
         self.hasStrikethrough = hasStrikethrough
         self.isVertical = isVertical
@@ -21,14 +35,16 @@ public struct TextObjectConfiguration: Codable, Equatable, Hashable, Sendable {
     }
 
     public var text: String
-    public var fontName: String? // PostScript name; nil = the system font
+    public var fontName: String // PostScript name carrying the face and weight
     public var fontSize: Double
     public var fill: Fill
     public var alignment: Alignment
     public var textTransform: TextTransform
     public var lineHeight: Double // Multiplier; 1 = the font's default
     public var letterSpacing: Double // Points added between characters
-    public var wrapWidth: Double? // Points; lines wrap at this width (line length for vertical text), nil = only explicit line breaks
+    // Fullwidth-character units (em): lines wrap after this many characters, independent of
+    // the font size and the on-screen scale (line length for vertical text). nil = only explicit breaks
+    public var wrapCharacters: Double?
     public var isUnderlined: Bool
     public var hasStrikethrough: Bool
     public var isVertical: Bool

@@ -68,13 +68,14 @@ public final class MacWindowManager {
 
     /// Closes any existing window of the same type and opens a fresh one,
     /// so the contents are rebuilt instead of just fronting the old window
-    public func reopen<T: MacWindow>(_ windowView: T) {
+    public func reopen<T: MacWindow>(_ windowView: T, onOpen: (@MainActor () -> Void)? = nil, onClose: (@MainActor () -> Void)? = nil) {
         close(T.self)
-        open(windowView)
+        onOpen?()
+        open(windowView, onClose: onClose)
     }
 
-    public func open<T: MacWindow>(_ windowView: T) {
-        open(windowView, key: .type(id(T.self)), onClose: nil)
+    public func open<T: MacWindow>(_ windowView: T, onClose: (@MainActor () -> Void)? = nil) {
+        open(windowView, key: .type(id(T.self)), onClose: onClose)
     }
 
     /// Opens a window keyed by an instance id, allowing multiple windows of the same view type

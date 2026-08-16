@@ -52,7 +52,7 @@ public enum VRMLoadSource: Int32, Sendable {
 // MARK: - Payload Structures
 public struct PlayMotionPayload {
     public var stringPtr: UnsafePointer<CChar>?
-    // C# bool occupies 4 bytes in the struct layout and shifts field offsets, so ABI-compatible flags use UInt8
+    // A bool is 4 bytes on the engine side and would shift the field offsets, so flags are UInt8
     public var isLoop: UInt8
 }
 
@@ -61,7 +61,7 @@ public struct RegisterImportedMotionPayload {
     public var pathPtr: UnsafePointer<CChar>?
     public var requestIDPtr: UnsafePointer<CChar>?
     public var axisMask: UInt8
-    // C# bool occupies 4 bytes in the struct layout and shifts field offsets, so ABI-compatible flags use UInt8
+    // A bool is 4 bytes on the engine side and would shift the field offsets, so flags are UInt8
     public var loadImmediately: UInt8
 }
 

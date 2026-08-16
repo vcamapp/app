@@ -309,9 +309,7 @@ private extension WKWebView {
   document.head.appendChild(style_My9jGxsf);
 }());
 """
-        evaluateJavaScript(jsString) { aaa, error in
-//            uniDebugLog("WKWebView Error: \(error.debugDescription)")
-        }
+        evaluateJavaScript(jsString, completionHandler: nil)
     }
 
     func readMetadata(renderer: WebRenderer) {

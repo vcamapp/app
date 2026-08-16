@@ -6,14 +6,14 @@ import VCamEntity
 struct TextFontSection: View {
     @Binding var configuration: TextObjectConfiguration
 
-    private static let defaultWrapWidth: Double = 800
+    private static let defaultWrapCharacters: Double = 15
 
     private var wrapEnabled: Binding<Bool> {
-        $configuration.wrapWidth.map(get: { $0 != nil }, set: { $0 ? Self.defaultWrapWidth : nil })
+        $configuration.wrapCharacters.map(get: { $0 != nil }, set: { $0 ? Self.defaultWrapCharacters : nil })
     }
 
-    private var wrapWidth: Binding<Double> {
-        $configuration.wrapWidth.map(get: { $0 ?? Self.defaultWrapWidth }, set: { max($0, 1) })
+    private var wrapCharacters: Binding<Double> {
+        $configuration.wrapCharacters.map(get: { $0 ?? Self.defaultWrapCharacters }, set: { max($0, 1) })
     }
 
     var body: some View {
@@ -50,12 +50,12 @@ struct TextFontSection: View {
 
             HStack {
                 Toggle(isOn: wrapEnabled) {
-                    Text(.wrapWidth)
+                    Text(.wrapCharacters)
                 }
                 .toggleStyle(.checkbox)
                 Spacer()
-                if configuration.wrapWidth != nil {
-                    TextField(value: wrapWidth, format: .number.grouping(.never)) { EmptyView() }
+                if configuration.wrapCharacters != nil {
+                    TextField(value: wrapCharacters, format: .number.grouping(.never)) { EmptyView() }
                         .frame(width: 64)
                 }
             }

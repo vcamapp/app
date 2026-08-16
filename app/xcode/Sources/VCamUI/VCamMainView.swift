@@ -79,8 +79,11 @@ public struct VCamMainView: View {
             HStack {
                 if #available(macOS 26.0, *) {
                     GroupBox {
-                        SelectAllTextField(placeholder: String(localized: .message), text: $state.message)
-                            .padding(.horizontal, 8)
+                        HStack(spacing: 4) {
+                            CommitTextField(placeholder: String(localized: .subtitle), text: $state.message)
+                            SubtitleStyleButton()
+                        }
+                        .padding(.horizontal, 8)
                     }
 
                     GroupBox {
@@ -90,7 +93,8 @@ public struct VCamMainView: View {
                             .padding(.vertical, -1.5)
                     }
                 } else {
-                    SelectAllTextField(placeholder: String(localized: .message), text: $state.message)
+                    CommitTextField(placeholder: String(localized: .subtitle), text: $state.message)
+                    SubtitleStyleButton()
 
                     calibrateButton
                 }
@@ -101,6 +105,21 @@ public struct VCamMainView: View {
         .task {
             isCameraExtensionDisallow = await CameraExtension().status().isAwaitingUserApproval
         }
+    }
+}
+
+/// Opens the text editor for the subtitle, so its look is configured where it is typed.
+/// Uses the same flat chip as the shortcut buttons below the field.
+private struct SubtitleStyleButton: View {
+    var body: some View {
+        FlatButton {
+            SubtitleTextObject.showStyleEditor()
+        } label: {
+            Image(systemName: "textformat")
+        }
+        .flatButtonStyle(.filled())
+        .help(Text(.subtitleStyle))
+        .accessibilityLabel(Text(.subtitleStyle))
     }
 }
 

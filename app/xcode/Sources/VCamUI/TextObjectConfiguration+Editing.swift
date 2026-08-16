@@ -8,8 +8,10 @@ extension TextObjectConfiguration {
     func applyingStyle(of other: Self) -> Self {
         var configuration = other
         configuration.text = text
-        configuration.wrapWidth = wrapWidth
+        configuration.wrapCharacters = wrapCharacters
         configuration.isVertical = isVertical
+        // The alignment also decides which edge the object grows from, so it stays layout
+        configuration.alignment = alignment
         return configuration
     }
 
@@ -19,7 +21,7 @@ extension TextObjectConfiguration {
         var configuration = self
         configuration.fontSize *= scale
         configuration.letterSpacing *= scale
-        configuration.wrapWidth = wrapWidth.map { $0 * scale }
+        // wrapCharacters is em-relative, so it follows the font size on its own
         configuration.outlines = outlines.map { $0.scaled(by: scale) }
         configuration.effects = effects.map { $0.scaled(by: scale) }
         configuration.background = background?.scaled(by: scale)

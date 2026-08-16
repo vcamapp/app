@@ -123,12 +123,6 @@ public final class WindowManager {
         quitMenu.target = self
         menu.addItem(quitMenu)
 
-//        let menuItemView = NSHostingView(rootView: MacMenuBarIcon())
-//        menuItemView.frame.size = .init(width: 320, height: 280)
-//        let menuItem = NSMenuItem()
-//        menuItem.view = menuItemView
-//        menu.addItem(menuItem)
-
         statusItem.menu = menu
 
         statusItem.isVisible = UniState.shared.useAddToMacOSMenuBar

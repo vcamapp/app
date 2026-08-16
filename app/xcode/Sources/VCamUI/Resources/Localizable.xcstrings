@@ -5728,6 +5728,29 @@
         }
       }
     },
+    "resetPosition": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset Position"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "位置をリセット"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "위치 재설정"
+          }
+        }
+      }
+    },
     "resetToDefault": {
       "extractionState": "manual",
       "localizations": {
@@ -6598,6 +6621,75 @@
           "stringUnit": {
             "state": "translated",
             "value": "취소선"
+          }
+        }
+      }
+    },
+    "subtitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subtitle"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "字幕"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "자막"
+          }
+        }
+      }
+    },
+    "subtitleDragHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drag on the canvas while this window is open"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "この画面を開いている間はドラッグで移動できます"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 창이 열려 있는 동안 드래그로 이동할 수 있습니다"
+          }
+        }
+      }
+    },
+    "subtitleStyle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subtitle Style"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "字幕のスタイル"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "자막 스타일"
           }
         }
       }
@@ -8028,25 +8120,25 @@
         }
       }
     },
-    "wrapWidth": {
+    "wrapCharacters": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Wrap Width"
+            "value": "Characters per Line"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "折り返し幅"
+            "value": "折り返し文字数"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "줄바꿈 너비"
+            "value": "줄당 글자 수"
           }
         }
       }

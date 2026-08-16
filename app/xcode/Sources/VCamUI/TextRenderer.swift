@@ -6,17 +6,47 @@ import NaturalLanguage
 import VCamEntity
 
 public final class TextRenderer: RenderTextureRenderer {
-    public init(configuration: TextObjectConfiguration) {
-        self.configuration = configuration
-        image = Self.renderImage(configuration)
+    /// What to draw, and how large to draw it. Both feed the same rasterization, so
+    /// changing them together only rasterizes once.
+    public struct Layout: Equatable, Sendable {
+        public init(configuration: TextObjectConfiguration, displayScale: Double = 1) {
+            self.configuration = configuration
+            self.displayScale = displayScale
+        }
+
+        public var configuration: TextObjectConfiguration
+        /// Canvas pixels per layout point. The text is rasterized at the size it is
+        /// displayed at, so the engine samples the texture 1:1; minifying a bitmap
+        /// authored at the configuration's own font size destroys thin outlines.
+        public var displayScale: Double
     }
 
-    public var configuration: TextObjectConfiguration {
+    /// Extra resolution over the display size. Every on-screen read of the texture is a
+    /// minification — 1/2 for the composited canvas, more in the window preview — so it
+    /// always comes from a prefiltered mip level instead of the raw, aliasing-prone base.
+    fileprivate nonisolated static let supersampling = 2.0
+
+    public init(layout: Layout) {
+        self.layout = layout
+        image = Self.renderImage(layout.rasterConfiguration)
+    }
+
+    public var layout: Layout {
         didSet {
-            guard configuration != oldValue else { return }
-            image = Self.renderImage(configuration)
+            guard layout != oldValue else { return }
+            image = Self.renderImage(layout.rasterConfiguration)
             render(outputImage)
         }
+    }
+
+    /// Re-rasterizes only when the new scale would change the bitmap's pixel size. The engine
+    /// reports geometry as 32-bit floats and rounds regions to whole pixels, so the scale it
+    /// round-trips back is never the one that was set; comparing in pixels is what tells a
+    /// real resize apart from that noise, which would otherwise rasterize on every click.
+    public func setDisplayScale(_ scale: Double) {
+        guard scale.isFinite, scale > 0 else { return }
+        guard abs(layoutSize.width * scale * Self.supersampling - image.extent.width) >= 1 else { return }
+        layout.displayScale = scale
     }
 
     private var image: CIImage
@@ -26,8 +56,20 @@ public final class TextRenderer: RenderTextureRenderer {
         filter?.apply(to: image) ?? image
     }
 
+    /// The size the text is displayed at, in canvas pixels
     public var size: CGSize {
+        image.extent.size * (1 / Self.supersampling)
+    }
+
+    /// The texture's own pixel size, which is what the engine has to allocate
+    public var textureSize: CGSize {
         image.extent.size
+    }
+
+    /// The size the text occupies at its own font size, which is independent of how large
+    /// the object is drawn; placement math works in this space so it survives a rescale.
+    public var layoutSize: CGSize {
+        size * (1 / layout.normalizedDisplayScale)
     }
 
     public let cropRect = CGRect(x: 0, y: 0, width: 1, height: 1)
@@ -59,6 +101,28 @@ public final class TextRenderer: RenderTextureRenderer {
     }
 }
 
+private extension TextRenderer.Layout {
+    var normalizedDisplayScale: Double {
+        displayScale.isFinite && displayScale > 0 ? displayScale : 1
+    }
+
+    var rasterConfiguration: TextObjectConfiguration {
+        var configuration = configuration
+        configuration.fontSize = TextObjectConfiguration.normalizedFontSize(configuration.fontSize)
+        return configuration.scaled(by: normalizedDisplayScale * TextRenderer.supersampling)
+    }
+}
+
+/// Only consulted for `defaultLineHeight(for:)`, so one instance serves every rasterization
+@MainActor private let layoutManager = NSLayoutManager()
+
+private extension TextObjectConfiguration {
+    /// The wrap limit in layout points; a fullwidth character is one em wide
+    var wrapPoints: Double? {
+        wrapCharacters.map { $0 * fontSize }
+    }
+}
+
 extension TextRenderer {
     /// Draws the laid-out text into a context, once per pass (outline, fill, gradient mask)
     private struct TextDrawing {
@@ -74,7 +138,28 @@ extension TextRenderer {
         }
     }
 
-    static func renderImage(_ configuration: TextObjectConfiguration) -> CIImage {
+    /// A laid-out text, before any pixels exist. Measuring costs the Core Text layout but
+    /// not the rasterization, which is what makes fitting an object to its text affordable.
+    private struct TextLayout {
+        let drawing: TextDrawing
+        let padding: Double
+
+        /// The bitmap the drawing needs, including room for the decorations around the glyphs
+        var size: CGSize {
+            .init(width: ceil(drawing.size.width) + padding * 2, height: ceil(drawing.size.height) + padding * 2)
+        }
+
+        var drawRect: CGRect {
+            .init(x: padding, y: padding, width: ceil(drawing.size.width), height: ceil(drawing.size.height))
+        }
+    }
+
+    /// The bitmap size the configuration lays out to, without rasterizing it
+    static func measure(_ configuration: TextObjectConfiguration) -> CGSize {
+        makeLayout(configuration).size
+    }
+
+    private static func makeLayout(_ configuration: TextObjectConfiguration) -> TextLayout {
         let transformedText = switch configuration.textTransform {
         case .none: configuration.text
         case .uppercase: configuration.text.uppercased()
@@ -83,7 +168,8 @@ extension TextRenderer {
         }
         // A zero-sized bitmap can't be created, so render a space instead
         let text = (transformedText.isEmpty ? " " : transformedText) as NSString
-        let font = configuration.fontName.flatMap { NSFont(name: $0, size: configuration.fontSize) }
+        // The face can be missing when a scene made on another machine used a third-party font
+        let font = NSFont(name: configuration.fontName, size: configuration.fontSize)
             ?? .systemFont(ofSize: configuration.fontSize)
 
         let paragraphStyle = NSMutableParagraphStyle()
@@ -112,23 +198,30 @@ extension TextRenderer {
             attributes[.strikethroughStyle] = NSUnderlineStyle.single.rawValue
         }
 
+        // A line height below 1 shrinks the line box without shrinking the glyphs, so the
+        // first line's ascender would be cut off; reserve the overhang above the text
+        let firstLineOverhang = max(0, font.ascender - layoutManager.defaultLineHeight(for: font) * configuration.lineHeight)
+
         let drawing = configuration.isVertical
-            ? makeVerticalDrawing(text: text, attributes: attributes, wrapWidth: configuration.wrapWidth)
-            : makeHorizontalDrawing(text: text, attributes: attributes, fontSize: configuration.fontSize, wrapWidth: configuration.wrapWidth)
+            ? makeVerticalDrawing(text: text, attributes: attributes, wrapWidth: configuration.wrapPoints, leadingOverhang: firstLineOverhang)
+            : makeHorizontalDrawing(text: text, attributes: attributes, fontSize: configuration.fontSize, wrapWidth: configuration.wrapPoints, topOverhang: firstLineOverhang)
 
         // Pad the bitmap so that decorations drawn outside the glyph bounds aren't clipped.
         // Inner shadows stay within the glyphs; blurs spread the whole image afterwards.
         let outlineWidth = configuration.outlines.map(\.width).max() ?? 0
         let shadowMargin = configuration.dropShadows.map { max(abs($0.x), abs($0.y)) + $0.blur }.max() ?? 0
         let blurMargin = (configuration.blurs.map(\.radius).max() ?? 0) * 3
-        let padding = max(ceil(outlineWidth + shadowMargin), ceil(configuration.background?.padding ?? 0)) + ceil(blurMargin)
-        let width = Int(ceil(drawing.size.width) + padding * 2)
-        let height = Int(ceil(drawing.size.height) + padding * 2)
+        return .init(drawing: drawing, padding: max(ceil(outlineWidth + shadowMargin), ceil(configuration.background?.padding ?? 0)) + ceil(blurMargin))
+    }
+
+    static func renderImage(_ configuration: TextObjectConfiguration) -> CIImage {
+        let layout = makeLayout(configuration)
+        let drawing = layout.drawing
 
         guard let context = CGContext(
             data: nil,
-            width: width,
-            height: height,
+            width: Int(layout.size.width),
+            height: Int(layout.size.height),
             bitsPerComponent: 8,
             bytesPerRow: 0,
             space: .sRGB,
@@ -138,7 +231,7 @@ extension TextRenderer {
         // Round joins keep a thick outline from spiking at sharp corners
         context.setLineJoin(.round)
 
-        let drawRect = CGRect(x: padding, y: padding, width: ceil(drawing.size.width), height: ceil(drawing.size.height))
+        let drawRect = layout.drawRect
 
         if let background = configuration.background {
             let rect = drawRect.insetBy(dx: -background.padding, dy: -background.padding)
@@ -190,20 +283,32 @@ extension TextRenderer {
         return result
     }
 
+    /// Language detection is the costly part of laying text out, and the answer only depends
+    /// on the text: measuring and then rendering the same string must not pay for it twice.
+    private static var lastWritingDirection: (text: String, direction: NSWritingDirection)?
+
     private static func writingDirection(for text: String) -> NSWritingDirection {
+        if let lastWritingDirection, lastWritingDirection.text == text {
+            return lastWritingDirection.direction
+        }
         let language = NLLanguageRecognizer.dominantLanguage(for: text)?.rawValue
-        return NSParagraphStyle.defaultWritingDirection(forLanguage: language)
+        let direction = NSParagraphStyle.defaultWritingDirection(forLanguage: language)
+        lastWritingDirection = (text, direction)
+        return direction
     }
 
-    private static func makeHorizontalDrawing(text: NSString, attributes: [NSAttributedString.Key: Any], fontSize: Double, wrapWidth: Double?) -> TextDrawing {
+    private static func makeHorizontalDrawing(text: NSString, attributes: [NSAttributedString.Key: Any], fontSize: Double, wrapWidth: Double?, topOverhang: Double) -> TextDrawing {
         let bounds = text.boundingRect(
             with: .init(width: wrapWidth.map { CGFloat($0) } ?? .greatestFiniteMagnitude, height: .greatestFiniteMagnitude),
             options: [.usesLineFragmentOrigin],
             attributes: attributes
         )
-        // A fixed wrap width also fixes the box width, so alignment works across the whole box
-        let size = CGSize(width: wrapWidth.map { CGFloat($0) } ?? bounds.width, height: bounds.height)
+        // The box hugs the laid-out text: the wrap width only limits the layout, so short
+        // text never produces a mostly-empty bitmap and alignment applies to the longest line
+        let size = CGSize(width: bounds.width, height: bounds.height + topOverhang)
         return .init(size: size) { context, rect, pass in
+            // Lay the text out below the overhang, leaving room for the first line's ascender
+            let rect = CGRect(x: rect.minX, y: rect.minY, width: rect.width, height: rect.height - topOverhang)
             var attributes = attributes
             switch pass {
             case let .stroke(width, color, shadow):
@@ -223,7 +328,7 @@ extension TextRenderer {
         }
     }
 
-    private static func makeVerticalDrawing(text: NSString, attributes: [NSAttributedString.Key: Any], wrapWidth: Double?) -> TextDrawing {
+    private static func makeVerticalDrawing(text: NSString, attributes: [NSAttributedString.Key: Any], wrapWidth: Double?, leadingOverhang: Double) -> TextDrawing {
         var attributes = attributes
         attributes[NSAttributedString.Key(kCTVerticalFormsAttributeName as String)] = true
         // Colors are set per pass on the context
@@ -239,10 +344,13 @@ extension TextRenderer {
             .init(width: CGFloat.greatestFiniteMagnitude, height: wrapWidth.map { CGFloat($0) } ?? .greatestFiniteMagnitude),
             &fitRange
         )
-        // The wrap width limits the line length, which runs vertically here
-        let size = CGSize(width: suggestedSize.width, height: wrapWidth.map { CGFloat($0) } ?? suggestedSize.height)
+        // The wrap width limits the line length, which runs vertically here, but the box
+        // still hugs what was actually laid out. Columns run right to left, so a tight
+        // line height pushes the first column out on the right
+        let size = CGSize(width: suggestedSize.width + leadingOverhang, height: suggestedSize.height)
         var cachedFrame: CTFrame?
         return .init(size: size) { context, rect, pass in
+            let rect = CGRect(x: rect.minX, y: rect.minY, width: rect.width - leadingOverhang, height: rect.height)
             context.saveGState()
             switch pass {
             case let .stroke(width, color, shadow):

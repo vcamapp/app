@@ -238,8 +238,13 @@ public final class UniState {
 
     // MARK: - String Properties
 
+    // The message is drawn by SubtitleTextObject through the text-object pipeline,
+    // not by the engine, so it only persists and notifies
     private var __message = UserDefaults.standard.value(for: .message)
-    @ObservationIgnored @UniStateValue(\.__message, persist: .message, bridge: .message)
+    @ObservationIgnored @UniStateValue(\.__message, onSet: { _, newValue in
+        UserDefaults.standard.set(newValue, for: .message)
+        NotificationCenter.default.post(name: .messageDidChange, object: nil)
+    })
     public var message: String
 
     // MARK: - Color Properties
@@ -317,7 +322,9 @@ public final class UniState {
         bridge.floatMapper.setValue(.swivelOffset, __swivelOffset)
 #endif
         bridge.intMapper.setValue(.qualityLevel, __qualityLevel)
-        bridge.stringMapper.setValue(.message, __message)
+        // Transitional: the engine still has its own message display, which starts with a
+        // placeholder. Clear it until that path is removed.
+        bridge.stringMapper.setValue(.message, "")
         bridge.structMapper.binding(.backgroundColor).wrappedValue = __backgroundColor
         UniBridge.setScreenResolution(width: Int32(_screenResolution.size.width), height: Int32(_screenResolution.size.height))
 #if FEATURE_3

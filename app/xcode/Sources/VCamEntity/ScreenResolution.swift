@@ -20,12 +20,8 @@ public enum ScreenResolution: Identifiable, CaseIterable, Sendable {
 
     public var size: (width: Int, height: Int) {
         switch self {
-//        case .resolution4320p:
-//            return (7680, 4320)
         case .resolution2160p:
             return (3840, 2160)
-//        case .resolution1440p:
-//            return (2560, 1440)
         case .resolution1080p:
             return (1920, 1080)
         case .resolution720p:

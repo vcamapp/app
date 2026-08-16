@@ -202,6 +202,8 @@ public final class SceneManager {
     }
 
     public func saveCurrentSceneAndObjects() throws {
+        // Object edits reach the subtitle too, which persists outside the scene
+        SubtitleTextObject.persistStyle()
         try saveCurrentScene(objects: SceneObjectManager.shared.objects)
     }
 

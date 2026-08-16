@@ -19,6 +19,7 @@ public struct SceneObject: Identifiable {
     }
 
     public static let avatarID: Int32 = -123
+    public static let subtitleID: Int32 = -124
 
     public var id = Int32.random(in: 0..<Int32.max)
     public let type: ObjectType

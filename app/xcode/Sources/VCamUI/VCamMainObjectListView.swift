@@ -162,7 +162,7 @@ private struct VCamMainObjectListBottomBar: View {
                             .frame(height: 14)
                     }
                     .contentShape(Rectangle())
-                    .disabled(isLocked)
+                    .disabled(isLocked || !objectManager.canRemove(byId: selectedId ?? -1))
                 }
 
                 Button {
@@ -370,11 +370,17 @@ private struct EditSceneObjectViewModifier: ViewModifier {
                 .contextMenu {
                     commonHeaderItems
                     EditSceneObjectButton(isLocked: object.isLocked) {
-                        TextRenderer.showPreferences(configuration: text.configuration) { configuration in
-                            text.configuration = configuration
-                            if let renderer = renderTextureManager.drawer(id: object.id) as? TextRenderer {
-                                renderer.configuration = configuration
-                            }
+                        TextRenderer.showPreferences(
+                            configuration: text.configuration,
+                            resetConfiguration: TextObjectPreset.textDefault
+                        ) { configuration in
+                            SceneObjectManager.shared.applyText(
+                                configuration,
+                                to: object,
+                                payload: text,
+                                horizontal: configuration.horizontalAnchor,
+                                vertical: configuration.verticalAnchor
+                            )
                             SceneObjectManager.shared.update(object)
                         }
                     }
