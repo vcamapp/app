@@ -74,10 +74,12 @@ private struct ScrollingTextView: NSViewRepresentable {
     func updateNSView(_ scrollView: NSScrollView, context: Context) {
         guard let textView = scrollView.documentView as? NSTextView else { return }
         textView.setAccessibilityLabel(label)
+        // The value the field itself just reported comes back through the binding, and
+        // rewriting it would drop the caret; anything else is a real external change and
+        // has to show, even while the field has focus
         guard textView.string != text else { return }
-        // Never while the field is being edited: replacing the value there would drop the
-        // caret and any in-progress IME composition
-        guard textView.window?.firstResponder !== textView else { return }
+        // Replacing the text mid-composition would swallow the characters being converted
+        guard !textView.hasMarkedText() else { return }
         textView.string = text
     }
 

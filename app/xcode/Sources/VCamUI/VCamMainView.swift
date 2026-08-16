@@ -80,7 +80,7 @@ public struct VCamMainView: View {
                 if #available(macOS 26.0, *) {
                     GroupBox {
                         HStack(spacing: 4) {
-                            CommitTextField(placeholder: String(localized: .subtitle), text: $state.message)
+                            CommitTextField(placeholder: String(localized: .subtitle), text: $state.subtitle)
                             SubtitleStyleButton()
                         }
                         .padding(.horizontal, 8)
@@ -93,7 +93,7 @@ public struct VCamMainView: View {
                             .padding(.vertical, -1.5)
                     }
                 } else {
-                    CommitTextField(placeholder: String(localized: .subtitle), text: $state.message)
+                    CommitTextField(placeholder: String(localized: .subtitle), text: $state.subtitle)
                     SubtitleStyleButton()
 
                     calibrateButton

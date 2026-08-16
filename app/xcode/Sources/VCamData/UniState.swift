@@ -39,7 +39,7 @@ public final class UniState {
         hasPerfectSyncBlendShape: Bool = false,
         fps: CGFloat = 60,
         qualityLevel: Int32 = 0,
-        message: String = "",
+        subtitle: String = "",
         screenResolution: ScreenResolution = .resolution1080p,
         objectSelected: Int32 = 0,
         lipSyncMicIntensity: CGFloat = 1.0,
@@ -69,7 +69,7 @@ public final class UniState {
         state.hasPerfectSyncBlendShape = hasPerfectSyncBlendShape
         state.__fps = fps
         state.__qualityLevel = qualityLevel
-        state.__message = message
+        state.__subtitle = subtitle
         state._screenResolution = screenResolution
         state.__objectSelected = objectSelected
         state.__lipSyncMicIntensity = lipSyncMicIntensity
@@ -238,14 +238,14 @@ public final class UniState {
 
     // MARK: - String Properties
 
-    // The message is drawn by SubtitleTextObject through the text-object pipeline,
+    // The subtitle is drawn by SubtitleTextObject through the text-object pipeline,
     // not by the engine, so it only persists and notifies
-    private var __message = UserDefaults.standard.value(for: .message)
-    @ObservationIgnored @UniStateValue(\.__message, onSet: { _, newValue in
-        UserDefaults.standard.set(newValue, for: .message)
-        NotificationCenter.default.post(name: .messageDidChange, object: nil)
+    private var __subtitle = UserDefaults.standard.value(for: .subtitle)
+    @ObservationIgnored @UniStateValue(\.__subtitle, onSet: { _, newValue in
+        UserDefaults.standard.set(newValue, for: .subtitle)
+        NotificationCenter.default.post(name: .subtitleDidChange, object: nil)
     })
-    public var message: String
+    public var subtitle: String
 
     // MARK: - Color Properties
 

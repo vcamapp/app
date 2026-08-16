@@ -138,7 +138,7 @@ struct VCamShortcutBuilderActionItemEditView: View {
         case let .emoji(configuration):
             VCamActionEditorEmojiPicker(emoji: .init(configuration, keyPath: \.emoji, to: $configuration))
         case let .message(configuration):
-            VCamActionEditorTextField(value: .init(configuration, keyPath: \.message, to: $configuration))
+            VCamActionEditorTextField(value: .init(configuration, keyPath: \.text, to: $configuration))
         case let .motion(configuration):
             VCamActionEditorMotionPicker(motionID: .init(configuration, keyPath: \.motionID, to: $configuration))
         case let .blendShape(configuration):

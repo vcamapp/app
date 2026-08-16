@@ -58,7 +58,7 @@ public enum SubtitleTextObject {
     public static func showStyleEditor() {
         var configuration = current?.payload.configuration ?? loadStyle()?.configuration ?? TextObjectPreset.subtitleDefault
         // The toolbar field owns the text, so it is the one the editor starts from
-        configuration.text = UniState.shared.message
+        configuration.text = UniState.shared.subtitle
         let placement = TextPlacementSupport(hint: .subtitleDragHint, setEditing: setEditing, reset: resetPlacement)
         TextRenderer.showPreferences(configuration: configuration, allowsEmptyText: true, resetConfiguration: TextObjectPreset.subtitleDefault, placement: placement) { configuration in
             if let current, !configuration.text.isEmpty {
@@ -68,7 +68,7 @@ public enum SubtitleTextObject {
                 persist(configuration: configuration)
             }
             // Setting the text also creates or removes the object
-            UniState.shared.message = configuration.text
+            UniState.shared.subtitle = configuration.text
         }
     }
 
@@ -95,7 +95,7 @@ public enum SubtitleTextObject {
         SceneObjectManager.shared.subtitleObject = nil
         // Stops the renderer from asking the engine to resize a texture it no longer has
         RenderTextureManager.shared.remove(id: SceneObject.subtitleID)
-        update(text: UniState.shared.message)
+        update(text: UniState.shared.subtitle)
     }
 
     /// Remembers the current style and placement, so they survive scene switches and restarts
@@ -122,7 +122,7 @@ public enum SubtitleTextObject {
 
     private static func subscribeIfNeeded() {
         guard observer == nil else { return }
-        observer = NotificationCenter.default.addObserver(forName: .messageDidChange, object: nil, queue: .main) { _ in
+        observer = NotificationCenter.default.addObserver(forName: .subtitleDidChange, object: nil, queue: .main) { _ in
             MainActor.assumeIsolated {
                 // The field reports every keystroke, and each one rasterizes the bitmap and
                 // makes the engine reallocate the texture, so a burst is coalesced into one
@@ -130,7 +130,7 @@ public enum SubtitleTextObject {
                 pendingUpdate = Task {
                     try? await Task.sleep(for: .milliseconds(150))
                     guard !Task.isCancelled else { return }
-                    update(text: UniState.shared.message)
+                    update(text: UniState.shared.subtitle)
                 }
             }
         }

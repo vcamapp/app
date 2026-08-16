@@ -45,7 +45,7 @@ public extension UserDefaults.Key {
     static var vSyncCount: Key<Int> { .init("vc_vsync_count", default: 0) }
     static var lipSyncMicIntensity: Key<Double> { .init("vc_lipsync_mic_intensity", default: 1.0) }
     static var fps: Key<Double> { .init("vc_fps", default: 60.0) }
-    static var message: Key<String> { .init("vc_message", default: "") }
+    static var subtitle: Key<String> { .init("vc_message", default: "") } // The stored key predates the rename
     static var backgroundColor: Key<String> { .init("vc_bg_color", default: "C6E7FFFF") }
     static var screenResolutionWidth: Key<Int> { .init("vc_screenresolution_width", default: 1920) }
     static var screenResolutionHeight: Key<Int> { .init("vc_screenresolution_height", default: 1080) }

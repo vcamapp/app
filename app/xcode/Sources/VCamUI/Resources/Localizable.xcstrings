@@ -3888,29 +3888,6 @@
         }
       }
     },
-    "message": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Message"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "メッセージ"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "메시지"
-          }
-        }
-      }
-    },
     "mic": {
       "extractionState": "manual",
       "localizations": {

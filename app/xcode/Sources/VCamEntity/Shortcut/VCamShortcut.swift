@@ -34,7 +34,8 @@ public protocol VCamActionConfiguration: Identifiable<UUID>, Codable, Equatable,
 
 public enum AnyVCamActionConfiguration: VCamActionConfiguration, Sendable {
     case emoji(configuration: VCamEmojiActionConfiguration)
-    case message(configuration: VCamMessageActionConfiguration)
+    // The case name is the key saved shortcuts are encoded with, so it stays `message`
+    case message(configuration: VCamSubtitleActionConfiguration)
     case motion(configuration: VCamMotionActionConfiguration)
     case blendShape(configuration: VCamBlendShapeActionConfiguration)
     case wait(configuration: VCamWaitActionConfiguration)
