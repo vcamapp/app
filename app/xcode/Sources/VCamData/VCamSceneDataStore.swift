@@ -54,8 +54,17 @@ public struct VCamSceneDataStore {
     /// Data that already belongs to the scene is used as is.
     public func copyData(fromURL url: URL, newUUID: String = UUID().uuidString) throws -> URL {
         guard !contains(url) else { return url }
+        return try copyData(fromURL: url, toId: newUUID)
+    }
 
-        let destination = dataURL(id: newUUID)
+    /// Copies the data into a file of its own even when it already belongs to the scene, so
+    /// that two objects never point at one file: removing either would delete it for both.
+    public func duplicateData(at url: URL) throws -> URL {
+        try copyData(fromURL: url, toId: UUID().uuidString)
+    }
+
+    private func copyData(fromURL url: URL, toId id: String) throws -> URL {
+        let destination = dataURL(id: id)
         try FileManager.default.createDirectoryIfNeeded(at: sceneRootURL)
         try FileManager.default.copyItem(at: url, to: destination)
         return destination

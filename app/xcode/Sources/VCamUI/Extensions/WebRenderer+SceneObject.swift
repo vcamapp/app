@@ -1,11 +1,16 @@
-//
-//  WebRenderer+SceneObject.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/06/30.
-//
-
 import Foundation
+import VCamEntity
+
+public extension WebRenderer.Resource {
+    /// The object only ever has one of the two set
+    init(web: SceneObject.Web) {
+        if let url = web.url {
+            self = .url(url)
+        } else {
+            self = .path(bookmark: web.path ?? .init())
+        }
+    }
+}
 
 public extension WebRenderer {
     static func showPreferencesForAdding(url: String = "https://x.com/vcamapp") {

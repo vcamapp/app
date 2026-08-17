@@ -381,23 +381,19 @@ extension SceneObjectManager {
                     RenderTextureManager.shared.set(drawer, id: object.id)
                 }
                 configure(sceneObject)
-            case let .web(state):
-                let resource: WebRenderer.Resource
-                if let url = state.url {
-                    resource = .url(url)
-                } else {
-                    resource = .path(bookmark: state.path ?? .init())
+            case .web:
+                if case let .web(web) = sceneObject.type {
+                    let renderer = WebRenderer(
+                        resource: .init(web: web),
+                        size: web.textureSize,
+                        fps: web.fps,
+                        css: web.css,
+                        js: web.js
+                    )
+                    renderer.filter = web.filter
+                    RenderTextureManager.shared.set(renderer, id: object.id)
+                    configure(sceneObject)
                 }
-                let renderer = WebRenderer(
-                    resource: resource,
-                    size: state.texture.textureSize,
-                    fps: state.fps,
-                    css: state.css,
-                    js: state.js
-                )
-                renderer.filter = state.texture.filter.map(ImageFilter.init(configuration:))
-                RenderTextureManager.shared.set(renderer, id: object.id)
-                configure(sceneObject)
             case let .text(state):
                 // Measured first, so the only rasterization happens at the size the stored
                 // region draws the object at
@@ -445,5 +441,68 @@ extension SceneObjectManager {
     public func addVideoCapture(_ drawer: CaptureDeviceRenderer) {
         let id = RenderTextureManager.shared.add(drawer)
         add(.init(id: id, type: .videoCapture(.init(id: drawer.id, textureSize: drawer.size, crop: drawer.cropRect, filter: nil)), isHidden: false, isLocked: false))
+    }
+}
+
+extension SceneObjectManager {
+    /// Adds a copy at the same place on the canvas. Nothing is shared with the original, so
+    /// editing or removing either copy leaves the other one as it was.
+    public func duplicate(_ object: SceneObject) async {
+        guard let duplicated = await makeDuplicate(of: object) else { return }
+        add(duplicated)
+    }
+
+    private func makeDuplicate(of object: SceneObject) async -> SceneObject? {
+        func copy(id: Int32 = .random(in: 0..<Int32.max), type: SceneObject.ObjectType) -> SceneObject {
+            .init(id: id, type: type, name: object.name, isHidden: object.isHidden, isLocked: object.isLocked)
+        }
+
+        let renderTextureManager = RenderTextureManager.shared
+        do {
+            switch object.type {
+            case .avatar:
+                // The avatar is what the scene is built around, so there is only ever one of it
+                return nil
+            case let .image(image):
+                let url = try VCamSceneDataStore(sceneId: SceneManager.shared.currentSceneId).duplicateData(at: image.url)
+                let id = renderTextureManager.add(ImageRenderer(imageURL: url, filter: image.filter))
+                return copy(id: id, type: .image(.init(url: url, offset: image.offset, size: image.size, filter: image.filter)))
+            case let .screen(screen):
+                let recorder = try await ScreenRecorder.create(id: screen.id, screenCapture: .init(
+                    captureType: screen.captureType,
+                    texture: .init(
+                        width: Float(screen.textureSize.width),
+                        height: Float(screen.textureSize.height),
+                        region: .init(rect: screen.region),
+                        crop: .init(rect: screen.crop),
+                        filter: screen.filter?.configuration
+                    )
+                ))
+                let id = renderTextureManager.add(recorder)
+                return copy(id: id, type: .screen(.init(id: screen.id, captureType: screen.captureType, textureSize: screen.textureSize, region: screen.region, crop: screen.crop, filter: screen.filter)))
+            case let .videoCapture(videoCapture):
+                let device = try AVCaptureDevice(uniqueID: videoCapture.id).orThrow(NSError.vcam(message: "duplicate:capture device not found"))
+                let renderer = try CaptureDeviceRenderer(device: device, cropRect: videoCapture.crop)
+                renderer.filter = videoCapture.filter
+                let id = renderTextureManager.add(renderer)
+                return copy(id: id, type: .videoCapture(.init(id: videoCapture.id, textureSize: videoCapture.textureSize, region: videoCapture.region, crop: videoCapture.crop, filter: videoCapture.filter)))
+            case let .web(web):
+                let renderer = WebRenderer(resource: .init(web: web), size: web.textureSize, fps: web.fps, css: web.css, js: web.js)
+                renderer.filter = web.filter
+                let id = renderTextureManager.add(renderer)
+                return copy(id: id, type: .web(.init(url: web.url, path: web.path, fps: web.fps, css: web.css, js: web.js, textureSize: web.textureSize, region: web.region, crop: web.crop, filter: web.filter)))
+            case let .text(text):
+                // Rasterized at the original's scale so that the copy's glyphs look the same
+                let displayScale = renderTextureManager.textRenderer(id: object.id)?.layout.displayScale
+                    ?? TextObjectPlacement.fittedDefaultScale(of: text.configuration)
+                let id = renderTextureManager.add(TextRenderer(layout: .init(configuration: text.configuration, displayScale: displayScale)))
+                return copy(id: id, type: .text(.init(configuration: text.configuration, region: text.region)))
+            case let .wind(wind):
+                return copy(type: .wind(.init(direction: wind.direction)))
+            }
+        } catch {
+            Logger.error(error)
+            return nil
+        }
     }
 }

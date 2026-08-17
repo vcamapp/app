@@ -1,10 +1,3 @@
-//
-//  View+.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/04/29.
-//
-
 import SwiftUI
 import UniformTypeIdentifiers
 
@@ -15,18 +8,18 @@ public extension View {
 }
 
 public extension View {
+    /// Runs the action on the Return key without adding a visible control for it
     @ViewBuilder
-    @inlinable func onTapGestureWithDefaultActionShortcut(perform: @escaping () -> Void) -> some View {
-        onTapGesture(perform: perform)
-            .background(
-                Button {
-                    perform()
-                } label: {
-                    EmptyView()
-                }
-                .buttonStyle(.plain)
-                .keyboardShortcut(.defaultAction)
-            )
+    @inlinable func defaultActionShortcut(perform: @escaping () -> Void) -> some View {
+        background(
+            Button {
+                perform()
+            } label: {
+                EmptyView()
+            }
+            .buttonStyle(.plain)
+            .keyboardShortcut(.defaultAction)
+        )
     }
 }
 
