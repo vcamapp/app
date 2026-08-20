@@ -1,5 +1,5 @@
 {
-  "originHash" : "016daa6905e964e8c779941fd1421eec33c72ec7418e174b40d5e8f99559bad2",
+  "originHash" : "cac630f43c336a485a5ce7d45a70d2a6e226403e97ec103bc4e609af0e0ebffa",
   "pins" : [
     {
       "identity" : "swift-vroid-sdk",
@@ -16,7 +16,7 @@
       "location" : "https://github.com/tattn/VRMKit",
       "state" : {
         "branch" : "main",
-        "revision" : "8a1bd0b03278993a21e9c9f02908cb46c9a899a1"
+        "revision" : "6e5e1beef8a804d3c6865cbf77c5869cd80a3445"
       }
     }
   ],

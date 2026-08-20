@@ -1,4 +1,3 @@
-import QuartzCore
 import RealityKit
 import SwiftUI
 import VRMKit
@@ -17,12 +16,6 @@ struct VRoidPreviewView: View {
     var body: some View {
         RealityView { content in
             content.add(model.rootEntity)
-            model.sceneSubscription = content.subscribe(to: SceneEvents.Update.self) { _ in
-                // RealityKit delivers scene events on the main actor
-                MainActor.assumeIsolated {
-                    model.update()
-                }
-            }
         }
         .gesture(
             DragGesture()
@@ -53,12 +46,8 @@ private final class VRoidPreviewModel {
         didSet { applyRotation() }
     }
 
-    private var vrmEntity: VRMEntity?
     private let modelPivot = Entity()
     private var initialYaw: Float = 0
-
-    /// Drives spring bones etc. only while the scene actually renders
-    var sceneSubscription: EventSubscription?
 
     func load(data: Data) async throws {
         // Parsing a model of tens of megabytes must not block the UI;
@@ -81,10 +70,10 @@ private final class VRoidPreviewModel {
 
         // Rotate around the center of the model, not its root bone, so
         // off-center or non-humanoid shapes stay in place while dragging
-        let bounds = vrmEntity.entity.visualBounds(relativeTo: vrmEntity.entity)
+        let bounds = vrmEntity.visualBounds(relativeTo: vrmEntity)
         let center = (bounds.min + bounds.max) / 2
-        vrmEntity.entity.position = SIMD3<Float>(-center.x, 0, -center.z)
-        modelPivot.addChild(vrmEntity.entity)
+        vrmEntity.position = SIMD3<Float>(-center.x, 0, -center.z)
+        modelPivot.addChild(vrmEntity)
         rootEntity.addChild(modelPivot)
 
         // Frame the whole model with a small margin. The vertical fit uses the
@@ -105,12 +94,7 @@ private final class VRoidPreviewModel {
         camera.position = SIMD3<Float>(0, (bounds.max.y + bounds.min.y) / 2, distance)
         rootEntity.addChild(camera)
 
-        self.vrmEntity = vrmEntity
         applyRotation()
-    }
-
-    func update() {
-        vrmEntity?.update(at: CACurrentMediaTime())
     }
 
     @concurrent
