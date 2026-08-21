@@ -340,6 +340,12 @@
             "state": "translated",
             "value": "정렬"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "对齐方式"
+          }
         }
       }
     },
@@ -715,7 +721,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "挥手打招呼"
+            "value": "挥手告别"
           }
         }
       }
@@ -971,6 +977,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "단어 첫 글자 대문자"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "首字母大写"
           }
         }
       }
@@ -1343,6 +1355,12 @@
             "state": "translated",
             "value": "색온도"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "色温"
+          }
         }
       }
     },
@@ -1423,6 +1441,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "상업적으로 이용하려면 라이선스가 필요합니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "商业用途需要获取商业许可证。"
           }
         }
       }
@@ -1678,6 +1702,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "모서리 둥글기"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "圆角半径"
           }
         }
       }
@@ -2166,6 +2196,12 @@
             "state": "translated",
             "value": "디스플레이"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示画面"
+          }
         }
       }
     },
@@ -2305,6 +2341,12 @@
             "state": "translated",
             "value": "드롭 섀도우"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "投影"
+          }
         }
       }
     },
@@ -2386,6 +2428,12 @@
             "state": "translated",
             "value": "손가락 열림 감도"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "手指张开灵敏度"
+          }
         }
       }
     },
@@ -2466,6 +2514,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "입력 범위의 최솟값과 최댓값을 설정합니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "设置输入范围的最小值和最大值。"
           }
         }
       }
@@ -2809,6 +2863,12 @@
             "state": "translated",
             "value": "만료일: "
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "有效期至："
+          }
         }
       }
     },
@@ -2947,6 +3007,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "상하 감도"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "眼球垂直灵敏度"
           }
         }
       }
@@ -3116,6 +3182,12 @@
             "state": "translated",
             "value": "PC 소리를 녹음하지 못했습니다."
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "录制系统声音失败。"
+          }
         }
       }
     },
@@ -3196,6 +3268,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "채우기"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "填充"
           }
         }
       }
@@ -3307,6 +3385,12 @@
             "state": "translated",
             "value": "글꼴"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "字体"
+          }
         }
       }
     },
@@ -3329,6 +3413,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "글꼴 크기"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "字号大小"
           }
         }
       }
@@ -3353,6 +3443,12 @@
             "state": "translated",
             "value": "스타일"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "字体样式"
+          }
         }
       }
     },
@@ -3375,6 +3471,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "카메라 FPS (트래킹 갱신 빈도)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "面捕/手捕帧率 (FPS)"
           }
         }
       }
@@ -3456,6 +3558,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "그라데이션"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "渐变色"
           }
         }
       }
@@ -3857,6 +3965,12 @@
             "state": "translated",
             "value": "내부 그림자"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "内阴影"
+          }
         }
       }
     },
@@ -4054,6 +4168,12 @@
             "state": "translated",
             "value": "조작"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "交互操作"
+          }
         }
       }
     },
@@ -4134,6 +4254,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "점프"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "跳跃"
           }
         }
       }
@@ -4245,6 +4371,12 @@
             "state": "translated",
             "value": "자간"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "字间距"
+          }
         }
       }
     },
@@ -4355,6 +4487,12 @@
             "state": "translated",
             "value": "선형"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "线性渐变"
+          }
         }
       }
     },
@@ -4377,6 +4515,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "줄 높이"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "行高"
           }
         }
       }
@@ -4458,6 +4602,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "불러오기"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "载入模型"
           }
         }
       }
@@ -4656,6 +4806,12 @@
             "state": "translated",
             "value": "모두 소문자"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全部小写"
+          }
         }
       }
     },
@@ -4823,6 +4979,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "새로운 가상 카메라로 이전"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "迁移至新版虚拟摄像头"
           }
         }
       }
@@ -5688,6 +5850,12 @@
             "state": "translated",
             "value": "외곽선"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "描边"
+          }
         }
       }
     },
@@ -5710,6 +5878,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "여백"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "内边距"
           }
         }
       }
@@ -5767,7 +5941,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "吸管取色"
+            "value": "选择文件"
           }
         }
       }
@@ -5966,6 +6140,12 @@
             "state": "translated",
             "value": "띠"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "横幅字幕"
+          }
         }
       }
     },
@@ -5988,6 +6168,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "굵은 외곽선"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "粗描边"
           }
         }
       }
@@ -6012,6 +6198,12 @@
             "state": "translated",
             "value": "이중 외곽선"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "双重描边"
+          }
         }
       }
     },
@@ -6034,6 +6226,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "음각"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雕刻内嵌"
           }
         }
       }
@@ -6058,6 +6256,12 @@
             "state": "translated",
             "value": "그라데이션"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "渐变字幕"
+          }
         }
       }
     },
@@ -6080,6 +6284,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "네온"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "霓虹发光"
           }
         }
       }
@@ -6104,6 +6314,12 @@
             "state": "translated",
             "value": "핑크"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "粉色风格"
+          }
         }
       }
     },
@@ -6126,6 +6342,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "팝"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "波普流行"
           }
         }
       }
@@ -6150,6 +6372,12 @@
             "state": "translated",
             "value": "레드 임팩트"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "冲击红"
+          }
         }
       }
     },
@@ -6172,6 +6400,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Aa"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "字A"
           }
         }
       }
@@ -6196,6 +6430,12 @@
             "state": "translated",
             "value": "심플"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "极简纯色"
+          }
         }
       }
     },
@@ -6218,6 +6458,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "자막 띠"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "字幕底带"
           }
         }
       }
@@ -6242,6 +6488,12 @@
             "state": "translated",
             "value": "선셋"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "日落余晖"
+          }
         }
       }
     },
@@ -6264,6 +6516,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "노란 자막"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "醒目黄字"
           }
         }
       }
@@ -6345,6 +6603,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "최고 품질"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "极致画质"
           }
         }
       }
@@ -6514,6 +6778,12 @@
             "state": "translated",
             "value": "방사형"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "径向渐变"
+          }
         }
       }
     },
@@ -6623,6 +6893,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "수정자 키와 문자를 입력해 주세요"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请按下修饰键和按键..."
           }
         }
       }
@@ -6937,6 +7213,12 @@
             "state": "translated",
             "value": "위치 재설정"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重置位置"
+          }
         }
       }
     },
@@ -6989,6 +7271,12 @@
             "state": "translated",
             "value": "윈도우 크기를 기본값으로 되돌리기"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重置窗口尺寸"
+          }
         }
       }
     },
@@ -7040,6 +7328,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "가상 카메라 설정은 Mac을 재시동한 후에 완료됩니다"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "虚拟摄像头设置将在重启 Mac 后生效。"
           }
         }
       }
@@ -7150,6 +7444,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "달리기"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "奔跑"
           }
         }
       }
@@ -7555,7 +7855,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "系统设置"
+            "value": "设置"
           }
         }
       }
@@ -7899,6 +8199,12 @@
             "state": "translated",
             "value": "단색"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "纯色"
+          }
         }
       }
     },
@@ -7950,6 +8256,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "녹화 시작 [β]"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开始录制 [β]"
           }
         }
       }
@@ -8003,6 +8315,12 @@
             "state": "translated",
             "value": "취소선"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除线"
+          }
         }
       }
     },
@@ -8025,6 +8343,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "자막"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "字幕"
           }
         }
       }
@@ -8049,6 +8373,12 @@
             "state": "translated",
             "value": "이 창이 열려 있는 동안 드래그로 이동할 수 있습니다"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打开此面板时可在画布上直接拖拽调整位置"
+          }
         }
       }
     },
@@ -8071,6 +8401,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "자막 스타일"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "字幕样式"
           }
         }
       }
@@ -8211,6 +8547,12 @@
             "state": "translated",
             "value": "텍스트"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "文本"
+          }
         }
       }
     },
@@ -8233,6 +8575,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "텍스트 변환"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "大小写转换"
           }
         }
       }
@@ -8314,6 +8662,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "촬영까지의 대기 시간"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拍照倒计时"
           }
         }
       }
@@ -8860,6 +9214,12 @@
             "state": "translated",
             "value": "모음"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "元音输入"
+          }
         }
       }
     },
@@ -8882,6 +9242,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "입력"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "输入源"
           }
         }
       }
@@ -9138,6 +9504,12 @@
             "state": "translated",
             "value": "밑줄"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下划线"
+          }
         }
       }
     },
@@ -9277,6 +9649,12 @@
             "state": "translated",
             "value": "모두 대문자"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全部大写"
+          }
         }
       }
     },
@@ -9386,6 +9764,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "세로쓰기"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "竖排文字"
           }
         }
       }
@@ -9613,6 +9997,12 @@
             "state": "translated",
             "value": "VRMA를 재생하려면 이 모델을 VRM 1.0으로 자동 변환하여 불러와야 합니다. 설정을 활성화한 후 모델을 다시 불러와 주세요."
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "若要播放 VRMA 动画，必须将此模型自动转换为 VRM 1.0 重新载入。请启用该设置并重新载入模型。"
+          }
         }
       }
     },
@@ -9838,6 +10228,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "줄당 글자 수"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每行换行字数"
           }
         }
       }

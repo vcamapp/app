@@ -21,6 +21,12 @@
             "state": "translated",
             "value": "반사회적·혐오 표현에서의 이용"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "反社会或仇恨言论使用"
+          }
         }
       }
     },
@@ -131,6 +137,12 @@
             "state": "translated",
             "value": "개변물의 재배포"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "二次修改模型再分发"
+          }
         }
       }
     },
@@ -182,6 +194,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "종교·정치 목적에서의 이용"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "政治或宗教用途"
           }
         }
       }
@@ -235,6 +253,12 @@
             "state": "translated",
             "value": "성적 표현에서의 이용"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "成人/色情内容使用 (R-18)"
+          }
         }
       }
     },
@@ -258,6 +282,12 @@
             "state": "translated",
             "value": "아바타 이용"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "作为形象/虚拟化身使用"
+          }
         }
       }
     },
@@ -280,6 +310,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "폭력 표현에서의 이용"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "暴力/血腥表现使用 (R-18G)"
           }
         }
       }
@@ -333,6 +369,12 @@
             "state": "translated",
             "value": "불필요"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无需署名"
+          }
         }
       }
     },
@@ -355,6 +397,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "불러오기에 실패했습니다"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "载入模型失败"
           }
         }
       }
@@ -466,6 +514,12 @@
             "state": "translated",
             "value": "허용"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "允许"
+          }
         }
       }
     },
@@ -489,6 +543,12 @@
             "state": "translated",
             "value": "허용 안 함"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "禁止"
+          }
         }
       }
     },
@@ -511,6 +571,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "미설정"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未设置"
           }
         }
       }
@@ -593,6 +659,12 @@
             "state": "translated",
             "value": "미리보기를 표시할 수 없습니다"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法显示预览图"
+          }
         }
       }
     },
@@ -615,6 +687,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "비공개"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "仅自己可见"
           }
         }
       }
@@ -667,6 +745,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "로그인에 실패했습니다"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "登录失败"
           }
         }
       }
@@ -749,6 +833,12 @@
             "state": "translated",
             "value": "픽업"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "官方推荐"
+          }
         }
       }
     },
@@ -771,6 +861,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "모델 데이터 이용 조건"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "模型数据使用许可协议"
           }
         }
       }
@@ -795,6 +891,12 @@
             "state": "translated",
             "value": "이용 조건을 가져올 수 없습니다. VRoid Hub에서 확인해 주세요."
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未能获取使用许可条款，请前往 VRoid Hub 页面确认。"
+          }
         }
       }
     },
@@ -817,6 +919,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "모델을 불러오지 못했습니다"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "加载模型失败"
           }
         }
       }
@@ -869,6 +977,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "VRoid Hub에 로그인하면 내 모델과 하트한 모델을 이용할 수 있습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "登录 VRoid Hub 即可直接调用你上传及收藏的 3D 模型。"
           }
         }
       }
