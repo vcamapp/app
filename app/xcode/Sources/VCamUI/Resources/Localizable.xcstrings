@@ -21,6 +21,12 @@
             "state": "translated",
             "value": "%@에 관하여"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "关于 %@"
+          }
         }
       }
     },
@@ -43,6 +49,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "계정 관리..."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "账户管理..."
           }
         }
       }
@@ -67,6 +79,12 @@
             "state": "translated",
             "value": "라이선스 취득..."
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "获取许可证..."
+          }
         }
       }
     },
@@ -89,6 +107,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "동작"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "动作"
           }
         }
       }
@@ -113,6 +137,12 @@
             "state": "translated",
             "value": "추가"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加"
+          }
         }
       }
     },
@@ -135,6 +165,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "이미지 추가"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加图片"
           }
         }
       }
@@ -159,6 +195,12 @@
             "state": "translated",
             "value": "화면 캡처 추가"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加屏幕捕获"
+          }
         }
       }
     },
@@ -181,6 +223,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "macOS 메뉴 막대에 아이콘 추가"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在 macOS 菜单栏常驻图标"
           }
         }
       }
@@ -205,6 +253,12 @@
             "state": "translated",
             "value": "영상 캡처 추가"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加视频捕获"
+          }
         }
       }
     },
@@ -228,6 +282,12 @@
             "state": "translated",
             "value": "웹 추가"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加网页源"
+          }
         }
       }
     },
@@ -250,6 +310,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "바람 추가"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加风力效果"
           }
         }
       }
@@ -297,6 +363,12 @@
             "state": "translated",
             "value": "%@에 대한 접근을 허용해 주세요"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "允许访问 %@"
+          }
         }
       }
     },
@@ -319,6 +391,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "URP 사용 시 항상 활성화됩니다"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "启用 URP 时此设置始终生效。"
           }
         }
       }
@@ -343,6 +421,12 @@
             "state": "translated",
             "value": "윈도우를 항상 맨 앞에 표시"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "窗口始终置顶"
+          }
         }
       }
     },
@@ -365,6 +449,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "환경광 색상"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "环境光颜色"
           }
         }
       }
@@ -389,6 +479,12 @@
             "state": "translated",
             "value": "환경광 세기"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "环境光强度"
+          }
         }
       }
     },
@@ -411,6 +507,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "왜곡 (아나모픽)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "变形比率 (Anamorphic)"
           }
         }
       }
@@ -435,6 +537,12 @@
             "state": "translated",
             "value": "적용"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "应用"
+          }
         }
       }
     },
@@ -457,6 +565,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "(가로)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " - 横屏"
           }
         }
       }
@@ -481,6 +595,12 @@
             "state": "translated",
             "value": "(세로)"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " - 竖屏"
+          }
         }
       }
     },
@@ -503,6 +623,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "배경"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "背景"
           }
         }
       }
@@ -527,6 +653,12 @@
             "state": "translated",
             "value": "블룸 (Bloom)"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "泛光辉光 (Bloom)"
+          }
         }
       }
     },
@@ -549,6 +681,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "블러 / 흐림"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "背景模糊"
           }
         }
       }
@@ -573,6 +711,12 @@
             "state": "translated",
             "value": "바이바이"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "挥手打招呼"
+          }
         }
       }
     },
@@ -595,6 +739,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "캘리브레이션"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "校准面捕基准"
           }
         }
       }
@@ -619,6 +769,12 @@
             "state": "translated",
             "value": "캘리브레이션이 완료되었습니다"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "校准完成"
+          }
         }
       }
     },
@@ -641,6 +797,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "카메라"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "摄像机"
           }
         }
       }
@@ -665,6 +827,12 @@
             "state": "translated",
             "value": "카메라 노출 (EV)"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "曝光补偿 (EV)"
+          }
         }
       }
     },
@@ -687,6 +855,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "가상 카메라가 허용되지 않았습니다. 설정 앱의 '일반' → '로그인 항목 및 확장 프로그램'에서 허용해 주세요."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "虚拟摄像头扩展尚未获批。请前往「系统设置」->「通用」->「登录项与扩展」中允许 VCam 虚拟摄像头。"
           }
         }
       }
@@ -711,6 +885,12 @@
             "state": "translated",
             "value": "가상 카메라가 동작하지 않습니다."
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "虚拟摄像头未在运行。"
+          }
         }
       }
     },
@@ -734,6 +914,12 @@
             "state": "translated",
             "value": "가상 카메라가 동작 중입니다."
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "虚拟摄像头正在正常运行。"
+          }
         }
       }
     },
@@ -756,6 +942,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "취소"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "取消"
           }
         }
       }
@@ -803,6 +995,12 @@
             "state": "translated",
             "value": "캡처 설정"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "画面采集偏好"
+          }
         }
       }
     },
@@ -825,6 +1023,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "캡처 방식"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "采集源类型"
           }
         }
       }
@@ -849,6 +1053,12 @@
             "state": "translated",
             "value": "썸네일 변경"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更改缩略图"
+          }
         }
       }
     },
@@ -871,6 +1081,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "바람의 방향을 무작위로 바꾸기"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "随机改变风向"
           }
         }
       }
@@ -895,6 +1111,12 @@
             "state": "translated",
             "value": "업데이트 확인..."
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "检查软件更新..."
+          }
         }
       }
     },
@@ -917,6 +1139,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "라이선스 확인 중..."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在检查许可证..."
           }
         }
       }
@@ -941,6 +1169,12 @@
             "state": "translated",
             "value": "파이팅!"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "欢呼喝彩"
+          }
         }
       }
     },
@@ -963,6 +1197,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "크로마키 합성"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "色度键抠绿 (Chroma Key)"
           }
         }
       }
@@ -987,6 +1227,12 @@
             "state": "translated",
             "value": "클립보드"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "剪贴板"
+          }
         }
       }
     },
@@ -1009,6 +1255,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "닫기"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "关闭"
           }
         }
       }
@@ -1033,6 +1285,12 @@
             "state": "translated",
             "value": "색상"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "色彩"
+          }
         }
       }
     },
@@ -1055,6 +1313,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "색상 필터"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "色彩滤镜"
           }
         }
       }
@@ -1102,6 +1366,12 @@
             "state": "translated",
             "value": "상업적 이용 라이선스가 유효합니다."
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "商业许可证已激活。"
+          }
         }
       }
     },
@@ -1124,6 +1394,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "상업적 이용 라이선스가 유효하지 않습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "商业许可证未激活。"
           }
         }
       }
@@ -1171,6 +1447,12 @@
             "state": "translated",
             "value": "제거가 완료되었습니다."
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "卸载已完成。"
+          }
         }
       }
     },
@@ -1193,6 +1475,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "\"%@\"을(를) 삭제하시겠습니까?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "确定要删除模型 \"%@\" 吗？"
           }
         }
       }
@@ -1217,6 +1505,12 @@
             "state": "translated",
             "value": "로그아웃하시겠습니까?"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "确定要退出登录吗？"
+          }
         }
       }
     },
@@ -1239,6 +1533,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "연결"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "连接"
           }
         }
       }
@@ -1263,6 +1563,12 @@
             "state": "translated",
             "value": "연결됨"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已连接"
+          }
         }
       }
     },
@@ -1285,6 +1591,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "연결 중..."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在连接..."
           }
         }
       }
@@ -1309,6 +1621,12 @@
             "state": "translated",
             "value": "대비"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "对比度"
+          }
         }
       }
     },
@@ -1331,6 +1649,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "복사하기"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "复制"
           }
         }
       }
@@ -1378,6 +1702,12 @@
             "state": "translated",
             "value": "단축어 만들기"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新建快捷键"
+          }
         }
       }
     },
@@ -1400,6 +1730,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "현재 버전: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前版本: %@"
           }
         }
       }
@@ -1424,6 +1760,12 @@
             "state": "translated",
             "value": "사용자 지정 (.vrma)"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自定义动作 (.vrma)"
+          }
         }
       }
     },
@@ -1446,6 +1788,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "오려두기"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "剪切"
           }
         }
       }
@@ -1470,6 +1818,12 @@
             "state": "translated",
             "value": "기본값"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "默认"
+          }
         }
       }
     },
@@ -1492,6 +1846,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "삭제"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除"
           }
         }
       }
@@ -1516,6 +1876,12 @@
             "state": "translated",
             "value": "삭제된 모션"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已删除动作"
+          }
         }
       }
     },
@@ -1538,6 +1904,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "이전 가상 카메라 삭제"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清理旧版虚拟摄像头"
           }
         }
       }
@@ -1562,6 +1934,12 @@
             "state": "translated",
             "value": "이전 가상 카메라는 더 이상 지원되지 않으므로 지금 삭제합니다."
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "旧版虚拟摄像头已弃用，系统将立即进行清理。"
+          }
         }
       }
     },
@@ -1584,6 +1962,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@을(를) 삭제합니다"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除 %@"
           }
         }
       }
@@ -1608,6 +1992,12 @@
             "state": "translated",
             "value": "가상 카메라 플러그인을 삭제합니다"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除虚拟摄像头插件"
+          }
         }
       }
     },
@@ -1630,6 +2020,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "저장 위치"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保存目录"
           }
         }
       }
@@ -1654,6 +2050,12 @@
             "state": "translated",
             "value": "빛 확산"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "光线扩散"
+          }
         }
       }
     },
@@ -1676,6 +2078,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "방향"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "方向"
           }
         }
       }
@@ -1700,6 +2108,12 @@
             "state": "translated",
             "value": "연결 해제"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "断开连接"
+          }
         }
       }
     },
@@ -1722,6 +2136,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "연결 안 됨"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已断开连接"
           }
         }
       }
@@ -1769,6 +2189,12 @@
             "state": "translated",
             "value": "https://docs.vcamapp.com/v/ko/virtual-camera/virtualcamera"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "https://docs.vcamapp.com/virtual-camera/virtualcamera"
+          }
         }
       }
     },
@@ -1791,6 +2217,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "완료"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完成"
           }
         }
       }
@@ -1815,6 +2247,12 @@
             "state": "translated",
             "value": "다운로드"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下载"
+          }
         }
       }
     },
@@ -1837,6 +2275,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "후원자 버전 다운로드"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下载赞助者专属版本"
           }
         }
       }
@@ -1884,6 +2328,12 @@
             "state": "translated",
             "value": "복제"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "创建副本"
+          }
         }
       }
     },
@@ -1906,6 +2356,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "손가락 닫힘 감도"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "手指并拢灵敏度"
           }
         }
       }
@@ -1953,6 +2409,12 @@
             "state": "translated",
             "value": "편집"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "编辑"
+          }
         }
       }
     },
@@ -1975,6 +2437,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "입력 범위 편집"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "设置输入阈值范围"
           }
         }
       }
@@ -2022,6 +2490,12 @@
             "state": "translated",
             "value": "모델 편집"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "编辑模型属性"
+          }
         }
       }
     },
@@ -2044,6 +2518,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "출력 범위 편집"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "调整输出画面边界"
           }
         }
       }
@@ -2068,6 +2548,12 @@
             "state": "translated",
             "value": "출력 범위의 최솟값과 최댓값을 설정합니다."
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "设置输出范围的最小值与最大值。"
+          }
         }
       }
     },
@@ -2090,6 +2576,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "효과"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "画面滤镜与特效"
           }
         }
       }
@@ -2114,6 +2606,12 @@
             "state": "translated",
             "value": "이모지"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "表情贴纸 (Emoji)"
+          }
         }
       }
     },
@@ -2136,6 +2634,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "활성화"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "启用"
           }
         }
       }
@@ -2160,6 +2664,12 @@
             "state": "translated",
             "value": "VRM 0.x 모델을 VRM 1.x로 자동 변환"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自动将 VRM 0.x 模型升级转换为 VRM 1.0"
+          }
         }
       }
     },
@@ -2182,6 +2692,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "전체 화면"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "捕获完整屏幕"
           }
         }
       }
@@ -2206,6 +2722,12 @@
             "state": "translated",
             "value": "권한이 없습니다. 시스템 환경설정의 보안 및 개인 정보 보호에서 화면 기록을 허용해 주세요."
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "缺少屏幕录制权限。请前往系统设置的「隐私与安全性」中允许屏幕录制。"
+          }
         }
       }
     },
@@ -2229,6 +2751,12 @@
             "state": "translated",
             "value": "새로운 버전 %@ 사용 가능!"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "检测到新版本 %@ 可用！"
+          }
         }
       }
     },
@@ -2251,6 +2779,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "실험적 기능"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "实验性功能"
           }
         }
       }
@@ -2298,6 +2832,12 @@
             "state": "translated",
             "value": "가상 카메라를 설치합니다.\n'시스템 설정 열기'를 클릭한 다음 '허용'을 클릭해 주세요."
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在安装虚拟摄像头扩展。请在弹出的系统提示中点击「打开隐私与安全性设置」并选择「允许」。"
+          }
         }
       }
     },
@@ -2320,6 +2860,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "업데이트를 위해 가상 카메라를 다시 설치합니다"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "为了更新，正在重新安装虚拟摄像头扩展。"
           }
         }
       }
@@ -2344,6 +2890,12 @@
             "state": "translated",
             "value": "이 Mac의 다른 앱에서 WebSocket (JSON-RPC)으로 VCam을 제어할 수 있게 합니다."
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "允许此 Mac 上的其他软件通过 WebSocket (JSON-RPC) 远程控制 VCam。"
+          }
         }
       }
     },
@@ -2366,6 +2918,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "좌우 감도"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "眼球水平追踪灵敏度"
           }
         }
       }
@@ -2413,6 +2971,12 @@
             "state": "translated",
             "value": "얼굴 / 눈 / 입"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "面部 / 眼睛 / 嘴唇"
+          }
         }
       }
     },
@@ -2435,6 +2999,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "페이스 트래킹"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "人脸面部捕捉"
           }
         }
       }
@@ -2459,6 +3029,12 @@
             "state": "translated",
             "value": "표정"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "面部表情模拟"
+          }
         }
       }
     },
@@ -2482,6 +3058,12 @@
             "state": "translated",
             "value": "가상 카메라 설치에 실패했습니다. 사용하려면 이 앱의 설정에서 설치해 주세요."
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "虚拟摄像头安装失败。如需使用，请在应用设置中重试安装。"
+          }
         }
       }
     },
@@ -2504,6 +3086,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "모션을 불러오지 못했습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "载入动作文件失败。"
           }
         }
       }
@@ -2551,6 +3139,12 @@
             "state": "translated",
             "value": "실패"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "操作失败"
+          }
         }
       }
     },
@@ -2573,6 +3167,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "파일"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "文件"
           }
         }
       }
@@ -2620,6 +3220,12 @@
             "state": "translated",
             "value": "필터"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "滤镜"
+          }
         }
       }
     },
@@ -2643,6 +3249,12 @@
             "state": "translated",
             "value": "손가락"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "手指动作"
+          }
         }
       }
     },
@@ -2665,6 +3277,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "가상 카메라의 화면을 좌우 반전"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "水平翻转虚拟摄像头画面"
           }
         }
       }
@@ -2781,6 +3399,12 @@
             "state": "translated",
             "value": "FPS (화면 갱신 빈도)"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "屏幕捕获帧率"
+          }
         }
       }
     },
@@ -2803,6 +3427,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "일반"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "通用设置"
           }
         }
       }
@@ -2850,6 +3480,12 @@
             "state": "translated",
             "value": "손"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "手势捕捉"
+          }
         }
       }
     },
@@ -2872,6 +3508,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "핸드 트래킹"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "双手手势追踪"
           }
         }
       }
@@ -2896,6 +3538,12 @@
             "state": "translated",
             "value": "높이"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "高度"
+          }
         }
       }
     },
@@ -2918,6 +3566,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "도움말"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "帮助与支持"
           }
         }
       }
@@ -2942,6 +3596,12 @@
             "state": "translated",
             "value": "실제 움직임과 어긋나는 경우, 카메라 정면을 향해 카메라를 바라본 상태에서 이 버튼을 눌러 주세요"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "若动作与实际姿态有偏差，请面向正前方摄像头并点击此按钮重新校准。"
+          }
         }
       }
     },
@@ -2964,6 +3624,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "메시 결합 등을 통해 앱의 부하를 크게 줄일 수 있습니다. 모델 표시에 문제가 있는 경우에는 끈 다음 모델을 다시 불러와 주세요."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "通过合并网格降低运行负载。若模型显示异常，请关闭此项并重载模型。"
           }
         }
       }
@@ -2988,6 +3654,12 @@
             "state": "translated",
             "value": "mocopi 쪽 PC 연결 설정의 포트는 '12351'로 설정해 주세요"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "mocopi 移动端 PC 连接设置中的端口号应填 \"12351\"。"
+          }
         }
       }
     },
@@ -3010,6 +3682,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "안녕"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打招呼"
           }
         }
       }
@@ -3034,6 +3712,12 @@
             "state": "translated",
             "value": "숨기기"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "隐藏"
+          }
         }
       }
     },
@@ -3056,6 +3740,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "고정밀"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "高精度模式"
           }
         }
       }
@@ -3080,6 +3770,12 @@
             "state": "translated",
             "value": "색상 시프트 (Hue Shift)"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "色相偏移"
+          }
         }
       }
     },
@@ -3103,6 +3799,12 @@
             "state": "translated",
             "value": "이미지"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "图像"
+          }
         }
       }
     },
@@ -3125,6 +3827,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "특정 윈도우"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "独立分离窗口"
           }
         }
       }
@@ -3172,6 +3880,12 @@
             "state": "translated",
             "value": "설치"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安装"
+          }
         }
       }
     },
@@ -3194,6 +3908,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@을(를) 설치합니다"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "将安装 %@"
           }
         }
       }
@@ -3218,6 +3938,12 @@
             "state": "translated",
             "value": "가상 카메라 플러그인을 %@합니다"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 虚拟摄像头驱动插件"
+          }
         }
       }
     },
@@ -3240,6 +3966,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "가상 카메라 설치"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安装虚拟摄像头"
           }
         }
       }
@@ -3264,6 +3996,12 @@
             "state": "translated",
             "value": "연동"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "第三方集成"
+          }
         }
       }
     },
@@ -3286,6 +4024,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "강도"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "光效/滤镜强度"
           }
         }
       }
@@ -3333,6 +4077,12 @@
             "state": "translated",
             "value": "%@를 찾을 수 없습니다"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未找到 %@"
+          }
         }
       }
     },
@@ -3355,6 +4105,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@이(가) 설정되지 않았습니다"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 尚未配置"
           }
         }
       }
@@ -3402,6 +4158,12 @@
             "state": "translated",
             "value": "언어"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "语言 (Language)"
+          }
         }
       }
     },
@@ -3425,6 +4187,12 @@
             "state": "translated",
             "value": "렌즈 플레어"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "镜头眩光 (Lens Flare)"
+          }
         }
       }
     },
@@ -3447,6 +4215,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "렌즈 플레어 세기"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "眩光强度"
           }
         }
       }
@@ -3494,6 +4268,12 @@
             "state": "translated",
             "value": "라이선스"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "许可证"
+          }
         }
       }
     },
@@ -3517,6 +4297,12 @@
             "state": "translated",
             "value": "이미 상업적 이용 라이선스를 취득한 경우에는 라이선스 상태를 확인해 주세요. [라이선스 상태 확인...](vcam2d://auth/checkLicense)"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "如果您已购买商业许可证，请验证您的许可证状态。[检查许可证状态...](vcam2d://auth/checkLicense)"
+          }
         }
       }
     },
@@ -3539,6 +4325,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "라이선스가 만료되었습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "您的许可证已过期。"
           }
         }
       }
@@ -3609,6 +4401,12 @@
             "state": "translated",
             "value": "립싱크"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "口型同步 (Lip-sync)"
+          }
         }
       }
     },
@@ -3631,6 +4429,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "립싱크 감도 (마이크)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "麦克风口型灵敏度"
           }
         }
       }
@@ -3678,6 +4482,12 @@
             "state": "translated",
             "value": "모션 불러오기"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "导入动作文件"
+          }
         }
       }
     },
@@ -3700,6 +4510,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "VRoid Hub에서 아바타 불러오기"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从 VRoid Hub 载入模型"
           }
         }
       }
@@ -3724,6 +4540,12 @@
             "state": "translated",
             "value": "씬 불러오기"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "加载场景预设"
+          }
         }
       }
     },
@@ -3746,6 +4568,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "로컬 파일"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "本地文件"
           }
         }
       }
@@ -3770,6 +4598,12 @@
             "state": "translated",
             "value": "잠그기"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "锁定"
+          }
         }
       }
     },
@@ -3792,6 +4626,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "반복 재생"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "循环播放动作"
           }
         }
       }
@@ -3839,6 +4679,12 @@
             "state": "translated",
             "value": "메인"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "主要"
+          }
         }
       }
     },
@@ -3861,6 +4707,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "계정 및 구독 관리"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "管理账户与赞助订阅"
           }
         }
       }
@@ -3885,6 +4737,12 @@
             "state": "translated",
             "value": "최댓값"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最大值"
+          }
         }
       }
     },
@@ -3908,6 +4766,12 @@
             "state": "translated",
             "value": "마이크"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "麦克风"
+          }
         }
       }
     },
@@ -3930,6 +4794,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "마이크 소리의 동기화 오프셋 [ms]"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "麦克风音频同步延迟偏移 [ms]"
           }
         }
       }
@@ -3977,6 +4847,12 @@
             "state": "translated",
             "value": "이 앱은 최신 macOS에 최적화된 가상 카메라로 이전합니다.\n안내에 따라 이전 플러그인을 삭제하고 새로운 가상 카메라를 설치해 주세요."
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "本应用将迁移至为最新 macOS 优化的全新虚拟摄像头。\n请按照提示删除旧插件并安装新版虚拟摄像头。"
+          }
         }
       }
     },
@@ -3999,6 +4875,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "최솟값"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最小值"
           }
         }
       }
@@ -4023,6 +4905,12 @@
             "state": "translated",
             "value": "통신 보간"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "动作捕捉网络插值平滑"
+          }
         }
       }
     },
@@ -4045,6 +4933,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "통신이 끊길 때 생기는 끊김을 완화합니다 (지연이 늘어납니다). VCamMocap과 iFacialMocap에 적용됩니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "网络丢包时自动插帧以平滑动作（会轻微增加延迟），适用于 VCamMocap 与 iFacialMocap。"
           }
         }
       }
@@ -4069,6 +4963,12 @@
             "state": "translated",
             "value": "모델"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "3D 模型 (VRM)"
+          }
         }
       }
     },
@@ -4091,6 +4991,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "모델 목록"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "模型列表"
           }
         }
       }
@@ -4115,6 +5021,12 @@
             "state": "translated",
             "value": "찾을 수 없음"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "模型文件丢失"
+          }
         }
       }
     },
@@ -4137,6 +5049,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "모션"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "预设动作"
           }
         }
       }
@@ -4161,6 +5079,12 @@
             "state": "translated",
             "value": "모션 이름"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "动作名称"
+          }
         }
       }
     },
@@ -4183,6 +5107,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "이 모션은 %lld개의 단축어에 할당되어 있습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此动作已分配给 %lld 个快捷键。"
           }
         }
       }
@@ -4207,6 +5137,12 @@
             "state": "translated",
             "value": "앱이 \"응용 프로그램(Applications)\" 폴더에 없어 가상 카메라를 설치할 수 없습니다. 앱을 \"응용 프로그램(Applications)\" 폴더로 이동해 다시 실행한 후 다시 시도해 주세요."
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "因应用程序不在「应用程序(Applications)」文件夹中，无法安装虚拟摄像头。请将其移动到应用程序文件夹后重新启动。"
+          }
         }
       }
     },
@@ -4229,6 +5165,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "카메라 위치 초기화"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重置摄像机至初始视角"
           }
         }
       }
@@ -4253,6 +5195,12 @@
             "state": "translated",
             "value": "새 프리셋"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新建预设方案"
+          }
         }
       }
     },
@@ -4275,6 +5223,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "도리도리"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "否"
           }
         }
       }
@@ -4299,6 +5253,12 @@
             "state": "translated",
             "value": "끄덕끄덕"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "点头"
+          }
         }
       }
     },
@@ -4321,6 +5281,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "모델을 찾을 수 없습니다"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未找到可用模型"
           }
         }
       }
@@ -4345,6 +5311,12 @@
             "state": "translated",
             "value": "없음"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无"
+          }
         }
       }
     },
@@ -4367,6 +5339,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "일반"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "标准"
           }
         }
       }
@@ -4391,6 +5369,12 @@
             "state": "translated",
             "value": "설치 후에는 앱을 한 번 재실행해 주세요"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安装完成后，请重新启动一次本应用以生效。"
+          }
         }
       }
     },
@@ -4413,6 +5397,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "제목 없음"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未命名"
           }
         }
       }
@@ -4437,6 +5427,12 @@
             "state": "translated",
             "value": "지원되지 않음"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前设备不受支持"
+          }
         }
       }
     },
@@ -4459,6 +5455,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "오브젝트"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "场景道具物件"
           }
         }
       }
@@ -4483,6 +5485,12 @@
             "state": "translated",
             "value": "확인"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "确定"
+          }
         }
       }
     },
@@ -4505,6 +5513,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "파일 열기"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择文件"
           }
         }
       }
@@ -4529,6 +5543,12 @@
             "state": "translated",
             "value": "macOS 언어 설정 열기"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打开语言设置"
+          }
         }
       }
     },
@@ -4551,6 +5571,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "모델 목록 열기"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打开模型列表"
           }
         }
       }
@@ -4575,6 +5601,12 @@
             "state": "translated",
             "value": "설정 열기"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "偏好设置"
+          }
         }
       }
     },
@@ -4598,6 +5630,12 @@
             "state": "translated",
             "value": "%@ 열기"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打开 %@"
+          }
         }
       }
     },
@@ -4620,6 +5658,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "모델의 메시 최적화 (권장)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "合并与优化模型网格 (推荐开启)"
           }
         }
       }
@@ -4690,6 +5734,12 @@
             "state": "translated",
             "value": "붙여넣기"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "粘贴"
+          }
         }
       }
     },
@@ -4712,6 +5762,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "선택"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "吸管取色"
           }
         }
       }
@@ -4736,6 +5792,12 @@
             "state": "translated",
             "value": "대기 모션을 무작위로 재생"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "待机时播放闲置微动作"
+          }
         }
       }
     },
@@ -4758,6 +5820,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "다시 인증해 주세요."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请重新进行身份验证。"
           }
         }
       }
@@ -4782,6 +5850,12 @@
             "state": "translated",
             "value": "Mac을 재시동하면 문제가 개선되는 경우가 있습니다."
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重启 Mac 可能会解决此问题。"
+          }
         }
       }
     },
@@ -4804,6 +5878,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "포즈"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "姿态动作"
           }
         }
       }
@@ -4828,6 +5908,12 @@
             "state": "translated",
             "value": "위치"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "空间坐标位置"
+          }
         }
       }
     },
@@ -4850,6 +5936,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "프리셋"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "预设方案"
           }
         }
       }
@@ -5196,6 +6288,12 @@
             "state": "translated",
             "value": "영상 미리보기"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "预览捕获画面"
+          }
         }
       }
     },
@@ -5218,6 +6316,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "고품질"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "极佳画质"
           }
         }
       }
@@ -5265,6 +6369,12 @@
             "state": "translated",
             "value": "낮은 부하"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "流畅模式"
+          }
         }
       }
     },
@@ -5287,6 +6397,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "최저 부하"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最高性能 (最省电)"
           }
         }
       }
@@ -5311,6 +6427,12 @@
             "state": "translated",
             "value": "좋은 품질"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "高画质"
+          }
         }
       }
     },
@@ -5334,6 +6456,12 @@
             "state": "translated",
             "value": "보통"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "极简模式"
+          }
         }
       }
     },
@@ -5356,6 +6484,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ 종료"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "退出 %@"
           }
         }
       }
@@ -5403,6 +6537,12 @@
             "state": "translated",
             "value": "다시 인증..."
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新认证..."
+          }
         }
       }
     },
@@ -5426,6 +6566,12 @@
             "state": "translated",
             "value": "PC 소리 녹음 [β]"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "录制电脑系统声音 [β]"
+          }
         }
       }
     },
@@ -5448,6 +6594,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "촬영"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在录制中..."
           }
         }
       }
@@ -5495,6 +6647,12 @@
             "state": "translated",
             "value": "수정자 키를 하나 이상 조합해 주세요"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "快捷键必须包含至少一个修饰键 (Command/Option/Control/Shift)。"
+          }
         }
       }
     },
@@ -5517,6 +6675,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "화면 새로 고침"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "刷新屏幕源"
           }
         }
       }
@@ -5541,6 +6705,12 @@
             "state": "translated",
             "value": "재설치"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新安装"
+          }
         }
       }
     },
@@ -5563,6 +6733,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "릴리스 노트:"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更新日志与说明:"
           }
         }
       }
@@ -5587,6 +6763,12 @@
             "state": "translated",
             "value": "다시 불러오기"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新载入"
+          }
         }
       }
     },
@@ -5609,6 +6791,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "이름 변경"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重命名"
           }
         }
       }
@@ -5633,6 +6821,12 @@
             "state": "translated",
             "value": "렌더링"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "图形渲染"
+          }
         }
       }
     },
@@ -5655,6 +6849,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "렌더링 품질"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "渲染画质级别"
           }
         }
       }
@@ -5679,6 +6879,12 @@
             "state": "translated",
             "value": "모두 기본값으로 되돌리기"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全部恢复为默认设置"
+          }
         }
       }
     },
@@ -5701,6 +6907,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "모델 위치 초기화"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重置模型站位"
           }
         }
       }
@@ -5748,6 +6960,12 @@
             "state": "translated",
             "value": "기본값으로 되돌리기"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "恢复默认值"
+          }
         }
       }
     },
@@ -5793,6 +7011,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "설정이 완료되었습니다. Zoom 등의 클라이언트를 다시 실행해 주세요"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安装已就绪。请重启 Zoom、腾讯会议或 OBS。"
           }
         }
       }
@@ -5840,6 +7064,12 @@
             "state": "translated",
             "value": "입력 방향 반전"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "反转输入控制方向"
+          }
         }
       }
     },
@@ -5863,6 +7093,12 @@
             "state": "translated",
             "value": "출력 방향 반전"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "反转输出方向"
+          }
         }
       }
     },
@@ -5885,6 +7121,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "둥글기"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "边框圆角"
           }
         }
       }
@@ -5932,6 +7174,12 @@
             "state": "translated",
             "value": "실행"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "运行脚本"
+          }
         }
       }
     },
@@ -5954,6 +7202,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "채도"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "色彩饱和度"
           }
         }
       }
@@ -5978,6 +7232,12 @@
             "state": "translated",
             "value": "저장"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保存设置"
+          }
         }
       }
     },
@@ -6000,6 +7260,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "씬"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "场景布局"
           }
         }
       }
@@ -6024,6 +7290,12 @@
             "state": "translated",
             "value": "화면"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "屏幕显示"
+          }
         }
       }
     },
@@ -6046,6 +7318,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "화면 효과"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "屏幕画面特效"
           }
         }
       }
@@ -6070,6 +7348,12 @@
             "state": "translated",
             "value": "화면 효과를 사용하려면 실험적 기능 설정에서 URP를 비활성화하세요"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "如需使用屏幕特效，请在实验功能中关闭 URP 渲染管线。"
+          }
         }
       }
     },
@@ -6092,6 +7376,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "URP용 화면 효과는 현재 개발 중입니다"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "适用于 URP 的屏幕特效正在开发中。"
           }
         }
       }
@@ -6116,6 +7406,12 @@
             "state": "translated",
             "value": "화면 해상도"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "屏幕分辨率"
+          }
         }
       }
     },
@@ -6138,6 +7434,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "초"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "秒"
           }
         }
       }
@@ -6162,6 +7464,12 @@
             "state": "translated",
             "value": "자세한 내용은 이 페이지를 참고해 주세요."
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "如需了解详细说明，请参阅官方文档页面。"
+          }
         }
       }
     },
@@ -6184,6 +7492,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "전체 선택"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全选"
           }
         }
       }
@@ -6208,6 +7522,12 @@
             "state": "translated",
             "value": "배경으로 설정"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "设为当前场景背景"
+          }
         }
       }
     },
@@ -6230,6 +7550,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "설정"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系统设置"
           }
         }
       }
@@ -6254,6 +7580,12 @@
             "state": "translated",
             "value": "단축키"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "按键组合"
+          }
         }
       }
     },
@@ -6276,6 +7608,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "어깨 회전의 크기"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "肩膀联动旋转权重"
           }
         }
       }
@@ -6300,6 +7638,12 @@
             "state": "translated",
             "value": "표시"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示"
+          }
         }
       }
     },
@@ -6322,6 +7666,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "변경 방법 보기"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "查看多语言配置说明"
           }
         }
       }
@@ -6346,6 +7696,12 @@
             "state": "translated",
             "value": "부들부들"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "颤抖害怕"
+          }
         }
       }
     },
@@ -6368,6 +7724,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "로그아웃"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "退出登录"
           }
         }
       }
@@ -6392,6 +7754,12 @@
             "state": "translated",
             "value": "로그아웃에 실패했습니다: "
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "退出登录失败: "
+          }
         }
       }
     },
@@ -6414,6 +7782,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "이 버전은 건너뛰기"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "跳过此版本更新"
           }
         }
       }
@@ -6438,6 +7812,12 @@
             "state": "translated",
             "value": "스무딩"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "平滑滤波 (Smoothing)"
+          }
         }
       }
     },
@@ -6461,6 +7841,12 @@
             "state": "translated",
             "value": "매끄러움"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "平滑度"
+          }
         }
       }
     },
@@ -6483,6 +7869,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "부드러움 (Soft Knee)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "软拐点压缩 (Soft Knee)"
           }
         }
       }
@@ -6530,6 +7922,12 @@
             "state": "translated",
             "value": "시작"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开始"
+          }
         }
       }
     },
@@ -6575,6 +7973,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "녹화 중지"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "停止录制并保存"
           }
         }
       }
@@ -6691,6 +8095,12 @@
             "state": "translated",
             "value": "성공"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "操作成功"
+          }
         }
       }
     },
@@ -6713,6 +8123,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "지원 언어"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "支持的语言列表"
           }
         }
       }
@@ -6737,6 +8153,12 @@
             "state": "translated",
             "value": "팔꿈치 조정"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "手肘关节微调"
+          }
         }
       }
     },
@@ -6759,6 +8181,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "사진 촬영"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拍照快照"
           }
         }
       }
@@ -6829,6 +8257,12 @@
             "state": "translated",
             "value": "임계값"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "触发阈值"
+          }
         }
       }
     },
@@ -6851,6 +8285,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "임계값 (적용할 최소 밝기)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "亮度作用阈值"
           }
         }
       }
@@ -6898,6 +8338,12 @@
             "state": "translated",
             "value": "색조"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "色调偏移 (Tint)"
+          }
         }
       }
     },
@@ -6920,6 +8366,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "제목"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "标题名称"
           }
         }
       }
@@ -6944,6 +8396,12 @@
             "state": "translated",
             "value": "눈을 트래킹"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "眼球视线追踪"
+          }
         }
       }
     },
@@ -6966,6 +8424,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "트래킹"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "动作捕捉系统"
           }
         }
       }
@@ -6990,6 +8454,12 @@
             "state": "translated",
             "value": "트래킹 조정"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "动作捕捉微调"
+          }
         }
       }
     },
@@ -7012,6 +8482,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "반응"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "响应敏捷度"
           }
         }
       }
@@ -7036,6 +8512,12 @@
             "state": "translated",
             "value": "부드러움"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "滤波平滑度"
+          }
         }
       }
     },
@@ -7058,6 +8540,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "왼쪽 눈 깜박임"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "左眼眨眼"
           }
         }
       }
@@ -7082,6 +8570,12 @@
             "state": "translated",
             "value": "오른쪽 눈 깜박임"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "右眼眨眼"
+          }
         }
       }
     },
@@ -7104,6 +8598,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "눈 움직임 X"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "眼球水平移动 X"
           }
         }
       }
@@ -7128,6 +8628,12 @@
             "state": "translated",
             "value": "눈 움직임 Y"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "眼球垂直移动 Y"
+          }
         }
       }
     },
@@ -7150,6 +8656,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "머리 회전 X"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "头部左右转动 X"
           }
         }
       }
@@ -7174,6 +8686,12 @@
             "state": "translated",
             "value": "머리 회전 Y"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "头部上下仰俯 Y"
+          }
         }
       }
     },
@@ -7196,6 +8714,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "머리 회전 Z"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "头部左右歪头 Z"
           }
         }
       }
@@ -7220,6 +8744,12 @@
             "state": "translated",
             "value": "입"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "张嘴幅度"
+          }
         }
       }
     },
@@ -7242,6 +8772,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "위치 X"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "水平位移 X"
           }
         }
       }
@@ -7266,6 +8802,12 @@
             "state": "translated",
             "value": "위치 Y"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "垂直位移 Y"
+          }
         }
       }
     },
@@ -7288,6 +8830,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "위치 Z"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "前后位移 Z"
           }
         }
       }
@@ -7358,6 +8906,12 @@
             "state": "translated",
             "value": "현재 모델과 트래킹 설정에서는 '%@' 설정이 사용됩니다"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前模型与面捕设置正在应用 \"%@\" 映射方案"
+          }
         }
       }
     },
@@ -7380,6 +8934,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "얼굴 트래킹이 꺼져 있어 어떤 설정도 사용되지 않습니다"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "面部追踪已关闭，当前未启用任何映射设置"
           }
         }
       }
@@ -7404,6 +8964,12 @@
             "state": "translated",
             "value": "출력"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "输出映射"
+          }
         }
       }
     },
@@ -7426,6 +8992,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "설정 저장 기능은 향후 추가될 예정입니다"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保存功能将在后续版本中推出。"
           }
         }
       }
@@ -7450,6 +9022,12 @@
             "state": "translated",
             "value": "트래킹 모드"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "动作捕捉模式"
+          }
         }
       }
     },
@@ -7472,6 +9050,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "움직임의 부드러움 (스무딩)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "动作平滑度 (Smoothing)"
           }
         }
       }
@@ -7496,6 +9080,12 @@
             "state": "translated",
             "value": "이동"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "空间平移轴向"
+          }
         }
       }
     },
@@ -7518,6 +9108,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "타입 %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "类型 %@"
           }
         }
       }
@@ -7565,6 +9161,12 @@
             "state": "translated",
             "value": "제거"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "卸载"
+          }
         }
       }
     },
@@ -7587,6 +9189,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "가상 카메라 플러그인 제거"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "卸载虚拟摄像头插件"
           }
         }
       }
@@ -7611,6 +9219,12 @@
             "state": "translated",
             "value": "잠금 해제"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "解锁"
+          }
         }
       }
     },
@@ -7633,6 +9247,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "업데이트"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "检查并更新"
           }
         }
       }
@@ -7680,6 +9300,12 @@
             "state": "translated",
             "value": "최신 버전입니다"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前已是最新版本！"
+          }
         }
       }
     },
@@ -7703,6 +9329,12 @@
             "state": "translated",
             "value": "현재 %@ 버전이 최신입니다."
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 目前已是最新版本"
+          }
         }
       }
     },
@@ -7725,6 +9357,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "카메라로 모음 추정"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "通过摄像头估算元音口型"
           }
         }
       }
@@ -7772,6 +9410,12 @@
             "state": "translated",
             "value": "영상 캡처"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "视频采集"
+          }
         }
       }
     },
@@ -7794,6 +9438,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "영상 장치"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "视频采集设备"
           }
         }
       }
@@ -7818,6 +9468,12 @@
             "state": "translated",
             "value": "형식"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "视频编码格式"
+          }
         }
       }
     },
@@ -7840,6 +9496,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "HEVC (알파 채널 포함)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HEVC (带透明通道 Alpha)"
           }
         }
       }
@@ -7864,6 +9526,12 @@
             "state": "translated",
             "value": "사용법 보기"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "查看说明文档"
+          }
         }
       }
     },
@@ -7887,6 +9555,12 @@
             "state": "translated",
             "value": "비네트"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "暗角晕影 (Vignette)"
+          }
         }
       }
     },
@@ -7909,6 +9583,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "가상 카메라"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "虚拟摄像头"
           }
         }
       }
@@ -7956,6 +9636,12 @@
             "state": "translated",
             "value": "대기"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请稍候..."
+          }
         }
       }
     },
@@ -7978,6 +9664,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "웹"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Web 网页源"
           }
         }
       }
@@ -8002,6 +9694,12 @@
             "state": "translated",
             "value": "뭐라고!?"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "惊讶表情"
+          }
         }
       }
     },
@@ -8024,6 +9722,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "화이트 밸런스"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "白平衡调节"
           }
         }
       }
@@ -8048,6 +9752,12 @@
             "state": "translated",
             "value": "너비"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "宽度"
+          }
         }
       }
     },
@@ -8071,6 +9781,12 @@
             "state": "translated",
             "value": "바람"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "微风扰动效果"
+          }
         }
       }
     },
@@ -8093,6 +9809,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "윈도우"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "窗口管理"
           }
         }
       }

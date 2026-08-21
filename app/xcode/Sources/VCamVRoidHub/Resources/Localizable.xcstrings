@@ -44,6 +44,12 @@
             "state": "translated",
             "value": "법인 이용"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "企业商业用途许可"
+          }
         }
       }
     },
@@ -67,6 +73,12 @@
             "state": "translated",
             "value": "크레딧 표기"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "作者署名要求"
+          }
         }
       }
     },
@@ -89,6 +101,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "개변"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "模型修改/二改许可"
           }
         }
       }
@@ -136,6 +154,12 @@
             "state": "translated",
             "value": "개인의 상업적 이용"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "个人商业用途许可"
+          }
         }
       }
     },
@@ -181,6 +205,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "재배포"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "二次分发/再发布许可"
           }
         }
       }
@@ -274,6 +304,12 @@
             "state": "translated",
             "value": "필요"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "需要署名"
+          }
         }
       }
     },
@@ -343,6 +379,12 @@
             "state": "translated",
             "value": "하트한 모델"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已收藏/点赞的模型"
+          }
         }
       }
     },
@@ -366,6 +408,12 @@
             "state": "translated",
             "value": "내 모델"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "我的 VRoid 模型"
+          }
         }
       }
     },
@@ -388,6 +436,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "모델을 찾을 수 없습니다"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未找到可用模型"
           }
         }
       }
@@ -481,6 +535,12 @@
             "state": "translated",
             "value": "비영리 활동만"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "仅限非营利性活动"
+          }
         }
       }
     },
@@ -503,6 +563,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "3D 미리보기"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "3D 模型实时预览"
           }
         }
       }
@@ -573,6 +639,12 @@
             "state": "translated",
             "value": "다시 시도"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重试"
+          }
         }
       }
     },
@@ -619,6 +691,12 @@
             "state": "translated",
             "value": "VRoid Hub에 로그인"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "登录到 VRoid Hub"
+          }
         }
       }
     },
@@ -641,6 +719,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "로그아웃"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "退出登录"
           }
         }
       }
@@ -756,6 +840,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "이 모델 사용"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择并载入此模型"
           }
         }
       }
