@@ -54,7 +54,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "企业商业用途许可"
+            "value": "法人使用"
           }
         }
       }
@@ -83,7 +83,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "作者署名要求"
+            "value": "署名要求"
           }
         }
       }
@@ -112,7 +112,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "模型修改/二改许可"
+            "value": "修改"
           }
         }
       }
@@ -170,7 +170,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "个人商业用途许可"
+            "value": "个人商业使用"
           }
         }
       }
@@ -228,7 +228,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "二次分发/再发布许可"
+            "value": "再分发"
           }
         }
       }
@@ -257,7 +257,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "成人/色情内容使用 (R-18)"
+            "value": "性相关内容使用"
           }
         }
       }
@@ -315,7 +315,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "暴力/血腥表现使用 (R-18G)"
+            "value": "暴力相关内容使用"
           }
         }
       }
@@ -460,7 +460,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "我的 VRoid 模型"
+            "value": "我的模型"
           }
         }
       }

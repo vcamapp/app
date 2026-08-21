@@ -692,7 +692,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "背景模糊"
+            "value": "画面模糊"
           }
         }
       }
@@ -1214,7 +1214,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "色度键抠绿 (Chroma Key)"
+            "value": "色度键 (绿幕抠像)"
           }
         }
       }
@@ -2490,7 +2490,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "设置输入阈值范围"
+            "value": "编辑输入范围"
           }
         }
       }
@@ -2577,7 +2577,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "调整输出画面边界"
+            "value": "编辑输出范围"
           }
         }
       }
@@ -4549,7 +4549,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "口型同步 (Lip-sync)"
+            "value": "口型同步"
           }
         }
       }
@@ -4636,7 +4636,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "导入动作文件"
+            "value": "加载动作"
           }
         }
       }
@@ -5129,7 +5129,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "3D 模型 (VRM)"
+            "value": "模型"
           }
         }
       }
@@ -5216,7 +5216,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "预设动作"
+            "value": "动作"
           }
         }
       }
@@ -5593,7 +5593,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "当前设备不受支持"
+            "value": "不支持"
           }
         }
       }
@@ -5825,7 +5825,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "合并与优化模型网格 (推荐开启)"
+            "value": "优化模型网格（推荐）"
           }
         }
       }
@@ -5970,7 +5970,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "待机时播放闲置微动作"
+            "value": "播放待机动作"
           }
         }
       }
@@ -6666,7 +6666,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "最高性能 (最省电)"
+            "value": "最快模式"
           }
         }
       }
@@ -6869,7 +6869,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "正在录制中..."
+            "value": "录制中"
           }
         }
       }
@@ -7913,7 +7913,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "肩膀联动旋转权重"
+            "value": "肩部旋转权重"
           }
         }
       }
@@ -8116,7 +8116,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "平滑滤波 (Smoothing)"
+            "value": "平滑处理"
           }
         }
       }
@@ -8174,7 +8174,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "软拐点压缩 (Soft Knee)"
+            "value": "泛光柔和度 (Soft Knee)"
           }
         }
       }
@@ -8464,7 +8464,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "支持的语言列表"
+            "value": "支持语言"
           }
         }
       }
@@ -8696,7 +8696,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "色调偏移 (Tint)"
+            "value": "色调偏移"
           }
         }
       }
@@ -9015,7 +9015,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "头部左右转动 X"
+            "value": "头部绕X轴旋转"
           }
         }
       }
@@ -9044,7 +9044,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "头部上下仰俯 Y"
+            "value": "头部绕Y轴旋转"
           }
         }
       }
@@ -9073,7 +9073,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "头部左右歪头 Z"
+            "value": "头部绕Z轴旋转"
           }
         }
       }
@@ -9421,7 +9421,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "动作平滑度 (Smoothing)"
+            "value": "追踪平滑度"
           }
         }
       }
@@ -9943,7 +9943,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "暗角晕影 (Vignette)"
+            "value": "暗角效果"
           }
         }
       }
@@ -10175,7 +10175,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "微风扰动效果"
+            "value": "风效"
           }
         }
       }
