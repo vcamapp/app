@@ -34,16 +34,33 @@ struct FaceTransformValuesTests {
         #expect(values[Index.lookAtY] == 0)
     }
 
+    /// The gaze keeps the subject's own direction while the sided shapes mirror,
+    /// so a source that flips it as well would show the avatar looking the wrong way.
     @Test
-    func enablingEyeTrackingKeepsTheMirroredGaze() {
+    func enablingEyeTrackingKeepsTheGazeUnmirrored() {
         let values = FaceTransformValues.perfectSync(
             translation: .zero, rotationEuler: .zero,
             blendShape: makeBlendShape(), useEyeTracking: true
         )
 
-        // Mirrored, so the horizontal gaze is flipped and the vertical one is not
-        #expect(values[Index.lookAtX] == -0.4)
+        #expect(values[Index.lookAtX] == 0.4)
         #expect(values[Index.lookAtY] == -0.6)
+
+        let lookInLeft = Index.blendShapes + BlendShape.wireOrder.firstIndex(of: \.eyeLookInLeft)!
+        let lookInRight = Index.blendShapes + BlendShape.wireOrder.firstIndex(of: \.eyeLookInRight)!
+        #expect(values[lookInLeft] == 0.7)
+        #expect(values[lookInRight] == 0)
+    }
+
+    /// The 12 element array drives the eyes through the same gaze convention.
+    @Test
+    func vcamHeadTransformKeepsTheGazeOnTheSubjectsEye() {
+        let values = FaceTransformValues.vcamHeadTransform(
+            translation: .zero, rotationEuler: .zero,
+            blendShape: makeBlendShape(), useEyeTracking: true, vowel: .a
+        )
+
+        #expect(values[9] == 0.7)
     }
 
     @Test

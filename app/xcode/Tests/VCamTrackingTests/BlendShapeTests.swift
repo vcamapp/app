@@ -45,12 +45,13 @@ struct BlendShapeTests {
     }
 
     @Test
-    func mirroringSwapsSidedShapesAndFlipsGaze() {
+    func mirroringSwapsSidedShapesAndKeepsTheGaze() {
         var blend = BlendShape(lookAtPoint: .init(0.4, 0.7))
         blend.eyeBlinkLeft = 1
         blend.mouthSmileRight = 0.8
         blend.jawLeft = 0.3
         blend.jawOpen = 0.6
+        blend.eyeLookInLeft = 0.9
 
         let mirrored = blend.mirrored()
 
@@ -58,9 +59,10 @@ struct BlendShapeTests {
         #expect(mirrored.eyeBlinkLeft == 0)
         #expect(mirrored.mouthSmileLeft == 0.8)
         #expect(mirrored.jawRight == 0.3)
-        // A shape without a side, and the vertical gaze, stay as they are
+        // A shape without a side stays as it is, and so does the gaze
         #expect(mirrored.jawOpen == 0.6)
-        #expect(mirrored.lookAtPoint == .init(-0.4, 0.7))
+        #expect(mirrored.eyeLookInLeft == 0.9)
+        #expect(mirrored.lookAtPoint == .init(0.4, 0.7))
     }
 
     @Test
@@ -74,16 +76,19 @@ struct BlendShapeTests {
     }
 
     /// Every shape whose name carries a side has to be listed as a pair, or mirroring
-    /// would silently leave it on the wrong side of the avatar's face.
+    /// would silently leave it on the wrong side of the avatar's face. The gaze shapes
+    /// are the deliberate exception, so they have to stay out of the pairs.
     @Test
-    func everySidedShapeIsPaired() {
+    func everySidedShapeIsPairedExceptTheGaze() {
         let paired = Set(BlendShape.sidedPairs.flatMap { [$0.0, $0.1] })
         for keyPath in BlendShape.wireOrder {
             var probe = BlendShape()
             probe[keyPath: keyPath] = 1
             let movedByMirroring = probe.mirrored()[keyPath: keyPath] == 0
             #expect(movedByMirroring == paired.contains(keyPath))
+            #expect(!paired.contains(keyPath) || !BlendShape.gazeDirectionKeyPaths.contains(keyPath))
         }
-        #expect(BlendShape.sidedPairs.count == 20)
+        #expect(BlendShape.sidedPairs.count == 16)
+        #expect(BlendShape.gazeDirectionKeyPaths.count == 8)
     }
 }

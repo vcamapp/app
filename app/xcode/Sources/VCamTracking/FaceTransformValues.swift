@@ -10,10 +10,14 @@ import VCamMotionV1
 /// are flipped here. Every source of these arrays names its blend shapes after the
 /// subject's own left and right, so they are mirrored too; otherwise a wink would
 /// close the eye on the opposite side of the screen from the head turn.
+///
+/// The gaze is the exception: it keeps the subject's own direction, matching the
+/// Vision path, which builds its arrays from image space without passing through here.
+/// `BlendShape.gazeDirectionKeyPaths` documents which shapes that covers.
 enum FaceTransformValues {
     static func vcamHeadTransform(translation: SIMD3<Float>, rotationEuler: SIMD3<Float>,
                                   blendShape: BlendShape, useEyeTracking: Bool, vowel: Vowel) -> [Float] {
-        let blendShape = blendShape.mirrored().compensatingBlinkForDownwardGaze()
+        let blendShape = blendShape.compensatingBlinkForDownwardGaze().mirrored()
         return [
             -translation.x, translation.y, translation.z,
              rotationEuler.x, -rotationEuler.y, -rotationEuler.z,
@@ -28,7 +32,7 @@ enum FaceTransformValues {
 
     static func perfectSync(translation: SIMD3<Float>, rotationEuler: SIMD3<Float>,
                             blendShape: BlendShape, useEyeTracking: Bool) -> [Float] {
-        let blendShape = blendShape.mirrored().compensatingBlinkForDownwardGaze()
+        let blendShape = blendShape.compensatingBlinkForDownwardGaze().mirrored()
         // The eye block of the wire order is gated below, and the gaze has to follow it:
         // it drives the eyes through their own channel, so leaving it here would keep
         // them moving after eye tracking is turned off.

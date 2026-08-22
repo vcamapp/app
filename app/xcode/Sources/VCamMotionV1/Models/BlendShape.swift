@@ -89,16 +89,13 @@ public extension BlendShape {
 
     /// Pairs of sided shapes, as `wireOrder` key paths. Directional shapes such as
     /// `jawLeft` / `mouthRight` belong here too: mirroring moves the jaw the other way.
-    /// The shapes missing from this list are the ones without a side.
+    /// The shapes missing from this list are the ones without a side, plus the gaze
+    /// shapes of `gazeDirectionKeyPaths`.
     static let sidedPairs: [(WritableKeyPath<BlendShape, Float> & Sendable, WritableKeyPath<BlendShape, Float> & Sendable)] = [
         (\.browDownLeft, \.browDownRight),
         (\.browOuterUpLeft, \.browOuterUpRight),
         (\.cheekSquintLeft, \.cheekSquintRight),
         (\.eyeBlinkLeft, \.eyeBlinkRight),
-        (\.eyeLookDownLeft, \.eyeLookDownRight),
-        (\.eyeLookInLeft, \.eyeLookInRight),
-        (\.eyeLookOutLeft, \.eyeLookOutRight),
-        (\.eyeLookUpLeft, \.eyeLookUpRight),
         (\.eyeSquintLeft, \.eyeSquintRight),
         (\.eyeWideLeft, \.eyeWideRight),
         (\.jawLeft, \.jawRight),
@@ -113,15 +110,25 @@ public extension BlendShape {
         (\.noseSneerLeft, \.noseSneerRight),
     ]
 
-    /// Swaps every sided shape and flips the horizontal gaze, turning values named
-    /// after the subject's own left and right into the screen's left and right.
+    /// Gaze shapes, kept out of `sidedPairs` on purpose. The avatar's gaze follows the
+    /// subject's own direction rather than the screen's, so `lookAtPoint` is not flipped
+    /// either; swapping only these shapes would make a perfect sync model's eye meshes
+    /// pull against the look at target.
+    static let gazeDirectionKeyPaths: Set<WritableKeyPath<BlendShape, Float> & Sendable> = [
+        \.eyeLookDownLeft, \.eyeLookDownRight,
+        \.eyeLookInLeft, \.eyeLookInRight,
+        \.eyeLookOutLeft, \.eyeLookOutRight,
+        \.eyeLookUpLeft, \.eyeLookUpRight,
+    ]
+
+    /// Swaps every sided shape, turning values named after the subject's own left and
+    /// right into the screen's left and right. The gaze keeps the subject's direction.
     func mirrored() -> BlendShape {
         var mirrored = self
         for (left, right) in Self.sidedPairs {
             mirrored[keyPath: left] = self[keyPath: right]
             mirrored[keyPath: right] = self[keyPath: left]
         }
-        mirrored.lookAtPoint.x = -lookAtPoint.x
         return mirrored
     }
 
