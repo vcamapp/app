@@ -36,12 +36,11 @@ public final class UniBridgeStub {
                 NSApp.terminate(nil)
             }
         }
+        // The engine is what resumes a waiting caller, so the stub answers every
+        // request as it is sent; a call that waits for nothing is a no-op
         UniBridge.methodCallback = { method, payload, _ in
-            // Callers waiting for the engine's model load result would otherwise time out
-            guard let call = LoadVRMCall(method: method, payload: payload),
-                  let requestID = call.requestID else { return }
-            Task { @MainActor in
-                UniRequestHub.modelLoad.complete(requestID: requestID, errorCode: 0)
+            MainActor.assumeIsolated {
+                UniBridge.completeRequest(method: method, payload: payload, errorCode: 0)
             }
         }
     }

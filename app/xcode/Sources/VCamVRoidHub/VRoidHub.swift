@@ -57,6 +57,17 @@ public enum VRoidHub {
 
     private static var didAttemptRestore = false
 
+    /// Decrypts the VRoid Hub model currently in use into memory without ever
+    /// writing a plaintext file. Returns nil when the current avatar is not from VRoid
+    /// Hub or the session cannot be restored; restoring the session verifies
+    /// the account over the network, the model itself resolves from the
+    /// encrypted cache while its license is valid
+    public static func currentModelData() async throws -> Data? {
+        guard let client, let reference = VRoidModelReference.lastUsed else { return nil }
+        guard try await client.restoreSession() != nil else { return nil }
+        return try await client.decryptedModel(StoredModelReference(reference: reference)).data
+    }
+
     /// Whether a VRoid Hub model will be installed right after launch, so that
     /// the engine can skip restoring a model of its own
     public static var hasPendingRestore: Bool {

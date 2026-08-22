@@ -24,6 +24,52 @@
         }
       }
     },
+    "accessoryApplyFailed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Some accessories could not be placed on the avatar."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一部のアクセサリをモデルに配置できませんでした。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "일부 액세서리를 모델에 배치하지 못했습니다."
+          }
+        }
+      }
+    },
+    "accessoryApplyTimedOut": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The avatar did not respond in time."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "モデルからの応答がありませんでした。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모델이 응답하지 않았습니다."
+          }
+        }
+      }
+    },
     "accountManagement": {
       "extractionState": "manual",
       "localizations": {
@@ -480,6 +526,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "(세로)"
+          }
+        }
+      }
+    },
+    "avatarNotLoaded": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Load an avatar in the main window first."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "先にメインウィンドウでモデルを読み込んでください。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "먼저 메인 윈도우에서 모델을 불러와 주세요."
           }
         }
       }

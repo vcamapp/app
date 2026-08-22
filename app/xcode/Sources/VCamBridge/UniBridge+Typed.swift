@@ -1,7 +1,7 @@
 import Foundation
 
 // MARK: - Method ID Enum
-public struct UniBridgeMethodId: RawRepresentable, Sendable {
+public struct UniBridgeMethodId: RawRepresentable, Sendable, Equatable {
     static let playMotion = Self.init(rawValue: 0)
     static let stopMotion = Self.init(rawValue: 1)
     static let applyExpression = Self.init(rawValue: 2)
@@ -19,6 +19,7 @@ public struct UniBridgeMethodId: RawRepresentable, Sendable {
     static let setTrackingChannelEnabled = Self.init(rawValue: 40)
 
     public static let loadVRM = Self.init(rawValue: 50)
+    static let applyAccessoryPlacements = Self.init(rawValue: 51)
 
     public let rawValue: Int32
 
@@ -110,7 +111,68 @@ public struct LoadVRMPayload {
     public var source: Int32
 }
 
-/// A decoded ``LoadVRMPayload`` with the C strings copied, for stubs and tests
+struct ApplyAccessoryPlacementsPayload {
+    var jsonPtr: UnsafePointer<CChar>
+    var requestIDPtr: UnsafePointer<CChar>
+}
+
+/// One accessory placement sent to the engine.
+/// TRS values are in glTF space; the engine converts them to its own axes
+public struct AccessoryPlacement: Codable, Equatable, Sendable {
+    /// Named components, because the engine reads the JSON as an object rather
+    /// than the array a `SIMD3` would encode to
+    public struct Vector3: Codable, Equatable, Sendable {
+        public var x: Float
+        public var y: Float
+        public var z: Float
+
+        public init(_ vector: SIMD3<Float>) {
+            x = vector.x
+            y = vector.y
+            z = vector.z
+        }
+    }
+
+    public struct Quaternion: Codable, Equatable, Sendable {
+        public var x: Float
+        public var y: Float
+        public var z: Float
+        public var w: Float
+
+        public init(_ vector: SIMD4<Float>) {
+            x = vector.x
+            y = vector.y
+            z = vector.z
+            w = vector.w
+        }
+    }
+
+    public var bone: String
+    /// Path of a model to load. Empty for placements referencing `nodeName`
+    public var sourcePath: String
+    /// Name of an existing node under a `vcam_accessory` group, for updating
+    /// accessories baked into an exported model
+    public var nodeName: String
+    public var position: Vector3
+    public var rotation: Quaternion
+    public var scale: Vector3
+
+    public init(bone: String, sourcePath: String, nodeName: String, position: Vector3, rotation: Quaternion, scale: Vector3) {
+        self.bone = bone
+        self.sourcePath = sourcePath
+        self.nodeName = nodeName
+        self.position = position
+        self.rotation = rotation
+        self.scale = scale
+    }
+
+    /// The JSON the engine reads, envelope included
+    static func encode(_ placements: [AccessoryPlacement]) throws -> String {
+        String(decoding: try JSONEncoder().encode(["items": placements]), as: UTF8.self)
+    }
+}
+
+/// A decoded ``LoadVRMPayload`` with the C strings copied, for tests
 public struct LoadVRMCall: Equatable, Sendable {
     public var path: String
     /// nil when the caller does not wait for a completion notification
@@ -234,6 +296,15 @@ public extension UniBridge {
             (requestID?.uuidString ?? "").withCString { requestIDPtr in
                 var payload = LoadVRMPayload(pathPtr: pathPtr, requestIDPtr: requestIDPtr, source: source.rawValue)
                 send(.loadVRM, payload: &payload)
+            }
+        }
+    }
+
+    static func applyAccessoryPlacements(json: String, requestID: UUID) {
+        json.withCString { jsonPtr in
+            requestID.uuidString.withCString { requestIDPtr in
+                var payload = ApplyAccessoryPlacementsPayload(jsonPtr: jsonPtr, requestIDPtr: requestIDPtr)
+                send(.applyAccessoryPlacements, payload: &payload)
             }
         }
     }

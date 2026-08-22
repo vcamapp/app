@@ -43,9 +43,8 @@ func completingModelLoads(errorCode: Int32, during body: () async throws -> Void
     UniBridge.methodCallback = { method, payload, _ in
         guard let call = LoadVRMCall(method: method, payload: payload) else { return }
         calls.append(call)
-        guard let requestID = call.requestID else { return }
-        Task { @MainActor in
-            UniRequestHub.modelLoad.complete(requestID: requestID, errorCode: errorCode)
+        MainActor.assumeIsolated {
+            UniBridge.completeRequest(method: method, payload: payload, errorCode: errorCode)
         }
     }
     try await body()
