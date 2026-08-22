@@ -37,6 +37,7 @@ public extension VCamColor {
 
 public extension Binding where Value == VCamColor {
     /// Lets a ColorPicker edit a stored VCamColor directly
+    @MainActor
     var color: Binding<Color> {
         map(get: \.color, set: VCamColor.init(color:))
     }

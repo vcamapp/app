@@ -1059,29 +1059,6 @@
         }
       }
     },
-    "close": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Close"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "閉じる"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "닫기"
-          }
-        }
-      }
-    },
     "color": {
       "extractionState": "manual",
       "localizations": {
@@ -3240,52 +3217,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "설치"
-          }
-        }
-      }
-    },
-    "installOne %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Install %@"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@が設置されます"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@을(를) 설치합니다"
-          }
-        }
-      }
-    },
-    "installPlugin %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ a virtual camera plugin"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "仮想カメラプラグインを%@します"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "가상 카메라 플러그인을 %@합니다"
           }
         }
       }
@@ -7633,29 +7564,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "제거"
-          }
-        }
-      }
-    },
-    "uninstallPlugin": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Uninstall Virtual Camera Plugin"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "プラグインのアンインストール"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "가상 카메라 플러그인 제거"
           }
         }
       }

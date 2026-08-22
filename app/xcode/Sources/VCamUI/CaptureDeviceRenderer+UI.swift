@@ -97,7 +97,7 @@ private struct CaptureDeviceSelectView: View {
             var cgImage: CGImage?
             _ = VTCreateCGImageFromCVPixelBuffer(frame.buffer, options: nil, imageOut: &cgImage)
             guard let cgImage else { return }
-            nonisolated(unsafe) let image = NSImage(cgImage: cgImage, size: .init(width: cgImage.width, height: cgImage.height))
+            let image = NSImage(cgImage: cgImage, size: .init(width: cgImage.width, height: cgImage.height))
             DispatchQueue.runOnMain {
                 showPreview(image)
             }
