@@ -156,6 +156,7 @@ private extension AppMenu {
             makeMenuItem(title: String(localized: .addScreenCapture), action: #selector(addScreenCapture)),
             makeMenuItem(title: String(localized: .addVideoCapture), action: #selector(addVideoCapture)),
             makeMenuItem(title: String(localized: .addWeb), action: #selector(addWeb)),
+            makeMenuItem(title: String(localized: .addText), action: #selector(addText)),
             .separator(),
             makeMenuItem(title: String(localized: .addWind), action: #selector(addWind)),
         ]
@@ -167,6 +168,7 @@ private extension AppMenu {
             makeMenuItem(title: String(localized: .addScreenCapture), action: #selector(addScreenCapture)),
             makeMenuItem(title: String(localized: .addVideoCapture), action: #selector(addVideoCapture)),
             makeMenuItem(title: String(localized: .addWeb), action: #selector(addWeb)),
+            makeMenuItem(title: String(localized: .addText), action: #selector(addText)),
         ]
 #endif
         Self.makeSubMenu(menu: subMenu, title: String(localized: .object), items: items)
@@ -191,6 +193,10 @@ private extension AppMenu {
 
     @objc private func addWeb() {
         WebRenderer.showPreferencesForAdding()
+    }
+
+    @objc private func addText() {
+        TextRenderer.showPreferencesForAdding()
     }
 
     @objc private func addWind() {

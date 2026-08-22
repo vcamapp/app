@@ -208,6 +208,29 @@
         }
       }
     },
+    "addText": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Text"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "テキストを追加"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "텍스트 추가"
+          }
+        }
+      }
+    },
     "addToMacOSMenuBar": {
       "extractionState": "manual",
       "localizations": {

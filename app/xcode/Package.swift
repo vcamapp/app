@@ -13,6 +13,8 @@ let package = Package(
 
         .library(name: "VCamDefaults", targets: ["VCamDefaults"]),
         .library(name: "VCamMotionV1", targets: ["VCamMotionV1"]),
+        .library(name: "VCamTracking", targets: ["VCamTracking"]),
+        .library(name: "VCamControl", targets: ["VCamControl"]),
         .library(name: "VCamAppExtension", targets: ["VCamAppExtension"]),
 
         .library(name: "VCamStub", targets: ["VCamStub"]),
