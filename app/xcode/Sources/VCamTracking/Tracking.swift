@@ -237,13 +237,18 @@ public final class Tracking {
         if method == .vcamMocap {
             setHandAndFingerTrackingMethods(hand: .vcamMocap, finger: .vcamMocap)
         } else if handTrackingMethod == .vcamMocap {
-            setHandAndFingerTrackingMethods(hand: .disabled, finger: method)
+            setHandAndFingerTrackingMethods(hand: .disabled, finger: .disabled)
         } else {
             setHandAndFingerTrackingMethods(hand: handTrackingMethod, finger: method)
         }
     }
 
     private func setHandAndFingerTrackingMethods(hand: TrackingMethod.Hand, finger: TrackingMethod.Finger) {
+        var finger = finger
+        if hand == .disabled {
+            finger = .disabled
+        }
+
         if handTrackingMethod != hand {
             vcamMotionTracking.stopHandResampling()
         }
