@@ -82,22 +82,29 @@ public extension FacialMocapData {
 }
 
 extension FacialMocapData {
-    func vcamHeadTransform(useEyeTracking: Bool) -> [Float] {
+    /// Relays ARKit values like VCamMotion; see `VCamMotion.anatomicalBlendShape`.
+    private var anatomicalBlendShape: BlendShape {
+        blendShape.horizontallyMirrored()
+    }
+
+    func vcamHeadTransform(useEyeTracking: Bool, mirrored: Bool) -> [Float] {
         FaceTransformValues.vcamHeadTransform(
             translation: head.translation,
             rotationEuler: head.rotation,
-            blendShape: blendShape,
+            blendShape: anatomicalBlendShape,
             useEyeTracking: useEyeTracking,
+            mirrored: mirrored,
             vowel: VowelEstimator.estimate(blendShape: blendShape)
         )
     }
 
-    func perfectSync(useEyeTracking: Bool) -> [Float] {
+    func perfectSync(useEyeTracking: Bool, mirrored: Bool) -> [Float] {
         FaceTransformValues.perfectSync(
             translation: head.translation,
             rotationEuler: head.rotation,
-            blendShape: blendShape,
-            useEyeTracking: useEyeTracking
+            blendShape: anatomicalBlendShape,
+            useEyeTracking: useEyeTracking,
+            mirrored: mirrored
         )
     }
 }

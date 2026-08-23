@@ -110,10 +110,8 @@ public extension BlendShape {
         (\.noseSneerLeft, \.noseSneerRight),
     ]
 
-    /// Gaze shapes, kept out of `sidedPairs` on purpose. The avatar's gaze follows the
-    /// subject's own direction rather than the screen's, so `lookAtPoint` is not flipped
-    /// either; swapping only these shapes would make a perfect sync model's eye meshes
-    /// pull against the look at target.
+    /// Gaze shapes, kept out of `sidedPairs` on purpose: they mirror as a direction
+    /// through `gazeMirrored()` rather than by swapping the eyes.
     static let gazeDirectionKeyPaths: Set<WritableKeyPath<BlendShape, Float> & Sendable> = [
         \.eyeLookDownLeft, \.eyeLookDownRight,
         \.eyeLookInLeft, \.eyeLookInRight,
@@ -122,7 +120,8 @@ public extension BlendShape {
     ]
 
     /// Swaps every sided shape, turning values named after the subject's own left and
-    /// right into the screen's left and right. The gaze keeps the subject's direction.
+    /// right into the screen's left and right. The gaze channel is left untouched;
+    /// see `gazeDirectionKeyPaths`.
     func mirrored() -> BlendShape {
         var mirrored = self
         for (left, right) in Self.sidedPairs {
@@ -130,6 +129,28 @@ public extension BlendShape {
             mirrored[keyPath: right] = self[keyPath: left]
         }
         return mirrored
+    }
+
+    /// Mirrors the gaze direction horizontally: each eye's nasal and temporal shapes
+    /// swap and `lookAtPoint.x` flips with them, so the shape-driven eye meshes and the
+    /// look at target keep agreeing. Keeping the values on their own eye (instead of
+    /// swapping left and right) preserves per-eye asymmetry. The vertical axis has a
+    /// single shared convention and stays untouched.
+    func gazeMirrored() -> BlendShape {
+        var mirrored = self
+        mirrored.eyeLookInLeft = eyeLookOutLeft
+        mirrored.eyeLookOutLeft = eyeLookInLeft
+        mirrored.eyeLookInRight = eyeLookOutRight
+        mirrored.eyeLookOutRight = eyeLookInRight
+        mirrored.lookAtPoint.x = -lookAtPoint.x
+        return mirrored
+    }
+
+    /// The complete horizontal parity flip. Self-inverse, so the same call converts
+    /// observer-based wire data to anatomical sides and anatomical values to the
+    /// mirrored presentation.
+    func horizontallyMirrored() -> BlendShape {
+        mirrored().gazeMirrored()
     }
 
     func appendWireOrderValues(to values: inout [Float], useEyeTracking: Bool) {

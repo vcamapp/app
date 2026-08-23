@@ -27,47 +27,47 @@ struct FaceTransformValuesTests {
     func disablingEyeTrackingZeroesTheGaze() {
         let values = FaceTransformValues.perfectSync(
             translation: .zero, rotationEuler: .zero,
-            blendShape: makeBlendShape(), useEyeTracking: false
+            blendShape: makeBlendShape(), useEyeTracking: false, mirrored: true
         )
 
         #expect(values[Index.lookAtX] == 0)
         #expect(values[Index.lookAtY] == 0)
     }
 
-    /// The gaze keeps the subject's own direction while the sided shapes mirror,
-    /// so a source that flips it as well would show the avatar looking the wrong way.
+    /// The look at point and the gaze shapes have to flip together, or a perfect
+    /// sync model's eye meshes pull against the look at target.
     @Test
-    func enablingEyeTrackingKeepsTheGazeUnmirrored() {
+    func mirroringFlipsTheGazeWithTheFace() {
         let values = FaceTransformValues.perfectSync(
             translation: .zero, rotationEuler: .zero,
-            blendShape: makeBlendShape(), useEyeTracking: true
+            blendShape: makeBlendShape(), useEyeTracking: true, mirrored: true
         )
 
-        #expect(values[Index.lookAtX] == 0.4)
+        #expect(values[Index.lookAtX] == -0.4)
         #expect(values[Index.lookAtY] == -0.6)
 
         let lookInLeft = Index.blendShapes + BlendShape.wireOrder.firstIndex(of: \.eyeLookInLeft)!
-        let lookInRight = Index.blendShapes + BlendShape.wireOrder.firstIndex(of: \.eyeLookInRight)!
-        #expect(values[lookInLeft] == 0.7)
-        #expect(values[lookInRight] == 0)
+        let lookOutLeft = Index.blendShapes + BlendShape.wireOrder.firstIndex(of: \.eyeLookOutLeft)!
+        #expect(values[lookOutLeft] == 0.7)
+        #expect(values[lookInLeft] == 0)
     }
 
     /// The 12 element array drives the eyes through the same gaze convention.
     @Test
-    func vcamHeadTransformKeepsTheGazeOnTheSubjectsEye() {
+    func vcamHeadTransformFlipsTheGazeWhileMirrored() {
         let values = FaceTransformValues.vcamHeadTransform(
             translation: .zero, rotationEuler: .zero,
-            blendShape: makeBlendShape(), useEyeTracking: true, vowel: .a
+            blendShape: makeBlendShape(), useEyeTracking: true, mirrored: true, vowel: .a
         )
 
-        #expect(values[9] == 0.7)
+        #expect(values[9] == -0.7)
     }
 
     @Test
     func perfectSyncMirrorsTheSidedBlendShapes() {
         let values = FaceTransformValues.perfectSync(
             translation: .zero, rotationEuler: .zero,
-            blendShape: makeBlendShape(), useEyeTracking: true
+            blendShape: makeBlendShape(), useEyeTracking: true, mirrored: true
         )
 
         let blinkLeft = Index.blendShapes + BlendShape.wireOrder.firstIndex(of: \.eyeBlinkLeft)!
@@ -81,13 +81,79 @@ struct FaceTransformValuesTests {
     func vcamHeadTransformMirrorsTheSidedBlendShapes() {
         let values = FaceTransformValues.vcamHeadTransform(
             translation: .zero, rotationEuler: .zero,
-            blendShape: makeBlendShape(), useEyeTracking: true, vowel: .a
+            blendShape: makeBlendShape(), useEyeTracking: true, mirrored: true, vowel: .a
         )
 
         // Indices 6 and 7 are the left and right blink of the 12 element array
         #expect(values[6] == 0)
         #expect(values[7] == 1)
         #expect(values.count == 12)
+    }
+
+    @Test
+    func perfectSyncMirrorsTheHeadPose() {
+        let values = FaceTransformValues.perfectSync(
+            translation: .init(0.1, 0.2, 0.3), rotationEuler: .init(10, 20, 30),
+            blendShape: makeBlendShape(), useEyeTracking: true, mirrored: true
+        )
+
+        #expect(values[0] == -0.1)
+        #expect(values[1] == 0.2)
+        #expect(values[2] == 0.3)
+        #expect(values[3] == 10)
+        #expect(values[4] == -20)
+        #expect(values[5] == -30)
+    }
+
+    /// Without the mirror the subject's right maps onto the avatar's right.
+    @Test
+    func disablingMirroringKeepsTheSubjectsSides() {
+        let values = FaceTransformValues.perfectSync(
+            translation: .init(0.1, 0.2, 0.3), rotationEuler: .init(10, 20, 30),
+            blendShape: makeBlendShape(), useEyeTracking: true, mirrored: false
+        )
+
+        #expect(values[0] == 0.1)
+        #expect(values[1] == 0.2)
+        #expect(values[2] == 0.3)
+        #expect(values[3] == 10)
+        #expect(values[4] == 20)
+        #expect(values[5] == 30)
+
+        let blinkLeft = Index.blendShapes + BlendShape.wireOrder.firstIndex(of: \.eyeBlinkLeft)!
+        let blinkRight = Index.blendShapes + BlendShape.wireOrder.firstIndex(of: \.eyeBlinkRight)!
+        #expect(values[blinkLeft] == 1)
+        #expect(values[blinkRight] == 0)
+    }
+
+    /// Without the mirror the gaze keeps the subject's own direction on both axes.
+    @Test
+    func disablingMirroringKeepsTheGaze() {
+        let values = FaceTransformValues.perfectSync(
+            translation: .zero, rotationEuler: .zero,
+            blendShape: makeBlendShape(), useEyeTracking: true, mirrored: false
+        )
+
+        #expect(values[Index.lookAtX] == 0.4)
+        #expect(values[Index.lookAtY] == -0.6)
+
+        let lookInLeft = Index.blendShapes + BlendShape.wireOrder.firstIndex(of: \.eyeLookInLeft)!
+        #expect(values[lookInLeft] == 0.7)
+    }
+
+    @Test
+    func disablingMirroringKeepsTheSidesOfTheShortArray() {
+        let values = FaceTransformValues.vcamHeadTransform(
+            translation: .init(0.1, 0.2, 0.3), rotationEuler: .init(10, 20, 30),
+            blendShape: makeBlendShape(), useEyeTracking: true, mirrored: false, vowel: .a
+        )
+
+        #expect(values[0] == 0.1)
+        #expect(values[4] == 20)
+        #expect(values[5] == 30)
+        #expect(values[6] == 1)
+        #expect(values[7] == 0)
+        #expect(values[9] == 0.7)
     }
 
     @Test
@@ -100,10 +166,27 @@ struct FaceTransformValuesTests {
 
         let values = FaceTransformValues.vcamHeadTransform(
             translation: .zero, rotationEuler: .zero,
-            blendShape: blend, useEyeTracking: true, vowel: .a
+            blendShape: blend, useEyeTracking: true, mirrored: true, vowel: .a
         )
 
         // The 0.4 blink is entirely lid follow of the 0.8 downward gaze
+        #expect(values[6] == 0)
+        #expect(values[7] == 0)
+    }
+
+    /// The compensation pairs each blink with its own eye's downward gaze,
+    /// which must hold without the mirroring as well.
+    @Test
+    func blinkCompensationAppliesWithoutMirroring() {
+        var blend = BlendShape()
+        blend.eyeBlinkLeft = 0.4
+        blend.eyeLookDownLeft = 0.8
+
+        let values = FaceTransformValues.vcamHeadTransform(
+            translation: .zero, rotationEuler: .zero,
+            blendShape: blend, useEyeTracking: true, mirrored: false, vowel: .a
+        )
+
         #expect(values[6] == 0)
         #expect(values[7] == 0)
     }
@@ -118,7 +201,7 @@ struct FaceTransformValuesTests {
 
         let values = FaceTransformValues.vcamHeadTransform(
             translation: .zero, rotationEuler: .zero,
-            blendShape: blend, useEyeTracking: true, vowel: .a
+            blendShape: blend, useEyeTracking: true, mirrored: true, vowel: .a
         )
 
         #expect(values[6] == 1)
@@ -133,7 +216,7 @@ struct FaceTransformValuesTests {
 
         let values = FaceTransformValues.vcamHeadTransform(
             translation: .zero, rotationEuler: .zero,
-            blendShape: blend, useEyeTracking: true, vowel: .a
+            blendShape: blend, useEyeTracking: true, mirrored: true, vowel: .a
         )
 
         #expect(values[6] == 0.4)
@@ -144,10 +227,29 @@ struct FaceTransformValuesTests {
     func disablingEyeTrackingZeroesTheEyeChannelsOfTheShortArray() {
         let values = FaceTransformValues.vcamHeadTransform(
             translation: .zero, rotationEuler: .zero,
-            blendShape: makeBlendShape(), useEyeTracking: false, vowel: .a
+            blendShape: makeBlendShape(), useEyeTracking: false, mirrored: true, vowel: .a
         )
 
         #expect(values[9] == 0)
         #expect(values[10] == 0)
+    }
+
+    /// Only the blinks need swapping: the rest of the image-space array is
+    /// already mirrored.
+    @Test
+    func presentingImageSpaceValuesMirroredSwapsOnlyTheBlinks() {
+        let values: [Float] = [0.1, 0.2, 0.3, 10, 20, 30, 0.9, 0.1, 0.5, 0.6, -0.7, 2]
+        let presented = FaceTransformValues.presenting(imageSpaceValues: values, mirrored: true)
+
+        #expect(presented == [0.1, 0.2, 0.3, 10, 20, 30, 0.1, 0.9, 0.5, 0.6, -0.7, 2])
+    }
+
+    /// Without the mirror it is the other way around.
+    @Test
+    func presentingImageSpaceValuesUnmirroredFlipsTheLateralComponents() {
+        let values: [Float] = [0.1, 0.2, 0.3, 10, 20, 30, 0.9, 0.1, 0.5, 0.6, -0.7, 2]
+        let presented = FaceTransformValues.presenting(imageSpaceValues: values, mirrored: false)
+
+        #expect(presented == [-0.1, 0.2, 0.3, 10, -20, -30, 0.9, 0.1, 0.5, -0.6, -0.7, 2])
     }
 }

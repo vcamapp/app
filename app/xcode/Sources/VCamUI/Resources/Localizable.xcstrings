@@ -4026,6 +4026,29 @@
         }
       }
     },
+    "mirrorTracking": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mirror your movements"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "鏡のように動かす (ミラーリング)"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "거울처럼 움직이기 (미러링)"
+          }
+        }
+      }
+    },
     "mocapNetworkInterpolation": {
       "extractionState": "manual",
       "localizations": {

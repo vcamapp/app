@@ -13,6 +13,7 @@ public struct VCamSettingTrackingView: View {
     @AppStorage(key: .eyeTrackingIntensityY) private var eyeTrackingIntensityY
     @AppStorage(key: .useVowelEstimation) private var useVowelEstimation
     @AppStorage(key: .useEyeTracking) private var useEyeTracking
+    @AppStorage(key: .mirrorTracking) private var mirrorTracking
     @AppStorage(key: .fingerTrackingOpenIntensity) private var fingerTrackingOpenIntensity
     @AppStorage(key: .fingerTrackingCloseIntensity) private var fingerTrackingCloseIntensity
 #if ENABLE_MOCOPI
@@ -27,6 +28,9 @@ public struct VCamSettingTrackingView: View {
         Form {
             Section {
                 VCamTrackingView()
+                Toggle(isOn: $mirrorTracking) {
+                    Text(.mirrorTracking)
+                }
             }
             Section {
                 TrackingDeviceView()

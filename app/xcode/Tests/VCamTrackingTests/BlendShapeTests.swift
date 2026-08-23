@@ -75,6 +75,46 @@ struct BlendShapeTests {
         #expect(blend.mirrored().mirrored() == blend)
     }
 
+    @Test
+    func gazeMirroringFlipsTheHorizontalGaze() {
+        var blend = BlendShape(lookAtPoint: .init(0.4, 0.7))
+        blend.eyeLookInLeft = 0.9
+        blend.eyeLookOutRight = 0.6
+        blend.eyeLookUpLeft = 0.3
+        blend.eyeBlinkLeft = 1
+
+        let mirrored = blend.gazeMirrored()
+
+        #expect(mirrored.eyeLookOutLeft == 0.9)
+        #expect(mirrored.eyeLookInLeft == 0)
+        #expect(mirrored.eyeLookInRight == 0.6)
+        #expect(mirrored.eyeLookOutRight == 0)
+        #expect(mirrored.lookAtPoint == .init(-0.4, 0.7))
+        // The vertical gaze and the non-gaze shapes stay as they are
+        #expect(mirrored.eyeLookUpLeft == 0.3)
+        #expect(mirrored.eyeBlinkLeft == 1)
+    }
+
+    @Test
+    func gazeMirroringTwiceRestoresTheOriginal() {
+        var blend = BlendShape(lookAtPoint: .init(-0.2, 0.5))
+        for (index, keyPath) in BlendShape.wireOrder.enumerated() {
+            blend[keyPath: keyPath] = Float(index) / 100
+        }
+
+        #expect(blend.gazeMirrored().gazeMirrored() == blend)
+    }
+
+    @Test
+    func horizontalMirroringTwiceRestoresTheOriginal() {
+        var blend = BlendShape(lookAtPoint: .init(-0.2, 0.5))
+        for (index, keyPath) in BlendShape.wireOrder.enumerated() {
+            blend[keyPath: keyPath] = Float(index) / 100
+        }
+
+        #expect(blend.horizontallyMirrored().horizontallyMirrored() == blend)
+    }
+
     /// Every shape whose name carries a side has to be listed as a pair, or mirroring
     /// would silently leave it on the wrong side of the avatar's face. The gaze shapes
     /// are the deliberate exception, so they have to stay out of the pairs.

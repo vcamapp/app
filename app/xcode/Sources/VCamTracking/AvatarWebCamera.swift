@@ -302,7 +302,10 @@ public final class AvatarWebCamera {
     private static func apply(_ output: TrackingOutput) {
         switch output.face {
         case .vcamBlendShape(let values):
-            UniBridge.shared.receiveVCamBlendShape(values)
+            UniBridge.shared.receiveVCamBlendShape(FaceTransformValues.presenting(
+                imageSpaceValues: values,
+                mirrored: Tracking.shared.mirrorsTracking
+            ))
         case .cameraFace(let result):
             applyCameraFace(result)
         case nil:
@@ -325,12 +328,14 @@ public final class AvatarWebCamera {
     @MainActor
     private static func applyCameraFace(_ result: CameraFaceTrackingResult) {
         let useEyeTracking = Tracking.shared.useEyeTracking
+        let mirrored = Tracking.shared.mirrorsTracking
         if Tracking.shared.activeFaceMappingMode == .perfectSync {
             UniBridge.shared.receivePerfectSync(FaceTransformValues.perfectSync(
                 translation: result.headTranslation,
                 rotationEuler: result.headRotationEuler,
                 blendShape: result.blendShape,
-                useEyeTracking: useEyeTracking
+                useEyeTracking: useEyeTracking,
+                mirrored: mirrored
             ))
         } else {
             UniBridge.shared.receiveVCamBlendShape(FaceTransformValues.vcamHeadTransform(
@@ -338,6 +343,7 @@ public final class AvatarWebCamera {
                 rotationEuler: result.headRotationEuler,
                 blendShape: result.blendShape,
                 useEyeTracking: useEyeTracking,
+                mirrored: mirrored,
                 vowel: VowelEstimator.estimate(blendShape: result.blendShape)
             ))
         }

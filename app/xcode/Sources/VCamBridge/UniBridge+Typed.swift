@@ -17,6 +17,7 @@ public struct UniBridgeMethodId: RawRepresentable, Sendable, Equatable {
     static let removeImportedMotion = Self.init(rawValue: 32)
 
     static let setTrackingChannelEnabled = Self.init(rawValue: 40)
+    static let setTrackingMirror = Self.init(rawValue: 41)
 
     public static let loadVRM = Self.init(rawValue: 50)
     static let applyAccessoryPlacements = Self.init(rawValue: 51)
@@ -51,9 +52,9 @@ public enum VRMLoadSource: Int32, Sendable {
 }
 
 // MARK: - Payload Structures
+// A bool is 4 bytes on the engine side and would shift the field offsets, so flags are UInt8
 public struct PlayMotionPayload {
     public var stringPtr: UnsafePointer<CChar>?
-    // A bool is 4 bytes on the engine side and would shift the field offsets, so flags are UInt8
     public var isLoop: UInt8
 }
 
@@ -62,7 +63,6 @@ public struct RegisterImportedMotionPayload {
     public var pathPtr: UnsafePointer<CChar>?
     public var requestIDPtr: UnsafePointer<CChar>?
     public var axisMask: UInt8
-    // A bool is 4 bytes on the engine side and would shift the field offsets, so flags are UInt8
     public var loadImmediately: UInt8
 }
 
@@ -74,6 +74,10 @@ public struct ImportedMotionAxesPayload {
 public struct TrackingChannelEnabledPayload {
     public var channel: Int32
     public var isEnabled: UInt8
+}
+
+public struct TrackingMirrorPayload {
+    public var isMirrored: UInt8
 }
 
 public struct TrackingMappingPayload {
@@ -255,6 +259,11 @@ public extension UniBridge {
     static func setTrackingChannelEnabled(_ channel: TrackingChannel, isEnabled: Bool) {
         var payload = TrackingChannelEnabledPayload(channel: channel.rawValue, isEnabled: isEnabled ? 1 : 0)
         send(.setTrackingChannelEnabled, payload: &payload)
+    }
+
+    static func setTrackingMirror(isMirrored: Bool) {
+        var payload = TrackingMirrorPayload(isMirrored: isMirrored ? 1 : 0)
+        send(.setTrackingMirror, payload: &payload)
     }
 
     static func applyExpression(name: String) {

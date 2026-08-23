@@ -22,15 +22,48 @@ struct FacialMocapTests {
 
         let decoded = try #require(FacialMocapData(rawData: testData))
 
-        #expect(Array(decoded.vcamHeadTransform(useEyeTracking: false)[0...2]) == [
+        #expect(Array(decoded.vcamHeadTransform(useEyeTracking: false, mirrored: true)[0...2]) == [
             0.030653415,
             -0.10287084,
             -0.6584072
         ])
-        #expect(Array(decoded.perfectSync(useEyeTracking: false)[0...2]) == [
+        #expect(Array(decoded.perfectSync(useEyeTracking: false, mirrored: true)[0...2]) == [
             0.030653415,
             -0.10287084,
             -0.6584072
         ])
+    }
+
+    /// The relayed ARKit shapes come through the mirror (`eyeBlink_L` is the
+    /// subject's right eye), so the mirrored presentation is the one that keeps
+    /// them as they arrived.
+    @Test
+    func blinkSidesFollowThePresentation() throws {
+        let testData = "eyeBlink_L&80|=head#0,0,0,0,0,0|rightEye#0,0,0|leftEye#0,0,0|"
+
+        let decoded = try #require(FacialMocapData(rawData: testData))
+
+        let mirrored = decoded.vcamHeadTransform(useEyeTracking: true, mirrored: true)
+        #expect(mirrored[6] == 0.8)
+        #expect(mirrored[7] == 0)
+
+        let unmirrored = decoded.vcamHeadTransform(useEyeTracking: true, mirrored: false)
+        #expect(unmirrored[6] == 0)
+        #expect(unmirrored[7] == 0.8)
+    }
+
+    /// The relayed gaze comes through the mirror as well.
+    @Test
+    func gazeFollowsThePresentation() throws {
+        let testData = "eyeLookIn_L&50|=head#0,0,0,0,0,0|rightEye#0,19,0|leftEye#0,19,0|"
+
+        let decoded = try #require(FacialMocapData(rawData: testData))
+        #expect(decoded.blendShape.lookAtPoint.x == -1)
+
+        let mirrored = decoded.perfectSync(useEyeTracking: true, mirrored: true)
+        #expect(mirrored[6] == -1)
+
+        let unmirrored = decoded.perfectSync(useEyeTracking: true, mirrored: false)
+        #expect(unmirrored[6] == 1)
     }
 }

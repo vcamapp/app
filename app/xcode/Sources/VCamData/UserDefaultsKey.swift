@@ -10,6 +10,7 @@ public extension UserDefaults.Key {
     static var useAutoConvertVRM1: Key<Bool> { .init("vc_use_auto_convert_vrm1", default: true) }
     static var useVowelEstimation: Key<Bool> { .init("vc_use_vowel_estimation", default: false) }
     static var useEyeTracking: Key<Bool> { .init("vc_use_eye_tracking", default: true) }
+    static var mirrorTracking: Key<Bool> { .init("vc_tracking_mirror", default: true) }
     static var useEmotion: Key<Bool> { .init("vc_use_emotion", default: false) }
     static var cameraFps: Key<Int> { .init("vc_camera_fps", default: 24) }
     static var captureDeviceId: Key<String?> { .init("vc_capture_device_id", default: nil) }

@@ -6,43 +6,82 @@ import VCamMotionV1
 /// FacialMocapData passes its euler rotation directly while VCamMotion
 /// converts its quaternion to euler angles first.
 ///
-/// The avatar moves like a mirror, which is why the head translation and rotation
-/// are flipped here. Every source of these arrays names its blend shapes after the
-/// subject's own left and right, so they are mirrored too; otherwise a wink would
-/// close the eye on the opposite side of the screen from the head turn.
+/// The input contract is the subject's own anatomical sides for the head pose,
+/// the sided shapes and the gaze alike. Sources whose wire data names them
+/// through the mirror convert it first (`VCamMotion.anatomicalBlendShape`).
 ///
-/// The gaze is the exception: it keeps the subject's own direction, matching the
-/// Vision path, which builds its arrays from image space without passing through here.
-/// `BlendShape.gazeDirectionKeyPaths` documents which shapes that covers.
+/// Mirroring flips every one of those channels together, here: flipping only some
+/// would make a wink close the eye on the opposite side of the screen from the
+/// head turn.
 enum FaceTransformValues {
+    /// Positions in the 12-element array, which the builders below emit in order.
+    private enum LegacyIndex {
+        static let posX = 0
+        static let yaw = 4
+        static let roll = 5
+        static let blinkLeft = 6
+        static let blinkRight = 7
+        static let eyeX = 9
+    }
+
     static func vcamHeadTransform(translation: SIMD3<Float>, rotationEuler: SIMD3<Float>,
-                                  blendShape: BlendShape, useEyeTracking: Bool, vowel: Vowel) -> [Float] {
-        let blendShape = blendShape.compensatingBlinkForDownwardGaze().mirrored()
-        return [
-            -translation.x, translation.y, translation.z,
-             rotationEuler.x, -rotationEuler.y, -rotationEuler.z,
-             blendShape.eyeBlinkLeft,
-             blendShape.eyeBlinkRight,
-             blendShape.jawOpen,
-             useEyeTracking ? blendShape.eyeLookInLeft - blendShape.eyeLookOutLeft : 0,
-             useEyeTracking ? blendShape.eyeLookUpLeft - blendShape.eyeLookDownLeft : 0,
-             Float(vowel.rawValue)
+                                  blendShape: BlendShape, useEyeTracking: Bool, mirrored: Bool, vowel: Vowel) -> [Float] {
+        let blendShape = presentationBlendShape(blendShape, mirrored: mirrored)
+        var values = headPoseValues(translation: translation, rotationEuler: rotationEuler, mirrored: mirrored)
+        values += [
+            blendShape.eyeBlinkLeft,
+            blendShape.eyeBlinkRight,
+            blendShape.jawOpen,
+            useEyeTracking ? blendShape.eyeLookInLeft - blendShape.eyeLookOutLeft : 0,
+            useEyeTracking ? blendShape.eyeLookUpLeft - blendShape.eyeLookDownLeft : 0,
+            Float(vowel.rawValue)
         ]
+        return values
     }
 
     static func perfectSync(translation: SIMD3<Float>, rotationEuler: SIMD3<Float>,
-                            blendShape: BlendShape, useEyeTracking: Bool) -> [Float] {
-        let blendShape = blendShape.compensatingBlinkForDownwardGaze().mirrored()
+                            blendShape: BlendShape, useEyeTracking: Bool, mirrored: Bool) -> [Float] {
+        let blendShape = presentationBlendShape(blendShape, mirrored: mirrored)
         // The eye block of the wire order is gated below, and the gaze has to follow it:
         // it drives the eyes through their own channel, so leaving it here would keep
         // them moving after eye tracking is turned off.
         let lookAtPoint = useEyeTracking ? blendShape.lookAtPoint : .zero
-        var values: [Float] = [
-            -translation.x, translation.y, translation.z,
-             rotationEuler.x, -rotationEuler.y, -rotationEuler.z,
-             lookAtPoint.x, lookAtPoint.y
-        ]
+        var values = headPoseValues(translation: translation, rotationEuler: rotationEuler, mirrored: mirrored)
+        values += [lookAtPoint.x, lookAtPoint.y]
         blendShape.appendWireOrderValues(to: &values, useEyeTracking: useEyeTracking)
+        return values
+    }
+
+    private static func headPoseValues(translation: SIMD3<Float>, rotationEuler: SIMD3<Float>, mirrored: Bool) -> [Float] {
+        [
+            mirrored ? -translation.x : translation.x, translation.y, translation.z,
+            rotationEuler.x,
+            mirrored ? -rotationEuler.y : rotationEuler.y,
+            mirrored ? -rotationEuler.z : rotationEuler.z,
+        ]
+    }
+
+    /// The blink compensation runs first, on anatomical values, so each blink pairs
+    /// with its own eye's downward gaze regardless of the presentation.
+    private static func presentationBlendShape(_ blendShape: BlendShape, mirrored: Bool) -> BlendShape {
+        let compensated = blendShape.compensatingBlinkForDownwardGaze()
+        return mirrored ? compensated.horizontallyMirrored() : compensated
+    }
+
+    /// The Vision camera path builds its 12-element array in image space, so its head
+    /// components and pupil-based gaze are already mirrored while its blinks are
+    /// anatomical: Vision names its landmarks after the subject's own sides (verified
+    /// against a still image and its horizontal flip).
+    static func presenting(imageSpaceValues: [Float], mirrored: Bool) -> [Float] {
+        var values = imageSpaceValues
+        if mirrored {
+            values.swapAt(LegacyIndex.blinkLeft, LegacyIndex.blinkRight)
+        } else {
+            values[LegacyIndex.posX].negate()
+            values[LegacyIndex.yaw].negate()
+            values[LegacyIndex.roll].negate()
+            values[LegacyIndex.eyeX].negate()
+        }
         return values
     }
 }

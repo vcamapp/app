@@ -110,10 +110,10 @@ public final class FacialMocapReceiver {
 
         let smoothingEnabled = smoothingStorage.isEnabled
         if Tracking.shared.activeFaceMappingMode == .perfectSync {
-            let perfectSync = data.perfectSync(useEyeTracking: Tracking.shared.useEyeTracking)
+            let perfectSync = data.perfectSync(useEyeTracking: Tracking.shared.useEyeTracking, mirrored: Tracking.shared.mirrorsTracking)
             perfectSyncResampler.send(perfectSync, smoothed: smoothingEnabled)
         } else {
-            let blendShape = data.vcamHeadTransform(useEyeTracking: Tracking.shared.useEyeTracking)
+            let blendShape = data.vcamHeadTransform(useEyeTracking: Tracking.shared.useEyeTracking, mirrored: Tracking.shared.mirrorsTracking)
             facialMocapLastValues = vDSP.linearInterpolate(
                 facialMocapLastValues,
                 blendShape,

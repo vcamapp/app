@@ -21,6 +21,7 @@ public final class Tracking {
 
     @ObservationIgnored public private(set) var useEyeTracking = false
     @ObservationIgnored public private(set) var useVowelEstimation = false
+    @ObservationIgnored public private(set) var mirrorsTracking = true
 
     public private(set) var usesAlternativeHandTracking = false
     public private(set) var usesHighPrecisionFaceTracking = false
@@ -47,6 +48,12 @@ public final class Tracking {
             .store(in: &cancellables)
         UserDefaults.standard.publisher(for: \.vc_use_vowel_estimation, options: [.initial, .new])
             .sink { [unowned self] in useVowelEstimation = $0 }
+            .store(in: &cancellables)
+        UserDefaults.standard.publisher(for: \.vc_tracking_mirror, options: [.initial, .new])
+            .sink { [unowned self] in
+                mirrorsTracking = $0
+                UniBridge.setTrackingMirror(isMirrored: $0)
+            }
             .store(in: &cancellables)
         UserDefaults.standard.publisher(for: \.vc_mocap_network_interpolation, options: [.initial, .new])
             .removeDuplicates()
@@ -330,6 +337,7 @@ public final class Tracking {
                 isHandTrackingEnabled: usesVCamMocapHandTracking,
                 useEyeTracking: useEyeTracking,
                 useVowelEstimation: useVowelEstimation,
+                mirrorsTracking: mirrorsTracking,
                 handConfiguration: webCamera.handTracking.configuration
             )
         }
@@ -344,5 +352,6 @@ public final class Tracking {
 private extension UserDefaults {
     @objc dynamic var vc_use_eye_tracking: Bool { value(for: .useEyeTracking) }
     @objc dynamic var vc_use_vowel_estimation: Bool { value(for: .useVowelEstimation) }
+    @objc dynamic var vc_tracking_mirror: Bool { value(for: .mirrorTracking) }
     @objc dynamic var vc_mocap_network_interpolation: Double { value(for: .mocapNetworkInterpolation) }
 }

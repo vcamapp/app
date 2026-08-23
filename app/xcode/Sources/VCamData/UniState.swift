@@ -314,6 +314,7 @@ public final class UniState {
         bridge.boolMapper.setValue(.useVSync, __useVSync)
         bridge.boolMapper.setValue(.lipSyncWebCam, __lipSyncWebCam)
         UniBridge.setTrackingChannelEnabled(.eye, isEnabled: UserDefaults.standard.value(for: .useEyeTracking))
+        UniBridge.setTrackingMirror(isMirrored: UserDefaults.standard.value(for: .mirrorTracking))
         bridge.floatMapper.setValue(.fps, __fps)
         bridge.floatMapper.setValue(.lipSyncMicIntensity, __lipSyncMicIntensity)
         bridge.floatMapper.setValue(.trackingSmoothing, __trackingSmoothing)
