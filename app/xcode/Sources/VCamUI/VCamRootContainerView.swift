@@ -1,6 +1,8 @@
 import AppKit
 import SwiftUI
 import VCamControl
+import VCamData
+import VCamLogger
 
 public final class VCamRootContainerView: NSView {
     public override init(frame frameRect: NSRect) {
@@ -22,18 +24,7 @@ public final class VCamRootContainerView: NSView {
 
 public extension VCamRootContainerView {
     override func draggingEntered(_ sender: any NSDraggingInfo) -> NSDragOperation {
-        guard let url = url(for: sender) else {
-            return [] // NSDragOperationNone
-        }
-
-#if !FEATURE_3
-        var isDirectory: ObjCBool = false
-        if FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory), isDirectory.boolValue {
-            return .copy
-        }
-#endif
-
-        guard FileType(url: url) != nil else {
+        guard let url = url(for: sender), FileType(url: url) != nil else {
             return [] // NSDragOperationNone
         }
 
@@ -45,35 +36,36 @@ public extension VCamRootContainerView {
     }
 
     override func performDragOperation(_ sender: any NSDraggingInfo) -> Bool {
-        guard let url = url(for: sender) else {
+        guard let url = url(for: sender), let type = FileType(url: url) else {
             return false
         }
-        
-#if !FEATURE_3
-        var isDirectory: ObjCBool = false
-        if FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory), isDirectory.boolValue {
-            AvatarControl.load(modelDirectoryURL: url)
-            return true
-        }
-#endif
 
-        guard let type = FileType(url: url) else {
-            return false
-        }
-        
         switch type {
-        case .vrm:
-            AvatarControl.load(vrmFileURL: url)
+        case .model:
+            loadAvatar(from: url)
         case .image:
             SceneObjectManager.shared.addImage(url: url)
         case .html:
             NSApp.activate(ignoringOtherApps: true) // To present the sheet, the window must be activated.
-            Task { @MainActor in
+            Task {
                 try? await Task.sleep(for: .milliseconds(500))
                 WebRenderer.showPreferencesForAdding(path: url.absoluteString)
             }
         }
         return true
+    }
+
+    /// Dropped models are registered to the library first so that they behave
+    /// exactly like the ones loaded from the model list
+    private func loadAvatar(from url: URL) {
+        Task {
+            do {
+                let item = try await ModelManager.shared.saveModel(from: url)
+                try AvatarControl.load(item)
+            } catch {
+                Logger.error(error)
+            }
+        }
     }
 
     func url(for info: any NSDraggingInfo) -> URL? {
@@ -84,14 +76,22 @@ public extension VCamRootContainerView {
     }
 
     enum FileType {
-        case vrm
+        case model
         case image
         case html
 
         public init?(url: URL) {
+#if !FEATURE_3
+            // A model is a directory here, so it is matched before the file extensions
+            var isDirectory: ObjCBool = false
+            if FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory), isDirectory.boolValue {
+                self = .model
+                return
+            }
+#endif
             switch url.pathExtension.lowercased() {
             case "vrm":
-                self = .vrm
+                self = .model
             case "png", "jpeg", "jpg", "tiff", "tif", "tga", "bmp":
                 self = .image
             case "html", "htm":

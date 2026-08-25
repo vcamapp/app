@@ -12,11 +12,10 @@ public struct ModelMeta: Hashable, Sendable {
 package enum ModelMetaLoader {
 #if FEATURE_3
     package static func load(from url: URL) throws -> ModelMeta {
-        let loader = VRMLoader()
-        let vrm = try loader.load(withURL: url)
+        let vrm = try VRM(withURL: url)
         return ModelMeta(
-            name: vrm.meta.title ?? url.deletingPathExtension().lastPathComponent,
-            image: try? loader.loadThumbnail(from: vrm).pngData()
+            name: vrm.name ?? url.deletingPathExtension().lastPathComponent,
+            image: try? vrm.thumbnail.pngData()
         )
     }
 #else

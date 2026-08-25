@@ -1,6 +1,7 @@
 import SwiftUI
 import VCamData
 import VCamControl
+import VCamLogger
 
 public struct ModelListView: View {
     @Bindable private var modelManager: ModelManager
@@ -56,7 +57,7 @@ public struct ModelListView: View {
         do {
             try AvatarControl.load(item, modelManager: modelManager)
         } catch {
-            print("Failed to save the last loaded model: \(error)")
+            Logger.error(error)
         }
         MacWindowManager.shared.close(ModelListView.self)
     }
@@ -73,7 +74,7 @@ public struct ModelListView: View {
                 let model = try await modelManager.saveModel(from: url)
                 selectedModelId = model.id
             } catch {
-                print("Failed to add model: \(error)")
+                Logger.error(error)
             }
         }
     }
@@ -111,7 +112,7 @@ private struct ModelListContent: View {
                         do {
                             try modelManager.moveModel(fromOffsets: source, toOffset: destination)
                         } catch {
-                            print("Failed to move model: \(error)")
+                            Logger.error(error)
                         }
                     }
                 }
@@ -191,7 +192,7 @@ private struct ModelListContent: View {
                 selectedModelId = nil
             }
         } catch {
-            print("Failed to delete model: \(error)")
+            Logger.error(error)
         }
         modelToDelete = nil
     }
@@ -202,7 +203,7 @@ private struct ModelListContent: View {
                 let newItem = try await modelManager.duplicateModel(item)
                 selectedModelId = newItem.id
             } catch {
-                print("Failed to duplicate model: \(error)")
+                Logger.error(error)
             }
         }
     }
@@ -316,7 +317,7 @@ struct ModelRowView: View {
         do {
             try modelManager.renameModel(item, to: editingName)
         } catch {
-            print("Failed to rename model: \(error)")
+            Logger.error(error)
         }
     }
 }

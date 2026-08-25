@@ -40,39 +40,37 @@ public final class ModelManager {
     }
 
     public func saveModel(from source: URL, name: String? = nil) async throws -> ModelItem {
-#if FEATURE_3
-        let displayName = name ?? source.deletingPathExtension().lastPathComponent
-#else
-        let metadata = try? ModelMetaLoader.load(from: source)
-        let displayName = name ?? metadata?.name ?? source.lastPathComponent
-#endif
         // The name comes from untrusted model metadata, so never use it as a path;
         // models are stored under a fixed UUID directory and the name stays display-only
         let id = UUID()
-        let modelInfo = Models.Model(id: id, name: id.uuidString, displayName: displayName, type: Models.modelType)
+        var modelInfo = Models.Model(id: id, name: id.uuidString, type: Models.modelType)
         let modelDirectory = modelInfo.rootURL
-        // Copy off the main actor so that large models do not block the UI
         do {
-            try await Task.detached(priority: .utility) { [destinationURL = modelInfo.modelURL] in
+            // The copy is what the user waits for, so keep it and the metadata parse off
+            // the main actor and let them run against the source at the same time
+            let copy = Task.detached(priority: .userInitiated) { [destinationURL = modelInfo.modelURL] in
                 try FileManager.default.createDirectoryIfNeeded(at: modelDirectory)
                 try FileManager.default.copyItem(at: source, to: destinationURL)
-            }.value
-            await saveThumbnail(for: modelInfo)
-            return try addModel(modelInfo)
+            }
+            let metadata = Task.detached(priority: .userInitiated) {
+                try? ModelMetaLoader.load(from: source)
+            }
+
+            try await copy.value
+            let meta = await metadata.value
+#if FEATURE_3
+            modelInfo.displayName = name ?? source.deletingPathExtension().lastPathComponent
+#else
+            modelInfo.displayName = name ?? meta?.name ?? source.lastPathComponent
+#endif
+            if let image = meta?.image {
+                try? saveThumbnail(image, for: modelInfo)
+            }
+            return try addModel(modelInfo, thumbnail: meta?.image)
         } catch {
             // The directory was created solely for this import, so don't leave it behind
             try? FileManager.default.removeItem(at: modelDirectory)
             throw error
-        }
-    }
-
-    private func saveThumbnail(for model: Models.Model) async {
-        let metadata = await Task.detached(priority: .utility) {
-            try? ModelMetaLoader.load(from: model.modelURL)
-        }.value
-
-        if let image = metadata?.image {
-            try? saveThumbnail(image, for: model)
         }
     }
 
@@ -198,8 +196,8 @@ public final class ModelManager {
         }
     }
 
-    private func addModel(_ model: Models.Model) throws -> ModelItem {
-        let item = ModelItem(model: model, status: .valid, thumbnail: model.loadThumbnailData())
+    private func addModel(_ model: Models.Model, thumbnail: Data?) throws -> ModelItem {
+        let item = ModelItem(model: model, status: .valid, thumbnail: thumbnail)
         guard modelItems.find(byId: model.id) == nil else { return item }
         try commit { items, _ in
             items.insert(item, at: 0)

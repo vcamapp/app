@@ -2,12 +2,21 @@
   "originHash" : "d607316a68643525c656231b063852a3f343f32f17c308bde4c4ac5b798fef09",
   "pins" : [
     {
+      "identity" : "swift-vroid-sdk",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/tattn/swift-vroid-sdk",
+      "state" : {
+        "revision" : "0154d1556c81bbb752fcdc1be42473d276c82e0d",
+        "version" : "0.1.2"
+      }
+    },
+    {
       "identity" : "vrmkit",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tattn/VRMKit",
       "state" : {
         "branch" : "main",
-        "revision" : "d373e0aa541d905efbfbafa5128bbe1b46b671fc"
+        "revision" : "ede911a31efb8aa8ee4e6e3160a497405058f74b"
       }
     }
   ],

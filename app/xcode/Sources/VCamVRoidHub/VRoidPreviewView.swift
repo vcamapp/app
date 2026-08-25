@@ -56,13 +56,17 @@ private final class VRoidPreviewModel {
         let loader = VRMEntityLoader(vrm: vrm)
         let vrmEntity = try loader.loadEntity()
 
-        // Face the model toward the viewer (VRM 0.x models face +Z)
-        initialYaw = if case .v0 = vrmEntity.vrm { Float.pi } else { 0 }
+        // Turn the model so it faces the camera, whichever way its version faces
+        let forward = vrmEntity.vrm.forwardDirection
+        initialYaw = -atan2(forward.x, forward.z)
 
         applyAPose(to: vrmEntity)
 
-        // A key light from the viewer's side keeps the toon textures from
-        // looking dim under the default environment lighting
+        // A key light from the viewer's side keeps the toon textures from looking
+        // dim under the default environment lighting. MToon shades from its own
+        // light rather than from the scene's, so both are set
+        let keyDirection = SIMD3<Float>(0, sin(20 * .pi / 180), cos(20 * .pi / 180))
+        vrmEntity.setMToonLightDirection(keyDirection)
         let keyLight = Entity()
         keyLight.components.set(DirectionalLightComponent(color: .white, intensity: 1000))
         keyLight.orientation = simd_quatf(angle: -20 * .pi / 180, axis: SIMD3<Float>(1, 0, 0))
@@ -76,10 +80,9 @@ private final class VRoidPreviewModel {
         modelPivot.addChild(vrmEntity)
         rootEntity.addChild(modelPivot)
 
-        // Frame the whole model with a small margin. The vertical fit uses the
-        // height (fieldOfViewInDegrees is the vertical field of view) and the
-        // horizontal fit uses the largest radius around the rotation axis, so
-        // wide models stay inside the view at any drag angle
+        // Frame the whole model with a small margin. The vertical fit uses the height
+        // (fieldOfViewInDegrees is vertical) and the horizontal fit the largest radius
+        // around the rotation axis, so wide models stay inside the view at any angle
         let camera = PerspectiveCamera()
         let fieldOfView: Float = 30
         let margin: Float = 1.05
@@ -99,7 +102,7 @@ private final class VRoidPreviewModel {
 
     @concurrent
     private nonisolated static func parse(_ data: Data) async throws -> sending VRM {
-        try VRMLoader().load(withData: data)
+        try VRM(data: data)
     }
 
     /// Lowers both arms from the T-pose into an A-pose

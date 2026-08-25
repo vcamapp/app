@@ -179,15 +179,12 @@ public struct AccessoryPlacement: Codable, Equatable, Sendable {
 /// A decoded ``LoadVRMPayload`` with the C strings copied, for tests
 public struct LoadVRMCall: Equatable, Sendable {
     public var path: String
-    /// nil when the caller does not wait for a completion notification
-    public var requestID: UUID?
     public var source: VRMLoadSource
 
     public init?(method: UniBridgeMethodId, payload: UnsafeMutableRawPointer?) {
         guard method == .loadVRM, let payload else { return nil }
         let loadVRM = payload.assumingMemoryBound(to: LoadVRMPayload.self).pointee
         path = loadVRM.pathPtr.map { String(cString: $0) } ?? ""
-        requestID = loadVRM.requestIDPtr.flatMap { UUID(uuidString: String(cString: $0)) }
         source = VRMLoadSource(rawValue: loadVRM.source) ?? .file
     }
 }
