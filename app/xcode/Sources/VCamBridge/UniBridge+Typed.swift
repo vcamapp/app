@@ -8,7 +8,7 @@ public struct UniBridgeMethodId: RawRepresentable, Sendable, Equatable {
     static let sendHandPacketV1 = Self.init(rawValue: 3)
 
     static let addTrackingMapping = Self.init(rawValue: 11)
-    static let clearTrackingMapping = Self.init(rawValue: 14)
+    static let clearTrackingMapping = Self.init(rawValue: 12)
 
     static let setScreenResolution = Self.init(rawValue: 20)
 

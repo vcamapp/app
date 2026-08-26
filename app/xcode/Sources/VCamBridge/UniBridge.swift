@@ -102,16 +102,14 @@ public final class UniBridge {
         case resetCamera = 0
         case deleteObject = 1
         case resetAllObjects = 2
-        case editAvatar = 3
-        case pauseApp = 4
-        case resumeApp = 5
-        case quitApp = 6
+        case pauseApp = 3
+        case resumeApp = 4
+        case quitApp = 5
     }
     public let triggerMapper = ValueBinding<Void, TriggerType>()
     public private(set) lazy var resetCamera = triggerMapper.trigger(.resetCamera)
     public private(set) lazy var deleteObject = triggerMapper.trigger(.deleteObject)
     public private(set) lazy var resetAllObjects = triggerMapper.trigger(.resetAllObjects)
-    public private(set) lazy var editAvatar = triggerMapper.trigger(.editAvatar)
     public private(set) lazy var pauseApp = triggerMapper.trigger(.pauseApp)
     public private(set) lazy var resumeApp = triggerMapper.trigger(.resumeApp)
     public private(set) lazy var quitApp = triggerMapper.trigger(.quitApp)

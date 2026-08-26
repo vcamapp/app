@@ -446,9 +446,7 @@ private struct SceneObjectMenuItems: View {
 private func sceneObjectEditor(for object: SceneObject) -> (() -> Void)? {
     switch object.type {
     case .avatar:
-        return {
-            UniBridge.shared.editAvatar()
-        }
+        return MacWindowManager.shared.openAvatarEditor
     case let .image(image):
         return {
             guard let url = FileUtility.openFile(type: .image) else { return }

@@ -13,18 +13,7 @@ import VCamVRoidHub
 
 @MainActor
 public final class AppMenu: NSObject {
-    public struct ModelMenuItem {
-        let title: String
-        let action: @MainActor () -> Void
-
-        public init(title: String, action: @escaping @MainActor () -> Void) {
-            self.title = title
-            self.action = action
-        }
-    }
-
     public static let shared = AppMenu()
-    public static var additionalModelMenuItems: [ModelMenuItem] = []
 
     public let menu: NSMenu
 
@@ -207,30 +196,17 @@ private extension AppMenu {
 // MARK: - Model
 private extension AppMenu {
     private func setupModelMenu(subMenu: NSMenu) {
-        var items: [NSMenuItem] = [
+        Self.makeSubMenu(menu: subMenu, title: String(localized: .model), items: [
             makeMenuItem(title: String(localized: .editModel), action: #selector(editModel)),
-        ]
-        for (index, injectedItem) in Self.additionalModelMenuItems.enumerated() {
-            let item = makeMenuItem(title: injectedItem.title, action: #selector(performAdditionalModelMenuItem(_:)))
-            item.tag = index
-            items.append(item)
-        }
-        items.append(contentsOf: [
             .separator(),
             makeMenuItem(title: String(localized: .calibrate), action: #selector(resetCalibration)),
             makeMenuItem(title: String(localized: .resetModelPosition), action: #selector(resetModelPosition)),
         ])
-        Self.makeSubMenu(menu: subMenu, title: String(localized: .model), items: items)
     }
 
     @objc private func editModel() {
         Logger.log("")
-        UniBridge.shared.editAvatar()
-    }
-
-    @objc private func performAdditionalModelMenuItem(_ sender: NSMenuItem) {
-        guard Self.additionalModelMenuItems.indices.contains(sender.tag) else { return }
-        Self.additionalModelMenuItems[sender.tag].action()
+        MacWindowManager.shared.openAvatarEditor()
     }
 
     @objc private func resetCalibration() {
