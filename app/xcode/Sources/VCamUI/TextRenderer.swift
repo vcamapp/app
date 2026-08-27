@@ -4,27 +4,28 @@ import CoreText
 import AppKit
 import NaturalLanguage
 import VCamEntity
+import VCamBridge
 
 public final class TextRenderer: RenderTextureRenderer {
-    /// What to draw, and how large to draw it. Both feed the same rasterization, so
+    /// What to draw, and how large to draw it. They feed the same rasterization, so
     /// changing them together only rasterizes once.
     public struct Layout: Equatable, Sendable {
-        public init(configuration: TextObjectConfiguration, displayScale: Double = 1) {
+        public init(configuration: TextObjectConfiguration, displayScale: Double = 1, renderScale: Double = MainTexture.shared.renderScale) {
             self.configuration = configuration
             self.displayScale = displayScale
+            self.renderScale = renderScale
         }
 
         public var configuration: TextObjectConfiguration
         /// Canvas pixels per layout point. The text is rasterized at the size it is
-        /// displayed at, so the engine samples the texture 1:1; minifying a bitmap
+        /// displayed at, so the compositor samples the texture 1:1; minifying a bitmap
         /// authored at the configuration's own font size destroys thin outlines.
         public var displayScale: Double
+        /// Output pixels per canvas pixel. The composition at the output resolution is the
+        /// only read of this texture, so anything above it is wasted and anything below it
+        /// is lost detail.
+        public var renderScale: Double
     }
-
-    /// Extra resolution over the display size. Every on-screen read of the texture is a
-    /// minification — 1/2 for the composited canvas, more in the window preview — so it
-    /// always comes from a prefiltered mip level instead of the raw, aliasing-prone base.
-    fileprivate nonisolated static let supersampling = 2.0
 
     public init(layout: Layout) {
         self.layout = layout
@@ -39,14 +40,14 @@ public final class TextRenderer: RenderTextureRenderer {
         }
     }
 
-    /// Re-rasterizes only when the new scale would change the bitmap's pixel size. The engine
-    /// reports geometry as 32-bit floats and rounds regions to whole pixels, so the scale it
-    /// round-trips back is never the one that was set; comparing in pixels is what tells a
-    /// real resize apart from that noise, which would otherwise rasterize on every click.
-    public func setDisplayScale(_ scale: Double) {
-        guard scale.isFinite, scale > 0 else { return }
-        guard abs(layoutSize.width * scale * Self.supersampling - image.extent.width) >= 1 else { return }
-        layout.displayScale = scale
+    /// Re-rasterizes only when the new scales would change the bitmap's pixel size. Geometry
+    /// round-trips through 32-bit floats and regions are rounded to whole pixels, so the scale
+    /// that comes back is never the one that was set; comparing in pixels is what tells a real
+    /// resize apart from that noise, which would otherwise rasterize on every click.
+    public func setScale(display displayScale: Double, render renderScale: Double) {
+        guard displayScale.isFinite, displayScale > 0, renderScale.isFinite, renderScale > 0 else { return }
+        guard abs(layoutSize.width * displayScale * renderScale - image.extent.width) >= 1 else { return }
+        layout = .init(configuration: layout.configuration, displayScale: displayScale, renderScale: renderScale)
     }
 
     private var image: CIImage
@@ -58,10 +59,10 @@ public final class TextRenderer: RenderTextureRenderer {
 
     /// The size the text is displayed at, in canvas pixels
     public var size: CGSize {
-        image.extent.size * (1 / Self.supersampling)
+        image.extent.size * (1 / layout.normalizedRenderScale)
     }
 
-    /// The texture's own pixel size, which is what the engine has to allocate
+    /// The texture's own pixel size, which is what the composition has to allocate
     public var textureSize: CGSize {
         image.extent.size
     }
@@ -107,10 +108,14 @@ private extension TextRenderer.Layout {
         displayScale.isFinite && displayScale > 0 ? displayScale : 1
     }
 
+    var normalizedRenderScale: Double {
+        renderScale.isFinite && renderScale > 0 ? renderScale : 1
+    }
+
     var rasterConfiguration: TextObjectConfiguration {
         var configuration = configuration
         configuration.fontSize = TextObjectConfiguration.normalizedFontSize(configuration.fontSize)
-        return configuration.scaled(by: normalizedDisplayScale * TextRenderer.supersampling)
+        return configuration.scaled(by: normalizedDisplayScale * normalizedRenderScale)
     }
 }
 

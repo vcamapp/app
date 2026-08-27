@@ -18,9 +18,14 @@ public final class MainTexture: @unchecked Sendable {
     }
 
     /// The reference frame object geometry is normalized against. The fixed height keeps the
-    /// rasterization size and the fixed overlays independent of the output resolution.
+    /// stored geometry and the fixed overlays independent of the output resolution.
     public var canvasSize: CGSize {
         CGSize(width: Self.canvasHeight * size.width / size.height, height: Self.canvasHeight)
+    }
+
+    /// Output pixels per canvas pixel, for the sources that rasterize their own bitmap
+    public var renderScale: CGFloat {
+        size.height / Self.canvasHeight
     }
 
     private static let canvasHeight: CGFloat = 720

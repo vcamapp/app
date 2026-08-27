@@ -17,6 +17,30 @@ public final class SceneObjectManager {
     public internal(set) var subtitleObject: SceneObject?
     @ObservationIgnored private var loadGeneration = 0
 
+    private init() {
+        NotificationCenter.default.addObserver(
+            forName: .screenResolutionDidChange,
+            object: nil,
+            queue: .main
+        ) { _ in
+            MainActor.assumeIsolated {
+                SceneObjectManager.shared.rasterizeTextForOutputSize()
+            }
+        }
+    }
+
+    /// Text is the one source rasterized for the pixels it occupies in the output; the others
+    /// author their bitmap at their own resolution and are unaffected.
+    private func rasterizeTextForOutputSize() {
+        for object in objects {
+            guard case .text = object.type else { continue }
+            configure(object)
+        }
+        if let subtitleObject {
+            configure(subtitleObject)
+        }
+    }
+
     public func object(byId id: Int32) -> SceneObject? {
         id == SceneObject.subtitleID ? subtitleObject : objects.find(byId: id)
     }
@@ -79,9 +103,7 @@ public final class SceneObjectManager {
             let canvasSize = MainTexture.shared.canvasSize
             if let renderer = RenderTextureManager.shared.textRenderer(id: object.id),
                let scale = TextObjectPlacement.scale(region: text.region, layoutSize: renderer.layoutSize) {
-                // Rasterize at the size the object is drawn at, so a resize on the canvas or a
-                // scene reloaded at another resolution reaches the renderer
-                renderer.setDisplayScale(scale)
+                renderer.setScale(display: scale, render: MainTexture.shared.renderScale)
             }
             let drawer = RenderTextureManager.shared.drawer(id: object.id)
             let textureSize = drawer?.size ?? .init(width: canvasSize.width * text.region.width, height: canvasSize.height * text.region.height)

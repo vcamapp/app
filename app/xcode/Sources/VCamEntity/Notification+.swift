@@ -6,4 +6,5 @@ public extension Notification.Name {
     static let unfocusObject = Notification.Name("vcam.unfocusObject")
     static let subtitleDidChange = Notification.Name("vcam.subtitleDidChange")
     static let aspectRatioDidChange = Notification.Name("vcam.aspectRatioDidChange")
+    static let screenResolutionDidChange = Notification.Name("vcam.screenResolutionDidChange")
 }

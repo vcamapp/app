@@ -299,6 +299,9 @@ public final class UniState {
             UniBridge.setScreenResolution(width: Int32(newValue.size.width), height: Int32(newValue.size.height))
             if wasLandscape != newValue.isLandscape {
                 NotificationCenter.default.post(name: .aspectRatioDidChange, object: nil)
+            } else {
+                // The other branch reloads the scene, which rebuilds it for the new size anyway
+                NotificationCenter.default.post(name: .screenResolutionDidChange, object: nil)
             }
         }
     }
