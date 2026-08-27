@@ -253,7 +253,12 @@ public final class UniState {
         let hexString = UserDefaults.standard.value(for: .backgroundColor)
         return Color(hexRGBA: hexString) ?? Color(red: 0.77647059, green: 0.90588235, blue: 1.0)
     }()
-    @ObservationIgnored @UniStateValue(\.__backgroundColor, persist: .backgroundColor, bridge: .backgroundColor)
+
+    @ObservationIgnored @UniStateValue(\.__backgroundColor, onSet: { _, newValue in
+        if let hex = newValue.hexRGBAString {
+            UserDefaults.standard.set(hex, for: .backgroundColor)
+        }
+    })
     public var backgroundColor: Color
 
 #if FEATURE_3
@@ -333,7 +338,6 @@ public final class UniState {
         bridge.floatMapper.setValue(.swivelOffset, __swivelOffset)
 #endif
         bridge.intMapper.setValue(.qualityLevel, __qualityLevel)
-        bridge.structMapper.binding(.backgroundColor).wrappedValue = __backgroundColor
         UniBridge.setScreenResolution(width: Int32(_screenResolution.size.width), height: Int32(_screenResolution.size.height))
 #if FEATURE_3
         displayParameters.syncState()

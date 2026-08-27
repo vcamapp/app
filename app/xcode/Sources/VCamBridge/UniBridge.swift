@@ -115,14 +115,12 @@ public final class UniBridge {
     public private(set) lazy var quitApp = triggerMapper.trigger(.quitApp)
 
     public enum StructType: Int32, Sendable {
-        case backgroundColor = 0
-        case environmentLightColor = 1
-        case colorFilter = 2
-        case bloomColor = 3
-        case vignetteColor = 4
+        case environmentLightColor = 0
+        case colorFilter = 1
+        case bloomColor = 2
+        case vignetteColor = 3
     }
     public let structMapper = ValueBinding<UnsafeMutableRawPointer, StructType>()
-    public private(set) lazy var backgroundColor = structMapper.set(.backgroundColor, type: Color.self)
     public private(set) lazy var environmentLightColor = structMapper.set(.environmentLightColor, type: Color.self)
     public private(set) lazy var colorFilter = structMapper.set(.colorFilter, type: Color.self)
     public private(set) lazy var bloomColor = structMapper.set(.bloomColor, type: Color.self)
