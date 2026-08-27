@@ -9,15 +9,10 @@ public final class UniBridgeStub {
     private var intTypes: [UniBridge.IntType: Int32] = [:]
     private var floatTypes: [UniBridge.FloatType: CGFloat] = [:]
     private var stringTypes: [UniBridge.StringType: String] = [:]
-    private lazy var arrayTypes: [UniBridge.ArrayType: UnsafeMutableRawPointer] = [
-        .canvasSize: canvasSize.withUnsafeMutableBufferPointer { pointer in
-            UnsafeMutableRawPointer(pointer.baseAddress!)
-        }!
-    ]
+    private var arrayTypes: [UniBridge.ArrayType: UnsafeMutableRawPointer] = [:]
 
     private var emptyArray: [Float] = []
     private lazy var emptyArrayPointer = UnsafeMutableRawPointer(emptyArray.withUnsafeMutableBufferPointer { $0.baseAddress! })
-    private var canvasSize: [Float] = [1920, 1080]
 
     public func stub(_ action: UniBridge) {
         action.stringMapper.getValue = { type in self.stringTypes[type] ?? "" }

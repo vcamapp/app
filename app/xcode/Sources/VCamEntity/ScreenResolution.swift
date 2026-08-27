@@ -33,6 +33,11 @@ public enum ScreenResolution: Identifiable, CaseIterable, Sendable {
         }
     }
 
+    public var cgSize: CGSize {
+        let size = size
+        return CGSize(width: size.width, height: size.height)
+    }
+
     public var isLandscape: Bool {
         let size = size
         return size.width > size.height

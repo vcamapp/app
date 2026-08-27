@@ -76,7 +76,9 @@ public final class UniBridge {
         case useBlinker = 6
         case useFullTracking = 7
         case lipSyncWebCam = 8
-        case hasPerfectSyncBlendShape = 9
+        case avatarHidden = 9
+        case avatarLocked = 10
+        case hasPerfectSyncBlendShape = 11
     }
     public let boolMapper = ValueBinding<Bool, BoolType>()
     public private(set) lazy var useAutoMode = boolMapper.set(.useAutoMode)
@@ -88,28 +90,26 @@ public final class UniBridge {
     public private(set) lazy var useBlinker = boolMapper.set(.useBlinker)
     public private(set) lazy var useFullTracking = boolMapper.set(.useFullTracking)
     public private(set) lazy var lipSyncWebCam = boolMapper.set(.lipSyncWebCam)
+    public private(set) lazy var avatarHidden = boolMapper.set(.avatarHidden)
+    public private(set) lazy var avatarLocked = boolMapper.set(.avatarLocked)
     public var hasPerfectSyncBlendShape: Bool { boolMapper.get(.hasPerfectSyncBlendShape) }
 
     public enum StringType: Int32, Sendable {
         case loadModel = 0
-        case showEmojiStamp = 1
     }
     public let stringMapper = ValueBinding<String, StringType>()
     public private(set) lazy var loadModel = stringMapper.set(.loadModel)
-    public private(set) lazy var showEmojiStamp = stringMapper.set(.showEmojiStamp)
 
     public enum TriggerType: Int32, Sendable {
         case resetCamera = 0
-        case deleteObject = 1
-        case resetAllObjects = 2
-        case pauseApp = 3
-        case resumeApp = 4
-        case quitApp = 5
+        case removeAllWinds = 1
+        case pauseApp = 2
+        case resumeApp = 3
+        case quitApp = 4
     }
     public let triggerMapper = ValueBinding<Void, TriggerType>()
     public private(set) lazy var resetCamera = triggerMapper.trigger(.resetCamera)
-    public private(set) lazy var deleteObject = triggerMapper.trigger(.deleteObject)
-    public private(set) lazy var resetAllObjects = triggerMapper.trigger(.resetAllObjects)
+    public private(set) lazy var removeAllWinds = triggerMapper.trigger(.removeAllWinds)
     public private(set) lazy var pauseApp = triggerMapper.trigger(.pauseApp)
     public private(set) lazy var resumeApp = triggerMapper.trigger(.resumeApp)
     public private(set) lazy var quitApp = triggerMapper.trigger(.quitApp)
@@ -133,28 +133,18 @@ public final class UniBridge {
         case fingers = 1
         case receiveVCamBlendShape = 2
         case receivePerfectSync = 3
-        case addRenderTexture = 4
-        case updateRenderTexture = 5
-        case updateObjectOrder = 6
-        case setObjectActive = 7
-        case setObjectLocked = 8
-        case objectAvatarTransform = 9
-        case addWind = 10
-        case canvasSize = 11
+        case objectAvatarTransform = 4
+        case addWind = 5
+        case removeWind = 6
         public var arraySize: Int {
             switch self {
             case .hands: return 12
             case .fingers: return 10
             case .receiveVCamBlendShape: return 12
             case .receivePerfectSync: return 60
-            case .addRenderTexture: return 8
-            case .updateRenderTexture: return 3
-            case .updateObjectOrder: return 99
-            case .setObjectActive: return 2
-            case .setObjectLocked: return 2
             case .objectAvatarTransform: return 6
             case .addWind: return 4
-            case .canvasSize: return 2
+            case .removeWind: return 1
             }
         }
     }
@@ -163,13 +153,8 @@ public final class UniBridge {
     public private(set) lazy var fingers = arrayMapper.set(.fingers, type: [Float].self)
     public private(set) lazy var receiveVCamBlendShape = arrayMapper.set(.receiveVCamBlendShape, type: [Float].self)
     public private(set) lazy var receivePerfectSync = arrayMapper.set(.receivePerfectSync, type: [Float].self)
-    public private(set) lazy var addRenderTexture = arrayMapper.set(.addRenderTexture, type: [Int32].self)
-    public private(set) lazy var updateRenderTexture = arrayMapper.set(.updateRenderTexture, type: [Int32].self)
-    public private(set) lazy var updateObjectOrder = arrayMapper.set(.updateObjectOrder, type: [Int32].self)
-    public private(set) lazy var setObjectActive = arrayMapper.set(.setObjectActive, type: [Int32].self)
-    public private(set) lazy var setObjectLocked = arrayMapper.set(.setObjectLocked, type: [Int32].self)
     public private(set) lazy var objectAvatarTransform = arrayMapper.set(.objectAvatarTransform, type: [Float].self)
     public private(set) lazy var addWind = arrayMapper.set(.addWind, type: [Int32].self)
-    public var canvasSize: [Float] { arrayMapper.get(.canvasSize, size: 2) }
+    public private(set) lazy var removeWind = arrayMapper.set(.removeWind, type: [Int32].self)
 
 }

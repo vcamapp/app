@@ -2,9 +2,8 @@ import CoreGraphics
 import VCamEntity
 import VCamBridge
 
-/// Placement math shared by scene text objects and the subtitle: when an edit re-renders
-/// the bitmap, the on-screen glyph size stays the same and the object grows from a fixed
-/// edge instead of being refit into its old box.
+/// Placement math shared by scene text objects and the subtitle: a re-rendered bitmap keeps
+/// its on-screen glyph size and grows from a fixed edge, instead of being refit into its old box.
 @MainActor
 enum TextObjectPlacement {
     enum HorizontalAnchor {
@@ -15,29 +14,28 @@ enum TextObjectPlacement {
         case top, center, bottom
     }
 
-    /// Glyph height of a freshly added text, as a fraction of the canvas height. Text starts
-    /// at a size that reads the same at any canvas resolution and for any text length;
-    /// the user sizes it from there by resizing the object.
+    /// Glyph height of a freshly added text, as a fraction of the canvas height, so that it reads
+    /// the same at any canvas resolution and for any text length.
     static let defaultGlyphHeightRatio = 0.08
 
     /// How much of the canvas width text is allowed to take before it has to wrap or shrink
     private static let maxCanvasWidthRatio = 0.9
 
     static func defaultScale(fontSize: Double) -> Double {
-        UniBridge.shared.canvasCGSize.height * defaultGlyphHeightRatio / TextObjectConfiguration.normalizedFontSize(fontSize)
+        MainTexture.shared.canvasSize.height * defaultGlyphHeightRatio / TextObjectConfiguration.normalizedFontSize(fontSize)
     }
 
     static func normalizedScale(_ scale: Double, fontSize: Double) -> Double {
         scale.isFinite && scale > 0 ? scale : defaultScale(fontSize: fontSize)
     }
 
-    /// The default scale, reduced until the text fits on the canvas. Used where the text
-    /// isn't allowed to wrap on its own, so a long line has to be scaled down instead.
+    /// The default scale, reduced until the text fits. Used where the text isn't allowed to wrap
+    /// on its own, so a long line has to be scaled down instead.
     static func fittedDefaultScale(of configuration: TextObjectConfiguration) -> Double {
         var configuration = configuration
         configuration.fontSize = TextObjectConfiguration.normalizedFontSize(configuration.fontSize)
         let scale = defaultScale(fontSize: configuration.fontSize)
-        let measured = TextRenderer.measure(configuration) * scale / UniBridge.shared.canvasCGSize
+        let measured = TextRenderer.measure(configuration) * scale / MainTexture.shared.canvasSize
         return scale / max(max(measured.width, measured.height) / maxCanvasWidthRatio, 1)
     }
 
@@ -45,13 +43,13 @@ enum TextObjectPlacement {
     static func wrapCharacters(forScale scale: Double, fontSize: Double) -> Double {
         let fontSize = TextObjectConfiguration.normalizedFontSize(fontSize)
         let scale = normalizedScale(scale, fontSize: fontSize)
-        return UniBridge.shared.canvasCGSize.width * maxCanvasWidthRatio / scale / fontSize
+        return MainTexture.shared.canvasSize.width * maxCanvasWidthRatio / scale / fontSize
     }
 
-    /// The display scale the current region implies, which is how a resize the user made
-    /// on the canvas comes back into the layout space
+    /// The display scale the current region implies, which is how a resize made on the canvas
+    /// comes back into the layout space
     static func scale(region: CGRect, layoutSize: CGSize, canvasSize: CGSize? = nil) -> Double? {
-        let canvasSize = canvasSize ?? UniBridge.shared.canvasCGSize
+        let canvasSize = canvasSize ?? MainTexture.shared.canvasSize
         guard region.width.isFinite, region.height.isFinite,
               layoutSize.width.isFinite, layoutSize.height.isFinite,
               canvasSize.width.isFinite, canvasSize.height.isFinite,
@@ -67,7 +65,7 @@ enum TextObjectPlacement {
     /// Region for a re-rendered bitmap, keeping the anchored edges of the old region in
     /// place (the canvas origin is its center, y-up)
     static func region(bitmapSize: CGSize, anchoredTo old: CGRect, horizontal: HorizontalAnchor, vertical: VerticalAnchor) -> CGRect {
-        let size = bitmapSize / UniBridge.shared.canvasCGSize
+        let size = bitmapSize / MainTexture.shared.canvasSize
         let x: CGFloat = switch horizontal {
         case .leading: old.origin.x - (old.width - size.width) / 2
         case .center: old.origin.x

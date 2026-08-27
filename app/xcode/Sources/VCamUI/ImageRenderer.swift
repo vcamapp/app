@@ -31,6 +31,7 @@ public final class ImageRenderer: RenderTextureRenderer {
 
     public var size: CGSize
     public let cropRect = CGRect(x: 0, y: 0, width: 1, height: 1)
+    public let isStaticSource = true
 
     public var filter: ImageFilter? {
         didSet {

@@ -5,19 +5,18 @@ import VCamData
 import VCamDefaults
 import VCamBridge
 
-/// The subtitle overlay, drawn through the text-object pipeline. It belongs to no scene:
-/// the text lives in UserDefaults (`UniState.message`) so it can be set from the toolbar or
-/// the external API, and the style and placement are stored globally so every scene shows it.
+/// The subtitle overlay, drawn through the text-object pipeline. It belongs to no scene: the
+/// text lives in UserDefaults (`UniState.message`), and the style and placement are stored
+/// globally so that every scene shows it.
 ///
-/// Unlike a scene text object, whose on-screen width is fixed by the user, a subtitle keeps
-/// its glyph size steady while the text changes: it wraps at 90% of the canvas width and
-/// grows upward from a fixed bottom edge, like broadcast subtitles.
+/// Unlike a scene text object, whose on-screen width is fixed by the user, a subtitle keeps its
+/// glyph size steady while the text changes, like broadcast subtitles.
 @MainActor
 public enum SubtitleTextObject {
     /// The text is excluded: the message key owns it. The placement is stored as the
     /// glyph scale plus anchors, because the box itself changes with every utterance.
     fileprivate struct Style: Codable {
-        /// Fills in the default placement, which depends on the canvas the engine reports
+        /// Fills in the default placement, which depends on the canvas size
         @MainActor init(configuration: TextObjectConfiguration, scale: Double? = nil, centerX: Double? = nil, bottomY: Double? = nil) {
             self.configuration = configuration
             // The text is what the object is sized against, so it can't be part of the style
@@ -37,8 +36,8 @@ public enum SubtitleTextObject {
     private static var pendingUpdate: Task<Void, Never>?
     private static var isStyleEditorOpen = false
 
-    /// Recreates the subtitle; called after a scene rebuilt the engine's object list.
-    /// The engine dropped its object there, so this can't diff against what it had.
+    /// A scene rebuild drops the engine's object, so this recreates it instead of diffing
+    /// against what the engine had.
     public static func reapply() {
         subscribeIfNeeded()
         recreate()
@@ -48,7 +47,6 @@ public enum SubtitleTextObject {
     // text sits noticeably higher than the region's bottom edge
     private static let defaultBottomY = -0.47
 
-    /// The subtitle as an object and its text payload, which every operation on it needs
     private static var current: (object: SceneObject, payload: SceneObject.Text)? {
         guard let object = SceneObjectManager.shared.subtitleObject, case let .text(payload) = object.type else { return nil }
         return (object, payload)
@@ -72,16 +70,16 @@ public enum SubtitleTextObject {
         }
     }
 
-    /// The subtitle stays locked on the canvas so that arranging other objects can't
-    /// grab it; its editor frees it for as long as that window is open
+    /// The subtitle stays locked so that arranging other objects can't grab it; its editor frees
+    /// it for as long as that window is open
     private static func setEditing(_ isEditing: Bool) {
         isStyleEditorOpen = isEditing
         guard let object = SceneObjectManager.shared.subtitleObject else { return }
         SceneObjectManager.shared.setSubtitleLocked(!isEditing, of: object)
     }
 
-    /// Brings an off-screen or shrunken subtitle back to the bottom of the canvas
-    /// at the default scale, without touching its style
+    /// Brings an off-screen or shrunken subtitle back to the default placement and scale,
+    /// without touching its style
     public static func resetPlacement() {
         if let style = loadStyle() {
             save(Style(configuration: style.configuration))
@@ -153,7 +151,7 @@ public enum SubtitleTextObject {
             var configuration = style.configuration
             configuration.text = text
             let scale = TextObjectPlacement.normalizedScale(style.scale, fontSize: configuration.fontSize)
-            let canvasSize = UniBridge.shared.canvasCGSize
+            let canvasSize = MainTexture.shared.canvasSize
             configuration.wrapCharacters = TextObjectPlacement.wrapCharacters(forScale: scale, fontSize: configuration.fontSize)
             let renderer = TextRenderer(layout: .init(configuration: configuration, displayScale: scale))
             RenderTextureManager.shared.set(renderer, id: SceneObject.subtitleID)
@@ -194,23 +192,16 @@ private extension UserDefaults.Key {
 }
 
 extension SceneObjectManager {
-    /// Puts the subtitle on screen, or refits the one that is already there to its
-    /// re-rendered bitmap. The subtitle lives outside the scenes, so nothing is saved here.
+    /// The subtitle lives outside the scenes, so nothing is persisted here.
     func addSubtitle(_ object: SceneObject) {
-        let isNew = subtitleObject == nil
         subtitleObject = object
         configure(object)
-        if isNew {
-            // The order only has to be re-sent when the engine gained an object
-            updateObjectOrder(persist: false)
-        }
     }
 
     func removeSubtitle() {
         guard let object = subtitleObject else { return }
         subtitleObject = nil
         RenderTextureManager.shared.remove(id: object.id)
-        deleteFromEngine(id: object.id)
     }
 
     /// The subtitle isn't in `objects`, so the shared `setLocked(_:id:)` can't reach it
@@ -218,6 +209,5 @@ extension SceneObjectManager {
         var object = object
         object.isLocked = isLocked
         subtitleObject = object
-        applyState(object)
     }
 }

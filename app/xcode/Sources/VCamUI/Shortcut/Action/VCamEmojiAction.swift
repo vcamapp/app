@@ -1,6 +1,5 @@
 import AppKit
 import VCamEntity
-import VCamBridge
 import struct SwiftUI.Image
 
 public struct VCamEmojiAction: VCamAction {
@@ -17,9 +16,6 @@ public struct VCamEmojiAction: VCamAction {
         guard !configuration.emoji.isEmpty else {
             throw VCamActionError(String(localized: .isNotSetYet(String(localized: .emoji))))
         }
-        let url = URL.temporaryDirectory.appending(path: "vcam_emoji.png")
-        try configuration.emoji.drawImage().writeAsPNG(to: url)
-
-        UniBridge.shared.showEmojiStamp(url.path)
+        EmojiStamp.show?(try configuration.emoji.drawImage())
     }
 }

@@ -14,11 +14,9 @@ public final class SceneObjectManager {
 
     public var objects: [SceneObject] = VCamSceneDataStore.defaultObjects
     /// The subtitle overlays every scene, so it is kept out of the scene's object list.
-    /// Only SubtitleTextObject maintains it.
     public internal(set) var subtitleObject: SceneObject?
     @ObservationIgnored private var loadGeneration = 0
 
-    /// Finds a scene object or the scene-independent subtitle by the id the engine uses
     public func object(byId id: Int32) -> SceneObject? {
         id == SceneObject.subtitleID ? subtitleObject : objects.find(byId: id)
     }
@@ -30,8 +28,8 @@ public final class SceneObjectManager {
         persistScene()
     }
 
-    /// The scene JSON stores the whole state, so a failed save here only leaves the disk
-    /// stale until the next successful save; the in-memory state stays consistent.
+    /// The scene JSON stores the whole state, so a failed save only leaves the disk stale
+    /// until the next successful one.
     private func persistScene() {
         do {
             try SceneManager.shared.saveCurrentSceneAndObjects()
@@ -41,7 +39,6 @@ public final class SceneObjectManager {
     }
 
     func configure(_ object: SceneObject) {
-        let uniBridge = UniBridge.shared
         uniDebugLog("SceneObjectManager.configure: \(object)")
         switch object.type {
         case .avatar: ()
@@ -54,7 +51,7 @@ public final class SceneObjectManager {
                 Logger.error(error)
             }
 
-            let canvasSize = uniBridge.canvasCGSize
+            let canvasSize = MainTexture.shared.canvasSize
 
             if image.size == .zero { // Migration from v0.6.3 and below & change the aspect ratio
                 image.size = NSImage(contentsOf: image.url)?.size ?? .init(width: 800, height: 800)
@@ -65,60 +62,58 @@ public final class SceneObjectManager {
             let region: CGRect = image.isPlaced
                 ? .init(origin: .init(x: CGFloat(image.offset.x), y: CGFloat(image.offset.y)), size: image.size)
                 : .init(origin: .zero, size: .invalid)
-            let placement = addFixedTexture(
+            let placement = addTexture(
                 object.id,
-                type: .photo,
                 region: region,
                 textureSize: .init(width: canvasSize.width * image.size.width, height: canvasSize.height * image.size.height)
             )
             image.offset = .init(x: Float(placement.origin.x), y: Float(placement.origin.y))
             image.size = placement.size
         case let .screen(screen):
-            let rect = textureRect(region: screen.region, crop: screen.crop, textureSize: screen.textureSize)
-            uniBridge.addRenderTexture([object.id, RenderTextureType.screen.rawValue, rect[2], rect[3]] + rect)
+            screen.region = addTexture(object.id, region: screen.region, crop: screen.crop, textureSize: screen.textureSize)
         case let .videoCapture(videoCapture):
-            let rect = textureRect(region: videoCapture.region, crop: videoCapture.crop, textureSize: videoCapture.textureSize)
-            uniBridge.addRenderTexture([object.id, RenderTextureType.captureDevice.rawValue, rect[2], rect[3]] + rect)
+            videoCapture.region = addTexture(object.id, region: videoCapture.region, crop: videoCapture.crop, textureSize: videoCapture.textureSize)
         case let .web(web):
-            let rect = textureRect(region: web.region, crop: web.crop, textureSize: web.textureSize)
-            uniBridge.addRenderTexture([object.id, RenderTextureType.web.rawValue, rect[2], rect[3]] + rect)
+            web.region = addTexture(object.id, region: web.region, crop: web.crop, textureSize: web.textureSize)
         case let .text(text):
-            let canvasSize = uniBridge.canvasCGSize
+            let canvasSize = MainTexture.shared.canvasSize
             if let renderer = RenderTextureManager.shared.textRenderer(id: object.id),
                let scale = TextObjectPlacement.scale(region: text.region, layoutSize: renderer.layoutSize) {
-                // Rasterize at the size the object is drawn at. This is where a resize made on
-                // the canvas, or a scene reloaded at another resolution, reaches the renderer.
+                // Rasterize at the size the object is drawn at, so a resize on the canvas or a
+                // scene reloaded at another resolution reaches the renderer
                 renderer.setDisplayScale(scale)
             }
             let drawer = RenderTextureManager.shared.drawer(id: object.id)
             let textureSize = drawer?.size ?? .init(width: canvasSize.width * text.region.width, height: canvasSize.height * text.region.height)
-            text.region = addFixedTexture(object.id, type: .text, region: text.region, textureSize: textureSize, allocationSize: drawer?.textureSize)
+            text.region = addTexture(object.id, region: text.region, textureSize: textureSize, allocationSize: drawer?.textureSize)
         case let .wind(wind):
             let direction = wind.direction
             let scale: Float = 100000 // Shift the digits by the number of significant figures to send as Int.
-            uniBridge.addWind([object.id, Int32(direction.x * scale), Int32(direction.y * scale), Int32(direction.z * scale)])
+            UniBridge.shared.addWind([object.id, Int32(direction.x * scale), Int32(direction.y * scale), Int32(direction.z * scale)])
         }
 
-        applyState(object)
+        applyAvatarState(object)
     }
 
-    func applyState(_ object: SceneObject) {
-        let uniBridge = UniBridge.shared
-        uniBridge.setObjectActive([object.id, object.isHidden ? 0 : 1])
-        uniBridge.setObjectLocked([object.id, object.isLocked ? 1 : 0])
+    /// The avatar is the one object the engine still owns, so its visibility and lock have to reach it.
+    private func applyAvatarState(_ object: SceneObject) {
+        guard case .avatar = object.type else { return }
+        UniBridge.shared.avatarHidden(object.isHidden)
+        UniBridge.shared.avatarLocked(object.isLocked)
     }
 
-    /// Re-registers an object whose geometry the engine just changed. Text re-rasterizes at
-    /// its new size, so the glyphs stay crisp instead of a bitmap drawn for another size
-    /// being scaled; the other types keep their texture as it is.
-    public func didResize(_ object: SceneObject) {
-        guard case .text = object.type else { return }
-        configure(object)
+    /// Applies a geometry edit made on the canvas. Text re-rasterizes at its new size so that
+    /// the glyphs stay crisp instead of a bitmap drawn for another size being scaled; the other
+    /// types keep their texture as it is.
+    public func didEditGeometry(_ object: SceneObject) {
+        if case .text = object.type {
+            configure(object)
+        }
+        persistScene()
     }
 
-    /// Re-renders a text object with an edited configuration, keeping the glyph scale it is
-    /// drawn at and growing it from the edges its anchors name, instead of refitting the
-    /// text into the box it happened to have.
+    /// Keeps the glyph scale and grows the object from the anchored edges, instead of refitting
+    /// the text into the box it happened to have.
     func applyText(_ configuration: TextObjectConfiguration, to object: SceneObject, payload: SceneObject.Text, horizontal: TextObjectPlacement.HorizontalAnchor, vertical: TextObjectPlacement.VerticalAnchor) {
         guard let renderer = RenderTextureManager.shared.textRenderer(id: object.id) else { return }
         renderer.layout = .init(configuration: configuration, displayScale: renderer.layout.displayScale)
@@ -126,15 +121,14 @@ public final class SceneObjectManager {
         payload.region = TextObjectPlacement.region(bitmapSize: renderer.size, anchoredTo: payload.region, horizontal: horizontal, vertical: vertical)
     }
 
-    /// Re-registers the type-specific resources (image copies, render textures, wind, ...)
-    /// because the object now points at different data.
+    /// Re-registers the type-specific resources (image copies, render textures, wind, ...) that
+    /// the object now points at.
     public func update(_ object: SceneObject) {
         configure(object)
         didChange(object)
     }
 
-    /// Swaps in a renderer the user has just reconfigured, and fits the object's
-    /// texture geometry to the new source before re-registering it.
+    /// Fits the object's texture geometry to the new source before re-registering it.
     public func replaceRenderer(_ renderer: any RenderTextureRenderer, of object: SceneObject) {
         guard let texture = object.type.croppableTexture else { return }
         RenderTextureManager.shared.set(renderer, id: object.id)
@@ -145,8 +139,8 @@ public final class SceneObjectManager {
         update(object)
     }
 
-    /// Persists a change and notifies Observation. The object types hold their state in
-    /// reference types, so a change made through them stays invisible until it's pushed back here.
+    /// The object types hold their state in reference types, so a change made through them stays
+    /// invisible to Observation until it's pushed back here.
     public func didChange(_ object: SceneObject) {
         objects.update(object)
         persistScene()
@@ -160,20 +154,18 @@ public final class SceneObjectManager {
         updateState(id) { $0.isLocked = isLocked }
     }
 
-    /// Applies a change that only affects the object's own state, so the type-specific
-    /// resources are left untouched.
+    /// Leaves the type-specific resources untouched, unlike `update(_:)`.
     private func updateState(_ id: Int32, _ change: (inout SceneObject) -> Void) {
         guard var object = objects.find(byId: id) else {
             return
         }
         change(&object)
-        applyState(object)
+        applyAvatarState(object)
         didChange(object)
     }
 
-    /// Whether the user may delete the object. This is the only definition of the rule: the
-    /// object list disables its button on it, the engine asks before the delete key destroys
-    /// anything, and `remove` refuses anything it rejects.
+    /// The only definition of the rule: the object list, the delete key on the canvas and
+    /// `remove` all defer to it.
     public func canRemove(byId id: Int32) -> Bool {
         switch id {
         case SceneObject.avatarID: false // The avatar is what the scene is built around
@@ -194,8 +186,8 @@ public final class SceneObjectManager {
         Logger.log("\(object.type)")
         guard canRemove(byId: object.id) else { return }
 
-        // Persist the removal before touching any state so that a failed save can't
-        // leave the saved scene referencing data files deleted below
+        // Persist before touching any state, so that a failed save can't leave the saved scene
+        // referencing the data files deleted below
         var newObjects = objects
         newObjects.remove(byId: object.id)
         do {
@@ -207,27 +199,21 @@ public final class SceneObjectManager {
         objects = newObjects
 
         switch object.type {
-        case .avatar, .wind: ()
+        case .avatar: ()
+        case .wind:
+            UniBridge.shared.removeWind([object.id])
         case let .image(image):
             RenderTextureManager.shared.remove(id: object.id)
             VCamSceneDataStore(sceneId: SceneManager.shared.currentSceneId).removeManagedDataIfNeeded(at: image.url)
         case .screen, .videoCapture, .web, .text:
             RenderTextureManager.shared.remove(id: object.id)
         }
-        deleteFromEngine(id: object.id)
-    }
-
-    /// The engine deletes the currently selected item, so the target has to be selected
-    /// first; otherwise removing an unselected object leaves it on screen.
-    func deleteFromEngine(id: Int32) {
-        UniBridge.shared.objectSelected.wrappedValue = id
-        UniBridge.shared.deleteObject()
     }
 
     public func move(byId id: Int32, up: Bool) {
         Logger.log("\(id), \(up)")
         if objects.move(byId: id, up: up) {
-            updateObjectOrder()
+            persistScene()
         }
     }
 
@@ -239,63 +225,58 @@ public final class SceneObjectManager {
 
         let element = objects.remove(at: index)
         objects.insert(element, at: 0)
-        updateObjectOrder()
+        persistScene()
     }
 
     public func move(fromOffsets source: IndexSet, toOffset destination: Int) {
         Logger.log("\(source), \(destination)")
         objects.move(fromOffsets: source, toOffset: destination)
-        updateObjectOrder()
-    }
-
-    func updateObjectOrder(persist: Bool = true) {
-        // The subtitle sits in front of the scene's objects
-        UniBridge.shared.updateObjectOrder(objects.map(\.id) + (subtitleObject.map { [$0.id] } ?? []) + [-1])
-        if persist {
-            persistScene()
-        }
+        persistScene()
     }
 
     public func dispose() {
+        UniBridge.shared.removeAllWinds()
         objects = objects.filter { $0.id == SceneObject.avatarID }
         // The subtitle's renderer goes with the rest, so it can't be left pointing at one
         subtitleObject = nil
         RenderTextureManager.shared.removeAll()
     }
 
-    /// Registers an uncropped texture and returns the canvas-relative placement
-    /// textureRect decided, which the object stores as its own geometry.
-    @discardableResult
-    /// `allocationSize` is the texture's pixel size when it intentionally differs from the
-    /// on-canvas size (a supersampled text); nil allocates at the displayed size
-    private func addFixedTexture(_ id: Int32, type: RenderTextureType, region: CGRect, textureSize: CGSize, allocationSize: CGSize? = nil) -> CGRect {
-        let canvasSize = UniBridge.shared.canvasCGSize
-        let rect = textureRect(region: region, crop: .init(x: 0, y: 0, width: 1, height: 1), textureSize: textureSize)
-        let allocation = allocationSize.map { [Int32($0.width), Int32($0.height)] } ?? [rect[2], rect[3]]
-        UniBridge.shared.addRenderTexture([id, type.rawValue] + allocation + rect)
-        return .init(
-            x: CGFloat(rect[0]) / canvasSize.width,
-            y: CGFloat(rect[1]) / canvasSize.height,
-            width: CGFloat(rect[2]) / canvasSize.width,
-            height: CGFloat(rect[3]) / canvasSize.height
+    /// Returns the canvas-relative placement that `textureRect` decided, which the object stores
+    /// as its own geometry. `allocationSize` is the texture's pixel size when it intentionally
+    /// differs from the on-canvas size (a supersampled text); nil allocates at the displayed size
+    private func addTexture(_ id: Int32, region: CGRect, crop: CGRect = .init(x: 0, y: 0, width: 1, height: 1), textureSize: CGSize, allocationSize: CGSize? = nil) -> CGRect {
+        let canvasSize = MainTexture.shared.canvasSize
+        let rect = textureRect(region: region, crop: crop, textureSize: textureSize)
+        let allocation = allocationSize ?? rect.size
+        RenderTextureManager.shared.allocateTexture(id: id, width: Int(allocation.width), height: Int(allocation.height))
+        return CGRect(
+            x: rect.origin.x / canvasSize.width,
+            y: rect.origin.y / canvasSize.height,
+            width: rect.width / canvasSize.width,
+            height: rect.height / canvasSize.height
         )
     }
 
-    private func textureRect(region: CGRect, crop: CGRect, textureSize: CGSize) -> [Int32] {
-        let canvasSize = UniBridge.shared.canvasCGSize
+    /// The object's placement in canvas units, rounded to whole pixels as the texture is
+    private func textureRect(region: CGRect, crop: CGRect, textureSize: CGSize) -> CGRect {
+        let canvasSize = MainTexture.shared.canvasSize
         uniDebugLog("textureRect: r\(region), c\(crop), s\(canvasSize)")
-        let x = Int32(canvasSize.width * region.origin.x)
-        let y = Int32(canvasSize.height * region.origin.y)
 
         // The crop is a unit rect, so convert it to pixels to give fitSize the real aspect ratio
         let cropPixelSize = CGSize(width: crop.width * textureSize.width, height: crop.height * textureSize.height)
         let estimatedSize = fitSize(cropPixelSize, regionSize: region.size)
 
-        return [x, y, Int32(estimatedSize.width), Int32(estimatedSize.height)]
+        return CGRect(
+            x: (canvasSize.width * region.origin.x).rounded(.towardZero),
+            y: (canvasSize.height * region.origin.y).rounded(.towardZero),
+            width: estimatedSize.width.rounded(.towardZero),
+            height: estimatedSize.height.rounded(.towardZero)
+        )
     }
 
     private func fitSize(_ size: CGSize, regionSize: CGSize) -> CGSize {
-        let canvasSize = UniBridge.shared.canvasCGSize
+        let canvasSize = MainTexture.shared.canvasSize
 
         var estimatedWidth: CGFloat
 
@@ -323,7 +304,7 @@ extension SceneObjectManager {
         let dataStore = VCamSceneDataStore(sceneId: scene.id)
 
         RenderTextureManager.shared.removeAll()
-        UniBridge.shared.resetAllObjects()
+        UniBridge.shared.removeAllWinds()
 
         self.objects = []
         var availableContent: SCShareableContent?
@@ -395,8 +376,7 @@ extension SceneObjectManager {
                     configure(sceneObject)
                 }
             case let .text(state):
-                // Measured first, so the only rasterization happens at the size the stored
-                // region draws the object at
+                // Measured first, so the only rasterization happens at the stored region's size
                 let scale = TextObjectPlacement.scale(region: state.region.rect, layoutSize: TextRenderer.measure(state.configuration))
                     ?? TextObjectPlacement.fittedDefaultScale(of: state.configuration)
                 RenderTextureManager.shared.set(TextRenderer(layout: .init(configuration: state.configuration, displayScale: scale)), id: object.id)
@@ -408,9 +388,7 @@ extension SceneObjectManager {
         }
 
         Logger.log("finish loadObjects")
-        // Loading a scene must not implicitly save it, so only notify the order to the engine
-        updateObjectOrder(persist: false)
-        // The scene rebuild wiped every engine object, including the scene-independent subtitle
+        // The scene rebuild dropped every object, including the scene-independent subtitle
         SubtitleTextObject.reapply()
     }
 }
@@ -419,7 +397,7 @@ extension SceneObjectManager {
     public func addImage(url: URL) {
         let renderer = ImageRenderer(imageURL: url, filter: nil)
         let id = RenderTextureManager.shared.add(renderer)
-        let canvasSize = UniBridge.shared.canvasCGSize
+        let canvasSize = MainTexture.shared.canvasSize
         add(.init(id: id, type: .image(.init(url: url, size: .init(width: renderer.size.width / canvasSize.width, height: renderer.size.height / canvasSize.height), filter: nil)), isHidden: false, isLocked: false))
     }
 
@@ -430,11 +408,11 @@ extension SceneObjectManager {
     }
 
     public func addText(_ configuration: TextObjectConfiguration) {
-        // Glyphs start at a fixed size regardless of how much was typed, so that the text
-        // reads the same whatever its length; the user scales the object from there
+        // Glyphs start at a fixed size so that the text reads the same whatever its length;
+        // the user scales the object from there
         let renderer = TextRenderer(layout: .init(configuration: configuration, displayScale: TextObjectPlacement.fittedDefaultScale(of: configuration)))
         let id = RenderTextureManager.shared.add(renderer)
-        let region = CGRect(origin: .zero, size: renderer.size / UniBridge.shared.canvasCGSize)
+        let region = CGRect(origin: .zero, size: renderer.size / MainTexture.shared.canvasSize)
         add(.init(id: id, type: .text(.init(configuration: configuration, region: region)), isHidden: false, isLocked: false))
     }
 
@@ -445,8 +423,8 @@ extension SceneObjectManager {
 }
 
 extension SceneObjectManager {
-    /// Adds a copy at the same place on the canvas. Nothing is shared with the original, so
-    /// editing or removing either copy leaves the other one as it was.
+    /// Nothing is shared with the original, so editing or removing either copy leaves the other
+    /// one as it was.
     public func duplicate(_ object: SceneObject) async {
         guard let duplicated = await makeDuplicate(of: object) else { return }
         add(duplicated)

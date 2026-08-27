@@ -145,10 +145,9 @@ public final class SceneManager {
         guard scenes.count > 1, let scene = scenes.find(byId: id) else {
             return
         }
-        // Delete the directory before dropping the scene from memory and metadata;
-        // otherwise a failed deletion leaves a directory no launch can ever clean up
-        // (loadAndRepair only scans IDs registered in the metadata). In the reverse
-        // failure case, the startup repair drops the metadata entry with no directory.
+        // Delete the directory before dropping the scene from memory and metadata; otherwise a
+        // failed deletion leaves a directory no launch can ever clean up (loadAndRepair only
+        // scans IDs registered in the metadata). The reverse order is repaired at startup.
         do {
             try VCamSceneDataStore(sceneId: scene.id).delete()
         } catch {
@@ -207,8 +206,8 @@ public final class SceneManager {
         try saveCurrentScene(objects: SceneObjectManager.shared.objects)
     }
 
-    /// Persists the given objects as the current scene's content. Callers can save a
-    /// new object list before applying it to memory, so a failed save changes nothing.
+    /// Callers can save a new object list before applying it to memory, so a failed save
+    /// changes nothing.
     public func saveCurrentScene(objects: [SceneObject]) throws {
         let dataStore = VCamSceneDataStore(sceneId: currentSceneId)
         let scene = try dataStore.makeScene(name: currentScene.name, objects: objects)
@@ -225,16 +224,7 @@ public final class SceneManager {
         // The aspect-ratio flag is already toggled, so `scenes` now reflects the new
         // orientation automatically (edits were always written to the backing store).
         guard let scene = scenes.first else { return }
-        UniBridge.shared.resetAllObjects() // Since processing is delayed, first remove only the list items from UI.
         Task { @MainActor in
-            // The engine doesn't notify when the canvas finishes resizing, so poll until its
-            // orientation matches instead of waiting a fixed time; time out as a fallback.
-            let isLandscape = MainTexture.shared.isLandscape
-            for _ in 0..<40 {
-                let canvasSize = UniBridge.shared.canvasCGSize
-                if (canvasSize.width >= canvasSize.height) == isLandscape { break }
-                try? await Task.sleep(for: .milliseconds(50))
-            }
             try? await self.loadScene(id: scene.id)
         }
     }

@@ -276,21 +276,28 @@ public final class UniState {
 
     // MARK: - Screen Resolution
 
+    // Objects are configured before the first frame exists, so the output size has to follow the
+    // resolution rather than the frame. didSet doesn't run for the initial value, hence both.
     private var _screenResolution: ScreenResolution = {
         let width = UserDefaults.standard.value(for: .screenResolutionWidth)
         let height = UserDefaults.standard.value(for: .screenResolutionHeight)
-        return ScreenResolution(width: width, height: height)
-    }()
+        let resolution = ScreenResolution(width: width, height: height)
+        MainTexture.shared.setSize(resolution.cgSize)
+        return resolution
+    }() {
+        didSet { MainTexture.shared.setSize(_screenResolution.cgSize) }
+    }
 
     public var screenResolution: ScreenResolution {
         get { _screenResolution }
         set {
+            // Read the orientation before assigning: the output size follows _screenResolution
+            let wasLandscape = _screenResolution.isLandscape
             _screenResolution = newValue
             UserDefaults.standard.set(newValue.size.width, for: .screenResolutionWidth)
             UserDefaults.standard.set(newValue.size.height, for: .screenResolutionHeight)
-            let isLandscape = MainTexture.shared.isLandscape
             UniBridge.setScreenResolution(width: Int32(newValue.size.width), height: Int32(newValue.size.height))
-            if isLandscape != MainTexture.shared.isLandscape {
+            if wasLandscape != newValue.isLandscape {
                 NotificationCenter.default.post(name: .aspectRatioDidChange, object: nil)
             }
         }
