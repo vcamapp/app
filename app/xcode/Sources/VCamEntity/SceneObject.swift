@@ -46,6 +46,54 @@ public extension SceneObject {
             case .web(let state): return state
             }
         }
+
+        /// The canvas-normalized placement: the origin is the offset of the rect's center from
+        /// the canvas center, the size is relative to the canvas. nil for types without an
+        /// on-canvas rect and for an object that has not been placed yet. Setting it is ignored
+        /// for types without a placement.
+        public var normalizedPlacement: CGRect? {
+            get {
+                switch self {
+                case .avatar, .wind:
+                    nil
+                case let .image(image):
+                    image.isPlaced ? Self.placedRect(CGRect(
+                        x: CGFloat(image.offset.x), y: CGFloat(image.offset.y),
+                        width: image.size.width, height: image.size.height
+                    )) : nil
+                case let .screen(screen):
+                    Self.placedRect(screen.region)
+                case let .videoCapture(videoCapture):
+                    Self.placedRect(videoCapture.region)
+                case let .web(web):
+                    Self.placedRect(web.region)
+                case let .text(text):
+                    Self.placedRect(text.region)
+                }
+            }
+            nonmutating set {
+                guard let newValue else { return }
+                switch self {
+                case .avatar, .wind:
+                    break
+                case let .image(image):
+                    image.offset = .init(x: Float(newValue.origin.x), y: Float(newValue.origin.y))
+                    image.size = newValue.size
+                case let .screen(screen):
+                    screen.region = newValue
+                case let .videoCapture(videoCapture):
+                    videoCapture.region = newValue
+                case let .web(web):
+                    web.region = newValue
+                case let .text(text):
+                    text.region = newValue
+                }
+            }
+        }
+
+        private static func placedRect(_ rect: CGRect) -> CGRect? {
+            rect.width > 0 && rect.height > 0 ? rect : nil
+        }
     }
 
     final class Avatar {
@@ -70,6 +118,10 @@ public extension SceneObject {
         public var offset: SIMD2<Float>
         public var size: CGSize = .zero
         public var filter: ImageFilter?
+
+        /// A large negative offset is the "not placed yet" sentinel that asks the layout to
+        /// pick the initial placement.
+        public var isPlaced: Bool { offset.x >= -1000 }
     }
 
     final class ScreenCapture: SceneObjectCroppableTexture {

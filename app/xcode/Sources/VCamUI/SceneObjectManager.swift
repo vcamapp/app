@@ -62,9 +62,9 @@ public final class SceneObjectManager {
             }
 
             // The offset sentinel asks textureRect to place the object for the first time
-            let region: CGRect = image.offset.x < -1000
-                ? .init(origin: .zero, size: .invalid)
-                : .init(origin: .init(x: CGFloat(image.offset.x), y: CGFloat(image.offset.y)), size: image.size)
+            let region: CGRect = image.isPlaced
+                ? .init(origin: .init(x: CGFloat(image.offset.x), y: CGFloat(image.offset.y)), size: image.size)
+                : .init(origin: .zero, size: .invalid)
             let placement = addFixedTexture(
                 object.id,
                 type: .photo,

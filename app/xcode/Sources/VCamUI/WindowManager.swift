@@ -77,6 +77,8 @@ public final class WindowManager {
         }
     }
 
+    public static var makeEngineDisplayView: (NSView) -> NSView = { $0 }
+
     public func setUpView() {
         Logger.log("")
 
@@ -84,7 +86,7 @@ public final class WindowManager {
             return
         }
 
-        containerView.addFilledView(RootView(engineView: {
+        containerView.addFilledView(RootView(engineView: Self.makeEngineDisplayView({
             if UniBridge.isEngineApp {
                 return NSView()
             } else {
@@ -93,7 +95,7 @@ public final class WindowManager {
                 engineView.translatesAutoresizingMaskIntoConstraints = false
                 return engineView
             }
-        }()))
+        }())))
         window.contentView = containerView
 
         if UniBridge.isEngineApp {
