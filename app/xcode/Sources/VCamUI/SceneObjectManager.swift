@@ -117,11 +117,10 @@ public final class SceneObjectManager {
         applyAvatarState(object)
     }
 
-    /// The avatar is the one object the engine still owns, so its visibility and lock have to reach it.
+    /// The avatar is the one object the engine still owns, so its visibility has to reach it
     private func applyAvatarState(_ object: SceneObject) {
         guard case .avatar = object.type else { return }
         UniBridge.shared.avatarHidden(object.isHidden)
-        UniBridge.shared.avatarLocked(object.isLocked)
     }
 
     /// Applies a geometry edit made on the canvas. Text re-rasterizes at its new size so that
@@ -335,7 +334,7 @@ extension SceneObjectManager {
         for object in scene.objects {
             let sceneObject = object.sceneObject(dataStore: dataStore)
             switch object.type {
-            case let .avatar(avatar):
+            case let .avatar(avatar, zoom):
                 Logger.log("load avatar \(avatar == .zero)")
                 if avatar == .zero {
                     CameraControl.resetCamera()
@@ -343,6 +342,7 @@ extension SceneObjectManager {
                     UniBridge.shared.objectAvatarTransform([
                         avatar.position.x, avatar.position.y, avatar.position.z,
                         avatar.rotation.x, avatar.rotation.y, avatar.rotation.z,
+                        zoom ?? 1,
                     ])
                 }
             case .image:

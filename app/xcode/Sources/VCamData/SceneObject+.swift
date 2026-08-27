@@ -1,20 +1,14 @@
-//
-//  SceneObject+.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/05/05.
-//
-
 import Foundation
 import VCamEntity
 
 extension VCamScene.Object {
     public func sceneObject(dataStore: VCamSceneDataStore) -> SceneObject {
         switch type {
-        case let .avatar(avatar):
+        case let .avatar(avatar, zoom):
             return sceneObject(type: .avatar(.init(
                 position: avatar.position.simd3,
-                rotation: avatar.rotation.simd3
+                rotation: avatar.rotation.simd3,
+                zoom: zoom ?? 1
             )))
         case let .image(id, image):
             let url = dataStore.dataURL(id: id)
@@ -77,7 +71,7 @@ extension SceneObject {
             return encodeScene(type: .avatar(state: .init(
                 position: .init(vector: avatar.position),
                 rotation: .init(vector: avatar.rotation)
-            )))
+            ), zoom: avatar.zoom == 1 ? nil : avatar.zoom))
         case let .image(image):
             let id = try VCamSceneDataStore.dataId(fromURL: image.url)
             return encodeScene(type: .image(id: id.uuidString, state: .init(

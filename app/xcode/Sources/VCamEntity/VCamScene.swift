@@ -40,7 +40,7 @@ public extension VCamScene {
     }
 
     enum ObjectType: Codable, Sendable {
-        case avatar(state: Solid)
+        case avatar(state: Solid, zoom: Float?) // zoom: [Added 0.15.5] nil = 1
         case image(id: String, state: Image)
         case screen(id: String, state: ScreenCapture)
         case captureDevice(id: String, state: RenderTexture)

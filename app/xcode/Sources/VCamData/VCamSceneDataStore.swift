@@ -119,7 +119,7 @@ extension VCamSceneDataStore {
 
     public func makeNewScene() -> VCamScene {
         .init(id: sceneId, name: "", objects: [
-            .init(id: SceneObject.avatarID, name: "", type: .avatar(state: .zero), isHidden: false, isLocked: false)
+            .init(id: SceneObject.avatarID, name: "", type: .avatar(state: .zero, zoom: nil), isHidden: false, isLocked: false)
         ], aspectRatio: MainTexture.shared.aspectRatio)
     }
 

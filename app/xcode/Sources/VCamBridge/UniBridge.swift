@@ -7,13 +7,11 @@ public final class UniBridge {
     public enum IntType: Int32, Sendable {
         case lensFlare = 0
         case facialExpression = 1
-        case objectSelected = 2
-        case qualityLevel = 3
+        case qualityLevel = 2
     }
     public let intMapper = ValueBinding<Int32, IntType>()
     public private(set) lazy var lensFlare = intMapper.set(.lensFlare)
     public private(set) lazy var facialExpression = intMapper.set(.facialExpression)
-    public var objectSelected: Binding<Int32> { intMapper.binding(.objectSelected) }
     public private(set) lazy var qualityLevel = intMapper.set(.qualityLevel)
 
     public enum FloatType: Int32, Sendable {
@@ -77,8 +75,7 @@ public final class UniBridge {
         case useFullTracking = 7
         case lipSyncWebCam = 8
         case avatarHidden = 9
-        case avatarLocked = 10
-        case hasPerfectSyncBlendShape = 11
+        case hasPerfectSyncBlendShape = 10
     }
     public let boolMapper = ValueBinding<Bool, BoolType>()
     public private(set) lazy var useAutoMode = boolMapper.set(.useAutoMode)
@@ -91,7 +88,6 @@ public final class UniBridge {
     public private(set) lazy var useFullTracking = boolMapper.set(.useFullTracking)
     public private(set) lazy var lipSyncWebCam = boolMapper.set(.lipSyncWebCam)
     public private(set) lazy var avatarHidden = boolMapper.set(.avatarHidden)
-    public private(set) lazy var avatarLocked = boolMapper.set(.avatarLocked)
     public var hasPerfectSyncBlendShape: Bool { boolMapper.get(.hasPerfectSyncBlendShape) }
 
     public enum StringType: Int32, Sendable {
@@ -140,7 +136,7 @@ public final class UniBridge {
             case .fingers: return 10
             case .receiveVCamBlendShape: return 12
             case .receivePerfectSync: return 60
-            case .objectAvatarTransform: return 6
+            case .objectAvatarTransform: return 7
             case .addWind: return 4
             case .removeWind: return 1
             }

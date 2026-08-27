@@ -41,7 +41,7 @@ public final class UniState {
         qualityLevel: Int32 = 0,
         subtitle: String = "",
         screenResolution: ScreenResolution = .resolution1080p,
-        objectSelected: Int32 = 0,
+        objectSelected: Int32 = -1,
         lipSyncMicIntensity: CGFloat = 1.0,
         shoulderRotationWeight: CGFloat = 0.5,
         swivelOffset: CGFloat = 0,
@@ -71,7 +71,7 @@ public final class UniState {
         state.__qualityLevel = qualityLevel
         state.__subtitle = subtitle
         state._screenResolution = screenResolution
-        state.__objectSelected = objectSelected
+        state.objectSelected = objectSelected
         state.__lipSyncMicIntensity = lipSyncMicIntensity
 #if FEATURE_3
         state.__shoulderRotationWeight = shoulderRotationWeight
@@ -226,9 +226,8 @@ public final class UniState {
     @ObservationIgnored @UniStateValue(\.__qualityLevel, persist: .renderingQuality, bridge: .qualityLevel)
     public var qualityLevel: Int32
 
-    private var __objectSelected: Int32 = 0
-    @ObservationIgnored @UniStateValue(\.__objectSelected, bridge: .objectSelected)
-    public var objectSelected: Int32
+    /// The id of the object selected on the canvas, or -1. Selection is decided in the app, so it is never sent to the engine
+    public var objectSelected: Int32 = -1
 
 #if FEATURE_3
     private var __lensFlare: Int32 = 0
@@ -346,24 +345,6 @@ public final class UniState {
 
     /// Read values from the engine that are not managed by Swift storage
     public func initializeFromEngine() {
-        let bridge = UniBridge.shared
-        hasPerfectSyncBlendShape = bridge.boolMapper.get(.hasPerfectSyncBlendShape)
-        __objectSelected = bridge.intMapper.get(.objectSelected)
-    }
-
-    // MARK: - Engine → Swift Update Methods (bypasses engine sync to avoid loops)
-
-    public func setFromEngine(intType: UniBridge.IntType, value: Int32) {
-        switch intType {
-        case .lensFlare:
-#if FEATURE_3
-            __lensFlare = value
-#else
-            break
-#endif
-        case .facialExpression: break // set-only from Swift
-        case .objectSelected: __objectSelected = value
-        case .qualityLevel: __qualityLevel = value
-        }
+        hasPerfectSyncBlendShape = UniBridge.shared.boolMapper.get(.hasPerfectSyncBlendShape)
     }
 }

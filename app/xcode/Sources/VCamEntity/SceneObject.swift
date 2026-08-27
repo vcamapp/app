@@ -96,14 +96,18 @@ public extension SceneObject {
         }
     }
 
+    /// The camera framing of the avatar, which is the one object the engine still owns
     final class Avatar {
-        public init(position: SIMD3<Float> = .zero, rotation: SIMD3<Float> = .zero) {
+        public init(position: SIMD3<Float> = .zero, rotation: SIMD3<Float> = .zero, zoom: Float = 1) {
             self.position = position
             self.rotation = rotation
+            self.zoom = zoom
         }
 
         public var position: SIMD3<Float> = .zero
         public var rotation: SIMD3<Float> = .zero
+        /// Orthographic zoom used by the 2D variant. The 3D variant zooms by moving the camera, so it stays at 1
+        public var zoom: Float = 1
     }
 
     final class Image {
