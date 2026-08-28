@@ -15,8 +15,12 @@ package enum ModelMetaLoader {
         let vrm = try VRM(withURL: url)
         return ModelMeta(
             name: vrm.name ?? url.deletingPathExtension().lastPathComponent,
-            image: try? vrm.thumbnail.pngData()
+            image: (try? vrm.thumbnail).flatMap(pngData(of:))
         )
+    }
+
+    private static func pngData(of image: CGImage) -> Data? {
+        NSBitmapImageRep(cgImage: image).representation(using: .png, properties: [:])
     }
 #else
     package static func load(from url: URL) throws -> ModelMeta {

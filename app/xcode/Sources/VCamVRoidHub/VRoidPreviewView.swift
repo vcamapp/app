@@ -54,7 +54,7 @@ private final class VRoidPreviewModel {
         // only the entity construction needs the main actor
         let vrm = try await Self.parse(data)
         let loader = VRMEntityLoader(vrm: vrm)
-        let vrmEntity = try loader.loadEntity()
+        let vrmEntity = try await loader.loadEntity()
 
         // Turn the model so it faces the camera, whichever way its version faces
         let forward = vrmEntity.vrm.forwardDirection
