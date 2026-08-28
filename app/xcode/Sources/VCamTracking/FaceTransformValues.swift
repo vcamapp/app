@@ -14,7 +14,8 @@ import VCamMotionV1
 /// would make a wink close the eye on the opposite side of the screen from the
 /// head turn.
 enum FaceTransformValues {
-    /// Positions in the 12-element array, which the builders below emit in order.
+    /// Positions in the 12-element array, which the builders below emit in the order of
+    /// `TrackingMappingEntry.trackingValueKeys(for: .blendShape)`. A test pins them to it.
     private enum LegacyIndex {
         static let posX = 0
         static let yaw = 4

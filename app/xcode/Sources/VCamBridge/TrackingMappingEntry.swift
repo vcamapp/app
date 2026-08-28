@@ -221,6 +221,8 @@ public extension TrackingMappingEntry.DefaultMappingDefinition {
     static let blinkL = Self(key: "_blinkL", bounds: 0...1, rangeMin: 0.2, rangeMax: 0.8, filter: .oneEuro(minCutoff: 0.3, beta: 1.0))
     static let blinkR = Self(key: "_blinkR", bounds: 0...1, rangeMin: 0.2, rangeMax: 0.8, filter: .oneEuro(minCutoff: 0.3, beta: 1.0))
     static let mouth = Self(key: "_mouth", bounds: 0...1)
+    /// Kept out of the mode definitions: the vowel is a mouth shape index, not a channel to scale
+    static let vowel = Self(key: "_vowel", bounds: 0...4)
     static let iPhonePosZ = Self(key: "_posZ", bounds: -1...1, rangeMin: -1, rangeMax: 0, outputRangeMin: 0, outputRangeMax: 0)
     static let iPhoneEyeX = Self(key: "_eyeX", bounds: -1...1)
     static let iPhoneEyeY = Self(key: "_eyeY", bounds: -1...1)
@@ -360,4 +362,23 @@ public extension TrackingMappingEntry {
                 )
             }
     }
+
+    /// Input keys in the order the `receiveVCamBlendShape` / `receivePerfectSync` arrays
+    /// are laid out. `FaceTransformValues` fills them by position, so the two move together
+    static func trackingValueKeys(for mode: TrackingMode) -> [String] {
+        switch mode {
+        case .perfectSync:
+            perfectSyncTrackingValueKeys
+        case .blendShape:
+            blendShapeTrackingValueKeys
+        }
+    }
+
+    private static let perfectSyncTrackingValueKeys = perfectSyncInputKeys.map(\.key)
+    private static let blendShapeTrackingValueKeys = blendShapeInputKeys.map(\.key) + [DefaultMappingDefinition.vowel.key]
+
+    static let vowelPassthrough = TrackingMappingEntry(
+        input: DefaultMappingDefinition.vowel.inputKey,
+        outputKey: DefaultMappingDefinition.vowel.outputKey
+    )
 }

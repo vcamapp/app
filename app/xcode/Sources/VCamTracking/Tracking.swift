@@ -134,7 +134,11 @@ public final class Tracking {
 
     private func applyMappingsToEngine(for mode: TrackingMode) {
         UniBridge.clearTrackingMapping(mode: mode)
-        for mapping in mappings[mode] where mapping.isEnabled {
+        var entries = mappings[mode].filter(\.isEnabled)
+        if mode == .blendShape {
+            entries.append(.vowelPassthrough)
+        }
+        for mapping in entries {
             UniBridge.addTrackingMapping(
                 mode: mode,
                 inputKey: mapping.input.key,
@@ -145,9 +149,6 @@ public final class Tracking {
                 outputRangeMax: mapping.outputKey.rangeMax,
                 filter: mapping.filter
             )
-        }
-        if mode == .blendShape {
-            UniBridge.addTrackingMapping(mode: mode, inputKey: "_vowel", outputKey: "_vowel", inputRangeMin: 0, inputRangeMax: 4, outputRangeMin: 0, outputRangeMax: 4, filter: .none)
         }
     }
 
