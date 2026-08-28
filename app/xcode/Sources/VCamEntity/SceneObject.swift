@@ -2,9 +2,13 @@ import Foundation
 import CoreGraphics
 import simd
 
-public protocol SceneObjectCroppableTexture: AnyObject {
-    var textureSize: CGSize { get set }
+/// An object that stores its own canvas-relative placement.
+public protocol SceneObjectPlaceable: AnyObject {
     var region: CGRect { get set }
+}
+
+public protocol SceneObjectCroppableTexture: SceneObjectPlaceable {
+    var textureSize: CGSize { get set }
     var crop: CGRect { get set }
     var filter: ImageFilter? { get set }
 }
@@ -53,41 +57,34 @@ public extension SceneObject {
         /// for types without a placement.
         public var normalizedPlacement: CGRect? {
             get {
-                switch self {
-                case .avatar, .wind:
-                    nil
-                case let .image(image):
-                    image.isPlaced ? Self.placedRect(CGRect(
+                // The image keeps its placement split across offset and size, so it can't go
+                // through `placeable`
+                if case let .image(image) = self {
+                    return image.isPlaced ? Self.placedRect(CGRect(
                         x: CGFloat(image.offset.x), y: CGFloat(image.offset.y),
                         width: image.size.width, height: image.size.height
                     )) : nil
-                case let .screen(screen):
-                    Self.placedRect(screen.region)
-                case let .videoCapture(videoCapture):
-                    Self.placedRect(videoCapture.region)
-                case let .web(web):
-                    Self.placedRect(web.region)
-                case let .text(text):
-                    Self.placedRect(text.region)
                 }
+                return placeable.flatMap { Self.placedRect($0.region) }
             }
             nonmutating set {
                 guard let newValue else { return }
-                switch self {
-                case .avatar, .wind:
-                    break
-                case let .image(image):
+                if case let .image(image) = self {
                     image.offset = .init(x: Float(newValue.origin.x), y: Float(newValue.origin.y))
                     image.size = newValue.size
-                case let .screen(screen):
-                    screen.region = newValue
-                case let .videoCapture(videoCapture):
-                    videoCapture.region = newValue
-                case let .web(web):
-                    web.region = newValue
-                case let .text(text):
-                    text.region = newValue
+                    return
                 }
+                placeable?.region = newValue
+            }
+        }
+
+        private var placeable: (any SceneObjectPlaceable)? {
+            switch self {
+            case .avatar, .image, .wind: nil
+            case let .screen(state): state
+            case let .videoCapture(state): state
+            case let .web(state): state
+            case let .text(state): state
             }
         }
 
@@ -186,7 +183,7 @@ public extension SceneObject {
         public var filter: ImageFilter?
     }
 
-    final class Text {
+    final class Text: SceneObjectPlaceable {
         public init(configuration: TextObjectConfiguration, region: CGRect) {
             self.configuration = configuration
             self.region = region

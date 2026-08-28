@@ -100,12 +100,14 @@ extension UniStateValue where Value == String {
 // MARK: - Color Convenience Initializers
 
 extension UniStateValue where Value == Color {
-    init(_ keyPath: ValueKeyPath, persist: UserDefaults.Key<String>? = nil, bridge: UniBridge.StructType) {
+    init(_ keyPath: ValueKeyPath, persist: UserDefaults.Key<String>? = nil, bridge: UniBridge.StructType? = nil) {
         self.init(keyPath) { @MainActor _, newValue in
             if let key = persist, let hex = newValue.hexRGBAString {
                 UserDefaults.standard.set(hex, for: key)
             }
-            UniBridge.shared.structMapper.binding(bridge).wrappedValue = newValue
+            if let bridge {
+                UniBridge.shared.structMapper.binding(bridge).wrappedValue = newValue
+            }
         }
     }
 }

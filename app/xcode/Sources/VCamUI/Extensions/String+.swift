@@ -1,4 +1,5 @@
 import AppKit
+import VCamEntity
 
 public extension String {
     /// Rasterizes the string (an emoji, in practice) so it can be shown as an overlay image.
@@ -20,7 +21,7 @@ public extension String {
             space: .sRGB,
             bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
         ) else {
-            throw NSError(domain: "vcam", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to make a drawing context. string: \(self)"])
+            throw NSError.vcam(message: "Failed to make a drawing context. string: \(self)")
         }
 
         NSGraphicsContext.saveGraphicsState()
@@ -29,7 +30,7 @@ public extension String {
         string.draw(at: .zero, withAttributes: attributes)
 
         guard let image = context.makeImage() else {
-            throw NSError(domain: "vcam", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to draw. string: \(self)"])
+            throw NSError.vcam(message: "Failed to draw. string: \(self)")
         }
         return image
     }

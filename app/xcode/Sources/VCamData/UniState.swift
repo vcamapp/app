@@ -253,11 +253,7 @@ public final class UniState {
         return Color(hexRGBA: hexString) ?? Color(red: 0.77647059, green: 0.90588235, blue: 1.0)
     }()
 
-    @ObservationIgnored @UniStateValue(\.__backgroundColor, onSet: { _, newValue in
-        if let hex = newValue.hexRGBAString {
-            UserDefaults.standard.set(hex, for: .backgroundColor)
-        }
-    })
+    @ObservationIgnored @UniStateValue(\.__backgroundColor, persist: .backgroundColor)
     public var backgroundColor: Color
 
 #if FEATURE_3

@@ -45,7 +45,7 @@ public final class TextRenderer: RenderTextureRenderer {
     /// that comes back is never the one that was set; comparing in pixels is what tells a real
     /// resize apart from that noise, which would otherwise rasterize on every click.
     public func setScale(display displayScale: Double, render renderScale: Double) {
-        guard displayScale.isFinite, displayScale > 0, renderScale.isFinite, renderScale > 0 else { return }
+        guard Layout.isUsableScale(displayScale), Layout.isUsableScale(renderScale) else { return }
         guard abs(layoutSize.width * displayScale * renderScale - image.extent.width) >= 1 else { return }
         layout = .init(configuration: layout.configuration, displayScale: displayScale, renderScale: renderScale)
     }
@@ -104,12 +104,17 @@ public final class TextRenderer: RenderTextureRenderer {
 }
 
 private extension TextRenderer.Layout {
+    /// A scale that can't be used as a multiplier falls back to 1 instead of collapsing the bitmap
+    static func isUsableScale(_ scale: Double) -> Bool {
+        scale.isFinite && scale > 0
+    }
+
     var normalizedDisplayScale: Double {
-        displayScale.isFinite && displayScale > 0 ? displayScale : 1
+        Self.isUsableScale(displayScale) ? displayScale : 1
     }
 
     var normalizedRenderScale: Double {
-        renderScale.isFinite && renderScale > 0 ? renderScale : 1
+        Self.isUsableScale(renderScale) ? renderScale : 1
     }
 
     var rasterConfiguration: TextObjectConfiguration {

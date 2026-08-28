@@ -65,7 +65,8 @@ public final class SceneObjectManager {
     func configure(_ object: SceneObject) {
         uniDebugLog("SceneObjectManager.configure: \(object)")
         switch object.type {
-        case .avatar: ()
+        case .avatar:
+            applyAvatarState(object)
         case let .image(image):
             let sceneId = SceneManager.shared.currentSceneId
             do {
@@ -93,12 +94,9 @@ public final class SceneObjectManager {
             )
             image.offset = .init(x: Float(placement.origin.x), y: Float(placement.origin.y))
             image.size = placement.size
-        case let .screen(screen):
-            screen.region = addTexture(object.id, region: screen.region, crop: screen.crop, textureSize: screen.textureSize)
-        case let .videoCapture(videoCapture):
-            videoCapture.region = addTexture(object.id, region: videoCapture.region, crop: videoCapture.crop, textureSize: videoCapture.textureSize)
-        case let .web(web):
-            web.region = addTexture(object.id, region: web.region, crop: web.crop, textureSize: web.textureSize)
+        case .screen, .videoCapture, .web:
+            guard let texture = object.type.croppableTexture else { break }
+            texture.region = addTexture(object.id, region: texture.region, crop: texture.crop, textureSize: texture.textureSize)
         case let .text(text):
             let canvasSize = MainTexture.shared.canvasSize
             if let renderer = RenderTextureManager.shared.textRenderer(id: object.id),
@@ -113,8 +111,6 @@ public final class SceneObjectManager {
             let scale: Float = 100000 // Shift the digits by the number of significant figures to send as Int.
             UniBridge.shared.addWind([object.id, Int32(direction.x * scale), Int32(direction.y * scale), Int32(direction.z * scale)])
         }
-
-        applyAvatarState(object)
     }
 
     /// The avatar is the one object the engine still owns, so its visibility has to reach it
