@@ -30,7 +30,6 @@ public final class UniState {
         currentExpressionIndex: Int? = nil,
         blendShapeNames: [String] = TrackingMappingEntry.defaultMappings(for: .blendShape).map(\.input.key),
         // UniBridge properties
-        useAutoMode: Bool = false,
         usePostEffect: Bool = false,
         useCombineMesh: Bool = false,
         useAddToMacOSMenuBar: Bool = false,
@@ -59,7 +58,6 @@ public final class UniState {
         state.currentExpressionIndex = currentExpressionIndex
         state.blendShapeNames = blendShapeNames
 #if FEATURE_3
-        state.__useAutoMode = useAutoMode
         state.__usePostEffect = usePostEffect
         state.__useCombineMesh = useCombineMesh
 #endif
@@ -101,10 +99,6 @@ public final class UniState {
     // MARK: - Bool Properties
 
 #if FEATURE_3
-    private var __useAutoMode = UserDefaults.standard.value(for: .useAutoMode)
-    @ObservationIgnored @UniStateValue(\.__useAutoMode, persist: .useAutoMode, bridge: .useAutoMode)
-    public var useAutoMode: Bool
-
     private var __usePostEffect = UserDefaults.standard.value(for: .usePostEffect)
     @ObservationIgnored @UniStateValue(\.__usePostEffect, onSet: { state, newValue in
         UserDefaults.standard.set(newValue, for: .usePostEffect)
@@ -316,7 +310,6 @@ public final class UniState {
     public func initializeToEngine() {
         let bridge = UniBridge.shared
 #if FEATURE_3
-        bridge.boolMapper.setValue(.useAutoMode, __useAutoMode)
         bridge.boolMapper.setValue(.usePostEffect, __usePostEffect)
         bridge.boolMapper.setValue(.useCombineMesh, __useCombineMesh)
 #endif

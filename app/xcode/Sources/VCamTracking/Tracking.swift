@@ -169,6 +169,17 @@ public final class Tracking {
         }
     }
 
+    /// True while nothing can drive the body. VCamMocap is covered by the methods
+    /// themselves (`.vcamMocap`): its integration only starts the receiver, and
+    /// packets are dropped unless a method opts into them. Lip sync and eye
+    /// tracking don't move the body, so they are intentionally ignored.
+    public var isIdleMotionUsed: Bool {
+        faceTrackingMethod == .disabled
+            && handTrackingMethod == .disabled
+            && fingerTrackingMethod == .disabled
+            && !UserDefaults.standard.value(for: .integrationMocopi)
+    }
+
     /// Applies the camera usage and syncs the blinker state, which depends on
     /// the tracking method owned here rather than by the camera
     private func applyWebCamUsage(_ usage: AvatarWebCamera.Usage) {

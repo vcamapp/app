@@ -4762,29 +4762,6 @@
         }
       }
     },
-    "playIdleMotions": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Play idle motions"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "待機モーションをランダム再生する"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "대기 모션을 무작위로 재생"
-          }
-        }
-      }
-    },
     "pleaseReauthenticate": {
       "extractionState": "manual",
       "localizations": {

@@ -14,9 +14,6 @@ public struct VCamSettingGeneralView: View {
         Form {
             Section {
 #if FEATURE_3
-                Toggle(isOn: $state.useAutoMode) {
-                    Text(.playIdleMotions)
-                }
                 Toggle(isOn: $state.useCombineMesh) {
                     Text(.optimizeMeshes)
                 }

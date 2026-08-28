@@ -65,20 +65,18 @@ public final class UniBridge {
     public private(set) lazy var trackingSmoothing = floatMapper.set(.trackingSmoothing)
 
     public enum BoolType: Int32, Sendable {
-        case useAutoMode = 0
-        case useShadow = 1
-        case usePostEffect = 2
-        case useCombineMesh = 3
-        case useAddToMacOSMenuBar = 4
-        case useVSync = 5
-        case useBlinker = 6
-        case useFullTracking = 7
-        case lipSyncWebCam = 8
-        case avatarHidden = 9
-        case hasPerfectSyncBlendShape = 10
+        case useShadow = 0
+        case usePostEffect = 1
+        case useCombineMesh = 2
+        case useAddToMacOSMenuBar = 3
+        case useVSync = 4
+        case useBlinker = 5
+        case useFullTracking = 6
+        case lipSyncWebCam = 7
+        case avatarHidden = 8
+        case hasPerfectSyncBlendShape = 9
     }
     public let boolMapper = ValueBinding<Bool, BoolType>()
-    public private(set) lazy var useAutoMode = boolMapper.set(.useAutoMode)
     public private(set) lazy var useShadow = boolMapper.set(.useShadow)
     public private(set) lazy var usePostEffect = boolMapper.set(.usePostEffect)
     public private(set) lazy var useCombineMesh = boolMapper.set(.useCombineMesh)

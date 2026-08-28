@@ -53,7 +53,6 @@ public extension UserDefaults.Key {
     static var trackingSmoothing: Key<Double> { .init("vc_tracking_smoothing", default: 0.0) }
 #if FEATURE_3
     static var displayParameterId: Key<String?> { .init("vc_display_parameter_id", default: nil) }
-    static var useAutoMode: Key<Bool> { .init("vc_use_automode", default: false) }
     static var usePostEffect: Key<Bool> { .init("vc_use_posteffect", default: false) }
     static var useCombineMesh: Key<Bool> { .init("vc_use_combine_mesh", default: true) }
     static var shoulderRotationWeight: Key<Double> { .init("vc_shoulder_rotation_weight", default: 1.0) }
