@@ -77,25 +77,24 @@ public struct VCamMainView: View {
             }
 
             HStack {
+                let subtitleField = HStack(spacing: 4) {
+                    CommitTextField(placeholder: String(localized: .subtitle), text: $state.subtitle)
+                    SubtitleStyleButton()
+                }
                 if #available(macOS 26.0, *) {
                     GroupBox {
-                        HStack(spacing: 4) {
-                            CommitTextField(placeholder: String(localized: .subtitle), text: $state.subtitle)
-                            SubtitleStyleButton()
-                        }
-                        .padding(.horizontal, 8)
+                        subtitleField
+                            .padding(.horizontal, 8)
                     }
 
                     GroupBox {
-                        // controlSizeはメニュー項目のフォントまで縮めてしまうため、
-                        // 高さの調整は余白だけで行う
+                        // controlSize would also shrink the menu item fonts,
+                        // so adjust the height with padding alone
                         calibrateButton
                             .padding(.vertical, -1.5)
                     }
                 } else {
-                    CommitTextField(placeholder: String(localized: .subtitle), text: $state.subtitle)
-                    SubtitleStyleButton()
-
+                    subtitleField
                     calibrateButton
                 }
             }

@@ -5,8 +5,8 @@ import VCamEntity
 /// How an object's placement is handled while its text is edited. Objects that stay
 /// locked on the canvas (the subtitle) hand this over so the window can free them
 /// for as long as it is open, and offer a way back when they end up out of reach.
-public struct TextPlacementSupport {
-    public init(hint: LocalizedStringResource, setEditing: @escaping @MainActor (Bool) -> Void, reset: @escaping @MainActor () -> Void) {
+struct TextPlacementSupport {
+    init(hint: LocalizedStringResource, setEditing: @escaping @MainActor (Bool) -> Void, reset: @escaping @MainActor () -> Void) {
         self.hint = hint
         self.setEditing = setEditing
         self.reset = reset
@@ -17,7 +17,7 @@ public struct TextPlacementSupport {
     let reset: @MainActor () -> Void
 }
 
-public extension TextRenderer {
+extension TextRenderer {
     static func showPreferences(configuration: TextObjectConfiguration, allowsEmptyText: Bool = false, resetConfiguration: TextObjectConfiguration? = nil, placement: TextPlacementSupport? = nil, completion: @escaping (TextObjectConfiguration) -> Void) {
         MacWindowManager.shared.reopen(
             TextRendererPreferenceView(

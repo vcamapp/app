@@ -6,14 +6,14 @@ import VCamDefaults
 import VCamBridge
 
 /// The subtitle overlay, drawn through the text-object pipeline. It belongs to no scene: the
-/// text lives in UserDefaults (`UniState.message`), and the style and placement are stored
+/// text lives in UserDefaults (`UniState.subtitle`), and the style and placement are stored
 /// globally so that every scene shows it.
 ///
 /// Unlike a scene text object, whose on-screen width is fixed by the user, a subtitle keeps its
 /// glyph size steady while the text changes, like broadcast subtitles.
 @MainActor
-public enum SubtitleTextObject {
-    /// The text is excluded: the message key owns it. The placement is stored as the
+enum SubtitleTextObject {
+    /// The text is excluded: the subtitle key owns it. The placement is stored as the
     /// glyph scale plus anchors, because the box itself changes with every utterance.
     fileprivate struct Style: Codable {
         /// Fills in the default placement, which depends on the canvas size
@@ -38,7 +38,7 @@ public enum SubtitleTextObject {
 
     /// A scene rebuild drops the engine's object, so this recreates it instead of diffing
     /// against what the engine had.
-    public static func reapply() {
+    static func reapply() {
         subscribeIfNeeded()
         recreate()
     }
@@ -53,7 +53,7 @@ public enum SubtitleTextObject {
     }
 
     /// Opens the text editor for the subtitle's own style; works before any text was typed
-    public static func showStyleEditor() {
+    static func showStyleEditor() {
         var configuration = current?.payload.configuration ?? loadStyle()?.configuration ?? TextObjectPreset.subtitleDefault
         // The toolbar field owns the text, so it is the one the editor starts from
         configuration.text = UniState.shared.subtitle
@@ -80,7 +80,7 @@ public enum SubtitleTextObject {
 
     /// Brings an off-screen or shrunken subtitle back to the default placement and scale,
     /// without touching its style
-    public static func resetPlacement() {
+    private static func resetPlacement() {
         if let style = loadStyle() {
             save(Style(configuration: style.configuration))
         }

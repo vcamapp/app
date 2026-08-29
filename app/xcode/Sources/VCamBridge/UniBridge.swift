@@ -128,17 +128,6 @@ public final class UniBridge {
         case objectAvatarTransform = 4
         case addWind = 5
         case removeWind = 6
-        public var arraySize: Int {
-            switch self {
-            case .hands: return 12
-            case .fingers: return 10
-            case .receiveVCamBlendShape: return 12
-            case .receivePerfectSync: return 60
-            case .objectAvatarTransform: return 7
-            case .addWind: return 4
-            case .removeWind: return 1
-            }
-        }
     }
     public let arrayMapper = ValueBinding<UnsafeMutableRawPointer, ArrayType>()
     public private(set) lazy var hands = arrayMapper.set(.hands, type: [Float].self)

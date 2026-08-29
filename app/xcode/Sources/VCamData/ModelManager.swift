@@ -29,11 +29,19 @@ public final class ModelManager {
         return modelItems.find(byId: id)
     }
 
+    /// The last loaded model, or nil when it can no longer be loaded
+    public var restorableLastLoadedModel: ModelItem? {
+        guard let item = lastLoadedModel, item.status == .valid else { return nil }
+        return item
+    }
+
     public func model(for modelId: UUID) -> Models.Model? {
         modelItems.find(byId: modelId)?.model
     }
 
     public func setLastLoadedModel(_ model: ModelItem) throws {
+        // Restoring on launch re-selects the persisted model; skip the disk write then
+        guard lastLoadedModelId != model.id else { return }
         try commit { _, lastModelId in
             lastModelId = model.id
         }

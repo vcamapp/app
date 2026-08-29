@@ -31,7 +31,7 @@ public enum FileUtility {
         let savePanel = NSSavePanel()
         savePanel.canCreateDirectories = true
         if let type = UTType(filenameExtension: fileExtension) {
-            // 拡張子はパネルが付与するため、ファイル名には含めない
+            // The panel appends the extension, so the filename must not include it
             savePanel.allowedContentTypes = [type]
             savePanel.nameFieldStringValue = defaultName
         } else {

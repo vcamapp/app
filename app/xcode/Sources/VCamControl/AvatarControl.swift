@@ -15,18 +15,18 @@ public enum AvatarControl {
     /// Whether the app will push a model right after launch, so the engine leaves the
     /// avatar empty instead of restoring one of its own
     public static var hasPendingRestore: Bool {
-        ModelManager.shared.lastLoadedModel?.status == .valid
+        ModelManager.shared.restorableLastLoadedModel != nil
     }
 
     /// Loads the model that was in use when the app last quit. The library keeps its own
     /// copy of every model, so nothing else has to be cached for this
-    public static func restoreLastModelOnLaunch(modelManager: ModelManager = .shared) {
+    public static func restoreLastModelOnLaunch() {
         guard !didAttemptRestore else { return }
         didAttemptRestore = true
 
-        guard let item = modelManager.lastLoadedModel, item.status == .valid else { return }
+        guard let item = ModelManager.shared.restorableLastLoadedModel else { return }
         do {
-            try load(item, modelManager: modelManager)
+            try load(item)
         } catch {
             Logger.error(error)
         }
@@ -36,6 +36,7 @@ public enum AvatarControl {
     /// The avatar is no longer the VRoid Hub one, so that reference is cleared
     public static func load(_ item: ModelItem, modelManager: ModelManager = .shared) throws {
         guard item.status == .valid else { return }
+        Logger.log(event: .loadModelFile)
         VRoidModelReference.lastUsed = nil
 #if FEATURE_3
         UniBridge.loadVRM(path: item.model.modelURL.path)

@@ -76,9 +76,8 @@ public enum VRoidHub {
 
     /// Reloads the last used VRoid Hub model through the SDK's encrypted cache.
     ///
-    /// The engine restores the last file-based model (or the sample) on its own, so
-    /// this quietly replaces it afterwards and gives up on any failure —
-    /// signing in again or reselecting the model recovers.
+    /// When a file-based model was restored first, this quietly replaces it and
+    /// gives up on any failure — signing in again or reselecting the model recovers.
     public static func restoreLastModelOnLaunch() {
         guard !didAttemptRestore else { return }
         didAttemptRestore = true

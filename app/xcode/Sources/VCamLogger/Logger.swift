@@ -26,7 +26,6 @@ public struct Logger: Sendable {
 public extension Logger {
     enum Event: String, Sendable {
         case openVRoidHub = "open_vroidhub"
-        case loadVRMFile = "load_vrmfile"
         case loadModelFile = "load_modelfile"
     }
 
