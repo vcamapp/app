@@ -19,7 +19,7 @@ public struct VCamSettingTrackingMappingEditorView: View {
                 if store.isInitialized {
                     VCamSettingMappingTableView(
                         store: store,
-                        hasBlendShapeNames: !uniState.blendShapeNames.isEmpty,
+                        hasBlendShapeNames: !uniState.avatarBlendShapeNames.isEmpty,
                         mappingsRevision: store.mappingsRevision
                     )
                 } else {

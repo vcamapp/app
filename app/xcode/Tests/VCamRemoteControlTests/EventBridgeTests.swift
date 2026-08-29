@@ -78,7 +78,7 @@ struct EventBridgeTests {
             bridge.stop()
         }
 
-        uniState.currentExpressionIndex = 1
+        uniState.currentExpressionName = "Angry"
         await drainMainActor()
         #expect(recorder.received == [.expressionChanged(name: "Angry")])
     }

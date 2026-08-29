@@ -9,15 +9,12 @@ public struct VCamMainToolbarExpressionPicker: View {
     @Environment(UniState.self) var uniState
 
     public var body: some View {
-        let currentExpressionName = uniState.currentExpressionIndex.flatMap { index in
-            uniState.expressions.indices.contains(index) ? uniState.expressions[index].name : nil
-        }
         ScrollView(.vertical, showsIndicators: true) {
             GroupBox {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 60))]) {
                     ForEach(uniState.expressions) { expression in
                         VCamMainToolbarButton(
-                            isSelected: expression.name == currentExpressionName,
+                            isSelected: expression.name == uniState.currentExpressionName,
                             action: {
                                 ExpressionControl.apply(name: expression.name)
                             },
@@ -72,7 +69,7 @@ extension VCamMainToolbarExpressionPicker: MacWindow {
                 .init(name: "FFFFFFF"),
                 .init(name: "GGGGGGG"),
             ],
-            currentExpressionIndex: 0
+            currentExpressionName: "Angry"
         ))
 }
 

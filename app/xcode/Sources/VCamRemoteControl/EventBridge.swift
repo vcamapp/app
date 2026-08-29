@@ -25,7 +25,7 @@ final class EventBridge {
             self?.publish(.avatarLoaded(avatarId: avatarId))
         }
         observeMotionPlaying(previous: uniState.isMotionPlaying)
-        observeExpression(previous: currentExpressionName)
+        observeExpression(previous: uniState.currentExpressionName)
         observeScene(previous: SceneControl.provider?.activeScene?.id)
         observeSubtitle(previous: uniState.subtitle)
     }
@@ -39,12 +39,6 @@ final class EventBridge {
         Task { @MainActor in
             await eventPublisher.publish(notification)
         }
-    }
-
-    private var currentExpressionName: String? {
-        guard let index = uniState.currentExpressionIndex,
-              uniState.expressions.indices.contains(index) else { return nil }
-        return uniState.expressions[index].name
     }
 
     /// Re-arms observation after each change; the loop ends when `isActive` turns false
@@ -70,12 +64,11 @@ final class EventBridge {
     private func observeExpression(previous: String?) {
         guard isActive else { return }
         withObservationTracking {
-            _ = uniState.currentExpressionIndex
-            _ = uniState.expressions
+            _ = uniState.currentExpressionName
         } onChange: {
             Task { @MainActor [weak self] in
                 guard let self, self.isActive else { return }
-                let current = self.currentExpressionName
+                let current = self.uniState.currentExpressionName
                 if let current, current != previous {
                     self.publish(.expressionChanged(name: current))
                 }

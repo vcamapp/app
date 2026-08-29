@@ -19,7 +19,7 @@ public enum VCamUIPreviewStub {
 
         // Stands in for the model load that fills these from the engine
         UniState.shared.initializeFromEngine()
-        UniState.shared.blendShapeNames = stubBlendShapeNames
+        UniState.shared.avatarBlendShapeNames = stubBlendShapeNames
         Tracking.shared.mappings.perfectSync = TrackingMappingEntry.defaultMappings(for: .perfectSync)
 
         // The app provides this tab, so the preview app opens its windows from a stub of its own
@@ -39,12 +39,9 @@ public enum VCamUIPreviewStub {
         NSApp.mainOrFirstWindow?.title = "VCam"
     }
 
-    /// The keys a Perfect Sync capable model exposes, plus its expressions
+    /// Stands in for a Perfect Sync model: the 52 ARKit shapes plus the VRM groups
     private static var stubBlendShapeNames: [String] {
-        let names = TrackingMappingEntry.defaultMappings(for: .blendShape).map(\.input.key)
-            + TrackingMappingEntry.defaultMappings(for: .perfectSync).map(\.outputKey.key)
+        TrackingMappingEntry.DefaultMappingDefinition.perfectSyncFacialDefinitions.map(\.key)
             + ["Neutral", "Joy", "Angry", "Sorrow", "Fun", "A", "I", "U", "E", "O"]
-        var seen: Set<String> = []
-        return names.filter { seen.insert($0).inserted }
     }
 }

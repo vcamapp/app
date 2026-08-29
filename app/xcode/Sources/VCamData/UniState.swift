@@ -27,8 +27,8 @@ public final class UniState {
         motions: [Avatar.Motion] = [],
         isMotionPlaying: [String: Bool] = [:],
         expressions: [Avatar.Expression] = [],
-        currentExpressionIndex: Int? = nil,
-        blendShapeNames: [String] = TrackingMappingEntry.defaultMappings(for: .blendShape).map(\.input.key),
+        currentExpressionName: String? = nil,
+        avatarBlendShapeNames: [String] = [],
         // UniBridge properties
         usePostEffect: Bool = false,
         useCombineMesh: Bool = false,
@@ -55,8 +55,8 @@ public final class UniState {
         state.motions = motions
         state.isMotionPlaying = isMotionPlaying
         state.expressions = expressions
-        state.currentExpressionIndex = currentExpressionIndex
-        state.blendShapeNames = blendShapeNames
+        state.currentExpressionName = currentExpressionName
+        state.avatarBlendShapeNames = avatarBlendShapeNames
 #if FEATURE_3
         state.__usePostEffect = usePostEffect
         state.__useCombineMesh = useCombineMesh
@@ -93,8 +93,17 @@ public final class UniState {
     /// Playback states keyed by motion ID
     public var isMotionPlaying: [String: Bool] = [:]
     public var expressions: [Avatar.Expression] = []
-    public var currentExpressionIndex: Int?
-    public var blendShapeNames: [String] = []
+    /// The expression the user picked, or nil while none is applied. Owned here rather
+    /// than echoed back by the engine: `ExpressionControl` is the only thing that sets it
+    public var currentExpressionName: String?
+    /// Output keys the loaded avatar exposes, as the engine reports them
+    /// (3D: expression names / 2D: Live2D parameter names)
+    public var avatarBlendShapeNames: [String] = []
+
+    /// Keys a tracking mapping can write to: the abstract input channels plus the avatar's own
+    public var blendShapeNames: [String] {
+        TrackingMappingEntry.availableInputKeys(for: .blendShape).map(\.key) + avatarBlendShapeNames
+    }
 
     // MARK: - Bool Properties
 

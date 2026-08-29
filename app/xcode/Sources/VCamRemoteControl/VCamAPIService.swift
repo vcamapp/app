@@ -54,15 +54,9 @@ package struct VCamAPIService: VCamHandler {
     package func stateGet() async throws -> StateGetResult {
         StateGetResult(
             avatarId: modelManager.lastLoadedModelId,
-            expressionName: currentExpressionName,
+            expressionName: uniState.currentExpressionName,
             playingMotionIds: uniState.isMotionPlaying.filter(\.value).keys.sorted()
         )
-    }
-
-    private var currentExpressionName: String? {
-        guard let index = uniState.currentExpressionIndex,
-              uniState.expressions.indices.contains(index) else { return nil }
-        return uniState.expressions[index].name
     }
 
     @MainActor
