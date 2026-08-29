@@ -139,57 +139,24 @@ private extension AppMenu {
 // MARK: - Object
 private extension AppMenu {
     private func setupObjectMenu(subMenu: NSMenu) {
-#if FEATURE_3
-        let items: [NSMenuItem] = [
-            makeMenuItem(title: String(localized: .addImage), action: #selector(addImage)),
-            makeMenuItem(title: String(localized: .addScreenCapture), action: #selector(addScreenCapture)),
-            makeMenuItem(title: String(localized: .addVideoCapture), action: #selector(addVideoCapture)),
-            makeMenuItem(title: String(localized: .addWeb), action: #selector(addWeb)),
-            makeMenuItem(title: String(localized: .addText), action: #selector(addText)),
-            .separator(),
-            makeMenuItem(title: String(localized: .addWind), action: #selector(addWind)),
-        ]
-#else
-        let items: [NSMenuItem] = [
-            makeMenuItem(title: String(localized: .resetModelPosition), action: #selector(resetModelPosition)),
-            .separator(),
-            makeMenuItem(title: String(localized: .addImage), action: #selector(addImage)),
-            makeMenuItem(title: String(localized: .addScreenCapture), action: #selector(addScreenCapture)),
-            makeMenuItem(title: String(localized: .addVideoCapture), action: #selector(addVideoCapture)),
-            makeMenuItem(title: String(localized: .addWeb), action: #selector(addWeb)),
-            makeMenuItem(title: String(localized: .addText), action: #selector(addText)),
-        ]
+        var items: [NSMenuItem] = []
+#if !FEATURE_3
+        items.append(makeMenuItem(title: String(localized: .resetModelPosition), action: #selector(resetModelPosition)))
+        items.append(.separator())
 #endif
+        for object in AddableSceneObject.available {
+            if object.startsNewSection {
+                items.append(.separator())
+            }
+            let item = makeMenuItem(title: object.menuTitle, action: #selector(addObject(_:)))
+            item.tag = object.rawValue
+            items.append(item)
+        }
         Self.makeSubMenu(menu: subMenu, title: String(localized: .object), items: items)
     }
 
-    @objc private func addImage() {
-        guard let url = FileUtility.openFile(type: .image) else { return }
-        SceneObjectManager.shared.addImage(url: url)
-    }
-
-    @objc private func addScreenCapture() {
-        showScreenRecorderPreferenceView { recorder in
-            SceneObjectManager.shared.addScreenCapture(recorder)
-        }
-    }
-
-    @objc private func addVideoCapture() {
-        CaptureDeviceRenderer.selectDevice { drawer in
-            SceneObjectManager.shared.addVideoCapture(drawer)
-        }
-    }
-
-    @objc private func addWeb() {
-        WebRenderer.showPreferencesForAdding()
-    }
-
-    @objc private func addText() {
-        TextRenderer.showPreferencesForAdding()
-    }
-
-    @objc private func addWind() {
-        SceneObjectManager.shared.add(.init(type: .wind(), isHidden: false, isLocked: false))
+    @objc private func addObject(_ sender: NSMenuItem) {
+        AddableSceneObject(rawValue: sender.tag)?.perform()
     }
 }
 

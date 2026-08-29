@@ -120,6 +120,11 @@ public extension SceneObject {
         public var size: CGSize = .zero
         public var filter: ImageFilter?
 
+        /// The payloads are reference types, so a duplicated object must not share them
+        public func copy() -> SceneObject.Image {
+            .init(url: url, offset: offset, size: size, filter: filter)
+        }
+
         /// A large negative offset is the "not placed yet" sentinel that asks the layout to
         /// pick the initial placement.
         public var isPlaced: Bool { offset.x >= -1000 }
@@ -141,6 +146,10 @@ public extension SceneObject {
         public var region: CGRect
         public var crop: CGRect
         public var filter: ImageFilter?
+
+        public func copy() -> SceneObject.ScreenCapture {
+            .init(id: id, captureType: captureType, textureSize: textureSize, region: region, crop: crop, filter: filter)
+        }
     }
 
     final class VideoCapture: SceneObjectCroppableTexture {
@@ -157,6 +166,10 @@ public extension SceneObject {
         public var region: CGRect
         public var crop: CGRect
         public var filter: ImageFilter?
+
+        public func copy() -> SceneObject.VideoCapture {
+            .init(id: id, textureSize: textureSize, region: region, crop: crop, filter: filter)
+        }
     }
 
     final class Web: SceneObjectCroppableTexture {
@@ -181,6 +194,10 @@ public extension SceneObject {
         public var region: CGRect
         public var crop: CGRect
         public var filter: ImageFilter?
+
+        public func copy() -> SceneObject.Web {
+            .init(url: url, path: path, fps: fps, css: css, js: js, textureSize: textureSize, region: region, crop: crop, filter: filter)
+        }
     }
 
     final class Text: SceneObjectPlaceable {
@@ -191,6 +208,10 @@ public extension SceneObject {
 
         public var configuration: TextObjectConfiguration
         public var region: CGRect // Canvas-relative placement, as the textured objects store it
+
+        public func copy() -> SceneObject.Text {
+            .init(configuration: configuration, region: region)
+        }
     }
 
     final class Wind {
@@ -203,5 +224,9 @@ public extension SceneObject {
         }
 
         public var direction: SIMD3<Float>
+
+        public func copy() -> SceneObject.Wind {
+            .init(direction: direction)
+        }
     }
 }

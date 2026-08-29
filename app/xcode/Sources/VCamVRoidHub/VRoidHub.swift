@@ -55,8 +55,6 @@ public enum VRoidHub {
         return loader
     }
 
-    private static var didAttemptRestore = false
-
     /// Decrypts the VRoid Hub model currently in use into memory without ever
     /// writing a plaintext file. Returns nil when the current avatar is not from VRoid
     /// Hub or the session cannot be restored; restoring the session verifies
@@ -68,20 +66,15 @@ public enum VRoidHub {
         return try await client.decryptedModel(StoredModelReference(reference: reference)).data
     }
 
-    /// Whether a VRoid Hub model will be installed right after launch, so that
-    /// the engine can skip restoring a model of its own
+    /// Whether a VRoid Hub model will be installed right after launch; see `LaunchAvatarRestore`
     public static var hasPendingRestore: Bool {
         integration != nil && VRoidModelReference.lastUsed != nil
     }
 
-    /// Reloads the last used VRoid Hub model through the SDK's encrypted cache.
-    ///
-    /// When a file-based model was restored first, this quietly replaces it and
-    /// gives up on any failure — signing in again or reselecting the model recovers.
+    /// Reloads the last used VRoid Hub model through the SDK's encrypted cache,
+    /// giving up on any failure — signing in again or reselecting the model recovers.
+    /// `LaunchAvatarRestore` guarantees this runs at most once per launch
     public static func restoreLastModelOnLaunch() {
-        guard !didAttemptRestore else { return }
-        didAttemptRestore = true
-
         guard let client, let modelLoader, let reference = VRoidModelReference.lastUsed else { return }
 
         Task {

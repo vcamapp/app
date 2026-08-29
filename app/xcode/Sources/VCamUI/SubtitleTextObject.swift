@@ -74,8 +74,7 @@ enum SubtitleTextObject {
     /// it for as long as that window is open
     private static func setEditing(_ isEditing: Bool) {
         isStyleEditorOpen = isEditing
-        guard let object = SceneObjectManager.shared.subtitleObject else { return }
-        SceneObjectManager.shared.setSubtitleLocked(!isEditing, of: object)
+        SceneObjectManager.shared.setLocked(!isEditing, id: SceneObject.subtitleID)
     }
 
     /// Brings an off-screen or shrunken subtitle back to the default placement and scale,
@@ -202,12 +201,5 @@ extension SceneObjectManager {
         guard let object = subtitleObject else { return }
         subtitleObject = nil
         RenderTextureManager.shared.remove(id: object.id)
-    }
-
-    /// The subtitle isn't in `objects`, so the shared `setLocked(_:id:)` can't reach it
-    func setSubtitleLocked(_ isLocked: Bool, of object: SceneObject) {
-        var object = object
-        object.isLocked = isLocked
-        subtitleObject = object
     }
 }

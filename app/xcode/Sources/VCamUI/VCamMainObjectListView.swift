@@ -112,63 +112,26 @@ private struct VCamMainObjectListAddButton: View {
     @Bindable private var pasteboard = PasteboardObserver.shared
 
     var body: some View {
-        let objectManager = SceneObjectManager.shared
         Menu {
             if let url = pasteboard.imageURL {
                 Button {
-                    objectManager.addImage(url: url)
+                    SceneObjectManager.shared.addImage(url: url)
                 } label: {
                     Image(systemName: "photo")
                     Text(.clipboard)
                 }
             }
-            Button {
-                if let url = FileUtility.openFile(type: .image) {
-                    objectManager.addImage(url: url)
+            ForEach(AddableSceneObject.available, id: \.self) { object in
+                if object.startsNewSection {
+                    Divider()
                 }
-            } label: {
-                Image(systemName: "photo")
-                Text(.image)
-            }
-            Button {
-                showScreenRecorderPreferenceView { recorder in
-                    objectManager.addScreenCapture(recorder)
+                Button {
+                    object.perform()
+                } label: {
+                    Image(systemName: object.systemImage)
+                    Text(object.shortTitle)
                 }
-            } label: {
-                Image(systemName: "display")
-                Text(.screen)
             }
-            Button {
-                CaptureDeviceRenderer.selectDevice { drawer in
-                    objectManager.addVideoCapture(drawer)
-                }
-            } label: {
-                Image(systemName: "camera")
-                Text(.videoCaptureDevice)
-            }
-            Button {
-                WebRenderer.showPreferencesForAdding()
-            } label: {
-                Image(systemName: "network")
-                Text(.web)
-            }
-            Button {
-                TextRenderer.showPreferencesForAdding()
-            } label: {
-                Image(systemName: "textformat")
-                Text(.text)
-            }
-
-#if FEATURE_3
-            Divider()
-
-            Button {
-                objectManager.add(.init(type: .wind(), isHidden: false, isLocked: false))
-            } label: {
-                Image(systemName: "wind")
-                Text(.wind)
-            }
-#endif
         } label: {
             Image(systemName: "plus")
         }
@@ -185,51 +148,33 @@ private struct VCamMainObjectListBottomBar: View {
     @Bindable private var objectManager = SceneObjectManager.shared
 
     var body: some View {
-        HStack {
+        ListToolbar(isActionDisabled: selectedId == nil) {
             VCamMainObjectListAddButton()
-
-            Group {
-                let isLocked = selectedId.flatMap(objectManager.objects.find(byId:))?.isLocked ?? false
-                if selectedId == SceneObject.avatarID {
-                    Button {
-                        CameraControl.resetCamera()
-                    } label: {
-                        Image(systemName: "arrow.uturn.backward")
-                    }
-                    .disabled(isLocked)
-                } else {
-                    Button {
-                        if let selectedId = selectedId {
-                            objectManager.remove(byId: selectedId)
-                        }
-                    } label: {
-                        Image(systemName: "minus")
-                            .background(Color.clear)
-                            .frame(height: 14)
-                    }
-                    .contentShape(Rectangle())
-                    .disabled(isLocked || !objectManager.canRemove(byId: selectedId ?? -1))
-                }
-
+        } remove: {
+            let isLocked = selectedId.flatMap(objectManager.objects.find(byId:))?.isLocked ?? false
+            if selectedId == SceneObject.avatarID {
                 Button {
-                    if let selectedId = selectedId {
-                        objectManager.move(byId: selectedId, up: false)
-                    }
+                    CameraControl.resetCamera()
                 } label: {
-                    Image(systemName: "chevron.up")
+                    Image(systemName: "arrow.uturn.backward")
                 }
-                Button {
+                .disabled(isLocked)
+            } else {
+                ListRemoveButton {
                     if let selectedId = selectedId {
-                        objectManager.move(byId: selectedId, up: true)
+                        objectManager.remove(byId: selectedId)
                     }
-                } label: {
-                    Image(systemName: "chevron.down")
                 }
+                .disabled(isLocked || !objectManager.canRemove(byId: selectedId ?? -1))
             }
-            .disabled(selectedId == nil)
-            .buttonStyle(.borderless)
-
-            Spacer()
+        } moveUp: {
+            if let selectedId = selectedId {
+                objectManager.move(byId: selectedId, up: false)
+            }
+        } moveDown: {
+            if let selectedId = selectedId {
+                objectManager.move(byId: selectedId, up: true)
+            }
         }
     }
 }
@@ -267,35 +212,6 @@ private struct FilterSceneObjectButton: View {
         } label: {
             Image(systemName: "wand.and.stars")
             Text(.filter)
-        }
-        .disabled(object.isLocked)
-    }
-}
-
-private struct DuplicateSceneObjectButton: View {
-    let object: SceneObject
-
-    var body: some View {
-        Button {
-            Task {
-                await SceneObjectManager.shared.duplicate(object)
-            }
-        } label: {
-            Image(systemName: "doc.on.doc")
-            Text(.duplicate)
-        }
-    }
-}
-
-private struct DeleteSceneObjectButton: View {
-    let object: SceneObject
-
-    var body: some View {
-        Button(role: .destructive) {
-            SceneObjectManager.shared.remove(byId: object.id)
-        } label: {
-            Image(systemName: "trash")
-            Text(.delete)
         }
         .disabled(object.isLocked)
     }
@@ -423,8 +339,14 @@ private struct SceneObjectMenuItems: View {
 
     @ViewBuilder
     private var footerItems: some View {
-        DuplicateSceneObjectButton(object: object)
-        DeleteSceneObjectButton(object: object)
+        DuplicateMenuButton {
+            Task {
+                await SceneObjectManager.shared.duplicate(object)
+            }
+        }
+        DeleteMenuButton(isDisabled: object.isLocked) {
+            SceneObjectManager.shared.remove(byId: object.id)
+        }
     }
 
     private func setAsBackground(_ image: SceneObject.Image) {

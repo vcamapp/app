@@ -29,20 +29,23 @@ public final class SceneObjectManager {
         }
     }
 
+    /// The scene's objects plus the scene-independent subtitle, for operations
+    /// that must reach every live object
+    private var allObjects: [SceneObject] {
+        subtitleObject.map { objects + [$0] } ?? objects
+    }
+
     /// Text is the one source rasterized for the pixels it occupies in the output; the others
     /// author their bitmap at their own resolution and are unaffected.
     private func rasterizeTextForOutputSize() {
-        for object in objects {
+        for object in allObjects {
             guard case .text = object.type else { continue }
             configure(object)
-        }
-        if let subtitleObject {
-            configure(subtitleObject)
         }
     }
 
     public func object(byId id: Int32) -> SceneObject? {
-        id == SceneObject.subtitleID ? subtitleObject : objects.find(byId: id)
+        allObjects.find(byId: id)
     }
 
     public func add(_ object: SceneObject) {
@@ -173,12 +176,15 @@ public final class SceneObjectManager {
 
     /// Leaves the type-specific resources untouched, unlike `update(_:)`.
     private func updateState(_ id: Int32, _ change: (inout SceneObject) -> Void) {
-        guard var object = objects.find(byId: id) else {
-            return
+        if var object = objects.find(byId: id) {
+            change(&object)
+            applyAvatarState(object)
+            didChange(object)
+        } else if var object = subtitleObject, object.id == id {
+            // The subtitle lives outside the scenes, so nothing is persisted
+            change(&object)
+            subtitleObject = object
         }
-        change(&object)
-        applyAvatarState(object)
-        didChange(object)
     }
 
     /// The only definition of the rule: the object list, the delete key on the canvas and
@@ -460,9 +466,10 @@ extension SceneObjectManager {
                 // The avatar is what the scene is built around, so there is only ever one of it
                 return nil
             case let .image(image):
-                let url = try VCamSceneDataStore(sceneId: SceneManager.shared.currentSceneId).duplicateData(at: image.url)
-                let id = renderTextureManager.add(ImageRenderer(imageURL: url, filter: image.filter))
-                return copy(id: id, type: .image(.init(url: url, offset: image.offset, size: image.size, filter: image.filter)))
+                let duplicated = image.copy()
+                duplicated.url = try VCamSceneDataStore(sceneId: SceneManager.shared.currentSceneId).duplicateData(at: image.url)
+                let id = renderTextureManager.add(ImageRenderer(imageURL: duplicated.url, filter: duplicated.filter))
+                return copy(id: id, type: .image(duplicated))
             case let .screen(screen):
                 let recorder = try await ScreenRecorder.create(id: screen.id, screenCapture: .init(
                     captureType: screen.captureType,
@@ -475,26 +482,26 @@ extension SceneObjectManager {
                     )
                 ))
                 let id = renderTextureManager.add(recorder)
-                return copy(id: id, type: .screen(.init(id: screen.id, captureType: screen.captureType, textureSize: screen.textureSize, region: screen.region, crop: screen.crop, filter: screen.filter)))
+                return copy(id: id, type: .screen(screen.copy()))
             case let .videoCapture(videoCapture):
                 let device = try AVCaptureDevice(uniqueID: videoCapture.id).orThrow(NSError.vcam(message: "duplicate:capture device not found"))
                 let renderer = try CaptureDeviceRenderer(device: device, cropRect: videoCapture.crop)
                 renderer.filter = videoCapture.filter
                 let id = renderTextureManager.add(renderer)
-                return copy(id: id, type: .videoCapture(.init(id: videoCapture.id, textureSize: videoCapture.textureSize, region: videoCapture.region, crop: videoCapture.crop, filter: videoCapture.filter)))
+                return copy(id: id, type: .videoCapture(videoCapture.copy()))
             case let .web(web):
                 let renderer = WebRenderer(resource: .init(web: web), size: web.textureSize, fps: web.fps, css: web.css, js: web.js)
                 renderer.filter = web.filter
                 let id = renderTextureManager.add(renderer)
-                return copy(id: id, type: .web(.init(url: web.url, path: web.path, fps: web.fps, css: web.css, js: web.js, textureSize: web.textureSize, region: web.region, crop: web.crop, filter: web.filter)))
+                return copy(id: id, type: .web(web.copy()))
             case let .text(text):
                 // Rasterized at the original's scale so that the copy's glyphs look the same
                 let displayScale = renderTextureManager.textRenderer(id: object.id)?.layout.displayScale
                     ?? TextObjectPlacement.fittedDefaultScale(of: text.configuration)
                 let id = renderTextureManager.add(TextRenderer(layout: .init(configuration: text.configuration, displayScale: displayScale)))
-                return copy(id: id, type: .text(.init(configuration: text.configuration, region: text.region)))
+                return copy(id: id, type: .text(text.copy()))
             case let .wind(wind):
-                return copy(type: .wind(.init(direction: wind.direction)))
+                return copy(type: .wind(wind.copy()))
             }
         } catch {
             Logger.error(error)

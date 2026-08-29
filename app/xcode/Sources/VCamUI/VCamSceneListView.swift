@@ -49,7 +49,7 @@ public struct VCamSceneListView: View {
                 }
             }
 
-            HStack {
+            ListToolbar(isActionDisabled: sceneManager.scenes.count == 1) {
                 Button {
                     Task {
                         try? await sceneManager.addNewScene()
@@ -59,38 +59,22 @@ public struct VCamSceneListView: View {
                 }
                 .buttonStyle(.borderless)
                 .contentShape(Rectangle())
-
-                Group {
-                    Button {
-                        if let selectedId = selectedId {
-                            Task {
-                                await sceneManager.remove(byId: selectedId)
-                            }
+            } remove: {
+                ListRemoveButton {
+                    if let selectedId = selectedId {
+                        Task {
+                            await sceneManager.remove(byId: selectedId)
                         }
-                    } label: {
-                        Image(systemName: "minus").background(Color.clear).frame(height: 14)
-                    }
-                    .contentShape(Rectangle())
-
-                    Button {
-                        if let selectedId = selectedId {
-                            sceneManager.move(byId: selectedId, up: false)
-                        }
-                    } label: {
-                        Image(systemName: "chevron.up")
-                    }
-                    Button {
-                        if let selectedId = selectedId {
-                            sceneManager.move(byId: selectedId, up: true)
-                        }
-                    } label: {
-                        Image(systemName: "chevron.down")
                     }
                 }
-                .disabled(sceneManager.scenes.count == 1)
-                .buttonStyle(.borderless)
-
-                Spacer()
+            } moveUp: {
+                if let selectedId = selectedId {
+                    sceneManager.move(byId: selectedId, up: false)
+                }
+            } moveDown: {
+                if let selectedId = selectedId {
+                    sceneManager.move(byId: selectedId, up: true)
+                }
             }
         }
         .modifierOnMacWindow { content, _ in
@@ -112,29 +96,13 @@ extension VCamSceneListView: MacWindow {
     }
 }
 
-private struct DeleteSceneButton: View {
-    let scene: VCamScene
-
-    var body: some View {
-        Button(role: .destructive) {
-            Task {
-                await SceneManager.shared.remove(byId: scene.id)
-            }
-        } label: {
-            Image(systemName: "trash")
-            Text(.delete)
-        }
-        .disabled(SceneManager.shared.scenes.count <= 1)
-    }
-}
-
 private struct EditSceneViewModifier: ViewModifier {
     let scene: VCamScene
 
     func body(content: Content) -> some View {
         content
             .contextMenu {
-                Button {
+                DuplicateMenuButton {
                     Task {
                         do {
                             try await SceneManager.shared.duplicate(scene)
@@ -142,12 +110,13 @@ private struct EditSceneViewModifier: ViewModifier {
                             Logger.error(error)
                         }
                     }
-                } label: {
-                    Image(systemName: "doc.on.doc")
-                    Text(.duplicate)
                 }
                 Divider()
-                DeleteSceneButton(scene: scene)
+                DeleteMenuButton(isDisabled: SceneManager.shared.scenes.count <= 1) {
+                    Task {
+                        await SceneManager.shared.remove(byId: scene.id)
+                    }
+                }
             }
     }
 }

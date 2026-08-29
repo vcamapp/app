@@ -10,20 +10,15 @@ public enum AvatarControl {
     /// not in the model library
     public static var onLoad: ((UUID?) -> Void)?
 
-    private static var didAttemptRestore = false
-
-    /// Whether the app will push a model right after launch, so the engine leaves the
-    /// avatar empty instead of restoring one of its own
+    /// Whether the app will push a model right after launch; see ``LaunchAvatarRestore``
     public static var hasPendingRestore: Bool {
         ModelManager.shared.restorableLastLoadedModel != nil
     }
 
     /// Loads the model that was in use when the app last quit. The library keeps its own
-    /// copy of every model, so nothing else has to be cached for this
+    /// copy of every model, so nothing else has to be cached for this.
+    /// ``LaunchAvatarRestore`` guarantees this runs at most once per launch
     public static func restoreLastModelOnLaunch() {
-        guard !didAttemptRestore else { return }
-        didAttemptRestore = true
-
         guard let item = ModelManager.shared.restorableLastLoadedModel else { return }
         do {
             try load(item)
