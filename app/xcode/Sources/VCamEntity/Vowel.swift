@@ -1,12 +1,5 @@
-//
-//  Vowel.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2023/01/07.
-//
-
 import Foundation
 
-public enum Vowel: Int32, Equatable {
+public enum Vowel: Int32, Equatable, CaseIterable, Sendable {
     case a, i, u, e, o
 }

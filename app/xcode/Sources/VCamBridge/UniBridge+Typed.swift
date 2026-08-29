@@ -2,25 +2,25 @@ import Foundation
 
 // MARK: - Method ID Enum
 public struct UniBridgeMethodId: RawRepresentable, Sendable, Equatable {
-    static let playMotion = Self.init(rawValue: 0)
-    static let stopMotion = Self.init(rawValue: 1)
-    static let applyExpression = Self.init(rawValue: 2)
-    static let sendHandPacketV1 = Self.init(rawValue: 3)
+    public static let playMotion = Self.init(rawValue: 0)
+    public static let stopMotion = Self.init(rawValue: 1)
+    public static let applyExpression = Self.init(rawValue: 2)
+    public static let sendHandPacketV1 = Self.init(rawValue: 3)
 
-    static let addTrackingMapping = Self.init(rawValue: 11)
-    static let clearTrackingMapping = Self.init(rawValue: 12)
+    public static let addTrackingMapping = Self.init(rawValue: 11)
+    public static let clearTrackingMapping = Self.init(rawValue: 12)
 
-    static let setScreenResolution = Self.init(rawValue: 20)
+    public static let setScreenResolution = Self.init(rawValue: 20)
 
-    static let registerImportedMotion = Self.init(rawValue: 30)
-    static let updateImportedMotionAxes = Self.init(rawValue: 31)
-    static let removeImportedMotion = Self.init(rawValue: 32)
+    public static let registerImportedMotion = Self.init(rawValue: 30)
+    public static let updateImportedMotionAxes = Self.init(rawValue: 31)
+    public static let removeImportedMotion = Self.init(rawValue: 32)
 
-    static let setTrackingChannelEnabled = Self.init(rawValue: 40)
-    static let setTrackingMirror = Self.init(rawValue: 41)
+    public static let setTrackingChannelEnabled = Self.init(rawValue: 40)
+    public static let setTrackingMirror = Self.init(rawValue: 41)
 
     public static let loadVRM = Self.init(rawValue: 50)
-    static let applyAccessoryPlacements = Self.init(rawValue: 51)
+    public static let applyAccessoryPlacements = Self.init(rawValue: 51)
 
     public let rawValue: Int32
 
