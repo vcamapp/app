@@ -57,29 +57,21 @@ public extension ScreenResolution {
     func videoOutputSettings(format: VideoFormat) -> [String: Any]? {
         switch self {
         case .resolution2160p:
-            if format.isHevc {
-                return AVOutputSettingsAssistant(preset: .hevc3840x2160WithAlpha)?.videoSettings
-            } else {
-                return AVOutputSettingsAssistant(preset: .preset3840x2160)?.videoSettings
-            }
+            return AVOutputSettingsAssistant(
+                preset: format.isHevc ? .hevc3840x2160WithAlpha : .preset3840x2160
+            )?.videoSettings
         case .resolution1080p:
-            if format.isHevc {
-                return AVOutputSettingsAssistant(preset: .hevc1920x1080WithAlpha)?.videoSettings
-            } else {
-                return AVOutputSettingsAssistant(preset: .preset1920x1080)?.videoSettings
-            }
+            return AVOutputSettingsAssistant(
+                preset: format.isHevc ? .hevc1920x1080WithAlpha : .preset1920x1080
+            )?.videoSettings
         case .resolution720p:
-            if format.isHevc {
-                return AVOutputSettingsAssistant.videoSettingsForHevc1280x720WithAlpha
-            } else {
-                return AVOutputSettingsAssistant(preset: .preset1280x720)?.videoSettings
-            }
+            return format.isHevc
+                ? AVOutputSettingsAssistant.videoSettingsForHevc1280x720WithAlpha
+                : AVOutputSettingsAssistant(preset: .preset1280x720)?.videoSettings
         case .resolution540p:
-            if format.isHevc {
-                return AVOutputSettingsAssistant.videoSettingsForHevc960x540WithAlpha
-            } else {
-                return AVOutputSettingsAssistant(preset: .preset960x540)?.videoSettings
-            }
+            return format.isHevc
+                ? AVOutputSettingsAssistant.videoSettingsForHevc960x540WithAlpha
+                : AVOutputSettingsAssistant(preset: .preset960x540)?.videoSettings
         case .resolutionVertical1080p:
             var compressionProperties: [String: Any] = [
                 AVVideoExpectedSourceFrameRateKey: 30,

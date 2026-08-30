@@ -36,6 +36,16 @@ public extension View {
     func modifierOnMacWindow(@ViewBuilder content: @escaping (Self, NSWindow) -> some View) -> some View {
         MacWindowViewModifier(content: self, modifier: content)
     }
+
+    func floatingTransparentPanelContent(topInset: CGFloat = 1) -> some View {
+        modifierOnMacWindow { content, _ in
+            content
+                .padding(.top, topInset)
+                .padding([.leading, .trailing, .bottom], 8)
+                .frame(minWidth: 200, maxWidth: .infinity, minHeight: 80, maxHeight: .infinity)
+                .background(.regularMaterial)
+        }
+    }
 }
 
 struct MacWindowViewModifier<Content: View, ModifiedContent: View>: View {

@@ -81,7 +81,7 @@ public struct TextObjectConfiguration: Codable, Equatable, Hashable, Sendable {
         public var primaryColor: VCamColor {
             switch self {
             case let .solid(color): color
-            case let .gradient(gradient): gradient.sortedStops.first?.color ?? .white
+            case let .gradient(gradient): gradient.stops.min { $0.location < $1.location }?.color ?? .white
             }
         }
 

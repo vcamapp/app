@@ -48,20 +48,21 @@ package enum ModelMetaLoader {
     private static func live2DModelJSON(in directory: URL) -> URL? {
         guard let enumerator = FileManager.default.enumerator(
             at: directory,
-            includingPropertiesForKeys: [.isRegularFileKey],
+            includingPropertiesForKeys: nil,
             options: [.skipsHiddenFiles]
         ) else {
             return nil
         }
 
-        var candidates: [URL] = []
+        var candidate: URL?
         for case let fileURL as URL in enumerator {
-            if isLive2DModelJSON(fileURL) {
-                candidates.append(fileURL)
+            guard isLive2DModelJSON(fileURL) else { continue }
+            if candidate.map({ fileURL.lastPathComponent < $0.lastPathComponent }) ?? true {
+                candidate = fileURL
             }
         }
 
-        return candidates.sorted { $0.lastPathComponent < $1.lastPathComponent }.first
+        return candidate
     }
 
     private static func isLive2DModelJSON(_ url: URL) -> Bool {

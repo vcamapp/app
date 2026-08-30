@@ -185,7 +185,7 @@ public final class ModelManager {
         do {
             let contents = try FileManager.default.contentsOfDirectory(
                 at: Models.modelsDirectory,
-                includingPropertiesForKeys: [.creationDateKey],
+                includingPropertiesForKeys: nil,
                 options: [.skipsHiddenFiles]
             )
 
@@ -198,8 +198,7 @@ public final class ModelManager {
                 let modelFile = directory.appending(path: Models.modelFileName)
                 guard FileManager.default.fileExists(atPath: modelFile.path) else { continue }
 
-                let attributes = try? FileManager.default.attributesOfItem(atPath: modelFile.path)
-                let createdAt = attributes?[.creationDate] as? Date ?? .now
+                let createdAt = (try? modelFile.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? .now
                 let modelInfo = Models.Model(name: name, type: Models.modelType, createdAt: createdAt)
                 modelItems.append(ModelItem(model: modelInfo, status: .valid, thumbnail: nil))
             }

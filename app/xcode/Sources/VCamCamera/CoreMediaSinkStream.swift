@@ -203,7 +203,8 @@ public final class CoreMediaSinkStream: NSObject {
             &dataUsed,
             &deviceIds)
 
-        let deviceId = deviceIds.filter { $0 != 0 }.first { device in
+        let deviceId = deviceIds.first { device in
+            guard device != 0 else { return false }
             opa.mSelector = .deviceUID
             CMIOObjectGetPropertyDataSize(
                 device,

@@ -22,11 +22,8 @@ public struct VCamMainToolbarMotionPicker: View {
             ScrollView {
                 content
             }
-            .padding(.top, 1) // prevent from entering under the title bar.
-            .padding([.leading, .trailing, .bottom], 8)
-            .frame(minWidth: 200, maxWidth: .infinity, minHeight: 80, maxHeight: .infinity)
-            .background(.regularMaterial)
         }
+        .floatingTransparentPanelContent()
     }
 }
 

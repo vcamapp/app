@@ -1,6 +1,18 @@
 import Foundation
 import VCamEntity
 
+public extension SceneObjectCroppableTexture {
+    var sceneRenderTexture: VCamScene.RenderTexture {
+        .init(
+            width: Float(textureSize.width),
+            height: Float(textureSize.height),
+            region: .init(rect: region),
+            crop: .init(rect: crop),
+            filter: filter?.configuration
+        )
+    }
+}
+
 extension VCamScene.Object {
     public func sceneObject(dataStore: VCamSceneDataStore) -> SceneObject {
         switch type {
@@ -83,23 +95,11 @@ extension SceneObject {
             )))
         case let .screen(screen):
             return encodeScene(type: .screen(id: screen.id , state: .init(
-                captureType: screen.captureType, 
-                texture: .init(
-                    width: Float(screen.textureSize.width),
-                    height: Float(screen.textureSize.height),
-                    region: .init(rect: screen.region),
-                    crop: .init(rect: screen.crop),
-                    filter: screen.filter?.configuration
-                ))
-            ))
-        case let .videoCapture(videoCapture):
-            return encodeScene(type: .captureDevice(id: videoCapture.id, state: .init(
-                width: Float(videoCapture.textureSize.width),
-                height: Float(videoCapture.textureSize.height),
-                region: .init(rect: videoCapture.region),
-                crop: .init(rect: videoCapture.crop),
-                filter: videoCapture.filter?.configuration
+                captureType: screen.captureType,
+                texture: screen.sceneRenderTexture
             )))
+        case let .videoCapture(videoCapture):
+            return encodeScene(type: .captureDevice(id: videoCapture.id, state: videoCapture.sceneRenderTexture))
         case let .web(web):
             return encodeScene(type: .web(state: .init(
                 url: web.url,
@@ -107,13 +107,7 @@ extension SceneObject {
                 fps: web.fps,
                 css: web.css,
                 js: web.js,
-                texture: .init(
-                    width: Float(web.textureSize.width),
-                    height: Float(web.textureSize.height),
-                    region: .init(rect: web.region),
-                    crop: .init(rect: web.crop),
-                    filter: web.filter?.configuration
-                )
+                texture: web.sceneRenderTexture
             )))
         case let .text(text):
             return encodeScene(type: .text(state: .init(

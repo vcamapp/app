@@ -301,16 +301,14 @@ public final class SceneObjectManager {
     private func fitSize(_ size: CGSize, regionSize: CGSize) -> CGSize {
         let canvasSize = MainTexture.shared.canvasSize
 
-        var estimatedWidth: CGFloat
-
         if regionSize.width < 0 { // Can't compare with .invalid, so determine based on whether it's less than 0
             // Initially, display at 80% relative to the canvas to fit within the screen.
             var fittedSize = canvasSize * 0.8
             fittedSize.scaleToFit(size: size)
             return fittedSize
-        } else {
-            estimatedWidth = canvasSize.width * regionSize.width
         }
+
+        let estimatedWidth = canvasSize.width * regionSize.width
         return .init(width: estimatedWidth, height: estimatedWidth * size.height / size.width)
     }
 }
@@ -470,13 +468,7 @@ extension SceneObjectManager {
             case let .screen(screen):
                 let recorder = try await ScreenRecorder.create(id: screen.id, screenCapture: .init(
                     captureType: screen.captureType,
-                    texture: .init(
-                        width: Float(screen.textureSize.width),
-                        height: Float(screen.textureSize.height),
-                        region: .init(rect: screen.region),
-                        crop: .init(rect: screen.crop),
-                        filter: screen.filter?.configuration
-                    )
+                    texture: screen.sceneRenderTexture
                 ))
                 let id = renderTextureManager.add(recorder)
                 return copy(id: id, type: .screen(screen.copy()))

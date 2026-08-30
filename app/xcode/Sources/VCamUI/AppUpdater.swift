@@ -20,11 +20,7 @@ public struct AppUpdater: Sendable {
 #if DEBUG
         return latestRelease
 #else
-        if Version.current < latestRelease.version {
-            return latestRelease
-        } else {
-            return nil
-        }
+        return Version.current < latestRelease.version ? latestRelease : nil
 #endif
     }
 

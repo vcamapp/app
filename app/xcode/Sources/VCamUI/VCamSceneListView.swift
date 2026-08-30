@@ -77,12 +77,7 @@ public struct VCamSceneListView: View {
                 }
             }
         }
-        .modifierOnMacWindow { content, _ in
-            content
-                .padding([.leading, .trailing, .bottom], 8)
-                .frame(minWidth: 200, maxWidth: .infinity, minHeight: 80, maxHeight: .infinity)
-                .background(.regularMaterial)
-        }
+        .floatingTransparentPanelContent(topInset: 0)
     }
 }
 
