@@ -86,17 +86,6 @@ extension UniStateValue where Value == Int32 {
     }
 }
 
-// MARK: - String Convenience Initializers
-
-extension UniStateValue where Value == String {
-    init(_ keyPath: ValueKeyPath, persist: UserDefaults.Key<String>? = nil, bridge: UniBridge.StringType) {
-        self.init(keyPath) { @MainActor _, newValue in
-            if let key = persist { UserDefaults.standard.set(newValue, for: key) }
-            UniBridge.shared.stringMapper.setValue(bridge, newValue)
-        }
-    }
-}
-
 // MARK: - Color Convenience Initializers
 
 extension UniStateValue where Value == Color {

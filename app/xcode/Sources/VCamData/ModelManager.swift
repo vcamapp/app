@@ -145,16 +145,20 @@ public final class ModelManager {
     }
 
     private func validateModels() {
+        let persistedModels = modelItems.map(\.model)
         modelItems = modelItems.map { item in
             let url = item.model.modelURL
             let status: ModelItem.ModelStatus = FileManager.default.fileExists(atPath: url.path) ? .valid : .missing
             return ModelItem(model: item.model, status: status, thumbnail: item.thumbnail)
         }
         scanForNewModels()
-        do {
-            try saveMeta(models: modelItems.map(\.model), lastModelId: lastLoadedModelId)
-        } catch {
-            Logger.error(error)
+        let validatedModels = modelItems.map(\.model)
+        if validatedModels != persistedModels {
+            do {
+                try saveMeta(models: validatedModels, lastModelId: lastLoadedModelId)
+            } catch {
+                Logger.error(error)
+            }
         }
         loadMissingThumbnails()
     }

@@ -184,10 +184,6 @@ extension VCamShortcutBuilderView: MacWindow {
     public func configureWindow(_ window: NSWindow) -> NSWindow {
         window.level = .floating
         window.styleMask = [.titled, .closable, .resizable, .fullSizeContentView]
-//        window.isOpaque = false
-//        window.backgroundColor = .clear
-//        window.titleVisibility = .hidden
-//        window.titlebarAppearsTransparent = true
         return window
     }
 }

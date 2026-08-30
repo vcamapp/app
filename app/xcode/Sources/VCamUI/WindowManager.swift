@@ -60,7 +60,6 @@ public final class WindowManager {
             window.appearance = NSAppearance(named: .darkAqua)
             window.title = Bundle.main.displayName
             window.titlebarAppearsTransparent = true
-//            window.isMovableByWindowBackground = true
             window.backgroundColor = .clear
             window.styleMask = [
                 .titled,
@@ -77,23 +76,29 @@ public final class WindowManager {
         }
     }
 
-    public static var makeEngineDisplayView: (NSView) -> NSView = { $0 }
+    /// Builds the preview area from the engine's drawing view, or from nothing when `usesEngineView` is false
+    public static var makeEngineDisplayView: (NSView?) -> NSView = { $0 ?? NSView() }
+
+    /// Set to false before `setUpView()` by builds that draw without an engine
+    public static var usesEngineView = true
 
     public func setUpView() {
         Logger.log("")
 
-        guard !isConfigured, containerView.subviews.isEmpty, let window, let engineView = window.contentView else {
+        guard !isConfigured, containerView.subviews.isEmpty, let window, let contentView = window.contentView else {
             return
         }
 
         containerView.addFilledView(RootView(engineView: Self.makeEngineDisplayView({
-            if UniBridge.isEngineApp {
+            if !Self.usesEngineView {
+                return nil
+            } else if UniBridge.isEngineApp {
                 return NSView()
             } else {
-                NSLayoutConstraint.deactivate(engineView.constraints)
-                engineView.removeFromSuperview()
-                engineView.translatesAutoresizingMaskIntoConstraints = false
-                return engineView
+                NSLayoutConstraint.deactivate(contentView.constraints)
+                contentView.removeFromSuperview()
+                contentView.translatesAutoresizingMaskIntoConstraints = false
+                return contentView
             }
         }())))
         window.contentView = containerView

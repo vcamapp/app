@@ -173,18 +173,14 @@ private struct DraggableEdge<Content: View>: View {
 
     private func updateOffset(translation: CGSize) {
         switch edge {
-        case .top:
-            offset.height = simd_clamp((currentOffset.height + translation.height), range.lowerBound, range.upperBound)
-        case .bottom:
+        case .top, .bottom:
             offset.height = simd_clamp(currentOffset.height + translation.height, range.lowerBound, range.upperBound)
-        case .leading:
-            offset.width = simd_clamp(currentOffset.width + translation.width, range.lowerBound, range.upperBound)
-        case .trailing:
+        case .leading, .trailing:
             offset.width = simd_clamp(currentOffset.width + translation.width, range.lowerBound, range.upperBound)
         }
     }
 
-    enum Edge { // TODO: OptionSet
+    enum Edge {
         case top
         case bottom
         case leading

@@ -305,12 +305,9 @@ public final class SceneObjectManager {
 
         if regionSize.width < 0 { // Can't compare with .invalid, so determine based on whether it's less than 0
             // Initially, display at 80% relative to the canvas to fit within the screen.
-            if size.width > size.height {
-                estimatedWidth = canvasSize.width * 0.8
-            } else {
-                let height = canvasSize.height * 0.8
-                estimatedWidth = height * size.width / size.height
-            }
+            var fittedSize = canvasSize * 0.8
+            fittedSize.scaleToFit(size: size)
+            return fittedSize
         } else {
             estimatedWidth = canvasSize.width * regionSize.width
         }

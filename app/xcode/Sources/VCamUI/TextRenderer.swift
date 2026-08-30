@@ -6,7 +6,7 @@ import NaturalLanguage
 import VCamEntity
 import VCamBridge
 
-public final class TextRenderer: RenderTextureRenderer {
+public final class TextRenderer: StaticImageRenderer {
     /// What to draw, and how large to draw it. They feed the same rasterization, so
     /// changing them together only rasterizes once.
     public struct Layout: Equatable, Sendable {
@@ -29,14 +29,13 @@ public final class TextRenderer: RenderTextureRenderer {
 
     public init(layout: Layout) {
         self.layout = layout
-        image = Self.renderImage(layout.rasterConfiguration)
+        super.init(image: Self.renderImage(layout.rasterConfiguration))
     }
 
     public var layout: Layout {
         didSet {
             guard layout != oldValue else { return }
-            image = Self.renderImage(layout.rasterConfiguration)
-            render(outputImage)
+            setImage(Self.renderImage(layout.rasterConfiguration))
         }
     }
 
@@ -46,25 +45,18 @@ public final class TextRenderer: RenderTextureRenderer {
     /// resize apart from that noise, which would otherwise rasterize on every click.
     public func setScale(display displayScale: Double, render renderScale: Double) {
         guard Layout.isUsableScale(displayScale), Layout.isUsableScale(renderScale) else { return }
-        guard abs(layoutSize.width * displayScale * renderScale - image.extent.width) >= 1 else { return }
+        guard abs(layoutSize.width * displayScale * renderScale - textureSize.width) >= 1 else { return }
         layout = .init(configuration: layout.configuration, displayScale: displayScale, renderScale: renderScale)
     }
 
-    private var image: CIImage
-    private var render: ((CIImage) -> Void) = { _ in }
-
-    private var outputImage: CIImage {
-        filter?.apply(to: image) ?? image
-    }
-
     /// The size the text is displayed at, in canvas pixels
-    public var size: CGSize {
-        image.extent.size * (1 / layout.normalizedRenderScale)
+    public override var size: CGSize {
+        textureSize * (1 / layout.normalizedRenderScale)
     }
 
     /// The texture's own pixel size, which is what the composition has to allocate
     public var textureSize: CGSize {
-        image.extent.size
+        super.size
     }
 
     /// The size the text occupies at its own font size, which is independent of how large
@@ -73,34 +65,6 @@ public final class TextRenderer: RenderTextureRenderer {
         size * (1 / layout.normalizedDisplayScale)
     }
 
-    public let cropRect = CGRect(x: 0, y: 0, width: 1, height: 1)
-    public let isStaticSource = true
-
-    public var filter: ImageFilter? {
-        didSet {
-            render(outputImage)
-        }
-    }
-
-    public func setRenderTexture(updator: @escaping (CIImage) -> Void) {
-        render = updator
-        updator(outputImage)
-    }
-
-    public func snapshot() -> CIImage {
-        image
-    }
-
-    public func disableRenderTexture() {
-        render = { _ in }
-    }
-
-    public func pauseRendering() {}
-    public func resumeRendering() {}
-
-    public func stopRendering() {
-        render = { _ in }
-    }
 }
 
 private extension TextRenderer.Layout {

@@ -1,5 +1,4 @@
 import AppKit
-import VCamEntity
 #if FEATURE_3
 import VRMKit
 #endif

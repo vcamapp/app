@@ -49,3 +49,51 @@ public extension RenderTextureRenderer {
         return image.cropped(to: cropRect)
     }
 }
+
+@MainActor
+public class StaticImageRenderer: RenderTextureRenderer {
+    private var image: CIImage
+    private var render: (CIImage) -> Void = { _ in }
+
+    public init(image: CIImage, filter: ImageFilter? = nil) {
+        self.image = image
+        self.filter = filter
+    }
+
+    public var size: CGSize { image.extent.size }
+    public var cropRect: CGRect { CGRect(x: 0, y: 0, width: 1, height: 1) }
+    public var isStaticSource: Bool { true }
+
+    public var filter: ImageFilter? {
+        didSet { render(outputImage) }
+    }
+
+    public func setRenderTexture(updator: @escaping (CIImage) -> Void) {
+        render = updator
+        updator(outputImage)
+    }
+
+    public func snapshot() -> CIImage {
+        image
+    }
+
+    public func disableRenderTexture() {
+        render = { _ in }
+    }
+
+    public func pauseRendering() {}
+    public func resumeRendering() {}
+
+    public func stopRendering() {
+        disableRenderTexture()
+    }
+
+    func setImage(_ image: CIImage) {
+        self.image = image
+        render(outputImage)
+    }
+
+    private var outputImage: CIImage {
+        filter?.apply(to: image) ?? image
+    }
+}

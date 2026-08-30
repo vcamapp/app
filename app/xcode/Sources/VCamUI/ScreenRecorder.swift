@@ -64,8 +64,8 @@ public final class ScreenRecorder: NSObject {
         }
     }
 
-    struct ScreenRecorderError: Error {
-        let errorDescription: String
+    struct ScreenRecorderError: LocalizedError {
+        let errorDescription: String?
 
         init(_ description: String) {
             errorDescription = description

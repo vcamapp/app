@@ -22,6 +22,8 @@ public struct UniBridgeMethodId: RawRepresentable, Sendable, Equatable {
     public static let loadVRM = Self.init(rawValue: 50)
     public static let applyAccessoryPlacements = Self.init(rawValue: 51)
 
+    public static let cameraControl = Self.init(rawValue: 60)
+
     public let rawValue: Int32
 
     public init(rawValue: Int32) {
@@ -51,6 +53,13 @@ public enum VRMLoadSource: Int32, Sendable {
     case vroidHub = 1
 }
 
+public enum CameraControlIntent: Int32, Sendable {
+    case pan = 0
+    case orbit = 1
+    case zoom = 2
+    case commit = 3
+}
+
 // MARK: - Payload Structures
 // A bool is 4 bytes on the engine side and would shift the field offsets, so flags are UInt8
 public struct PlayMotionPayload {
@@ -78,6 +87,18 @@ public struct TrackingChannelEnabledPayload {
 
 public struct TrackingMirrorPayload {
     public var isMirrored: UInt8
+}
+
+public struct CameraControlPayload {
+    public var intent: Int32
+    public var dx: Float
+    public var dy: Float
+
+    public init(intent: CameraControlIntent, dx: Float, dy: Float) {
+        self.intent = intent.rawValue
+        self.dx = dx
+        self.dy = dy
+    }
 }
 
 public struct TrackingMappingPayload {
@@ -115,9 +136,9 @@ public struct LoadVRMPayload {
     public var source: Int32
 }
 
-struct ApplyAccessoryPlacementsPayload {
-    var jsonPtr: UnsafePointer<CChar>
-    var requestIDPtr: UnsafePointer<CChar>
+public struct ApplyAccessoryPlacementsPayload {
+    public var jsonPtr: UnsafePointer<CChar>
+    public var requestIDPtr: UnsafePointer<CChar>
 }
 
 /// One accessory placement sent to the engine.
@@ -261,6 +282,11 @@ public extension UniBridge {
     static func setTrackingMirror(isMirrored: Bool) {
         var payload = TrackingMirrorPayload(isMirrored: isMirrored ? 1 : 0)
         send(.setTrackingMirror, payload: &payload)
+    }
+
+    static func cameraControl(_ intent: CameraControlIntent, dx: Float = 0, dy: Float = 0) {
+        var payload = CameraControlPayload(intent: intent, dx: dx, dy: dy)
+        send(.cameraControl, payload: &payload)
     }
 
     static func applyExpression(name: String) {

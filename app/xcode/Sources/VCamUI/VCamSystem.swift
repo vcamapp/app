@@ -16,6 +16,11 @@ public final class VCamSystem {
     public static let shared = VCamSystem()
     public static var initializeToEngine: (() -> Void)?
 
+    /// Whether this build is the distributed product. A build that only hosts the UI sets it to
+    /// false so that it does not act on behalf of the installed app.
+    /// Must be set before the first access to `shared`
+    public static var isDistributedApp = true
+
     public let windowManager = WindowManager()
 
     public private(set) var isStarted = false
@@ -47,7 +52,7 @@ public final class VCamSystem {
         windowManager.setUpView()
         AppMenu.shared.configure()
 
-        if !UniBridge.isEngineApp {
+        if Self.isDistributedApp, !UniBridge.isEngineApp {
             AppUpdater.vcam.presentUpdateAlertIfAvailable()
         }
 
@@ -55,8 +60,10 @@ public final class VCamSystem {
         AudioDevice.configure()
 
         Task { @MainActor in
-            await Migration.migrate()
-
+            if Self.isDistributedApp {
+                await Migration.migrate()
+            }
+            // Runs for every build: connecting only requires an already installed extension
             VirtualCameraManager.shared.startCameraExtension()
         }
     }

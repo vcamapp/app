@@ -1,10 +1,14 @@
+@preconcurrency import AVFoundation
 import Foundation
-import AVFoundation
 import VCamEntity
 
 public final class CaptureDevicePreviewer {
     private let session = AVCaptureSession()
     private let delegator = BufferDelegator()
+    private let sessionQueue = DispatchQueue(
+        label: "com.github.tattn.vcam.queue.preview", qos: .userInitiated,
+        autoreleaseFrequency: .workItem
+    )
 
     // Called on the video data output queue, so the handler must not be actor-isolated
     public var didOutput: (@Sendable (CapturedFrame) -> Void)? {
@@ -24,8 +28,7 @@ public final class CaptureDevicePreviewer {
 
         // Create a serial dispatch queue used for the sample buffer delegate as well as when a still image is captured.
         // A serial dispatch queue must be used to guarantee that video frames will be delivered in order.
-        let videoDataOutputQueue = DispatchQueue(label: "com.github.tattn.vcam.queue.preview")
-        videoDataOutput.setSampleBufferDelegate(delegator, queue: videoDataOutputQueue)
+        videoDataOutput.setSampleBufferDelegate(delegator, queue: sessionQueue)
 
         if session.canAddOutput(videoDataOutput) {
             session.addOutput(videoDataOutput)
@@ -43,11 +46,19 @@ public final class CaptureDevicePreviewer {
     }
 
     public func start() {
-        session.startRunning()
+        sessionQueue.async { [session] in
+            if !session.isRunning {
+                session.startRunning()
+            }
+        }
     }
 
     public func stop() {
-        session.stopRunning()        
+        sessionQueue.async { [session] in
+            if session.isRunning {
+                session.stopRunning()
+            }
+        }
     }
 
     public func dispose() {
