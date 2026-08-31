@@ -52,7 +52,7 @@ let package = Package(
         .testTarget(name: "VCamRemoteControlTests", dependencies: ["VCamRemoteControl", "VCamBridge"]),
         .testTarget(name: "VCamDataTests", dependencies: ["VCamData"]),
         .testTarget(name: "VCamTrackingTests", dependencies: ["VCamTracking"]),
-        .testTarget(name: "VCamCameraTests", dependencies: ["VCamCamera"]),
+        .testTarget(name: "VCamCameraTests", dependencies: ["VCamCamera", "VCamMedia"]),
         .testTarget(name: "VCamBridgeTests", dependencies: ["VCamBridge"]),
     ],
     swiftLanguageModes: [.v6]

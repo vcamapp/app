@@ -1,7 +1,8 @@
 import Foundation
-import CoreImage
 import AVFoundation
+import Metal
 import AppKit
+import VCamBridge
 import VCamEntity
 import VCamMedia
 import VCamTracking
@@ -50,7 +51,7 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
     @ObservationIgnored private var sampleCount = CMTimeValue(0)
     @ObservationIgnored private var pcSampleCount = CMTimeValue(0)
     @ObservationIgnored private var baseHostTime = mach_absolute_time()
-    private let context = CIContext(options: [.cacheIntermediates: false, .name: "VideoRecorder"])
+    @ObservationIgnored private var pixelBufferWriter: MetalPixelBufferWriter?
     @ObservationIgnored private var outputURL: URL!
     @ObservationIgnored private var temporaryOutputURL: URL!
 
@@ -85,6 +86,8 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
             kCVPixelBufferHeightKey as String: screenResolution.size.height,
             kCVPixelBufferCGImageCompatibilityKey as String: true,
             kCVPixelBufferCGBitmapContextCompatibilityKey as String: true,
+            // The frame is copied in with Metal, which needs an IOSurface behind the buffer
+            kCVPixelBufferMetalCompatibilityKey as String: true,
         ])
 
         let assetAudioWriterInput = AVAssetWriterInput(mediaType: .audio, outputSettings: [
@@ -205,7 +208,7 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
 
     // Synchronous on purpose: this runs for every rendered frame and awaits nothing,
     // so wrapping it in a Task would only add allocations and ordering delays
-    public func renderFrame(_ frame: CIImage) {
+    public func renderFrame(_ frame: any MTLTexture, on commandQueue: any MTLCommandQueue) {
         guard case .recording = state,
               let assetWriterAdaptor = assetVideoWriterAdaptor else { return }
 
@@ -220,7 +223,10 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
             return
         }
 
-        context.render(frame, to: pixelBuffer)
+        if pixelBufferWriter?.device !== frame.device {
+            pixelBufferWriter = MetalPixelBufferWriter(device: frame.device)
+        }
+        guard let pixelBufferWriter else { return }
 
         if frameCount == 0 {
             startDate = Date()
@@ -230,15 +236,31 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
             // as the video's expectsMediaDataInRealTime is true
             assetwriter?.startSession(atSourceTime: CMTime.zero)
         }
+        // Stamped while encoding so the recording follows the frame, not the GPU
+        let presentationTime = currentPresentationTime
 
-        guard assetWriterAdaptor.append(pixelBuffer, withPresentationTime: currentPresentationTime) else {
+        nonisolated(unsafe) let recorder = self
+        nonisolated(unsafe) let buffer = pixelBuffer
+        guard pixelBufferWriter.encode(frame, to: pixelBuffer, mirrored: false, on: commandQueue, completion: {
+            // `DispatchQueue.main` keeps the frames in the order they were encoded;
+            // `Task` does not promise that, and the writer rejects frames that arrive out of order
+            DispatchQueue.runOnMain {
+                recorder.append(buffer, at: presentationTime)
+            }
+        }) else { return }
+        frameCount += 1
+    }
+
+    /// Appends a frame whose copy has landed
+    private func append(_ pixelBuffer: CVPixelBuffer, at presentationTime: CMTime) {
+        guard case .recording = state, let assetWriterAdaptor = assetVideoWriterAdaptor else { return }
+        guard assetWriterAdaptor.append(pixelBuffer, withPresentationTime: presentationTime) else {
             // Distinguish a failed writer from transient backpressure; only the former ends the recording
             if let assetwriter, assetwriter.status != .writing {
                 failRecording(assetwriter.error ?? RecordingError.appendFailed(.video))
             }
             return
         }
-        frameCount += 1
     }
 
     public func renderAudioFrame(_ pcmBuffer: AVAudioPCMBuffer, time: AVAudioTime, latency: TimeInterval, device: AudioDevice?) async {

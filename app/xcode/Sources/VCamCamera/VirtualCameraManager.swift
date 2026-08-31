@@ -1,6 +1,6 @@
 import Combine
-import CoreImage
 import Foundation
+import Metal
 import VCamData
 import VCamDefaults
 
@@ -17,20 +17,10 @@ public final class VirtualCameraManager: @unchecked Sendable {
             .store(in: &cancellables)
     }
 
-    public func sendImageToVirtualCamera(with image: CIImage) {
+    /// - Parameter commandQueue: the queue the frame was composited on
+    public func sendFrameToVirtualCamera(_ frame: any MTLTexture, on commandQueue: any MTLCommandQueue) {
         guard sinkStream.isStarting else { return }
-        let result = processImage(image)
-        sinkStream.render(result)
-    }
-
-    private func processImage(_ image: CIImage) -> CIImage {
-        var processedImage = image
-
-        if useHMirror {
-            processedImage = processedImage.oriented(.upMirrored)
-        }
-
-        return processedImage
+        sinkStream.render(frame, mirrored: useHMirror, on: commandQueue)
     }
 
     @concurrent

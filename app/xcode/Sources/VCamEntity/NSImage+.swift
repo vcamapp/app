@@ -1,21 +1,7 @@
-//
-//  NSImage+.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/06/13.
-//
-
 import AppKit
 import CoreImage
 
 public extension NSImage {
-    convenience init(color: NSColor, size: NSSize) {
-        self.init(size: size)
-        lockFocus()
-        color.drawSwatch(in: NSRect(origin: .zero, size: size))
-        unlockFocus()
-    }
-    
     var ciImage: CIImage? {
         guard let imageData = self.tiffRepresentation else { return nil }
         return CIImage(data: imageData)

@@ -15,6 +15,7 @@ public final class WindowManager {
 
     private let containerView = VCamRootContainerView()
     @ObservationIgnored private var statusItem: NSStatusItem?
+    @ObservationIgnored private var closeInterceptor: WindowCloseInterceptor?
 
     @ObservationIgnored public var isMacOSMenubarVisible: Bool {
         get { statusItem?.isVisible ?? false }
@@ -111,6 +112,10 @@ public final class WindowManager {
             setAlwaysOnTopEnabled(UserDefaults.standard.value(for: .alwaysOnTopEnabled))
         }
 
+        if !Self.usesEngineView {
+            installCloseInterceptor(on: window)
+        }
+
         isConfigured = true
     }
 
@@ -184,7 +189,50 @@ public final class WindowManager {
         UniBridge.shared.quitApp()
     }
 
+    /// A build that draws without an engine has nothing else to turn the close button into
+    /// "leave the app in the menu bar", so its window delegate has to do it. An engine build
+    /// is driven from the engine side and must keep its own path
+    private func installCloseInterceptor(on window: NSWindow) {
+        closeInterceptor = WindowCloseInterceptor(next: window.delegate) { [weak self] in
+            guard let self else { return }
+            // The menu bar item is the only way back, so without it closing means quitting
+            if UniState.shared.useAddToMacOSMenuBar {
+                hide()
+            } else {
+                quit()
+            }
+        }
+        window.delegate = closeInterceptor
+    }
+
     @objc private func openPreferences() {
         MacWindowManager.shared.open(VCamSettingView())
+    }
+}
+
+/// Turns the close button into "hide to the menu bar", leaving the window's own delegate in
+/// charge of everything else. SwiftUI installs one for its own scene bookkeeping, so it has to
+/// stay in the chain rather than be replaced
+@MainActor
+private final class WindowCloseInterceptor: NSObject, NSWindowDelegate {
+    private let next: (any NSWindowDelegate)?
+    private let onClose: () -> Void
+
+    init(next: (any NSWindowDelegate)?, onClose: @escaping () -> Void) {
+        self.next = next
+        self.onClose = onClose
+    }
+
+    func windowShouldClose(_ sender: NSWindow) -> Bool {
+        onClose()
+        return false
+    }
+
+    override func responds(to selector: Selector!) -> Bool {
+        super.responds(to: selector) || next?.responds(to: selector) == true
+    }
+
+    override func forwardingTarget(for selector: Selector!) -> Any? {
+        next
     }
 }

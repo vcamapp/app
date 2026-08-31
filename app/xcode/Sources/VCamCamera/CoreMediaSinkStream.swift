@@ -1,17 +1,18 @@
-import AppKit
 import CoreMediaIO
 import AVFoundation
+import Metal
 import VCamAppExtension
 import VCamEntity
+import VCamMedia
 
 public final class CoreMediaSinkStream: NSObject {
-    private let context = CIContext(options: [.cacheIntermediates: false, .name: "CoreMediaSinkStream", .workingFormat: CIFormat.BGRA8])
-    private var pixelBuffer: CVPixelBuffer?
+    private var writer: MetalPixelBufferWriter?
+    /// The copy is handed to the queue asynchronously, so a frame still being read by the
+    /// consumer must not be the one written next
+    private var pixelBuffers: [CVPixelBuffer] = []
+    private var pixelBufferIndex = 0
     private var videoFormatDescription: CMVideoFormatDescription?
     public private(set) var isStarting = false
-#if DEBUG
-    private var timer: Timer?
-#endif
 
     private var deviceId: CMIOObjectID?
     private var streamId: CMIOStreamID?
@@ -54,27 +55,11 @@ public final class CoreMediaSinkStream: NSObject {
             return false
         }
 
-#if DEBUG
-        timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
-            let debugImage = NSImage(
-                color: .init(red: .random(in: 0...1), green: .random(in: 0...1), blue: .random(in: 0...1), alpha: 1),
-                size: .init(width: 1280, height: 720)
-            ).ciImage!
-
-            VirtualCameraManager.shared.sendImageToVirtualCamera(with: debugImage)
-        }
-#endif
-
         isStarting = true
         return true
     }
 
     func stop() {
-#if DEBUG
-        timer?.invalidate()
-        timer = nil
-#endif
-
         guard isStarting else { return }
         isStarting = false
         if let deviceId, let streamId {
@@ -82,7 +67,7 @@ public final class CoreMediaSinkStream: NSObject {
         }
     }
 
-    func render(_ image: CIImage) {
+    func render(_ frame: any MTLTexture, mirrored: Bool, on commandQueue: any MTLCommandQueue) {
         // Avoid a CMIO property read per frame; use the cache updated by the
         // property listener, with a low-frequency sync as a safety net in case
         // a notification is missed
@@ -104,39 +89,61 @@ public final class CoreMediaSinkStream: NSObject {
             return
         }
 
-        let width = Int(image.extent.width)
-        let height = Int(image.extent.height)
-        guard let pixelBuffer,
+        guard let first = pixelBuffers.first,
               let videoFormatDescription,
-              width == CVPixelBufferGetWidth(pixelBuffer),
-              height == CVPixelBufferGetHeight(pixelBuffer) else {
-            pixelBuffer = createPixelBuffer(width: width, height: height)
-            if let pixelBuffer {
-                videoFormatDescription = try? CMVideoFormatDescription(imageBuffer: pixelBuffer)
+              frame.width == CVPixelBufferGetWidth(first),
+              frame.height == CVPixelBufferGetHeight(first) else {
+            pixelBuffers = (0..<Self.pixelBufferCount).compactMap {
+                _ in createPixelBuffer(width: frame.width, height: frame.height)
+            }
+            if let first = pixelBuffers.first {
+                videoFormatDescription = try? CMVideoFormatDescription(imageBuffer: first)
             }
             return
         }
 
-        CVPixelBufferLockBaseAddress(pixelBuffer, [])
-        defer { CVPixelBufferUnlockBaseAddress(pixelBuffer, []) }
-        context.render(image, to: pixelBuffer)
+        if writer?.device !== frame.device {
+            writer = MetalPixelBufferWriter(device: frame.device)
+        }
+        guard let writer else { return }
+        pixelBufferIndex = (pixelBufferIndex + 1) % pixelBuffers.count
+        let pixelBuffer = pixelBuffers[pixelBufferIndex]
 
+        // Stamped while encoding so the pacing follows the frame, not the GPU
         let timingInfo = CMSampleTimingInfo(
             duration: .invalid,
             presentationTimeStamp: CMClockGetTime(CMClockGetHostTimeClock()),
             decodeTimeStamp: .invalid
         )
+        let enqueue = EnqueueContext(queue: queue, format: videoFormatDescription,
+                                     pixelBuffer: pixelBuffer, timing: timingInfo)
+        writer.encode(frame, to: pixelBuffer, mirrored: mirrored, on: commandQueue) {
+            enqueue.run()
+        }
+    }
 
-        do {
-            let sampleBuffer = try CMSampleBuffer(
-                imageBuffer: pixelBuffer,
-                formatDescription: videoFormatDescription,
-                sampleTiming: timingInfo
-            )
-            let sampleBufferPointer = UnsafeMutableRawPointer(Unmanaged.passRetained(sampleBuffer).toOpaque())
-            try queue.enqueue(sampleBufferPointer)
-        } catch {
-            print(error)
+    /// The size of the ring the frames cycle through. Two is enough for the queue depth the
+    /// extension keeps, and a third gives room for a frame the consumer holds on to.
+    private static let pixelBufferCount = 3
+
+    /// Runs on a GPU thread, so it carries only the values it needs. Command buffers on one
+    /// queue complete in order, which keeps the frames in order too.
+    private struct EnqueueContext: @unchecked Sendable {
+        let queue: CMSimpleQueue
+        let format: CMVideoFormatDescription
+        let pixelBuffer: CVPixelBuffer
+        let timing: CMSampleTimingInfo
+
+        func run() {
+            do {
+                let sampleBuffer = try CMSampleBuffer(
+                    imageBuffer: pixelBuffer, formatDescription: format, sampleTiming: timing
+                )
+                let sampleBufferPointer = UnsafeMutableRawPointer(Unmanaged.passRetained(sampleBuffer).toOpaque())
+                try queue.enqueue(sampleBufferPointer)
+            } catch {
+                print(error)
+            }
         }
     }
 

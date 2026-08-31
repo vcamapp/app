@@ -106,7 +106,7 @@ private struct TakePhotoView: View {
                 try Task.checkCancellation()
 
                 let destination = try destinationURL()
-                let image = MainTexture.shared.texture.nsImage()
+                guard let image = MainTexture.shared.snapshot()?.nsImage() else { return }
                 let isAccessing = destination.startAccessingSecurityScopedResource()
                 defer {
                     if isAccessing {

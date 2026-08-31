@@ -4,14 +4,11 @@ import os
 public final class MainTexture: @unchecked Sendable {
     public static let shared = MainTexture()
 
-    public private(set) var texture = CIImage(color: .black).cropped(to: .init(x: 0, y: 0, width: 1280, height: 720))
     public private(set) var mtlTexture: (any MTLTexture)?
 
     /// Kept apart from the frame so that an object configured before the first frame exists
     /// still resolves its geometry against the right size.
     public private(set) var size = CGSize(width: 1280, height: 720)
-
-    private var images: [ObjectIdentifier: CIImage] = [:]
 
     public var aspectRatio: Float {
         Float(size.height / size.width)
@@ -38,19 +35,19 @@ public final class MainTexture: @unchecked Sendable {
         self.size = size
     }
 
+    /// Installed by the compositor. The per-frame path deliberately never waits,
+    /// so only the one-off readers below go through this.
+    public var waitForLatestFrame: (@Sendable () -> Void)?
+
+    /// The finished frame as a Core Image. Waits for the composite first:
+    /// reading while it is still running can tear the image.
+    public func snapshot() -> CIImage? {
+        waitForLatestFrame?()
+        guard let mtlTexture else { return nil }
+        return CIImage(mtlTexture: mtlTexture, options: nil)
+    }
+
     public func setTexture(_ texture: any MTLTexture) {
         mtlTexture = texture
-        // The frames cycle through a small ring of textures, so the wrappers are worth keeping
-        let key = ObjectIdentifier(texture)
-        if let image = images[key] {
-            self.texture = image
-            return
-        }
-        guard let image = CIImage(mtlTexture: texture, options: nil) else { return }
-        if images.count >= 4 { // a resolution change swaps the ring out
-            images.removeAll()
-        }
-        images[key] = image
-        self.texture = image
     }
 }
