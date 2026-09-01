@@ -33,7 +33,7 @@ public struct VCamTrackingView: View {
                     .bold()
 #if FEATURE_3
                 Picker(selection: handTrackingMethod) {
-                    ForEach(TrackingMethod.Hand.allCases) { method in
+                    ForEach(handTrackingOptions) { method in
                         Text(verbatim: method.name)
                     }
                 } label: {
@@ -74,6 +74,18 @@ public struct VCamTrackingView: View {
     }
 
 #if FEATURE_3
+    // Full body tracking drives the wrists itself, so it leaves the picker when the engine
+    // cannot run it. The current value stays included so the picker can display it.
+    private var handTrackingOptions: [TrackingMethod.Hand] {
+#if ENABLE_MOCOPI
+        RenderingFeature.supported.contains(.fullBodyTracking)
+            ? TrackingMethod.Hand.allCases
+            : TrackingMethod.Hand.allCases.filter { $0 != .mocopi || $0 == tracking.handTrackingMethod }
+#else
+        TrackingMethod.Hand.allCases
+#endif
+    }
+
     // VCamMocap owns wrist and fingers as one method, so the finger picker
     // never offers it as a choice. While the hand picker selects VCamMocap the
     // current value is still included so the locked picker can display it.

@@ -19,15 +19,17 @@ public struct VCamSettingRenderingView: View {
             } label: {
                 Text(.screenResolution)
             }
-            Picker(selection: $state.qualityLevel) {
-                ForEach(QualityLevel.allCases) {
-                    Text($0.localizedName)
-                        .tag($0.rawValue)
+            if RenderingFeature.supported.contains(.qualityLevel) {
+                Picker(selection: $state.qualityLevel) {
+                    ForEach(QualityLevel.allCases) {
+                        Text($0.localizedName)
+                            .tag($0.rawValue)
+                    }
+                } label: {
+                    Text(.renderingQuality)
                 }
-            } label: {
-                Text(.renderingQuality)
+                .accessibilityIdentifier("settings.rendering.quality")
             }
-            .accessibilityIdentifier("settings.rendering.quality")
 
             ValueEditField(.fpsScreen, value: $state.fps, type: .slider(10...60))
                 .disabled(uniState.useVSync)

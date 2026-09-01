@@ -1,11 +1,5 @@
-//
-//  VCamMenu.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/03/20.
-//
-
 import SwiftUI
+import VCamEntity
 import VCamLogger
 
 public enum VCamMenuItem: Identifiable, CaseIterable {
@@ -16,6 +10,18 @@ public enum VCamMenuItem: Identifiable, CaseIterable {
     case recording
     
     public var id: Self { self }
+
+    /// Whether the engine implements what the item leads to
+    @MainActor public var isAvailable: Bool {
+        switch self {
+        case .main, .recording:
+            true
+#if FEATURE_3
+        case .screenEffect:
+            RenderingFeature.supported.contains(.postEffect)
+#endif
+        }
+    }
 
     public var title: LocalizedStringResource {
         switch self {
@@ -50,7 +56,7 @@ public struct VCamMenu: View {
 
     public var body: some View {
         VStack(spacing: 0) {
-            ForEach(VCamMenuItem.allCases) { item in
+            ForEach(VCamMenuItem.allCases.filter { $0.isAvailable }) { item in
                 Button {
                     state.currentMenu = item
                     Logger.log(String(describing: item))

@@ -1,5 +1,6 @@
 import SwiftUI
 import VCamData
+import VCamEntity
 
 public struct VCamSettingGeneralView: View {
     public init() {}
@@ -14,10 +15,12 @@ public struct VCamSettingGeneralView: View {
         Form {
             Section {
 #if FEATURE_3
-                Toggle(isOn: $state.useCombineMesh) {
-                    Text(.optimizeMeshes)
+                if RenderingFeature.supported.contains(.meshOptimization) {
+                    Toggle(isOn: $state.useCombineMesh) {
+                        Text(.optimizeMeshes)
+                    }
+                    .help(.helpMesh)
                 }
-                .help(.helpMesh)
                 if uniState.value(for: .useURP) {
                     // URP doesn't support MToon of VRM 0.x, so the conversion is always enabled
                     Toggle(isOn: .constant(true)) {

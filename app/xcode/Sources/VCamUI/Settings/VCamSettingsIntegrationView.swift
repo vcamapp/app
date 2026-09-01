@@ -2,6 +2,7 @@ import SwiftUI
 import VCamTracking
 import VCamBridge
 import VCamData
+import VCamEntity
 import VCamLogger
 #if FEATURE_API
 import VCamRemoteControl
@@ -97,7 +98,9 @@ public struct VCamSettingsIntegrationView: View {
 
 #if FEATURE_3
 #if ENABLE_MOCOPI
-            MocopiSettingView()
+            if RenderingFeature.supported.contains(.fullBodyTracking) {
+                MocopiSettingView()
+            }
 #endif
 #endif
 #if FEATURE_API
