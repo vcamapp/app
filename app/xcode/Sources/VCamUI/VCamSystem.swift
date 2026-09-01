@@ -1,5 +1,4 @@
 import AppKit
-import VCamAppExtension
 import VCamBridge
 import VCamControl
 #if FEATURE_API
@@ -33,15 +32,13 @@ public final class VCamSystem {
     private init() {
         SceneControl.provider = SceneManager.shared
 
-        ExtensionNotificationCenter.default.setObserver(for: .startCameraExtensionStream) { [weak self] in
+        VirtualCamera.onConsumersChanged = { [weak self] hasConsumers in
             Task { @MainActor in
-                self?.startSystem()
-            }
-        }
-
-        ExtensionNotificationCenter.default.setObserver(for: .stopAllCameraExtensionStreams) { [weak self] in
-            Task { @MainActor in
-                self?.stopSystem()
+                if hasConsumers {
+                    self?.startSystem()
+                } else {
+                    self?.stopSystem()
+                }
             }
         }
 
@@ -63,8 +60,8 @@ public final class VCamSystem {
             if Self.isDistributedApp {
                 await Migration.migrate()
             }
-            // Runs for every build: connecting only requires an already installed extension
-            VirtualCameraManager.shared.startCameraExtension()
+            // Runs for every build: connecting only requires an already installed virtual camera
+            VirtualCamera.backend?.start()
         }
     }
 

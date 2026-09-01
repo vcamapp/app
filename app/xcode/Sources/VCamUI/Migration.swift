@@ -36,14 +36,15 @@ extension Migration {
     @concurrent
     static func migrationFirst(previousVersion: String) async {
         guard previousVersion.isEmpty else { return }
+        guard let virtualCamera = VirtualCamera.backend else { return }
         await VCamAlert.showModal(title: String(localized: .installVirtualCamera), message: String(localized: .explainAboutInstallingCameraExtension), canCancel: false)
         Task {
             do {
-                if CoreMediaSinkStream.isInstalled {
+                if virtualCamera.isDeviceAvailable {
                     NSWorkspace.shared.open(.cameraExtension)
                 }
-                try await CameraExtension().installExtension()
-                _ = await VirtualCameraManager.shared.installAndStartCameraExtension()
+                _ = try await virtualCamera.install()
+                _ = await virtualCamera.installAndStart()
                 await VCamAlert.showModal(title: String(localized: .success), message: String(localized: .restartAfterInstalling), canCancel: false)
             } catch {
                 await VCamAlert.showModal(title: String(localized: .failure), message: String(localized: .failedToInstallCameraExtension), canCancel: false)
@@ -88,7 +89,7 @@ extension Migration {
         }
         Logger.log("")
 
-        let isNewCameraInstalled = CoreMediaSinkStream.isInstalled
+        let isNewCameraInstalled = VirtualCamera.backend?.isDeviceAvailable == true
 
         await VCamAlert.showModal(
             title: isNewCameraInstalled ? String(localized: .deleteOldDALPlugin) : String(localized: .migrateToNewVirtualCamera),
@@ -117,11 +118,12 @@ extension Migration {
             canCancel: false
         )
 
+        guard let virtualCamera = VirtualCamera.backend else { return }
         do {
-            try? await CameraExtension().uninstallExtension()
+            try? await virtualCamera.uninstall()
             NSWorkspace.shared.open(.cameraExtension)
-            try await CameraExtension().installExtension()
-            _ = await VirtualCameraManager.shared.installAndStartCameraExtension()
+            _ = try await virtualCamera.install()
+            _ = await virtualCamera.installAndStart()
             await VCamAlert.showModal(title: String(localized: .success), message: String(localized: .restartAfterInstalling), canCancel: false)
         } catch {
             await VCamAlert.showModal(title: String(localized: .failure), message: String(localized: .failedToInstallCameraExtension), canCancel: false)

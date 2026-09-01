@@ -102,7 +102,7 @@ public struct VCamMainView: View {
             VCamShortcutGridView()
         }
         .task {
-            isCameraExtensionDisallow = await CameraExtension().status().isAwaitingUserApproval
+            isCameraExtensionDisallow = await VirtualCamera.backend?.status().isAwaitingUserApproval == true
         }
     }
 }

@@ -145,7 +145,7 @@ public final class WindowManager {
         isWindowClosed = true
         window?.setIsVisible(false)
         NSApp.setActivationPolicy(.accessory)
-        if VirtualCameraManager.shared.sinkStream.streamingCount() == 0 {
+        if (VirtualCamera.backend?.consumerCount ?? 0) == 0 {
             VCamSystem.shared.stopSystem()
         }
     }

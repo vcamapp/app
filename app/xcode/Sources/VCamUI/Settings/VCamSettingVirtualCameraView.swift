@@ -83,8 +83,9 @@ public struct VCamSettingVirtualCameraView: View {
                 }
             }
             .task {
-                isCameraExtensionStarting = VirtualCameraManager.shared.sinkStream.isStarting
-                let status = await CameraExtension().status()
+                guard let virtualCamera = VirtualCamera.backend else { return }
+                isCameraExtensionStarting = virtualCamera.isRunning
+                let status = await virtualCamera.status()
                 isCameraExtensionInstalled = status.isInstalled
                 isAwaitingUserApproval = status.isAwaitingUserApproval
             }
@@ -109,23 +110,25 @@ extension VCamSettingVirtualCameraView {
 
     @MainActor
     private func installExtension() async throws {
-        guard CameraExtension.isAppInApplicationsFolder else {
+        guard let virtualCamera = VirtualCamera.backend else { return }
+        guard virtualCamera.isInstallable else {
             await VCamAlert.showModal(title: String(localized: .failure), message: String(localized: .moveAppToApplicationsFolder), canCancel: false)
             return
         }
         NSWorkspace.shared.open(.cameraExtension)
-        let result = try await CameraExtension().installExtension()
+        let result = try await virtualCamera.install()
         isCameraExtensionInstalled = true
-        isCameraExtensionStarting = await VirtualCameraManager.shared.installAndStartCameraExtension()
-        let message = result == .willCompleteAfterReboot ? String(localized: .restartMacToCompleteCameraExtensionSetup) : String(localized: .restartAfterInstalling)
+        isCameraExtensionStarting = await virtualCamera.installAndStart()
+        let message = result == .completesAfterReboot ? String(localized: .restartMacToCompleteCameraExtensionSetup) : String(localized: .restartAfterInstalling)
         await VCamAlert.showModal(title: String(localized: .success), message: message, canCancel: false)
     }
 
     @MainActor
     private func uninstallExtension(isAlertShown: Bool) async throws {
-        try await CameraExtension().uninstallExtension()
+        guard let virtualCamera = VirtualCamera.backend else { return }
+        try await virtualCamera.uninstall()
         isCameraExtensionInstalled = false
-        isCameraExtensionStarting = await VirtualCameraManager.shared.installAndStartCameraExtension()
+        isCameraExtensionStarting = await virtualCamera.installAndStart()
         if isAlertShown {
             await VCamAlert.showModal(title: String(localized: .success), message: String(localized: .completeUninstalling), canCancel: false)
         }

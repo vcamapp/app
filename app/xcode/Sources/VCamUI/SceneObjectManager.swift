@@ -44,8 +44,11 @@ public final class SceneObjectManager {
         }
     }
 
+    /// Runs several times per composited frame, so it avoids `allObjects`: combining the
+    /// arrays would retain every object to find one.
     public func object(byId id: Int32) -> SceneObject? {
-        allObjects.find(byId: id)
+        if let object = objects.find(byId: id) { return object }
+        return subtitleObject?.id == id ? subtitleObject : nil
     }
 
     public func add(_ object: SceneObject) {
@@ -111,7 +114,7 @@ public final class SceneObjectManager {
             text.region = addTexture(object.id, region: text.region, textureSize: textureSize, allocationSize: drawer?.textureSize)
         case let .wind(wind):
             let direction = wind.direction
-            let scale: Float = 100000 // Shift the digits by the number of significant figures to send as Int.
+            let scale = UniBridge.windDirectionScale
             UniBridge.shared.addWind([object.id, Int32(direction.x * scale), Int32(direction.y * scale), Int32(direction.z * scale)])
         }
     }

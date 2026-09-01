@@ -195,6 +195,11 @@ public struct AccessoryPlacement: Codable, Equatable, Sendable {
     static func encode(_ placements: [AccessoryPlacement]) throws -> String {
         String(decoding: try JSONEncoder().encode(["items": placements]), as: UTF8.self)
     }
+
+    /// Reads back ``encode(_:)``, for a receiver that applies the placements itself
+    public static func decode(_ json: String) throws -> [AccessoryPlacement] {
+        try JSONDecoder().decode([String: [AccessoryPlacement]].self, from: Data(json.utf8))["items"] ?? []
+    }
 }
 
 /// A decoded ``LoadVRMPayload`` with the C strings copied, for tests
@@ -355,4 +360,10 @@ public extension UniBridge {
             send(.sendHandPacketV1, payload: &payload)
         }
     }
+}
+
+public extension UniBridge {
+    /// `addWind` carries its direction as `Int32`, so both ends shift the digits by
+    /// this factor. Changing it on one side alone scales the wind by 100000
+    static let windDirectionScale: Float = 100_000
 }
