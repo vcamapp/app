@@ -3,6 +3,7 @@ import Vision
 import VCamBridge
 import VCamMotionV1
 @testable import VCamTracking
+@testable import VCamTrackingCore
 
 @Suite
 struct VCamMotionTests {

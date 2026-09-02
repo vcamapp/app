@@ -4,6 +4,7 @@ import VCamBridge
 import Accelerate
 import VCamLogger
 import Synchronization
+import VCamTrackingCore
 
 @Observable
 @MainActor

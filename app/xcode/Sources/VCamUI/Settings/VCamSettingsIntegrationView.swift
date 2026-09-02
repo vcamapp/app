@@ -1,5 +1,6 @@
 import SwiftUI
 import VCamTracking
+import VCamTrackingCore
 import VCamBridge
 import VCamData
 import VCamEntity

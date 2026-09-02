@@ -14,6 +14,7 @@ let package = Package(
         .library(name: "VCamDefaults", targets: ["VCamDefaults"]),
         .library(name: "VCamMotionV1", targets: ["VCamMotionV1"]),
         .library(name: "VCamTracking", targets: ["VCamTracking"]),
+        .library(name: "VCamTrackingCore", targets: ["VCamTrackingCore"]),
         .library(name: "VCamControl", targets: ["VCamControl"]),
 
         .library(name: "VCamStub", targets: ["VCamStub"]),
@@ -35,7 +36,9 @@ let package = Package(
         .target(name: "VCamEntity", dependencies: ["VCamDefaults"]),
         .target(name: "VCamMedia", dependencies: ["VCamEntity", "VCamLogger"]),
         .target(name: "VCamBridge", dependencies: ["VCamEntity"]),
-        .target(name: "VCamTracking", dependencies: ["VCamCamera", "VCamMotionV1"]),
+        .target(name: "VCamTracking", dependencies: ["VCamTrackingCore", "VCamCamera", "VCamMotionV1"]),
+        // Platform-independent tracking math shared with other apps
+        .target(name: "VCamTrackingCore", dependencies: ["VCamEntity", "VCamMotionV1", "VCamLogger"]),
         .target(name: "VCamMotionV1", dependencies: []),
         .target(name: "VCamCamera", dependencies: ["VCamMedia", "VCamData", "VCamLogger"]),
 
@@ -49,7 +52,7 @@ let package = Package(
         .testTarget(name: "VCamControlTests", dependencies: ["VCamControl", "VCamBridge"]),
         .testTarget(name: "VCamRemoteControlTests", dependencies: ["VCamRemoteControl", "VCamBridge"]),
         .testTarget(name: "VCamDataTests", dependencies: ["VCamData"]),
-        .testTarget(name: "VCamTrackingTests", dependencies: ["VCamTracking"]),
+        .testTarget(name: "VCamTrackingTests", dependencies: ["VCamTracking", "VCamTrackingCore"]),
         .testTarget(name: "VCamCameraTests", dependencies: ["VCamCamera", "VCamMedia"]),
         .testTarget(name: "VCamBridgeTests", dependencies: ["VCamBridge"]),
     ],

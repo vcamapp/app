@@ -2,20 +2,20 @@ import Foundation
 import VCamLogger
 
 @MainActor
-final class DataTimeoutWatchdog {
+package final class DataTimeoutWatchdog {
     private let timeout: Duration
     private var task: Task<Void, Never>?
     private var lastDataReceivedAt = ContinuousClock.now
 
-    init(timeout: Duration) {
+    package init(timeout: Duration) {
         self.timeout = timeout
     }
 
-    func markDataReceived() {
+    package func markDataReceived() {
         lastDataReceivedAt = .now
     }
 
-    func start(
+    package func start(
         isActive: @escaping @MainActor () -> Bool,
         onTimeout: @escaping @MainActor () async -> Void
     ) {
@@ -33,7 +33,7 @@ final class DataTimeoutWatchdog {
         }
     }
 
-    func stop() {
+    package func stop() {
         task?.cancel()
         task = nil
     }

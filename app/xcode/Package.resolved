@@ -1,5 +1,5 @@
 {
-  "originHash" : "31aa97bd5a1f46f314e2d14f1f188bfa15e5f33554224316e5a20ec7e215f436",
+  "originHash" : "aa26808e259932fb8a1e69fc646e00da9ec9a68d123df727cf348005ed629946",
   "pins" : [
     {
       "identity" : "swift-vroid-sdk",
@@ -8,6 +8,15 @@
       "state" : {
         "revision" : "0154d1556c81bbb752fcdc1be42473d276c82e0d",
         "version" : "0.1.2"
+      }
+    },
+    {
+      "identity" : "vrmkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/tattn/VRMKit",
+      "state" : {
+        "branch" : "main",
+        "revision" : "89945b69e34113708d77422d086a202807c6a9fd"
       }
     }
   ],

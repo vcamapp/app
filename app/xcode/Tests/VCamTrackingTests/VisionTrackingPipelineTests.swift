@@ -2,6 +2,7 @@ import CoreVideo
 import Testing
 import VCamCamera
 @testable import VCamTracking
+@testable import VCamTrackingCore
 
 @Suite
 struct VisionTrackingPipelineTests {

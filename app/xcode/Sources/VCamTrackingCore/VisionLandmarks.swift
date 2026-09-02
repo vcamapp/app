@@ -1,16 +1,9 @@
-//
-//  VisionLandmarks.swift
-//
-//
-//  Created by Tatsuya Tanaka on 2023/10/28.
-//
-
 import Foundation
 import simd
 import Vision
 
 public struct VisionLandmarks {
-    let p: [CGPoint]
+    package let p: [CGPoint]
 
     public let leftEyeBall: SIMD2<Float>
     public let leftEyeInner: SIMD2<Float>
@@ -36,7 +29,7 @@ public struct VisionLandmarks {
 
     public let noseHeight: Float
 
-    init(landmarks: FaceObservation.Landmarks2D, imageSize: CGSize) {
+    package init(landmarks: FaceObservation.Landmarks2D, imageSize: CGSize) {
         p = landmarks.allPoints.pointsInImageCoordinates(imageSize)
 
         leftEyeBall = SIMD2(p[13])

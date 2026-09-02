@@ -3,6 +3,7 @@ import Network
 import Observation
 import VCamMotionV1
 import VCamLogger
+import VCamTrackingCore
 
 public enum VCamMotionProtocolVersion: Equatable, Sendable {
     case v0

@@ -1,3 +1,4 @@
+#if os(macOS)
 import Foundation
 import struct AVFAudio.AudioDeviceID
 
@@ -10,3 +11,4 @@ public struct AudioDevice: Hashable, Identifiable, Sendable {
     public let id: AudioDeviceID
     public let uid: String
 }
+#endif

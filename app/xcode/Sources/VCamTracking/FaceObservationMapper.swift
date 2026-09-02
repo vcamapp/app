@@ -1,5 +1,6 @@
 import simd
 import Vision
+import VCamTrackingCore
 
 struct FaceObservationMapper {
     private let request = DetectFaceLandmarksRequest()

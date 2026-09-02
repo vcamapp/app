@@ -91,10 +91,12 @@ public extension ScreenResolution {
                     AVVideoColorPrimariesKey: AVVideoColorPrimaries_ITU_R_709_2,
                 ],
                 AVVideoScalingModeKey: AVVideoScalingModeResizeAspect,
-                AVVideoEncoderSpecificationKey: [
-                    "EnableHardwareAcceleratedVideoEncoder": 1
-                ]
             ]
+#if os(macOS)
+            settings[AVVideoEncoderSpecificationKey] = [
+                "EnableHardwareAcceleratedVideoEncoder": 1
+            ]
+#endif
 
             if format.isHevc {
                 compressionProperties["TargetQualityForAlpha"] = 0.75

@@ -2,12 +2,12 @@ import Foundation
 import simd
 import VCamMotionV1
 
-enum MotionPacketV1Decoder {
-    enum Error: Swift.Error {
+package enum MotionPacketV1Decoder {
+    package enum Error: Swift.Error {
         case truncated, invalidHeader, invalidSize
     }
 
-    static func headerIfV1(_ data: Data) throws -> MotionPacketHeaderV1? {
+    package static func headerIfV1(_ data: Data) throws -> MotionPacketHeaderV1? {
         guard data.count >= MotionPacketV1Constants.headerSize else { throw Error.truncated }
         return try data.withUnsafeBytes { raw -> MotionPacketHeaderV1? in
             let reader = Reader(raw)
@@ -29,11 +29,11 @@ enum MotionPacketV1Decoder {
         }
     }
 
-    static func validateHandsPacket(_ data: Data, header: MotionPacketHeaderV1) throws {
+    package static func validateHandsPacket(_ data: Data, header: MotionPacketHeaderV1) throws {
         guard header.type == .hands, data.count == MotionPacketV1Constants.handsPacketSize else { throw Error.invalidSize }
     }
 
-    static func decodeFace(_ data: Data, header: MotionPacketHeaderV1) throws -> VCamMotion {
+    package static func decodeFace(_ data: Data, header: MotionPacketHeaderV1) throws -> VCamMotion {
         guard header.type == .face, data.count == MotionPacketV1Constants.facePacketSize else {
             throw Error.invalidSize
         }
@@ -69,29 +69,29 @@ enum MotionPacketV1Decoder {
 }
 
 private struct Reader {
-    let bytes: UnsafeRawBufferPointer
+    package let bytes: UnsafeRawBufferPointer
 
-    init(_ bytes: UnsafeRawBufferPointer) {
+    package init(_ bytes: UnsafeRawBufferPointer) {
         self.bytes = bytes
     }
 
-    func u8(_ offset: Int) -> UInt8 {
+    package func u8(_ offset: Int) -> UInt8 {
         bytes[offset]
     }
 
-    func u16(_ offset: Int) -> UInt16 {
+    package func u16(_ offset: Int) -> UInt16 {
         bytes.loadUnaligned(fromByteOffset: offset, as: UInt16.self).littleEndian
     }
 
-    func u32(_ offset: Int) -> UInt32 {
+    package func u32(_ offset: Int) -> UInt32 {
         bytes.loadUnaligned(fromByteOffset: offset, as: UInt32.self).littleEndian
     }
 
-    func f32(_ offset: Int) -> Float {
+    package func f32(_ offset: Int) -> Float {
         Float(bitPattern: u32(offset))
     }
 
-    func quaternion(_ offset: Int) -> simd_quatf {
+    package func quaternion(_ offset: Int) -> simd_quatf {
         .init(ix: f32(offset), iy: f32(offset + 4), iz: f32(offset + 8), r: f32(offset + 12))
     }
 }

@@ -1,6 +1,7 @@
 import CoreMedia
 import ImageIO
 import Vision
+import VCamTrackingCore
 
 struct HandObservationMapper {
     // Use the legacy VN* hand pose API for macOS 15 compatibility. The newer Swift Vision

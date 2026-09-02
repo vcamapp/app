@@ -2,6 +2,7 @@ import Foundation
 import Network
 import VCamBridge
 import VCamLogger
+import VCamEntity
 
 @MainActor
 final class UDPDatagramSession {

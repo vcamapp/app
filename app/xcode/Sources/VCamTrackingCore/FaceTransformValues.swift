@@ -13,19 +13,19 @@ import VCamMotionV1
 /// Mirroring flips every one of those channels together, here: flipping only some
 /// would make a wink close the eye on the opposite side of the screen from the
 /// head turn.
-enum FaceTransformValues {
+package enum FaceTransformValues {
     /// Positions in the 12-element array, which the builders below emit in the order of
     /// `TrackingMappingEntry.trackingValueKeys(for: .blendShape)`. A test pins them to it.
     private enum LegacyIndex {
-        static let posX = 0
-        static let yaw = 4
-        static let roll = 5
-        static let blinkLeft = 6
-        static let blinkRight = 7
-        static let eyeX = 9
+        package static let posX = 0
+        package static let yaw = 4
+        package static let roll = 5
+        package static let blinkLeft = 6
+        package static let blinkRight = 7
+        package static let eyeX = 9
     }
 
-    static func vcamHeadTransform(translation: SIMD3<Float>, rotationEuler: SIMD3<Float>,
+    package static func vcamHeadTransform(translation: SIMD3<Float>, rotationEuler: SIMD3<Float>,
                                   blendShape: BlendShape, useEyeTracking: Bool, mirrored: Bool, vowel: Vowel) -> [Float] {
         let blendShape = presentationBlendShape(blendShape, mirrored: mirrored)
         var values = headPoseValues(translation: translation, rotationEuler: rotationEuler, mirrored: mirrored)
@@ -40,7 +40,7 @@ enum FaceTransformValues {
         return values
     }
 
-    static func perfectSync(translation: SIMD3<Float>, rotationEuler: SIMD3<Float>,
+    package static func perfectSync(translation: SIMD3<Float>, rotationEuler: SIMD3<Float>,
                             blendShape: BlendShape, useEyeTracking: Bool, mirrored: Bool) -> [Float] {
         let blendShape = presentationBlendShape(blendShape, mirrored: mirrored)
         // The eye block of the wire order is gated below, and the gaze has to follow it:
@@ -73,7 +73,7 @@ enum FaceTransformValues {
     /// components and pupil-based gaze are already mirrored while its blinks are
     /// anatomical: Vision names its landmarks after the subject's own sides (verified
     /// against a still image and its horizontal flip).
-    static func presenting(imageSpaceValues: [Float], mirrored: Bool) -> [Float] {
+    package static func presenting(imageSpaceValues: [Float], mirrored: Bool) -> [Float] {
         var values = imageSpaceValues
         if mirrored {
             values.swapAt(LegacyIndex.blinkLeft, LegacyIndex.blinkRight)
@@ -91,7 +91,7 @@ private extension BlendShape {
     /// ARKit-style trackers raise eyeBlink as the lids follow a downward gaze,
     /// leaving the avatar half-asleep whenever it looks down. Cancel that share
     /// of the blink, rescaled so an intentional blink still reaches 1.
-    func compensatingBlinkForDownwardGaze() -> BlendShape {
+    package func compensatingBlinkForDownwardGaze() -> BlendShape {
         var compensated = self
         compensated.eyeBlinkLeft = Self.cancelingLidFollow(blink: eyeBlinkLeft, lookDown: eyeLookDownLeft)
         compensated.eyeBlinkRight = Self.cancelingLidFollow(blink: eyeBlinkRight, lookDown: eyeLookDownRight)

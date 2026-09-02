@@ -4,6 +4,7 @@ import VCamEntity
 import VCamData
 import VCamBridge
 import VCamLogger
+import VCamTrackingCore
 
 @Observable
 @MainActor

@@ -87,7 +87,7 @@ extension FacialMocapData {
         blendShape.horizontallyMirrored()
     }
 
-    func vcamHeadTransform(useEyeTracking: Bool, mirrored: Bool) -> [Float] {
+    package func vcamHeadTransform(useEyeTracking: Bool, mirrored: Bool) -> [Float] {
         FaceTransformValues.vcamHeadTransform(
             translation: head.translation,
             rotationEuler: head.rotation,
@@ -98,7 +98,7 @@ extension FacialMocapData {
         )
     }
 
-    func perfectSync(useEyeTracking: Bool, mirrored: Bool) -> [Float] {
+    package func perfectSync(useEyeTracking: Bool, mirrored: Bool) -> [Float] {
         FaceTransformValues.perfectSync(
             translation: head.translation,
             rotationEuler: head.rotation,

@@ -3,6 +3,7 @@ import VCamEntity
 import Combine
 import Foundation
 import Synchronization
+import VCamTrackingCore
 
 public final class HandTracking {
     private var cancellables: Set<AnyCancellable> = []

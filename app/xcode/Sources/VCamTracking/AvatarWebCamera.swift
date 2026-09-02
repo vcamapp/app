@@ -3,6 +3,7 @@ import VCamBridge
 import VCamCamera
 import VCamData
 import VCamLogger
+import VCamTrackingCore
 
 public struct CameraPermissionProvider: Sendable {
     public var isAuthorized: @Sendable () -> Bool

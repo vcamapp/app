@@ -3,6 +3,7 @@ import VCamBridge
 import VCamEntity
 import VCamMotionV1
 @testable import VCamTracking
+@testable import VCamTrackingCore
 
 /// Pins the value builders to the key order the engine resolves its mappings by.
 @Suite

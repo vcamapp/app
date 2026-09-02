@@ -4,6 +4,7 @@ import VideoToolbox
 import VCamBridge
 import VCamCamera
 import VCamLogger
+import VCamEntity
 
 @MainActor
 public func showCaptureDeviceSelectView(didSelect: @escaping (AVCaptureDevice, CGRect) -> Void) {

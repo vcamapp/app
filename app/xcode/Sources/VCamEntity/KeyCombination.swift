@@ -1,10 +1,4 @@
-//
-//  KeyCombination.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2023/04/15.
-//
-
+#if canImport(AppKit)
 import Foundation
 import class AppKit.NSEvent
 import var Carbon.HIToolbox.Events.kVK_Space
@@ -79,3 +73,4 @@ public struct KeyCombination: Equatable, CustomStringConvertible, Sendable {
         }
     }
 }
+#endif

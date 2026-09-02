@@ -1,3 +1,4 @@
+import VCamTrackingCore
 struct HandSmoothingState {
     private var prevHands = Array(repeating: RevisedMovingAverage<SIMD2<Float>>(weight: .six), count: 6)
     private var prevFingers = Array(repeating: RevisedMovingAverage<Float>(weight: .six), count: 10)

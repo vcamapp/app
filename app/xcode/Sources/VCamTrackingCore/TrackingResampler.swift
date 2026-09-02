@@ -1,28 +1,28 @@
 import Foundation
 import Accelerate
 
-final class TrackingResampler: @unchecked Sendable {
-    struct Settings: Sendable {
-        let fps: Double
-        let bufferDelay: Double
-        let maxPrediction: Double
-        let maxFrames: Int
+package final class TrackingResampler: @unchecked Sendable {
+    package struct Settings: Sendable {
+        package let fps: Double
+        package let bufferDelay: Double
+        package let maxPrediction: Double
+        package let maxFrames: Int
 
-        var outputInterval: Double {
+        package var outputInterval: Double {
             precondition(fps > 0, "TrackingResampler.Settings.fps must be > 0")
             return 1.0 / fps
         }
     }
 
     private struct Frame: Sendable {
-        let time: Double
-        let values: [Float]
+        package let time: Double
+        package let values: [Float]
     }
 
     private struct State: Sendable {
-        var frames: [Frame] = []
-        var timer: (any DispatchSourceTimer)?
-        var valueCount: Int?
+        package var frames: [Frame] = []
+        package var timer: (any DispatchSourceTimer)?
+        package var valueCount: Int?
     }
 
     private var state: State
@@ -30,7 +30,7 @@ final class TrackingResampler: @unchecked Sendable {
     private let settingsProvider: @Sendable () -> Settings
     private let output: @MainActor @Sendable ([Float]) -> Void
 
-    init(label: String, settingsProvider: @escaping @Sendable () -> Settings, output: @escaping @MainActor @Sendable ([Float]) -> Void) {
+    package init(label: String, settingsProvider: @escaping @Sendable () -> Settings, output: @escaping @MainActor @Sendable ([Float]) -> Void) {
         self.state = State()
         self.queue = DispatchQueue(label: "com.github.tattn.vcam.tracking.resampler.\(label)")
         self.settingsProvider = settingsProvider
@@ -38,7 +38,7 @@ final class TrackingResampler: @unchecked Sendable {
     }
 
     /// Routes values through the resampler, or straight to its output when smoothing is off
-    @MainActor func send(_ values: [Float], smoothed: Bool) {
+    @MainActor package func send(_ values: [Float], smoothed: Bool) {
         if smoothed {
             push(values)
         } else {
@@ -46,7 +46,7 @@ final class TrackingResampler: @unchecked Sendable {
         }
     }
 
-    func push(_ values: [Float]) {
+    package func push(_ values: [Float]) {
         let timestamp = ProcessInfo.processInfo.systemUptime
         queue.async { [self] in
             ensureValueCount(values, state: &state)
@@ -59,7 +59,7 @@ final class TrackingResampler: @unchecked Sendable {
         }
     }
 
-    func reset(with values: [Float]? = nil) {
+    package func reset(with values: [Float]? = nil) {
         let timestamp = ProcessInfo.processInfo.systemUptime
         queue.async { [self] in
             state.frames.removeAll(keepingCapacity: true)
@@ -73,7 +73,7 @@ final class TrackingResampler: @unchecked Sendable {
         }
     }
 
-    func stop() {
+    package func stop() {
         queue.async { [self] in
             stopLocked()
         }

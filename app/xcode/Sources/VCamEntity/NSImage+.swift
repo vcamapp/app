@@ -1,3 +1,4 @@
+#if canImport(AppKit)
 import AppKit
 import CoreImage
 
@@ -19,3 +20,4 @@ public extension NSImage {
         try imageData.write(to: destination)
     }
 }
+#endif

@@ -4,6 +4,7 @@ import ImageIO
 import VCamCamera
 import VCamLogger
 import Vision
+import VCamTrackingCore
 
 struct VisionFrame: Sendable {
     let sampleBuffer: CameraSampleBuffer
