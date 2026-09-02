@@ -73,12 +73,12 @@ public final class VCamMotionTracking {
         guard settings.isFaceTrackingEnabled else { return }
 
         if Tracking.shared.activeFaceMappingMode == .perfectSync {
-            let values = data.perfectSync(useEyeTracking: settings.useEyeTracking, mirrored: settings.mirrorsTracking)
+            let values = data.face.perfectSync(useEyeTracking: settings.useEyeTracking, mirrored: settings.mirrorsTracking)
             perfectSyncResampler.send(values, smoothed: smoothingStorage.isEnabled)
             return
         }
 
-        let values = data.vcamHeadTransform(
+        let values = data.face.vcamHeadTransform(
             useEyeTracking: settings.useEyeTracking,
             useVowelEstimation: settings.useVowelEstimation,
             mirrored: settings.mirrorsTracking
@@ -149,37 +149,5 @@ public final class VCamMotionTracking {
 
     func stopFingerResampling() {
         fingersResampler.stop()
-    }
-}
-
-private extension VCamMotion {
-    /// The tracker relays ARKit values, which name the sided shapes and the gaze
-    /// through the mirror while the head pose is already the subject's own, so
-    /// mirroring those two back yields the builders' anatomical input. Verified on a
-    /// device: without this a wink closed the wrong eye in both presentations and the
-    /// gaze stayed mirrored in both.
-    var anatomicalBlendShape: BlendShape {
-        blendShape.horizontallyMirrored()
-    }
-
-    func vcamHeadTransform(useEyeTracking: Bool, useVowelEstimation: Bool, mirrored: Bool) -> [Float] {
-        FaceTransformValues.vcamHeadTransform(
-            translation: head.translation,
-            rotationEuler: head.rotation.eulerAngles(),
-            blendShape: anatomicalBlendShape,
-            useEyeTracking: useEyeTracking,
-            mirrored: mirrored,
-            vowel: useVowelEstimation ? VowelEstimator.estimate(blendShape: blendShape) : .a
-        )
-    }
-
-    func perfectSync(useEyeTracking: Bool, mirrored: Bool) -> [Float] {
-        FaceTransformValues.perfectSync(
-            translation: head.translation,
-            rotationEuler: head.rotation.eulerAngles(),
-            blendShape: anatomicalBlendShape,
-            useEyeTracking: useEyeTracking,
-            mirrored: mirrored
-        )
     }
 }

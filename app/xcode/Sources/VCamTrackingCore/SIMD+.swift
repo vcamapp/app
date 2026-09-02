@@ -1,10 +1,3 @@
-//
-//  SIMD+.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/10/15.
-//
-
 import simd
 import struct CoreGraphics.CGPoint
 

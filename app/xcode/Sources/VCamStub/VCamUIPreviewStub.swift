@@ -4,6 +4,7 @@ import VCamBridge
 import VCamData
 import VCamTracking
 import VCamUI
+import VCamTrackingCore
 
 public enum VCamUIPreviewStub {
     @MainActor

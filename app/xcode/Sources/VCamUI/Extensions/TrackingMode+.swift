@@ -1,5 +1,6 @@
 import Foundation
 import VCamBridge
+import VCamTrackingCore
 
 extension TrackingMode {
     var name: String {

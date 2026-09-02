@@ -15,6 +15,8 @@ let package = Package(
         .library(name: "VCamMotionV1", targets: ["VCamMotionV1"]),
         .library(name: "VCamTracking", targets: ["VCamTracking"]),
         .library(name: "VCamTrackingCore", targets: ["VCamTrackingCore"]),
+        .library(name: "VCamEntity", targets: ["VCamEntity"]),
+        .library(name: "VCamLogger", targets: ["VCamLogger"]),
         .library(name: "VCamControl", targets: ["VCamControl"]),
 
         .library(name: "VCamStub", targets: ["VCamStub"]),
@@ -32,10 +34,10 @@ let package = Package(
         .target(name: "VCamRemoteControl", dependencies: ["VCamControl", "VCamData", "VCamBridge", "VCamEntity", "VCamLogger"], resources: [
             .copy("Resources/openrpc.json"),
         ]),
-        .target(name: "VCamData", dependencies: ["VCamBridge", "VCamEntity", "VCamLogger"]),
+        .target(name: "VCamData", dependencies: ["VCamBridge", "VCamEntity", "VCamLogger", "VCamTrackingCore"]),
         .target(name: "VCamEntity", dependencies: ["VCamDefaults"]),
         .target(name: "VCamMedia", dependencies: ["VCamEntity", "VCamLogger"]),
-        .target(name: "VCamBridge", dependencies: ["VCamEntity"]),
+        .target(name: "VCamBridge", dependencies: ["VCamEntity", "VCamTrackingCore"]),
         .target(name: "VCamTracking", dependencies: ["VCamTrackingCore", "VCamCamera", "VCamMotionV1"]),
         // Platform-independent tracking math shared with other apps
         .target(name: "VCamTrackingCore", dependencies: ["VCamEntity", "VCamMotionV1", "VCamLogger"]),

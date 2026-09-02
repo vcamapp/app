@@ -1,5 +1,6 @@
 import Foundation
 import VCamBridge
+import VCamTrackingCore
 
 extension TrackingMappingEntry.Key {
     var localizedTitle: String {

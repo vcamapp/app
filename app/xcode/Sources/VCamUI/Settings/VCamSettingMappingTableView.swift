@@ -2,6 +2,7 @@ import SwiftUI
 import AppKit
 import simd
 import VCamBridge
+import VCamTrackingCore
 
 private enum MappingTableSection {
     case main

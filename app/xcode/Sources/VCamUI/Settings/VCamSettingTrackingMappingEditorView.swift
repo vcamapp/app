@@ -3,6 +3,7 @@ import AppKit
 import VCamBridge
 import VCamData
 import VCamTracking
+import VCamTrackingCore
 
 public struct VCamSettingTrackingMappingEditorView: View {
     @State private var store = MappingDataStore()
