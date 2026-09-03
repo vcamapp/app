@@ -12,24 +12,14 @@ struct FourCharCodeTests {
         #expect(code.string == "????")
     }
 
-    @Test
-    func videoRange420v() {
-        let code: FourCharCode = "420v"
-        #expect(code == kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange)
-        #expect(code.string == "420v")
-    }
-
-    @Test
-    func fullRange420f() {
-        let code: FourCharCode = "420f"
-        #expect(code == kCVPixelFormatType_420YpCbCr8BiPlanarFullRange)
-        #expect(code.string == "420f")
-    }
-
-    @Test
-    func bgra() {
-        let code: FourCharCode = "BGRA"
-        #expect(code == kCVPixelFormatType_32BGRA)
-        #expect(code.string == "BGRA")
+    @Test(arguments: [
+        ("420v", kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange),
+        ("420f", kCVPixelFormatType_420YpCbCr8BiPlanarFullRange),
+        ("BGRA", kCVPixelFormatType_32BGRA),
+    ])
+    func roundTripsPixelFormatCodes(string: String, expected: OSType) {
+        let code = FourCharCode(stringLiteral: string)
+        #expect(code == expected)
+        #expect(code.string == string)
     }
 }

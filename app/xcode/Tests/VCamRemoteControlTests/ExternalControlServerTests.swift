@@ -1,4 +1,5 @@
 import Foundation
+import Network
 import Testing
 @testable import VCamRemoteControl
 
@@ -64,6 +65,8 @@ struct ExternalControlServerTests {
         #expect(commitResponse.contains("invalid_vrm"))
     }
 
+    /// The rejection is an HTTP 400 on the raw socket, so read the status line instead of
+    /// waiting for a WebSocket client to give up
     @Test
     func rejectsHandshakesWithOriginHeader() async throws {
         let (server, port) = try Self.makeRunningServer()
@@ -71,17 +74,42 @@ struct ExternalControlServerTests {
             server.stop()
         }
 
-        var request = URLRequest(url: URL(string: "ws://127.0.0.1:\(port)")!)
-        request.setValue("https://example.com", forHTTPHeaderField: "Origin")
-        // The rejected handshake never completes, so bound the wait
-        let configuration = URLSessionConfiguration.ephemeral
-        configuration.timeoutIntervalForRequest = 3
-        let task = URLSession(configuration: configuration).webSocketTask(with: request)
-        task.resume()
-        await #expect(throws: (any Error).self) {
-            try await task.send(.string(#"{"jsonrpc":"2.0","id":1,"method":"app.getInfo","params":{}}"#))
-            _ = try await task.receive()
+        let handshake = """
+        GET / HTTP/1.1\r
+        Host: 127.0.0.1\r
+        Upgrade: websocket\r
+        Connection: Upgrade\r
+        Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r
+        Sec-WebSocket-Version: 13\r
+        Origin: https://example.com\r
+        \r
+
+        """
+        let response = try await Self.exchange(Data(handshake.utf8), port: port)
+        #expect(response.hasPrefix("HTTP/1.1 400"))
+    }
+
+    /// Sends `request` over a plain TCP connection and returns the first bytes the server answers with
+    private static func exchange(_ request: Data, port: UInt16) async throws -> String {
+        let connection = NWConnection(host: "127.0.0.1", port: NWEndpoint.Port(rawValue: port)!, using: .tcp)
+        defer {
+            connection.cancel()
         }
-        task.cancel(with: .goingAway, reason: nil)
+        connection.start(queue: .main)
+        return try await withCheckedThrowingContinuation { continuation in
+            connection.send(content: request, completion: .contentProcessed { error in
+                if let error {
+                    continuation.resume(throwing: error)
+                    return
+                }
+                connection.receive(minimumIncompleteLength: 1, maximumLength: 4096) { data, _, _, error in
+                    if let error {
+                        continuation.resume(throwing: error)
+                    } else {
+                        continuation.resume(returning: String(decoding: data ?? Data(), as: UTF8.self))
+                    }
+                }
+            })
+        }
     }
 }

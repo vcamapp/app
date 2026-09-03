@@ -67,16 +67,6 @@ struct BlendShapeTests {
     }
 
     @Test
-    func mirroringTwiceRestoresTheOriginal() {
-        var blend = BlendShape(lookAtPoint: .init(-0.2, 0.5))
-        for (index, keyPath) in BlendShape.wireOrder.enumerated() {
-            blend[keyPath: keyPath] = Float(index) / 100
-        }
-
-        #expect(blend.mirrored().mirrored() == blend)
-    }
-
-    @Test
     func gazeMirroringFlipsTheHorizontalGaze() {
         var blend = BlendShape(lookAtPoint: .init(0.4, 0.7))
         blend.eyeLookInLeft = 0.9
@@ -97,22 +87,14 @@ struct BlendShapeTests {
     }
 
     @Test
-    func gazeMirroringTwiceRestoresTheOriginal() {
+    func everyMirroringIsItsOwnInverse() {
         var blend = BlendShape(lookAtPoint: .init(-0.2, 0.5))
         for (index, keyPath) in BlendShape.wireOrder.enumerated() {
             blend[keyPath: keyPath] = Float(index) / 100
         }
 
+        #expect(blend.mirrored().mirrored() == blend)
         #expect(blend.gazeMirrored().gazeMirrored() == blend)
-    }
-
-    @Test
-    func horizontalMirroringTwiceRestoresTheOriginal() {
-        var blend = BlendShape(lookAtPoint: .init(-0.2, 0.5))
-        for (index, keyPath) in BlendShape.wireOrder.enumerated() {
-            blend[keyPath: keyPath] = Float(index) / 100
-        }
-
         #expect(blend.horizontallyMirrored().horizontallyMirrored() == blend)
     }
 

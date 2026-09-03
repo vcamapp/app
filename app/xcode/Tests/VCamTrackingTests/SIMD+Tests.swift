@@ -3,7 +3,6 @@ import simd
 import SceneKit
 import VCamTracking
 
-
 @Suite
 struct SIMDTests {
     @Test
@@ -13,39 +12,16 @@ struct SIMDTests {
         #expect(angle == .init(180, 0, 0))
     }
 
-    @Test
-    func piX1MatchesSceneKit() {
-        let rotation = simd_quatf(angle: .pi, axis: .init(1, 0, 0))
-        #expect(rotation.eulerAngles() == quaternionToEulerAngles(rotation))
-    }
-
-    @Test
-    func piY1MatchesSceneKit() {
-        let rotation = simd_quatf(angle: .pi, axis: .init(0, 1, 0))
-        #expect(rotation.eulerAngles() == quaternionToEulerAngles(rotation))
-    }
-
-    @Test
-    func piZ1MatchesSceneKit() {
-        let rotation = simd_quatf(angle: .pi, axis: .init(0, 0, 1))
-        #expect(rotation.eulerAngles() == quaternionToEulerAngles(rotation))
-    }
-
-    @Test
-    func piXY05MatchesSceneKit() {
-        let rotation = simd_quatf(angle: .pi, axis: simd_normalize(.init(0.5, 0.5, 0)))
-        #expect(rotation.eulerAngles().isApproximatelyEqual(to: quaternionToEulerAngles(rotation), accuracy: 0.01))
-    }
-
-    @Test
-    func piYZ05MatchesSceneKit() {
-        let rotation = simd_quatf(angle: .pi, axis: simd_normalize(.init(0, 0.5, 0.5)))
-        #expect(rotation.eulerAngles().isApproximatelyEqual(to: quaternionToEulerAngles(rotation), accuracy: 0.01))
-    }
-
-    @Test
-    func arbitraryAxisMatchesSceneKit() {
-        let rotation = simd_quatf(angle: 2, axis: simd_normalize(.init(0.3, 0.3, 0.4)))
+    @Test(arguments: [
+        (angle: Float.pi, axis: SIMD3<Float>(1, 0, 0)),
+        (angle: .pi, axis: SIMD3<Float>(0, 1, 0)),
+        (angle: .pi, axis: SIMD3<Float>(0, 0, 1)),
+        (angle: .pi, axis: simd_normalize(SIMD3<Float>(0.5, 0.5, 0))),
+        (angle: .pi, axis: simd_normalize(SIMD3<Float>(0, 0.5, 0.5))),
+        (angle: 2 as Float, axis: simd_normalize(SIMD3<Float>(0.3, 0.3, 0.4))),
+    ])
+    func eulerAnglesMatchSceneKit(rotation: (angle: Float, axis: SIMD3<Float>)) {
+        let rotation = simd_quatf(angle: rotation.angle, axis: rotation.axis)
         #expect(rotation.eulerAngles().isApproximatelyEqual(to: quaternionToEulerAngles(rotation), accuracy: 0.01))
     }
 }

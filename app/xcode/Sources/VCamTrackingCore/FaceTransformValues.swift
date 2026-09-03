@@ -8,7 +8,7 @@ import VCamMotionV1
 ///
 /// The input contract is the subject's own anatomical sides for the head pose,
 /// the sided shapes and the gaze alike. Sources whose wire data names them
-/// through the mirror convert it first (`VCamMotion.anatomicalBlendShape`).
+/// through the mirror convert it first (`VCamFaceMotion.anatomicalBlendShape`).
 ///
 /// Mirroring flips every one of those channels together, here: flipping only some
 /// would make a wink close the eye on the opposite side of the screen from the

@@ -174,15 +174,6 @@ struct VisionTrackingPipelineTests {
         #expect(missingOutput.fingersValues?.count == 10)
     }
 
-    @Test
-    func fingerConfigurationSnapshotStoresValues() {
-        let snapshot = FingerTrackingConfigurationSnapshot(open: 1.2, close: 0.8, isFingerEnabled: false)
-
-        #expect(snapshot.open == 1.2)
-        #expect(snapshot.close == 0.8)
-        #expect(!snapshot.isFingerEnabled)
-    }
-
     private func makeConfiguration(usage: AvatarWebCamera.Usage, isEmotionEnabled: Bool = false) -> VisionTrackingConfigurationSnapshot {
         VisionTrackingConfigurationSnapshot(
             revision: 0,

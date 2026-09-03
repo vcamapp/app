@@ -32,8 +32,6 @@ public struct UniBridgeMethodId: RawRepresentable, Sendable, Equatable {
     }
 }
 
-// MARK: - Tracking Mode Enum
-// MARK: - Tracking Channel Enum
 // MARK: - VRM Load Source Enum
 /// Where a VRM load request originates. The engine decides the avatar metadata
 /// and whether to persist the file for restart restoration based on this.

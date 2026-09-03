@@ -46,20 +46,12 @@ struct FrameRateSelectorTests {
         expectRecommendedFrameRate(targetFPS: 45, ranges: [], min: .invalid, max: .invalid)
     }
 
-    @Test
-    func nonIntegerFPS() throws {
+    /// Webcams such as the Razer Kiyo report rates a hair off the integer
+    @Test(arguments: [30000030, 29999970] as [CMTimeScale])
+    func nonIntegerFPS(timescale: CMTimeScale) throws {
         let range = MockAVFrameRateRange(
-            minFrameDuration: CMTime(value: 1000000, timescale: 30000030), // Razer Kiyo Webcam
-            maxFrameDuration: CMTime(value: 1000000, timescale: 30000030)
-        )
-        expectRecommendedFrameRate(targetFPS: 30, ranges: [range], min: range.minFrameDuration, max: range.maxFrameDuration)
-    }
-
-    @Test
-    func nonIntegerFPS2() throws {
-        let range = MockAVFrameRateRange(
-            minFrameDuration: CMTime(value: 1000000, timescale: 29999970),
-            maxFrameDuration: CMTime(value: 1000000, timescale: 29999970)
+            minFrameDuration: CMTime(value: 1000000, timescale: timescale),
+            maxFrameDuration: CMTime(value: 1000000, timescale: timescale)
         )
         expectRecommendedFrameRate(targetFPS: 30, ranges: [range], min: range.minFrameDuration, max: range.maxFrameDuration)
     }

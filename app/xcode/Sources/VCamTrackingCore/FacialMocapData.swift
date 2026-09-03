@@ -82,7 +82,7 @@ public extension FacialMocapData {
 }
 
 extension FacialMocapData {
-    /// Relays ARKit values like VCamMotion; see `VCamMotion.anatomicalBlendShape`.
+    /// Relays ARKit values like VCamMotion; see `VCamFaceMotion.anatomicalBlendShape`.
     private var anatomicalBlendShape: BlendShape {
         blendShape.horizontallyMirrored()
     }

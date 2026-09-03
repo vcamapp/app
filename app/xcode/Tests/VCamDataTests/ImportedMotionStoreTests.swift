@@ -56,36 +56,20 @@ struct ImportedMotionStoreTests {
     }
 
     @Test
-    func renameKeepsIDAndSettings() throws {
+    func settingsUpdatesPersistAndKeepTheID() throws {
         let directory = try makeTemporaryDirectory()
         defer { try? FileManager.default.removeItem(at: directory) }
 
         let store = makeStore(in: directory)
-        let record = ImportedMotionRecord(displayName: "Old", translationAxes: .all, isLoop: true)
+        let record = ImportedMotionRecord(displayName: "Old", translationAxes: .all, isLoop: false)
         try store.addRecord(record)
-        try store.updateSettings(id: record.id, displayName: "New", translationAxes: .all, isLoop: true)
+        try store.updateLoop(id: record.id, isLoop: true)
+        try store.updateSettings(id: record.id, displayName: "New", translationAxes: [.y], isLoop: true)
 
         let restored = makeStore(in: directory)
         let restoredRecord = try #require(restored.records.first)
         #expect(restoredRecord.id == record.id)
         #expect(restoredRecord.displayName == "New")
-        #expect(restoredRecord.isLoop == true)
-        #expect(restoredRecord.translationAxes == .all)
-    }
-
-    @Test
-    func updateLoopAndAxesPersist() throws {
-        let directory = try makeTemporaryDirectory()
-        defer { try? FileManager.default.removeItem(at: directory) }
-
-        let store = makeStore(in: directory)
-        let record = ImportedMotionRecord(displayName: "Dance")
-        try store.addRecord(record)
-        try store.updateLoop(id: record.id, isLoop: true)
-        try store.updateSettings(id: record.id, displayName: "Dance", translationAxes: [.y], isLoop: true)
-
-        let restored = makeStore(in: directory)
-        let restoredRecord = try #require(restored.records.first)
         #expect(restoredRecord.isLoop == true)
         #expect(restoredRecord.translationAxes == [.y])
     }

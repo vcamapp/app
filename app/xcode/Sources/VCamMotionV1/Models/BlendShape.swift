@@ -61,6 +61,16 @@ public struct BlendShape: Equatable, Sendable {
 }
 
 public extension BlendShape {
+    /// Linear interpolation of every channel and the gaze (`t` = 0 keeps `self`, 1 gives `next`)
+    func lerp(next: Self, t: Float) -> Self {
+        var mixed = self
+        for keyPath in Self.wireOrder {
+            mixed[keyPath: keyPath] += (next[keyPath: keyPath] - self[keyPath: keyPath]) * t
+        }
+        mixed.lookAtPoint += (next.lookAtPoint - lookAtPoint) * t
+        return mixed
+    }
+
     /// Alphabetical blend shape order shared by the perfect sync bridge
     /// array and the MotionV1 face packet. This list is the wire contract:
     /// encoder and decoder both derive their index mapping from it.
