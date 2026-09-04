@@ -197,7 +197,10 @@ public final class SceneManager {
     }
 
     public func loadCurrentScene() async throws {
-        try await loadScene(id: currentSceneId)
+        // The initial id is chosen before the engine reports the output size, so it can belong
+        // to the other orientation. Fall back to the first scene of the current one.
+        let id = scenes.find(byId: currentSceneId)?.id ?? scenes[0].id
+        try await loadScene(id: id)
     }
 
     public func saveCurrentSceneAndObjects() throws {
