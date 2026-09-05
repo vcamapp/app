@@ -26,8 +26,7 @@ public final class CaptureDevicePreviewer {
         let videoDataOutput = AVCaptureVideoDataOutput()
         videoDataOutput.alwaysDiscardsLateVideoFrames = true
 
-        // Create a serial dispatch queue used for the sample buffer delegate as well as when a still image is captured.
-        // A serial dispatch queue must be used to guarantee that video frames will be delivered in order.
+        // A serial queue keeps the frames in delivery order
         videoDataOutput.setSampleBufferDelegate(delegator, queue: sessionQueue)
 
         if session.canAddOutput(videoDataOutput) {

@@ -10,13 +10,15 @@ import VCamLogger
 public final class SceneManager {
     public static let shared = SceneManager()
 
-    public private(set) var currentSceneId: Int32
+    private var selectedSceneId: Int32
 
-    @ObservationIgnored var currentScene: VCamScene {
-        get throws {
-            try scenes.find(byId: currentSceneId).orThrow(NSError.vcam(message: "invalid scene id: \(currentSceneId)"))
-        }
+    /// Always a scene of the current orientation: right after the orientation flips, the selection
+    /// still refers to a scene of the previous one until `changeAspectRatio` finishes loading.
+    var currentScene: VCamScene {
+        scenes.find(byId: selectedSceneId) ?? scenes[0]
     }
+
+    public var currentSceneId: Int32 { currentScene.id }
 
     /// Scenes are kept per orientation so each keeps its own order.
     /// Both orientations always hold at least one scene by construction.
@@ -74,9 +76,12 @@ public final class SceneManager {
         if portrait.isEmpty {
             portrait = [Self.createAndSaveNewScene()]
         }
-        self.scenesByOrientation = OrientedScenes(landscape: landscape, portrait: portrait)
-        let currentScenes = MainTexture.shared.isLandscape ? landscape : portrait
-        self.currentSceneId = currentScenes[0].id
+        let orientedScenes = OrientedScenes(landscape: landscape, portrait: portrait)
+        // The output size follows the persisted resolution, which UniState applies on creation.
+        // Make sure that happened before reading the orientation.
+        _ = UniState.shared
+        self.scenesByOrientation = orientedScenes
+        self.selectedSceneId = orientedScenes[isLandscape: MainTexture.shared.isLandscape][0].id
     }
 
     private static func createNewScene(sceneId: Int32 = .random(in: 0..<Int32.max)) -> VCamScene {
@@ -156,8 +161,8 @@ public final class SceneManager {
         }
         scenes.remove(byId: scene.id)
         logAnyError { try save() }
-        if currentSceneId == scene.id, let nextScene = scenes.first {
-            try? await loadScene(id: nextScene.id)
+        if selectedSceneId == scene.id {
+            try? await loadCurrentScene()
         } else {
             logAnyError { try saveCurrentSceneAndObjects() }
         }
@@ -186,21 +191,18 @@ public final class SceneManager {
     public func loadScene(id: Int32) async throws {
         // Abort the switch when saving fails so the current scene's edits are not lost.
         // The current scene no longer exists right after its removal; nothing to save then.
-        if currentSceneId != id, scenes.find(byId: currentSceneId) != nil {
+        if selectedSceneId != id, scenes.find(byId: selectedSceneId) != nil {
             try saveCurrentSceneAndObjects()
         }
         let scene = try scenes.find(byId: id).orThrow(NSError.vcam(message: "invalid scene id: \(id)"))
         uniDebugLog("\(scene.id) \(scene.objects.count)")
         Logger.log("\(scene.id) \(scene.objects.count)")
-        currentSceneId = id
+        selectedSceneId = id
         await SceneObjectManager.shared.loadObjects(scene)
     }
 
     public func loadCurrentScene() async throws {
-        // The initial id is chosen before the engine reports the output size, so it can belong
-        // to the other orientation. Fall back to the first scene of the current one.
-        let id = scenes.find(byId: currentSceneId)?.id ?? scenes[0].id
-        try await loadScene(id: id)
+        try await loadScene(id: currentSceneId)
     }
 
     public func saveCurrentSceneAndObjects() throws {
@@ -239,7 +241,8 @@ extension SceneManager: SceneControlling {
     }
 
     public var activeScene: SceneControl.Scene? {
-        scenes.find(byId: currentSceneId).map { .init(id: $0.id, name: $0.name) }
+        let scene = currentScene
+        return .init(id: scene.id, name: scene.name)
     }
 }
 

@@ -88,7 +88,6 @@ private struct TakePhotoView: View {
         }
     }
 
-    // TODO: Move it to VCamDomain
     private func takeScreenshot() {
         screenshotTask?.cancel()
         restWaitTime = Int(screenshotWaitTime)
@@ -210,7 +209,6 @@ private struct RecordVideoView: View {
     }
 }
 
-// TODO: Move it to VCamDomain
 extension VCamRecordingView {
     @discardableResult
     private func setDestinationURL() throws -> URL {

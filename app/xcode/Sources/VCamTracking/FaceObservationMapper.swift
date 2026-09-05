@@ -88,11 +88,11 @@ struct FaceObservationMapper {
         }
 
         guard configuration.shouldOutputFace else {
-            updateLatestFace(landmarks, captureSize: captureSize)
+            updateLatestFace(landmarks, captureSize: captureSize, observation: observation)
             return nil
         }
         let landmarks2D = VisionLandmarks(landmarks: landmarks, imageSize: captureSize)
-        updateLatestFace(landmarks2D, captureSize: captureSize)
+        updateLatestFace(landmarks2D, captureSize: captureSize, observation: observation)
         let (headPosition, headRotation) = poseEstimator.estimate(landmarks2D, observation: observation)
         let facial = facialEstimator.estimate(landmarks2D)
         let values = [Float](
@@ -108,24 +108,42 @@ struct FaceObservationMapper {
         return .vcamBlendShape(values)
     }
 
-    private mutating func updateLatestFace(_ landmarks: VisionLandmarks, captureSize: CGSize) {
-        let size = SIMD2(Float(captureSize.width), Float(captureSize.height))
-        guard size.x > 0, size.y > 0 else { return }
-        latestFace = HandPoseFaceContext(
-            leftEyeCenter: (landmarks.leftEyeInner + landmarks.leftEyeOuter) / 2 / size,
-            rightEyeCenter: (landmarks.rightEyeInner + landmarks.rightEyeOuter) / 2 / size
+    private mutating func updateLatestFace(
+        _ landmarks: VisionLandmarks, captureSize: CGSize, observation: FaceObservation
+    ) {
+        updateLatestFace(
+            leftEyePixels: (landmarks.leftEyeInner + landmarks.leftEyeOuter) / 2,
+            rightEyePixels: (landmarks.rightEyeInner + landmarks.rightEyeOuter) / 2,
+            captureSize: captureSize,
+            observation: observation
         )
     }
 
-    private mutating func updateLatestFace(_ landmarks: FaceObservation.Landmarks2D, captureSize: CGSize) {
-        let size = SIMD2(Float(captureSize.width), Float(captureSize.height))
-        guard size.x > 0, size.y > 0 else { return }
+    private mutating func updateLatestFace(
+        _ landmarks: FaceObservation.Landmarks2D, captureSize: CGSize, observation: FaceObservation
+    ) {
         let leftEye = landmarks.leftEye.pointsInImageCoordinates(captureSize)
         let rightEye = landmarks.rightEye.pointsInImageCoordinates(captureSize)
         guard leftEye.count >= 2, rightEye.count >= 2 else { return }
+        updateLatestFace(
+            leftEyePixels: (SIMD2(leftEye[0]) + SIMD2(leftEye[1])) / 2,
+            rightEyePixels: (SIMD2(rightEye[0]) + SIMD2(rightEye[1])) / 2,
+            captureSize: captureSize,
+            observation: observation
+        )
+    }
+
+    /// Reused observations copy yaw from the input unchanged, so it is at
+    /// most one full detection stale. The head turns far slower than that.
+    private mutating func updateLatestFace(
+        leftEyePixels: SIMD2<Float>, rightEyePixels: SIMD2<Float>, captureSize: CGSize, observation: FaceObservation
+    ) {
+        let size = SIMD2(Float(captureSize.width), Float(captureSize.height))
+        guard size.x > 0, size.y > 0 else { return }
         latestFace = HandPoseFaceContext(
-            leftEyeCenter: (SIMD2(leftEye[0]) + SIMD2(leftEye[1])) / 2 / size,
-            rightEyeCenter: (SIMD2(rightEye[0]) + SIMD2(rightEye[1])) / 2 / size
+            leftEyeCenter: leftEyePixels / size,
+            rightEyeCenter: rightEyePixels / size,
+            headYaw: Float(observation.yaw.converted(to: .radians).value)
         )
     }
 

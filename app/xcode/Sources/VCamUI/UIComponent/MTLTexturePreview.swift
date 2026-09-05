@@ -113,11 +113,9 @@ private final class _MTLTexturePreview: MTKView {
 
         let vertexDescriptor = MTLVertexDescriptor()
 
-        // Position attribute
         vertexDescriptor.attributes[0].format = .float2
         vertexDescriptor.attributes[0].offset = 0
 
-        // TexCoord attribute
         vertexDescriptor.attributes[1].format = .float2
         vertexDescriptor.attributes[1].offset = MemoryLayout<SIMD2<Float>>.size
 

@@ -70,4 +70,16 @@ public extension simd_quatf {
 
         return .init(x, y, z) * (180 / .pi)
     }
+
+    /// The shortest rotation to `other` in radians. `(inverse * other).angle` reports nearly 2π for
+    /// the same rotation with the opposite sign (the double cover), and quaternions built from
+    /// matrices flip sign freely, so the dot product is folded instead.
+    @inlinable func angle(to other: simd_quatf) -> Float {
+        let cosine = abs(simd_dot(simd_normalize(self).vector, simd_normalize(other).vector))
+        return 2 * acos(min(1, cosine))
+    }
+
+    @inlinable func degrees(to other: simd_quatf) -> Float {
+        angle(to: other) * 180 / .pi
+    }
 }

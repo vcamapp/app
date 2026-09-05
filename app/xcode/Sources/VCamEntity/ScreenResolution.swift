@@ -1,16 +1,7 @@
-//
-//  ScreenResolution.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/05/22.
-//
-
 import AVFoundation
 
 public enum ScreenResolution: Identifiable, CaseIterable, Sendable {
-//    case resolution4320p
     case resolution2160p
-//    case resolution1440p
     case resolution1080p
     case resolution720p
     case resolution540p

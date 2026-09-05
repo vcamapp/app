@@ -86,7 +86,6 @@ private struct EngineView: View {
 
     var body: some View {
         EngineContainerView(engineView: engineView)
-        //                    .help(String(localized: .helpMouseHover))
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .aspectRatio(1280 / 720, contentMode: .fit)
     }

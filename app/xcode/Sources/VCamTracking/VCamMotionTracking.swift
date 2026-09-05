@@ -113,7 +113,6 @@ public final class VCamMotionTracking {
 
         var (hand, finger) = hands.vcamHandFingerTransform()
 
-        // TODO: Not yet optimized
         let missingLeft = hands.left == nil
         let missingRight = hands.right == nil
         if missingLeft {

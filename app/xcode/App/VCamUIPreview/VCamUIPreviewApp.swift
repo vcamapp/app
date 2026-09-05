@@ -32,7 +32,6 @@ struct VCamUIPreviewApp: App {
         VCamUIPreviewStub.stub()
         VCamSystem.shared.configure()
 
-        // TODO: Refactor
         Task {
             try? await SceneManager.shared.loadCurrentScene()
         }

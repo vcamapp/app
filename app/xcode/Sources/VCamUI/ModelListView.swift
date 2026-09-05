@@ -155,7 +155,6 @@ private struct ModelListContent: View {
                         .disabled(modelManager.modelItems.count <= 1)
                     }
                 } primaryAction: { ids in
-                    // Double click to load
                     guard let id = ids.first,
                           let item = modelManager.modelItems.find(byId: id),
                           item.status == .valid else { return }

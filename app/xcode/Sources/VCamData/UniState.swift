@@ -30,7 +30,6 @@ public final class UniState {
         expressions: [Avatar.Expression] = [],
         currentExpressionName: String? = nil,
         avatarBlendShapeNames: [String] = [],
-        // UniBridge properties
         usePostEffect: Bool = false,
         useCombineMesh: Bool = false,
         useAddToMacOSMenuBar: Bool = false,

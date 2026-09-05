@@ -20,7 +20,6 @@ public struct CapturedFrame {
 
     public var surface: IOSurface? {
         guard let surfaceRef = surfaceRef else { return nil }
-        // Force-cast the IOSurfaceRef to IOSurface.
         return unsafeBitCast(surfaceRef, to: IOSurface.self)
     }
 

@@ -55,7 +55,6 @@ public struct Keychain {
     }
 
     private func saveData(_ data: Data, rawKey: String) throws(KeychainError) {
-        // Delete existing item first
         try? delete(rawKey: rawKey)
 
         let query: [String: Any] = [

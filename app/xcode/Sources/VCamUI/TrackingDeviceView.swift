@@ -68,7 +68,6 @@ public struct TrackingDeviceView: View {
         }
         .disabled(tracking.micLipSyncDisabled)
         .onReceive(NotificationCenter.default.publisher(for: .deviceWasChanged)) { _ in
-            // Refresh device list
             captureDevice = Tracking.shared.webCamera.currentCaptureDevice
             audioDevice = AvatarAudioManager.shared.currentInputDevice
         }

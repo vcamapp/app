@@ -9,7 +9,6 @@ public struct Version: Sendable {
         let separatedStrings = version.components(separatedBy: ".")
         components = separatedStrings.compactMap { Int($0) }
 
-        // parse check
         guard !isEmpty, separatedStrings.count == count else {
             return nil
         }

@@ -113,16 +113,13 @@ public final class AudioExpressionEstimator: NSObject, Sendable {
         callbackState.reset()
     }
 
-    /// Analyzes the audio buffer for expression estimation and audio level.
-    /// Audio level computation and expression analysis are done synchronously for performance.
-    /// Callbacks are invoked synchronously on the caller's thread.
+    /// Runs synchronously on the caller's thread, callbacks included
     public func analyze(buffer: AVAudioPCMBuffer, time: AVAudioTime) {
-        // Compute audio level synchronously (high frequency, needs to be fast)
         let level = audioLevelCalculator.computeAudioLevel(from: buffer)
 
         callbackState.notifyAudioLevel(level)
 
-        // Expression analysis is rate-limited (~8fps) and runs synchronously
+        // Expression analysis is rate-limited (~8fps)
         analyzerState.analyzeIfNeeded(buffer: buffer, sampleTime: time.sampleTime)
     }
 }

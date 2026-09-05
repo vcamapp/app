@@ -159,7 +159,7 @@ struct ImportedMotionStoreTests {
         let newerData = Data(#"{"schemaVersion": 99, "motions": []}"#.utf8)
         try newerData.write(to: manifestURL)
 
-        // 新しいアプリが書いたmanifestを古い形式で上書きしない
+        // A manifest written by a newer app must not be overwritten with the old format
         let store = makeStore(in: directory)
         #expect(store.isManifestLoadFailed)
         #expect(throws: ImportedMotionStoreError.manifestLoadFailed) {

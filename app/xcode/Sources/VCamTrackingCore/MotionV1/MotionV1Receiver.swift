@@ -4,8 +4,8 @@ import VCamMotionV1
 @MainActor
 package final class MotionV1Receiver {
     /// `handledV1`: face is fully accepted here (session/sequence verified);
-    /// hands is only shape-validated and forwarded — 
-    /// `V1HandPacketState` owns the final session/sequence decision.
+    /// hands is only shape-validated and forwarded, `V1HandPacketState` owns
+    /// the final session/sequence decision.
     package enum ReceiveResult { case handledV1, rejectedV1, notV1 }
     private var faceSequence = MotionSequenceState()
     private let onFace: @MainActor (VCamMotion) -> Void
