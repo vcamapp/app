@@ -10,7 +10,7 @@ test-package:
 	cd app/xcode && xcodebuild -scheme VCam-Package test -destination 'platform=macOS'
 
 build-ui-preview:
-	cd app/xcode/App && xcodebuild -project VCam.xcodeproj -scheme VCamUIPreview -derivedDataPath /tmp/build clean build
+	cd app/xcode/App && xcodebuild -project VCam.xcodeproj -scheme VCamUIPreview -derivedDataPath $(CURDIR)/.build/DerivedData/VCamUIPreview clean build
 
 test-ui-preview:
-	cd app/xcode/App && xcodebuild -project VCam.xcodeproj -scheme VCamUIPreviewUITests -derivedDataPath /tmp/build -resultBundlePath /tmp/UITestResults test ONLY_ACTIVE_ARCH=YES CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO CODE_SIGN_ENTITLEMENTS=""
+	cd app/xcode/App && xcodebuild -project VCam.xcodeproj -scheme VCamUIPreviewUITests -derivedDataPath $(CURDIR)/.build/DerivedData/VCamUIPreview -resultBundlePath $(CURDIR)/.build/results/VCamUIPreviewUITests.xcresult test ONLY_ACTIVE_ARCH=YES CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO CODE_SIGN_ENTITLEMENTS=""

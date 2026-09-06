@@ -131,7 +131,9 @@ public final class AvatarWebCamera {
             // The permission dialog can stay open indefinitely; drop the request if it was superseded meanwhile
             guard await permissionProvider.requestPermission(), generation == lifecycleGeneration else { return }
         }
-        guard state != .starting, state != .running else {
+        // The device lookups below read the camera cache, which is empty until the first scan finishes
+        await Camera.waitForInitialDiscovery()
+        guard generation == lifecycleGeneration, state != .starting, state != .running else {
             return
         }
         state = .starting

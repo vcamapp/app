@@ -6,20 +6,37 @@ import VCamEntity
 public enum Camera {
     private struct CacheState: @unchecked Sendable {
         var devices: [AVCaptureDevice] = []
+        var initialDiscovery: Task<Void, Never>?
     }
 
     private static let cache = Mutex(CacheState())
 
-    private static func updateCache() {
+    private static func scanDevices() -> [AVCaptureDevice] {
         enableDalDevices()
         let deviceDiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInWideAngleCamera, .external], mediaType: nil, position: .unspecified)
-        let devices = deviceDiscoverySession.devices.filter { $0.uniqueID != "vcam-device" }
+        return deviceDiscoverySession.devices.filter { $0.uniqueID != "vcam-device" }
+    }
+
+    private static func updateCache() {
+        let devices = scanDevices()
         cache.withLock { $0.devices = devices }
         NotificationCenter.default.post(name: .deviceWasChanged, object: nil)
     }
 
     public static func configure() {
-        updateCache()
+        // The first scan loads the camera plug-ins and takes on the order of 100ms, so it runs off
+        // the main thread. It must not start while the caller is still inside a library constructor:
+        // the plug-ins take the CFPlugIn lock and then wait for dyld, which the constructor holds.
+        // Hopping through the main actor waits for the first run loop turn after the constructor
+        let initialDiscovery = Task.detached(priority: .userInitiated) {
+            await MainActor.run {}
+            let devices = scanDevices()
+            cache.withLock { $0.devices = devices }
+            await MainActor.run {
+                NotificationCenter.default.post(name: .deviceWasChanged, object: nil)
+            }
+        }
+        cache.withLock { $0.initialDiscovery = initialDiscovery }
 
         NotificationCenter.default.addObserver(forName: AVCaptureDevice.wasConnectedNotification, object: nil, queue: .main) { _ in
             updateCache()
@@ -28,6 +45,11 @@ public enum Camera {
         NotificationCenter.default.addObserver(forName: AVCaptureDevice.wasDisconnectedNotification, object: nil, queue: .main) { _ in
             updateCache()
         }
+    }
+
+    /// Waits for the first scan started by `configure()`. Until it finishes every lookup sees no cameras
+    public static func waitForInitialDiscovery() async {
+        await cache.withLock { $0.initialDiscovery }?.value
     }
     
     public static var hasCamera: Bool {

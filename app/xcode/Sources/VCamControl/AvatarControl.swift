@@ -27,17 +27,35 @@ public enum AvatarControl {
         }
     }
 
-    /// Loads a registered model and records it as the last loaded one.
-    /// The avatar is no longer the VRoid Hub one, so that reference is cleared
+    /// Hands the model that was in use when the app last quit to the engine, which loads it
+    /// in its first scene. The engine reports nothing back for that load, so the bookkeeping
+    /// of ``load(_:modelManager:)`` happens here.
+    /// ``LaunchAvatarRestore`` guarantees this runs at most once per launch
+    public static func takeLastModelFileForEngineLaunchLoad(modelManager: ModelManager = .shared) -> URL? {
+        guard let item = modelManager.restorableLastLoadedModel else { return nil }
+        do {
+            try recordLoad(of: item, modelManager: modelManager)
+        } catch {
+            Logger.error(error)
+        }
+        return item.model.modelURL
+    }
+
+    /// Loads a registered model and records it as the last loaded one
     public static func load(_ item: ModelItem, modelManager: ModelManager = .shared) throws {
         guard item.status == .valid else { return }
-        Logger.log(event: .loadModelFile)
-        VRoidModelReference.lastUsed = nil
 #if FEATURE_3
         UniBridge.loadVRM(path: item.model.modelURL.path)
 #else
         UniBridge.shared.loadModel(item.model.modelURL.path)
 #endif
+        try recordLoad(of: item, modelManager: modelManager)
+    }
+
+    /// The avatar is no longer the VRoid Hub one, so that reference is cleared
+    private static func recordLoad(of item: ModelItem, modelManager: ModelManager) throws {
+        Logger.log(event: .loadModelFile)
+        VRoidModelReference.lastUsed = nil
         onLoad?(item.id)
         try modelManager.setLastLoadedModel(item)
     }
