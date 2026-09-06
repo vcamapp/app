@@ -141,8 +141,8 @@ public final class AvatarWebCamera {
         let stream = VisionFrameStream()
         let pipeline = VisionTrackingPipeline(
             frameStream: stream,
-            alternativeHandMapper: handPoseMapperFactory?(),
-            alternativeFaceProvider: faceTrackingProviderFactory?()
+            handPoseMapperFactory: handPoseMapperFactory,
+            faceTrackingProviderFactory: faceTrackingProviderFactory
         ) { output in
             Self.apply(output)
         }
@@ -277,12 +277,8 @@ public final class AvatarWebCamera {
                 close: configuration.close,
                 isFingerEnabled: configuration.isFingerEnabled
             ),
-            usesAlternativeHandMapper: isAlternativeHandTrackingEnabled
-                && UniState.shared.isEnabled
-                && handPoseMapperFactory != nil,
-            usesAlternativeFaceProvider: isHighPrecisionFaceTrackingEnabled
-                && UniState.shared.isEnabled
-                && faceTrackingProviderFactory != nil
+            usesAlternativeHandMapper: isAlternativeHandTrackingEnabled && handPoseMapperFactory != nil,
+            usesAlternativeFaceProvider: isHighPrecisionFaceTrackingEnabled && faceTrackingProviderFactory != nil
         )
     }
 

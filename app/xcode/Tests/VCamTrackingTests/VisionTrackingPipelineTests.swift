@@ -1,4 +1,6 @@
+import CoreMedia
 import CoreVideo
+import Synchronization
 import Testing
 import VCamCamera
 @testable import VCamTracking
@@ -174,6 +176,21 @@ struct VisionTrackingPipelineTests {
         #expect(missingOutput.fingersValues?.count == 10)
     }
 
+    /// Building a backend can load private frameworks and models, so a user who turned
+    /// one off must not pay for it when the camera starts.
+    @Test
+    func alternativeBackendsAreNotBuiltWhenThePipelineIsCreated() {
+        let builds = Mutex(0)
+
+        _ = VisionTrackingPipeline(
+            frameStream: VisionFrameStream(),
+            handPoseMapperFactory: { builds.withLock { $0 += 1 }; return StubHandPoseMapper() },
+            faceTrackingProviderFactory: { builds.withLock { $0 += 1 }; return StubFaceTrackingProvider() }
+        ) { _ in }
+
+        #expect(builds.withLock { $0 } == 0)
+    }
+
     private func makeConfiguration(usage: AvatarWebCamera.Usage, isEmotionEnabled: Bool = false) -> VisionTrackingConfigurationSnapshot {
         VisionTrackingConfigurationSnapshot(
             revision: 0,
@@ -202,4 +219,13 @@ struct VisionTrackingPipelineTests {
             littleTip: 0.6
         )
     }
+}
+
+private final class StubHandPoseMapper: HandPoseMapper {
+    func map(sampleBuffer: CMSampleBuffer, face: HandPoseFaceContext?, fingersEnabled: Bool) {}
+}
+
+private final class StubFaceTrackingProvider: FaceTrackingProvider {
+    func process(sampleBuffer: CMSampleBuffer, captureSize: CGSize) -> CameraFaceTrackingResult? { nil }
+    func calibrate() {}
 }

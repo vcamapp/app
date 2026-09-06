@@ -87,6 +87,8 @@ public struct VCamSettingTrackingView: View {
                 }
             }
 #endif
+
+            VCamSettingTrackingFeatureView.make()
         }
         .formStyle(.grouped)
     }

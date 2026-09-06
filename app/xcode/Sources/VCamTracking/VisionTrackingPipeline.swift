@@ -134,15 +134,24 @@ struct HandTrackingOutput: Sendable {
 /// rate of both trackers.
 actor HandProcessor {
     private var handMapper = HandObservationMapper()
-    private let alternativeHandMapper: (any HandPoseMapper)?
+    private let handPoseMapperFactory: (@Sendable () -> sending any HandPoseMapper)?
+    private var alternativeHandMapper: (any HandPoseMapper)?
 
-    init(alternativeHandMapper: sending (any HandPoseMapper)?) {
-        self.alternativeHandMapper = alternativeHandMapper
+    init(handPoseMapperFactory: (@Sendable () -> sending any HandPoseMapper)?) {
+        self.handPoseMapperFactory = handPoseMapperFactory
+    }
+
+    /// Built on first use, like the alternative face provider
+    private func alternativeMapper() -> (any HandPoseMapper)? {
+        if alternativeHandMapper == nil {
+            alternativeHandMapper = handPoseMapperFactory?()
+        }
+        return alternativeHandMapper
     }
 
     func process(_ frame: VisionFrame, face: HandPoseFaceContext?) throws -> HandTrackingOutput? {
         let configuration = frame.configuration
-        if configuration.shouldUseAlternativeHandMapper, let alternativeHandMapper {
+        if configuration.shouldUseAlternativeHandMapper, let alternativeHandMapper = alternativeMapper() {
             // The mapper delivers its output through its own channel
             alternativeHandMapper.map(
                 sampleBuffer: frame.sampleBuffer.value,
@@ -164,7 +173,8 @@ actor VisionTrackingPipeline {
     private var processingTask: Task<Void, Never>?
     private var faceMapper = FaceObservationMapper()
     private let handProcessor: HandProcessor
-    private let alternativeFaceProvider: (any FaceTrackingProvider)?
+    private let faceTrackingProviderFactory: (@Sendable () -> sending any FaceTrackingProvider)?
+    private var alternativeFaceProvider: (any FaceTrackingProvider)?
     /// The most recent eye anchor produced by the alternative face backend, kept
     /// so hands can anchor to the previous frame's face like the Vision path.
     private var latestAlternativeFaceContext: HandPoseFaceContext?
@@ -173,14 +183,23 @@ actor VisionTrackingPipeline {
 
     init(
         frameStream: VisionFrameStream,
-        alternativeHandMapper: sending (any HandPoseMapper)? = nil,
-        alternativeFaceProvider: sending (any FaceTrackingProvider)? = nil,
+        handPoseMapperFactory: (@Sendable () -> sending any HandPoseMapper)? = nil,
+        faceTrackingProviderFactory: (@Sendable () -> sending any FaceTrackingProvider)? = nil,
         outputHandler: @escaping @MainActor @Sendable (TrackingOutput) -> Void
     ) {
         self.frameStream = frameStream
-        handProcessor = HandProcessor(alternativeHandMapper: alternativeHandMapper)
-        self.alternativeFaceProvider = alternativeFaceProvider
+        handProcessor = HandProcessor(handPoseMapperFactory: handPoseMapperFactory)
+        self.faceTrackingProviderFactory = faceTrackingProviderFactory
         self.outputHandler = outputHandler
+    }
+
+    /// Built on first use: a backend the user turned off must not be constructed at all,
+    /// since building one can load frameworks and models the rest of the app never needs.
+    private func alternativeProvider() -> (any FaceTrackingProvider)? {
+        if alternativeFaceProvider == nil {
+            alternativeFaceProvider = faceTrackingProviderFactory?()
+        }
+        return alternativeFaceProvider
     }
 
     func start() {
@@ -214,6 +233,7 @@ actor VisionTrackingPipeline {
 
     func calibrate() {
         faceMapper.calibrate()
+        // A backend that has not run yet calibrates itself on its first frame
         alternativeFaceProvider?.calibrate()
     }
 
@@ -225,7 +245,7 @@ actor VisionTrackingPipeline {
         let configuration = frame.configuration
         guard configuration.needsVisionProcessing else { return nil }
 
-        if configuration.shouldUseAlternativeFaceProvider, let alternativeFaceProvider {
+        if configuration.shouldUseAlternativeFaceProvider, let alternativeFaceProvider = alternativeProvider() {
             // The alternative face backend replaces the Vision face path and also
             // supplies the hand anchor, so Vision face landmarks are skipped.
             guard configuration.needsHandPose else {
