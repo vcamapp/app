@@ -77,6 +77,35 @@ struct AvatarImportManagerTests {
     }
 
     @Test
+    func commitClosesTheUploadBeforeSaving() async throws {
+        let connectionID = UUID()
+        weak var validatingManager: AvatarImportManager?
+        let manager = Self.makeManager(validate: { fileURL in
+            let manager = try #require(validatingManager)
+            let importId = try #require(UUID(uuidString: fileURL.deletingLastPathComponent().lastPathComponent))
+            #expect(manager.stagedFileURL(importId: importId) == nil)
+            manager.receiveFrame(frame(importId: importId, chunk: [9]), connectionID: connectionID)
+            #expect(throws: AvatarImportManagerError.importNotFound) {
+                try manager.cancel(importId: importId, connectionID: connectionID)
+            }
+            manager.cancelAll(connectionID: connectionID)
+            #expect(try Data(contentsOf: fileURL) == Data([1, 2]))
+            throw AvatarImportManagerError.invalidModel
+        })
+        validatingManager = manager
+        defer { manager.removeAllStaging() }
+        let importId = try manager.begin(filename: "avatar.vrm", connectionID: connectionID)
+        let fileURL = try #require(manager.stagedFileURL(importId: importId))
+        manager.receiveFrame(frame(importId: importId, chunk: [1, 2]), connectionID: connectionID)
+
+        await #expect(throws: AvatarImportManagerError.invalidModel) {
+            try await manager.commit(
+                importId: importId, connectionID: connectionID, load: false, modelManager: ModelManager(models: []))
+        }
+        #expect(!FileManager.default.fileExists(atPath: fileURL.path))
+    }
+
+    @Test
     func commitAndCancelRequireTheOwningConnection() async throws {
         let manager = Self.makeManager()
         let connectionID = UUID()

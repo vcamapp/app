@@ -20,7 +20,7 @@ public extension Array where Element: Identifiable {
     }
 
     mutating func remove(byId id: Element.ID) {
-        self = filter { $0.id != id }
+        removeAll { $0.id == id }
     }
 
     mutating func update(_ element: Element) {

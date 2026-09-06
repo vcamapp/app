@@ -23,6 +23,6 @@ public extension VCamShortcutMetadata {
     }
 
     mutating func remove(id: UUID) {
-        ids = ids.filter { $0 != id }
+        ids.removeAll { $0 == id }
     }
 }

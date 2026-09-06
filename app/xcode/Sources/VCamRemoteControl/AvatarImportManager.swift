@@ -105,8 +105,10 @@ package final class AvatarImportManager {
         guard let session = sessions[importId], session.connectionID == connectionID else {
             throw AvatarImportManagerError.importNotFound
         }
+        // Saving suspends; the staged file must no longer accept writes or cancellation.
+        sessions.removeValue(forKey: importId)
         defer {
-            removeStaging(importId: importId)
+            try? FileManager.default.removeItem(at: session.directoryURL)
         }
         guard !session.isFailed, session.receivedBytes > 0 else {
             throw AvatarImportManagerError.invalidUpload

@@ -29,46 +29,34 @@ public extension simd_float4x4 {
 }
 
 public extension simd_quatf {
+    /// Euler angles in radians (x: pitch, y: yaw, z: roll), applied yaw then pitch then roll about
+    /// the intrinsic axes to match how the engine composes them. `eulerAngles()` must decompose in
+    /// the same order, or roll leaks into pitch as yaw grows (18° off at 60° yaw with 10° roll).
     @inlinable init(_ radianAngles: SIMD3<Float>) {
-        let cz = cos(radianAngles.z * 0.5)
-        let sz = sin(radianAngles.z * 0.5)
-        let cy = cos(radianAngles.y * 0.5)
-        let sy = sin(radianAngles.y * 0.5)
-        let cx = cos(radianAngles.x * 0.5)
-        let sx = sin(radianAngles.x * 0.5)
-
-        self.init(vector: [
-            sx * cy * cz - cx * sy * sz,
-            cx * sy * cz + sx * cy * sz,
-            cx * cy * sz - sx * sy * cz,
-            cx * cy * cz + sx * sy * sz,
-        ])
+        self = simd_quatf(angle: radianAngles.y, axis: SIMD3(0, 1, 0))
+            * simd_quatf(angle: radianAngles.x, axis: SIMD3(1, 0, 0))
+            * simd_quatf(angle: radianAngles.z, axis: SIMD3(0, 0, 1))
     }
 
+    /// The inverse of `init(_:)`, in degrees. Straight up or down (±90° pitch) leaves yaw and roll
+    /// on the same axis, so the whole rotation goes to yaw.
     @inlinable func eulerAngles() -> SIMD3<Float> {
-        // https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
-        let (x, y, z): (Float, Float, Float)
-        let v = vector
-
-        // roll (x-axis)
-        let sinr_cosp = 2.0 * (v.w * v.x + v.y * v.z)
-        let cosr_cosp = 1.0 - 2.0 * (v.x * v.x + v.y * v.y)
-        x = atan2(sinr_cosp, cosr_cosp)
-
-        // pitch (y-axis)
-        let sinp = 2 * (v.w * v.y - v.z * v.x)
-        if abs(sinp) >= 1 {
-            y = copysign(.pi * 0.5, sinp)
+        let q = simd_normalize(self)
+        let x = q.imag.x, y = q.imag.y, z = q.imag.z, w = q.real
+        let sinPitch = 2 * (w * x - y * z)
+        let pitch: Float
+        let yaw: Float
+        let roll: Float
+        if abs(sinPitch) > 0.9999 {
+            pitch = copysign(.pi / 2, sinPitch)
+            yaw = atan2(2 * (w * y - x * z), 1 - 2 * (y * y + z * z))
+            roll = 0
         } else {
-            y = asin(sinp)
+            pitch = asin(sinPitch)
+            yaw = atan2(2 * (w * y + x * z), 1 - 2 * (x * x + y * y))
+            roll = atan2(2 * (w * z + x * y), 1 - 2 * (x * x + z * z))
         }
-
-        // yaw (z-axis)
-        let siny_cosp = 2 * (v.w * v.z + v.x * v.y)
-        let cosy_cosp = 1 - 2 * (v.y * v.y + v.z * v.z)
-        z = atan2(siny_cosp, cosy_cosp)
-
-        return .init(x, y, z) * (180 / .pi)
+        return SIMD3(pitch, yaw, roll) * (180 / .pi)
     }
 
     /// The shortest rotation to `other` in radians. `(inverse * other).angle` reports nearly 2π for
