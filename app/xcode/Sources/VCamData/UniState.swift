@@ -158,6 +158,10 @@ public final class UniState {
     @ObservationIgnored @UniStateValue(\.__swivelOffset, persist: .swivelOffset, bridge: .swivelOffset)
     public var swivelOffset: CGFloat
 
+    private var __bodyFollowWeight = CGFloat(UserDefaults.standard.value(for: .bodyFollowWeight))
+    @ObservationIgnored @UniStateValue(\.__bodyFollowWeight, persist: .bodyFollowWeight, bridge: .bodyFollowWeight)
+    public var bodyFollowWeight: CGFloat
+
     private var __light: CGFloat = 1
     @ObservationIgnored @UniStateValue(\.__light, bridge: .light)
     public var light: CGFloat
@@ -333,6 +337,7 @@ public final class UniState {
 #if FEATURE_3
         bridge.floatMapper.setValue(.shoulderRotationWeight, __shoulderRotationWeight)
         bridge.floatMapper.setValue(.swivelOffset, __swivelOffset)
+        bridge.floatMapper.setValue(.bodyFollowWeight, __bodyFollowWeight)
 #endif
         bridge.intMapper.setValue(.qualityLevel, __qualityLevel)
         UniBridge.setScreenResolution(width: Int32(_screenResolution.size.width), height: Int32(_screenResolution.size.height))

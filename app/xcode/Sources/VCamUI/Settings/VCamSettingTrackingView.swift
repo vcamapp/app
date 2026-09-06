@@ -52,6 +52,9 @@ public struct VCamSettingTrackingView: View {
 
 #if FEATURE_3
             Section {
+                ValueEditField(.bodyFollowWeight, value: $state.bodyFollowWeight, type: .slider(0.0...1)) {
+                    Text($0, format: .percent.precision(.fractionLength(0)))
+                }
                 ValueEditField(.shoulderRotationWeight, value: $state.shoulderRotationWeight, type: .slider(0.0...1))
                 ValueEditField(.swivelOffset, value: $state.swivelOffset, type: .slider(0.0...30))
             }

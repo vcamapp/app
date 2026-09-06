@@ -38,6 +38,7 @@ public final class UniBridge {
         case shoulderRotationWeight = 20
         case swivelOffset = 21
         case trackingSmoothing = 22
+        case bodyFollowWeight = 23
     }
     public let floatMapper = ValueBinding<CGFloat, FloatType>()
     public private(set) lazy var camera = floatMapper.set(.camera)
@@ -63,6 +64,7 @@ public final class UniBridge {
     public private(set) lazy var shoulderRotationWeight = floatMapper.set(.shoulderRotationWeight)
     public private(set) lazy var swivelOffset = floatMapper.set(.swivelOffset)
     public private(set) lazy var trackingSmoothing = floatMapper.set(.trackingSmoothing)
+    public private(set) lazy var bodyFollowWeight = floatMapper.set(.bodyFollowWeight)
 
     public enum BoolType: Int32, Sendable {
         case useShadow = 0

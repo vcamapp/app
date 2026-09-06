@@ -57,5 +57,6 @@ public extension UserDefaults.Key {
     static var useCombineMesh: Key<Bool> { .init("vc_use_combine_mesh", default: true) }
     static var shoulderRotationWeight: Key<Double> { .init("vc_shoulder_rotation_weight", default: 1.0) }
     static var swivelOffset: Key<Double> { .init("vc_swivel_offset", default: 0.0) }
+    static var bodyFollowWeight: Key<Double> { .init("vc_body_follow_weight", default: 1.0) }
 #endif
 }

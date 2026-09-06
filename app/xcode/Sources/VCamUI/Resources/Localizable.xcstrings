@@ -645,6 +645,29 @@
         }
       }
     },
+    "bodyFollowWeight": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Body follow-through"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "体の連動の大きさ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "몸의 연동 크기"
+          }
+        }
+      }
+    },
     "bye": {
       "extractionState": "manual",
       "localizations": {
