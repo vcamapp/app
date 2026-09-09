@@ -165,6 +165,7 @@ private extension AppMenu {
     private func setupModelMenu(subMenu: NSMenu) {
         Self.makeSubMenu(menu: subMenu, title: String(localized: .model), items: [
             makeMenuItem(title: String(localized: .editModel), action: #selector(editModel)),
+            makeMenuItem(title: String(localized: .editPose), action: #selector(editPose)),
             .separator(),
             makeMenuItem(title: String(localized: .calibrate), action: #selector(resetCalibration)),
             makeMenuItem(title: String(localized: .resetModelPosition), action: #selector(resetModelPosition)),
@@ -174,6 +175,11 @@ private extension AppMenu {
     @objc private func editModel() {
         Logger.log("")
         MacWindowManager.shared.openAvatarEditor()
+    }
+
+    @objc private func editPose() {
+        Logger.log("")
+        MacWindowManager.shared.openPoseEditor()
     }
 
     @objc private func resetCalibration() {

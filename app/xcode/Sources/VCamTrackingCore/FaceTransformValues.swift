@@ -91,7 +91,7 @@ private extension BlendShape {
     /// ARKit-style trackers raise eyeBlink as the lids follow a downward gaze,
     /// leaving the avatar half-asleep whenever it looks down. Cancel that share
     /// of the blink, rescaled so an intentional blink still reaches 1.
-    package func compensatingBlinkForDownwardGaze() -> BlendShape {
+    func compensatingBlinkForDownwardGaze() -> BlendShape {
         var compensated = self
         compensated.eyeBlinkLeft = Self.cancelingLidFollow(blink: eyeBlinkLeft, lookDown: eyeLookDownLeft)
         compensated.eyeBlinkRight = Self.cancelingLidFollow(blink: eyeBlinkRight, lookDown: eyeLookDownRight)

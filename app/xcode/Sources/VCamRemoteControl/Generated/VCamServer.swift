@@ -46,6 +46,40 @@ package protocol VCamHandler: Sendable {
     @concurrent func subtitleSet(text: String) async throws -> Bool
     /// Hides the subtitle
     @concurrent func subtitleClear() async throws -> Bool
+    /// Opens the pose editor with the current avatar
+    /// 
+    /// Opens the pose editor window, or fronts it when it is already open, and loads the current avatar into it. The other pose methods require the editor to be open. Bone names follow VRM 1.0 (`hips`, `spine`, `leftUpperArm`, ...); rotations are degrees relative to the rest pose (T-pose), applied in Y, X, Z order around the bone's own axes, so `[0, 0, 0]` is the rest pose. Expressions are named as VRM 1.0 names its presets (`happy`, `blink`, ...) and as the model names its custom expressions; weights run from 0 to 1. Available only when app.getInfo lists the poseEditor capability.
+    @concurrent func poseOpen() async throws -> PoseOpenResult
+    /// Returns the pose being edited
+    @concurrent func poseGet() async throws -> [JointPose]
+    /// Poses bones in the editor
+    /// 
+    /// Applies the given bones as one undoable change. `position` is accepted for `hips` only.
+    @concurrent func poseSet(joints: [JointPose]) async throws -> Bool
+    /// Returns bones to the rest pose
+    @concurrent func poseReset(bones: [String]?) async throws -> Bool
+    /// Returns the expression weights being edited
+    @concurrent func poseExpressionsGet() async throws -> [ExpressionWeight]
+    /// Weights expressions in the editor
+    /// 
+    /// Applies the given weights as one undoable change. Expressions not listed keep their current weight.
+    @concurrent func poseExpressionsSet(expressions: [ExpressionWeight]) async throws -> Bool
+    /// Takes expressions off
+    @concurrent func poseExpressionsReset(names: [String]?) async throws -> Bool
+    /// Plays the pose on the live avatar
+    /// 
+    /// Shows the pose on the avatar in the main window as a looping motion, replacing a pose applied earlier. Stop it with motion.stop on the motion ID reported by motion.started, or by closing the editor.
+    @concurrent func poseApply() async throws -> Bool
+    /// Returns the pose as a VRM animation
+    /// 
+    /// Writes the pose as a `.vrma` (VRMC_vrm_animation) clip that holds it for `duration` seconds, with the expressions worn (weight above 0) written into it, and returns the file as base64.
+    @concurrent func poseExport(name: String?, duration: Double?) async throws -> PoseExportResult
+    /// Adds the pose to the motion library
+    /// 
+    /// Registers the pose as an imported motion holding it for `duration` seconds, so motion.play and the toolbar can play it.
+    @concurrent func poseSaveAsMotion(name: String, duration: Double?, loop: Bool?) async throws -> PoseSaveAsMotionResult
+    /// Closes the pose editor
+    @concurrent func poseClose() async throws -> Bool
     /// Subscribes this connection to server-pushed events
     /// 
     /// Connections receive no events until they subscribe. Omit `events` to subscribe to all events.
@@ -132,6 +166,45 @@ package struct VCamServer: Sendable {
             return try JSONRPCServer.resultResponse(id: request.id, result: result)
         case "subtitle.clear":
             let result = try await handler.subtitleClear()
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "pose.open":
+            let result = try await handler.poseOpen()
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "pose.get":
+            let result = try await handler.poseGet()
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "pose.set":
+            let params = JSONRPCParameters(request.params)
+            let result = try await handler.poseSet(joints: try params.required("joints", at: 0))
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "pose.reset":
+            let params = JSONRPCParameters(request.params)
+            let result = try await handler.poseReset(bones: try params.optional("bones", at: 0))
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "pose.expressions.get":
+            let result = try await handler.poseExpressionsGet()
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "pose.expressions.set":
+            let params = JSONRPCParameters(request.params)
+            let result = try await handler.poseExpressionsSet(expressions: try params.required("expressions", at: 0))
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "pose.expressions.reset":
+            let params = JSONRPCParameters(request.params)
+            let result = try await handler.poseExpressionsReset(names: try params.optional("names", at: 0))
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "pose.apply":
+            let result = try await handler.poseApply()
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "pose.export":
+            let params = JSONRPCParameters(request.params)
+            let result = try await handler.poseExport(name: try params.optional("name", at: 0), duration: try params.optional("duration", at: 1))
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "pose.saveAsMotion":
+            let params = JSONRPCParameters(request.params)
+            let result = try await handler.poseSaveAsMotion(name: try params.required("name", at: 0), duration: try params.optional("duration", at: 1), loop: try params.optional("loop", at: 2))
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "pose.close":
+            let result = try await handler.poseClose()
             return try JSONRPCServer.resultResponse(id: request.id, result: result)
         case "events.subscribe":
             let params = JSONRPCParameters(request.params)

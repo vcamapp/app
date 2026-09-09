@@ -431,6 +431,342 @@
       }
     },
     {
+      "name": "pose.open",
+      "summary": "Opens the pose editor with the current avatar",
+      "description": "Opens the pose editor window, or fronts it when it is already open, and loads the current avatar into it. The other pose methods require the editor to be open. Bone names follow VRM 1.0 (`hips`, `spine`, `leftUpperArm`, ...); rotations are degrees relative to the rest pose (T-pose), applied in Y, X, Z order around the bone's own axes, so `[0, 0, 0]` is the rest pose. Expressions are named as VRM 1.0 names its presets (`happy`, `blink`, ...) and as the model names its custom expressions; weights run from 0 to 1. Available only when app.getInfo lists the poseEditor capability.",
+      "paramStructure": "by-name",
+      "params": [],
+      "result": {
+        "name": "result",
+        "schema": {
+          "type": "object",
+          "required": [
+            "bones",
+            "expressions"
+          ],
+          "properties": {
+            "bones": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "The humanoid bones the avatar has, in VRM order."
+            },
+            "expressions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "The expressions the avatar has: presets first, then custom expressions."
+            }
+          }
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/notReady"
+        },
+        {
+          "$ref": "#/components/errors/unsupportedOperation"
+        }
+      ]
+    },
+    {
+      "name": "pose.get",
+      "summary": "Returns the pose being edited",
+      "paramStructure": "by-name",
+      "params": [],
+      "result": {
+        "name": "joints",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/JointPose"
+          }
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/poseEditorNotOpen"
+        }
+      ]
+    },
+    {
+      "name": "pose.set",
+      "summary": "Poses bones in the editor",
+      "description": "Applies the given bones as one undoable change. `position` is accepted for `hips` only.",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "joints",
+          "required": true,
+          "schema": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/JointPose"
+            }
+          },
+          "description": "The bones to pose. Bones not listed keep their current pose."
+        }
+      ],
+      "result": {
+        "name": "success",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/poseEditorNotOpen"
+        },
+        {
+          "$ref": "#/components/errors/boneNotFound"
+        }
+      ]
+    },
+    {
+      "name": "pose.reset",
+      "summary": "Returns bones to the rest pose",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "bones",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "description": "The bones to reset. Omit to reset every bone."
+        }
+      ],
+      "result": {
+        "name": "success",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/poseEditorNotOpen"
+        },
+        {
+          "$ref": "#/components/errors/boneNotFound"
+        }
+      ]
+    },
+    {
+      "name": "pose.expressions.get",
+      "summary": "Returns the expression weights being edited",
+      "paramStructure": "by-name",
+      "params": [],
+      "result": {
+        "name": "expressions",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/ExpressionWeight"
+          }
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/poseEditorNotOpen"
+        }
+      ]
+    },
+    {
+      "name": "pose.expressions.set",
+      "summary": "Weights expressions in the editor",
+      "description": "Applies the given weights as one undoable change. Expressions not listed keep their current weight.",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "expressions",
+          "required": true,
+          "schema": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExpressionWeight"
+            }
+          },
+          "description": "The expressions to weight."
+        }
+      ],
+      "result": {
+        "name": "success",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/poseEditorNotOpen"
+        },
+        {
+          "$ref": "#/components/errors/expressionNotFound"
+        }
+      ]
+    },
+    {
+      "name": "pose.expressions.reset",
+      "summary": "Takes expressions off",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "names",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "description": "The expressions to take off. Omit to take off every expression."
+        }
+      ],
+      "result": {
+        "name": "success",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/poseEditorNotOpen"
+        },
+        {
+          "$ref": "#/components/errors/expressionNotFound"
+        }
+      ]
+    },
+    {
+      "name": "pose.apply",
+      "summary": "Plays the pose on the live avatar",
+      "description": "Shows the pose on the avatar in the main window as a looping motion, replacing a pose applied earlier. Stop it with motion.stop on the motion ID reported by motion.started, or by closing the editor.",
+      "paramStructure": "by-name",
+      "params": [],
+      "result": {
+        "name": "success",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/poseEditorNotOpen"
+        }
+      ]
+    },
+    {
+      "name": "pose.export",
+      "summary": "Returns the pose as a VRM animation",
+      "description": "Writes the pose as a `.vrma` (VRMC_vrm_animation) clip that holds it for `duration` seconds, with the expressions worn (weight above 0) written into it, and returns the file as base64.",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "name",
+          "schema": {
+            "type": "string"
+          },
+          "description": "The animation's name inside the file."
+        },
+        {
+          "name": "duration",
+          "schema": {
+            "type": "number",
+            "minimum": 0
+          },
+          "description": "Seconds the clip holds the pose. Defaults to 2."
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "type": "object",
+          "required": [
+            "vrma"
+          ],
+          "properties": {
+            "vrma": {
+              "type": "string",
+              "description": "The .vrma file, base64-encoded."
+            }
+          }
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/poseEditorNotOpen"
+        }
+      ]
+    },
+    {
+      "name": "pose.saveAsMotion",
+      "summary": "Adds the pose to the motion library",
+      "description": "Registers the pose as an imported motion holding it for `duration` seconds, so motion.play and the toolbar can play it.",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "name",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "The display name in the motion list."
+        },
+        {
+          "name": "duration",
+          "schema": {
+            "type": "number",
+            "minimum": 0
+          },
+          "description": "Seconds the clip holds the pose. Defaults to 2."
+        },
+        {
+          "name": "loop",
+          "schema": {
+            "type": "boolean"
+          },
+          "description": "The motion's loop setting. Defaults to false."
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "type": "object",
+          "required": [
+            "motionId"
+          ],
+          "properties": {
+            "motionId": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/poseEditorNotOpen"
+        },
+        {
+          "$ref": "#/components/errors/importFailed"
+        }
+      ]
+    },
+    {
+      "name": "pose.close",
+      "summary": "Closes the pose editor",
+      "paramStructure": "by-name",
+      "params": [],
+      "result": {
+        "name": "success",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "errors": []
+    },
+    {
       "name": "events.subscribe",
       "summary": "Subscribes this connection to server-pushed events",
       "description": "Connections receive no events until they subscribe. Omit `events` to subscribe to all events.",
@@ -652,6 +988,56 @@
             "type": "string"
           }
         }
+      },
+      "JointPose": {
+        "type": "object",
+        "required": [
+          "name",
+          "rotation"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "A VRM 1.0 humanoid bone name."
+          },
+          "rotation": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 3,
+            "maxItems": 3,
+            "description": "Degrees around the bone's X, Y and Z axes relative to the rest pose, applied in Y, X, Z order."
+          },
+          "position": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 3,
+            "maxItems": 3,
+            "description": "The hips' local position in meters. Present for hips only."
+          }
+        }
+      },
+      "ExpressionWeight": {
+        "type": "object",
+        "required": [
+          "name",
+          "weight"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "A VRM 1.0 preset name, or the model's name for a custom expression."
+          },
+          "weight": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "0 takes the expression off; 1 wears it in full."
+          }
+        }
       }
     },
     "errors": {
@@ -690,6 +1076,14 @@
       "unsupportedOperation": {
         "code": 1008,
         "message": "This operation is not supported by this VCam."
+      },
+      "poseEditorNotOpen": {
+        "code": 1009,
+        "message": "The pose editor is not open."
+      },
+      "boneNotFound": {
+        "code": 1010,
+        "message": "Bone was not found."
       }
     }
   }

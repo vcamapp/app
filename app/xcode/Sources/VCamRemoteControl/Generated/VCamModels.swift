@@ -21,6 +21,33 @@ package struct Expression: Codable, Hashable, Sendable {
     }
 }
 
+package struct ExpressionWeight: Codable, Hashable, Sendable {
+    /// A VRM 1.0 preset name, or the model's name for a custom expression.
+    package var name: String
+    /// 0 takes the expression off; 1 wears it in full.
+    package var weight: Double
+
+    package init(name: String, weight: Double) {
+        self.name = name
+        self.weight = weight
+    }
+}
+
+package struct JointPose: Codable, Hashable, Sendable {
+    /// A VRM 1.0 humanoid bone name.
+    package var name: String
+    /// The hips' local position in meters. Present for hips only.
+    package var position: [Double]?
+    /// Degrees around the bone's X, Y and Z axes relative to the rest pose, applied in Y, X, Z order.
+    package var rotation: [Double]
+
+    package init(name: String, position: [Double]? = nil, rotation: [Double]) {
+        self.name = name
+        self.position = position
+        self.rotation = rotation
+    }
+}
+
 package struct Motion: Codable, Hashable, Sendable {
     /// A stable motion ID: "builtin:<name>" or "vrma:<UUID>".
     package var id: String
@@ -90,6 +117,35 @@ package struct AvatarImportCommitResult: Codable, Hashable, Sendable {
     }
 }
 
+package struct PoseOpenResult: Codable, Hashable, Sendable {
+    /// The humanoid bones the avatar has, in VRM order.
+    package var bones: [String]
+    /// The expressions the avatar has: presets first, then custom expressions.
+    package var expressions: [String]
+
+    package init(bones: [String], expressions: [String]) {
+        self.bones = bones
+        self.expressions = expressions
+    }
+}
+
+package struct PoseExportResult: Codable, Hashable, Sendable {
+    /// The .vrma file, base64-encoded.
+    package var vrma: String
+
+    package init(vrma: String) {
+        self.vrma = vrma
+    }
+}
+
+package struct PoseSaveAsMotionResult: Codable, Hashable, Sendable {
+    package var motionId: String
+
+    package init(motionId: String) {
+        self.motionId = motionId
+    }
+}
+
 /// Errors declared in the OpenRPC document, mapped by error code.
 /// Clients catch these; handlers can throw them via the static factories.
 /// Undeclared codes surface as `JSONRPCError.server`.
@@ -112,6 +168,10 @@ package enum VCamError: JSONRPCErrorConvertible, Hashable, Sendable {
     case notReady(JSONRPCErrorObject)
     /// Scene was not found. (code 1004)
     case sceneNotFound(JSONRPCErrorObject)
+    /// The pose editor is not open. (code 1009)
+    case poseEditorNotOpen(JSONRPCErrorObject)
+    /// Bone was not found. (code 1010)
+    case boneNotFound(JSONRPCErrorObject)
 
     package init?(_ error: JSONRPCErrorObject) {
         switch error.code {
@@ -124,6 +184,8 @@ package enum VCamError: JSONRPCErrorConvertible, Hashable, Sendable {
         case 1002: self = .motionNotFound(error)
         case 1000: self = .notReady(error)
         case 1004: self = .sceneNotFound(error)
+        case 1009: self = .poseEditorNotOpen(error)
+        case 1010: self = .boneNotFound(error)
         default: return nil
         }
     }
@@ -140,6 +202,8 @@ package enum VCamError: JSONRPCErrorConvertible, Hashable, Sendable {
         case .motionNotFound(let error): return error
         case .notReady(let error): return error
         case .sceneNotFound(let error): return error
+        case .poseEditorNotOpen(let error): return error
+        case .boneNotFound(let error): return error
         }
     }
 
@@ -186,5 +250,15 @@ package enum VCamError: JSONRPCErrorConvertible, Hashable, Sendable {
     /// Scene was not found. (code 1004)
     package static func sceneNotFound(data: JSONValue? = nil) -> Self {
         .sceneNotFound(JSONRPCErrorObject(code: 1004, message: "Scene was not found.", data: data))
+    }
+
+    /// The pose editor is not open. (code 1009)
+    package static func poseEditorNotOpen(data: JSONValue? = nil) -> Self {
+        .poseEditorNotOpen(JSONRPCErrorObject(code: 1009, message: "The pose editor is not open.", data: data))
+    }
+
+    /// Bone was not found. (code 1010)
+    package static func boneNotFound(data: JSONValue? = nil) -> Self {
+        .boneNotFound(JSONRPCErrorObject(code: 1010, message: "Bone was not found.", data: data))
     }
 }

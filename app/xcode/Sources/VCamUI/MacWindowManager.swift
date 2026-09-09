@@ -78,6 +78,8 @@ public final class MacWindowManager {
 
     public var openAvatarEditor: () -> Void = {}
 
+    public var openPoseEditor: () -> Void = {}
+
     /// Closes any existing window of the same type and opens a fresh one,
     /// so the contents are rebuilt instead of just fronting the old window
     public func reopen<T: MacWindow>(_ windowView: T, onOpen: (@MainActor () -> Void)? = nil, onClose: (@MainActor () -> Void)? = nil) {

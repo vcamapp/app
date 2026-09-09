@@ -217,6 +217,174 @@ struct VCamAPIServiceTests {
         #expect(uniState.subtitle.isEmpty)
     }
 
+    // MARK: - Pose
+
+    private func withPoseEditor<T>(_ editor: PoseEditorMock?, _ body: () async throws -> T) async rethrows -> T {
+        let originalProvider = PoseControl.provider
+        defer {
+            PoseControl.provider = originalProvider
+        }
+        PoseControl.provider = editor
+        return try await body()
+    }
+
+    @Test
+    func poseMethodsAreUnsupportedWithoutAnEditor() async throws {
+        try await withPoseEditor(nil) {
+            let response = try await call(makeService(), method: "pose.open")
+            let error = errorObject(of: response)
+            #expect(error?.code == 1008)
+            #expect(error?.dataCode == "unsupported_operation")
+
+            let info = try await call(makeService(), method: "app.getInfo")
+            guard case .object(let result)? = info["result"], case .array(let capabilities)? = result["capabilities"] else {
+                Issue.record("Unexpected response: \(info)")
+                return
+            }
+            #expect(!capabilities.contains(.string("poseEditor")))
+        }
+    }
+
+    @Test
+    func poseOpenLoadsTheEditorAndListsBones() async throws {
+        let editor = PoseEditorMock()
+        try await withPoseEditor(editor) {
+            let info = try await call(makeService(), method: "app.getInfo")
+            guard case .object(let result)? = info["result"], case .array(let capabilities)? = result["capabilities"] else {
+                Issue.record("Unexpected response: \(info)")
+                return
+            }
+            #expect(capabilities.contains(.string("poseEditor")))
+
+            let response = try await call(makeService(), method: "pose.open")
+            #expect(response["result"] == .object([
+                "bones": .array([.string("hips"), .string("leftUpperArm")]),
+                "expressions": .array([.string("happy"), .string("Wink")]),
+            ]))
+            #expect(editor.isOpen)
+        }
+    }
+
+    @Test
+    func poseMethodsRequireAnOpenEditor() async throws {
+        let editor = PoseEditorMock()
+        try await withPoseEditor(editor) {
+            for method in ["pose.get", "pose.reset", "pose.expressions.get", "pose.expressions.reset", "pose.apply", "pose.export"] {
+                let response = try await call(makeService(), method: method)
+                let error = errorObject(of: response)
+                #expect(error?.code == 1009, "\(method)")
+                #expect(error?.dataCode == "pose_editor_not_open", "\(method)")
+            }
+            let response = try await call(makeService(), method: "pose.set", params: #"{"joints": []}"#)
+            #expect(errorObject(of: response)?.code == 1009)
+        }
+    }
+
+    @Test
+    func poseSetAndGetRoundTripThroughTheEditor() async throws {
+        let editor = PoseEditorMock()
+        editor.isOpen = true
+        try await withPoseEditor(editor) {
+            let set = try await call(
+                makeService(), method: "pose.set",
+                params: #"{"joints": [{"name": "leftUpperArm", "rotation": [0, 0, -60]}, {"name": "hips", "rotation": [0, 10, 0], "position": [0, 0.5, 0]}]}"#)
+            #expect(set["result"] == .bool(true))
+            #expect(editor.pose["leftUpperArm"]?.rotation == SIMD3(0, 0, -60))
+            #expect(editor.pose["hips"]?.position == SIMD3(0, 0.5, 0))
+
+            let get = try await call(makeService(), method: "pose.get")
+            guard case .array(let joints)? = get["result"] else {
+                Issue.record("Unexpected response: \(get)")
+                return
+            }
+            #expect(joints.count == 2)
+            // 整数で表せる数はintとしてデコードされるため、型付きの結果で比べる
+            let decoded = try JSONDecoder().decode([JointPose].self, from: JSONEncoder().encode(joints))
+            #expect(decoded.contains(JointPose(name: "leftUpperArm", rotation: [0, 0, -60])))
+            // 値はFloatを経由するので、Doubleで正確に表せる数で比べる
+            #expect(decoded.contains(JointPose(name: "hips", position: [0, 0.5, 0], rotation: [0, 10, 0])))
+
+            let unknown = try await call(
+                makeService(), method: "pose.set", params: #"{"joints": [{"name": "tail", "rotation": [0, 0, 0]}]}"#)
+            let error = errorObject(of: unknown)
+            #expect(error?.code == 1010)
+            #expect(error?.dataCode == "bone_not_found")
+
+            let malformed = try await call(
+                makeService(), method: "pose.set", params: #"{"joints": [{"name": "hips", "rotation": [0, 0]}]}"#)
+            guard case .object(let malformedError)? = malformed["error"], case .int(let code)? = malformedError["code"] else {
+                Issue.record("Unexpected response: \(malformed)")
+                return
+            }
+            #expect(code == -32602)
+        }
+    }
+
+    @Test
+    func poseExpressionsRoundTripThroughTheEditor() async throws {
+        let editor = PoseEditorMock()
+        editor.isOpen = true
+        try await withPoseEditor(editor) {
+            let set = try await call(
+                makeService(), method: "pose.expressions.set",
+                params: #"{"expressions": [{"name": "happy", "weight": 0.5}, {"name": "Wink", "weight": 1}]}"#)
+            #expect(set["result"] == .bool(true))
+            #expect(editor.expressions == ["happy": 0.5, "Wink": 1])
+
+            let get = try await call(makeService(), method: "pose.expressions.get")
+            guard case .array(let weights)? = get["result"] else {
+                Issue.record("Unexpected response: \(get)")
+                return
+            }
+            let decoded = try JSONDecoder().decode([ExpressionWeight].self, from: JSONEncoder().encode(weights))
+            #expect(decoded == [ExpressionWeight(name: "happy", weight: 0.5), ExpressionWeight(name: "Wink", weight: 1)])
+
+            let reset = try await call(makeService(), method: "pose.expressions.reset", params: #"{"names": ["happy"]}"#)
+            #expect(reset["result"] == .bool(true))
+            #expect(editor.expressions == ["Wink": 1])
+
+            let unknown = try await call(
+                makeService(), method: "pose.expressions.set", params: #"{"expressions": [{"name": "grin", "weight": 1}]}"#)
+            let error = errorObject(of: unknown)
+            #expect(error?.code == 1003)
+            #expect(error?.dataCode == "expression_not_found")
+
+            let outOfRange = try await call(
+                makeService(), method: "pose.expressions.set", params: #"{"expressions": [{"name": "happy", "weight": 2}]}"#)
+            guard case .object(let outOfRangeError)? = outOfRange["error"], case .int(let code)? = outOfRangeError["code"] else {
+                Issue.record("Unexpected response: \(outOfRange)")
+                return
+            }
+            #expect(code == -32602)
+        }
+    }
+
+    @Test
+    func poseExportAndSaveAsMotionUseTheClipSettings() async throws {
+        let editor = PoseEditorMock()
+        editor.isOpen = true
+        try await withPoseEditor(editor) {
+            let exported = try await call(makeService(), method: "pose.export", params: #"{"name": "peace", "duration": 3}"#)
+            #expect(exported["result"] == .object(["vrma": .string(Data("peace@3.0".utf8).base64EncodedString())]))
+
+            let defaulted = try await call(makeService(), method: "pose.export")
+            #expect(defaulted["result"] == .object(["vrma": .string(Data("Pose@2.0".utf8).base64EncodedString())]))
+
+            let saved = try await call(makeService(), method: "pose.saveAsMotion", params: #"{"name": "Peace", "loop": true}"#)
+            #expect(saved["result"] == .object(["motionId": .string("vrma:Peace")]))
+            #expect(editor.savedMotions.first?.isLoop == true)
+            #expect(editor.savedMotions.first?.duration == 2)
+
+            let applied = try await call(makeService(), method: "pose.apply")
+            #expect(applied["result"] == .bool(true))
+            #expect(editor.applyCount == 1)
+
+            let closed = try await call(makeService(), method: "pose.close")
+            #expect(closed["result"] == .bool(true))
+            #expect(!editor.isOpen)
+        }
+    }
+
     @Test
     func unknownMethodReturnsMethodNotFound() async throws {
         let response = try await call(makeService(), method: "unknown.method")
@@ -266,5 +434,94 @@ private final class SceneProviderMock: SceneControlling {
 
     func loadScene(id: Int32) async throws {
         loadedSceneIds.append(id)
+    }
+}
+
+@MainActor
+private final class PoseEditorMock: PoseEditing {
+    /// 編集画面が開いてアバターを読み込めた状態か。開いていない間、`open` 以外は
+    /// 実装側と同じく `editorNotOpen` を投げる
+    var isOpen = false
+    var pose: [String: PoseControl.JointPose] = [:]
+    var expressions: [String: Float] = [:]
+    var savedMotions: [(name: String, duration: Float, isLoop: Bool)] = []
+    var applyCount = 0
+
+    private let bones = ["hips", "leftUpperArm"]
+    private let expressionNames = ["happy", "Wink"]
+
+    func open() async throws -> PoseControl.Rig {
+        isOpen = true
+        return PoseControl.Rig(bones: bones, expressions: expressionNames)
+    }
+
+    func close() {
+        isOpen = false
+    }
+
+    func currentPose() throws -> [PoseControl.JointPose] {
+        try requireOpen()
+        return bones.compactMap { pose[$0] }
+    }
+
+    func setPose(_ joints: [PoseControl.JointPose]) throws {
+        try requireOpen()
+        for joint in joints {
+            guard bones.contains(joint.bone) else { throw PoseControlError.boneNotFound(joint.bone) }
+        }
+        for joint in joints {
+            pose[joint.bone] = joint
+        }
+    }
+
+    func resetPose(bones: [String]?) throws {
+        try requireOpen()
+        for bone in bones ?? self.bones {
+            guard self.bones.contains(bone) else { throw PoseControlError.boneNotFound(bone) }
+            pose[bone] = nil
+        }
+    }
+
+    func currentExpressions() throws -> [PoseControl.ExpressionWeight] {
+        try requireOpen()
+        return expressionNames.map { PoseControl.ExpressionWeight(name: $0, weight: expressions[$0] ?? 0) }
+    }
+
+    func setExpressions(_ weights: [PoseControl.ExpressionWeight]) throws {
+        try requireOpen()
+        for weight in weights {
+            guard expressionNames.contains(weight.name) else { throw PoseControlError.expressionNotFound(weight.name) }
+        }
+        for weight in weights {
+            expressions[weight.name] = weight.weight
+        }
+    }
+
+    func resetExpressions(names: [String]?) throws {
+        try requireOpen()
+        for name in names ?? expressionNames {
+            guard expressionNames.contains(name) else { throw PoseControlError.expressionNotFound(name) }
+            expressions[name] = nil
+        }
+    }
+
+    func applyToAvatar() async throws {
+        try requireOpen()
+        applyCount += 1
+    }
+
+    func exportAnimation(name: String, duration: Float) throws -> Data {
+        try requireOpen()
+        return Data("\(name)@\(duration)".utf8)
+    }
+
+    func addToMotions(name: String, duration: Float, isLoop: Bool) async throws -> String {
+        try requireOpen()
+        savedMotions.append((name, duration, isLoop))
+        return "vrma:\(name)"
+    }
+
+    private func requireOpen() throws {
+        guard isOpen else { throw PoseControlError.editorNotOpen }
     }
 }

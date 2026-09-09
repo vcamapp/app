@@ -48,6 +48,40 @@ package protocol VCamProtocol: Sendable {
     @concurrent func subtitleSet(text: String) async throws -> Bool
     /// Hides the subtitle
     @concurrent func subtitleClear() async throws -> Bool
+    /// Opens the pose editor with the current avatar
+    /// 
+    /// Opens the pose editor window, or fronts it when it is already open, and loads the current avatar into it. The other pose methods require the editor to be open. Bone names follow VRM 1.0 (`hips`, `spine`, `leftUpperArm`, ...); rotations are degrees relative to the rest pose (T-pose), applied in Y, X, Z order around the bone's own axes, so `[0, 0, 0]` is the rest pose. Expressions are named as VRM 1.0 names its presets (`happy`, `blink`, ...) and as the model names its custom expressions; weights run from 0 to 1. Available only when app.getInfo lists the poseEditor capability.
+    @concurrent func poseOpen() async throws -> PoseOpenResult
+    /// Returns the pose being edited
+    @concurrent func poseGet() async throws -> [JointPose]
+    /// Poses bones in the editor
+    /// 
+    /// Applies the given bones as one undoable change. `position` is accepted for `hips` only.
+    @concurrent func poseSet(joints: [JointPose]) async throws -> Bool
+    /// Returns bones to the rest pose
+    @concurrent func poseReset(bones: [String]?) async throws -> Bool
+    /// Returns the expression weights being edited
+    @concurrent func poseExpressionsGet() async throws -> [ExpressionWeight]
+    /// Weights expressions in the editor
+    /// 
+    /// Applies the given weights as one undoable change. Expressions not listed keep their current weight.
+    @concurrent func poseExpressionsSet(expressions: [ExpressionWeight]) async throws -> Bool
+    /// Takes expressions off
+    @concurrent func poseExpressionsReset(names: [String]?) async throws -> Bool
+    /// Plays the pose on the live avatar
+    /// 
+    /// Shows the pose on the avatar in the main window as a looping motion, replacing a pose applied earlier. Stop it with motion.stop on the motion ID reported by motion.started, or by closing the editor.
+    @concurrent func poseApply() async throws -> Bool
+    /// Returns the pose as a VRM animation
+    /// 
+    /// Writes the pose as a `.vrma` (VRMC_vrm_animation) clip that holds it for `duration` seconds, with the expressions worn (weight above 0) written into it, and returns the file as base64.
+    @concurrent func poseExport(name: String?, duration: Double?) async throws -> PoseExportResult
+    /// Adds the pose to the motion library
+    /// 
+    /// Registers the pose as an imported motion holding it for `duration` seconds, so motion.play and the toolbar can play it.
+    @concurrent func poseSaveAsMotion(name: String, duration: Double?, loop: Bool?) async throws -> PoseSaveAsMotionResult
+    /// Closes the pose editor
+    @concurrent func poseClose() async throws -> Bool
     /// Subscribes this connection to server-pushed events
     /// 
     /// Connections receive no events until they subscribe. Omit `events` to subscribe to all events.
@@ -225,6 +259,143 @@ package struct VCam: VCamProtocol {
     /// Hides the subtitle
     @concurrent package func subtitleClear() async throws -> Bool {
         return try await rpc.call(method: "subtitle.clear")
+    }
+
+    /// Opens the pose editor with the current avatar
+    /// 
+    /// Opens the pose editor window, or fronts it when it is already open, and loads the current avatar into it. The other pose methods require the editor to be open. Bone names follow VRM 1.0 (`hips`, `spine`, `leftUpperArm`, ...); rotations are degrees relative to the rest pose (T-pose), applied in Y, X, Z order around the bone's own axes, so `[0, 0, 0]` is the rest pose. Expressions are named as VRM 1.0 names its presets (`happy`, `blink`, ...) and as the model names its custom expressions; weights run from 0 to 1. Available only when app.getInfo lists the poseEditor capability.
+    @concurrent package func poseOpen() async throws -> PoseOpenResult {
+        do {
+            return try await rpc.call(method: "pose.open")
+        } catch let JSONRPCError.server(error) {
+            throw VCamError(error) ?? JSONRPCError.server(error)
+        }
+    }
+
+    /// Returns the pose being edited
+    @concurrent package func poseGet() async throws -> [JointPose] {
+        do {
+            return try await rpc.call(method: "pose.get")
+        } catch let JSONRPCError.server(error) {
+            throw VCamError(error) ?? JSONRPCError.server(error)
+        }
+    }
+
+    /// Poses bones in the editor
+    /// 
+    /// Applies the given bones as one undoable change. `position` is accepted for `hips` only.
+    /// - Parameter joints: The bones to pose. Bones not listed keep their current pose.
+    @concurrent package func poseSet(joints: [JointPose]) async throws -> Bool {
+        struct Params: Encodable, Sendable {
+            var joints: [JointPose]
+        }
+        do {
+            return try await rpc.call(method: "pose.set", params: Params(joints: joints))
+        } catch let JSONRPCError.server(error) {
+            throw VCamError(error) ?? JSONRPCError.server(error)
+        }
+    }
+
+    /// Returns bones to the rest pose
+    /// - Parameter bones: The bones to reset. Omit to reset every bone.
+    @concurrent package func poseReset(bones: [String]? = nil) async throws -> Bool {
+        struct Params: Encodable, Sendable {
+            var bones: [String]?
+        }
+        do {
+            return try await rpc.call(method: "pose.reset", params: Params(bones: bones))
+        } catch let JSONRPCError.server(error) {
+            throw VCamError(error) ?? JSONRPCError.server(error)
+        }
+    }
+
+    /// Returns the expression weights being edited
+    @concurrent package func poseExpressionsGet() async throws -> [ExpressionWeight] {
+        do {
+            return try await rpc.call(method: "pose.expressions.get")
+        } catch let JSONRPCError.server(error) {
+            throw VCamError(error) ?? JSONRPCError.server(error)
+        }
+    }
+
+    /// Weights expressions in the editor
+    /// 
+    /// Applies the given weights as one undoable change. Expressions not listed keep their current weight.
+    /// - Parameter expressions: The expressions to weight.
+    @concurrent package func poseExpressionsSet(expressions: [ExpressionWeight]) async throws -> Bool {
+        struct Params: Encodable, Sendable {
+            var expressions: [ExpressionWeight]
+        }
+        do {
+            return try await rpc.call(method: "pose.expressions.set", params: Params(expressions: expressions))
+        } catch let JSONRPCError.server(error) {
+            throw VCamError(error) ?? JSONRPCError.server(error)
+        }
+    }
+
+    /// Takes expressions off
+    /// - Parameter names: The expressions to take off. Omit to take off every expression.
+    @concurrent package func poseExpressionsReset(names: [String]? = nil) async throws -> Bool {
+        struct Params: Encodable, Sendable {
+            var names: [String]?
+        }
+        do {
+            return try await rpc.call(method: "pose.expressions.reset", params: Params(names: names))
+        } catch let JSONRPCError.server(error) {
+            throw VCamError(error) ?? JSONRPCError.server(error)
+        }
+    }
+
+    /// Plays the pose on the live avatar
+    /// 
+    /// Shows the pose on the avatar in the main window as a looping motion, replacing a pose applied earlier. Stop it with motion.stop on the motion ID reported by motion.started, or by closing the editor.
+    @concurrent package func poseApply() async throws -> Bool {
+        do {
+            return try await rpc.call(method: "pose.apply")
+        } catch let JSONRPCError.server(error) {
+            throw VCamError(error) ?? JSONRPCError.server(error)
+        }
+    }
+
+    /// Returns the pose as a VRM animation
+    /// 
+    /// Writes the pose as a `.vrma` (VRMC_vrm_animation) clip that holds it for `duration` seconds, with the expressions worn (weight above 0) written into it, and returns the file as base64.
+    /// - Parameter name: The animation's name inside the file.
+    /// - Parameter duration: Seconds the clip holds the pose. Defaults to 2.
+    @concurrent package func poseExport(name: String? = nil, duration: Double? = nil) async throws -> PoseExportResult {
+        struct Params: Encodable, Sendable {
+            var name: String?
+            var duration: Double?
+        }
+        do {
+            return try await rpc.call(method: "pose.export", params: Params(name: name, duration: duration))
+        } catch let JSONRPCError.server(error) {
+            throw VCamError(error) ?? JSONRPCError.server(error)
+        }
+    }
+
+    /// Adds the pose to the motion library
+    /// 
+    /// Registers the pose as an imported motion holding it for `duration` seconds, so motion.play and the toolbar can play it.
+    /// - Parameter name: The display name in the motion list.
+    /// - Parameter duration: Seconds the clip holds the pose. Defaults to 2.
+    /// - Parameter loop: The motion's loop setting. Defaults to false.
+    @concurrent package func poseSaveAsMotion(name: String, duration: Double? = nil, loop: Bool? = nil) async throws -> PoseSaveAsMotionResult {
+        struct Params: Encodable, Sendable {
+            var name: String
+            var duration: Double?
+            var loop: Bool?
+        }
+        do {
+            return try await rpc.call(method: "pose.saveAsMotion", params: Params(name: name, duration: duration, loop: loop))
+        } catch let JSONRPCError.server(error) {
+            throw VCamError(error) ?? JSONRPCError.server(error)
+        }
+    }
+
+    /// Closes the pose editor
+    @concurrent package func poseClose() async throws -> Bool {
+        return try await rpc.call(method: "pose.close")
     }
 
     /// Subscribes this connection to server-pushed events

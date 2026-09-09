@@ -2163,6 +2163,29 @@
         }
       }
     },
+    "editPose": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit Pose"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ポーズの編集"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "포즈 편집"
+          }
+        }
+      }
+    },
     "effects": {
       "extractionState": "manual",
       "localizations": {
