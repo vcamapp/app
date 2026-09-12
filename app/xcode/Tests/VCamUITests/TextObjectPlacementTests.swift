@@ -2,8 +2,8 @@ import Testing
 import CoreGraphics
 @testable import VCamUI
 
-@Suite
 @MainActor
+@Suite
 struct TextObjectPlacementTests {
     private let canvasSize = CGSize(width: 1920, height: 1080)
     private let layoutSize = CGSize(width: 400, height: 200)

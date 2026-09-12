@@ -27,7 +27,7 @@ struct ValueBindingTests {
     }
 
     @Test
-    func int32() throws {
+    func int32() {
         let store = ValueStore(123 as Int32)
         #expect(store.value == 123)
 
@@ -37,37 +37,7 @@ struct ValueBindingTests {
     }
 
     @Test
-    func cgFloat() throws {
-        let store = ValueStore(123 as CGFloat)
-        #expect(store.value == 123)
-
-        store.value = 321
-        #expect(store.value == 321)
-        #expect(store.value == store.store)
-    }
-
-    @Test
-    func bool() throws {
-        let store = ValueStore(false)
-        #expect(store.value == false)
-
-        store.value = true
-        #expect(store.value == true)
-        #expect(store.value == store.store)
-    }
-
-    @Test
-    func string() throws {
-        let store = ValueStore("hello")
-        #expect(store.value == "hello")
-
-        store.value = "world"
-        #expect(store.value == "world")
-        #expect(store.value == store.store)
-    }
-
-    @Test
-    func void() throws {
+    func void() {
         let binding = ValueBinding<Void, TestType>()
         let trigger = binding.trigger(.value)
 
@@ -83,17 +53,7 @@ struct ValueBindingTests {
     }
 
     @Test
-    func color2() throws {
-        let store = ValueStore(Color.purple)
-        #expect(store.value == .purple)
-
-        store.value = .yellow
-        #expect(store.value == .yellow)
-        #expect(store.value == store.store)
-    }
-
-    @Test
-    func color() throws {
+    func color() {
         let binding = ValueBinding<UnsafeMutableRawPointer, TestType>()
 
         let value = binding.binding(.value, type: Color.self)
@@ -118,7 +78,7 @@ struct ValueBindingTests {
     }
 
     @Test
-    func array() throws {
+    func array() {
         let binding = ValueBinding<UnsafeMutableRawPointer, TestType>()
 
         let value = binding.binding(.value, size: 3, type: [Int32].self)

@@ -184,8 +184,8 @@ struct VisionTrackingPipelineTests {
 
         _ = VisionTrackingPipeline(
             frameStream: VisionFrameStream(),
-            handPoseMapperFactory: { builds.withLock { $0 += 1 }; return StubHandPoseMapper() },
-            faceTrackingProviderFactory: { builds.withLock { $0 += 1 }; return StubFaceTrackingProvider() }
+            handPoseMapperFactory: { builds.withLock { $0 += 1 }; return MockHandPoseMapper() },
+            faceTrackingProviderFactory: { builds.withLock { $0 += 1 }; return MockFaceTrackingProvider() }
         ) { _ in }
 
         #expect(builds.withLock { $0 } == 0)
@@ -221,11 +221,11 @@ struct VisionTrackingPipelineTests {
     }
 }
 
-private final class StubHandPoseMapper: HandPoseMapper {
+private final class MockHandPoseMapper: HandPoseMapper {
     func map(sampleBuffer: CMSampleBuffer, face: HandPoseFaceContext?, fingersEnabled: Bool) {}
 }
 
-private final class StubFaceTrackingProvider: FaceTrackingProvider {
+private final class MockFaceTrackingProvider: FaceTrackingProvider {
     func process(sampleBuffer: CMSampleBuffer, captureSize: CGSize) -> CameraFaceTrackingResult? { nil }
     func calibrate() {}
 }

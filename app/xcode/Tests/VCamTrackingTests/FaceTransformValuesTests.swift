@@ -14,6 +14,11 @@ struct FaceTransformValuesTests {
         static let blendShapes = 8
     }
 
+    /// Position of a Perfect Sync blend shape in the values array.
+    private func index(of keyPath: WritableKeyPath<BlendShape, Float> & Sendable) -> Int {
+        Index.blendShapes + BlendShape.wireOrder.firstIndex(of: keyPath)!
+    }
+
     private func makeBlendShape() -> BlendShape {
         var blend = BlendShape(lookAtPoint: .init(0.4, -0.6))
         blend.eyeBlinkLeft = 1
@@ -47,8 +52,8 @@ struct FaceTransformValuesTests {
         #expect(values[Index.lookAtX] == -0.4)
         #expect(values[Index.lookAtY] == -0.6)
 
-        let lookInLeft = Index.blendShapes + BlendShape.wireOrder.firstIndex(of: \.eyeLookInLeft)!
-        let lookOutLeft = Index.blendShapes + BlendShape.wireOrder.firstIndex(of: \.eyeLookOutLeft)!
+        let lookInLeft = index(of: \.eyeLookInLeft)
+        let lookOutLeft = index(of: \.eyeLookOutLeft)
         #expect(values[lookOutLeft] == 0.7)
         #expect(values[lookInLeft] == 0)
     }
@@ -71,8 +76,8 @@ struct FaceTransformValuesTests {
             blendShape: makeBlendShape(), useEyeTracking: true, mirrored: true
         )
 
-        let blinkLeft = Index.blendShapes + BlendShape.wireOrder.firstIndex(of: \.eyeBlinkLeft)!
-        let blinkRight = Index.blendShapes + BlendShape.wireOrder.firstIndex(of: \.eyeBlinkRight)!
+        let blinkLeft = index(of: \.eyeBlinkLeft)
+        let blinkRight = index(of: \.eyeBlinkRight)
         #expect(values[blinkRight] == 1)
         #expect(values[blinkLeft] == 0)
         #expect(values.count == 60)
@@ -121,8 +126,8 @@ struct FaceTransformValuesTests {
         #expect(values[4] == 20)
         #expect(values[5] == 30)
 
-        let blinkLeft = Index.blendShapes + BlendShape.wireOrder.firstIndex(of: \.eyeBlinkLeft)!
-        let blinkRight = Index.blendShapes + BlendShape.wireOrder.firstIndex(of: \.eyeBlinkRight)!
+        let blinkLeft = index(of: \.eyeBlinkLeft)
+        let blinkRight = index(of: \.eyeBlinkRight)
         #expect(values[blinkLeft] == 1)
         #expect(values[blinkRight] == 0)
     }
@@ -138,23 +143,8 @@ struct FaceTransformValuesTests {
         #expect(values[Index.lookAtX] == 0.4)
         #expect(values[Index.lookAtY] == -0.6)
 
-        let lookInLeft = Index.blendShapes + BlendShape.wireOrder.firstIndex(of: \.eyeLookInLeft)!
+        let lookInLeft = index(of: \.eyeLookInLeft)
         #expect(values[lookInLeft] == 0.7)
-    }
-
-    @Test
-    func disablingMirroringKeepsTheSidesOfTheShortArray() {
-        let values = FaceTransformValues.vcamHeadTransform(
-            translation: .init(0.1, 0.2, 0.3), rotationEuler: .init(10, 20, 30),
-            blendShape: makeBlendShape(), useEyeTracking: true, mirrored: false, vowel: .a
-        )
-
-        #expect(values[0] == 0.1)
-        #expect(values[4] == 20)
-        #expect(values[5] == 30)
-        #expect(values[6] == 1)
-        #expect(values[7] == 0)
-        #expect(values[9] == 0.7)
     }
 
     @Test

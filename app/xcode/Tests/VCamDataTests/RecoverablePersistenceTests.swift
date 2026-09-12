@@ -6,14 +6,6 @@ import VCamEntity
 @MainActor
 @Suite
 struct RecoverablePersistenceTests {
-    private func makeTemporaryDirectory() throws -> URL {
-        let url = FileManager.default.temporaryDirectory
-            .appending(path: "RecoverablePersistenceTests")
-            .appending(path: UUID().uuidString)
-        try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
-        return url
-    }
-
     @Test
     func brokenSceneMetadataIsNotTreatedAsEmpty() throws {
         let directory = try makeTemporaryDirectory()

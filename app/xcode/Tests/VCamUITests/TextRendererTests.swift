@@ -2,8 +2,8 @@ import Testing
 import VCamEntity
 @testable import VCamUI
 
-@Suite
 @MainActor
+@Suite
 struct TextRendererTests {
     private let configuration = TextObjectConfiguration(text: "VCam", fontSize: 64)
 

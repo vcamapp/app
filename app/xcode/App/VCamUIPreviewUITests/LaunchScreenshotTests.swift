@@ -17,6 +17,7 @@ final class LaunchScreenshotTests: XCTestCase {
         app.launch()
 
         XCTContext.runActivity(named: "Launch Screen") { activity in
+            XCTAssertTrue(app.buttons["menu.main"].exists)
             add(.keepAlways(screenshot: app.screenshot(), activity: activity))
         }
 

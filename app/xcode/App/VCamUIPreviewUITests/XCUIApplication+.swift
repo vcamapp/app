@@ -1,10 +1,3 @@
-//
-//  XCUIApplication+.swift
-//  VCamUIPreviewUITests
-//
-//  Created by Tatsuya Tanaka on 2023/10/22.
-//
-
 import XCTest
 import VCamData
 import VCamDefaults

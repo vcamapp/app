@@ -22,6 +22,34 @@ struct VCamAPIServiceTests {
         ))
     }()
 
+    /// Records the engine calls `decode` accepts while `body` runs, restoring the hook afterwards
+    private func recordedMethodCalls<Call>(
+        _ decode: @escaping (UniBridgeMethodId, UnsafeMutableRawPointer?) -> Call?,
+        during body: () async throws -> Void
+    ) async rethrows -> [Call] {
+        nonisolated(unsafe) var calls: [Call] = []
+        let originalCallback = UniBridge.methodCallback
+        defer {
+            UniBridge.methodCallback = originalCallback
+        }
+        UniBridge.methodCallback = { method, payload, _ in
+            if let call = decode(method, payload) {
+                calls.append(call)
+            }
+        }
+        try await body()
+        return calls
+    }
+
+    private func withSceneProvider<T>(_ provider: MockSceneProvider?, _ body: () async throws -> T) async rethrows -> T {
+        let originalProvider = SceneControl.provider
+        defer {
+            SceneControl.provider = originalProvider
+        }
+        SceneControl.provider = provider
+        return try await body()
+    }
+
     private func makeService(
         connectionID: UUID = UUID(),
         modelManager: ModelManager = ModelManager(models: []),
@@ -80,21 +108,16 @@ struct VCamAPIServiceTests {
 
     @Test
     func motionPlayUsesAPITriggerLoopDefault() async throws {
-        var played: [(id: String, isLoop: Bool)] = []
-        let originalCallback = UniBridge.methodCallback
-        defer {
-            UniBridge.methodCallback = originalCallback
-        }
-        UniBridge.methodCallback = { method, payload, _ in
-            if method == .playMotion {
-                let payload = payload!.load(as: PlayMotionPayload.self)
-                played.append((id: String(cString: payload.stringPtr!), isLoop: payload.isLoop == 1))
-            }
-        }
-
         let motionID = MotionID.builtIn(name: "hi").rawValue
-        let response = try await call(
-            makeService(), method: "motion.play", params: #"{"motionId": "\#(motionID)"}"#)
+        var response: [String: JSONValue] = [:]
+        let played = try await recordedMethodCalls({ method, payload -> (id: String, isLoop: Bool)? in
+            guard method == .playMotion else { return nil }
+            let payload = payload!.load(as: PlayMotionPayload.self)
+            return (id: String(cString: payload.stringPtr!), isLoop: payload.isLoop == 1)
+        }) {
+            response = try await call(
+                makeService(), method: "motion.play", params: #"{"motionId": "\#(motionID)"}"#)
+        }
 
         #expect(response["result"] == .bool(true))
         #expect(played.count == 1)
@@ -148,22 +171,16 @@ struct VCamAPIServiceTests {
 
     @Test
     func expressionSetValidatesAgainstCurrentExpressions() async throws {
-        var applied: [String] = []
-        let originalCallback = UniBridge.methodCallback
-        defer {
-            UniBridge.methodCallback = originalCallback
-        }
-        UniBridge.methodCallback = { method, payload, _ in
-            if method == .applyExpression {
-                applied.append(String(cString: payload!.assumingMemoryBound(to: CChar.self)))
-            }
-        }
-
         let uniState = UniState()
         uniState.expressions = [.init(name: "Joy")]
         let service = makeService(uniState: uniState)
 
-        let success = try await call(service, method: "expression.set", params: #"{"name": "Joy"}"#)
+        var success: [String: JSONValue] = [:]
+        let applied = try await recordedMethodCalls({ method, payload in
+            method == .applyExpression ? String(cString: payload!.assumingMemoryBound(to: CChar.self)) : nil
+        }) {
+            success = try await call(service, method: "expression.set", params: #"{"name": "Joy"}"#)
+        }
         #expect(success["result"] == .bool(true))
         #expect(applied == ["Joy"])
 
@@ -173,34 +190,26 @@ struct VCamAPIServiceTests {
 
     @Test
     func sceneGetReportsNotReadyWithoutProvider() async throws {
-        let originalProvider = SceneControl.provider
-        defer {
-            SceneControl.provider = originalProvider
+        try await withSceneProvider(nil) {
+            let response = try await call(makeService(), method: "scene.get")
+            let error = errorObject(of: response)
+            #expect(error?.code == 1000)
+            #expect(error?.dataCode == "not_ready")
         }
-        SceneControl.provider = nil
-
-        let response = try await call(makeService(), method: "scene.get")
-        let error = errorObject(of: response)
-        #expect(error?.code == 1000)
-        #expect(error?.dataCode == "not_ready")
     }
 
     @Test
     func sceneLoadDelegatesToProvider() async throws {
-        let originalProvider = SceneControl.provider
-        defer {
-            SceneControl.provider = originalProvider
+        let provider = MockSceneProvider()
+        try await withSceneProvider(provider) {
+            let success = try await call(makeService(), method: "scene.load", params: #"{"sceneId": 2}"#)
+            #expect(success["result"] == .bool(true))
+            #expect(provider.loadedSceneIds == [2])
+
+            let failure = try await call(makeService(), method: "scene.load", params: #"{"sceneId": 99}"#)
+            #expect(errorObject(of: failure)?.code == 1004)
+            #expect(provider.loadedSceneIds == [2])
         }
-        let provider = SceneProviderMock()
-        SceneControl.provider = provider
-
-        let success = try await call(makeService(), method: "scene.load", params: #"{"sceneId": 2}"#)
-        #expect(success["result"] == .bool(true))
-        #expect(provider.loadedSceneIds == [2])
-
-        let failure = try await call(makeService(), method: "scene.load", params: #"{"sceneId": 99}"#)
-        #expect(errorObject(of: failure)?.code == 1004)
-        #expect(provider.loadedSceneIds == [2])
     }
 
     @Test
@@ -219,7 +228,7 @@ struct VCamAPIServiceTests {
 
     // MARK: - Pose
 
-    private func withPoseEditor<T>(_ editor: PoseEditorMock?, _ body: () async throws -> T) async rethrows -> T {
+    private func withPoseEditor<T>(_ editor: MockPoseEditor?, _ body: () async throws -> T) async rethrows -> T {
         let originalProvider = PoseControl.provider
         defer {
             PoseControl.provider = originalProvider
@@ -247,7 +256,7 @@ struct VCamAPIServiceTests {
 
     @Test
     func poseOpenLoadsTheEditorAndListsBones() async throws {
-        let editor = PoseEditorMock()
+        let editor = MockPoseEditor()
         try await withPoseEditor(editor) {
             let info = try await call(makeService(), method: "app.getInfo")
             guard case .object(let result)? = info["result"], case .array(let capabilities)? = result["capabilities"] else {
@@ -267,7 +276,7 @@ struct VCamAPIServiceTests {
 
     @Test
     func poseMethodsRequireAnOpenEditor() async throws {
-        let editor = PoseEditorMock()
+        let editor = MockPoseEditor()
         try await withPoseEditor(editor) {
             for method in ["pose.get", "pose.reset", "pose.expressions.get", "pose.expressions.reset", "pose.apply", "pose.export"] {
                 let response = try await call(makeService(), method: method)
@@ -282,7 +291,7 @@ struct VCamAPIServiceTests {
 
     @Test
     func poseSetAndGetRoundTripThroughTheEditor() async throws {
-        let editor = PoseEditorMock()
+        let editor = MockPoseEditor()
         editor.isOpen = true
         try await withPoseEditor(editor) {
             let set = try await call(
@@ -298,10 +307,10 @@ struct VCamAPIServiceTests {
                 return
             }
             #expect(joints.count == 2)
-            // 整数で表せる数はintとしてデコードされるため、型付きの結果で比べる
+            // Whole numbers decode as ints, so compare through the typed model
             let decoded = try JSONDecoder().decode([JointPose].self, from: JSONEncoder().encode(joints))
             #expect(decoded.contains(JointPose(name: "leftUpperArm", rotation: [0, 0, -60])))
-            // 値はFloatを経由するので、Doubleで正確に表せる数で比べる
+            // Values pass through Float, so use numbers that Double represents exactly
             #expect(decoded.contains(JointPose(name: "hips", position: [0, 0.5, 0], rotation: [0, 10, 0])))
 
             let unknown = try await call(
@@ -322,7 +331,7 @@ struct VCamAPIServiceTests {
 
     @Test
     func poseExpressionsRoundTripThroughTheEditor() async throws {
-        let editor = PoseEditorMock()
+        let editor = MockPoseEditor()
         editor.isOpen = true
         try await withPoseEditor(editor) {
             let set = try await call(
@@ -361,7 +370,7 @@ struct VCamAPIServiceTests {
 
     @Test
     func poseExportAndSaveAsMotionUseTheClipSettings() async throws {
-        let editor = PoseEditorMock()
+        let editor = MockPoseEditor()
         editor.isOpen = true
         try await withPoseEditor(editor) {
             let exported = try await call(makeService(), method: "pose.export", params: #"{"name": "peace", "duration": 3}"#)
@@ -421,7 +430,7 @@ struct VCamAPIServiceTests {
 }
 
 @MainActor
-private final class SceneProviderMock: SceneControlling {
+private final class MockSceneProvider: SceneControlling {
     var loadedSceneIds: [Int32] = []
 
     var sceneList: [SceneControl.Scene] {
@@ -438,9 +447,9 @@ private final class SceneProviderMock: SceneControlling {
 }
 
 @MainActor
-private final class PoseEditorMock: PoseEditing {
-    /// 編集画面が開いてアバターを読み込めた状態か。開いていない間、`open` 以外は
-    /// 実装側と同じく `editorNotOpen` を投げる
+private final class MockPoseEditor: PoseEditing {
+    /// Whether the editor has opened and loaded the avatar. While closed everything
+    /// but `open` throws `editorNotOpen`, matching the real editor
     var isOpen = false
     var pose: [String: PoseControl.JointPose] = [:]
     var expressions: [String: Float] = [:]

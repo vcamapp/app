@@ -7,15 +7,7 @@ import VCamEntity
 @Suite
 struct MotionLibraryTests {
     private func makeLibrary() throws -> MotionLibrary {
-        let directory = FileManager.default.temporaryDirectory
-            .appending(path: "MotionLibraryTests")
-            .appending(path: UUID().uuidString)
-        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        let store = ImportedMotionStore(
-            manifestURL: directory.appending(path: "manifest.json"),
-            filesDirectory: directory.appending(path: "files")
-        )
-        return MotionLibrary(store: store)
+        MotionLibrary(store: makeImportedMotionStore(in: try makeTemporaryDirectory()))
     }
 
     @Test

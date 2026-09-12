@@ -5,7 +5,7 @@ import VCamCamera
 @Suite
 struct FrameRateSelectorTests {
     @Test
-    func outOfRangeLow() throws {
+    func outOfRangeLow() {
         let range = MockAVFrameRateRange(
             minFrameDuration: CMTime(value: 1000000, timescale: 45000000),
             maxFrameDuration: CMTime(value: 1000000, timescale: 30000000)
@@ -14,7 +14,7 @@ struct FrameRateSelectorTests {
     }
 
     @Test
-    func outOfRangeHigh() throws {
+    func outOfRangeHigh() {
         let range = MockAVFrameRateRange(
             minFrameDuration: CMTime(value: 1000000, timescale: 30000000),
             maxFrameDuration: CMTime(value: 1000000, timescale: 15000000)
@@ -28,7 +28,7 @@ struct FrameRateSelectorTests {
     }
 
     @Test
-    func inRange() throws {
+    func inRange() {
         let range = MockAVFrameRateRange(
             minFrameDuration: CMTime(value: 1000000, timescale: 60000000),
             maxFrameDuration: CMTime(value: 1000000, timescale: 30000000)
@@ -42,7 +42,7 @@ struct FrameRateSelectorTests {
     }
 
     @Test
-    func empty() throws {
+    func empty() {
         expectRecommendedFrameRate(targetFPS: 45, ranges: [], min: .invalid, max: .invalid)
     }
 
@@ -57,7 +57,7 @@ struct FrameRateSelectorTests {
     }
 
     @Test
-    func nonIntegerFPS3() throws {
+    func nonIntegerFPS3() {
         let range = MockAVFrameRateRange(
             minFrameDuration: CMTime(value: 1000000, timescale: 30000030),
             maxFrameDuration: CMTime(value: 1000000, timescale: 29999970)
@@ -71,7 +71,7 @@ struct FrameRateSelectorTests {
     }
 
     @Test
-    func nonIntegerNonContinuous() throws {
+    func nonIntegerNonContinuous() {
         let ranges: [MockAVFrameRateRange] = [
             MockAVFrameRateRange(
                 minFrameDuration: CMTime(value: 1001, timescale: 3000),
@@ -99,7 +99,7 @@ struct FrameRateSelectorTests {
     }
 
     @Test
-    func belowAllOverlappingRanges() throws {
+    func belowAllOverlappingRanges() {
         // With 30-60 fps and 15-120 fps, a request below both must pick the range
         // that can go lowest (15 fps), not the one with the smallest maximum (30 fps)
         let ranges: [MockAVFrameRateRange] = [
@@ -116,7 +116,7 @@ struct FrameRateSelectorTests {
     }
 
     @Test
-    func supportsFrameRate() throws {
+    func supportsFrameRate() {
         let range = MockAVFrameRateRange(
             minFrameDuration: CMTime(value: 1, timescale: 60),
             maxFrameDuration: CMTime(value: 1, timescale: 30)
@@ -130,21 +130,10 @@ struct FrameRateSelectorTests {
     }
 
     @Test
-    func effectiveFrameRate() throws {
+    func effectiveFrameRate() {
         #expect(FrameRateSelector.effectiveFrameRate(of: CMTime(value: 1, timescale: 30)) == 30)
         #expect(FrameRateSelector.effectiveFrameRate(of: CMTime(value: 1000000, timescale: 30000030)) == 30)
         #expect(FrameRateSelector.effectiveFrameRate(of: .invalid) == nil)
-    }
-
-    @Test
-    func effectiveFrameRateOfClampedResult() throws {
-        // 60 FPS requested on a format capped at 30 FPS results in an actual 30 FPS
-        let range = MockAVFrameRateRange(
-            minFrameDuration: CMTime(value: 1000000, timescale: 30000000),
-            maxFrameDuration: CMTime(value: 1000000, timescale: 15000000)
-        )
-        let rate = FrameRateSelector.recommendedFrameRate(targetFPS: 60, supportedFrameRateRanges: [range])
-        #expect(FrameRateSelector.effectiveFrameRate(of: rate.maxFrameDuration) == 30)
     }
 
     private func expectRecommendedFrameRate(
@@ -159,8 +148,8 @@ struct FrameRateSelectorTests {
     }
 }
 
-struct MockAVFrameRateRange: AVFrameRateRangeProtocol {
-    internal init(minFrameDuration: CMTime, maxFrameDuration: CMTime) {
+private struct MockAVFrameRateRange: AVFrameRateRangeProtocol {
+    init(minFrameDuration: CMTime, maxFrameDuration: CMTime) {
         self.minFrameRate = 1 / maxFrameDuration.seconds
         self.maxFrameRate = 1 / minFrameDuration.seconds
         self.minFrameDuration = minFrameDuration

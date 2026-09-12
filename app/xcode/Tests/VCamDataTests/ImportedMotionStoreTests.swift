@@ -6,21 +6,6 @@ import VCamEntity
 @MainActor
 @Suite
 struct ImportedMotionStoreTests {
-    private func makeTemporaryDirectory() throws -> URL {
-        let url = FileManager.default.temporaryDirectory
-            .appending(path: "ImportedMotionStoreTests")
-            .appending(path: UUID().uuidString)
-        try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
-        return url
-    }
-
-    private func makeStore(in directory: URL) -> ImportedMotionStore {
-        ImportedMotionStore(
-            manifestURL: directory.appending(path: "manifest.json"),
-            filesDirectory: directory.appending(path: "files")
-        )
-    }
-
     private func makeSourceFile(in directory: URL) throws -> URL {
         let url = directory.appending(path: "source.vrma")
         try Data("vrma".utf8).write(to: url)
@@ -32,7 +17,7 @@ struct ImportedMotionStoreTests {
         let directory = try makeTemporaryDirectory()
         defer { try? FileManager.default.removeItem(at: directory) }
 
-        let store = makeStore(in: directory)
+        let store = makeImportedMotionStore(in: directory)
         let sourceURL = try makeSourceFile(in: directory)
         let id = UUID()
         let fileURL = try await store.stageMotionFile(from: sourceURL, id: id)
@@ -46,7 +31,7 @@ struct ImportedMotionStoreTests {
         )
         try store.addRecord(record)
 
-        let restored = makeStore(in: directory)
+        let restored = makeImportedMotionStore(in: directory)
         #expect(restored.records.count == 1)
         let restoredRecord = try #require(restored.records.first)
         #expect(restoredRecord.id == id)
@@ -60,13 +45,13 @@ struct ImportedMotionStoreTests {
         let directory = try makeTemporaryDirectory()
         defer { try? FileManager.default.removeItem(at: directory) }
 
-        let store = makeStore(in: directory)
+        let store = makeImportedMotionStore(in: directory)
         let record = ImportedMotionRecord(displayName: "Old", translationAxes: .all, isLoop: false)
         try store.addRecord(record)
         try store.updateLoop(id: record.id, isLoop: true)
         try store.updateSettings(id: record.id, displayName: "New", translationAxes: [.y], isLoop: true)
 
-        let restored = makeStore(in: directory)
+        let restored = makeImportedMotionStore(in: directory)
         let restoredRecord = try #require(restored.records.first)
         #expect(restoredRecord.id == record.id)
         #expect(restoredRecord.displayName == "New")
@@ -79,7 +64,7 @@ struct ImportedMotionStoreTests {
         let directory = try makeTemporaryDirectory()
         defer { try? FileManager.default.removeItem(at: directory) }
 
-        let store = makeStore(in: directory)
+        let store = makeImportedMotionStore(in: directory)
         let records = ["A", "B", "C"].map { ImportedMotionRecord(displayName: $0) }
         for record in records {
             try store.addRecord(record)
@@ -88,7 +73,7 @@ struct ImportedMotionStoreTests {
         try store.move(fromOffsets: IndexSet(integer: 0), toOffset: 3)
         #expect(store.records.map(\.displayName) == ["B", "C", "A"])
 
-        let restored = makeStore(in: directory)
+        let restored = makeImportedMotionStore(in: directory)
         #expect(restored.records.map(\.displayName) == ["B", "C", "A"])
     }
 
@@ -97,7 +82,7 @@ struct ImportedMotionStoreTests {
         let directory = try makeTemporaryDirectory()
         defer { try? FileManager.default.removeItem(at: directory) }
 
-        let store = makeStore(in: directory)
+        let store = makeImportedMotionStore(in: directory)
         let sourceURL = try makeSourceFile(in: directory)
         let id = UUID()
         let fileURL = try await store.stageMotionFile(from: sourceURL, id: id)
@@ -114,7 +99,7 @@ struct ImportedMotionStoreTests {
         let directory = try makeTemporaryDirectory()
         defer { try? FileManager.default.removeItem(at: directory) }
 
-        let store = makeStore(in: directory)
+        let store = makeImportedMotionStore(in: directory)
         let record = ImportedMotionRecord(displayName: "Dance")
         try store.addRecord(record)
 
@@ -138,7 +123,7 @@ struct ImportedMotionStoreTests {
         let brokenData = Data("broken json".utf8)
         try brokenData.write(to: manifestURL)
 
-        let store = makeStore(in: directory)
+        let store = makeImportedMotionStore(in: directory)
         #expect(store.isManifestLoadFailed)
         #expect(store.records.isEmpty)
 
@@ -160,7 +145,7 @@ struct ImportedMotionStoreTests {
         try newerData.write(to: manifestURL)
 
         // A manifest written by a newer app must not be overwritten with the old format
-        let store = makeStore(in: directory)
+        let store = makeImportedMotionStore(in: directory)
         #expect(store.isManifestLoadFailed)
         #expect(throws: ImportedMotionStoreError.manifestLoadFailed) {
             try store.addRecord(ImportedMotionRecord(displayName: "Dance"))
@@ -176,7 +161,7 @@ struct ImportedMotionStoreTests {
         let manifestURL = directory.appending(path: "manifest.json")
         try Data("broken json".utf8).write(to: manifestURL)
 
-        let store = makeStore(in: directory)
+        let store = makeImportedMotionStore(in: directory)
         #expect(store.isManifestLoadFailed)
 
         // Writes succeed after the manifest becomes loadable again
@@ -192,7 +177,7 @@ struct ImportedMotionStoreTests {
         let directory = try makeTemporaryDirectory()
         defer { try? FileManager.default.removeItem(at: directory) }
 
-        let store = makeStore(in: directory)
+        let store = makeImportedMotionStore(in: directory)
         let sourceURL = try makeSourceFile(in: directory)
         let id = UUID()
         let fileURL = try await store.stageMotionFile(from: sourceURL, id: id)
