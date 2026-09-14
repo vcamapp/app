@@ -26,6 +26,20 @@ public extension simd_float4x4 {
         )
     }
 
+    /// The rotation part with the translation dropped.
+    @inlinable var rotationOnly: Self {
+        .init(
+            SIMD4(columns.0.x, columns.0.y, columns.0.z, 0),
+            SIMD4(columns.1.x, columns.1.y, columns.1.z, 0),
+            SIMD4(columns.2.x, columns.2.y, columns.2.z, 0),
+            SIMD4(0, 0, 0, 1)
+        )
+    }
+
+    /// Whether the transform is a reflection (left-handed, negative determinant).
+    @inlinable var isMirrored: Bool {
+        simd_determinant(self) < 0
+    }
 }
 
 public extension simd_quatf {
