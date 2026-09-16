@@ -7,14 +7,22 @@ public enum Camera {
     private struct CacheState: @unchecked Sendable {
         var devices: [AVCaptureDevice] = []
         var initialDiscovery: Task<Void, Never>?
+        var excludedDeviceIDs: Set<String> = []
     }
 
     private static let cache = Mutex(CacheState())
 
+    /// Devices hidden from the tracking lookups, such as the app's own virtual camera: tracking its
+    /// output would track the avatar instead of the user.
+    public static var excludedDeviceIDs: Set<String> {
+        get { cache.withLock { $0.excludedDeviceIDs } }
+        set { cache.withLock { $0.excludedDeviceIDs = newValue } }
+    }
+
     private static func scanDevices() -> [AVCaptureDevice] {
         enableDalDevices()
         let deviceDiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInWideAngleCamera, .external], mediaType: nil, position: .unspecified)
-        return deviceDiscoverySession.devices.filter { $0.uniqueID != "vcam-device" }
+        return deviceDiscoverySession.devices
     }
 
     private static func updateCache() {
@@ -59,9 +67,11 @@ public enum Camera {
     public static var defaultCaptureDevice: AVCaptureDevice? {
         // Derived from the cache to avoid creating discovery sessions on every call;
         // the cache is refreshed by the connect/disconnect observers in configure()
-        cache.withLock { cache in
-            cache.devices.first { $0.deviceType == .builtInWideAngleCamera } ?? cache.devices.first
-        }
+        preferredDevice(in: cameras(type: nil))
+    }
+
+    public static func preferredDevice(in devices: [AVCaptureDevice]) -> AVCaptureDevice? {
+        devices.first { $0.deviceType == .builtInWideAngleCamera } ?? devices.first
     }
 
     public static func enableDalDevices() {
@@ -77,16 +87,19 @@ public enum Camera {
 
     public static func cameras(type: AVMediaType? = .video) -> [AVCaptureDevice] {
         cache.withLock { cache in
-            if let type {
-                return cache.devices.filter { $0.hasMediaType(type) }
-            } else {
-                return cache.devices
-            }
+            cache.devices.filter { !cache.excludedDeviceIDs.contains($0.uniqueID) && $0.matches(mediaType: type) }
+        }
+    }
+
+    /// Includes the excluded devices so a scene can show the app's own output
+    public static func captureSourceCameras(type: AVMediaType? = .video) -> [AVCaptureDevice] {
+        cache.withLock { cache in
+            cache.devices.filter { $0.matches(mediaType: type) }
         }
     }
 
     public static func camera(id: String?) -> AVCaptureDevice? {
-        cache.withLock { $0.devices.first { $0.uniqueID == id } }
+        cameras(type: nil).first { $0.uniqueID == id }
     }
 
     public static func searchHighestResolutionFormat(for device: AVCaptureDevice) -> (format: AVCaptureDevice.Format, resolution: CGSize)? {
@@ -133,5 +146,11 @@ public enum Camera {
         let resultDimensions = resultFormat.formatDescription.dimensions
         let resolution = CGSize(width: CGFloat(resultDimensions.width), height: CGFloat(resultDimensions.height))
         return (resultFormat, resolution)
+    }
+}
+
+private extension AVCaptureDevice {
+    func matches(mediaType: AVMediaType?) -> Bool {
+        mediaType.map(hasMediaType) ?? true
     }
 }

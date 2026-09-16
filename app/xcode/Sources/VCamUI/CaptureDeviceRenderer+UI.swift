@@ -8,22 +8,28 @@ import VCamEntity
 
 @MainActor
 public func showCaptureDeviceSelectView(didSelect: @escaping (AVCaptureDevice, CGRect) -> Void) {
-    guard Camera.hasCamera else { return } // Calling the following will crash if there's no camera.
+    guard let initialDevice = Camera.preferredDevice(in: Camera.captureSourceCameras(type: nil)) else { return }
     showSheet(
         title: String(localized: .capturePreference),
         view: { close in
-            CaptureDeviceSelectView(didSelect: didSelect, close: close)
+            CaptureDeviceSelectView(initialDevice: initialDevice, didSelect: didSelect, close: close)
         }
     )
 }
 
 private struct CaptureDeviceSelectView: View {
+    init(initialDevice: AVCaptureDevice, didSelect: @escaping (AVCaptureDevice, CGRect) -> Void, close: @escaping () -> Void) {
+        self.didSelect = didSelect
+        self.close = close
+        _captureDevice = State(initialValue: initialDevice)
+    }
+
     let didSelect: (AVCaptureDevice, CGRect) -> Void
     let close: () -> Void
 
     @State private var preview: NSImage?
     @State private var previewer: CaptureDevicePreviewer?
-    @State private var captureDevice = Camera.defaultCaptureDevice!
+    @State private var captureDevice: AVCaptureDevice
     @State private var previewable = false
     @State private var cropRect = CGRect(x: 0, y: 0, width: 1, height: 1)
     @State private var cropPreviewSize = CGSize(width: 1, height: 1)
@@ -42,7 +48,7 @@ private struct CaptureDeviceSelectView: View {
             VStack {
                 Form {
                     Picker(.videoCaptureDevice, selection: $captureDevice) {
-                        ForEach(Camera.cameras(type: nil)) { device in
+                        ForEach(Camera.captureSourceCameras(type: nil)) { device in
                             Text(device.localizedName).tag(device)
                         }
                     }
