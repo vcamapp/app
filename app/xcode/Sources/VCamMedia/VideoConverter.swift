@@ -3,22 +3,28 @@ import AVFoundation
 import Synchronization
 
 public enum VideoConverter { // TODO: Migrate to new API for macOS 26+
-    /// Guarantees the continuation is resumed exactly once, whichever of the
-    /// drain, failure and cancellation paths gets there first.
+    /// Guarantees that the reader and writer are torn down at most once and that
+    /// the continuation is resumed exactly once, whichever of the drain, failure
+    /// and cancellation paths gets there first.
     private final class ConversionState: @unchecked Sendable {
         private struct Storage {
             var pendingInputs: Set<AVMediaType> = [.video, .audio]
             var continuation: CheckedContinuation<Void, Error>?
-            var finishedResult: Result<Void, Error>?
+            var isFinishing = false
+            var result: Result<Void, Error>?
         }
 
         private let storage = Mutex(Storage())
 
+        var isFinishing: Bool {
+            storage.withLock { $0.isFinishing }
+        }
+
         /// Cancellation can win the race against the continuation being stored,
-        /// so one handed over after `finish()` resumes right away.
+        /// so one handed over after `resume(with:)` resumes right away.
         func store(_ continuation: CheckedContinuation<Void, Error>) {
             let result = storage.withLock { state -> Result<Void, Error>? in
-                guard let result = state.finishedResult else {
+                guard let result = state.result else {
                     state.continuation = continuation
                     return nil
                 }
@@ -30,15 +36,24 @@ public enum VideoConverter { // TODO: Migrate to new API for macOS 26+
         /// Returns true only for the input that drains last.
         func finishInput(_ mediaType: AVMediaType) -> Bool {
             storage.withLock { state in
-                guard state.pendingInputs.remove(mediaType) != nil, state.finishedResult == nil else { return false }
+                guard state.pendingInputs.remove(mediaType) != nil, !state.isFinishing else { return false }
                 return state.pendingInputs.isEmpty
             }
         }
 
-        func finish(with result: Result<Void, Error>) {
+        /// Returns true only for the first caller, which owns the teardown and
+        /// must call `resume(with:)` once it is done.
+        func beginFinishing() -> Bool {
+            storage.withLock { state in
+                guard !state.isFinishing else { return false }
+                state.isFinishing = true
+                return true
+            }
+        }
+
+        func resume(with result: Result<Void, Error>) {
             let continuation = storage.withLock { state -> CheckedContinuation<Void, Error>? in
-                guard state.finishedResult == nil else { return nil }
-                state.finishedResult = result
+                state.result = result
                 defer { state.continuation = nil }
                 return state.continuation
             }
@@ -102,8 +117,6 @@ public enum VideoConverter { // TODO: Migrate to new API for macOS 26+
         var succeeded = false
         defer {
             if !succeeded {
-                reader.cancelReading()
-                writer.cancelWriting()
                 try? FileManager.default.removeItem(at: outputURL)
             }
         }
@@ -119,68 +132,80 @@ public enum VideoConverter { // TODO: Migrate to new API for macOS 26+
         writer.shouldOptimizeForNetworkUse = true
 
         guard reader.startReading() else { throw ConversionError.failedToStartReading(reader.error) }
-        guard writer.startWriting() else { throw ConversionError.failedToStartWriting(writer.error) }
+        guard writer.startWriting() else {
+            reader.cancelReading()
+            throw ConversionError.failedToStartWriting(writer.error)
+        }
         writer.startSession(atSourceTime: .zero)
 
+        // Every call into the reader and writer from here on happens on this queue:
+        // AVAssetReader.cancelReading() is not safe to call from two threads at once
+        // and crashes inside AVFoundation when it happens.
+        let queue = DispatchQueue(label: "vcam.mergeAudioTracks")
         let state = ConversionState()
+
+        @Sendable func fail(_ error: Error) {
+            guard state.beginFinishing() else { return }
+            reader.cancelReading()
+            writer.cancelWriting()
+            state.resume(with: .failure(error))
+        }
+
+        @Sendable func finishWriting() {
+            guard state.beginFinishing() else { return }
+            guard reader.status == .completed else {
+                writer.cancelWriting()
+                return state.resume(with: .failure(ConversionError.readerFailed(reader.error)))
+            }
+            guard writer.status == .writing else {
+                writer.cancelWriting()
+                return state.resume(with: .failure(ConversionError.writerFailed(writer.error)))
+            }
+            writer.finishWriting {
+                if writer.status == .completed {
+                    state.resume(with: .success(()))
+                } else {
+                    state.resume(with: .failure(ConversionError.writerFailed(writer.error)))
+                }
+            }
+        }
+
+        @Sendable func drain(
+            _ input: sending AVAssetWriterInput,
+            from output: sending AVAssetReaderOutput,
+            mediaType: AVMediaType
+        ) {
+            nonisolated(unsafe) let input = input
+            nonisolated(unsafe) let output = output
+            input.requestMediaDataWhenReady(on: queue) {
+                // A teardown that already ran on this queue invalidated the reader and writer
+                guard !state.isFinishing else { return }
+                while input.isReadyForMoreMediaData {
+                    guard let buffer = output.copyNextSampleBuffer() else {
+                        input.markAsFinished()
+                        if state.finishInput(mediaType) {
+                            queue.async(execute: finishWriting)
+                        }
+                        return
+                    }
+                    guard input.append(buffer) else {
+                        return fail(ConversionError.appendFailed(mediaType, writer.error))
+                    }
+                }
+            }
+        }
+
         try await withTaskCancellationHandler {
             try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
                 state.store(continuation)
-
-                @Sendable func fail(_ error: Error) {
-                    reader.cancelReading()
-                    writer.cancelWriting()
-                    videoInput.markAsFinished()
-                    audioInput.markAsFinished()
-                    state.finish(with: .failure(error))
+                queue.async {
+                    guard !state.isFinishing else { return }
+                    drain(videoInput, from: videoOutput, mediaType: .video)
+                    drain(audioInput, from: audioOutput, mediaType: .audio)
                 }
-
-                @Sendable func finishWriting() {
-                    guard reader.status == .completed else {
-                        return fail(ConversionError.readerFailed(reader.error))
-                    }
-                    guard writer.status == .writing || writer.status == .completed else {
-                        return fail(ConversionError.writerFailed(writer.error))
-                    }
-                    writer.finishWriting {
-                        if writer.status == .completed {
-                            state.finish(with: .success(()))
-                        } else {
-                            state.finish(with: .failure(ConversionError.writerFailed(writer.error)))
-                        }
-                    }
-                }
-
-                @Sendable func drain(
-                    _ input: sending AVAssetWriterInput,
-                    from output: sending AVAssetReaderOutput,
-                    mediaType: AVMediaType
-                ) {
-                    nonisolated(unsafe) let input = input
-                    nonisolated(unsafe) let output = output
-                    input.requestMediaDataWhenReady(on: DispatchQueue(label: "vcam.mergeAudioTracks.\(mediaType.rawValue)")) {
-                        while input.isReadyForMoreMediaData {
-                            guard let buffer = output.copyNextSampleBuffer() else {
-                                input.markAsFinished()
-                                if state.finishInput(mediaType) {
-                                    DispatchQueue.global().async(execute: finishWriting)
-                                }
-                                return
-                            }
-                            guard input.append(buffer) else {
-                                return fail(ConversionError.appendFailed(mediaType, writer.error))
-                            }
-                        }
-                    }
-                }
-
-                drain(videoInput, from: videoOutput, mediaType: .video)
-                drain(audioInput, from: audioOutput, mediaType: .audio)
             }
         } onCancel: {
-            reader.cancelReading()
-            writer.cancelWriting()
-            state.finish(with: .failure(CancellationError()))
+            queue.async { fail(CancellationError()) }
         }
 
         succeeded = true
