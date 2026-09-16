@@ -15,6 +15,7 @@ public func showScreenRecorderPreferenceView(capture: @escaping (ScreenRecorder)
 
 public struct ScreenRecorderPreferenceView: View {
     @State private var screenRecorder = ScreenRecorder()
+    @State private var previewSource = LivePreviewSource()
     @State private var displays: [SCDisplay] = []
     @State private var windows: [SCWindow] = []
     @State private var captureConfig = ScreenRecorder.CaptureConfiguration()
@@ -58,13 +59,19 @@ public struct ScreenRecorderPreferenceView: View {
                     .foregroundStyle(.red)
                 }
 
-                ScreenRecorderCapturePreviewContainer(
-                    screenRecorder: screenRecorder,
-                    cropRect: $cropRect,
-                    cropPreviewSize: $cropPreviewSize
-                )
+                LivePreview(source: previewSource)
+                    .modifier(CropViewModifier(rect: $cropRect))
+                    .overlay(GeometryReader { proxy in
+                        Color.clear
+                            .onChange(of: proxy.size, initial: true) { _, size in
+                                cropPreviewSize = size
+                            }
+                    })
             }
             .onAppear {
+                screenRecorder.didOutputPreviewFrame = { [previewSource] frame in
+                    previewSource.publish(frame.croppedCIImage.nsImage(), size: frame.contentRect.size)
+                }
                 timer = RunLoop.current.schedule(after: .init(.now),
                                                  interval: .seconds(3)) {
                     refreshAvailableContent()
@@ -86,12 +93,20 @@ public struct ScreenRecorderPreferenceView: View {
                     false,
                     onScreenWindowsOnly: true
                 )
-                displays = availableContent.displays
-                windows = availableContent.windows
+                // Replacing the lists rebuilds the pickers' menus, which must not happen
+                // while one of them is open, so keep the arrays when nothing changed
+                let availableDisplays = availableContent.displays
+                if availableDisplays.map(\.id) != displays.map(\.id) {
+                    displays = availableDisplays
+                }
+                let availableWindows = availableContent.windows
                     .filter { $0.owningApplication?.applicationName.isEmpty == false }
                     .sorted {
                         $0.owningApplication?.applicationName ?? "" < $1.owningApplication?.applicationName ?? ""
                     }
+                if availableWindows.map(\.id) != windows.map(\.id) {
+                    windows = availableWindows
+                }
 
                 let isFirstTime = captureConfig.display == nil && captureConfig.window == nil
                 if captureConfig.display == nil {
@@ -113,24 +128,9 @@ public struct ScreenRecorderPreferenceView: View {
 
     private func dismiss() { // Can't use onDisappear with this implementation, so call this explicitly
         close()
+        screenRecorder.didOutputPreviewFrame = nil
         timer?.cancel()
         timer = nil
-    }
-}
-
-private struct ScreenRecorderCapturePreviewContainer: View {
-    let screenRecorder: ScreenRecorder
-    @Binding var cropRect: CGRect
-    @Binding var cropPreviewSize: CGSize
-
-    var body: some View {
-        if let frame = screenRecorder.latestFrame {
-            ScreenRecorderCapturePreview(
-                frame: frame,
-                cropRect: $cropRect,
-                cropPreviewSize: $cropPreviewSize
-            )
-        }
     }
 }
 
@@ -169,24 +169,6 @@ private struct ScreenRecorderConfigForm: View {
     }
 }
 
-private struct ScreenRecorderCapturePreview: View {
-    let frame: ScreenRecorder.CapturedFrame
-    @Binding var cropRect: CGRect
-    @Binding var cropPreviewSize: CGSize
-
-    var body: some View {
-        ScreenCaptureContentView(frame: frame.croppedCIImage.nsImage())
-            .aspectRatio(frame.contentRect.size, contentMode: .fit)
-            .modifier(CropViewModifier(rect: $cropRect))
-            .overlay(GeometryReader { proxy in
-                Color.clear
-                    .onAppear {
-                        cropPreviewSize = proxy.size
-                    }
-            })
-    }
-}
-
 extension SCWindow {
     var displayName: String {
         switch (owningApplication, title) {
@@ -199,22 +181,5 @@ extension SCWindow {
         default:
             return ""
         }
-    }
-}
-
-private struct ScreenCaptureContentView: NSViewRepresentable {
-    let frame: NSImage?
-
-    func makeNSView(context: Context) -> NSView {
-        let view = NSView()
-        if view.layer == nil {
-            view.makeBackingLayer()
-        }
-        view.layer?.contents = frame
-        return view
-    }
-
-    func updateNSView(_ nsView: NSView, context: Context) {
-        nsView.layer?.contents = frame
     }
 }

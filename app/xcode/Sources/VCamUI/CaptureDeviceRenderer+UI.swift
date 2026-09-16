@@ -27,7 +27,7 @@ private struct CaptureDeviceSelectView: View {
     let didSelect: (AVCaptureDevice, CGRect) -> Void
     let close: () -> Void
 
-    @State private var preview: NSImage?
+    @State private var previewSource = LivePreviewSource()
     @State private var previewer: CaptureDevicePreviewer?
     @State private var captureDevice: AVCaptureDevice
     @State private var previewable = false
@@ -54,18 +54,13 @@ private struct CaptureDeviceSelectView: View {
                     }
                     Toggle(.previewCapture, isOn: $previewable)
                 }
-                if previewable, let preview = preview {
-                    Image(nsImage: preview)
-                        .resizable()
-                        .scaledToFit()
+                if previewable {
+                    LivePreview(source: previewSource)
                         .modifier(CropViewModifier(rect: $cropRect))
                         .background(GeometryReader { proxy in
                             Color.clear
-                                .onAppear {
-                                    cropPreviewSize = proxy.size
-                                }
-                                .onChange(of: preview.size) { _, _ in
-                                    cropPreviewSize = proxy.size
+                                .onChange(of: proxy.size, initial: true) { _, size in
+                                    cropPreviewSize = size
                                 }
                         })
                 }
@@ -96,9 +91,7 @@ private struct CaptureDeviceSelectView: View {
             previewer?.didOutput = nil
             return
         }
-        // The view itself can't be captured by the nonisolated frame handler,
-        // so hand it a MainActor closure that publishes the converted image
-        let showPreview: @MainActor (NSImage) -> Void = { preview = $0 }
+        let previewSource = previewSource
         previewer?.didOutput = { frame in
             // Using CIImage accumulates memory, so convert to CGImage using VideoToolbox.
             var cgImage: CGImage?
@@ -106,7 +99,7 @@ private struct CaptureDeviceSelectView: View {
             guard let cgImage else { return }
             let image = NSImage(cgImage: cgImage, size: .init(width: cgImage.width, height: cgImage.height))
             DispatchQueue.runOnMain {
-                showPreview(image)
+                previewSource.publish(image, size: image.size)
             }
         }
     }

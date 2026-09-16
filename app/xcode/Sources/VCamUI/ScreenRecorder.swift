@@ -74,6 +74,9 @@ public final class ScreenRecorder: NSObject {
 
     @ObservationIgnored private var didVideoOutput: (@MainActor (CapturedFrame) -> Void)?
     @ObservationIgnored private var didAudioOutput: (@MainActor (CMSampleBuffer) -> Void)?
+    /// Frames for a live preview are delivered through a callback rather than an observable
+    /// property, so that the preview doesn't re-render its SwiftUI hierarchy at capture rate
+    @ObservationIgnored var didOutputPreviewFrame: (@MainActor (CapturedFrame) -> Void)?
 
     // Stale frames have no value for rendering, so only the newest one is kept
     // while a MainActor hop is pending; this also caps the number of in-flight callbacks at one
@@ -99,7 +102,7 @@ public final class ScreenRecorder: NSObject {
 
     @ObservationIgnored public var filter: ImageFilter?
 
-    @MainActor private(set) var latestFrame: CapturedFrame?
+    @MainActor @ObservationIgnored private(set) var latestFrame: CapturedFrame?
     @MainActor private(set) var error: (any Error)?
     @MainActor private(set) var isRecording = false
 
@@ -246,6 +249,7 @@ extension ScreenRecorder: SCStreamOutput {
                 }) else { return }
                 self.latestFrame = frame
                 self.didVideoOutput?(frame)
+                self.didOutputPreviewFrame?(frame)
             }
         } else if type == .audio {
             DispatchQueue.runOnMain {
