@@ -22,7 +22,7 @@ public struct TrackingDeviceView: View {
                 get: { currentDevice },
                 set: { newDevice in
                     captureDevice = newDevice
-                    Tracking.shared.webCamera.setCaptureDevice(id: newDevice.uniqueID)
+                    Tracking.shared.webCamera.setCaptureDevice(newDevice)
                 }
             )) {
                 ForEach(cameras) { device in
@@ -30,6 +30,11 @@ public struct TrackingDeviceView: View {
                 }
             } label: {
                 Text(.camera)
+            }
+            if tracking.webCamera.isUsingFallbackDevice {
+                Text(fallbackNotice)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
         } else {
             Picker(selection: .constant(0)) {
@@ -70,6 +75,18 @@ public struct TrackingDeviceView: View {
         .onReceive(NotificationCenter.default.publisher(for: .deviceWasChanged)) { _ in
             captureDevice = Tracking.shared.webCamera.currentCaptureDevice
             audioDevice = AvatarAudioManager.shared.currentInputDevice
+        }
+        // The camera moves on its own when the saved device appears or the current one is unplugged
+        .onChange(of: tracking.webCamera.activeCaptureDevice) { _, _ in
+            captureDevice = Tracking.shared.webCamera.currentCaptureDevice
+        }
+    }
+
+    private var fallbackNotice: String {
+        if let name = tracking.webCamera.savedCaptureDeviceName {
+            String(localized: .cameraFallbackNotice(name))
+        } else {
+            String(localized: .cameraFallbackNoticeUnnamed)
         }
     }
 }

@@ -70,8 +70,11 @@ public enum Camera {
         preferredDevice(in: cameras(type: nil))
     }
 
+    /// The discovery order changes between scans, so without a built-in camera the choice is
+    /// pinned by name to keep it the same across launches
     public static func preferredDevice(in devices: [AVCaptureDevice]) -> AVCaptureDevice? {
-        devices.first { $0.deviceType == .builtInWideAngleCamera } ?? devices.first
+        devices.first { $0.deviceType == .builtInWideAngleCamera }
+            ?? devices.min { ($0.localizedName, $0.uniqueID) < ($1.localizedName, $1.uniqueID) }
     }
 
     public static func enableDalDevices() {

@@ -852,6 +852,52 @@
         }
       }
     },
+    "cameraFallbackNotice %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The saved camera “%@” was not found, so another camera is in use. It switches back automatically once the camera is connected."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保存したカメラ「%@」が見つからないため、代わりのカメラを使用しています。接続されると自動で切り替わります。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "저장된 카메라 “%@”를 찾을 수 없어 다른 카메라를 사용 중입니다. 카메라가 연결되면 자동으로 전환됩니다."
+          }
+        }
+      }
+    },
+    "cameraFallbackNoticeUnnamed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The saved camera was not found, so another camera is in use. It switches back automatically once the camera is connected."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保存したカメラが見つからないため、代わりのカメラを使用しています。接続されると自動で切り替わります。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "저장된 카메라를 찾을 수 없어 다른 카메라를 사용 중입니다. 카메라가 연결되면 자동으로 전환됩니다."
+          }
+        }
+      }
+    },
     "cancel": {
       "extractionState": "manual",
       "localizations": {

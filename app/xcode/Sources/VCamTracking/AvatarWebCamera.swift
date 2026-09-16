@@ -20,6 +20,7 @@ public struct CameraPermissionProvider: Sendable {
     public static let denied = CameraPermissionProvider(isAuthorized: { false }, requestPermission: { false })
 }
 
+@Observable
 @MainActor
 public final class AvatarWebCamera {
     public enum State: Sendable, Equatable {
@@ -36,32 +37,51 @@ public final class AvatarWebCamera {
         let pipeline: VisionTrackingPipeline
     }
 
+    private struct ResolvedDevice {
+        let device: AVCaptureDevice
+        /// The saved device is missing, so tracking runs on the default one until it appears
+        let isFallback: Bool
+    }
+
     private let cameraSession: CameraSession
     private var activePipeline: ActivePipeline?
     private var configurationRevision: UInt64 = 0
     public private(set) var state: State = .stopped
+    /// The device the running session captures from; nil while stopped
+    public private(set) var activeCaptureDevice: AVCaptureDevice?
+    public private(set) var isUsingFallbackDevice = false
     public let handTracking = HandTracking()
 
+    @ObservationIgnored
     public var permissionProvider: CameraPermissionProvider = .denied
 
     /// An alternative hand tracking backend, injected by an external module.
     /// nil means only the standard hand tracking is available.
+    @ObservationIgnored
     public var handPoseMapperFactory: (@Sendable () -> sending any HandPoseMapper)?
 
     /// An alternative face tracking backend, injected by an external module.
     /// When active it produces the full set of blend shapes so the camera can
     /// drive Perfect Sync. nil means only the standard face tracking is
     /// available.
+    @ObservationIgnored
     public var faceTrackingProviderFactory: (@Sendable () -> sending any FaceTrackingProvider)?
 
     private var lifecycleGeneration: UInt64 = 0
     private var lifecycleTask: Task<Void, Never>?
+    /// Whether the tracking configuration wants the camera, so a failed start can be retried
+    private var isCameraRequested = false
 
     public init() {
         cameraSession = CameraSession(initialFPS: Int(UserDefaults.standard.value(for: .cameraFps)))
         handTracking.setConfigurationChangeHandler { [weak self] in
             Task { @MainActor in
                 self?.applyVisionConfiguration()
+            }
+        }
+        NotificationCenter.default.addObserver(forName: .deviceWasChanged, object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated {
+                self?.reconcileCaptureDevice()
             }
         }
     }
@@ -96,8 +116,13 @@ public final class AvatarWebCamera {
     // Persisted by the module that injects faceTrackingProviderFactory
     private var isHighPrecisionFaceTrackingEnabled = false
 
+    /// The device tracking uses now, or would use when started
     public var currentCaptureDevice: AVCaptureDevice? {
-        Camera.camera(id: currentCaptureDeviceID) ?? Camera.defaultCaptureDevice
+        activeCaptureDevice ?? resolveCaptureDevice()?.device
+    }
+
+    public var savedCaptureDeviceName: String? {
+        UserDefaults.standard.value(for: .captureDeviceName)
     }
 
     public var isRunning: Bool {
@@ -112,15 +137,26 @@ public final class AvatarWebCamera {
     public func setRunning(_ shouldRun: Bool) -> Task<Void, Never> {
         lifecycleGeneration &+= 1
         let generation = lifecycleGeneration
+        return enqueueLifecycleTransition { camera in
+            guard generation == camera.lifecycleGeneration else { return }
+            if shouldRun {
+                await camera.startCamera(generation: generation)
+            } else {
+                await camera.stopCamera()
+            }
+        }
+    }
+
+    /// Device switches share the queue with start/stop so they never interleave with a
+    /// transition, but they don't supersede a pending start or stop
+    private func enqueueLifecycleTransition(
+        _ transition: @escaping @MainActor (AvatarWebCamera) async -> Void
+    ) -> Task<Void, Never> {
         let previousTask = lifecycleTask
         let task = Task { [weak self] in
             await previousTask?.value
-            guard let self, generation == self.lifecycleGeneration else { return }
-            if shouldRun {
-                await self.startCamera(generation: generation)
-            } else {
-                await self.stopCamera()
-            }
+            guard let self else { return }
+            await transition(self)
         }
         lifecycleTask = task
         return task
@@ -148,10 +184,13 @@ public final class AvatarWebCamera {
         }
         activePipeline = ActivePipeline(stream: stream, pipeline: pipeline)
         do {
-            let actualFPS = try await cameraSession.configure(
-                deviceID: currentCaptureDeviceID, fps: currentFPS)
+            guard let resolved = resolveCaptureDevice() else {
+                throw CameraSessionError.deviceNotFound(currentCaptureDeviceID)
+            }
+            let actualFPS = try await cameraSession.configure(deviceID: resolved.device.uniqueID, fps: currentFPS)
             // Store what the device actually runs at so the UI matches reality
             UserDefaults.standard.set(actualFPS, for: .cameraFps)
+            setActiveDevice(resolved)
             let configuration = makeConfigurationSnapshot()
             let handler = Self.makeFrameHandler(frameStream: stream, configuration: configuration)
             await cameraSession.setFrameHandler(
@@ -166,12 +205,66 @@ public final class AvatarWebCamera {
         }
     }
 
+    /// Keeps tracking alive when the saved device is missing: the default camera stands in
+    /// and `reconcileCaptureDevice` moves over as soon as the saved one appears
+    private func resolveCaptureDevice() -> ResolvedDevice? {
+        if let savedID = currentCaptureDeviceID {
+            if let device = Camera.camera(id: savedID) {
+                return ResolvedDevice(device: device, isFallback: false)
+            }
+            return Camera.defaultCaptureDevice.map { ResolvedDevice(device: $0, isFallback: true) }
+        }
+        return Camera.defaultCaptureDevice.map { ResolvedDevice(device: $0, isFallback: false) }
+    }
+
+    private func setActiveDevice(_ resolved: ResolvedDevice?) {
+        activeCaptureDevice = resolved?.device
+        isUsingFallbackDevice = resolved?.isFallback ?? false
+    }
+
+    /// Follows the device list: moves to the saved device when it appears, off a device that was
+    /// unplugged, and retries a start that failed for lack of a camera
+    private func reconcileCaptureDevice() {
+        enqueueLifecycleTransition { camera in
+            switch camera.state {
+            case .running:
+                let resolved = camera.resolveCaptureDevice()
+                guard resolved?.device != camera.activeCaptureDevice else { return }
+                guard let resolved else {
+                    camera.setActiveDevice(nil)
+                    return
+                }
+                _ = await camera.switchDevice(to: resolved)
+            case .failed:
+                guard camera.isCameraRequested, camera.resolveCaptureDevice() != nil else { return }
+                camera.setRunning(true)
+            case .stopped, .starting, .stopping:
+                break
+            }
+        }
+    }
+
+    /// - Returns: false when the session keeps the previous device because the new one can't be opened
+    private func switchDevice(to resolved: ResolvedDevice) async -> Bool {
+        do {
+            // Store what the device actually runs at so the UI matches reality
+            let actualFPS = try await cameraSession.setDevice(id: resolved.device.uniqueID)
+            UserDefaults.standard.set(actualFPS, for: .cameraFps)
+            setActiveDevice(resolved)
+            return true
+        } catch {
+            Logger.log("Failed to switch web camera device: \(error.localizedDescription)")
+            return false
+        }
+    }
+
     private func stopCamera() async {
         guard state != .stopped, state != .stopping else {
             return
         }
         state = .stopping
         await tearDownPipeline()
+        setActiveDevice(nil)
         state = .stopped
     }
 
@@ -186,21 +279,14 @@ public final class AvatarWebCamera {
         activePipeline = nil
     }
 
-    public func setCaptureDevice(id: String?) {
-        Task {
-            do {
-                // Store what the device actually runs at so the UI matches reality
-                let actualFPS = try await cameraSession.setDevice(id: id)
-                UserDefaults.standard.set(actualFPS, for: .cameraFps)
-                if let id {
-                    UserDefaults.standard.set(id, for: .captureDeviceId)
-                } else {
-                    // Clear the stored ID so the next launch falls back to the default camera
-                    UserDefaults.standard.remove(for: .captureDeviceId)
-                }
-            } catch {
-                Logger.log("Failed to set web camera device: \(error.localizedDescription)")
+    public func setCaptureDevice(_ device: AVCaptureDevice) {
+        enqueueLifecycleTransition { camera in
+            if camera.state == .running {
+                // A device the session can't open isn't persisted, so the next launch keeps the working one
+                guard await camera.switchDevice(to: ResolvedDevice(device: device, isFallback: false)) else { return }
             }
+            UserDefaults.standard.set(device.uniqueID, for: .captureDeviceId)
+            UserDefaults.standard.set(device.localizedName, for: .captureDeviceName)
         }
     }
 
@@ -253,6 +339,7 @@ public final class AvatarWebCamera {
     private func applyVisionConfiguration() {
         let configuration = makeConfigurationSnapshot()
         scheduleVisionConfigurationUpdate(configuration)
+        isCameraRequested = configuration.needsCameraCapture
         setRunning(configuration.needsCameraCapture)
     }
 

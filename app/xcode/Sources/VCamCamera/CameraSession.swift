@@ -93,9 +93,10 @@ public actor CameraSession {
     /// - Returns: The frame rate the device actually runs at, which can be lower
     ///   than the requested one when no format supports it.
     @discardableResult
-    public func configure(deviceID: String?, fps: Int) throws -> Int {
+    public func configure(deviceID: String, fps: Int) throws -> Int {
         guard fps > 0 else { throw CameraSessionError.invalidFPS(fps) }
-        guard let device = (deviceID.flatMap(Camera.camera(id:)) ?? Camera.defaultCaptureDevice) else {
+        // Looked up here rather than passed in so the device never crosses the actor boundary
+        guard let device = Camera.camera(id: deviceID) else {
             throw CameraSessionError.deviceNotFound(deviceID)
         }
         guard let result = Camera.searchLowestResolutionFormat(for: device, supportingFPS: Float64(fps)) else {
@@ -186,13 +187,14 @@ public actor CameraSession {
     }
 
     @discardableResult
-    public func setDevice(id: String?) throws -> Int {
+    public func setDevice(id: String) throws -> Int {
         try configure(deviceID: id, fps: requestedFPS)
     }
 
     @discardableResult
     public func setFPS(_ fps: Int) throws -> Int {
-        try configure(deviceID: captureDevice?.uniqueID, fps: fps)
+        guard let captureDevice else { throw CameraSessionError.notConfigured }
+        return try configure(deviceID: captureDevice.uniqueID, fps: fps)
     }
 
     public func start() throws {
