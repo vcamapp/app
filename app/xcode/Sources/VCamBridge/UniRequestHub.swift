@@ -116,10 +116,10 @@ extension UniBridge {
 public extension UniBridge {
     /// Registers a VRMA to the engine and waits for the validation result
     @MainActor
-    static func registerImportedMotion(id: String, path: String, axisMask: UInt8, loadImmediately: Bool) async throws {
+    static func registerImportedMotion(id: String, path: String, axisMask: UInt8, loadImmediately: Bool, isPose: Bool) async throws {
         let requestID = UUID()
         try await UniRequestHub.motionRegistration.wait(requestID: requestID) {
-            registerImportedMotion(id: id, path: path, axisMask: axisMask, loadImmediately: loadImmediately, requestID: requestID)
+            registerImportedMotion(id: id, path: path, axisMask: axisMask, loadImmediately: loadImmediately, isPose: isPose, requestID: requestID)
         }
     }
 

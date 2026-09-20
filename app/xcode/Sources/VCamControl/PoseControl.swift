@@ -8,14 +8,29 @@ import Foundation
 public enum PoseControl {
     /// The pose of one humanoid bone: its rotation as a delta from the rest
     /// pose in degrees (applied Y, X, Z), and its position for the hips only.
+    /// `effector` is where the bone is in the scene, for the bones `movePose`
+    /// can pull.
     public struct JointPose: Sendable, Equatable {
         public let bone: String
         public let rotation: SIMD3<Float>
         public let position: SIMD3<Float>?
+        public let effector: SIMD3<Float>?
 
-        public init(bone: String, rotation: SIMD3<Float>, position: SIMD3<Float>? = nil) {
+        public init(bone: String, rotation: SIMD3<Float>, position: SIMD3<Float>? = nil, effector: SIMD3<Float>? = nil) {
             self.bone = bone
             self.rotation = rotation
+            self.position = position
+            self.effector = effector
+        }
+    }
+
+    /// A point to pull one of the movable bones to, in scene meters
+    public struct JointTarget: Sendable, Equatable {
+        public let bone: String
+        public let position: SIMD3<Float>
+
+        public init(bone: String, position: SIMD3<Float>) {
+            self.bone = bone
             self.position = position
         }
     }
@@ -36,10 +51,13 @@ public enum PoseControl {
     /// What the avatar loaded into the editor can be posed with
     public struct Rig: Sendable, Equatable {
         public let bones: [String]
+        /// The bones `movePose` can pull (a subset of `bones`)
+        public let movableBones: [String]
         public let expressions: [String]
 
-        public init(bones: [String], expressions: [String]) {
+        public init(bones: [String], movableBones: [String], expressions: [String]) {
             self.bones = bones
+            self.movableBones = movableBones
             self.expressions = expressions
         }
     }
@@ -54,6 +72,8 @@ public enum PoseControlError: Error, Sendable, Equatable {
     case editorNotOpen
     /// The avatar has no such bone, or the name is not a VRM bone
     case boneNotFound(String)
+    /// The bone exists but is not one that can be pulled with IK
+    case boneNotMovable(String)
     /// The avatar has no such expression
     case expressionNotFound(String)
     /// No avatar is loaded, or it could not be loaded into the editor
@@ -72,6 +92,10 @@ public protocol PoseEditing: AnyObject {
     func currentPose() throws -> [PoseControl.JointPose]
     /// Applies the given bones as one undoable change; the others stay as they are
     func setPose(_ joints: [PoseControl.JointPose]) throws
+    /// Pulls the given bones to their points with IK, in order, as one undoable
+    /// change, and returns the whole pose afterwards. `plantsFeet` keeps the feet
+    /// where they are while the hips move
+    func movePose(_ targets: [PoseControl.JointTarget], plantsFeet: Bool) throws -> [PoseControl.JointPose]
     /// Returns the bones to the rest pose, or every bone when `bones` is nil
     func resetPose(bones: [String]?) throws
     /// Every expression the avatar has, whether worn or not

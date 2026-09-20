@@ -267,7 +267,8 @@ struct VCamAPIServiceTests {
 
             let response = try await call(makeService(), method: "pose.open")
             #expect(response["result"] == .object([
-                "bones": .array([.string("hips"), .string("leftUpperArm")]),
+                "bones": .array([.string("hips"), .string("leftUpperArm"), .string("leftHand")]),
+                "movableBones": .array([.string("hips"), .string("leftHand")]),
                 "expressions": .array([.string("happy"), .string("Wink")]),
             ]))
             #expect(editor.isOpen)
@@ -311,7 +312,7 @@ struct VCamAPIServiceTests {
             let decoded = try JSONDecoder().decode([JointPose].self, from: JSONEncoder().encode(joints))
             #expect(decoded.contains(JointPose(name: "leftUpperArm", rotation: [0, 0, -60])))
             // Values pass through Float, so use numbers that Double represents exactly
-            #expect(decoded.contains(JointPose(name: "hips", position: [0, 0.5, 0], rotation: [0, 10, 0])))
+            #expect(decoded.contains(JointPose(effector: [0, 1, 0], name: "hips", position: [0, 0.5, 0], rotation: [0, 10, 0])))
 
             let unknown = try await call(
                 makeService(), method: "pose.set", params: #"{"joints": [{"name": "tail", "rotation": [0, 0, 0]}]}"#)
@@ -321,6 +322,49 @@ struct VCamAPIServiceTests {
 
             let malformed = try await call(
                 makeService(), method: "pose.set", params: #"{"joints": [{"name": "hips", "rotation": [0, 0]}]}"#)
+            guard case .object(let malformedError)? = malformed["error"], case .int(let code)? = malformedError["code"] else {
+                Issue.record("Unexpected response: \(malformed)")
+                return
+            }
+            #expect(code == -32602)
+        }
+    }
+
+    @Test
+    func poseMoveSolvesThroughTheEditorAndReturnsThePose() async throws {
+        let editor = MockPoseEditor()
+        try await withPoseEditor(editor) {
+            let open = try await call(makeService(), method: "pose.open")
+            guard case .object(let rig)? = open["result"] else {
+                Issue.record("Unexpected response: \(open)")
+                return
+            }
+            #expect(rig["movableBones"] == .array([.string("hips"), .string("leftHand")]))
+
+            let moved = try await call(
+                makeService(), method: "pose.move",
+                params: #"{"joints": [{"name": "leftHand", "position": [0.25, 1.5, 0.125]}], "plantFeet": false}"#)
+            #expect(editor.effectors["leftHand"] == SIMD3(0.25, 1.5, 0.125))
+            #expect(editor.movedWithPlantedFeet == false)
+            guard case .array(let joints)? = moved["result"] else {
+                Issue.record("Unexpected response: \(moved)")
+                return
+            }
+            let decoded = try JSONDecoder().decode([JointPose].self, from: JSONEncoder().encode(joints))
+            #expect(decoded.contains(JointPose(effector: [0.25, 1.5, 0.125], name: "leftHand", rotation: [0, 0, 45])))
+
+            _ = try await call(makeService(), method: "pose.move", params: #"{"joints": [{"name": "hips", "position": [0, 0.75, 0]}]}"#)
+            #expect(editor.movedWithPlantedFeet == true)
+
+            let notMovable = try await call(
+                makeService(), method: "pose.move", params: #"{"joints": [{"name": "leftUpperArm", "position": [0, 1, 0]}]}"#)
+            #expect(errorObject(of: notMovable)?.dataCode == "bone_not_movable")
+            #expect(errorObject(of: notMovable)?.code == 1011)
+            let unknown = try await call(
+                makeService(), method: "pose.move", params: #"{"joints": [{"name": "tail", "position": [0, 1, 0]}]}"#)
+            #expect(errorObject(of: unknown)?.dataCode == "bone_not_found")
+            let malformed = try await call(
+                makeService(), method: "pose.move", params: #"{"joints": [{"name": "leftHand", "position": [0, 1]}]}"#)
             guard case .object(let malformedError)? = malformed["error"], case .int(let code)? = malformedError["code"] else {
                 Issue.record("Unexpected response: \(malformed)")
                 return
@@ -456,12 +500,15 @@ private final class MockPoseEditor: PoseEditing {
     var savedMotions: [(name: String, duration: Float, isLoop: Bool)] = []
     var applyCount = 0
 
-    private let bones = ["hips", "leftUpperArm"]
+    private let bones = ["hips", "leftUpperArm", "leftHand"]
+    private let movableBones = ["hips", "leftHand"]
     private let expressionNames = ["happy", "Wink"]
+    var effectors: [String: SIMD3<Float>] = ["hips": SIMD3(0, 1, 0), "leftHand": SIMD3(0.6, 1.3, 0)]
+    var movedWithPlantedFeet: Bool?
 
     func open() async throws -> PoseControl.Rig {
         isOpen = true
-        return PoseControl.Rig(bones: bones, expressions: expressionNames)
+        return PoseControl.Rig(bones: bones, movableBones: movableBones, expressions: expressionNames)
     }
 
     func close() {
@@ -470,7 +517,24 @@ private final class MockPoseEditor: PoseEditing {
 
     func currentPose() throws -> [PoseControl.JointPose] {
         try requireOpen()
-        return bones.compactMap { pose[$0] }
+        return bones.compactMap { bone in
+            pose[bone].map { PoseControl.JointPose(bone: bone, rotation: $0.rotation, position: $0.position, effector: effectors[bone]) }
+        }
+    }
+
+    func movePose(_ targets: [PoseControl.JointTarget], plantsFeet: Bool) throws -> [PoseControl.JointPose] {
+        try requireOpen()
+        for target in targets {
+            guard bones.contains(target.bone) else { throw PoseControlError.boneNotFound(target.bone) }
+            guard movableBones.contains(target.bone) else { throw PoseControlError.boneNotMovable(target.bone) }
+        }
+        movedWithPlantedFeet = plantsFeet
+        for target in targets {
+            effectors[target.bone] = target.position
+            // The solver writes rotations of its own; a fixed value stands in for them
+            pose[target.bone] = PoseControl.JointPose(bone: target.bone, rotation: SIMD3(0, 0, 45))
+        }
+        return try currentPose()
     }
 
     func setPose(_ joints: [PoseControl.JointPose]) throws {

@@ -89,6 +89,14 @@ public struct VCamSettingTrackingView: View {
 #endif
 
             VCamSettingTrackingFeatureView.make()
+
+            Section {
+                VCamSettingTrackingDiagnosticsView()
+            } header: {
+                Text(.trackingDiagnostics)
+            } footer: {
+                Text(.trackingDiagnosticsDescription)
+            }
         }
         .formStyle(.grouped)
     }

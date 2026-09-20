@@ -52,6 +52,7 @@ public extension UserDefaults.Key {
     static var screenResolutionWidth: Key<Int> { .init("vc_screenresolution_width", default: 1920) }
     static var screenResolutionHeight: Key<Int> { .init("vc_screenresolution_height", default: 1080) }
     static var trackingSmoothing: Key<Double> { .init("vc_tracking_smoothing", default: 0.0) }
+    static var trackingTraceOnLaunch: Key<Bool> { .init("vc_tracking_trace_on_launch", default: false) }
 #if FEATURE_3
     static var displayParameterId: Key<String?> { .init("vc_display_parameter_id", default: nil) }
     static var usePostEffect: Key<Bool> { .init("vc_use_posteffect", default: false) }

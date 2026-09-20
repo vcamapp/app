@@ -84,6 +84,7 @@ public final class Tracking {
     }
 
     public func configure() {
+        TrackingDiagnostics.shared.startIfRequestedAtLaunch()
         setFaceTrackingMethod(UserDefaults.standard.value(for: .trackingMethodFace))
 #if FEATURE_3
         var hand: TrackingMethod.Hand = UserDefaults.standard.value(for: .trackingMethodHand)
@@ -138,6 +139,7 @@ public final class Tracking {
     }
 
     private func applyMappingsToEngine(for mode: TrackingMode) {
+        TrackingTraceRecorder.shared.recordEvent("tracking.mappings", ["mode": String(describing: mode), "count": "\(mappings[mode].count)"])
         UniBridge.clearTrackingMapping(mode: mode)
         var entries = mappings[mode].filter(\.isEnabled)
         if mode == .blendShape {
@@ -194,6 +196,7 @@ public final class Tracking {
 
     public func setFaceTrackingMethod(_ method: TrackingMethod.Face) {
         if faceTrackingMethod != method {
+            TrackingTraceRecorder.shared.recordEvent("tracking.faceMethod", ["method": String(describing: method)])
             stopFaceResamplers()
         }
         faceTrackingMethod = method
@@ -278,6 +281,9 @@ public final class Tracking {
         }
         if fingerTrackingMethod != finger {
             vcamMotionTracking.stopFingerResampling()
+        }
+        if handTrackingMethod != hand || fingerTrackingMethod != finger {
+            TrackingTraceRecorder.shared.recordEvent("tracking.handMethod", ["hand": String(describing: hand), "finger": String(describing: finger)])
         }
         handTrackingMethod = hand
         fingerTrackingMethod = finger

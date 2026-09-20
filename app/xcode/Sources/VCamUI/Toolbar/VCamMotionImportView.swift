@@ -13,6 +13,7 @@ struct VCamMotionImportView: View {
     @State private var displayName: String
     @State private var translationAxes: TranslationAxisMask = .all
     @State private var isLoop = false
+    @State private var isPose = false
     @State private var isImporting = false
     @State private var importTask: Task<Void, Never>?
 
@@ -20,7 +21,7 @@ struct VCamMotionImportView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            MotionSettingsFields(displayName: $displayName, translationAxes: $translationAxes, isLoop: $isLoop)
+            MotionSettingsFields(displayName: $displayName, translationAxes: $translationAxes, isLoop: $isLoop, isPose: $isPose)
 
             HStack {
                 Spacer()
@@ -55,7 +56,8 @@ struct VCamMotionImportView: View {
                     from: sourceURL,
                     displayName: displayName,
                     translationAxes: translationAxes,
-                    isLoop: isLoop
+                    isLoop: isLoop,
+                    isPose: isPose
                 )
                 nsWindow?.close()
             } catch is CancellationError {
@@ -85,6 +87,7 @@ struct MotionSettingsFields: View {
     @Binding var displayName: String
     @Binding var translationAxes: TranslationAxisMask
     @Binding var isLoop: Bool
+    @Binding var isPose: Bool
 
     var body: some View {
         Form {
@@ -95,6 +98,10 @@ struct MotionSettingsFields: View {
             Section {
                 Toggle(isOn: $isLoop) {
                     Text(.loopPlayback)
+                }
+                Toggle(isOn: $isPose) {
+                    Text(.playAsStillPose)
+                    Text(.playAsStillPoseDescription)
                 }
             }
         }

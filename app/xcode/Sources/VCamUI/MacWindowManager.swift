@@ -80,6 +80,9 @@ public final class MacWindowManager {
 
     public var openPoseEditor: () -> Void = {}
 
+    /// Opens the pose editor on a still pose from the motion list so it can be edited in place
+    public var editPoseMotion: (_ motionID: String) -> Void = { _ in }
+
     /// Closes any existing window of the same type and opens a fresh one,
     /// so the contents are rebuilt instead of just fronting the old window
     public func reopen<T: MacWindow>(_ windowView: T, onOpen: (@MainActor () -> Void)? = nil, onClose: (@MainActor () -> Void)? = nil) {

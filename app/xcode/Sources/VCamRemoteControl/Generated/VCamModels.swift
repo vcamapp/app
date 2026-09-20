@@ -34,17 +34,32 @@ package struct ExpressionWeight: Codable, Hashable, Sendable {
 }
 
 package struct JointPose: Codable, Hashable, Sendable {
+    /// Where the bone is in the scene, in meters (x right, y up, z toward the viewer for a VRM 1.0 model). Present only for the bones pose.move can pull; pass a point near it to move the bone there.
+    package var effector: [Double]?
     /// A VRM 1.0 humanoid bone name.
     package var name: String
-    /// The hips' local position in meters. Present for hips only.
+    /// The hips' local position in meters. Present for hips only; to move a bone with IK use pose.move instead.
     package var position: [Double]?
     /// Degrees around the bone's X, Y and Z axes relative to the rest pose, applied in Y, X, Z order.
     package var rotation: [Double]
 
-    package init(name: String, position: [Double]? = nil, rotation: [Double]) {
+    package init(effector: [Double]? = nil, name: String, position: [Double]? = nil, rotation: [Double]) {
+        self.effector = effector
         self.name = name
         self.position = position
         self.rotation = rotation
+    }
+}
+
+package struct JointTarget: Codable, Hashable, Sendable {
+    /// One of the bones pose.open lists in movableBones.
+    package var name: String
+    /// The point to pull the bone to, in scene meters (the same space as JointPose.effector).
+    package var position: [Double]
+
+    package init(name: String, position: [Double]) {
+        self.name = name
+        self.position = position
     }
 }
 
@@ -122,10 +137,13 @@ package struct PoseOpenResult: Codable, Hashable, Sendable {
     package var bones: [String]
     /// The expressions the avatar has: presets first, then custom expressions.
     package var expressions: [String]
+    /// The bones pose.move can pull: the hips, the head, the elbows, the knees, the hands and the feet the avatar has.
+    package var movableBones: [String]
 
-    package init(bones: [String], expressions: [String]) {
+    package init(bones: [String], expressions: [String], movableBones: [String]) {
         self.bones = bones
         self.expressions = expressions
+        self.movableBones = movableBones
     }
 }
 
@@ -172,6 +190,8 @@ package enum VCamError: JSONRPCErrorConvertible, Hashable, Sendable {
     case poseEditorNotOpen(JSONRPCErrorObject)
     /// Bone was not found. (code 1010)
     case boneNotFound(JSONRPCErrorObject)
+    /// Bone cannot be moved with IK. (code 1011)
+    case boneNotMovable(JSONRPCErrorObject)
 
     package init?(_ error: JSONRPCErrorObject) {
         switch error.code {
@@ -186,6 +206,7 @@ package enum VCamError: JSONRPCErrorConvertible, Hashable, Sendable {
         case 1004: self = .sceneNotFound(error)
         case 1009: self = .poseEditorNotOpen(error)
         case 1010: self = .boneNotFound(error)
+        case 1011: self = .boneNotMovable(error)
         default: return nil
         }
     }
@@ -204,6 +225,7 @@ package enum VCamError: JSONRPCErrorConvertible, Hashable, Sendable {
         case .sceneNotFound(let error): return error
         case .poseEditorNotOpen(let error): return error
         case .boneNotFound(let error): return error
+        case .boneNotMovable(let error): return error
         }
     }
 
@@ -260,5 +282,10 @@ package enum VCamError: JSONRPCErrorConvertible, Hashable, Sendable {
     /// Bone was not found. (code 1010)
     package static func boneNotFound(data: JSONValue? = nil) -> Self {
         .boneNotFound(JSONRPCErrorObject(code: 1010, message: "Bone was not found.", data: data))
+    }
+
+    /// Bone cannot be moved with IK. (code 1011)
+    package static func boneNotMovable(data: JSONValue? = nil) -> Self {
+        .boneNotMovable(JSONRPCErrorObject(code: 1011, message: "Bone cannot be moved with IK.", data: data))
     }
 }

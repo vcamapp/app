@@ -53,6 +53,7 @@ struct ImportedMotionRecordTests {
         """
         let record = try JSONDecoder().decode(ImportedMotionRecord.self, from: Data(json.utf8))
         #expect(record.isLoop == false)
+        #expect(record.isPose == false)
         #expect(record.displayName == "Dance")
         #expect(record.translationAxes == .all)
         #expect(record.motionID == "vrma:550E8400-E29B-41D4-A716-446655440000")
@@ -63,7 +64,8 @@ struct ImportedMotionRecordTests {
         let record = ImportedMotionRecord(
             displayName: "Greeting",
             translationAxes: [.x, .y],
-            isLoop: true
+            isLoop: true,
+            isPose: true
         )
         let decoded = try JSONDecoder().decode(ImportedMotionRecord.self, from: JSONEncoder().encode(record))
         #expect(decoded == record)

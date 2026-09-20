@@ -3,6 +3,7 @@ import VCamLogger
 import VCamCamera
 import VCamBridge
 import VCamData
+import VCamEntity
 
 @MainActor
 @Observable

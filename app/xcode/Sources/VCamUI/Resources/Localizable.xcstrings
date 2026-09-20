@@ -4854,6 +4854,52 @@
         }
       }
     },
+    "playAsStillPose": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Play as a still pose"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "静止ポーズとして再生"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "정지 포즈로 재생"
+          }
+        }
+      }
+    },
+    "playAsStillPoseDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tracking takes priority for the head, hands and fingers."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "頭・手・指はトラッキングを優先します"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "머리·손·손가락은 트래킹을 우선합니다"
+          }
+        }
+      }
+    },
     "pleaseReauthenticate": {
       "extractionState": "manual",
       "localizations": {
@@ -7104,6 +7150,144 @@
           "stringUnit": {
             "state": "translated",
             "value": "트래킹 조정"
+          }
+        }
+      }
+    },
+    "trackingDiagnostics": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diagnostics"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "診断"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "진단"
+          }
+        }
+      }
+    },
+    "trackingDiagnosticsDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Records the values and timing of tracking data for up to 10 minutes and saves a zip you can attach when reporting a problem. Video and model files are not included."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "トラッキングのデータの値とタイミングを最大10分間記録し、問題を報告するときに添付できる zip として保存します。映像やモデルは含まれません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "트래킹 데이터의 값과 타이밍을 최대 10분간 기록하고, 문제를 보고할 때 첨부할 수 있는 zip으로 저장합니다. 영상과 모델은 포함되지 않습니다."
+          }
+        }
+      }
+    },
+    "trackingDiagnosticsRecord": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Record diagnostics"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "診断データを記録"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "진단 데이터 기록"
+          }
+        }
+      }
+    },
+    "trackingDiagnosticsShowInFinder": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show in Finder"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finder で表示"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finder에서 보기"
+          }
+        }
+      }
+    },
+    "trackingDiagnosticsStats": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld packets/s, %2$lld gaps, max delay %3$lld ms, %4$lld extrapolations (max ×%5$@)"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld パケット/秒、途切れ %2$lld 回、最大遅延 %3$lld ms、外挿 %4$lld 回 (最大 ×%5$@)"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld 패킷/초, 끊김 %2$lld회, 최대 지연 %3$lld ms, 외삽 %4$lld회 (최대 ×%5$@)"
+          }
+        }
+      }
+    },
+    "trackingDiagnosticsStop": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop recording"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "記録を停止"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "기록 중지"
           }
         }
       }

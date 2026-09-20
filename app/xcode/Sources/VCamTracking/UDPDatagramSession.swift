@@ -3,6 +3,7 @@ import Network
 import VCamBridge
 import VCamLogger
 import VCamEntity
+import VCamTrackingCore
 
 @MainActor
 final class UDPDatagramSession {
@@ -97,7 +98,10 @@ final class UDPDatagramSession {
         case .ready:
             onReady()
             connection.receiveDatagrams { [weak self, weak connection] data in
+                // Recorded here rather than by each receiver, so every protocol gets both timestamps
+                TrackingTraceRecorder.shared.recordDatagram(data)
                 DispatchQueue.runOnMain {
+                    TrackingTraceRecorder.shared.recordMainArrival()
                     guard let self, let connection, self.connection === connection else { return }
                     onData(data)
                 }

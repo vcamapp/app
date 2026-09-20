@@ -80,13 +80,14 @@ public final class MotionLibrary {
 
     // MARK: - Import
 
-    public func importMotion(from sourceURL: URL, displayName: String, translationAxes: TranslationAxisMask, isLoop: Bool) async throws -> ImportedMotionRecord {
+    public func importMotion(from sourceURL: URL, displayName: String, translationAxes: TranslationAxisMask, isLoop: Bool, isPose: Bool = false) async throws -> ImportedMotionRecord {
         let id = UUID()
         let record = ImportedMotionRecord(
             id: id,
             displayName: displayName,
             translationAxes: translationAxes,
-            isLoop: isLoop
+            isLoop: isLoop,
+            isPose: isPose
         )
         let fileURL = try await store.stageMotionFile(from: sourceURL, id: id)
         do {
@@ -95,7 +96,8 @@ public final class MotionLibrary {
                 id: record.motionID,
                 path: fileURL.path,
                 axisMask: record.translationAxes.rawValue,
-                loadImmediately: true
+                loadImmediately: true,
+                isPose: record.isPose
             )
             try Task.checkCancellation()
             try store.addRecord(record)
@@ -107,6 +109,24 @@ public final class MotionLibrary {
         return record
     }
 
+    /// Overwrites an imported motion's file with a still pose edited in the pose editor.
+    /// The ID, name and settings are kept, so shortcuts and the API keep working
+    public func replaceMotionFile(motionID: String, with data: Data) async throws {
+        guard case .imported(let id) = MotionID(rawValue: motionID), let record = store.record(id: id) else { return }
+        let fileURL = store.fileURL(for: record)
+        try data.write(to: fileURL, options: .atomic)
+        if !record.isPose {
+            try store.updatePose(id: id, isPose: true)
+        }
+        try await UniBridge.registerImportedMotion(
+            id: motionID,
+            path: fileURL.path,
+            axisMask: record.translationAxes.rawValue,
+            loadImmediately: true,
+            isPose: true
+        )
+    }
+
     /// Registers the persisted VRMA motions to the engine (called when the engine starts)
     public func registerPersistedMotionsToEngine() {
         for record in store.records {
@@ -115,6 +135,7 @@ public final class MotionLibrary {
                 path: store.fileURL(for: record).path,
                 axisMask: record.translationAxes.rawValue,
                 loadImmediately: false,
+                isPose: record.isPose,
                 requestID: UUID()
             )
         }
@@ -122,11 +143,21 @@ public final class MotionLibrary {
 
     // MARK: - Settings
 
-    public func updateSettings(motionID: String, displayName: String, axes: TranslationAxisMask, isLoop: Bool) throws {
+    public func updateSettings(motionID: String, displayName: String, axes: TranslationAxisMask, isLoop: Bool, isPose: Bool) throws {
         guard case .imported(let id) = MotionID(rawValue: motionID) else { return }
-        let axesChanged = store.record(id: id)?.translationAxes != axes
-        try store.updateSettings(id: id, displayName: displayName, translationAxes: axes, isLoop: isLoop)
-        if axesChanged {
+        guard let before = store.record(id: id) else { return }
+        try store.updateSettings(id: id, displayName: displayName, translationAxes: axes, isLoop: isLoop, isPose: isPose)
+        if before.isPose != isPose {
+            // The pose flag is part of the engine's asset, so register again (the engine reloads it)
+            UniBridge.registerImportedMotion(
+                id: motionID,
+                path: store.fileURL(for: before).path,
+                axisMask: axes.rawValue,
+                loadImmediately: false,
+                isPose: isPose,
+                requestID: UUID()
+            )
+        } else if before.translationAxes != axes {
             UniBridge.updateImportedMotionAxes(id: motionID, axisMask: axes.rawValue)
         }
     }

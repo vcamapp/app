@@ -24,7 +24,8 @@ package enum MotionPacketV1Decoder {
             return MotionPacketHeaderV1(
                 type: type,
                 sessionID: reader.u32(MotionPacketV1Layout.Header.sessionID),
-                sequence: reader.u32(MotionPacketV1Layout.Header.sequence)
+                sequence: reader.u32(MotionPacketV1Layout.Header.sequence),
+                timestampNanoseconds: reader.u64(MotionPacketV1Layout.Header.timestampNanoseconds)
             )
         }
     }
@@ -85,6 +86,10 @@ private struct Reader {
 
     package func u32(_ offset: Int) -> UInt32 {
         bytes.loadUnaligned(fromByteOffset: offset, as: UInt32.self).littleEndian
+    }
+
+    package func u64(_ offset: Int) -> UInt64 {
+        bytes.loadUnaligned(fromByteOffset: offset, as: UInt64.self).littleEndian
     }
 
     package func f32(_ offset: Int) -> Float {

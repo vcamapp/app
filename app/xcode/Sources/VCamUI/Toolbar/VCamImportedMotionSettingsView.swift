@@ -8,6 +8,7 @@ struct VCamImportedMotionSettingsView: View {
         _displayName = State(initialValue: record.displayName)
         _translationAxes = State(initialValue: record.translationAxes)
         _isLoop = State(initialValue: record.isLoop)
+        _isPose = State(initialValue: record.isPose)
     }
 
     let record: ImportedMotionRecord
@@ -15,12 +16,13 @@ struct VCamImportedMotionSettingsView: View {
     @State private var displayName: String
     @State private var translationAxes: TranslationAxisMask
     @State private var isLoop: Bool
+    @State private var isPose: Bool
 
     @Environment(\.nsWindow) var nsWindow
 
     var body: some View {
         VStack(spacing: 0) {
-            MotionSettingsFields(displayName: $displayName, translationAxes: $translationAxes, isLoop: $isLoop)
+            MotionSettingsFields(displayName: $displayName, translationAxes: $translationAxes, isLoop: $isLoop, isPose: $isPose)
 
             HStack {
                 Spacer()
@@ -39,7 +41,7 @@ struct VCamImportedMotionSettingsView: View {
             }
             .padding([.horizontal, .bottom])
         }
-        .frame(width: 360, height: 320)
+        .frame(width: 360, height: 380)
     }
 
     private func save() {
@@ -48,7 +50,8 @@ struct VCamImportedMotionSettingsView: View {
                 motionID: record.motionID,
                 displayName: displayName,
                 axes: translationAxes,
-                isLoop: isLoop
+                isLoop: isLoop,
+                isPose: isPose
             )
             nsWindow?.close()
         } catch {

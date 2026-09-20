@@ -48,7 +48,7 @@ package struct VCamAPIService: VCamHandler {
         }
         return AppGetInfoResult(
             apiVersion: APISpecification.apiVersion,
-            appVersion: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "unknown",
+            appVersion: Bundle.main.version,
             capabilities: capabilities
         )
     }
@@ -206,19 +206,32 @@ package struct VCamAPIService: VCamHandler {
     package func poseOpen() async throws -> PoseOpenResult {
         try await withPoseEditor { editor in
             let rig = try await editor.open()
-            return PoseOpenResult(bones: rig.bones, expressions: rig.expressions)
+            return PoseOpenResult(bones: rig.bones, expressions: rig.expressions, movableBones: rig.movableBones)
         }
     }
 
     @MainActor
     package func poseGet() async throws -> [JointPose] {
         try await withPoseEditor { editor in
-            try editor.currentPose().map { joint in
-                JointPose(name: joint.bone,
-                          position: joint.position.map(Self.components),
-                          rotation: Self.components(joint.rotation))
-            }
+            try editor.currentPose().map(Self.jointPose)
         }
+    }
+
+    @MainActor
+    package func poseMove(joints: [JointTarget], plantFeet: Bool?) async throws -> [JointPose] {
+        let targets = try joints.map { joint in
+            PoseControl.JointTarget(bone: joint.name, position: try Self.vector(joint.position, of: "position"))
+        }
+        return try await withPoseEditor { editor in
+            try editor.movePose(targets, plantsFeet: plantFeet ?? true).map(Self.jointPose)
+        }
+    }
+
+    private static func jointPose(_ joint: PoseControl.JointPose) -> JointPose {
+        JointPose(effector: joint.effector.map(components),
+                  name: joint.bone,
+                  position: joint.position.map(components),
+                  rotation: components(joint.rotation))
     }
 
     @MainActor
@@ -322,6 +335,8 @@ package struct VCamAPIService: VCamHandler {
             VCamError.poseEditorNotOpen(data: .errorCode("pose_editor_not_open"))
         case .boneNotFound:
             VCamError.boneNotFound(data: .errorCode("bone_not_found"))
+        case .boneNotMovable:
+            VCamError.boneNotMovable(data: .errorCode("bone_not_movable"))
         case .expressionNotFound:
             VCamError.expressionNotFound(data: .errorCode("expression_not_found"))
         case .avatarUnavailable:

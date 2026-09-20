@@ -433,7 +433,7 @@
     {
       "name": "pose.open",
       "summary": "Opens the pose editor with the current avatar",
-      "description": "Opens the pose editor window, or fronts it when it is already open, and loads the current avatar into it. The other pose methods require the editor to be open. Bone names follow VRM 1.0 (`hips`, `spine`, `leftUpperArm`, ...); rotations are degrees relative to the rest pose (T-pose), applied in Y, X, Z order around the bone's own axes, so `[0, 0, 0]` is the rest pose. Expressions are named as VRM 1.0 names its presets (`happy`, `blink`, ...) and as the model names its custom expressions; weights run from 0 to 1. Available only when app.getInfo lists the poseEditor capability.",
+      "description": "Opens the pose editor window, or fronts it when it is already open, and loads the current avatar into it. The other pose methods require the editor to be open. Bone names follow VRM 1.0 (`hips`, `spine`, `leftUpperArm`, ...); rotations are degrees relative to the rest pose (T-pose), applied in Y, X, Z order around the bone's own axes, so `[0, 0, 0]` is the rest pose. Expressions are named as VRM 1.0 names its presets (`happy`, `blink`, ...) and as the model names its custom expressions; weights run from 0 to 1. Available only when app.getInfo lists the poseEditor capability. Besides rotating bones one by one with pose.set, pose.move pulls a hand, foot, elbow, knee, the head or the hips to a point and solves the limb with IK, the way dragging it in the editor does.",
       "paramStructure": "by-name",
       "params": [],
       "result": {
@@ -442,7 +442,8 @@
           "type": "object",
           "required": [
             "bones",
-            "expressions"
+            "expressions",
+            "movableBones"
           ],
           "properties": {
             "bones": {
@@ -458,6 +459,13 @@
                 "type": "string"
               },
               "description": "The expressions the avatar has: presets first, then custom expressions."
+            },
+            "movableBones": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "The bones pose.move can pull: the hips, the head, the elbows, the knees, the hands and the feet the avatar has."
             }
           }
         }
@@ -521,6 +529,53 @@
         },
         {
           "$ref": "#/components/errors/boneNotFound"
+        }
+      ]
+    },
+    {
+      "name": "pose.move",
+      "summary": "Pulls bones to points with IK",
+      "description": "Moves each listed bone to its point and solves the bones between it and the body, as one undoable change: a hand or foot is reached with the arm or leg (the shoulder follows; an unreachable point is approached at full stretch), an elbow or knee is moved while the hand or foot stays as close as it can to where it was, the head is leaned toward the point by bending the spine (the hips stay; only the direction is followed), and the hips are placed as given. The bones are solved in the order listed. Rotations the solver writes replace what pose.set had set on those bones; the result returns the whole pose so the caller can read them.",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "joints",
+          "required": true,
+          "schema": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/JointTarget"
+            }
+          },
+          "description": "The bones to pull and where to. Bones not listed keep their pose unless the solver bends them."
+        },
+        {
+          "name": "plantFeet",
+          "schema": {
+            "type": "boolean"
+          },
+          "description": "When moving the hips, keep both feet where they are and bend the legs. Defaults to true; false moves the whole body."
+        }
+      ],
+      "result": {
+        "name": "joints",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/JointPose"
+          }
+        },
+        "description": "The pose after solving, as pose.get returns it."
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/poseEditorNotOpen"
+        },
+        {
+          "$ref": "#/components/errors/boneNotFound"
+        },
+        {
+          "$ref": "#/components/errors/boneNotMovable"
         }
       ]
     },
@@ -1016,7 +1071,16 @@
             },
             "minItems": 3,
             "maxItems": 3,
-            "description": "The hips' local position in meters. Present for hips only."
+            "description": "The hips' local position in meters. Present for hips only; to move a bone with IK use pose.move instead."
+          },
+          "effector": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 3,
+            "maxItems": 3,
+            "description": "Where the bone is in the scene, in meters (x right, y up, z toward the viewer for a VRM 1.0 model). Present only for the bones pose.move can pull; pass a point near it to move the bone there."
           }
         }
       },
@@ -1036,6 +1100,28 @@
             "minimum": 0,
             "maximum": 1,
             "description": "0 takes the expression off; 1 wears it in full."
+          }
+        }
+      },
+      "JointTarget": {
+        "type": "object",
+        "required": [
+          "name",
+          "position"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "One of the bones pose.open lists in movableBones."
+          },
+          "position": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 3,
+            "maxItems": 3,
+            "description": "The point to pull the bone to, in scene meters (the same space as JointPose.effector)."
           }
         }
       }
@@ -1084,6 +1170,10 @@
       "boneNotFound": {
         "code": 1010,
         "message": "Bone was not found."
+      },
+      "boneNotMovable": {
+        "code": 1011,
+        "message": "Bone cannot be moved with IK."
       }
     }
   }

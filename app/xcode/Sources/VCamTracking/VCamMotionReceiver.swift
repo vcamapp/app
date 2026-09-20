@@ -74,6 +74,7 @@ public final class VCamMotionReceiver {
             onReady: { [weak self] in
                 guard let self else { return }
                 self.connectionStatus = .connected
+                TrackingTraceRecorder.shared.recordEvent("vcamMotion.connected")
                 self.startTimeoutWatchdog()
             },
             onData: { [weak self] data in
@@ -114,6 +115,7 @@ public final class VCamMotionReceiver {
         timeoutWatchdog.markDataReceived()
         if motionProtocolVersion != version {
             motionProtocolVersion = version
+            TrackingTraceRecorder.shared.recordEvent("vcamMotion.protocol", ["version": version.displayName])
         }
     }
 
@@ -139,12 +141,14 @@ public final class VCamMotionReceiver {
                 self?.connectionStatus == .connected
             },
             onTimeout: { [weak self] in
+                TrackingTraceRecorder.shared.recordEvent("vcamMotion.timeout")
                 self?.restartIfNeeded()
             }
         )
     }
 
     private func restartIfNeeded() {
+        TrackingTraceRecorder.shared.recordEvent("vcamMotion.restart")
         cancelRestartRetry()
         guard shouldAutoReconnect, let tracking, let settings else {
             stopInternal()

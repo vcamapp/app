@@ -7,6 +7,7 @@ import VCamCamera
 import VCamTracking
 import VCamLogger
 import SystemExtensions
+import VCamEntity
 #if FEATURE_3
 import VCamVRoidHub
 #endif

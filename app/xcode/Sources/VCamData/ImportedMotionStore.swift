@@ -75,16 +75,21 @@ public final class ImportedMotionStore {
     }
 
     /// Updates all the settings with a single manifest write to avoid partial saves
-    public func updateSettings(id: UUID, displayName: String, translationAxes: TranslationAxisMask, isLoop: Bool) throws {
+    public func updateSettings(id: UUID, displayName: String, translationAxes: TranslationAxisMask, isLoop: Bool, isPose: Bool) throws {
         try updateRecord(id: id) {
             $0.displayName = displayName
             $0.translationAxes = translationAxes
             $0.isLoop = isLoop
+            $0.isPose = isPose
         }
     }
 
     public func updateLoop(id: UUID, isLoop: Bool) throws {
         try updateRecord(id: id) { $0.isLoop = isLoop }
+    }
+
+    public func updatePose(id: UUID, isPose: Bool) throws {
+        try updateRecord(id: id) { $0.isPose = isPose }
     }
 
     public func move(fromOffsets source: IndexSet, toOffset destination: Int) throws {

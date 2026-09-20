@@ -60,6 +60,8 @@ public struct RegisterImportedMotionPayload {
     public var requestIDPtr: UnsafePointer<CChar>?
     public var axisMask: UInt8
     public var loadImmediately: UInt8
+    /// `ImportedMotionRecord.isPose`
+    public var isPose: UInt8
 }
 
 public struct ImportedMotionAxesPayload {
@@ -177,7 +179,7 @@ public extension UniBridge {
         send(.stopMotion, string: id)
     }
 
-    static func registerImportedMotion(id: String, path: String, axisMask: UInt8, loadImmediately: Bool, requestID: UUID) {
+    static func registerImportedMotion(id: String, path: String, axisMask: UInt8, loadImmediately: Bool, isPose: Bool, requestID: UUID) {
         id.withCString { idPtr in
             path.withCString { pathPtr in
                 requestID.uuidString.withCString { requestIDPtr in
@@ -186,7 +188,8 @@ public extension UniBridge {
                         pathPtr: pathPtr,
                         requestIDPtr: requestIDPtr,
                         axisMask: axisMask,
-                        loadImmediately: loadImmediately ? 1 : 0
+                        loadImmediately: loadImmediately ? 1 : 0,
+                        isPose: isPose ? 1 : 0
                     )
                     send(.registerImportedMotion, payload: &payload)
                 }

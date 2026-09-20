@@ -50,7 +50,7 @@ package protocol VCamProtocol: Sendable {
     @concurrent func subtitleClear() async throws -> Bool
     /// Opens the pose editor with the current avatar
     /// 
-    /// Opens the pose editor window, or fronts it when it is already open, and loads the current avatar into it. The other pose methods require the editor to be open. Bone names follow VRM 1.0 (`hips`, `spine`, `leftUpperArm`, ...); rotations are degrees relative to the rest pose (T-pose), applied in Y, X, Z order around the bone's own axes, so `[0, 0, 0]` is the rest pose. Expressions are named as VRM 1.0 names its presets (`happy`, `blink`, ...) and as the model names its custom expressions; weights run from 0 to 1. Available only when app.getInfo lists the poseEditor capability.
+    /// Opens the pose editor window, or fronts it when it is already open, and loads the current avatar into it. The other pose methods require the editor to be open. Bone names follow VRM 1.0 (`hips`, `spine`, `leftUpperArm`, ...); rotations are degrees relative to the rest pose (T-pose), applied in Y, X, Z order around the bone's own axes, so `[0, 0, 0]` is the rest pose. Expressions are named as VRM 1.0 names its presets (`happy`, `blink`, ...) and as the model names its custom expressions; weights run from 0 to 1. Available only when app.getInfo lists the poseEditor capability. Besides rotating bones one by one with pose.set, pose.move pulls a hand, foot, elbow, knee, the head or the hips to a point and solves the limb with IK, the way dragging it in the editor does.
     @concurrent func poseOpen() async throws -> PoseOpenResult
     /// Returns the pose being edited
     @concurrent func poseGet() async throws -> [JointPose]
@@ -58,6 +58,10 @@ package protocol VCamProtocol: Sendable {
     /// 
     /// Applies the given bones as one undoable change. `position` is accepted for `hips` only.
     @concurrent func poseSet(joints: [JointPose]) async throws -> Bool
+    /// Pulls bones to points with IK
+    /// 
+    /// Moves each listed bone to its point and solves the bones between it and the body, as one undoable change: a hand or foot is reached with the arm or leg (the shoulder follows; an unreachable point is approached at full stretch), an elbow or knee is moved while the hand or foot stays as close as it can to where it was, the head is leaned toward the point by bending the spine (the hips stay; only the direction is followed), and the hips are placed as given. The bones are solved in the order listed. Rotations the solver writes replace what pose.set had set on those bones; the result returns the whole pose so the caller can read them.
+    @concurrent func poseMove(joints: [JointTarget], plantFeet: Bool?) async throws -> [JointPose]
     /// Returns bones to the rest pose
     @concurrent func poseReset(bones: [String]?) async throws -> Bool
     /// Returns the expression weights being edited
@@ -263,7 +267,7 @@ package struct VCam: VCamProtocol {
 
     /// Opens the pose editor with the current avatar
     /// 
-    /// Opens the pose editor window, or fronts it when it is already open, and loads the current avatar into it. The other pose methods require the editor to be open. Bone names follow VRM 1.0 (`hips`, `spine`, `leftUpperArm`, ...); rotations are degrees relative to the rest pose (T-pose), applied in Y, X, Z order around the bone's own axes, so `[0, 0, 0]` is the rest pose. Expressions are named as VRM 1.0 names its presets (`happy`, `blink`, ...) and as the model names its custom expressions; weights run from 0 to 1. Available only when app.getInfo lists the poseEditor capability.
+    /// Opens the pose editor window, or fronts it when it is already open, and loads the current avatar into it. The other pose methods require the editor to be open. Bone names follow VRM 1.0 (`hips`, `spine`, `leftUpperArm`, ...); rotations are degrees relative to the rest pose (T-pose), applied in Y, X, Z order around the bone's own axes, so `[0, 0, 0]` is the rest pose. Expressions are named as VRM 1.0 names its presets (`happy`, `blink`, ...) and as the model names its custom expressions; weights run from 0 to 1. Available only when app.getInfo lists the poseEditor capability. Besides rotating bones one by one with pose.set, pose.move pulls a hand, foot, elbow, knee, the head or the hips to a point and solves the limb with IK, the way dragging it in the editor does.
     @concurrent package func poseOpen() async throws -> PoseOpenResult {
         do {
             return try await rpc.call(method: "pose.open")
@@ -291,6 +295,23 @@ package struct VCam: VCamProtocol {
         }
         do {
             return try await rpc.call(method: "pose.set", params: Params(joints: joints))
+        } catch let JSONRPCError.server(error) {
+            throw VCamError(error) ?? JSONRPCError.server(error)
+        }
+    }
+
+    /// Pulls bones to points with IK
+    /// 
+    /// Moves each listed bone to its point and solves the bones between it and the body, as one undoable change: a hand or foot is reached with the arm or leg (the shoulder follows; an unreachable point is approached at full stretch), an elbow or knee is moved while the hand or foot stays as close as it can to where it was, the head is leaned toward the point by bending the spine (the hips stay; only the direction is followed), and the hips are placed as given. The bones are solved in the order listed. Rotations the solver writes replace what pose.set had set on those bones; the result returns the whole pose so the caller can read them.
+    /// - Parameter joints: The bones to pull and where to. Bones not listed keep their pose unless the solver bends them.
+    /// - Parameter plantFeet: When moving the hips, keep both feet where they are and bend the legs. Defaults to true; false moves the whole body.
+    @concurrent package func poseMove(joints: [JointTarget], plantFeet: Bool? = nil) async throws -> [JointPose] {
+        struct Params: Encodable, Sendable {
+            var joints: [JointTarget]
+            var plantFeet: Bool?
+        }
+        do {
+            return try await rpc.call(method: "pose.move", params: Params(joints: joints, plantFeet: plantFeet))
         } catch let JSONRPCError.server(error) {
             throw VCamError(error) ?? JSONRPCError.server(error)
         }
