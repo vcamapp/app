@@ -149,6 +149,7 @@ public final class AvatarWebCamera {
 
     /// Device switches share the queue with start/stop so they never interleave with a
     /// transition, but they don't supersede a pending start or stop
+    @discardableResult
     private func enqueueLifecycleTransition(
         _ transition: @escaping @MainActor (AvatarWebCamera) async -> Void
     ) -> Task<Void, Never> {
@@ -388,10 +389,10 @@ public final class AvatarWebCamera {
     private static func apply(_ output: TrackingOutput) {
         switch output.face {
         case .vcamBlendShape(let values):
-            UniBridge.shared.receiveVCamBlendShape(FaceTransformValues.presenting(
+            Tracking.shared.sendFaceValues(FaceTransformValues.presenting(
                 imageSpaceValues: values,
                 mirrored: Tracking.shared.mirrorsTracking
-            ))
+            ), mode: .blendShape)
         case .cameraFace(let result):
             applyCameraFace(result)
         case nil:
@@ -416,22 +417,22 @@ public final class AvatarWebCamera {
         let useEyeTracking = Tracking.shared.useEyeTracking
         let mirrored = Tracking.shared.mirrorsTracking
         if Tracking.shared.activeFaceMappingMode == .perfectSync {
-            UniBridge.shared.receivePerfectSync(FaceTransformValues.perfectSync(
+            Tracking.shared.sendFaceValues(FaceTransformValues.perfectSync(
                 translation: result.headTranslation,
                 rotationEuler: result.headRotationEuler,
                 blendShape: result.blendShape,
                 useEyeTracking: useEyeTracking,
                 mirrored: mirrored
-            ))
+            ), mode: .perfectSync)
         } else {
-            UniBridge.shared.receiveVCamBlendShape(FaceTransformValues.vcamHeadTransform(
+            Tracking.shared.sendFaceValues(FaceTransformValues.vcamHeadTransform(
                 translation: result.headTranslation,
                 rotationEuler: result.headRotationEuler,
                 blendShape: result.blendShape,
                 useEyeTracking: useEyeTracking,
                 mirrored: mirrored,
                 vowel: VowelEstimator.estimate(blendShape: result.blendShape)
-            ))
+            ), mode: .blendShape)
         }
     }
 }

@@ -191,8 +191,8 @@ public final class TrackingDiagnostics {
         var size = 0
         sysctlbyname("hw.model", nil, &size, nil, 0)
         guard size > 0 else { return "" }
-        var buffer = [CChar](repeating: 0, count: size)
+        var buffer = [UInt8](repeating: 0, count: size)
         sysctlbyname("hw.model", &buffer, &size, nil, 0)
-        return String(cString: buffer)
+        return String(decoding: buffer.prefix { $0 != 0 }, as: UTF8.self)
     }
 }

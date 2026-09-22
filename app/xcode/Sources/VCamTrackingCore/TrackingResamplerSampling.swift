@@ -69,11 +69,21 @@ public enum TrackingResamplerSampling {
         guard dt > 0 else { return Output(values: last.values, mode: .held, factor: nil, spacing: dt) }
         let dtPred = min(renderTime - last.time, settings.maxPrediction)
         guard dtPred > 0 else { return Output(values: last.values, mode: .held, factor: 0, spacing: dt) }
-        var factor = Float(dtPred / dt)
+        var factor = Float(dtPred / max(dt, typicalSpacing(of: frames[...index])))
         if let limit = settings.maxExtrapolationFactor {
             factor = min(factor, limit)
         }
         let values = vDSP.linearInterpolate(prev.values, last.values, using: 1 + factor)
         return Output(values: values, mode: .extrapolated, factor: factor, spacing: dt)
+    }
+
+    /// Packets arrive in bunches when the main thread stalls or Wi-Fi batches them, so the last
+    /// two frames can sit well under a millisecond apart while their values are a full frame
+    /// apart. Dividing by that spacing turns one frame of motion into hundreds. The mean
+    /// spacing of the buffer is what the pair would have had if it had arrived evenly, and a
+    /// silence inside the buffer only raises it, which errs toward holding
+    private static func typicalSpacing(of frames: ArraySlice<Frame>) -> Double {
+        guard frames.count >= 3, let first = frames.first, let last = frames.last else { return 0 }
+        return (last.time - first.time) / Double(frames.count - 1)
     }
 }

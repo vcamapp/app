@@ -224,7 +224,7 @@ private extension AppMenu {
     }
 
     @objc private func help() {
-        let url = URL(string: "https://docs.vcamapp.com/")!
+        let url = URL(string: String(localized: .docsURL))!
         NSWorkspace.shared.open(url)
     }
 }

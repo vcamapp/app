@@ -8,10 +8,10 @@ package final class MotionV1Receiver {
     /// the final session/sequence decision.
     package enum ReceiveResult { case handledV1, rejectedV1, notV1 }
     private var faceSequence = MotionSequenceState()
-    private let onFace: @MainActor (VCamMotion) -> Void
+    private let onFace: @MainActor (VCamMotion, _ receivedAt: TimeInterval) -> Void
     private let onHands: @MainActor (Data) -> Void
 
-    package init(onFace: @escaping @MainActor (VCamMotion) -> Void,
+    package init(onFace: @escaping @MainActor (VCamMotion, _ receivedAt: TimeInterval) -> Void,
          onHands: @escaping @MainActor (Data) -> Void) {
         self.onFace = onFace
         self.onHands = onHands
@@ -21,7 +21,7 @@ package final class MotionV1Receiver {
         faceSequence.reset()
     }
 
-    package func receive(_ data: Data) -> ReceiveResult {
+    package func receive(_ data: Data, receivedAt: TimeInterval) -> ReceiveResult {
         do {
             guard let header = try MotionPacketV1Decoder.headerIfV1(data) else { return .notV1 }
             switch header.type {
@@ -29,7 +29,7 @@ package final class MotionV1Receiver {
                 guard faceSequence.canAccept(sessionID: header.sessionID, sequence: header.sequence) else { return .rejectedV1 }
                 let face = try MotionPacketV1Decoder.decodeFace(data, header: header)
                 faceSequence.commit(sessionID: header.sessionID, sequence: header.sequence)
-                onFace(face)
+                onFace(face, receivedAt)
                 return .handledV1
             case .hands:
                 try MotionPacketV1Decoder.validateHandsPacket(data, header: header)

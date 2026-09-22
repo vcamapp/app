@@ -37,11 +37,11 @@ public final class FacialMocapReceiver {
         let settingsProvider = smoothingStorage.settingsProvider
 
         blendShapeResampler = TrackingResampler(label: "facial-mocap-blendshape", settingsProvider: settingsProvider) { @MainActor values in
-            UniBridge.shared.receiveVCamBlendShape(values)
+            Tracking.shared.sendFaceValues(values, mode: .blendShape)
         }
 
         perfectSyncResampler = TrackingResampler(label: "facial-mocap-perfectsync", settingsProvider: settingsProvider) { @MainActor values in
-            UniBridge.shared.receivePerfectSync(values)
+            Tracking.shared.sendFaceValues(values, mode: .perfectSync)
         }
     }
 
@@ -106,13 +106,13 @@ public final class FacialMocapReceiver {
         }
     }
 
-    private func oniFacialMocapReceived(_ data: FacialMocapData) {
+    private func oniFacialMocapReceived(_ data: FacialMocapData, receivedAt: TimeInterval) {
         guard Tracking.shared.faceTrackingMethod == .iFacialMocap else { return }
 
         let smoothingEnabled = smoothingStorage.isEnabled
         if Tracking.shared.activeFaceMappingMode == .perfectSync {
             let perfectSync = data.perfectSync(useEyeTracking: Tracking.shared.useEyeTracking, mirrored: Tracking.shared.mirrorsTracking)
-            perfectSyncResampler.send(perfectSync, smoothed: smoothingEnabled)
+            perfectSyncResampler.send(perfectSync, smoothed: smoothingEnabled, receivedAt: receivedAt)
         } else {
             let blendShape = data.vcamHeadTransform(useEyeTracking: Tracking.shared.useEyeTracking, mirrored: Tracking.shared.mirrorsTracking)
             facialMocapLastValues = vDSP.linearInterpolate(
@@ -121,7 +121,7 @@ public final class FacialMocapReceiver {
                 using: 0.5
             )
 
-            blendShapeResampler.send(facialMocapLastValues, smoothed: smoothingEnabled)
+            blendShapeResampler.send(facialMocapLastValues, smoothed: smoothingEnabled, receivedAt: receivedAt)
         }
     }
 
@@ -150,12 +150,12 @@ extension FacialMocapReceiver {
                 self.connectionStatus = .connected
                 self.startTimeoutWatchdog()
             },
-            onData: { [weak self] data in
+            onData: { [weak self] data, receivedAt in
                 guard let self,
                       let rawData = String(data: data, encoding: .utf8),
                       let mocapData = FacialMocapData(rawData: rawData) else { return }
                 self.timeoutWatchdog.markDataReceived()
-                self.oniFacialMocapReceived(mocapData)
+                self.oniFacialMocapReceived(mocapData, receivedAt: receivedAt)
             }
         )
         connectionStatus = .connecting

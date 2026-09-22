@@ -21,6 +21,7 @@ public struct VCamSettingTrackingView: View {
 #endif
 
     @Environment(UniState.self) private var uniState
+    private var tracking = Tracking.shared
 
     public var body: some View {
         @Bindable var state = uniState
@@ -79,6 +80,22 @@ public struct VCamSettingTrackingView: View {
                 .disabled(!useEyeTracking)
                 .opacity(useEyeTracking ? 1.0 : 0.5)
             }
+            Section {
+                Picker(selection: blinkSource) {
+                    ForEach(BlinkSource.allCases) { source in
+                        Text(source.name).tag(source)
+                    }
+                } label: {
+                    Text(.blink)
+                }
+                .pickerStyle(.segmented)
+            } footer: {
+                if let description = tracking.blinkSource.description {
+                    Text(description)
+                }
+            }
+            .disabled(!hasTrackedBlink)
+            .opacity(hasTrackedBlink ? 1.0 : 0.5)
 #if FEATURE_3
             if !Tracking.shared.usesAlternativeHandTracking {
                 Section {
@@ -99,6 +116,38 @@ public struct VCamSettingTrackingView: View {
             }
         }
         .formStyle(.grouped)
+    }
+
+    /// Without a face source the avatar blinks on its own whatever is selected
+    private var hasTrackedBlink: Bool {
+        tracking.faceTrackingMethod != .disabled
+    }
+
+    private var blinkSource: Binding<BlinkSource> {
+        .init {
+            tracking.blinkSource
+        } set: {
+            tracking.setBlinkSource($0)
+        }
+    }
+}
+
+private extension BlinkSource {
+    var name: String {
+        switch self {
+        case .both: String(localized: .blinkBothEyes)
+        case .left: String(localized: .blinkLeftEye)
+        case .right: String(localized: .blinkRightEye)
+        case .auto: String(localized: .blinkAuto)
+        }
+    }
+
+    var description: LocalizedStringResource? {
+        switch self {
+        case .both: nil
+        case .left, .right: .blinkOneEyeDescription
+        case .auto: .blinkAutoDescription
+        }
     }
 }
 

@@ -96,9 +96,8 @@ public final class TrackingTraceRecorder: Sendable {
     /// On the receive queue, before the datagram is handed to the main actor. The lock only
     /// covers the counters; the record is built outside so the main actor and the resamplers
     /// never wait on the base64 encoding
-    public func recordDatagram(_ data: Data) {
+    public func recordDatagram(_ data: Data, time now: Double = ProcessInfo.processInfo.systemUptime) {
         guard isRecording else { return }
-        let now = ProcessInfo.processInfo.systemUptime
         let index = session.withLock { session -> Int? in
             guard let session else { return nil }
             let index = session.datagramCount

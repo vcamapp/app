@@ -19,7 +19,7 @@ final class UDPDatagramSession {
         onEnded: @escaping @MainActor @Sendable () -> Void,
         onConnectionStarted: @escaping @MainActor @Sendable () -> Void = {},
         onReady: @escaping @MainActor @Sendable () -> Void,
-        onData: @escaping @MainActor @Sendable (Data) -> Void
+        onData: @escaping @MainActor @Sendable (Data, _ receivedAt: TimeInterval) -> Void
     ) throws {
         let parameters = NWParameters.udp
         parameters.allowLocalEndpointReuse = true
@@ -90,7 +90,7 @@ final class UDPDatagramSession {
         from connection: NWConnection,
         onEnded: @escaping @MainActor @Sendable () -> Void,
         onReady: @escaping @MainActor @Sendable () -> Void,
-        onData: @escaping @MainActor @Sendable (Data) -> Void
+        onData: @escaping @MainActor @Sendable (Data, _ receivedAt: TimeInterval) -> Void
     ) {
         guard self.connection === connection else { return }
         Self.log(state)
@@ -98,12 +98,13 @@ final class UDPDatagramSession {
         case .ready:
             onReady()
             connection.receiveDatagrams { [weak self, weak connection] data in
+                let receivedAt = ProcessInfo.processInfo.systemUptime
                 // Recorded here rather than by each receiver, so every protocol gets both timestamps
-                TrackingTraceRecorder.shared.recordDatagram(data)
+                TrackingTraceRecorder.shared.recordDatagram(data, time: receivedAt)
                 DispatchQueue.runOnMain {
                     TrackingTraceRecorder.shared.recordMainArrival()
                     guard let self, let connection, self.connection === connection else { return }
-                    onData(data)
+                    onData(data, receivedAt)
                 }
             }
         case .cancelled, .failed:

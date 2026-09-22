@@ -58,7 +58,7 @@ public final class VCamMotionReceiver {
         }
 
         let motionV1Receiver = MotionV1Receiver(
-            onFace: { [weak tracking] data in tracking?.applyFace(data, settings: settings()) },
+            onFace: { [weak tracking] data, receivedAt in tracking?.applyFace(data, settings: settings(), receivedAt: receivedAt) },
             onHands: { [weak tracking] data in tracking?.applyHandsV1(data, settings: settings()) }
         )
         try session.start(
@@ -77,8 +77,8 @@ public final class VCamMotionReceiver {
                 TrackingTraceRecorder.shared.recordEvent("vcamMotion.connected")
                 self.startTimeoutWatchdog()
             },
-            onData: { [weak self] data in
-                self?.handleData(data)
+            onData: { [weak self] data, receivedAt in
+                self?.handleData(data, receivedAt: receivedAt)
             }
         )
         self.tracking = tracking
@@ -88,10 +88,10 @@ public final class VCamMotionReceiver {
         connectionStatus = .connecting
     }
 
-    private func handleData(_ data: Data) {
+    private func handleData(_ data: Data, receivedAt: TimeInterval) {
         // v1 packets have an explicit header; legacy packets do not.
         if let receiver = motionV1Receiver {
-            switch receiver.receive(data) {
+            switch receiver.receive(data, receivedAt: receivedAt) {
             case .handledV1:
                 markDataReceived(protocolVersion: .v1)
                 return
@@ -104,7 +104,7 @@ public final class VCamMotionReceiver {
 
         guard data.count == MemoryLayout<VCamMotion>.size, let settings else { return }
         markDataReceived(protocolVersion: .v0)
-        tracking?.applyLegacyMotion(VCamMotion(rawData: data), settings: settings())
+        tracking?.applyLegacyMotion(VCamMotion(rawData: data), settings: settings(), receivedAt: receivedAt)
     }
 
     /// Only handled packets keep the connection alive. If nothing but

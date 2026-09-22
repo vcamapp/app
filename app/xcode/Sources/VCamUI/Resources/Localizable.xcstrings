@@ -599,6 +599,167 @@
         }
       }
     },
+    "blink": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blink"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "まばたき"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "눈 깜빡임"
+          }
+        }
+      }
+    },
+    "blinkAuto": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auto"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自動"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "자동"
+          }
+        }
+      }
+    },
+    "blinkAutoDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blinks automatically instead of following the tracking."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "トラッキングの値を使わず、自動でまばたきします。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "트래킹 값을 사용하지 않고 자동으로 눈을 깜빡입니다."
+          }
+        }
+      }
+    },
+    "blinkBothEyes": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Both eyes"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "両目"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "양쪽 눈"
+          }
+        }
+      }
+    },
+    "blinkLeftEye": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Left eye"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "左目"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "왼쪽 눈"
+          }
+        }
+      }
+    },
+    "blinkOneEyeDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The selected eye's blink is applied to both eyes."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "選んだ目のまばたきが両目に反映されます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "선택한 눈의 깜빡임이 양쪽 눈에 반영됩니다."
+          }
+        }
+      }
+    },
+    "blinkRightEye": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Right eye"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "右目"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "오른쪽 눈"
+          }
+        }
+      }
+    },
     "bloom": {
       "extractionState": "manual",
       "localizations": {
@@ -1887,25 +2048,48 @@
         }
       }
     },
+    "docsURL": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "https://docs.vcamapp.com/en/vcam/"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "https://docs.vcamapp.com/vcam/"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "https://docs.vcamapp.com/ko/vcam/"
+          }
+        }
+      }
+    },
     "docsURLForVirtualCamera": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "https://docs.vcamapp.com/v/en/virtual-camera/virtualcamera"
+            "value": "https://docs.vcamapp.com/en/vcam/virtual-camera/"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "https://docs.vcamapp.com/virtual-camera/virtualcamera"
+            "value": "https://docs.vcamapp.com/vcam/virtual-camera/"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "https://docs.vcamapp.com/v/ko/virtual-camera/virtualcamera"
+            "value": "https://docs.vcamapp.com/ko/vcam/virtual-camera/"
           }
         }
       }

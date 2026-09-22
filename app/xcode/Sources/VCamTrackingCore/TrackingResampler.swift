@@ -40,18 +40,20 @@ package final class TrackingResampler: @unchecked Sendable {
         self.output = output
     }
 
-    /// Routes values through the resampler, or straight to its output when smoothing is off
-    @MainActor package func send(_ values: [Float], smoothed: Bool) {
+    /// Routes values through the resampler, or straight to its output when smoothing is off.
+    /// `receivedAt` is the packet's receive-queue time: stamping here instead would collapse the
+    /// spacing of packets a stalled main thread hands over in one turn, and the extrapolation
+    /// divides by that spacing
+    @MainActor package func send(_ values: [Float], smoothed: Bool, receivedAt: TimeInterval) {
         if smoothed {
-            push(values)
+            push(values, at: receivedAt)
         } else {
-            TrackingTraceRecorder.shared.recordPush(label: label, values: values, time: ProcessInfo.processInfo.systemUptime)
+            TrackingTraceRecorder.shared.recordPush(label: label, values: values, time: receivedAt)
             output(values)
         }
     }
 
-    package func push(_ values: [Float]) {
-        let timestamp = ProcessInfo.processInfo.systemUptime
+    package func push(_ values: [Float], at timestamp: TimeInterval) {
         TrackingTraceRecorder.shared.recordPush(label: label, values: values, time: timestamp)
         queue.async { [self] in
             ensureValueCount(values, state: &state)
@@ -64,8 +66,7 @@ package final class TrackingResampler: @unchecked Sendable {
         }
     }
 
-    package func reset(with values: [Float]? = nil) {
-        let timestamp = ProcessInfo.processInfo.systemUptime
+    package func reset(with values: [Float]? = nil, at timestamp: TimeInterval = ProcessInfo.processInfo.systemUptime) {
         queue.async { [self] in
             state.frames.removeAll(keepingCapacity: true)
             if let values {

@@ -8,18 +8,32 @@ import VCamMotionV1
 struct TrackingResamplerSamplingTests {
     private let settings = TrackingResamplerSampling.Settings(maxPrediction: 0.18)
 
-    /// Two frames handled in the same main-thread turn are recorded microseconds apart, so a
-    /// later silence extrapolates one frame of motion hundreds of times over
+    /// Two frames that arrived microseconds apart still carry a full frame of motion, so a
+    /// later silence has to extrapolate them at the spacing the buffer usually has, not theirs
     @Test
-    func bunchedFramesRunAwayDuringASilence() throws {
+    func bunchedFramesExtrapolateAtTheTypicalSpacing() throws {
         var frames = (0..<6).map { TrackingResamplerSampling.Frame(time: Double($0) * 0.016, values: [Float($0) * 0.5]) }
         frames.append(.init(time: 0.096, values: [3.0]))
         frames.append(.init(time: 0.0962, values: [3.5]))
 
         let output = try #require(TrackingResamplerSampling.sample(at: 0.0962 + 0.2, frames: frames, settings: settings))
         #expect(output.mode == .extrapolated)
-        #expect(output.factor.map { $0 > 100 } == true)
-        #expect(output.values[0] > 100)
+        // 180ms of prediction over the mean spacing of 0.0962s / 7
+        let expectedFactor = Float(0.18 / (0.0962 / 7))
+        #expect(abs(try #require(output.factor) - expectedFactor) < 0.01)
+        #expect(abs(output.values[0] - (3.5 + 0.5 * expectedFactor)) < 0.01)
+        #expect(output.spacing.map { $0 < 0.001 } == true)
+    }
+
+    /// Evenly spaced frames keep the plain velocity: the floor only bites when the last pair
+    /// is closer than the rest
+    @Test
+    func evenlySpacedFramesExtrapolateAtTheirOwnSpacing() throws {
+        let frames = (0..<6).map { TrackingResamplerSampling.Frame(time: Double($0) * 0.016, values: [Float($0) * 0.5]) }
+
+        let output = try #require(TrackingResamplerSampling.sample(at: 0.08 + 0.1, frames: frames, settings: settings))
+        #expect(output.mode == .extrapolated)
+        #expect(abs(try #require(output.factor) - Float(0.1 / 0.016)) < 0.01)
     }
 
     @Test

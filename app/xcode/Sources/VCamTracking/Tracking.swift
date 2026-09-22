@@ -12,6 +12,7 @@ public final class Tracking {
     public static let shared = Tracking()
 
     public private(set) var faceTrackingMethod = TrackingMethod.Face.default
+    public private(set) var blinkSource = BlinkSource.both
 #if FEATURE_3
     public private(set) var handTrackingMethod = TrackingMethod.Hand.default
     public private(set) var fingerTrackingMethod = TrackingMethod.Finger.default
@@ -85,6 +86,7 @@ public final class Tracking {
 
     public func configure() {
         TrackingDiagnostics.shared.startIfRequestedAtLaunch()
+        blinkSource = UserDefaults.standard.value(for: .blinkSource)
         setFaceTrackingMethod(UserDefaults.standard.value(for: .trackingMethodFace))
 #if FEATURE_3
         var hand: TrackingMethod.Hand = UserDefaults.standard.value(for: .trackingMethodHand)
@@ -167,12 +169,32 @@ public final class Tracking {
         webCamera.resetCalibration()
     }
 
+    /// Without a face source the avatar always blinks on its own; with one, only when the
+    /// blink setting asks for it, in which case `sendFaceValues` keeps the tracked pair open.
     public var isBlinkerUsed: Bool {
         switch faceTrackingMethod {
         case .disabled:
             return true
         case .default, .iFacialMocap, .vcamMocap:
-            return false
+            return blinkSource == .auto
+        }
+    }
+
+    public func setBlinkSource(_ source: BlinkSource) {
+        blinkSource = source
+        UserDefaults.standard.set(source, for: .blinkSource)
+        UniBridge.shared.useBlinker(isBlinkerUsed)
+    }
+
+    /// Every face source hands its presented arrays over here, so the blink setting is
+    /// applied once regardless of the source and mode.
+    public func sendFaceValues(_ values: [Float], mode: TrackingMode) {
+        let values = BlinkSourceValues.applying(blinkSource, to: values, mode: mode, mirrored: mirrorsTracking)
+        switch mode {
+        case .blendShape:
+            UniBridge.shared.receiveVCamBlendShape(values)
+        case .perfectSync:
+            UniBridge.shared.receivePerfectSync(values)
         }
     }
 
