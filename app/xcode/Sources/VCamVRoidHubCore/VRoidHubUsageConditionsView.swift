@@ -4,10 +4,14 @@ import VRoidSDK
 /// Displays a model's conditions of use with the exact labels, values, and
 /// order required by the official guideline:
 /// https://developer.vroid.com/guidelines/conditions_of_use.html
-struct VRoidHubUsageConditionsView: View {
+public struct VRoidHubUsageConditionsView: View {
     let conditions: VRoidUsageConditions?
 
-    var body: some View {
+    public init(conditions: VRoidUsageConditions?) {
+        self.conditions = conditions
+    }
+
+    public var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(.usageConditions)
                 .font(.headline)

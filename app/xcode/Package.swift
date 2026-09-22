@@ -67,16 +67,27 @@ if isThree {
     package.dependencies.append(
         .package(url: "https://github.com/tattn/swift-vroid-sdk", from: "0.1.2")
     )
-    package.targets.append(
-        .target(name: "VCamVRoidHub", dependencies: [
-            "VCamData",
-            "VCamLogger",
+    // The platform-neutral part of the VRoid Hub integration (session, paging,
+    // conditions of use, 3D preview) is shared with the iOS app as a product
+    package.products.append(
+        .library(name: "VCamVRoidHubCore", targets: ["VCamVRoidHubCore"])
+    )
+    package.targets.append(contentsOf: [
+        .target(name: "VCamVRoidHubCore", dependencies: [
             .product(name: "VRoidSDK", package: "swift-vroid-sdk"),
             .product(name: "VRMRealityKit", package: "VRMKit"),
         ], resources: [
             .process("Resources"),
-        ])
-    )
+        ]),
+        .target(name: "VCamVRoidHub", dependencies: [
+            "VCamVRoidHubCore",
+            "VCamData",
+            "VCamLogger",
+            .product(name: "VRoidSDK", package: "swift-vroid-sdk"),
+        ], resources: [
+            .process("Resources"),
+        ]),
+    ])
 }
 
 for target in package.targets {

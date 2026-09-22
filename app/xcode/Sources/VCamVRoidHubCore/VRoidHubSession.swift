@@ -1,7 +1,7 @@
 import Foundation
 import VRoidSDK
 
-/// Sign-in state shared by the VRoid Hub window.
+/// Sign-in state shared by the VRoid Hub screens.
 @MainActor
 @Observable
 public final class VRoidHubSession {
@@ -14,15 +14,17 @@ public final class VRoidHubSession {
 
     public private(set) var phase: Phase = .restoringSession
 
-    let client: VRoidHubClient
+    public let client: VRoidHubClient
 
-    public init?() {
-        guard let client = VRoidHub.client else { return nil }
+    public init(client: VRoidHubClient) {
         self.client = client
     }
 
-    public func restoreSession() async {
-        phase = .restoringSession
+    /// Verifies the stored session over the network unless already signed in.
+    /// An expired token then surfaces as a failed list load, and signing in
+    /// again recovers
+    public func restoreSessionIfNeeded() async {
+        if case .signedIn = phase { return }
         do {
             if let account = try await client.restoreSession() {
                 phase = .signedIn(account)

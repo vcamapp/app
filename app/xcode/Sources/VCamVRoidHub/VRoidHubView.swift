@@ -1,8 +1,10 @@
 import SwiftUI
+import VCamVRoidHubCore
 import VRoidSDK
 
 public struct VRoidHubView: View {
-    @State private var session = VRoidHubSession()
+    // Only nil when the credential injection is missing
+    @State private var session = VRoidHub.client.map { VRoidHubSession(client: $0) }
 
     /// Called when a model has been loaded into VCam and the window can close
     private let onFinished: () -> Void
@@ -16,7 +18,7 @@ public struct VRoidHubView: View {
             if let session {
                 VRoidHubContentView(session: session, onFinished: onFinished)
                     .task {
-                        await session.restoreSession()
+                        await session.restoreSessionIfNeeded()
                     }
             } else {
                 // Only reachable when the credential injection is missing

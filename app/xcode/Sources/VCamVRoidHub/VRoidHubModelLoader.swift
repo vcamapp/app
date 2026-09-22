@@ -1,5 +1,6 @@
 import Foundation
 import VCamData
+import VCamVRoidHubCore
 import VRoidSDK
 
 /// Downloads a VRoid Hub model and hands the decrypted data to the privately
@@ -23,22 +24,16 @@ final class VRoidHubModelLoader {
 
     /// Uses the data the 3D preview already decrypted, avoiding a second decrypt
     func useModel(preloaded model: DecryptedVRoidModel) async throws {
-        try await install { (model.data, model.reference) }
+        try await install { model }
     }
 
-    private func install(_ decrypt: () async throws -> (data: Data, reference: VRoidModelReference)) async throws {
+    private func install(_ decrypt: () async throws -> DecryptedVRoidModel) async throws {
         guard !isLoading else { return }
         isLoading = true
         defer { isLoading = false }
 
-        let (data, reference) = try await decrypt()
-        try await installModel(data)
-        VRoidModelReference.lastUsed = reference
+        let model = try await decrypt()
+        try await installModel(model.data)
+        VRoidModelReference.lastUsed = VRoidModelReference(model.reference)
     }
-}
-
-/// A model the app has downloaded and decrypted into memory
-struct DecryptedVRoidModel {
-    let data: Data
-    let reference: VRoidModelReference
 }

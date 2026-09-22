@@ -1,61 +1,58 @@
 import Foundation
 import VRoidSDK
 
-/// Paged model lists for each tab of the VRoid Hub window.
+/// Paged model lists for each tab of the VRoid Hub screens.
 @MainActor
 @Observable
-final class VRoidHubModelList {
-    enum Tab {
+public final class VRoidHubModelList {
+    public enum Tab {
         case myModels
         case hearts
         case staffPicks
     }
 
-    struct Page {
-        var models: [VRoidCharacterModel] = []
-        var next: URL?
-        var isLoading = false
-        var didLoadOnce = false
-        var loadFailed = false
+    public struct Page {
+        public var models: [VRoidCharacterModel] = []
+        public var next: URL?
+        public var isLoading = false
+        public var loadFailed = false
     }
 
-    private(set) var pages: [Tab: Page] = [:]
-
-    /// Every model seen so far, for detail lookups without a per-body scan
-    private var modelsByID: [String: VRoidCharacterModel] = [:]
+    /// Only the tabs that have been requested at least once
+    public private(set) var pages: [Tab: Page] = [:]
 
     private let client: VRoidHubClient
 
-    init(client: VRoidHubClient) {
+    public init(client: VRoidHubClient) {
         self.client = client
     }
 
-    func page(for tab: Tab) -> Page {
+    public func page(for tab: Tab) -> Page {
         pages[tab] ?? Page()
     }
 
-    func model(id: String) -> VRoidCharacterModel? {
-        modelsByID[id]
+    /// A listed model, shown in the detail while its own request is in flight
+    public func model(id: String) -> VRoidCharacterModel? {
+        pages.values.lazy.flatMap(\.models).first { $0.id == id }
     }
 
-    func loadFirstPageIfNeeded(for tab: Tab) async {
-        guard !page(for: tab).didLoadOnce else { return }
+    public func loadFirstPageIfNeeded(for tab: Tab) async {
+        guard pages[tab] == nil else { return }
         await reload(tab)
     }
 
-    func reload(_ tab: Tab) async {
+    public func reload(_ tab: Tab) async {
         guard !page(for: tab).isLoading else { return }
-        pages[tab] = Page(isLoading: true, didLoadOnce: page(for: tab).didLoadOnce)
+        pages[tab] = Page(isLoading: true)
         do {
             let firstPage = try await firstPage(for: tab)
-            pages[tab] = Page(models: firstPage.items, next: firstPage.next, didLoadOnce: true)
-            index(firstPage.items)
+            pages[tab] = Page(models: firstPage.items, next: firstPage.next)
         } catch {
-            pages[tab] = Page(didLoadOnce: true, loadFailed: true)
+            pages[tab] = Page(loadFailed: true)
         }
     }
 
-    func loadMoreIfNeeded(for tab: Tab, after model: VRoidCharacterModel) async {
+    public func loadMoreIfNeeded(for tab: Tab, after model: VRoidCharacterModel) async {
         guard page(for: tab).models.last?.id == model.id else { return }
         await loadMore(for: tab)
     }
@@ -70,7 +67,6 @@ final class VRoidHubModelList {
             let knownIDs = Set(page.models.map(\.id))
             page.models += newPage.items.filter { !knownIDs.contains($0.id) }
             page.next = newPage.next
-            index(newPage.items)
         } catch {
             // Keep the loaded models; reaching the end of the list again retries
             page.next = next
@@ -79,17 +75,12 @@ final class VRoidHubModelList {
         pages[tab] = page
     }
 
+    /// `next` is the only continuation signal: item counts do not match the requested count
     private func firstPage(for tab: Tab) async throws -> VRoidPage<VRoidCharacterModel> {
         switch tab {
         case .myModels: try await client.characterModels()
         case .hearts: try await client.hearts()
         case .staffPicks: try await client.staffPicks()
-        }
-    }
-
-    private func index(_ models: [VRoidCharacterModel]) {
-        for model in models {
-            modelsByID[model.id] = model
         }
     }
 

@@ -6,14 +6,22 @@ import VRMRealityKit
 /// A lightweight 3D preview of a VRM: a standing pose with drag-to-rotate and
 /// spring bone simulation. Rendering fidelity intentionally differs from the
 /// app's runtime renderer; this is only for choosing a model
-struct VRoidPreviewView: View {
+public struct VRoidPreviewView: View {
+    /// The pane keeps this aspect ratio; the camera distance is derived from it
+    public static let aspectRatio: Float = 3 / 4
+
     let modelData: Data
     let onLoadFailed: () -> Void
 
     @State private var model = VRoidPreviewModel()
     @State private var dragStartYaw: Float?
 
-    var body: some View {
+    public init(modelData: Data, onLoadFailed: @escaping () -> Void) {
+        self.modelData = modelData
+        self.onLoadFailed = onLoadFailed
+    }
+
+    public var body: some View {
         RealityView { content in
             content.add(model.rootEntity)
         }
@@ -28,6 +36,8 @@ struct VRoidPreviewView: View {
                     dragStartYaw = nil
                 }
         )
+        .accessibilityLabel(String(localized: .preview3D))
+        .accessibilityHint(String(localized: .preview3Dhint))
         .task {
             do {
                 try await model.load(data: modelData)
@@ -39,7 +49,7 @@ struct VRoidPreviewView: View {
 }
 
 @MainActor
-private final class VRoidPreviewModel {
+final class VRoidPreviewModel {
     let rootEntity = Entity()
 
     var yaw: Float = 0 {
@@ -53,8 +63,9 @@ private final class VRoidPreviewModel {
         // Parsing a model of tens of megabytes must not block the UI;
         // only the entity construction needs the main actor
         let vrm = try await Self.parse(data)
-        let loader = VRMEntityLoader(vrm: vrm)
-        let vrmEntity = try await loader.loadEntity()
+        // The pane is a few hundred points, so textures are shrunk before they
+        // reach the GPU; the app's own renderer may load the same model right after
+        let vrmEntity = try await VRMEntityLoader(vrm: vrm, maxTextureDimension: 1024).loadEntity()
 
         // Turn the model so it faces the camera, whichever way its version faces
         let forward = vrmEntity.vrm.forwardDirection
@@ -87,7 +98,7 @@ private final class VRoidPreviewModel {
         let fieldOfView: Float = 30
         let margin: Float = 1.05
         let halfVertical = tan(fieldOfView / 2 * .pi / 180)
-        let halfHorizontal = halfVertical * 3 / 4 // the pane keeps a 3:4 aspect ratio
+        let halfHorizontal = halfVertical * VRoidPreviewView.aspectRatio
         let radius = simd_length(SIMD2<Float>(bounds.max.x - bounds.min.x, bounds.max.z - bounds.min.z)) / 2
         let verticalDistance = (bounds.max.y - bounds.min.y) / 2 * margin / halfVertical
         let horizontalDistance = radius * margin / halfHorizontal

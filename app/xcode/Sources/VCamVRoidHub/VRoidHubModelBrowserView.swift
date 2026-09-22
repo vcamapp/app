@@ -1,4 +1,5 @@
 import SwiftUI
+import VCamVRoidHubCore
 import VRoidSDK
 
 struct VRoidHubModelBrowserView: View {
@@ -89,7 +90,7 @@ private struct VRoidHubModelGridView: View {
                     await modelList.reload(tab)
                 }
             } else if page.models.isEmpty {
-                if page.isLoading || !page.didLoadOnce {
+                if page.isLoading {
                     ProgressView()
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
@@ -148,69 +149,5 @@ private struct VRoidHubModelCell: View {
                 .font(.body)
                 .lineLimit(1)
         }
-    }
-}
-
-struct VRoidHubModelImage: View {
-    let imageSet: VRoidImageSet?
-    var contentMode: ContentMode = .fill
-    var prefersLargeImage = false
-
-    var body: some View {
-        AsyncImage(url: prefersLargeImage ? imageSet?.largeURL : imageSet?.thumbnailURL) { image in
-            image
-                .resizable()
-                .aspectRatio(contentMode: contentMode)
-        } placeholder: {
-            Rectangle()
-                .fill(.quaternary)
-                .overlay {
-                    Image(systemName: "person.fill")
-                        .font(.title)
-                        .foregroundStyle(.secondary)
-                }
-        }
-    }
-}
-
-extension VRoidCharacterModel {
-    /// `name` is often nil on the live API; the character name is the
-    /// user-visible one in that case
-    var displayName: String {
-        name ?? character?.name ?? id
-    }
-}
-
-/// A load failure placeholder with a retry button
-struct VRoidHubLoadFailedView: View {
-    let retry: () async -> Void
-
-    var body: some View {
-        ContentUnavailableView {
-            Label {
-                Text(.failedToLoadModels)
-            } icon: {
-                Image(systemName: "wifi.exclamationmark")
-            }
-        } actions: {
-            Button {
-                Task { await retry() }
-            } label: {
-                Text(.retry)
-            }
-        }
-    }
-}
-
-extension VRoidImageSet {
-    /// Not every variant is present: user icons come only as sq170/sq50 on
-    /// the live API, so fall through the whole set
-    var thumbnailURL: URL? {
-        sq300?.url ?? w300?.url ?? sq170?.url ?? sq150?.url
-            ?? sq600?.url ?? w600?.url ?? original?.url ?? sq50?.url
-    }
-
-    var largeURL: URL? {
-        w600?.url ?? original?.url ?? sq600?.url ?? thumbnailURL
     }
 }

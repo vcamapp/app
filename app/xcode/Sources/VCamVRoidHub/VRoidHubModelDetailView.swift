@@ -1,4 +1,5 @@
 import SwiftUI
+import VCamVRoidHubCore
 import VRoidSDK
 
 struct VRoidHubModelDetailView: View {
@@ -208,8 +209,7 @@ private struct VRoidHubModelPreviewPane: View {
         Task {
             defer { isLoadingPreview = false }
             do {
-                let (data, reference) = try await client.decryptedModel(model)
-                previewedModel = DecryptedVRoidModel(data: data, reference: reference)
+                previewedModel = try await client.decryptedModel(model)
             } catch {
                 previewFailed = true
             }

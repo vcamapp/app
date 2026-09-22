@@ -1,6 +1,7 @@
 import Foundation
 import VCamData
 import VCamLogger
+import VCamVRoidHubCore
 import VRoidSDK
 
 /// Entry point of the VRoid Hub integration.
@@ -63,7 +64,7 @@ public enum VRoidHub {
     public static func currentModelData() async throws -> Data? {
         guard let client, let reference = VRoidModelReference.lastUsed else { return nil }
         guard try await client.restoreSession() != nil else { return nil }
-        return try await client.decryptedModel(StoredModelReference(reference: reference)).data
+        return try await client.decryptedModel(VRoidHubModelReference(reference)).data
     }
 
     /// Whether a VRoid Hub model will be installed right after launch; see `LaunchAvatarRestore`
@@ -80,7 +81,7 @@ public enum VRoidHub {
         Task {
             do {
                 guard try await client.restoreSession() != nil else { return }
-                try await modelLoader.useModel(StoredModelReference(reference: reference))
+                try await modelLoader.useModel(VRoidHubModelReference(reference))
                 Logger.log("Restored the last VRoid Hub model")
             } catch {
                 Logger.log("VRoid Hub model restoration failed: \(error)")
@@ -89,25 +90,21 @@ public enum VRoidHub {
     }
 }
 
-/// Feeds the persisted IDs back to the SDK so a cached model with a valid
-/// license loads without any network access
-private struct StoredModelReference: VRoidCharacterModelDownloadable {
-    let reference: VRoidModelReference
-
-    var characterModelID: String { reference.characterModelID }
-    var latestVersionID: String? { reference.characterModelVersionID }
+/// The persisted reference (`VCamData`) and the shared one carry the same two ids
+extension VRoidHubModelReference {
+    init(_ reference: VRoidModelReference) {
+        self.init(
+            characterModelID: reference.characterModelID,
+            characterModelVersionID: reference.characterModelVersionID
+        )
+    }
 }
 
-extension VRoidHubClient {
-    /// Downloads and decrypts a model, along with the reference of the version
-    /// the download license actually granted
-    func decryptedModel(_ model: some VRoidCharacterModelDownloadable) async throws -> (data: Data, reference: VRoidModelReference) {
-        let downloaded = try await downloadModel(model)
-        let data = try await modelData(for: downloaded)
-        let reference = VRoidModelReference(
-            characterModelID: downloaded.characterModelID,
-            characterModelVersionID: downloaded.characterModelVersionID
+extension VRoidModelReference {
+    init(_ reference: VRoidHubModelReference) {
+        self.init(
+            characterModelID: reference.characterModelID,
+            characterModelVersionID: reference.characterModelVersionID
         )
-        return (data, reference)
     }
 }
