@@ -59,8 +59,7 @@ public final class MotionLibrary {
         case .imported(let id):
             store.record(id: id)?.isLoop ?? false
         case .builtIn:
-            // Loop settings of built-in motions are session-scoped. Shortcuts default
-            // to loop because they act as a start / stop toggle
+            // Shortcuts default to loop because they act as a start / stop toggle
             builtInLoopStates[motionID] ?? (trigger == .shortcut)
         case nil:
             false
@@ -127,7 +126,6 @@ public final class MotionLibrary {
         )
     }
 
-    /// Registers the persisted VRMA motions to the engine (called when the engine starts)
     public func registerPersistedMotionsToEngine() {
         for record in store.records {
             UniBridge.registerImportedMotion(

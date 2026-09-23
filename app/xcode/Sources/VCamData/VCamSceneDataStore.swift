@@ -50,8 +50,6 @@ public struct VCamSceneDataStore {
         uniDebugLog("scene saved: " + url.path)
     }
 
-    /// Copies the data into the scene directory and returns the URL of the copy.
-    /// Data that already belongs to the scene is used as is.
     public func copyData(fromURL url: URL, newUUID: String = UUID().uuidString) throws -> URL {
         guard !contains(url) else { return url }
         return try copyData(fromURL: url, toId: newUUID)
@@ -145,9 +143,6 @@ extension VCamSceneDataStore {
 }
 
 extension VCamSceneDataStore {
-    /// Loads every scene while repairing data inconsistencies in a single pass:
-    /// skips scenes that can't be loaded, removes image objects whose files are missing,
-    /// rebuilds the metadata from the surviving (deduplicated) IDs, and persists only what changed.
     public static func loadAndRepair(metadata: VCamSceneMetadata) throws -> (scenes: [VCamScene], metadata: VCamSceneMetadata) {
         var scenes: [VCamScene] = []
         var validIds: [Int32] = []
@@ -156,7 +151,6 @@ extension VCamSceneDataStore {
             let dataStore = Self.init(sceneId: id)
             do {
                 var scene = try dataStore.load()
-                // Remove image objects whose data files are missing
                 let originalCount = scene.objects.count
                 scene.objects = scene.objects.compactMap {
                     switch $0.type {
@@ -168,7 +162,6 @@ extension VCamSceneDataStore {
                     }
                     return $0
                 }
-                // Only rewrite the scene when an invalid object was actually removed.
                 // The rewrite is best-effort so a scene stays usable even if it can't be persisted.
                 if scene.objects.count != originalCount {
                     do {
@@ -181,8 +174,7 @@ extension VCamSceneDataStore {
                 validIds.append(id)
             } catch {
                 // A scene that fails to load is never deleted, since the failure can be transient.
-                // It stays registered so the next launch retries it, and only IDs whose file is
-                // already gone are dropped from the metadata.
+                // It stays registered so the next launch retries it.
                 Logger.error(error)
                 if FileManager.default.fileExists(atPath: dataStore.sceneURL.path) {
                     validIds.append(id)

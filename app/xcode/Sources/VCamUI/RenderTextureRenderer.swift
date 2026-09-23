@@ -13,9 +13,7 @@ public protocol RenderTextureRenderer: AnyObject {
     var filter: ImageFilter? { get set }
     /// Whether the content only changes when the user edits it. A static source is worth
     /// mipmapping, because the preview shrinks it to the window and thin drawings such as an
-    /// outlined text alias away without it (bilinear drops texels once the reduction passes
-    /// 0.5). Sources that change every frame are not: regenerating mipmaps per frame does not
-    /// pay off, and they value being faithful to the pixel.
+    /// outlined text alias away without it.
     var isStaticSource: Bool { get }
 
     func setRenderTexture(updator: @escaping (CIImage) -> Void)

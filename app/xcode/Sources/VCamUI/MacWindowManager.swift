@@ -20,7 +20,6 @@ public extension MacWindow {
         window
     }
 
-    /// The shared style for floating transparent picker panels
     func configureAsFloatingTransparentPanel(_ window: NSWindow, contentSize: CGSize) -> NSWindow {
         window.level = .floating
         window.styleMask = [.titled, .closable, .resizable, .fullSizeContentView]

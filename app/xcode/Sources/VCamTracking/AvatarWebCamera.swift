@@ -31,7 +31,6 @@ public final class AvatarWebCamera {
         case failed(String)
     }
 
-    /// The frame stream and pipeline only exist while the camera is running.
     private struct ActivePipeline {
         let stream: VisionFrameStream
         let pipeline: VisionTrackingPipeline
@@ -55,15 +54,12 @@ public final class AvatarWebCamera {
     @ObservationIgnored
     public var permissionProvider: CameraPermissionProvider = .denied
 
-    /// An alternative hand tracking backend, injected by an external module.
-    /// nil means only the standard hand tracking is available.
+    /// An alternative hand tracking backend, injected by an external module
     @ObservationIgnored
     public var handPoseMapperFactory: (@Sendable () -> sending any HandPoseMapper)?
 
     /// An alternative face tracking backend, injected by an external module.
-    /// When active it produces the full set of blend shapes so the camera can
-    /// drive Perfect Sync. nil means only the standard face tracking is
-    /// available.
+    /// It produces the full set of blend shapes needed for Perfect Sync.
     @ObservationIgnored
     public var faceTrackingProviderFactory: (@Sendable () -> sending any FaceTrackingProvider)?
 
@@ -129,10 +125,8 @@ public final class AvatarWebCamera {
         state == .running
     }
 
-    /// The single owner of the camera lifecycle. The request is enqueued synchronously so
-    /// requests run in the order they were made, transitions are serialized so a start and
-    /// a stop can never interleave mid-flight, and a request superseded by a newer one is
-    /// skipped instead of racing it. Await the returned task to wait for the transition.
+    /// Transitions run serially in request order, and a request superseded by a newer one is skipped.
+    /// Await the returned task to wait for the transition.
     @discardableResult
     public func setRunning(_ shouldRun: Bool) -> Task<Void, Never> {
         lifecycleGeneration &+= 1
@@ -269,9 +263,8 @@ public final class AvatarWebCamera {
         state = .stopped
     }
 
-    /// Releases everything `startCamera` acquires, in the reverse order, so a
-    /// failed start leaves the same state as a normal stop. The caller owns the
-    /// resulting state because only it knows whether the stop was expected.
+    /// Shared by a failed start and a normal stop. The caller sets the resulting state
+    /// because only it knows whether the stop was expected.
     private func tearDownPipeline() async {
         configurationRevision &+= 1
         await cameraSession.setFrameHandler(nil, revision: configurationRevision)
@@ -335,8 +328,7 @@ public final class AvatarWebCamera {
         Int(UserDefaults.standard.value(for: .cameraFps))
     }
 
-    /// The single place that derives both the camera lifecycle and the frame handler
-    /// from the tracking configuration, so the two can't disagree.
+    /// Derives both the camera lifecycle and the frame handler from one snapshot so the two can't disagree
     private func applyVisionConfiguration() {
         let configuration = makeConfigurationSnapshot()
         scheduleVisionConfigurationUpdate(configuration)
@@ -409,9 +401,7 @@ public final class AvatarWebCamera {
         }
     }
 
-    /// Routes an alternative backend's full blend shape result the same way a
-    /// VCamMotion face packet is routed: Perfect Sync when the model supports it,
-    /// otherwise the legacy blend shape array with an estimated vowel.
+    /// Routed the same way as a VCamMotion face packet
     @MainActor
     private static func applyCameraFace(_ result: CameraFaceTrackingResult) {
         let useEyeTracking = Tracking.shared.useEyeTracking

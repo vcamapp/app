@@ -13,7 +13,6 @@ extension VRoidHubView: MacWindow {
 }
 
 public extension VRoidHubView {
-    /// The single entry point for showing the VRoid Hub window
     @MainActor
     static func openWindow() {
         MacWindowManager.shared.open(VRoidHubView(onFinished: {

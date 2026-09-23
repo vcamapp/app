@@ -8,7 +8,6 @@ public struct TrackingTraceStatistics: Sendable, Equatable {
     /// buffer delay of the resampler, past which it starts extrapolating
     public static let gapThreshold = 0.12
 
-    public var elapsed: Double = 0
     public var datagramCount = 0
     public var datagramsPerSecond = 0
     public var maxReceiveGap: Double = 0
@@ -84,10 +83,7 @@ public final class TrackingTraceRecorder: Sendable {
 
     public func statistics() -> TrackingTraceStatistics {
         session.withLock { session in
-            guard let session else { return TrackingTraceStatistics() }
-            var statistics = session.statistics
-            statistics.elapsed = ProcessInfo.processInfo.systemUptime - session.startUptime
-            return statistics
+            session?.statistics ?? TrackingTraceStatistics()
         }
     }
 

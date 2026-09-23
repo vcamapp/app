@@ -91,9 +91,8 @@ final class VRoidPreviewModel {
         modelPivot.addChild(vrmEntity)
         rootEntity.addChild(modelPivot)
 
-        // Frame the whole model with a small margin. The vertical fit uses the height
-        // (fieldOfViewInDegrees is vertical) and the horizontal fit the largest radius
-        // around the rotation axis, so wide models stay inside the view at any angle
+        // The vertical fit uses the height (fieldOfViewInDegrees is vertical) and the horizontal
+        // fit the largest radius around the rotation axis, so wide models stay inside at any angle
         let camera = PerspectiveCamera()
         let fieldOfView: Float = 30
         let margin: Float = 1.05
@@ -116,7 +115,6 @@ final class VRoidPreviewModel {
         try VRM(data: data)
     }
 
-    /// Lowers both arms from the T-pose into an A-pose
     private func applyAPose(to vrmEntity: VRMEntity) {
         if let upperArm = vrmEntity.humanoid.node(for: .leftUpperArm),
            let lowerArm = vrmEntity.humanoid.node(for: .leftLowerArm) {

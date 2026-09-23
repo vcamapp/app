@@ -53,8 +53,7 @@ public extension SceneObject {
 
         /// The canvas-normalized placement: the origin is the offset of the rect's center from
         /// the canvas center, the size is relative to the canvas. nil for types without an
-        /// on-canvas rect and for an object that has not been placed yet. Setting it is ignored
-        /// for types without a placement.
+        /// on-canvas rect and for an object that has not been placed yet.
         public var normalizedPlacement: CGRect? {
             get {
                 // The image keeps its placement split across offset and size, so it can't go
@@ -93,7 +92,7 @@ public extension SceneObject {
         }
     }
 
-    /// The camera framing of the avatar, which is the one object the engine still owns
+    /// The camera framing of the avatar, which is the one object the engine owns
     final class Avatar {
         public init(position: SIMD3<Float> = .zero, rotation: SIMD3<Float> = .zero, zoom: Float = 1) {
             self.position = position

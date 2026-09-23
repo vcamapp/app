@@ -1,8 +1,8 @@
 import Foundation
 import VCamEntity
 
-/// Ready-made styles for the text object. Every value is authored against the
-/// configuration's own font size, so `scaled(by:)` renders them at any other size.
+/// Every value is authored against the configuration's own font size, so `scaled(by:)`
+/// renders them at any other size.
 /// A preset that doesn't author a font gets the bold member, the same as a new text object.
 struct TextObjectPreset: Identifiable, Sendable {
     init(id: String, name: LocalizedStringResource, configuration: TextObjectConfiguration) {
@@ -28,7 +28,6 @@ struct TextObjectPreset: Identifiable, Sendable {
         .init(fontName: TextObjectConfiguration.defaultBoldFontName, alignment: .leading, outlines: [.init(width: 12)])
     }
 
-    /// The style a subtitle starts from before the user restyles it
     static var subtitleDefault: TextObjectConfiguration {
         redImpact.configuration
     }

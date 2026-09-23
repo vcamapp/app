@@ -20,7 +20,6 @@ extension VRoidHubModelReference: VRoidCharacterModelDownloadable {
     public var latestVersionID: String? { characterModelVersionID }
 }
 
-/// A model the app has downloaded and decrypted into memory
 public struct DecryptedVRoidModel: Sendable {
     public let reference: VRoidHubModelReference
     public let data: Data

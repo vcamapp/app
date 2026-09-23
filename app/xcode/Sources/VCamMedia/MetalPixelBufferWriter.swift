@@ -1,8 +1,6 @@
 import CoreVideo
 import Metal
 
-/// Copies a rendered frame into a `CVPixelBuffer` with Metal.
-///
 /// The destination must be `kCVPixelFormatType_32BGRA` and Metal compatible
 /// (`kCVPixelBufferMetalCompatibilityKey`), which also requires an IOSurface.
 public final class MetalPixelBufferWriter {

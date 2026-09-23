@@ -1,7 +1,6 @@
 import VCamBridge
 import VCamData
 
-/// Facial expression operations shared by the toolbar, shortcuts, and other entry points
 @MainActor
 public enum ExpressionControl {
     /// Applies the expression, or clears it if it is already the current one

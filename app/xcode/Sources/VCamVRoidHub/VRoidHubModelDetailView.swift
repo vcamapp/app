@@ -143,8 +143,7 @@ struct VRoidHubModelDetailView: View {
     }
 }
 
-/// Shows the model image, switching to an interactive 3D preview on demand.
-/// The download shares the SDK's encrypted cache, so using the model
+/// The preview download shares the SDK's encrypted cache, so using the model
 /// afterwards does not download it again
 private struct VRoidHubModelPreviewPane: View {
     let model: VRoidCharacterModel

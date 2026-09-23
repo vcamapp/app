@@ -48,6 +48,29 @@ struct TrackingResamplerSamplingTests {
         #expect(output.values[0] == 4.5)
     }
 
+    /// A blink still closing when the frames stop must not run past fully closed, while the
+    /// pose channels keep their projection
+    @Test
+    func extrapolationKeepsWeightsInTheUnitInterval() throws {
+        let frames = (0..<4).map {
+            TrackingResamplerSampling.Frame(time: Double($0) * 0.016, values: [Float($0) * 10, 0.7 + Float($0) * 0.1])
+        }
+        let weighted = TrackingResamplerSampling.Settings(maxPrediction: 0.18, unitIntervalChannels: 1..<2)
+        let output = try #require(TrackingResamplerSampling.sample(at: 0.048 + 0.1, frames: frames, settings: weighted))
+        #expect(output.mode == .extrapolated)
+        #expect(output.values[1] == 1)
+        #expect(output.values[0] > 30)
+    }
+
+    @Test
+    func silenceStartsPastTheReceiveJitter() throws {
+        let frames = (0..<4).map { TrackingResamplerSampling.Frame(time: Double($0) * 0.016, values: [0]) }
+        let late = try #require(TrackingResamplerSampling.sample(at: 0.048 + 0.03, frames: frames, settings: settings))
+        #expect(!late.isInSilence)
+        let silent = try #require(TrackingResamplerSampling.sample(at: 0.048 + 0.05, frames: frames, settings: settings))
+        #expect(silent.isInSilence)
+    }
+
     @Test
     func interpolatesBetweenFramesAndHoldsBeforeTheFirst() throws {
         let frames = [
@@ -60,6 +83,32 @@ struct TrackingResamplerSamplingTests {
         let before = try #require(TrackingResamplerSampling.sample(at: 0.5, frames: frames, settings: settings))
         #expect(before.mode == .held)
         #expect(before.values[0] == 0)
+    }
+}
+
+@Suite
+struct TrackingResamplerRecoveryTests {
+    private static func output(_ value: Float, isInSilence: Bool) -> TrackingResamplerSampling.Output {
+        .init(values: [value], mode: isInSilence ? .held : .interpolated, factor: nil, spacing: 0.016, isInSilence: isInSilence)
+    }
+
+    /// The first frames back after a silence would put the output somewhere else in one step
+    @Test
+    func easesBackOntoTheFramesAfterASilence() {
+        var recovery = TrackingResamplerRecovery()
+        _ = recovery.apply(Self.output(0, isInSilence: true), at: 1)
+        #expect(recovery.apply(Self.output(10, isInSilence: false), at: 1)[0] == 0)
+        let halfway = recovery.apply(Self.output(10, isInSilence: false), at: 1 + TrackingResamplerRecovery.duration / 2)
+        #expect(abs(halfway[0] - 5) < 1e-4)
+        #expect(recovery.apply(Self.output(10, isInSilence: false), at: 1 + TrackingResamplerRecovery.duration)[0] == 10)
+    }
+
+    @Test
+    func passesSteadyFramesThrough() {
+        var recovery = TrackingResamplerRecovery()
+        for (index, value) in [Float(0), 3, 7, 12].enumerated() {
+            #expect(recovery.apply(Self.output(value, isInSilence: false), at: Double(index) * 0.016)[0] == value)
+        }
     }
 }
 
@@ -183,6 +232,29 @@ struct TrackingTraceTests {
         #expect(report.payload.discontinuities == 1)
         #expect(report.engine.maxPositionStep == 0.05)
         #expect(!report.summary().isEmpty)
+    }
+
+    /// VCamMotion v1 sends a hand packet right behind the face packet of the same frame, which
+    /// is neither bunching nor the end of a silence
+    @Test
+    func analyzerMeasuresSpacingWithinTheFaceStream() {
+        var trace = TrackingTrace(meta: Self.meta(startUptime: 0))
+        var order = 0
+        for index in 0..<10 {
+            let time = Double(index) * 0.016
+            trace.datagrams.append(.init(t: time, n: order, length: 276, version: 1, type: "face", sessionID: 1,
+                                         sequence: UInt32(index), senderTimestamp: nil, payload: ""))
+            order += 1
+            guard index.isMultiple(of: 2) else { continue }
+            trace.datagrams.append(.init(t: time + 0.0002, n: order, length: 600, version: 1, type: "hands", sessionID: 1,
+                                         sequence: UInt32(index), senderTimestamp: nil, payload: ""))
+            order += 1
+        }
+        let report = TrackingTraceAnalyzer.analyze(trace)
+        #expect(report.datagrams.count == 15)
+        #expect(report.datagrams.stream == "face")
+        #expect(report.datagrams.bunchedPairs == 0)
+        #expect(abs(report.datagrams.medianInterval - 0.016) < 1e-9)
     }
 
     @Test

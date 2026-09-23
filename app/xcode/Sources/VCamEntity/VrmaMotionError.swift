@@ -1,6 +1,5 @@
 import Foundation
 
-/// VRMA loading / registration errors reported by the engine
 public enum VrmaMotionError: Int32, EngineResultError {
     case fileNotFound = 1
     case invalidVrma = 2

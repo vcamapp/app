@@ -53,7 +53,7 @@ extension Migration {
     }
 
     static func migration095(version: [Int]) throws {
-        guard version == [0, 9, 4] else { return } // only for 0.9.4
+        guard version == [0, 9, 4] else { return }
         Logger.log("")
 
         var metadata = try VCamShortcutMetadata.load()

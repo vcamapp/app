@@ -1,9 +1,8 @@
 import SwiftUI
 
-/// Hands live frames straight to a layer-backed view. Only the frame size is observable,
-/// so a stream re-renders the SwiftUI hierarchy when its aspect ratio changes rather than
-/// on every frame. Re-rendering per frame while an AppKit menu tracks the mouse trips
-/// AppKit's display loop detection and aborts the app.
+/// Hands live frames straight to a layer-backed view with only the frame size observable:
+/// re-rendering SwiftUI per frame while an AppKit menu tracks the mouse trips AppKit's
+/// display loop detection and aborts the app.
 @MainActor
 @Observable
 final class LivePreviewSource {

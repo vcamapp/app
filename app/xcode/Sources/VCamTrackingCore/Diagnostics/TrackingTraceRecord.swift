@@ -199,6 +199,13 @@ public enum TrackingTraceFaceValue: Int, Sendable {
     public static func isFaceLabel(_ label: String) -> Bool {
         label.hasSuffix("blendshape") || label.hasSuffix("perfectsync")
     }
+
+    /// The blend shape weights the resampler of this label keeps in 0...1
+    public static func weightChannels(ofLabel label: String) -> Range<Int>? {
+        if label.hasSuffix("perfectsync") { return TrackingMappingEntry.weightChannels(for: .perfectSync) }
+        if label.hasSuffix("blendshape") { return TrackingMappingEntry.weightChannels(for: .blendShape) }
+        return nil
+    }
 }
 
 /// File names inside a trace directory

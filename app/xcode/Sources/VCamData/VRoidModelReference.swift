@@ -1,8 +1,6 @@
 import Foundation
 import VCamDefaults
 
-/// Identifies a VRoid Hub model without keeping the model file itself.
-///
 /// The plaintext VRM of a VRoid Hub model is never persisted; only this
 /// reference survives a restart, and the model is fetched again through the
 /// SDK's encrypted cache when restoring.

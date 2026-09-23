@@ -2,20 +2,13 @@ import simd
 import VCamEntity
 import VCamMotionV1
 
-/// Shared builders for the face tracking arrays sent over UniBridge.
-/// FacialMocapData passes its euler rotation directly while VCamMotion
-/// converts its quaternion to euler angles first.
+/// Inputs use the subject's own anatomical sides for the head pose, the sided shapes and
+/// the gaze alike (see `VCamFaceMotion.anatomicalBlendShape`).
 ///
-/// The input contract is the subject's own anatomical sides for the head pose,
-/// the sided shapes and the gaze alike. Sources whose wire data names them
-/// through the mirror convert it first (`VCamFaceMotion.anatomicalBlendShape`).
-///
-/// Mirroring flips every one of those channels together, here: flipping only some
-/// would make a wink close the eye on the opposite side of the screen from the
-/// head turn.
+/// Mirroring flips all of those channels together: flipping only some would make a wink
+/// close the eye on the opposite side of the screen from the head turn.
 package enum FaceTransformValues {
-    /// Positions in the 12-element array, which the builders below emit in the order of
-    /// `TrackingMappingEntry.trackingValueKeys(for: .blendShape)`. A test pins them to it.
+    /// Positions in `TrackingMappingEntry.trackingValueKeys(for: .blendShape)` order
     private enum LegacyIndex {
         package static let posX = 0
         package static let yaw = 4
@@ -43,9 +36,7 @@ package enum FaceTransformValues {
     package static func perfectSync(translation: SIMD3<Float>, rotationEuler: SIMD3<Float>,
                             blendShape: BlendShape, useEyeTracking: Bool, mirrored: Bool) -> [Float] {
         let blendShape = presentationBlendShape(blendShape, mirrored: mirrored)
-        // The eye block of the wire order is gated below, and the gaze has to follow it:
-        // it drives the eyes through their own channel, so leaving it here would keep
-        // them moving after eye tracking is turned off.
+        // The gaze drives the eyes through its own channel, so it is gated with the eye block
         let lookAtPoint = useEyeTracking ? blendShape.lookAtPoint : .zero
         var values = headPoseValues(translation: translation, rotationEuler: rotationEuler, mirrored: mirrored)
         values += [lookAtPoint.x, lookAtPoint.y]
@@ -69,10 +60,9 @@ package enum FaceTransformValues {
         return mirrored ? compensated.horizontallyMirrored() : compensated
     }
 
-    /// The Vision camera path builds its 12-element array in image space, so its head
-    /// components and pupil-based gaze are already mirrored while its blinks are
-    /// anatomical: Vision names its landmarks after the subject's own sides (verified
-    /// against a still image and its horizontal flip).
+    /// The Vision camera path builds its array in image space, so its head components and
+    /// pupil-based gaze are already mirrored while its blinks are anatomical: Vision names
+    /// its landmarks after the subject's own sides.
     package static func presenting(imageSpaceValues: [Float], mirrored: Bool) -> [Float] {
         var values = imageSpaceValues
         if mirrored {

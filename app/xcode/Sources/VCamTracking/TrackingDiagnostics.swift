@@ -19,14 +19,12 @@ public final class TrackingDiagnostics {
 
     public private(set) var isRecording = false
     public private(set) var startedAt: Date?
-    public private(set) var statistics = TrackingTraceStatistics()
     public private(set) var lastArchive: URL?
     public private(set) var isArchiving = false
 
     /// Where the current recording writes, kept here because the recorder forgets it once it
     /// stops itself at `maxDuration`
     @ObservationIgnored private var recordingDirectory: URL?
-    @ObservationIgnored private var statisticsTimer: Timer?
     @ObservationIgnored private var settingObservers: Set<AnyCancellable> = []
 
     private init() {
@@ -57,18 +55,10 @@ public final class TrackingDiagnostics {
         isRecording = true
         lastArchive = nil
         observeSettings()
-        statisticsTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
-            MainActor.assumeIsolated {
-                self?.statistics = TrackingTraceRecorder.shared.statistics()
-            }
-        }
     }
 
     public func stop() async {
         settingObservers.removeAll()
-        statisticsTimer?.invalidate()
-        statisticsTimer = nil
-        statistics = TrackingTraceRecorder.shared.statistics()
         TrackingTraceRecorder.shared.stop()
         isRecording = false
         startedAt = nil

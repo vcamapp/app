@@ -1,6 +1,5 @@
 import SwiftUI
 
-/// The duplicate item every list context menu shares
 struct DuplicateMenuButton: View {
     let action: () -> Void
 
@@ -12,7 +11,6 @@ struct DuplicateMenuButton: View {
     }
 }
 
-/// The destructive delete item every list context menu shares
 struct DeleteMenuButton: View {
     var isDisabled = false
     let action: () -> Void

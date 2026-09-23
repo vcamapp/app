@@ -68,13 +68,11 @@ public enum PoseControl {
 }
 
 public enum PoseControlError: Error, Sendable, Equatable {
-    /// The editor window is not open
     case editorNotOpen
     /// The avatar has no such bone, or the name is not a VRM bone
     case boneNotFound(String)
     /// The bone exists but is not one that can be pulled with IK
     case boneNotMovable(String)
-    /// The avatar has no such expression
     case expressionNotFound(String)
     /// No avatar is loaded, or it could not be loaded into the editor
     case avatarUnavailable

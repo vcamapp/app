@@ -21,7 +21,6 @@ public struct VRoidHubView: View {
                         await session.restoreSessionIfNeeded()
                     }
             } else {
-                // Only reachable when the credential injection is missing
                 ContentUnavailableView {
                     Label {
                         Text(verbatim: "VRoid Hub")

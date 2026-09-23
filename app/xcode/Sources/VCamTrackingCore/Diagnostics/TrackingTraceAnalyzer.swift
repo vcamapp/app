@@ -13,6 +13,9 @@ public struct TrackingTraceReport: Codable, Sendable, Equatable {
 
     public struct Datagrams: Codable, Sendable, Equatable {
         public var count = 0
+        /// The datagram type the spacing below is measured on (`TrackingTrace.primaryStream`)
+        public var stream: String?
+        public var streamCount = 0
         public var medianInterval: Double = 0
         public var p99Interval: Double = 0
         public var maxInterval: Double = 0
@@ -119,7 +122,8 @@ public enum TrackingTraceAnalyzer {
         let origin = trace.origin
         report.duration = trace.duration
         report.events = trace.events.count
-        report.datagrams = analyzeDatagrams(trace.datagrams, origin: origin)
+        report.datagrams = analyzeDatagrams(trace.primaryStream, origin: origin)
+        report.datagrams.count = trace.datagrams.count
         report.mainThread = analyzeMainThread(trace)
         report.resamplers = trace.labels.map { analyzeResampler(label: $0, trace: trace, origin: origin) }
         report.engine = analyzeEngine(trace, origin: origin)
@@ -137,7 +141,8 @@ public enum TrackingTraceAnalyzer {
 
     private static func analyzeDatagrams(_ datagrams: [TrackingTraceRecord.Datagram], origin: Double) -> TrackingTraceReport.Datagrams {
         var result = TrackingTraceReport.Datagrams()
-        result.count = datagrams.count
+        result.stream = datagrams.first?.type
+        result.streamCount = datagrams.count
         guard datagrams.count > 1 else { return result }
         var intervals: [Double] = []
         intervals.reserveCapacity(datagrams.count)
@@ -384,7 +389,7 @@ public extension TrackingTraceReport {
     func summary() -> String {
         var lines: [String] = []
         lines.append("Duration: \(String(format: "%.1f", duration))s, events: \(events)")
-        lines.append("Datagrams: \(datagrams.count), interval median \(ms(datagrams.medianInterval)) p99 \(ms(datagrams.p99Interval)) max \(ms(datagrams.maxInterval)), bunched pairs \(datagrams.bunchedPairs), gaps \(datagrams.gaps.count)")
+        lines.append("Datagrams: \(datagrams.count), \(datagrams.stream ?? "untyped") \(datagrams.streamCount) with interval median \(ms(datagrams.medianInterval)) p99 \(ms(datagrams.p99Interval)) max \(ms(datagrams.maxInterval)), bunched pairs \(datagrams.bunchedPairs), gaps \(datagrams.gaps.count)")
         lines.append("Main thread: delay median \(ms(mainThread.medianDelay)) p99 \(ms(mainThread.p99Delay)) max \(ms(mainThread.maxDelay)), >16ms \(mainThread.over16ms), >100ms \(mainThread.over100ms)")
         for resampler in resamplers {
             lines.append("Resampler \(resampler.label): pushes \(resampler.pushes), samples \(resampler.samples), extrapolated \(resampler.extrapolated), max factor ×\(String(format: "%.1f", resampler.maxFactor)), max step \(String(format: "%.2f", resampler.maxStep)) at \(String(format: "%.2f", resampler.maxStepTime))s, runaway \(resampler.runaway.count)")

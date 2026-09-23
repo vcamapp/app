@@ -107,8 +107,6 @@ public struct VCamMainView: View {
     }
 }
 
-/// Opens the text editor for the subtitle, so its look is configured where it is typed.
-/// Uses the same flat chip as the shortcut buttons below the field.
 private struct SubtitleStyleButton: View {
     var body: some View {
         FlatButton {

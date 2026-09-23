@@ -10,9 +10,7 @@ import VCamTrackingCore
 @MainActor
 public final class FacialMocapReceiver {
     @ObservationIgnored private let session = UDPDatagramSession()
-    @ObservationIgnored private var facialMocapLastValues: [Float] = Array(repeating: 0, count: 12)
-    @ObservationIgnored private var blendShapeResampler: TrackingResampler
-    @ObservationIgnored private var perfectSyncResampler: TrackingResampler
+    @ObservationIgnored nonisolated private let faceRoute: FaceResamplerRoute
     @ObservationIgnored private let smoothingStorage: TrackingSmoothingStorage
     nonisolated private static let queue = DispatchQueue(label: "com.github.tattn.vcam.facialmocapreceiver")
     /// Bumped on every stop so the handshake retry loop, which runs off the
@@ -34,15 +32,7 @@ public final class FacialMocapReceiver {
     public init(smoothing: TrackingSmoothing) {
         let smoothingStorage = TrackingSmoothingStorage(smoothing)
         self.smoothingStorage = smoothingStorage
-        let settingsProvider = smoothingStorage.settingsProvider
-
-        blendShapeResampler = TrackingResampler(label: "facial-mocap-blendshape", settingsProvider: settingsProvider) { @MainActor values in
-            Tracking.shared.sendFaceValues(values, mode: .blendShape)
-        }
-
-        perfectSyncResampler = TrackingResampler(label: "facial-mocap-perfectsync", settingsProvider: settingsProvider) { @MainActor values in
-            Tracking.shared.sendFaceValues(values, mode: .perfectSync)
-        }
+        faceRoute = FaceResamplerRoute(labelPrefix: "facial-mocap", smoothingStorage: smoothingStorage)
     }
 
     /// Throws only when the listener cannot be created. Failures after
@@ -106,28 +96,53 @@ public final class FacialMocapReceiver {
         }
     }
 
-    private func oniFacialMocapReceived(_ data: FacialMocapData, receivedAt: TimeInterval) {
-        guard Tracking.shared.faceTrackingMethod == .iFacialMocap else { return }
+    /// A datagram parsed on the receive queue, and whether the face already went to the resamplers there
+    private struct Received: Sendable {
+        var data: FacialMocapData
+        var receivedAt: TimeInterval
+        var facePushed: Bool
+    }
 
-        let smoothingEnabled = smoothingStorage.isEnabled
-        if Tracking.shared.activeFaceMappingMode == .perfectSync {
-            let perfectSync = data.perfectSync(useEyeTracking: Tracking.shared.useEyeTracking, mirrored: Tracking.shared.mirrorsTracking)
-            perfectSyncResampler.send(perfectSync, smoothed: smoothingEnabled, receivedAt: receivedAt)
-        } else {
-            let blendShape = data.vcamHeadTransform(useEyeTracking: Tracking.shared.useEyeTracking, mirrored: Tracking.shared.mirrorsTracking)
-            facialMocapLastValues = vDSP.linearInterpolate(
-                facialMocapLastValues,
-                blendShape,
-                using: 0.5
-            )
+    nonisolated private static func receive(_ data: Data, receivedAt: TimeInterval, route: FaceResamplerRoute) -> Received? {
+        guard let rawData = String(data: data, encoding: .utf8),
+              let mocapData = FacialMocapData(rawData: rawData) else { return nil }
+        let facePushed = route.push(at: receivedAt) { conversion, previousBlendShape in
+            faceValues(mocapData, conversion: conversion, previousBlendShape: &previousBlendShape)
+        }
+        return Received(data: mocapData, receivedAt: receivedAt, facePushed: facePushed)
+    }
 
-            blendShapeResampler.send(facialMocapLastValues, smoothed: smoothingEnabled, receivedAt: receivedAt)
+    private func handle(_ received: Received?) {
+        guard let received else { return }
+        timeoutWatchdog.markDataReceived()
+        faceRoute.send(faceConversion(), pushed: received.facePushed, receivedAt: received.receivedAt) { conversion, previousBlendShape in
+            Self.faceValues(received.data, conversion: conversion, previousBlendShape: &previousBlendShape)
+        }
+    }
+
+    private func faceConversion() -> FaceResamplerRoute.Conversion? {
+        let tracking = Tracking.shared
+        guard tracking.faceTrackingMethod == .iFacialMocap, let mode = tracking.activeFaceMappingMode else { return nil }
+        return .init(mode: mode, useEyeTracking: tracking.useEyeTracking, useVowelEstimation: false,
+                     mirrorsTracking: tracking.mirrorsTracking)
+    }
+
+    /// The blend shape array is halved toward the previous packet's before resampling
+    nonisolated private static func faceValues(_ data: FacialMocapData, conversion: FaceResamplerRoute.Conversion,
+                                               previousBlendShape: inout [Float]?) -> [Float] {
+        switch conversion.mode {
+        case .perfectSync:
+            return data.perfectSync(useEyeTracking: conversion.useEyeTracking, mirrored: conversion.mirrorsTracking)
+        case .blendShape:
+            let values = data.vcamHeadTransform(useEyeTracking: conversion.useEyeTracking, mirrored: conversion.mirrorsTracking)
+            let filtered = previousBlendShape.map { vDSP.linearInterpolate($0, values, using: 0.5) } ?? values
+            previousBlendShape = filtered
+            return filtered
         }
     }
 
     func stopResamplers() {
-        blendShapeResampler.stop()
-        perfectSyncResampler.stop()
+        faceRoute.stop()
     }
 }
 
@@ -150,12 +165,11 @@ extension FacialMocapReceiver {
                 self.connectionStatus = .connected
                 self.startTimeoutWatchdog()
             },
-            onData: { [weak self] data, receivedAt in
-                guard let self,
-                      let rawData = String(data: data, encoding: .utf8),
-                      let mocapData = FacialMocapData(rawData: rawData) else { return }
-                self.timeoutWatchdog.markDataReceived()
-                self.oniFacialMocapReceived(mocapData, receivedAt: receivedAt)
+            receive: { [faceRoute] data, receivedAt in
+                Self.receive(data, receivedAt: receivedAt, route: faceRoute)
+            },
+            onData: { [weak self] received in
+                self?.handle(received)
             }
         )
         connectionStatus = .connecting

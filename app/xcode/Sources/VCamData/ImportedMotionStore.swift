@@ -45,7 +45,7 @@ public final class ImportedMotionStore {
         filesDirectory.appending(path: Self.fileName(id: record.id))
     }
 
-    /// Copies the VRMA file into the app-managed directory. Add it to the manifest with addRecord only after the registration succeeds
+    /// Add it to the manifest with addRecord only after the registration succeeds
     public func stageMotionFile(from sourceURL: URL, id: UUID) async throws -> URL {
         let destinationURL = filesDirectory.appending(path: Self.fileName(id: id))
         // Copy off the main actor so that large files do not block the UI
@@ -106,7 +106,6 @@ public final class ImportedMotionStore {
         try? FileManager.default.removeItem(at: fileURL(for: record))
     }
 
-    /// Removes VRMA files that are not referenced by the manifest
     public func removeOrphanedFiles() {
         guard !isManifestLoadFailed else { return }
         let validFileNames = Set(records.map { Self.fileName(id: $0.id) })

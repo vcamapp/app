@@ -73,7 +73,6 @@ private final class ExpressionAnalyzerState: Sendable {
         }
     }
 
-    /// Analyzes the buffer if enough time has passed since the last analysis.
     func analyzeIfNeeded(buffer: AVAudioPCMBuffer, sampleTime: AVAudioFramePosition) {
         state.withLock { state in
             guard let analyzer = state.analyzer else { return }
@@ -124,7 +123,6 @@ public final class AudioExpressionEstimator: NSObject, Sendable {
     }
 }
 
-/// Thread-safe storage for callbacks.
 private final class CallbackState: Sendable {
     private struct State: Sendable {
         var onUpdate: (@Sendable (FacialExpression) -> Void)?

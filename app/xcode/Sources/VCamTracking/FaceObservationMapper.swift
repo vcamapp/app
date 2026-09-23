@@ -5,20 +5,16 @@ import VCamTrackingCore
 struct FaceObservationMapper {
     private let request = DetectFaceLandmarksRequest()
 
-    /// Reusing the previous observation via `inputFaceObservations` skips the
-    /// full-frame face detector, which costs several times the landmark stage
-    /// alone. Landmarks are still recomputed on reused frames, so expressions,
-    /// eyes, and mouth keep the full frame rate; roll/yaw/pitch/boundingBox are
-    /// copied from the input unchanged (verified empirically), so head pose
-    /// updates only on full detections. Alternating keeps that staleness to
-    /// one frame.
+    /// Reusing the previous observation via `inputFaceObservations` skips the costly
+    /// full-frame face detector. Landmarks are still recomputed on reused frames, but
+    /// roll/yaw/pitch/boundingBox are copied from the input unchanged, so head pose
+    /// updates only on full detections. Alternating keeps that staleness to one frame.
     private static let framesBetweenFullDetections = 2
     private var reusableObservation: FaceObservation?
     private var framesSinceFullDetection = 0
     private var lastRequestWasFullDetection = true
 
-    /// The most recent eye positions, kept for hand backends that anchor
-    /// hand positions to the face.
+    /// Kept for hand backends that anchor hand positions to the face
     private(set) var latestFace: HandPoseFaceContext?
 
     private var expressionCounter = 0

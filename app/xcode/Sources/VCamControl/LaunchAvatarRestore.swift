@@ -44,8 +44,7 @@ public enum LaunchAvatarRestore {
         sources.contains { $0.hasPendingRestore() }
     }
 
-    /// The model file for the engine to load in its first scene, when the winning source can
-    /// hand one over. Loading it there skips the placeholder avatar the engine would otherwise
+    /// Loading the model in the engine's first scene skips the placeholder avatar it would otherwise
     /// load and then replace through the bridge, which reloads the whole scene. Nil leaves the
     /// restore to `restoreOnLaunch`
     public static func takeModelFileForEngine() -> URL? {

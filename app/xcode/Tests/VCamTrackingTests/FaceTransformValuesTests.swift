@@ -14,7 +14,6 @@ struct FaceTransformValuesTests {
         static let blendShapes = 8
     }
 
-    /// Position of a Perfect Sync blend shape in the values array.
     private func index(of keyPath: WritableKeyPath<BlendShape, Float> & Sendable) -> Int {
         Index.blendShapes + BlendShape.wireOrder.firstIndex(of: keyPath)!
     }
@@ -111,7 +110,6 @@ struct FaceTransformValuesTests {
         #expect(values[5] == -30)
     }
 
-    /// Without the mirror the subject's right maps onto the avatar's right.
     @Test
     func disablingMirroringKeepsTheSubjectsSides() {
         let values = FaceTransformValues.perfectSync(
@@ -132,7 +130,6 @@ struct FaceTransformValuesTests {
         #expect(values[blinkRight] == 0)
     }
 
-    /// Without the mirror the gaze keeps the subject's own direction on both axes.
     @Test
     func disablingMirroringKeepsTheGaze() {
         let values = FaceTransformValues.perfectSync(
@@ -235,7 +232,6 @@ struct FaceTransformValuesTests {
         #expect(presented == [0.1, 0.2, 0.3, 10, 20, 30, 0.1, 0.9, 0.5, 0.6, -0.7, 2])
     }
 
-    /// Without the mirror it is the other way around.
     @Test
     func presentingImageSpaceValuesUnmirroredFlipsTheLateralComponents() {
         let values: [Float] = [0.1, 0.2, 0.3, 10, 20, 30, 0.9, 0.1, 0.5, 0.6, -0.7, 2]

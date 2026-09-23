@@ -226,8 +226,7 @@ public final class SceneManager {
     }
 
     func changeAspectRatio() {
-        // The aspect-ratio flag is already toggled, so `scenes` now reflects the new
-        // orientation automatically (edits were always written to the backing store).
+        // The aspect-ratio flag is already toggled, so `scenes` now reflects the new orientation
         guard let scene = scenes.first else { return }
         Task { @MainActor in
             try? await self.loadScene(id: scene.id)

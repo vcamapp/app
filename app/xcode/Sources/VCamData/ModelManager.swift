@@ -163,7 +163,6 @@ public final class ModelManager {
         loadMissingThumbnails()
     }
 
-    /// Thumbnail file I/O runs off the main actor and fills in items as results arrive.
     private func loadMissingThumbnails() {
         let models = modelItems.filter { $0.thumbnail == nil }.map(\.model)
         guard !models.isEmpty else { return }

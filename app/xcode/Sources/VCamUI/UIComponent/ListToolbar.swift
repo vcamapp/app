@@ -31,7 +31,6 @@ struct ListToolbar<AddControl: View, RemoveControl: View>: View {
     }
 }
 
-/// The remove button both lists share
 struct ListRemoveButton: View {
     let action: () -> Void
 

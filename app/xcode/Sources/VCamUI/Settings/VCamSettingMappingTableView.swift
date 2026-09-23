@@ -413,7 +413,6 @@ struct VCamSettingMappingTableView: NSViewRepresentable {
     }
 }
 
-/// Modal alert to edit the bounds of one side of a mapping entry.
 enum MappingBoundsAlert {
     /// Returns the new bounds, or nil when the alert is cancelled or the input is invalid.
     @MainActor

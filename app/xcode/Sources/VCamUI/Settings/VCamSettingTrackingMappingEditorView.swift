@@ -233,7 +233,6 @@ final class MappingDataStore {
         if supportsPerfectSyncMode {
             modes.append(.perfectSync)
         }
-        // Open on the mapping set that currently drives the avatar
         if let activeMode, modes.contains(activeMode) {
             selectedMode = activeMode
         }

@@ -1,5 +1,6 @@
 import Foundation
 import Network
+import Synchronization
 import VCamBridge
 import VCamLogger
 import VCamEntity
@@ -9,17 +10,23 @@ import VCamTrackingCore
 final class UDPDatagramSession {
     private var listener: NWListener?
     private var connection: NWConnection?
+    /// The receive queue checks this itself: a datagram of a replaced connection still in flight
+    /// there would otherwise reach the receiver's per-session state before the main actor drops it
+    private let currentConnection = CurrentConnection()
 
     var isRunning: Bool { listener != nil }
 
-    func start(
+    /// `receive` runs on the receive queue, before the hop to the main actor, so a receiver can
+    /// act on a datagram without waiting for a main thread busy drawing. Its result goes to `onData`
+    func start<Received: Sendable>(
         on port: NWEndpoint.Port,
         service: NWListener.Service? = nil,
         queue: DispatchQueue,
         onEnded: @escaping @MainActor @Sendable () -> Void,
         onConnectionStarted: @escaping @MainActor @Sendable () -> Void = {},
         onReady: @escaping @MainActor @Sendable () -> Void,
-        onData: @escaping @MainActor @Sendable (Data, _ receivedAt: TimeInterval) -> Void
+        receive: @escaping @Sendable (Data, _ receivedAt: TimeInterval) -> Received,
+        onData: @escaping @MainActor @Sendable (Received) -> Void
     ) throws {
         let parameters = NWParameters.udp
         parameters.allowLocalEndpointReuse = true
@@ -56,6 +63,7 @@ final class UDPDatagramSession {
                             from: connection,
                             onEnded: onEnded,
                             onReady: onReady,
+                            receive: receive,
                             onData: onData
                         )
                     }
@@ -77,34 +85,40 @@ final class UDPDatagramSession {
         connection?.stateUpdateHandler = nil
         connection?.cancel()
         connection = nil
+        currentConnection.set(nil)
     }
 
     private func replaceConnection(with connection: NWConnection) {
         self.connection?.stateUpdateHandler = nil
         self.connection?.cancel()
         self.connection = connection
+        currentConnection.set(connection)
     }
 
-    private func handle(
+    private func handle<Received: Sendable>(
         _ state: NWConnection.State,
         from connection: NWConnection,
         onEnded: @escaping @MainActor @Sendable () -> Void,
         onReady: @escaping @MainActor @Sendable () -> Void,
-        onData: @escaping @MainActor @Sendable (Data, _ receivedAt: TimeInterval) -> Void
+        receive: @escaping @Sendable (Data, _ receivedAt: TimeInterval) -> Received,
+        onData: @escaping @MainActor @Sendable (Received) -> Void
     ) {
         guard self.connection === connection else { return }
         Self.log(state)
         switch state {
         case .ready:
             onReady()
+            let currentConnection = currentConnection
             connection.receiveDatagrams { [weak self, weak connection] data in
                 let receivedAt = ProcessInfo.processInfo.systemUptime
                 // Recorded here rather than by each receiver, so every protocol gets both timestamps
                 TrackingTraceRecorder.shared.recordDatagram(data, time: receivedAt)
+                let received = connection.flatMap { currentConnection.is($0) ? receive(data, receivedAt) : nil }
+                // Hops even for a dropped datagram: the trace pairs receive and main arrival by order
                 DispatchQueue.runOnMain {
                     TrackingTraceRecorder.shared.recordMainArrival()
-                    guard let self, let connection, self.connection === connection else { return }
-                    onData(data, receivedAt)
+                    guard let self, let connection, self.connection === connection, let received else { return }
+                    onData(received)
                 }
             }
         case .cancelled, .failed:
@@ -143,5 +157,17 @@ private extension NWConnection {
             }
             receiveDatagrams(dataHandler)
         }
+    }
+}
+
+private final class CurrentConnection: Sendable {
+    private let identifier = Mutex<ObjectIdentifier?>(nil)
+
+    func set(_ connection: NWConnection?) {
+        identifier.withLock { $0 = connection.map(ObjectIdentifier.init) }
+    }
+
+    func `is`(_ connection: NWConnection) -> Bool {
+        identifier.withLock { $0 == ObjectIdentifier(connection) }
     }
 }

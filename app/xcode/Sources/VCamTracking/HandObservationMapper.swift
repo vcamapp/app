@@ -4,9 +4,8 @@ import Vision
 import VCamTrackingCore
 
 struct HandObservationMapper {
-    // Use the legacy VN* hand pose API for macOS 15 compatibility. The newer Swift Vision
-    // HumanHandPoseObservation API can introduce symbols that are unavailable on macOS 15.
-    // It maybe a bug in the Vision framework, but using the legacy API avoids this issue.
+    // The legacy VN* API because the Swift Vision HumanHandPoseObservation API can
+    // introduce symbols that are unavailable on macOS 15
     private let request: VNDetectHumanHandPoseRequest = {
         let request = VNDetectHumanHandPoseRequest()
         request.maximumHandCount = 2

@@ -108,8 +108,7 @@ private struct ImportedMotionItem: View {
         HStack(spacing: 2) {
             MotionPlayButton(motion: motion)
                 .contextMenu {
-                    // A still pose can be reopened in the pose editor. A motion cannot: it would be
-                    // flattened to its first frame, so editing is offered only once it is set to play as a pose
+                    // Editing would flatten a motion to its first frame, so only poses are editable
                     if MotionLibrary.shared.record(for: motion.id)?.isPose == true {
                         Button {
                             MacWindowManager.shared.editPoseMotion(motion.id)

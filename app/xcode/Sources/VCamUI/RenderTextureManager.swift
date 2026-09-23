@@ -73,7 +73,6 @@ public final class RenderTextureManager {
 
         // Do not draw through the sRGB format, as the gamma correction makes it brighter
         guard let writeTarget = texture.makeTextureView(pixelFormat: .rgba8Unorm) else { return }
-        // The target is fixed for this closure, so read its shape once instead of per frame
         let targetWidth = writeTarget.width
         let targetHeight = writeTarget.height
         let hasMipmaps = writeTarget.mipmapLevelCount > 1

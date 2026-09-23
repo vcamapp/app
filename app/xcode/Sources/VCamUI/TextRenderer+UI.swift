@@ -2,9 +2,8 @@ import SwiftUI
 import AppKit
 import VCamEntity
 
-/// How an object's placement is handled while its text is edited. Objects that stay
-/// locked on the canvas (the subtitle) hand this over so the window can free them
-/// for as long as it is open, and offer a way back when they end up out of reach.
+/// Lets the editor free an object that stays locked on the canvas (the subtitle) while it is
+/// open, and offer a way back when it ends up out of reach
 struct TextPlacementSupport {
     init(hint: LocalizedStringResource, setEditing: @escaping @MainActor (Bool) -> Void, reset: @escaping @MainActor () -> Void) {
         self.hint = hint
@@ -187,7 +186,6 @@ private struct TextPreview: View {
     }
 }
 
-/// A row of ready-made styles; picking one restyles the text in a single click
 private struct PresetPicker: View {
     let apply: (TextObjectConfiguration) -> Void
 

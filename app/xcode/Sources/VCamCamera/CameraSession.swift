@@ -209,8 +209,6 @@ public actor CameraSession {
         }
     }
 
-    /// Applies the format chosen in `configure`. The session only keeps it while it is
-    /// running, so before that the format is remembered and written in `start`.
     private func applyDesiredFormat() throws {
         guard let captureDevice, let desiredFormat else { return }
         try apply(desiredFormat, to: captureDevice)

@@ -186,8 +186,7 @@ public final class Tracking {
         UniBridge.shared.useBlinker(isBlinkerUsed)
     }
 
-    /// Every face source hands its presented arrays over here, so the blink setting is
-    /// applied once regardless of the source and mode.
+    /// Every face source goes through here so the blink setting applies regardless of the source and mode
     public func sendFaceValues(_ values: [Float], mode: TrackingMode) {
         let values = BlinkSourceValues.applying(blinkSource, to: values, mode: mode, mirrored: mirrorsTracking)
         switch mode {
@@ -198,10 +197,8 @@ public final class Tracking {
         }
     }
 
-    /// True while nothing can drive the body. VCamMocap is covered by the methods
-    /// themselves (`.vcamMocap`): its integration only starts the receiver, and
-    /// packets are dropped unless a method opts into them. Lip sync and eye
-    /// tracking don't move the body, so they are intentionally ignored.
+    /// The VCamMocap integration is not checked because it only starts the receiver; its packets
+    /// are dropped unless a method is `.vcamMocap`. Lip sync and eye tracking don't move the body.
     public var isIdleMotionUsed: Bool {
         faceTrackingMethod == .disabled
             && handTrackingMethod == .disabled
@@ -239,24 +236,19 @@ public final class Tracking {
         applyFaceMappingsToEngine()
     }
 
-    /// The engine owns one mapping set per mode, and which one actually receives the face data is
-    /// decided per packet by the model's Perfect Sync support. A Perfect Sync capable method
-    /// falls back to the blend shape mode for a model without those blend shapes, so both sets
-    /// are kept in sync instead of only the one of the current tracking method.
+    /// Both sets are applied because the mode receiving face data is decided per packet: a Perfect Sync
+    /// capable method falls back to the blend shape mode for a model without those blend shapes.
     private func applyFaceMappingsToEngine() {
         applyMappingsToEngine(for: .blendShape)
         applyMappingsToEngine(for: .perfectSync)
     }
 
-    /// Whether VCamMocap drives the hands. Checks both methods to guard
-    /// against a partially applied state from a future settings path.
+    /// Checks both methods to guard against a partially applied state
     public var usesVCamMocapHandTracking: Bool {
         handTrackingMethod == .vcamMocap && fingerTrackingMethod == .vcamMocap
     }
 
-    // VCamMocap tracks wrist and fingers as one unit, so the settings never
-    // allow only one of hand/finger to be .vcamMocap. The invariant is
-    // enforced in the model so every settings path goes through it.
+    // VCamMocap tracks wrist and fingers as one unit, so hand and finger are both .vcamMocap or neither is
     public func setHandTrackingMethod(_ method: TrackingMethod.Hand) {
         if method == .vcamMocap {
             setHandAndFingerTrackingMethods(hand: .vcamMocap, finger: .vcamMocap)
@@ -272,9 +264,8 @@ public final class Tracking {
         webCamera.setAlternativeHandTrackingEnabled(isEnabled)
     }
 
-    /// Swaps the Mac camera face backend for the experimental full-blend-shape
-    /// one. It drives Perfect Sync, so the lip sync and mapping state are
-    /// reconciled the same way a Perfect Sync tracking method would.
+    /// Swaps the Mac camera face backend for the experimental full-blend-shape one,
+    /// which drives Perfect Sync like a Perfect Sync tracking method
     public func setHighPrecisionFaceTrackingEnabled(_ isEnabled: Bool) {
         usesHighPrecisionFaceTracking = isEnabled
         webCamera.setHighPrecisionFaceTrackingEnabled(isEnabled)
@@ -338,9 +329,6 @@ public final class Tracking {
         }
     }
 
-    /// Whether the active face tracking can drive Perfect Sync. The camera
-    /// `.default` method can when the experimental full-blend-shape backend is on,
-    /// on top of the methods whose enum already declares support.
     public var faceTrackingSupportsPerfectSync: Bool {
         faceTrackingMethod.supportsPerfectSync || (faceTrackingMethod == .default && usesHighPrecisionFaceTracking)
     }
@@ -364,9 +352,8 @@ public final class Tracking {
         UniBridge.shared.hasPerfectSyncBlendShape
     }
 
-    /// The single owner of the mic lip sync lifecycle. Perfect Sync drives the mouth on its
-    /// own, so the mic is suppressed while it is active without touching the user's choice,
-    /// which lets the choice take effect again as soon as Perfect Sync stops.
+    /// Perfect Sync drives the mouth on its own, so the mic is suppressed while it is active
+    /// without touching the user's choice, which takes effect again once Perfect Sync stops.
     private func reconcileLipSyncState() {
         if UniState.shared.currentLipSync == .mic, !micLipSyncDisabled {
             AvatarAudioManager.shared.start(usage: .lipSync)

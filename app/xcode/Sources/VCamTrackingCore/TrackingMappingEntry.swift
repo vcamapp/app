@@ -374,6 +374,25 @@ public extension TrackingMappingEntry {
         }
     }
 
+    /// Positions of the blend shape weights (0...1) in `trackingValueKeys(for:)` order. They sit
+    /// in one run behind the pose and gaze channels in both layouts
+    package static func weightChannels(for mode: TrackingMode) -> Range<Int> {
+        switch mode {
+        case .perfectSync: perfectSyncWeightChannels
+        case .blendShape: blendShapeWeightChannels
+        }
+    }
+
+    private static let perfectSyncWeightChannels = weightChannels(in: perfectSyncMappingDefinitions)
+    private static let blendShapeWeightChannels = weightChannels(in: blendShapeMappingDefinitions)
+
+    private static func weightChannels(in definitions: [DefaultMappingDefinition]) -> Range<Int> {
+        let indices = definitions.indices.filter { definitions[$0].bounds == 0...1 }
+        guard let first = indices.first, let last = indices.last else { return 0..<0 }
+        assert(indices.count == last - first + 1, "The weights are expected in one run")
+        return first..<(last + 1)
+    }
+
     private static let perfectSyncTrackingValueKeys = perfectSyncInputKeys.map(\.key)
     private static let blendShapeTrackingValueKeys = blendShapeInputKeys.map(\.key) + [DefaultMappingDefinition.vowel.key]
 

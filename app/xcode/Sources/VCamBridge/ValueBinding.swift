@@ -58,7 +58,7 @@ extension ValueBinding where Value == UnsafeMutableRawPointer {
             onGet(retrievedValue)
             return retrievedValue
         } set: { [weak self] in
-            let ptr = $0.set() // // Keep the pointer alive until memory is received
+            let ptr = $0.set() // Keep the pointer alive until memory is received
             self?.setValue(kind, ptr.pointer)
             onSet($0)
         }

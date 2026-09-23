@@ -56,16 +56,14 @@ struct VisionTrackingConfigurationSnapshot: Sendable, Equatable {
         usage.contains(.fingerTracking) && finger.isFingerEnabled
     }
 
-    /// Whether Vision landmarks are needed when the alternative face backend is
-    /// not driving the face. The alternative hand backend anchors hands to the
-    /// face observation, so landmarks must run even when face output itself is off.
+    /// Ignores the alternative face backend. The alternative hand backend anchors hands
+    /// to the face observation, so landmarks run even when face output itself is off.
     var needsVisionFaceLandmarks: Bool {
         shouldOutputFace || isEmotionEnabled || shouldUseAlternativeHandMapper
     }
 
     var needsFaceLandmarks: Bool {
-        // The alternative face backend replaces the Vision face path entirely and
-        // supplies its own hand anchor, so Vision landmarks are not needed then.
+        // The alternative face backend replaces the Vision face path and supplies its own hand anchor
         shouldUseAlternativeFaceProvider ? false : needsVisionFaceLandmarks
     }
 
@@ -93,12 +91,9 @@ struct VisionTrackingConfigurationSnapshot: Sendable, Equatable {
         shouldOutputFace || needsHandPose
     }
 
-    /// The alternative hand backend consumes BGRA frames; capturing in BGRA
-    /// moves the conversion into the capture pipeline instead of a per-frame
-    /// GPU render. The alternative face backend only accepts the biplanar
-    /// default, so it wins when both are active and the hand backend converts
-    /// per frame instead. Vision performs the same on either format, so the
-    /// default stays 420f as recommended by TN3121.
+    /// Capturing in BGRA saves the alternative hand backend a per-frame GPU conversion.
+    /// The alternative face backend only accepts the biplanar default, so it wins when both are active.
+    /// Vision performs the same on either format, so the default stays 420f as recommended by TN3121.
     var capturePixelFormat: OSType {
         shouldUseAlternativeHandMapper && !shouldUseAlternativeFaceProvider
             ? kCVPixelFormatType_32BGRA
@@ -128,10 +123,8 @@ struct HandTrackingOutput: Sendable {
     var fingersValues: [Float]?
 }
 
-/// Hand inference runs on its own actor so it can execute concurrently with
-/// the face inference on the pipeline actor; the per-frame latency becomes
-/// max(face, hands) instead of their sum, which raises the effective frame
-/// rate of both trackers.
+/// A separate actor so hand inference runs concurrently with face inference;
+/// the per-frame latency becomes max(face, hands) instead of their sum.
 actor HandProcessor {
     private var handMapper = HandObservationMapper()
     private let handPoseMapperFactory: (@Sendable () -> sending any HandPoseMapper)?
@@ -141,7 +134,6 @@ actor HandProcessor {
         self.handPoseMapperFactory = handPoseMapperFactory
     }
 
-    /// Built on first use, like the alternative face provider
     private func alternativeMapper() -> (any HandPoseMapper)? {
         if alternativeHandMapper == nil {
             alternativeHandMapper = handPoseMapperFactory?()
@@ -175,8 +167,7 @@ actor VisionTrackingPipeline {
     private let handProcessor: HandProcessor
     private let faceTrackingProviderFactory: (@Sendable () -> sending any FaceTrackingProvider)?
     private var alternativeFaceProvider: (any FaceTrackingProvider)?
-    /// The most recent eye anchor produced by the alternative face backend, kept
-    /// so hands can anchor to the previous frame's face like the Vision path.
+    /// Kept so hands can anchor to the previous frame's face like the Vision path
     private var latestAlternativeFaceContext: HandPoseFaceContext?
 
     private let outputHandler: @MainActor @Sendable (TrackingOutput) -> Void
@@ -246,12 +237,9 @@ actor VisionTrackingPipeline {
         guard configuration.needsVisionProcessing else { return nil }
 
         if configuration.shouldUseAlternativeFaceProvider, let alternativeFaceProvider = alternativeProvider() {
-            // The alternative face backend replaces the Vision face path and also
-            // supplies the hand anchor, so Vision face landmarks are skipped.
             guard configuration.needsHandPose else {
                 return makeOutput(face: processAlternativeFace(frame, provider: alternativeFaceProvider), hands: nil)
             }
-            // Hands anchor to the previous frame's face like the Vision path.
             let anchor = latestAlternativeFaceContext
             async let hands = handProcessor.process(frame, face: anchor)
             let face = processAlternativeFace(frame, provider: alternativeFaceProvider)

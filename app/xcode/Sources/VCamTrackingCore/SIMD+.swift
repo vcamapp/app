@@ -26,7 +26,6 @@ public extension simd_float4x4 {
         )
     }
 
-    /// The rotation part with the translation dropped.
     @inlinable var rotationOnly: Self {
         .init(
             SIMD4(columns.0.x, columns.0.y, columns.0.z, 0),
@@ -36,7 +35,6 @@ public extension simd_float4x4 {
         )
     }
 
-    /// Whether the transform is a reflection (left-handed, negative determinant).
     @inlinable var isMirrored: Bool {
         simd_determinant(self) < 0
     }
@@ -45,7 +43,7 @@ public extension simd_float4x4 {
 public extension simd_quatf {
     /// Euler angles in radians (x: pitch, y: yaw, z: roll), applied yaw then pitch then roll about
     /// the intrinsic axes to match how the engine composes them. `eulerAngles()` must decompose in
-    /// the same order, or roll leaks into pitch as yaw grows (18° off at 60° yaw with 10° roll).
+    /// the same order, or roll leaks into pitch as yaw grows.
     @inlinable init(_ radianAngles: SIMD3<Float>) {
         self = simd_quatf(angle: radianAngles.y, axis: SIMD3(0, 1, 0))
             * simd_quatf(angle: radianAngles.x, axis: SIMD3(1, 0, 0))

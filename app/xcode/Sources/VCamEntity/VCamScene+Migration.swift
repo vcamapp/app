@@ -7,8 +7,7 @@ public extension VCamScene {
     /// - 2: crop rects are unit rects; (0, 0, 1, 1) is always the whole texture.
     static let currentVersion = 2
 
-    /// Migrates a decoded scene to the current format in memory.
-    /// The migrated form reaches the disk only through the next regular save.
+    /// Migrates in memory; the migrated form reaches the disk only through the next regular save.
     mutating func migrateToCurrentVersion() {
         if version == nil {
             migrateCropToUnitRect()

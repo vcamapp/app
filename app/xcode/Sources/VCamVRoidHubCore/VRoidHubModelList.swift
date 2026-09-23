@@ -1,7 +1,6 @@
 import Foundation
 import VRoidSDK
 
-/// Paged model lists for each tab of the VRoid Hub screens.
 @MainActor
 @Observable
 public final class VRoidHubModelList {

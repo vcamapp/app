@@ -1,7 +1,6 @@
 import SwiftUI
 import VRoidSDK
 
-/// A model image from the API's image set, with a placeholder while it loads
 public struct VRoidHubModelImage: View {
     let imageSet: VRoidImageSet?
     let contentMode: ContentMode
@@ -30,7 +29,6 @@ public struct VRoidHubModelImage: View {
     }
 }
 
-/// A load failure placeholder with a retry button
 public struct VRoidHubLoadFailedView: View {
     let retry: () async -> Void
 

@@ -315,9 +315,8 @@ package struct VCamAPIService: VCamHandler {
     private static let defaultPoseName = "Pose"
     private static let defaultPoseDuration: Double = 2
 
-    /// Runs `body` against the injected editor, translating the editor's errors
-    /// into the API's. Whether the editor is open enough to serve a request is
-    /// the editor's own call, so every method goes through here.
+    /// Whether the editor is open enough to serve a request is the editor's own call,
+    /// so every method goes through here.
     private func withPoseEditor<T>(_ body: (any PoseEditing) async throws -> T) async throws -> T {
         guard let editor = PoseControl.provider else {
             throw VCamError.unsupportedOperation(data: .errorCode("unsupported_operation"))
@@ -348,8 +347,7 @@ package struct VCamAPIService: VCamHandler {
         [Double(vector.x), Double(vector.y), Double(vector.z)]
     }
 
-    /// A 3-vector parameter. JSON-RPC reports a wrong shape as invalid params rather
-    /// than as an application error.
+    /// JSON-RPC reports a wrong shape as invalid params rather than as an application error.
     private static func vector(_ values: [Double], of name: String) throws -> SIMD3<Float> {
         guard values.count == 3, values.allSatisfy(\.isFinite) else {
             throw JSONRPCErrorObject(code: -32602, message: "Invalid parameter \"\(name)\": expected 3 numbers")
@@ -357,7 +355,6 @@ package struct VCamAPIService: VCamHandler {
         return SIMD3(Float(values[0]), Float(values[1]), Float(values[2]))
     }
 
-    /// A weight parameter, which the schema bounds to 0...1.
     private static func unitWeight(_ value: Double, of name: String) throws -> Float {
         guard value.isFinite, (0...1).contains(value) else {
             throw JSONRPCErrorObject(code: -32602, message: "Invalid parameter \"\(name)\": expected a number from 0 to 1")

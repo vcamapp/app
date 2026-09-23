@@ -94,7 +94,7 @@ public final class UniState {
     public var isMotionPlaying: [String: Bool] = [:]
     public var expressions: [Avatar.Expression] = []
     /// The expression the user picked, or nil while none is applied. Owned here rather
-    /// than echoed back by the engine: `ExpressionControl` is the only thing that sets it
+    /// than echoed back by the engine
     public var currentExpressionName: String?
     /// Output keys the loaded avatar exposes, as the engine reports them
     /// (3D: expression names / 2D: Live2D parameter names)

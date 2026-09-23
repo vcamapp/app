@@ -41,7 +41,6 @@ public struct VCamHands {
         @inline(always) @inlinable
         public static func finger(_ p: SIMD2<Float>, wrist: SIMD2<Float>, palmHeight: Float, configuration config: FingerTrackingConfiguration) -> Float {
             if p != .zero {
-                // Distance between the fingertip and the wrist
                 return simd_clamp(simd_distance(p, wrist) * 0.8 * config.open / palmHeight - 0.5 * config.close, 0, 1)
             } else {
                 return 0
@@ -182,7 +181,7 @@ public extension VCamHands.Hand {
         let thumbTip: Float
 
         if hand.thumbTip != .zero {
-            // Distance between the base of the pinky and the tip of the thumb (*2 and -1 are used to make it easier to close and open)
+            // *2 and -1 make the thumb easier to close and open
             thumbTip = simd_clamp(simd_distance(hand.thumbTip, hand.littleMCP) * 2 * config.open / palmWidth - 1 * config.close, 0, 1)
         } else {
             thumbTip = 0 // If the thumb is not visible, consider it as a clenched state

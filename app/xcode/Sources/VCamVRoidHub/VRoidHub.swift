@@ -4,8 +4,6 @@ import VCamLogger
 import VCamVRoidHubCore
 import VRoidSDK
 
-/// Entry point of the VRoid Hub integration.
-///
 /// The API credential and the model install pipeline are injected at startup
 /// from outside the open source modules; until then the feature is
 /// unavailable and the UI entry points should be hidden.
@@ -90,7 +88,6 @@ public enum VRoidHub {
     }
 }
 
-/// The persisted reference (`VCamData`) and the shared one carry the same two ids
 extension VRoidHubModelReference {
     init(_ reference: VRoidModelReference) {
         self.init(

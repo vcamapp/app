@@ -1,13 +1,13 @@
 import Foundation
 
 public struct TextObjectConfiguration: Codable, Equatable, Hashable, Sendable {
-    // Render at a large size by default so that scaling up on the canvas stays sharp
     /// The closest bundled face to San Francisco (SF itself is a hidden dot-prefixed font
     /// that can't be addressed by name, and the public SF Pro isn't preinstalled).
     /// CJK text cascades to a weight-matched Hiragino (Bold falls back to W6).
     public static let defaultFontName = "HelveticaNeue"
     /// Text on a stream sits over arbitrary footage, so the presets start from the bold member
     public static let defaultBoldFontName = "HelveticaNeue-Bold"
+    // Render at a large size by default so that scaling up on the canvas stays sharp
     public static let defaultFontSize = 256.0
     public static let fontSizeRange = 8.0...1024.0
 

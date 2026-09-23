@@ -16,7 +16,7 @@ extension TextObjectConfiguration {
     }
 
     /// Resizes the whole style, so that a configuration authored at one font size
-    /// renders identically at another (used for the preview and the preset thumbnails)
+    /// renders identically at another
     func scaled(by scale: Double) -> Self {
         var configuration = self
         configuration.fontSize *= scale

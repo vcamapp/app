@@ -93,14 +93,11 @@ public extension BlendShape {
     ]
 
     /// Entries of `wireOrder` that are zeroed while eye tracking is disabled:
-    /// the contiguous eye block `eyeLookDownLeft ... eyeWideRight`. A test
-    /// pins this range to the wire order.
+    /// the contiguous eye block `eyeLookDownLeft ... eyeWideRight`
     private static let eyeTrackingRange = 10..<22
 
     /// Pairs of sided shapes, as `wireOrder` key paths. Directional shapes such as
     /// `jawLeft` / `mouthRight` belong here too: mirroring moves the jaw the other way.
-    /// The shapes missing from this list are the ones without a side, plus the gaze
-    /// shapes of `gazeDirectionKeyPaths`.
     static let sidedPairs: [(WritableKeyPath<BlendShape, Float> & Sendable, WritableKeyPath<BlendShape, Float> & Sendable)] = [
         (\.browDownLeft, \.browDownRight),
         (\.browOuterUpLeft, \.browOuterUpRight),

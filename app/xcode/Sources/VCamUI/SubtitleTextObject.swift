@@ -5,12 +5,9 @@ import VCamData
 import VCamDefaults
 import VCamBridge
 
-/// The subtitle overlay, drawn through the text-object pipeline. It belongs to no scene: the
-/// text lives in UserDefaults (`UniState.subtitle`), and the style and placement are stored
-/// globally so that every scene shows it.
-///
-/// Unlike a scene text object, whose on-screen width is fixed by the user, a subtitle keeps its
-/// glyph size steady while the text changes, like broadcast subtitles.
+/// Belongs to no scene: the text lives in `UniState.subtitle`, and the style and placement are
+/// stored globally so that every scene shows it. Unlike a scene text object, whose on-screen
+/// width is fixed by the user, a subtitle keeps its glyph size steady while the text changes.
 @MainActor
 enum SubtitleTextObject {
     /// The text is excluded: the subtitle key owns it. The placement is stored as the
@@ -19,7 +16,6 @@ enum SubtitleTextObject {
         /// Fills in the default placement, which depends on the canvas size
         @MainActor init(configuration: TextObjectConfiguration, scale: Double? = nil, centerX: Double? = nil, bottomY: Double? = nil) {
             self.configuration = configuration
-            // The text is what the object is sized against, so it can't be part of the style
             self.configuration.text = ""
             self.scale = scale ?? TextObjectPlacement.defaultScale(fontSize: configuration.fontSize)
             self.centerX = centerX ?? 0
@@ -52,7 +48,7 @@ enum SubtitleTextObject {
         return (object, payload)
     }
 
-    /// Opens the text editor for the subtitle's own style; works before any text was typed
+    /// Works before any text was typed
     static func showStyleEditor() {
         var configuration = current?.payload.configuration ?? loadStyle()?.configuration ?? TextObjectPreset.subtitleDefault
         // The toolbar field owns the text, so it is the one the editor starts from
@@ -77,8 +73,6 @@ enum SubtitleTextObject {
         SceneObjectManager.shared.setLocked(!isEditing, id: SceneObject.subtitleID)
     }
 
-    /// Brings an off-screen or shrunken subtitle back to the default placement and scale,
-    /// without touching its style
     private static func resetPlacement() {
         if let style = loadStyle() {
             save(Style(configuration: style.configuration))
@@ -86,7 +80,6 @@ enum SubtitleTextObject {
         recreate()
     }
 
-    /// Rebuilds the engine object from scratch with the current saved style
     private static func recreate() {
         pendingUpdate?.cancel()
         SceneObjectManager.shared.subtitleObject = nil

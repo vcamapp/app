@@ -124,8 +124,7 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
             throw assetwriter.error ?? RecordingError.cannotStartWriting
         }
 
-        // Commit to the fields only after every step above has succeeded,
-        // so a failed setup never leaves the recorder half-initialized in the recording state
+        // Committed only after every step succeeded so a failed setup never leaves the recorder half-initialized
         self.assetwriter = assetwriter
         self.assetVideoWriterAdaptor = assetVideoWriterAdaptor
         self.assetAudioWriterInput = assetAudioWriterInput
@@ -267,7 +266,6 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
         guard case .recording = state, frameCount > 0 else { return }
 
         if sampleCount <= 0 {
-            // Time from start of recording to capture.
             var timeInterval = time.timeIntervalSince(hostTime: baseHostTime)
             if let device {
                 // https://lists.apple.com/archives/coreaudio-api/2010/Jan/msg00046.html

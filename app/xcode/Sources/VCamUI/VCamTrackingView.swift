@@ -86,9 +86,8 @@ public struct VCamTrackingView: View {
 #endif
     }
 
-    // VCamMocap owns wrist and fingers as one method, so the finger picker
-    // never offers it as a choice. While the hand picker selects VCamMocap the
-    // current value is still included so the locked picker can display it.
+    // VCamMocap owns wrist and fingers as one method, so it is listed only while the hand
+    // picker selects it, for the locked picker to display it
     private var fingerTrackingOptions: [TrackingMethod.Finger] {
         tracking.handTrackingMethod == .vcamMocap
             ? TrackingMethod.Finger.allCases

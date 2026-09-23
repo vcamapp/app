@@ -8,10 +8,9 @@ package enum AvatarImportManagerError: Error {
     case invalidModel
 }
 
-/// Staging for avatar uploads over the API: begin creates a per-import
-/// directory, binary frames append to the staged file, and commit hands the
-/// file to the shared import path (`ModelManager.saveModel`), so uploads and
-/// local file imports register avatars exactly the same way.
+/// Staging for avatar uploads over the API. Commit hands the file to the shared
+/// import path (`ModelManager.saveModel`), so uploads and local file imports
+/// register avatars exactly the same way.
 @MainActor
 package final class AvatarImportManager {
     package static let shared = AvatarImportManager()
@@ -67,7 +66,6 @@ package final class AvatarImportManager {
     }
 
     /// Handles one binary frame: the 36-byte importId followed by a chunk.
-    /// Failures are remembered and reported when the import is committed.
     package func receiveFrame(_ frame: Data, connectionID: UUID) {
         guard frame.count > Self.frameHeaderLength,
               let header = String(data: frame.prefix(Self.frameHeaderLength), encoding: .ascii),

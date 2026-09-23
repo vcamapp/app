@@ -7,8 +7,7 @@ import VCamEntity
 import VCamBridge
 
 public final class TextRenderer: StaticImageRenderer {
-    /// What to draw, and how large to draw it. They feed the same rasterization, so
-    /// changing them together only rasterizes once.
+    /// Changing these together rasterizes only once
     public struct Layout: Equatable, Sendable {
         public init(configuration: TextObjectConfiguration, displayScale: Double = 1, renderScale: Double = MainTexture.shared.renderScale) {
             self.configuration = configuration
@@ -21,9 +20,8 @@ public final class TextRenderer: StaticImageRenderer {
         /// displayed at, so the compositor samples the texture 1:1; minifying a bitmap
         /// authored at the configuration's own font size destroys thin outlines.
         public var displayScale: Double
-        /// Output pixels per canvas pixel. The composition at the output resolution is the
-        /// only read of this texture, so anything above it is wasted and anything below it
-        /// is lost detail.
+        /// Output pixels per canvas pixel. The texture is only read by the composition at the
+        /// output resolution, so anything above it is wasted and anything below it is lost detail.
         public var renderScale: Double
     }
 
@@ -39,10 +37,9 @@ public final class TextRenderer: StaticImageRenderer {
         }
     }
 
-    /// Re-rasterizes only when the new scales would change the bitmap's pixel size. Geometry
-    /// round-trips through 32-bit floats and regions are rounded to whole pixels, so the scale
-    /// that comes back is never the one that was set; comparing in pixels is what tells a real
-    /// resize apart from that noise, which would otherwise rasterize on every click.
+    /// Compares in pixels because geometry round-trips through 32-bit floats and whole-pixel
+    /// regions, so the scale that comes back never equals the one set; comparing scales would
+    /// rasterize on every click.
     public func setScale(display displayScale: Double, render renderScale: Double) {
         guard Layout.isUsableScale(displayScale), Layout.isUsableScale(renderScale) else { return }
         guard abs(layoutSize.width * displayScale * renderScale - textureSize.width) >= 1 else { return }
@@ -129,7 +126,6 @@ extension TextRenderer {
         }
     }
 
-    /// The bitmap size the configuration lays out to, without rasterizing it
     static func measure(_ configuration: TextObjectConfiguration) -> CGSize {
         makeLayout(configuration).size
     }
@@ -282,7 +278,6 @@ extension TextRenderer {
         // text never produces a mostly-empty bitmap and alignment applies to the longest line
         let size = CGSize(width: bounds.width, height: bounds.height + topOverhang)
         return .init(size: size) { context, rect, pass in
-            // Lay the text out below the overhang, leaving room for the first line's ascender
             let rect = CGRect(x: rect.minX, y: rect.minY, width: rect.width, height: rect.height - topOverhang)
             var attributes = attributes
             switch pass {

@@ -1,8 +1,6 @@
 import Foundation
 
-/// Delivers server-to-client notifications to subscribed connections.
-/// The transport layer registers a connection with `connect`, and the
-/// connection receives nothing until it opts in via `events.subscribe`.
+/// A connection receives nothing until it opts in via `events.subscribe`.
 @MainActor
 package final class EventPublisher {
     package static let shared = EventPublisher()

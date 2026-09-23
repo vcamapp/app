@@ -36,6 +36,16 @@ public struct TrackingTrace: Sendable {
         return seen
     }
 
+    /// The sender interleaves separate streams (face and hands on VCamMotion v1), so spacing
+    /// only means something between datagrams of the same kind: a hand packet right behind a
+    /// face packet is neither bunching nor the end of a silence. The most frequent kind is the
+    /// one the tracking runs on
+    public var primaryStream: [TrackingTraceRecord.Datagram] {
+        let counts = Dictionary(datagrams.map { ($0.type, 1) }, uniquingKeysWith: +)
+        guard let type = counts.max(by: { ($0.value, $0.key ?? "") < ($1.value, $1.key ?? "") })?.key else { return [] }
+        return datagrams.filter { $0.type == type }
+    }
+
     public var receiveTimeByOrder: [Int: Double] {
         Dictionary(datagrams.map { ($0.n, $0.t) }, uniquingKeysWith: { first, _ in first })
     }

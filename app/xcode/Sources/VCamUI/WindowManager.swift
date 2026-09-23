@@ -190,9 +190,7 @@ public final class WindowManager {
         UniBridge.shared.quitApp()
     }
 
-    /// A build that draws without an engine has nothing else to turn the close button into
-    /// "leave the app in the menu bar", so its window delegate has to do it. An engine build
-    /// is driven from the engine side and must keep its own path
+    /// Only for builds without an engine; an engine build handles the close button on the engine side
     private func installCloseInterceptor(on window: NSWindow) {
         closeInterceptor = WindowCloseInterceptor(next: window.delegate) { [weak self] in
             guard let self else { return }

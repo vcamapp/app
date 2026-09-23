@@ -1,8 +1,6 @@
 import SwiftUI
 import VCamEntity
 
-/// The catalog of scene objects a user can add. The menu bar and the object list build
-/// their items from this one list so the two entry points can't drift apart.
 @MainActor
 enum AddableSceneObject: Int, CaseIterable {
     case image

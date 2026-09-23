@@ -119,7 +119,6 @@ public enum Camera {
 
     /// Prefers the lowest-resolution format that can run at the requested FPS,
     /// so a low-resolution-but-low-FPS format doesn't silently cap the frame rate.
-    /// Falls back to the lowest-resolution format when no format supports the FPS.
     public static func searchLowestResolutionFormat(for device: AVCaptureDevice, supportingFPS fps: Float64) -> (format: AVCaptureDevice.Format, resolution: CGSize)? {
         let formats = device.formats.filter {
             FrameRateSelector.supportsFrameRate(fps, ranges: $0.videoSupportedFrameRateRanges)

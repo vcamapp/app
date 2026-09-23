@@ -16,8 +16,7 @@ struct VCamMotionTrackingSettings {
 
 @MainActor
 public final class VCamMotionTracking {
-    private let blendShapeResampler: TrackingResampler
-    private let perfectSyncResampler: TrackingResampler
+    nonisolated private let faceRoute: FaceResamplerRoute
     private let handsResampler: TrackingResampler
     private let fingersResampler: TrackingResampler
     private let smoothingStorage: TrackingSmoothingStorage
@@ -33,13 +32,7 @@ public final class VCamMotionTracking {
         self.smoothingStorage = smoothingStorage
         let settingsProvider = smoothingStorage.settingsProvider
 
-        blendShapeResampler = TrackingResampler(label: "vcam-motion-blendshape", settingsProvider: settingsProvider) { @MainActor values in
-            Tracking.shared.sendFaceValues(values, mode: .blendShape)
-        }
-
-        perfectSyncResampler = TrackingResampler(label: "vcam-motion-perfectsync", settingsProvider: settingsProvider) { @MainActor values in
-            Tracking.shared.sendFaceValues(values, mode: .perfectSync)
-        }
+        faceRoute = FaceResamplerRoute(labelPrefix: "vcam-motion", smoothingStorage: smoothingStorage)
 
         handsResampler = TrackingResampler(label: "vcam-motion-hands", settingsProvider: settingsProvider) { @MainActor values in
             UniBridge.shared.hands(values)
@@ -64,26 +57,37 @@ public final class VCamMotionTracking {
         }
     }
 
-    func applyLegacyMotion(_ data: VCamMotion, settings: VCamMotionTrackingSettings, receivedAt: TimeInterval) {
-        applyFace(data, settings: settings, receivedAt: receivedAt)
-        applyLegacyHands(data, settings: settings, receivedAt: receivedAt)
+    /// On the receive queue. False when the face has to go through `applyFace` on the main actor
+    nonisolated func pushFaceFromReceiveQueue(_ data: VCamMotion, receivedAt: TimeInterval) -> Bool {
+        faceRoute.push(at: receivedAt) { conversion, _ in
+            Self.faceValues(data, conversion: conversion)
+        }
     }
 
-    func applyFace(_ data: VCamMotion, settings: VCamMotionTrackingSettings, receivedAt: TimeInterval) {
-        guard settings.isFaceTrackingEnabled else { return }
-
-        if Tracking.shared.activeFaceMappingMode == .perfectSync {
-            let values = data.face.perfectSync(useEyeTracking: settings.useEyeTracking, mirrored: settings.mirrorsTracking)
-            perfectSyncResampler.send(values, smoothed: smoothingStorage.isEnabled, receivedAt: receivedAt)
-            return
+    /// `pushed`: the receive queue already sent this face to the resamplers
+    func applyFace(_ data: VCamMotion, pushed: Bool, settings: VCamMotionTrackingSettings, receivedAt: TimeInterval) {
+        faceRoute.send(faceConversion(settings: settings), pushed: pushed, receivedAt: receivedAt) { conversion, _ in
+            Self.faceValues(data, conversion: conversion)
         }
+    }
 
-        let values = data.face.vcamHeadTransform(
-            useEyeTracking: settings.useEyeTracking,
-            useVowelEstimation: settings.useVowelEstimation,
-            mirrored: settings.mirrorsTracking
-        )
-        blendShapeResampler.send(values, smoothed: smoothingStorage.isEnabled, receivedAt: receivedAt)
+    private func faceConversion(settings: VCamMotionTrackingSettings) -> FaceResamplerRoute.Conversion? {
+        guard settings.isFaceTrackingEnabled, let mode = Tracking.shared.activeFaceMappingMode else { return nil }
+        return .init(mode: mode, useEyeTracking: settings.useEyeTracking,
+                     useVowelEstimation: settings.useVowelEstimation, mirrorsTracking: settings.mirrorsTracking)
+    }
+
+    nonisolated private static func faceValues(_ data: VCamMotion, conversion: FaceResamplerRoute.Conversion) -> [Float] {
+        switch conversion.mode {
+        case .perfectSync:
+            data.face.perfectSync(useEyeTracking: conversion.useEyeTracking, mirrored: conversion.mirrorsTracking)
+        case .blendShape:
+            data.face.vcamHeadTransform(
+                useEyeTracking: conversion.useEyeTracking,
+                useVowelEstimation: conversion.useVowelEstimation,
+                mirrored: conversion.mirrorsTracking
+            )
+        }
     }
 
     /// The engine retargets v1 hand packets itself, but whether this tracking
@@ -93,7 +97,7 @@ public final class VCamMotionTracking {
         UniBridge.sendHandPacketV1(packet)
     }
 
-    private func applyLegacyHands(_ data: VCamMotion, settings: VCamMotionTrackingSettings, receivedAt: TimeInterval) {
+    func applyLegacyHands(_ data: VCamMotion, settings: VCamMotionTrackingSettings, receivedAt: TimeInterval) {
         guard settings.isHandTrackingEnabled else { return }
         let handOutput = makeHandOutput(data, configuration: settings.handConfiguration)
         if smoothingStorage.isEnabled, handOutput.hasMissingHand {
@@ -131,15 +135,13 @@ public final class VCamMotionTracking {
     }
 
     private func stopResamplers() {
-        blendShapeResampler.stop()
-        perfectSyncResampler.stop()
+        faceRoute.stop()
         handsResampler.stop()
         fingersResampler.stop()
     }
 
     func stopFaceResampling() {
-        blendShapeResampler.stop()
-        perfectSyncResampler.stop()
+        faceRoute.stop()
     }
 
     func stopHandResampling() {

@@ -87,7 +87,6 @@ public enum VideoConverter { // TODO: Migrate to new API for macOS 26+
         }
     }
 
-    /// Merge audio tracks into a single audio track.
     @concurrent
     public static func mergeAudioTracks(
         asset: AVAsset,

@@ -3,9 +3,7 @@ import VCamEntity
 import VCamMotionV1
 
 /// A face sample in the VCamMotion convention: the head pose is the subject's own
-/// while the sided shapes and the gaze are named through the mirror, as ARKit
-/// reports them. It is the common currency of the camera-based face sources
-/// (ARKit, MediaPipe, the VCamMotion receiver) before the wire arrays are built.
+/// while the sided shapes and the gaze are named through the mirror, as ARKit reports them.
 public struct VCamFaceMotion: Equatable, Sendable {
     public var head: VCamMotion.Head
     public var blendShape: BlendShape
@@ -15,9 +13,7 @@ public struct VCamFaceMotion: Equatable, Sendable {
         self.blendShape = blendShape
     }
 
-    /// Mirroring the sided shapes and the gaze back yields the builders' anatomical
-    /// input. Verified on a device: without this a wink closed the wrong eye in both
-    /// presentations and the gaze stayed mirrored in both.
+    /// Mirroring the sided shapes and the gaze back yields the builders' anatomical input
     public var anatomicalBlendShape: BlendShape {
         blendShape.horizontallyMirrored()
     }

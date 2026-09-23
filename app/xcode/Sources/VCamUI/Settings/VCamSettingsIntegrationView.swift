@@ -89,8 +89,10 @@ public struct VCamSettingsIntegrationView: View {
                 }
             }
             Section {
+                // The slider eases in, so its position says little about the delay it actually adds
                 ValueEditField(.mocapNetworkInterpolation, value: $mocapNetworkInterpolation.map(), type: .slider(0...1.0)) {
-                    Text($0, format: .percent.precision(.fractionLength(2)))
+                    Text(Measurement(value: TrackingSmoothing(value: $0).bufferDelay * 1000, unit: UnitDuration.milliseconds),
+                         format: .measurement(width: .abbreviated, numberFormatStyle: .number.precision(.fractionLength(0))))
                 }
                 Text(.mocapNetworkInterpolationHelp)
                     .font(.caption2)

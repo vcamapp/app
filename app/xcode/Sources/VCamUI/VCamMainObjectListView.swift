@@ -29,7 +29,7 @@ public struct VCamMainObjectListView: View {
                         id: object.id,
                         text: .init(value: object.name, set: {
                             // Workaround for this bug: https://www.reddit.com/r/SwiftUI/comments/11gujra/swiftui_bug_deleting_an_object_while_the/
-                            // Do not use `$object.name` now
+                            // Do not use `$object.name`
                             object.name = $0
                         }),
                         placeholder: object.type.localizedName,
@@ -254,7 +254,6 @@ private struct SceneObjectMenuItems: View {
         typeItems
     }
 
-    /// All object types share the same menu header
     @ViewBuilder
     private var commonHeaderItems: some View {
         Button {
@@ -326,7 +325,6 @@ private struct SceneObjectMenuItems: View {
         }
     }
 
-    /// Shared menu footer for filterable objects
     @ViewBuilder
     private func filterAndFooterItems(configuration: @escaping () -> ImageFilterConfiguration?, setFilter: @escaping (ImageFilter) -> Void) -> some View {
         FilterSceneObjectButton(object: object, configuration: configuration) { filter in
@@ -363,7 +361,6 @@ private struct SceneObjectMenuItems: View {
     }
 }
 
-/// The editor the object opens, shared by the menu's edit item and a double click on the row
 @MainActor
 private func sceneObjectEditor(for object: SceneObject) -> (() -> Void)? {
     switch object.type {

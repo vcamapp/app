@@ -2,10 +2,9 @@ import Foundation
 import SwiftUI
 import AppKit
 
-/// A one-line-tall field that still carries multi-line text: hard line breaks are preserved
-/// and reachable by scrolling, but the height never changes, so text edited elsewhere can't
-/// push the surrounding layout around. Return commits and gives up focus; Option+Return
-/// inserts a line break.
+/// A one-line-tall field that still carries multi-line text: line breaks are reachable by
+/// scrolling, but the height never changes, so text edited elsewhere can't push the
+/// surrounding layout around.
 public struct CommitTextField: View {
     public init(placeholder: String, text: Binding<String>) {
         self.placeholder = placeholder

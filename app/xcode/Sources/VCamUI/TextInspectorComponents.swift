@@ -2,7 +2,6 @@ import SwiftUI
 import AppKit
 import VCamEntity
 
-/// A titled group of controls, with the switches and list buttons that belong to the group in its header
 struct InspectorSection<Header: View, Content: View>: View {
     init(title: LocalizedStringResource, @ViewBuilder header: () -> Header = { EmptyView() }, @ViewBuilder content: () -> Content) {
         self.title = title

@@ -22,7 +22,6 @@ struct VCamAPIServiceTests {
         ))
     }()
 
-    /// Records the engine calls `decode` accepts while `body` runs, restoring the hook afterwards
     private func recordedMethodCalls<Call>(
         _ decode: @escaping (UniBridgeMethodId, UnsafeMutableRawPointer?) -> Call?,
         during body: () async throws -> Void
@@ -65,7 +64,6 @@ struct VCamAPIServiceTests {
         )
     }
 
-    /// Feeds one request into the generated server and decodes the response
     private func call(_ service: VCamAPIService, method: String, params: String = "{}") async throws -> [String: JSONValue] {
         let body = Data(#"{"jsonrpc":"2.0","id":1,"method":"\#(method)","params":\#(params)}"#.utf8)
         let response = try #require(await VCamServer(handler: service).handle(body))

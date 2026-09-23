@@ -29,8 +29,6 @@ public final class SceneObjectManager {
         }
     }
 
-    /// The scene's objects plus the scene-independent subtitle, for operations
-    /// that must reach every live object
     private var allObjects: [SceneObject] {
         subtitleObject.map { objects + [$0] } ?? objects
     }
@@ -119,15 +117,14 @@ public final class SceneObjectManager {
         }
     }
 
-    /// The avatar is the one object the engine still owns, so its visibility has to reach it
+    /// The avatar is the one object the engine owns, so its visibility has to reach it
     private func applyAvatarState(_ object: SceneObject) {
         guard case .avatar = object.type else { return }
         UniBridge.shared.avatarHidden(object.isHidden)
     }
 
-    /// Applies a geometry edit made on the canvas. Text re-rasterizes at its new size so that
-    /// the glyphs stay crisp instead of a bitmap drawn for another size being scaled; the other
-    /// types keep their texture as it is.
+    /// Text re-rasterizes at its new size so that the glyphs stay crisp instead of a bitmap drawn
+    /// for another size being scaled.
     public func didEditGeometry(_ object: SceneObject) {
         if case .text = object.type {
             configure(object)
@@ -151,7 +148,6 @@ public final class SceneObjectManager {
         didChange(object)
     }
 
-    /// Fits the object's texture geometry to the new source before re-registering it.
     public func replaceRenderer(_ renderer: any RenderTextureRenderer, of object: SceneObject) {
         guard let texture = object.type.croppableTexture else { return }
         RenderTextureManager.shared.set(renderer, id: object.id)
@@ -190,8 +186,6 @@ public final class SceneObjectManager {
         }
     }
 
-    /// The only definition of the rule: the object list, the delete key on the canvas and
-    /// `remove` all defer to it.
     public func canRemove(byId id: Int32) -> Bool {
         switch id {
         case SceneObject.avatarID: false // The avatar is what the scene is built around
@@ -268,9 +262,8 @@ public final class SceneObjectManager {
         RenderTextureManager.shared.removeAll()
     }
 
-    /// Returns the canvas-relative placement that `textureRect` decided, which the object stores
-    /// as its own geometry. `allocationSize` is the texture's pixel size when it intentionally
-    /// differs from the on-canvas size (a supersampled text); nil allocates at the displayed size
+    /// Returns the canvas-relative placement. `allocationSize` is the texture's pixel size when it
+    /// intentionally differs from the on-canvas size (a supersampled text)
     private func addTexture(_ id: Int32, region: CGRect, crop: CGRect = .init(x: 0, y: 0, width: 1, height: 1), textureSize: CGSize, allocationSize: CGSize? = nil) -> CGRect {
         let canvasSize = MainTexture.shared.canvasSize
         let rect = textureRect(region: region, crop: crop, textureSize: textureSize)
@@ -284,7 +277,7 @@ public final class SceneObjectManager {
         )
     }
 
-    /// The object's placement in canvas units, rounded to whole pixels as the texture is
+    /// The object's placement in canvas pixels, rounded to whole pixels as the texture is
     private func textureRect(region: CGRect, crop: CGRect, textureSize: CGSize) -> CGRect {
         let canvasSize = MainTexture.shared.canvasSize
         uniDebugLog("textureRect: r\(region), c\(crop), s\(canvasSize)")
@@ -305,7 +298,6 @@ public final class SceneObjectManager {
         let canvasSize = MainTexture.shared.canvasSize
 
         if regionSize.width < 0 { // Can't compare with .invalid, so determine based on whether it's less than 0
-            // Initially, display at 80% relative to the canvas to fit within the screen.
             var fittedSize = canvasSize * 0.8
             fittedSize.scaleToFit(size: size)
             return fittedSize

@@ -32,8 +32,7 @@ public final class VRoidHubSession {
                 phase = .signedOut
             }
         } catch {
-            // Temporary failures (offline etc.) fall back to the sign-in
-            // screen; signing in again recovers
+            // Temporary failures (offline etc.) fall back to the sign-in screen
             phase = .signedOut
         }
     }

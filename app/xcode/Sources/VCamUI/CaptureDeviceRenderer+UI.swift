@@ -86,7 +86,6 @@ private struct CaptureDeviceSelectView: View {
     }
 
     private func updatePreviewOutput() {
-        // Skip the conversion entirely while the preview is hidden
         guard previewable else {
             previewer?.didOutput = nil
             return

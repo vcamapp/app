@@ -24,7 +24,6 @@ public final class VCamMotionReceiver {
     @ObservationIgnored private let session = UDPDatagramSession()
     @ObservationIgnored private weak var tracking: VCamMotionTracking?
     @ObservationIgnored private var settings: (@MainActor () -> VCamMotionTrackingSettings)?
-    @ObservationIgnored private var motionV1Receiver: MotionV1Receiver?
 
     public private(set) var connectionStatus = ConnectionStatus.disconnected
     public private(set) var motionProtocolVersion: VCamMotionProtocolVersion?
@@ -57,10 +56,7 @@ public final class VCamMotionReceiver {
             service = .init(type: "_vcammocap._udp", domain: "local")
         }
 
-        let motionV1Receiver = MotionV1Receiver(
-            onFace: { [weak tracking] data, receivedAt in tracking?.applyFace(data, settings: settings(), receivedAt: receivedAt) },
-            onHands: { [weak tracking] data in tracking?.applyHandsV1(data, settings: settings()) }
-        )
+        let parser = MotionV1Receiver()
         try session.start(
             on: port,
             service: service,
@@ -68,8 +64,8 @@ public final class VCamMotionReceiver {
             onEnded: { [weak self] in
                 self?.restartIfNeeded()
             },
-            onConnectionStarted: { [weak self] in
-                self?.motionV1Receiver?.resetForNewConnection()
+            onConnectionStarted: {
+                parser.resetForNewConnection()
             },
             onReady: { [weak self] in
                 guard let self else { return }
@@ -77,34 +73,71 @@ public final class VCamMotionReceiver {
                 TrackingTraceRecorder.shared.recordEvent("vcamMotion.connected")
                 self.startTimeoutWatchdog()
             },
-            onData: { [weak self] data, receivedAt in
-                self?.handleData(data, receivedAt: receivedAt)
+            receive: { [weak tracking] data, receivedAt in
+                Self.receive(data, receivedAt: receivedAt, parser: parser, tracking: tracking)
+            },
+            onData: { [weak self] received in
+                self?.handle(received)
             }
         )
         self.tracking = tracking
         self.settings = settings
-        self.motionV1Receiver = motionV1Receiver
         shouldAutoReconnect = true
         connectionStatus = .connecting
     }
 
-    private func handleData(_ data: Data, receivedAt: TimeInterval) {
-        // v1 packets have an explicit header; legacy packets do not.
-        if let receiver = motionV1Receiver {
-            switch receiver.receive(data, receivedAt: receivedAt) {
-            case .handledV1:
-                markDataReceived(protocolVersion: .v1)
-                return
-            case .rejectedV1:
-                return
-            case .notV1:
-                break
-            }
+    /// A datagram after the receive queue has decoded it and, when it could, pushed the face
+    private struct Received: Sendable {
+        enum Content: Sendable {
+            case face(VCamMotion)
+            case hands(Data)
+            case legacy(VCamMotion)
         }
 
-        guard data.count == MemoryLayout<VCamMotion>.size, let settings else { return }
-        markDataReceived(protocolVersion: .v0)
-        tracking?.applyLegacyMotion(VCamMotion(rawData: data), settings: settings(), receivedAt: receivedAt)
+        var content: Content
+        var receivedAt: TimeInterval
+        var facePushed: Bool
+    }
+
+    /// On the receive queue. The face goes to the resamplers from here; everything else, and
+    /// the bookkeeping, waits for the main actor
+    nonisolated private static func receive(_ data: Data, receivedAt: TimeInterval, parser: MotionV1Receiver,
+                                            tracking: VCamMotionTracking?) -> Received? {
+        // v1 packets have an explicit header; legacy packets do not.
+        let content: Received.Content
+        switch parser.receive(data) {
+        case .face(let motion):
+            content = .face(motion)
+        case .hands(let packet):
+            content = .hands(packet)
+        case .rejected:
+            return nil
+        case .notV1:
+            guard data.count == MemoryLayout<VCamMotion>.size else { return nil }
+            content = .legacy(VCamMotion(rawData: data))
+        }
+        let facePushed = switch content {
+        case .face(let motion), .legacy(let motion): tracking?.pushFaceFromReceiveQueue(motion, receivedAt: receivedAt) ?? false
+        case .hands: false
+        }
+        return Received(content: content, receivedAt: receivedAt, facePushed: facePushed)
+    }
+
+    private func handle(_ received: Received?) {
+        guard let received, let settingsProvider = settings, let tracking else { return }
+        let settings = settingsProvider()
+        switch received.content {
+        case .face(let motion):
+            markDataReceived(protocolVersion: .v1)
+            tracking.applyFace(motion, pushed: received.facePushed, settings: settings, receivedAt: received.receivedAt)
+        case .hands(let packet):
+            markDataReceived(protocolVersion: .v1)
+            tracking.applyHandsV1(packet, settings: settings)
+        case .legacy(let motion):
+            markDataReceived(protocolVersion: .v0)
+            tracking.applyFace(motion, pushed: received.facePushed, settings: settings, receivedAt: received.receivedAt)
+            tracking.applyLegacyHands(motion, settings: settings, receivedAt: received.receivedAt)
+        }
     }
 
     /// Only handled packets keep the connection alive. If nothing but
@@ -129,7 +162,6 @@ public final class VCamMotionReceiver {
         timeoutWatchdog.stop()
 
         session.stop()
-        motionV1Receiver = nil
         motionProtocolVersion = nil
         connectionStatus = .disconnected
         tracking?.stop()

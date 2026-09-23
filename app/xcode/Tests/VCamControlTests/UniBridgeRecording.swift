@@ -1,8 +1,6 @@
 import Foundation
 @testable import VCamBridge
 
-// Swaps the UniBridge hooks for recording closures and restores them after `body` runs.
-
 @MainActor
 func recordedMethodCalls<Call>(_ decode: @escaping (UniBridgeMethodId, UnsafeMutableRawPointer?) -> Call?, during body: () -> Void) -> [Call] {
     var calls: [Call] = []

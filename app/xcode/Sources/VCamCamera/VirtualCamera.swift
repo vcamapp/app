@@ -1,6 +1,5 @@
 import Foundation
 
-/// How the system reports the virtual camera device.
 public struct VirtualCameraStatus: Sendable {
     public let isInstalled: Bool
     public let isAwaitingUserApproval: Bool
