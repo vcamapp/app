@@ -238,13 +238,12 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
         // Stamped while encoding so the recording follows the frame, not the GPU
         let presentationTime = currentPresentationTime
 
-        nonisolated(unsafe) let recorder = self
         nonisolated(unsafe) let buffer = pixelBuffer
         guard pixelBufferWriter.encode(frame, to: pixelBuffer, mirrored: false, on: commandQueue, completion: {
             // `DispatchQueue.main` keeps the frames in the order they were encoded;
             // `Task` does not promise that, and the writer rejects frames that arrive out of order
             DispatchQueue.runOnMain {
-                recorder.append(buffer, at: presentationTime)
+                self.append(buffer, at: presentationTime)
             }
         }) else { return }
         frameCount += 1

@@ -1,5 +1,4 @@
 import Testing
-@testable import VCamTracking
 @testable import VCamTrackingCore
 
 @Suite

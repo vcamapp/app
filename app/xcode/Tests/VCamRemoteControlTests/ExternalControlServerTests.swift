@@ -33,6 +33,7 @@ struct ExternalControlServerTests {
         #expect(response.contains(#""apiVersion":"\#(APISpecification.apiVersion)""#))
     }
 
+#if FEATURE_3
     @Test
     func importUploadTravelsOverBinaryFrames() async throws {
         let (server, port) = try Self.makeRunningServer()
@@ -64,6 +65,7 @@ struct ExternalControlServerTests {
         #expect(commitResponse.contains(#""code":1006"#))
         #expect(commitResponse.contains("invalid_vrm"))
     }
+#endif
 
     /// The rejection is an HTTP 400 on the raw socket, so read the status line instead of
     /// waiting for a WebSocket client to give up

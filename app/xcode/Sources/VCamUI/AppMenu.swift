@@ -3,7 +3,6 @@ import AppKit
 import VCamBridge
 import VCamControl
 import VCamData
-import VCamCamera
 import VCamTracking
 import VCamLogger
 import SystemExtensions

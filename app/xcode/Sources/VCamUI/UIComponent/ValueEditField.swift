@@ -55,18 +55,6 @@ public struct ValueEditField<ValueLabel: View>: View {
 }
 
 extension ValueEditField where ValueLabel == Text {
-    public init<F>(
-        _ label: LocalizedStringResource,
-        value: Binding<CGFloat>,
-        type: EditType,
-        format: F
-    ) where F : FormatStyle, F.FormatOutput == String, F.FormatInput == CGFloat {
-        self.label = label
-        self._value = value
-        self.type = type
-        self.valueLabel = { Text($0, format: format) }
-    }
-
     public init(
         _ label: LocalizedStringResource,
         value: Binding<CGFloat>,

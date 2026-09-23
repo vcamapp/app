@@ -1,6 +1,5 @@
 import Testing
 import simd
-import VCamTracking
 
 @Suite
 struct SIMDTests {

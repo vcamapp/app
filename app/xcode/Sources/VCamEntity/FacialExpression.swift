@@ -10,12 +10,4 @@ import Foundation
 public enum FacialExpression: Int32, Sendable {
     case neutral
     case laugh
-
-    public init(emotion: String) {
-        switch emotion {
-        case "natural": self = .neutral
-        case "laugh": self = .laugh
-        default: self = .neutral
-        }
-    }
 }

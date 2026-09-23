@@ -154,7 +154,11 @@ struct VCamAPIServiceTests {
 
     @Test
     func avatarListReturnsRegisteredModels() async throws {
+#if FEATURE_3
         let model = Models.Model(name: "internal-name", displayName: "Ada", type: .vrm)
+#else
+        let model = Models.Model(name: "internal-name", displayName: "Ada", type: .live2d)
+#endif
         let service = makeService(modelManager: ModelManager(models: [model]))
         let response = try await call(service, method: "avatar.list")
         guard case .array(let avatars)? = response["result"],

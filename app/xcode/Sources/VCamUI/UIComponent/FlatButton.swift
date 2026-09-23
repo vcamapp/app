@@ -76,10 +76,6 @@ public struct FlatButtonStyle: Sendable {
     public var backgroundColor: Color?
     public var cornerRadius: CGFloat = 0
 
-    public static let label = FlatButtonStyle(
-        hasBorder: false
-    )
-
     public static func filled(color: Color? = nil) -> FlatButtonStyle {
         FlatButtonStyle(
             hasBorder: false,

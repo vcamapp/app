@@ -44,12 +44,14 @@ struct LoopbackClientTests {
     func importErrorsAreTyped() async throws {
         let client = makeClient()
 
+#if FEATURE_3
         do {
             _ = try await client.avatarImportBegin(filename: "not-a-vrm.txt")
             Issue.record("Expected importFailed")
         } catch let VCamError.importFailed(error) {
             #expect(error.code == 1007)
         }
+#endif
 
         do {
             _ = try await client.avatarImportCommit(importId: UUID())

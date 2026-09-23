@@ -10,9 +10,7 @@ public final class UniBridge {
         case qualityLevel = 2
     }
     public let intMapper = ValueBinding<Int32, IntType>()
-    public private(set) lazy var lensFlare = intMapper.set(.lensFlare)
     public private(set) lazy var facialExpression = intMapper.set(.facialExpression)
-    public private(set) lazy var qualityLevel = intMapper.set(.qualityLevel)
 
     public enum FloatType: Int32, Sendable {
         case camera = 0
@@ -41,30 +39,7 @@ public final class UniBridge {
         case bodyFollowWeight = 23
     }
     public let floatMapper = ValueBinding<CGFloat, FloatType>()
-    public private(set) lazy var camera = floatMapper.set(.camera)
-    public private(set) lazy var light = floatMapper.set(.light)
-    public private(set) lazy var postExposure = floatMapper.set(.postExposure)
-    public private(set) lazy var whiteBalanceTemperature = floatMapper.set(.whiteBalanceTemperature)
-    public private(set) lazy var whiteBalanceTint = floatMapper.set(.whiteBalanceTint)
-    public private(set) lazy var saturation = floatMapper.set(.saturation)
-    public private(set) lazy var hueShift = floatMapper.set(.hueShift)
-    public private(set) lazy var contrast = floatMapper.set(.contrast)
-    public private(set) lazy var bloomIntensity = floatMapper.set(.bloomIntensity)
-    public private(set) lazy var bloomThreshold = floatMapper.set(.bloomThreshold)
-    public private(set) lazy var bloomSoftKnee = floatMapper.set(.bloomSoftKnee)
-    public private(set) lazy var bloomDiffusion = floatMapper.set(.bloomDiffusion)
-    public private(set) lazy var bloomAnamorphicRatio = floatMapper.set(.bloomAnamorphicRatio)
-    public private(set) lazy var bloomLensFlareIntensity = floatMapper.set(.bloomLensFlareIntensity)
-    public private(set) lazy var vignetteIntensity = floatMapper.set(.vignetteIntensity)
-    public private(set) lazy var vignetteSmoothness = floatMapper.set(.vignetteSmoothness)
-    public private(set) lazy var vignetteRoundness = floatMapper.set(.vignetteRoundness)
-    public private(set) lazy var lipSyncMicIntensity = floatMapper.set(.lipSyncMicIntensity)
     public private(set) lazy var micAudioLevel = floatMapper.set(.micAudioLevel)
-    public private(set) lazy var fps = floatMapper.set(.fps)
-    public private(set) lazy var shoulderRotationWeight = floatMapper.set(.shoulderRotationWeight)
-    public private(set) lazy var swivelOffset = floatMapper.set(.swivelOffset)
-    public private(set) lazy var trackingSmoothing = floatMapper.set(.trackingSmoothing)
-    public private(set) lazy var bodyFollowWeight = floatMapper.set(.bodyFollowWeight)
 
     public enum BoolType: Int32, Sendable {
         case useShadow = 0
@@ -79,14 +54,8 @@ public final class UniBridge {
         case hasPerfectSyncBlendShape = 9
     }
     public let boolMapper = ValueBinding<Bool, BoolType>()
-    public private(set) lazy var useShadow = boolMapper.set(.useShadow)
-    public private(set) lazy var usePostEffect = boolMapper.set(.usePostEffect)
-    public private(set) lazy var useCombineMesh = boolMapper.set(.useCombineMesh)
-    public private(set) lazy var useAddToMacOSMenuBar = boolMapper.set(.useAddToMacOSMenuBar)
-    public private(set) lazy var useVSync = boolMapper.set(.useVSync)
     public private(set) lazy var useBlinker = boolMapper.set(.useBlinker)
     public private(set) lazy var useFullTracking = boolMapper.set(.useFullTracking)
-    public private(set) lazy var lipSyncWebCam = boolMapper.set(.lipSyncWebCam)
     public private(set) lazy var avatarHidden = boolMapper.set(.avatarHidden)
     public var hasPerfectSyncBlendShape: Bool { boolMapper.get(.hasPerfectSyncBlendShape) }
 
@@ -117,10 +86,6 @@ public final class UniBridge {
         case vignetteColor = 3
     }
     public let structMapper = ValueBinding<UnsafeMutableRawPointer, StructType>()
-    public private(set) lazy var environmentLightColor = structMapper.set(.environmentLightColor, type: Color.self)
-    public private(set) lazy var colorFilter = structMapper.set(.colorFilter, type: Color.self)
-    public private(set) lazy var bloomColor = structMapper.set(.bloomColor, type: Color.self)
-    public private(set) lazy var vignetteColor = structMapper.set(.vignetteColor, type: Color.self)
 
     public enum ArrayType: Int32, Sendable {
         case hands = 0

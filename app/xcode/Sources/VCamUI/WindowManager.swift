@@ -214,7 +214,8 @@ public final class WindowManager {
 /// stay in the chain rather than be replaced
 @MainActor
 private final class WindowCloseInterceptor: NSObject, NSWindowDelegate {
-    private let next: (any NSWindowDelegate)?
+    // Read by the nonisolated NSObject forwarding overrides; the reference never changes
+    nonisolated(unsafe) private let next: (any NSWindowDelegate)?
     private let onClose: () -> Void
 
     init(next: (any NSWindowDelegate)?, onClose: @escaping () -> Void) {

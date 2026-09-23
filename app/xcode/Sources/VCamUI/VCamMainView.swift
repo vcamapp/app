@@ -1,14 +1,6 @@
-//
-//  VCamMainView.swift
-//  
-//
-//  Created by Tatsuya Tanaka on 2022/02/20.
-//
-
 import SwiftUI
 import VCamEntity
 import VCamCamera
-import VCamTracking
 import VCamData
 
 public struct VCamMainView: View {

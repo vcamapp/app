@@ -2,7 +2,6 @@ import Foundation
 import Testing
 import VCamEntity
 import VCamMotionV1
-@testable import VCamTracking
 @testable import VCamTrackingCore
 
 @Suite

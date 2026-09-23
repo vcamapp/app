@@ -192,7 +192,6 @@ public enum TrackingTraceFaceValue: Int, Sendable {
     case headYaw
     case headRoll
 
-    public static let position = positionX.rawValue...positionZ.rawValue
     public static let head = headPitch.rawValue...headRoll.rawValue
 
     /// Whether a resampler label carries a face stream rather than hands or fingers

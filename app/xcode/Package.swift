@@ -8,7 +8,6 @@ let package = Package(
     platforms: [.macOS(.v15), .iOS(.v18)],
     products: [
         .library(name: "VCam", targets: ["VCamUI", "VCamMedia", "VCamBridge"]),
-        .library(name: "VCamMedia", targets: ["VCamMedia"]),
         .library(name: "VCamCamera", targets: ["VCamCamera"]),
 
         .library(name: "VCamDefaults", targets: ["VCamDefaults"]),

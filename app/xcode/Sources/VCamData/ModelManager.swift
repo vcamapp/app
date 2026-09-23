@@ -35,10 +35,6 @@ public final class ModelManager {
         return item
     }
 
-    public func model(for modelId: UUID) -> Models.Model? {
-        modelItems.find(byId: modelId)?.model
-    }
-
     public func setLastLoadedModel(_ model: ModelItem) throws {
         // Restoring on launch re-selects the persisted model; skip the disk write then
         guard lastLoadedModelId != model.id else { return }

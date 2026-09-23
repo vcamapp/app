@@ -121,10 +121,6 @@ public final class AvatarWebCamera {
         UserDefaults.standard.value(for: .captureDeviceName)
     }
 
-    public var isRunning: Bool {
-        state == .running
-    }
-
     /// Transitions run serially in request order, and a request superseded by a newer one is skipped.
     /// Await the returned task to wait for the transition.
     @discardableResult

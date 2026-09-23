@@ -1,5 +1,4 @@
 import XCTest
-import VCamUI
 
 final class LaunchScreenshotTests: XCTestCase {
 

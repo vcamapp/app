@@ -4,6 +4,7 @@ import Testing
 import VCamControl
 import VCamEntity
 
+#if FEATURE_3
 @MainActor
 @Suite
 struct AvatarControlTests {
@@ -25,3 +26,4 @@ struct AvatarControlTests {
         }
     }
 }
+#endif
