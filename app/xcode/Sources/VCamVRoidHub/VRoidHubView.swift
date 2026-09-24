@@ -1,6 +1,5 @@
 import SwiftUI
 import VCamVRoidHubCore
-import VRoidSDK
 
 public struct VRoidHubView: View {
     // Only nil when the credential injection is missing
@@ -47,57 +46,6 @@ private struct VRoidHubContentView: View {
             VRoidHubSignInView(session: session)
         case .signedIn(let account):
             VRoidHubModelBrowserView(session: session, account: account, onFinished: onFinished)
-        }
-    }
-}
-
-private struct VRoidHubSignInView: View {
-    let session: VRoidHubSession
-
-    @State private var signInFailed = false
-
-    private var isSigningIn: Bool {
-        if case .signingIn = session.phase { return true }
-        return false
-    }
-
-    var body: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "person.crop.circle.badge.checkmark")
-                .font(.system(size: 48))
-                .foregroundStyle(.secondary)
-
-            Text(.vroidHubSignInDescription)
-                .multilineTextAlignment(.center)
-                .foregroundStyle(.secondary)
-
-            Button {
-                signIn()
-            } label: {
-                if isSigningIn {
-                    ProgressView()
-                        .controlSize(.small)
-                } else {
-                    Text(.signInToVRoidHub)
-                }
-            }
-            .buttonStyle(.borderedProminent)
-            .disabled(isSigningIn)
-        }
-        .padding(40)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .alert(.signInFailed, isPresented: $signInFailed) {}
-    }
-
-    private func signIn() {
-        Task {
-            do {
-                try await session.signIn()
-            } catch VRoidHubError.authenticationCancelled {
-                // Closing the browser is not an error
-            } catch {
-                signInFailed = true
-            }
         }
     }
 }

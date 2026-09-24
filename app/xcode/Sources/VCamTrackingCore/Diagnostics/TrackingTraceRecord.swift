@@ -1,4 +1,5 @@
 import Foundation
+import VCamMotionV1
 
 /// One line of a tracking trace. Every timestamp is `ProcessInfo.systemUptime` in seconds
 /// so the stages can be laid on the same axis; `Meta.startUptime` rebases them to zero.
@@ -204,6 +205,23 @@ public enum TrackingTraceFaceValue: Int, Sendable {
         if label.hasSuffix("perfectsync") { return TrackingMappingEntry.weightChannels(for: .perfectSync) }
         if label.hasSuffix("blendshape") { return TrackingMappingEntry.weightChannels(for: .blendShape) }
         return nil
+    }
+}
+
+public extension TrackingTraceRecord.Datagram {
+    /// The face the payload carried, for the legacy layout and framed face packets alike
+    var face: VCamMotion? {
+        guard let data = Data(base64Encoded: payload) else { return nil }
+        switch version {
+        case 0:
+            guard data.count == MemoryLayout<VCamMotion>.size else { return nil }
+            return VCamMotion(rawData: data)
+        case 1:
+            guard type == "face", let header = try? MotionPacketV1Decoder.headerIfV1(data) else { return nil }
+            return try? MotionPacketV1Decoder.decodeFace(data, header: header)
+        default:
+            return nil
+        }
     }
 }
 

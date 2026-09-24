@@ -323,6 +323,29 @@
         }
       }
     },
+    "noModelsFound": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No models found"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "モデルが見つかりません"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모델을 찾을 수 없습니다"
+          }
+        }
+      }
+    },
     "permissionAllowed": {
       "extractionState": "manual",
       "localizations": {
@@ -461,6 +484,29 @@
         }
       }
     },
+    "privateModel": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Private"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "非公開"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "비공개"
+          }
+        }
+      }
+    },
     "retry": {
       "extractionState": "manual",
       "localizations": {
@@ -480,6 +526,52 @@
           "stringUnit": {
             "state": "translated",
             "value": "다시 시도"
+          }
+        }
+      }
+    },
+    "signInFailed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign-in failed"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ログインに失敗しました"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "로그인에 실패했습니다"
+          }
+        }
+      }
+    },
+    "signInToVRoidHub": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign in to VRoid Hub"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VRoid Hubにログイン"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VRoid Hub에 로그인"
           }
         }
       }
@@ -526,6 +618,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "이용 조건을 가져올 수 없습니다. VRoid Hub에서 확인해 주세요."
+          }
+        }
+      }
+    },
+    "vroidHubSignInDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign in to VRoid Hub to use your models and liked models."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VRoid Hubにログインすると、あなたのモデルやハートしたモデルを利用できます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VRoid Hub에 로그인하면 내 모델과 하트한 모델을 이용할 수 있습니다."
           }
         }
       }

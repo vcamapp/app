@@ -125,19 +125,19 @@ struct TrackingTraceTests {
         return MotionPacketV1Encoder.encodeFace(motion, sequence: sequence, timestampNanoseconds: sentAt, sessionID: 1)
     }
 
-    private static func meta(startUptime: Double, bodyFollowWeight: Double = 1) -> TrackingTraceRecord.Meta {
+    private static func meta(startUptime: Double) -> TrackingTraceRecord.Meta {
         TrackingTraceRecord.Meta(
             app: "test", version: "0", os: "test", machine: "test", startedAt: Date(), startUptime: startUptime,
             faceTrackingMethod: "vcamMocap", handTrackingMethod: "disabled", fingerTrackingMethod: "disabled",
             motionProtocol: "VCamMotion v1", mocapNetworkInterpolation: 1, trackingSmoothing: 0,
-            bodyFollowWeight: bodyFollowWeight, mirrorsTracking: true,
+            bodyFollowWeight: 1, mirrorsTracking: true,
             mappings: .init(blendShape: TrackingMappingEntry.defaultMappings(for: .blendShape), perfectSync: [])
         )
     }
 
     @available(macOS 26.0, *)
     @Test
-    func recorderWritesEveryStageAndTheReaderLoadsThemBack() throws {
+    func recorderWritesEveryStage() throws {
         let directory = FileManager.default.temporaryDirectory.appending(path: "tracking-trace-\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: directory) }
         let recorder = TrackingTraceRecorder.shared
@@ -158,17 +158,35 @@ struct TrackingTraceTests {
         recorder.stop()
         #expect(!recorder.isRecording)
 
-        let trace = try TrackingTraceReader.load(from: directory)
-        #expect(trace.meta?.faceTrackingMethod == "vcamMocap")
-        #expect(trace.datagrams.count == 3)
-        #expect(trace.datagrams[1].version == 1)
-        #expect(trace.datagrams[1].sequence == 1)
-        #expect(trace.datagrams[1].senderTimestamp == 16_000_000)
-        #expect(trace.mainArrivals.map(\.n) == [0, 1, 2])
-        #expect(trace.pushes.first?.n == 2)
-        #expect(trace.samples.first?.mode == .extrapolated)
-        #expect(trace.engine.count == 1)
-        #expect(trace.events.first?.info["k"] == "v")
+        let meta: TrackingTraceRecord.Meta = try Self.decode(Data(contentsOf: directory.appending(path: TrackingTraceFile.meta.rawValue)))
+        #expect(meta.faceTrackingMethod == "vcamMocap")
+        let datagrams: [TrackingTraceRecord.Datagram] = try Self.records(.datagrams, in: directory)
+        #expect(datagrams.count == 3)
+        #expect(datagrams[1].version == 1)
+        #expect(datagrams[1].sequence == 1)
+        #expect(datagrams[1].senderTimestamp == 16_000_000)
+        let mainArrivals: [TrackingTraceRecord.MainArrival] = try Self.records(.mainArrivals, in: directory)
+        #expect(mainArrivals.map(\.n) == [0, 1, 2])
+        let pushes: [TrackingTraceRecord.Push] = try Self.records(.pushes, in: directory)
+        #expect(pushes.first?.n == 2)
+        let samples: [TrackingTraceRecord.Sample] = try Self.records(.samples, in: directory)
+        #expect(samples.first?.mode == .extrapolated)
+        let engine: [TrackingTraceRecord.Engine] = try Self.records(.engine, in: directory)
+        #expect(engine.count == 1)
+        let events: [TrackingTraceRecord.Event] = try Self.records(.events, in: directory)
+        #expect(events.first?.info["k"] == "v")
+    }
+
+    private static func decode<Record: Decodable>(_ data: Data) throws -> Record {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return try decoder.decode(Record.self, from: data)
+    }
+
+    private static func records<Record: Decodable>(_ file: TrackingTraceFile, in directory: URL) throws -> [Record] {
+        try Data(contentsOf: directory.appending(path: file.rawValue))
+            .split(separator: 0x0A)
+            .map { try decode(Data($0)) }
     }
 
     @Test
@@ -178,93 +196,5 @@ struct TrackingTraceTests {
         recorder.recordDatagram(Data([1, 2, 3]))
         recorder.recordMainArrival()
         #expect(recorder.statistics() == TrackingTraceStatistics())
-    }
-
-    @available(macOS 26.0, *)
-    @Test
-    func analyzerNamesTheCandidatesTheTracePointsAt() {
-        var trace = TrackingTrace(meta: Self.meta(startUptime: 100, bodyFollowWeight: 0.8))
-        // 60Hz datagrams, then two bunched ones and a 300ms silence the sender did not have
-        var time = 100.0
-        var sent: UInt64 = 0
-        for index in 0..<10 {
-            trace.datagrams.append(.init(t: time, n: index, length: 276, version: 1, type: "face", sessionID: 1,
-                                         sequence: UInt32(index), senderTimestamp: sent, payload: ""))
-            trace.mainArrivals.append(.init(t: time + 0.001, n: index))
-            time += index == 8 ? 0.0002 : 0.016
-            sent += 16_000_000
-        }
-        trace.datagrams.append(.init(t: time + 0.3, n: 10, length: 276, version: 1, type: "face", sessionID: 1,
-                                     sequence: 10, senderTimestamp: sent, payload: ""))
-        trace.mainArrivals.append(.init(t: time + 0.3 + 0.15, n: 10))
-        trace.samples = [
-            .init(t: 100.5, label: "face", renderTime: 100.38, mode: .interpolated, factor: nil, spacing: 0.016, values: [0, 0, 0, 0, 1]),
-            .init(t: 100.52, label: "face", renderTime: 100.4, mode: .extrapolated, factor: 400, spacing: 0.0002, values: [0, 0, 0, 0, 201]),
-        ]
-        // The root jumps 5cm in one frame after tracking has settled
-        trace.engine = [
-            .init(t: 100.53, values: [0, 0, 0, 0.00, 0, 0, 0.8, 0, 0, 0, 0, 0]),
-            .init(t: 100.55, values: [0, 0, 0, 0.05, 0, 0, 0.8, 0, 0, 0, 0, 0]),
-        ]
-        // A sender-side discontinuity: yaw jumps 60° between consecutive packets
-        let jump = Self.facePacket(sequence: 11, yawDegrees: 60, sentAt: sent + 16_000_000)
-        let steady = Self.facePacket(sequence: 12, yawDegrees: 0, sentAt: sent + 32_000_000)
-        trace.datagrams.append(.init(t: time + 0.316, n: 11, length: jump.count, version: 1, type: "face", sessionID: 1,
-                                     sequence: 11, senderTimestamp: sent + 16_000_000, payload: jump.base64EncodedString()))
-        trace.datagrams.append(.init(t: time + 0.332, n: 12, length: steady.count, version: 1, type: "face", sessionID: 1,
-                                     sequence: 12, senderTimestamp: sent + 32_000_000, payload: steady.base64EncodedString()))
-
-        let report = TrackingTraceAnalyzer.analyze(trace)
-        let candidates = report.findings.map(\.candidate)
-        #expect(candidates.contains(1))
-        #expect(candidates.contains(2))
-        #expect(candidates.contains(3))
-        #expect(!candidates.contains(4))
-        #expect(candidates.contains(5))
-        #expect(candidates.contains(7))
-        #expect(report.datagrams.bunchedPairs == 1)
-        #expect(report.datagrams.gaps.count == 1)
-        #expect(report.datagrams.networkGaps == 1)
-        #expect(report.datagrams.senderStalledGaps == 0)
-        #expect(report.mainThread.over100ms == 1)
-        #expect(report.resamplers.first?.runaway.count == 1)
-        #expect(report.resamplers.first?.maxStep == 200)
-        #expect(report.payload.discontinuities == 1)
-        #expect(report.engine.maxPositionStep == 0.05)
-        #expect(!report.summary().isEmpty)
-    }
-
-    /// VCamMotion v1 sends a hand packet right behind the face packet of the same frame, which
-    /// is neither bunching nor the end of a silence
-    @Test
-    func analyzerMeasuresSpacingWithinTheFaceStream() {
-        var trace = TrackingTrace(meta: Self.meta(startUptime: 0))
-        var order = 0
-        for index in 0..<10 {
-            let time = Double(index) * 0.016
-            trace.datagrams.append(.init(t: time, n: order, length: 276, version: 1, type: "face", sessionID: 1,
-                                         sequence: UInt32(index), senderTimestamp: nil, payload: ""))
-            order += 1
-            guard index.isMultiple(of: 2) else { continue }
-            trace.datagrams.append(.init(t: time + 0.0002, n: order, length: 600, version: 1, type: "hands", sessionID: 1,
-                                         sequence: UInt32(index), senderTimestamp: nil, payload: ""))
-            order += 1
-        }
-        let report = TrackingTraceAnalyzer.analyze(trace)
-        #expect(report.datagrams.count == 15)
-        #expect(report.datagrams.stream == "face")
-        #expect(report.datagrams.bunchedPairs == 0)
-        #expect(abs(report.datagrams.medianInterval - 0.016) < 1e-9)
-    }
-
-    @Test
-    func analyzerReportsNonDefaultMappings() {
-        var meta = Self.meta(startUptime: 0)
-        var entry = TrackingMappingEntry.defaultMappings(for: .blendShape)[0]
-        entry.outputKey.rangeMax *= 3
-        meta.mappings.blendShape[0] = entry
-        let report = TrackingTraceAnalyzer.analyze(TrackingTrace(meta: meta))
-        #expect(report.nonDefaultMappings.count == 1)
-        #expect(report.findings.contains { $0.candidate == 4 })
     }
 }

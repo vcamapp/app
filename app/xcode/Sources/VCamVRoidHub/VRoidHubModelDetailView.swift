@@ -45,30 +45,7 @@ struct VRoidHubModelDetailView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 8))
 
             VStack(alignment: .leading, spacing: 12) {
-                Text(verbatim: model.displayName)
-                    .font(.title2)
-                    .bold()
-
-                if let user = model.character?.user {
-                    HStack(spacing: 6) {
-                        VRoidHubModelImage(imageSet: user.icon)
-                            .frame(width: 20, height: 20)
-                            .clipShape(Circle())
-
-                        Text(verbatim: user.name ?? "")
-                            .foregroundStyle(.secondary)
-                    }
-                }
-
-                if model.isPrivate == true {
-                    Label {
-                        Text(.privateModel)
-                    } icon: {
-                        Image(systemName: "lock.fill")
-                    }
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                }
+                VRoidHubModelHeader(model: model)
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 12) {
