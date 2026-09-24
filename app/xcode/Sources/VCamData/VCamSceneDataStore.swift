@@ -115,10 +115,21 @@ extension VCamSceneDataStore {
         ]
     }
 
-    public func makeNewScene() -> VCamScene {
+    public func makeNewScene(isLandscape: Bool) -> VCamScene {
         .init(id: sceneId, name: "", objects: [
             .init(id: SceneObject.avatarID, name: "", type: .avatar(state: .zero, zoom: nil), isHidden: false, isLocked: false)
-        ], aspectRatio: MainTexture.shared.aspectRatio)
+        ], aspectRatio: Self.aspectRatio(isLandscape: isLandscape, currentAspectRatio: MainTexture.shared.aspectRatio))
+    }
+
+    /// The ratio is what sorts a scene into an orientation, so a scene made for the orientation that
+    /// isn't being output can't take the current ratio. Otherwise the missing orientation stays
+    /// missing and a new scene is created on every launch
+    static func aspectRatio(isLandscape: Bool, currentAspectRatio: Float) -> Float {
+        if (currentAspectRatio <= 1) == isLandscape {
+            return currentAspectRatio
+        }
+        let size = (isLandscape ? ScreenResolution.resolution1080p : .resolutionVertical1080p).size
+        return Float(size.height) / Float(size.width)
     }
 
     /// Encoding is all-or-nothing so that an object which can't be converted is never

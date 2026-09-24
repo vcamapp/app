@@ -71,10 +71,10 @@ public final class SceneManager {
         var landscape = loadedScenes.scenes(isLandscape: true)
         var portrait = loadedScenes.scenes(isLandscape: false)
         if landscape.isEmpty {
-            landscape = [Self.createAndSaveNewScene()]
+            landscape = [Self.createAndSaveNewScene(isLandscape: true)]
         }
         if portrait.isEmpty {
-            portrait = [Self.createAndSaveNewScene()]
+            portrait = [Self.createAndSaveNewScene(isLandscape: false)]
         }
         let orientedScenes = OrientedScenes(landscape: landscape, portrait: portrait)
         // The output size follows the persisted resolution, which UniState applies on creation.
@@ -84,19 +84,19 @@ public final class SceneManager {
         self.selectedSceneId = orientedScenes[isLandscape: MainTexture.shared.isLandscape][0].id
     }
 
-    private static func createNewScene(sceneId: Int32 = .random(in: 0..<Int32.max)) -> VCamScene {
-        let dataStore = VCamSceneDataStore(sceneId: sceneId)
-        return dataStore.makeNewScene()
+    private static func createNewScene(isLandscape: Bool) -> VCamScene {
+        let dataStore = VCamSceneDataStore(sceneId: .random(in: 0..<Int32.max))
+        return dataStore.makeNewScene(isLandscape: isLandscape)
     }
 
-    private static func createAndSaveNewScene() -> VCamScene {
-        let scene = createNewScene()
+    private static func createAndSaveNewScene(isLandscape: Bool) -> VCamScene {
+        let scene = createNewScene(isLandscape: isLandscape)
         try? VCamSceneDataStore(sceneId: scene.id).saveNew(scene)
         return scene
     }
 
     public func addNewScene() async throws {
-        let scene = Self.createNewScene()
+        let scene = Self.createNewScene(isLandscape: MainTexture.shared.isLandscape)
         try add(scene)
         try await loadScene(id: scene.id)
     }
