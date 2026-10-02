@@ -95,6 +95,12 @@ public final class VCamSystem {
         UniBridge.shared.reset()
     }
 
+    /// Quitting in the middle of writing a recording leaves a broken file, so the teardown waits for it
+    public func prepareForTermination() async {
+        stopSubsystems()
+        await VideoRecorder.shared.waitUntilFinished()
+    }
+
     public func relaunch() {
         // Launch the new instance after this instance has exited to avoid conflicts over the virtual camera
         let process = Process()

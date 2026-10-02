@@ -21,6 +21,11 @@ public final class RenderTextureManager {
 
     public func set(_ recorder: any RenderTextureRenderer, id: Int32) {
         uniDebugLog("Set rendertexture: \(id)")
+        // The draw callback and the renderer retain each other until it stops, and a replaced
+        // renderer would otherwise keep capturing into the same texture
+        if let replaced = recorders[id], replaced !== recorder {
+            replaced.stopRendering()
+        }
         recorders[id] = recorder
     }
 

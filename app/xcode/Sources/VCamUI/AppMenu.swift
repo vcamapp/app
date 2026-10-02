@@ -62,7 +62,7 @@ public final class AppMenu: NSObject {
 
     private func setupEditMenu(subMenu: NSMenu) {
         Self.makeSubMenu(menu: subMenu, title: String(localized: .edit), items: [
-            NSMenuItem(title: String(localized: .cut), action: #selector(NSText.copy(_:)), keyEquivalent: "x"),
+            NSMenuItem(title: String(localized: .cut), action: #selector(NSText.cut(_:)), keyEquivalent: "x"),
             NSMenuItem(title: String(localized: .copy), action: #selector(NSText.copy(_:)), keyEquivalent: "c"),
             NSMenuItem(title: String(localized: .paste), action: #selector(NSText.paste(_:)), keyEquivalent: "v"),
             NSMenuItem(title: String(localized: .selectAll), action: #selector(NSText.selectAll(_:)), keyEquivalent: "a"),

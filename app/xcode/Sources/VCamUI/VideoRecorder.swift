@@ -55,6 +55,9 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
     @ObservationIgnored private var outputURL: URL!
     @ObservationIgnored private var temporaryOutputURL: URL!
 
+    /// Writing the file continues after `stop()` returns
+    @ObservationIgnored private var finishingTask: Task<Void, Never>?
+
     @ObservationIgnored private var converter: AudioConverter?
     private let expectedFormat = AVAudioFormat(standardFormatWithSampleRate: 48000, channels: 1)!
     @ObservationIgnored private var systemAudioRecorder: ScreenRecorder?
@@ -169,7 +172,7 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
             return
         }
 
-        Task { @MainActor in
+        finishingTask = Task { @MainActor in
             defer {
                 try? FileManager.default.removeItem(at: temporaryOutputURL)
             }
@@ -203,6 +206,11 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
                 self.failRecording(error)
             }
         }
+    }
+
+    /// Waits until a stopped recording has been written to its file
+    public func waitUntilFinished() async {
+        await finishingTask?.value
     }
 
     // Synchronous on purpose: this runs for every rendered frame and awaits nothing,

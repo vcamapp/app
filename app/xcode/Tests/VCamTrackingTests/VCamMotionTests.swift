@@ -21,18 +21,6 @@ struct VCamMotionTests {
     }
 
     @Test
-    func invertedTrackingInputRangeScalesInReverse() {
-        let entry = TrackingMappingEntry(
-            input: .init(key: "_posY", bounds: -1...1, rangeMin: 1, rangeMax: -1),
-            outputKey: .init(key: "_posY", bounds: -1...1)
-        )
-
-        #expect(entry.scaleValue(1) == -1)
-        #expect(entry.scaleValue(0) == 0)
-        #expect(entry.scaleValue(-1) == 1)
-    }
-
-    @Test
     func reverseDirectionFlipsOnlyTheGivenSide() {
         var entry = TrackingMappingEntry(
             input: .init(key: "_posY", bounds: -1...1, rangeMin: -1, rangeMax: 1),

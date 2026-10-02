@@ -45,9 +45,11 @@ public final class VCamShortcutManager {
     }
 
     public func move(fromOffsets source: IndexSet, toOffset destination: Int) {
+        var reordered = shortcuts
+        reordered.move(fromOffsets: source, toOffset: destination)
         do {
-            try dataStore.move(fromOffsets: source, toOffset: destination)
-            shortcuts.move(fromOffsets: source, toOffset: destination)
+            try dataStore.saveOrder(reordered.map(\.id))
+            shortcuts = reordered
         } catch {
             showError(error)
         }

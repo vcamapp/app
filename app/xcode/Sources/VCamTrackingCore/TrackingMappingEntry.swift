@@ -16,14 +16,6 @@ public struct TrackingMappingEntry: Codable, Sendable, Hashable, Identifiable {
         self.filter = filter
     }
 
-    public func scaleValue(_ value: Float) -> Float {
-        guard input.rangeMax != input.rangeMin else { return 0 }
-        let lowerBound = Swift.min(input.rangeMin, input.rangeMax)
-        let upperBound = Swift.max(input.rangeMin, input.rangeMax)
-        let clamped = simd_clamp(value, lowerBound, upperBound)
-        return (clamped - input.rangeMin) / (input.rangeMax - input.rangeMin) * 2 - 1
-    }
-
     public mutating func resetToDefault(for mode: TrackingMode) {
         input.resetToDefault(for: mode)
         outputKey.resetToDefault(for: mode)

@@ -9,20 +9,23 @@ public struct VCamShortcutDataStore {
         let decoder = JSONDecoder()
         var metadata = (try? VCamShortcutMetadata.load()) ?? .init()
         var shortcuts: [VCamShortcut] = []
-        var loadedIds: [UUID] = []
+        var existingIds: [UUID] = []
         for id in metadata.ids {
+            let url = URL.shortcutData(id: id)
+            guard FileManager.default.fileExists(atPath: url.path) else { continue }
+            // An unreadable shortcut stays registered so that it comes back once it can be read again
+            existingIds.append(id)
             do {
-                let data = try Data(contentsOf: .shortcutData(id: id))
+                let data = try Data(contentsOf: url)
                 shortcuts.append(try decoder.decode(VCamShortcut.self, from: data))
-                loadedIds.append(id)
             } catch {
                 // Skip unreadable shortcuts instead of replacing them with empty ones;
                 // an empty placeholder would silently overwrite the data on the next save
                 Logger.error(error)
             }
         }
-        if loadedIds != metadata.ids {
-            metadata.ids = loadedIds
+        if existingIds != metadata.ids {
+            metadata.ids = existingIds
             try? metadata.save()
         }
         return shortcuts
@@ -41,9 +44,15 @@ public struct VCamShortcutDataStore {
         try metadata.save()
     }
 
-    public func move(fromOffsets source: IndexSet, toOffset destination: Int) throws {
+    /// Unreadable shortcuts aren't in the list, so they keep their registration after the loaded ones
+    public func saveOrder(_ loadedIds: [UUID]) throws {
         var metadata = try VCamShortcutMetadata.load()
-        metadata.ids.move(fromOffsets: source, toOffset: destination)
+        let loadedIdSet = Set(loadedIds)
+        let unavailableIds = metadata.ids.filter {
+            !loadedIdSet.contains($0)
+                && FileManager.default.fileExists(atPath: URL.shortcutData(id: $0).path)
+        }
+        metadata.ids = loadedIds + unavailableIds
         try metadata.save()
     }
 

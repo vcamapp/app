@@ -112,7 +112,7 @@ struct TrackingResamplerRecoveryTests {
     }
 }
 
-@Suite
+@Suite(.serialized)
 struct TrackingTraceTests {
     @available(macOS 26.0, *)
     private static func facePacket(sequence: UInt32, yawDegrees: Float, sentAt: UInt64) -> Data {

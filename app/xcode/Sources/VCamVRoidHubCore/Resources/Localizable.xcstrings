@@ -10,6 +10,12 @@
             "value": "Antisocial/hateful acts"
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actos antisociales o de odio"
+          }
+        },
         "ja": {
           "stringUnit": {
             "state": "translated",
@@ -20,6 +26,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "반사회적·혐오 표현에서의 이용"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atos antissociais ou de ódio"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "การใช้ในทางต่อต้านสังคมหรือสร้างความเกลียดชัง"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用于反社会或仇恨表达"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用於反社會或仇恨表現"
           }
         }
       }
@@ -33,6 +63,12 @@
             "value": "Corporate use"
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uso corporativo"
+          }
+        },
         "ja": {
           "stringUnit": {
             "state": "translated",
@@ -43,6 +79,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "법인 이용"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uso corporativo"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "การใช้งานโดยนิติบุคคล"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "企业使用"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "企業使用"
           }
         }
       }
@@ -56,6 +116,12 @@
             "value": "Attribution"
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atribución"
+          }
+        },
         "ja": {
           "stringUnit": {
             "state": "translated",
@@ -66,6 +132,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "크레딧 표기"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atribuição"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "การให้เครดิต"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "署名"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "標示出處"
           }
         }
       }
@@ -79,6 +169,12 @@
             "value": "Alterations"
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modificaciones"
+          }
+        },
         "ja": {
           "stringUnit": {
             "state": "translated",
@@ -89,6 +185,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "개변"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modificações"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "การดัดแปลง"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "修改"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "修改"
           }
         }
       }
@@ -102,6 +222,12 @@
             "value": "Redistribution of altered model"
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Redistribución del modelo modificado"
+          }
+        },
         "ja": {
           "stringUnit": {
             "state": "translated",
@@ -112,6 +238,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "개변물의 재배포"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Redistribuição do modelo modificado"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "การเผยแพร่ซ้ำโมเดลที่ดัดแปลง"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "再分发修改后的模型"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "再散布修改後的模型"
           }
         }
       }
@@ -125,6 +275,12 @@
             "value": "Individual commercial use"
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uso comercial individual"
+          }
+        },
         "ja": {
           "stringUnit": {
             "state": "translated",
@@ -135,6 +291,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "개인의 상업적 이용"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uso comercial individual"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "การใช้เชิงพาณิชย์โดยบุคคล"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "个人商业用途"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "個人商業用途"
           }
         }
       }
@@ -148,6 +328,12 @@
             "value": "Political/religious acts"
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actos políticos o religiosos"
+          }
+        },
         "ja": {
           "stringUnit": {
             "state": "translated",
@@ -158,6 +344,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "종교·정치 목적에서의 이용"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atos políticos ou religiosos"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "การใช้เพื่อวัตถุประสงค์ทางการเมืองหรือศาสนา"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用于政治或宗教目的"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用於政治或宗教目的"
           }
         }
       }
@@ -171,6 +381,12 @@
             "value": "Redistribution"
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Redistribución"
+          }
+        },
         "ja": {
           "stringUnit": {
             "state": "translated",
@@ -181,6 +397,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "재배포"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Redistribuição"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "การเผยแพร่ซ้ำ"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "再分发"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "再散布"
           }
         }
       }
@@ -194,6 +434,12 @@
             "value": "Sexual acts"
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actos sexuales"
+          }
+        },
         "ja": {
           "stringUnit": {
             "state": "translated",
@@ -204,6 +450,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "성적 표현에서의 이용"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atos sexuais"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "การใช้ในเนื้อหาทางเพศ"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用于性表达"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用於性表現"
           }
         }
       }
@@ -217,6 +487,12 @@
             "value": "Avatar use"
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uso como avatar"
+          }
+        },
         "ja": {
           "stringUnit": {
             "state": "translated",
@@ -227,6 +503,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "아바타 이용"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uso como avatar"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "การใช้เป็นอวตาร"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "作为虚拟形象使用"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "作為虛擬形象使用"
           }
         }
       }
@@ -240,6 +540,12 @@
             "value": "Violent acts"
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actos violentos"
+          }
+        },
         "ja": {
           "stringUnit": {
             "state": "translated",
@@ -250,6 +556,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "폭력 표현에서의 이용"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atos violentos"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "การใช้ในเนื้อหาความรุนแรง"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用于暴力表达"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用於暴力表現"
           }
         }
       }
@@ -263,6 +593,12 @@
             "value": "Required"
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obligatoria"
+          }
+        },
         "ja": {
           "stringUnit": {
             "state": "translated",
@@ -273,6 +609,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "필요"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obrigatória"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "จำเป็น"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "需要"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "需要"
           }
         }
       }
@@ -286,6 +646,12 @@
             "value": "Not required"
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No obligatoria"
+          }
+        },
         "ja": {
           "stringUnit": {
             "state": "translated",
@@ -296,6 +662,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "불필요"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não obrigatória"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ไม่จำเป็น"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不需要"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不需要"
           }
         }
       }
@@ -309,6 +699,12 @@
             "value": "Failed to load"
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo cargar"
+          }
+        },
         "ja": {
           "stringUnit": {
             "state": "translated",
@@ -319,6 +715,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "불러오기에 실패했습니다"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Falha ao carregar"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "โหลดไม่สำเร็จ"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "载入失败"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "載入失敗"
           }
         }
       }
@@ -332,6 +752,12 @@
             "value": "No models found"
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se encontraron modelos"
+          }
+        },
         "ja": {
           "stringUnit": {
             "state": "translated",
@@ -342,6 +768,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "모델을 찾을 수 없습니다"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhum modelo encontrado"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ไม่พบโมเดล"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "找不到模型"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "找不到模型"
           }
         }
       }
@@ -355,6 +805,12 @@
             "value": "Allow"
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permitido"
+          }
+        },
         "ja": {
           "stringUnit": {
             "state": "translated",
@@ -365,6 +821,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "허용"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permitido"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "อนุญาต"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "允许"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "允許"
           }
         }
       }
@@ -378,6 +858,12 @@
             "value": "Do not allow"
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No permitido"
+          }
+        },
         "ja": {
           "stringUnit": {
             "state": "translated",
@@ -388,6 +874,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "허용 안 함"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não permitido"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ไม่อนุญาต"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不允许"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不允許"
           }
         }
       }
@@ -401,6 +911,12 @@
             "value": "Not set"
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin especificar"
+          }
+        },
         "ja": {
           "stringUnit": {
             "state": "translated",
@@ -411,6 +927,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "미설정"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não definido"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ไม่ได้ระบุ"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未设置"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未設定"
           }
         }
       }
@@ -424,6 +964,12 @@
             "value": "Non-profit activities only"
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo actividades sin fines de lucro"
+          }
+        },
         "ja": {
           "stringUnit": {
             "state": "translated",
@@ -434,6 +980,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "비영리 활동만"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Somente atividades sem fins lucrativos"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "เฉพาะกิจกรรมที่ไม่แสวงหากำไร"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "仅限非营利活动"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "僅限非營利活動"
           }
         }
       }
@@ -447,6 +1017,12 @@
             "value": "3D Preview"
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vista previa 3D"
+          }
+        },
         "ja": {
           "stringUnit": {
             "state": "translated",
@@ -457,6 +1033,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "3D 미리보기"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prévia 3D"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ดูตัวอย่าง 3D"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "3D 预览"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "3D 預覽"
           }
         }
       }
@@ -470,6 +1070,12 @@
             "value": "Drag to rotate the model."
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arrastra para girar el modelo."
+          }
+        },
         "ja": {
           "stringUnit": {
             "state": "translated",
@@ -480,6 +1086,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "드래그하여 모델을 회전할 수 있습니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arraste para girar o modelo."
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ลากเพื่อหมุนโมเดล"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拖动即可旋转模型。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拖曳即可旋轉模型。"
           }
         }
       }
@@ -493,6 +1123,12 @@
             "value": "Private"
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Privado"
+          }
+        },
         "ja": {
           "stringUnit": {
             "state": "translated",
@@ -503,6 +1139,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "비공개"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Privado"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ส่วนตัว"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "非公开"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "非公開"
           }
         }
       }
@@ -516,6 +1176,12 @@
             "value": "Retry"
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reintentar"
+          }
+        },
         "ja": {
           "stringUnit": {
             "state": "translated",
@@ -526,6 +1192,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "다시 시도"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tentar Novamente"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ลองอีกครั้ง"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重试"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重試"
           }
         }
       }
@@ -539,6 +1229,12 @@
             "value": "Sign-in failed"
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo iniciar sesión"
+          }
+        },
         "ja": {
           "stringUnit": {
             "state": "translated",
@@ -549,6 +1245,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "로그인에 실패했습니다"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Falha ao entrar"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "เข้าสู่ระบบไม่สำเร็จ"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "登录失败"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "登入失敗"
           }
         }
       }
@@ -562,6 +1282,12 @@
             "value": "Sign in to VRoid Hub"
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iniciar sesión en VRoid Hub"
+          }
+        },
         "ja": {
           "stringUnit": {
             "state": "translated",
@@ -572,6 +1298,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "VRoid Hub에 로그인"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entrar no VRoid Hub"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "เข้าสู่ระบบ VRoid Hub"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "登录 VRoid Hub"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "登入 VRoid Hub"
           }
         }
       }
@@ -585,6 +1335,12 @@
             "value": "Model Data Conditions of Use"
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Condiciones de uso del modelo"
+          }
+        },
         "ja": {
           "stringUnit": {
             "state": "translated",
@@ -595,6 +1351,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "모델 데이터 이용 조건"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Condições de uso do modelo"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "เงื่อนไขการใช้ข้อมูลโมเดล"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "模型数据使用条件"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "模型資料使用條件"
           }
         }
       }
@@ -608,6 +1388,12 @@
             "value": "The conditions of use could not be retrieved. Check them on VRoid Hub."
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudieron obtener las condiciones de uso. Consúltalas en VRoid Hub."
+          }
+        },
         "ja": {
           "stringUnit": {
             "state": "translated",
@@ -618,6 +1404,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "이용 조건을 가져올 수 없습니다. VRoid Hub에서 확인해 주세요."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível obter as condições de uso. Confira no VRoid Hub."
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ไม่สามารถดึงเงื่อนไขการใช้งานได้ โปรดตรวจสอบใน VRoid Hub"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法获取使用条件。请在 VRoid Hub 上确认。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法取得使用條件。請至 VRoid Hub 確認。"
           }
         }
       }
@@ -631,6 +1441,12 @@
             "value": "Sign in to VRoid Hub to use your models and liked models."
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inicia sesión en VRoid Hub para usar tus modelos y los que te gustan."
+          }
+        },
         "ja": {
           "stringUnit": {
             "state": "translated",
@@ -641,6 +1457,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "VRoid Hub에 로그인하면 내 모델과 하트한 모델을 이용할 수 있습니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entre no VRoid Hub para usar seus modelos e os modelos curtidos."
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "เข้าสู่ระบบ VRoid Hub เพื่อใช้โมเดลของคุณและโมเดลที่คุณถูกใจ"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "登录 VRoid Hub 后，即可使用你的模型和喜欢的模型。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "登入 VRoid Hub 後，即可使用你的模型和按過愛心的模型。"
           }
         }
       }

@@ -24,15 +24,6 @@ public final class WindowManager {
     }
 
     init() {
-        NotificationCenter.default.addObserver(forName: NSWindow.didResizeNotification, object: nil, queue: .main) { [weak self] _ in
-            Task { @MainActor in
-                guard let self else { return }
-                if let size = NSApp.mainWindow?.contentView?.frame.size {
-                    self.size = size
-                }
-            }
-        }
-
         NotificationCenter.default.addObserver(forName: NSApplication.didBecomeActiveNotification, object: nil, queue: .main) { [weak self] _ in
             // Display the window when launching the app while it's stored in the menu bar.
             // Use Task instead of assumeIsolated; the synchronous executor check of
@@ -75,6 +66,19 @@ public final class WindowManager {
             window.minSize = .init(width: 800, height: 450)
             window.contentAspectRatio = NSSize(width: 1280, height: 720)
             self.window = window
+        }
+
+        if let window {
+            observeResize(of: window)
+        }
+    }
+
+    private func observeResize(of window: NSWindow) {
+        NotificationCenter.default.addObserver(forName: NSWindow.didResizeNotification, object: window, queue: .main) { [weak self] _ in
+            Task { @MainActor in
+                guard let self, let size = self.window?.contentView?.frame.size else { return }
+                self.size = size
+            }
         }
     }
 
