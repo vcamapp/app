@@ -11,10 +11,7 @@ public struct Logger: Sendable {
     }
 
     public static func log(_ message: String, file: StaticString = #file, function: StaticString = #function, line: Int = #line) {
-        let handler = _logInternal
-        Task(priority: .background) { @MainActor in
-            handler(message, file, function, line)
-        }
+        _logInternal(message, file, function, line)
     }
 
     public static var logInternal: (@Sendable (String, StaticString, StaticString, Int) -> Void) {

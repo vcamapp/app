@@ -2,10 +2,10 @@ import VCamEntity
 
 /// Rewrites the blink pair of the face arrays right before they leave for the engine,
 /// so the blink setting applies the same way to every tracking source and mode.
-package enum BlinkSourceValues {
+public enum BlinkSourceValues {
     /// `values` is laid out in `TrackingMappingEntry.trackingValueKeys(for:)` order and is
     /// already presented, so once mirrored the subject's eye sits in the opposite slot.
-    package static func applying(_ source: BlinkSource, to values: [Float], mode: TrackingMode, mirrored: Bool) -> [Float] {
+    public static func applying(_ source: BlinkSource, to values: [Float], mode: TrackingMode, mirrored: Bool) -> [Float] {
         let slots = blinkSlots(for: mode)
         var values = values
         switch source {
