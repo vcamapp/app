@@ -33,6 +33,8 @@ public struct VCamSettingRenderingView: View {
 
             ValueEditField(.fpsScreen, value: $state.fps, type: .slider(10...60))
                 .disabled(uniState.useVSync)
+
+            VCamSettingAvatarAppearanceView.make()
         }
         .formStyle(.grouped)
     }

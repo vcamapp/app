@@ -1,11 +1,12 @@
 import Foundation
 
 public struct VCamScene: Codable, Identifiable, Sendable {
-    public init(id: Int32, name: String, objects: [VCamScene.Object], aspectRatio: Float, version: Int = VCamScene.currentVersion) {
+    public init(id: Int32, name: String, objects: [VCamScene.Object], aspectRatio: Float, lighting: Lighting? = nil, version: Int = VCamScene.currentVersion) {
         self.id = id
         self.name = name
         self.objects = objects
         self.aspectRatio = aspectRatio
+        self.lighting = lighting
         self.version = version
     }
 
@@ -13,6 +14,7 @@ public struct VCamScene: Codable, Identifiable, Sendable {
     public var name: String
     public var objects: [Object]
     public var aspectRatio: Float?
+    public var lighting: Lighting? // [Added 0.15.7] nil = the renderer's default light
     public var version: Int? // [Added 0.14.8] nil = version 1. See VCamScene.currentVersion for the format history.
 }
 
@@ -182,5 +184,42 @@ public extension VCamScene {
         public var css: String?
         public var js: String?
         public var texture: RenderTexture
+    }
+}
+
+public extension VCamScene {
+    /// The light that falls on the avatars, fixed to the background so it keeps matching it: a 2D background
+    /// stays in front of the camera however the camera turns around the avatar, so the light stays with the camera too.
+    /// The light's color and intensity belong to the display parameters instead
+    struct Lighting: Codable, Equatable, Sendable {
+        public init(azimuth: Float, elevation: Float, shadow: Float, shadowColor: VCamColor, rim: Rim?) {
+            self.azimuth = azimuth
+            self.elevation = elevation
+            self.shadow = shadow
+            self.shadowColor = shadowColor
+            self.rim = rim
+        }
+
+        /// Degrees around the avatar as seen from the background: 0 lights it from the camera's side,
+        /// negative from the left of the screen, ±180 from behind it
+        public var azimuth: Float
+        /// Degrees above the horizon: 90 is straight overhead
+        public var elevation: Float
+        /// 0...1: 0 lights the avatar evenly, 1 leaves the side away from the light unlit
+        public var shadow: Float
+        public var shadowColor: VCamColor
+        public var rim: Rim?
+
+        /// A light from behind that outlines the avatar's silhouette
+        public struct Rim: Codable, Equatable, Sendable {
+            public init(color: VCamColor, intensity: Float) {
+                self.color = color
+                self.intensity = intensity
+            }
+
+            public var color: VCamColor
+            /// Multiplies the color; values above 1 keep the outline visible on bright clothes
+            public var intensity: Float
+        }
     }
 }

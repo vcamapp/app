@@ -5,7 +5,11 @@ import VCamData
 public struct VCamMainToolbar: View {
     public init() {}
 
+    /// Set only by renderers that let the user light the avatar per scene; the button is hidden otherwise
+    @MainActor public static var makeAvatarLightingPopover: (() -> AnyView)?
+
     @State private var isPhotoPopover = false
+    @State private var isLightingPopover = false
     @State private var isEmojiPickerPopover = false
     @State private var isMotionPickerPopover = false
     @State private var isBlendShapePickerPopover = false
@@ -22,6 +26,20 @@ public struct VCamMainToolbar: View {
             .popover(isPresented: $isPhotoPopover) {
                 VCamPopoverContainer(.background) {
                     VCamMainToolbarBackgroundColorPicker()
+                }
+            }
+
+            if let makeAvatarLightingPopover = Self.makeAvatarLightingPopover {
+                Item {
+                    isLightingPopover.toggle()
+                } label: {
+                    Image(systemName: "sun.max.fill")
+                }
+                .help(Text(.lighting))
+                .accessibilityLabel(Text(.lighting))
+                // Opens toward the sidebar so the preview stays visible while the light is matched to it
+                .popover(isPresented: $isLightingPopover, arrowEdge: .leading) {
+                    makeAvatarLightingPopover()
                 }
             }
 

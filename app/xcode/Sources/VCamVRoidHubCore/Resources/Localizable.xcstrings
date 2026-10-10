@@ -4,6 +4,12 @@
     "conditionAntisocialHateUse": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Antisoziale/hasserfüllte Darstellungen"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
@@ -14,6 +20,18 @@
           "stringUnit": {
             "state": "translated",
             "value": "Actos antisociales o de odio"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actes antisociaux ou haineux"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tindakan antisosial/kebencian"
           }
         },
         "ja": {
@@ -40,6 +58,12 @@
             "value": "การใช้ในทางต่อต้านสังคมหรือสร้างความเกลียดชัง"
           }
         },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hành vi phản xã hội/thù ghét"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
@@ -57,6 +81,12 @@
     "conditionCorporateCommercialUse": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nutzung durch Unternehmen"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
@@ -67,6 +97,18 @@
           "stringUnit": {
             "state": "translated",
             "value": "Uso corporativo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usage par une entreprise"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Penggunaan korporat"
           }
         },
         "ja": {
@@ -93,6 +135,12 @@
             "value": "การใช้งานโดยนิติบุคคล"
           }
         },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sử dụng bởi doanh nghiệp"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
@@ -110,6 +158,12 @@
     "conditionCredit": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Namensnennung"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
@@ -120,6 +174,18 @@
           "stringUnit": {
             "state": "translated",
             "value": "Atribución"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crédit"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atribusi"
           }
         },
         "ja": {
@@ -146,6 +212,12 @@
             "value": "การให้เครดิต"
           }
         },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ghi công"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
@@ -163,6 +235,12 @@
     "conditionModification": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bearbeitung"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
@@ -173,6 +251,18 @@
           "stringUnit": {
             "state": "translated",
             "value": "Modificaciones"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modifications"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modifikasi"
           }
         },
         "ja": {
@@ -199,6 +289,12 @@
             "value": "การดัดแปลง"
           }
         },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chỉnh sửa"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
@@ -216,6 +312,12 @@
     "conditionModifiedRedistribution": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weitergabe bearbeiteter Modelle"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
@@ -226,6 +328,18 @@
           "stringUnit": {
             "state": "translated",
             "value": "Redistribución del modelo modificado"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Redistribution du modèle modifié"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Redistribusi model yang dimodifikasi"
           }
         },
         "ja": {
@@ -252,6 +366,12 @@
             "value": "การเผยแพร่ซ้ำโมเดลที่ดัดแปลง"
           }
         },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Phân phối lại mô hình đã chỉnh sửa"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
@@ -269,6 +389,12 @@
     "conditionPersonalCommercialUse": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kommerzielle Nutzung durch Privatpersonen"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
@@ -279,6 +405,18 @@
           "stringUnit": {
             "state": "translated",
             "value": "Uso comercial individual"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usage commercial par un particulier"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Penggunaan komersial perorangan"
           }
         },
         "ja": {
@@ -305,6 +443,12 @@
             "value": "การใช้เชิงพาณิชย์โดยบุคคล"
           }
         },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sử dụng thương mại cá nhân"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
@@ -322,6 +466,12 @@
     "conditionPoliticalReligiousUse": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Politische/religiöse Zwecke"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
@@ -332,6 +482,18 @@
           "stringUnit": {
             "state": "translated",
             "value": "Actos políticos o religiosos"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actes politiques ou religieux"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tindakan politik/keagamaan"
           }
         },
         "ja": {
@@ -358,6 +520,12 @@
             "value": "การใช้เพื่อวัตถุประสงค์ทางการเมืองหรือศาสนา"
           }
         },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hành vi chính trị/tôn giáo"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
@@ -375,6 +543,12 @@
     "conditionRedistribution": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weitergabe"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
@@ -385,6 +559,18 @@
           "stringUnit": {
             "state": "translated",
             "value": "Redistribución"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Redistribution"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Redistribusi"
           }
         },
         "ja": {
@@ -411,6 +597,12 @@
             "value": "การเผยแพร่ซ้ำ"
           }
         },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Phân phối lại"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
@@ -428,6 +620,12 @@
     "conditionSexualExpressions": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sexuelle Darstellungen"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
@@ -438,6 +636,18 @@
           "stringUnit": {
             "state": "translated",
             "value": "Actos sexuales"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Représentations sexuelles"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tindakan seksual"
           }
         },
         "ja": {
@@ -464,6 +674,12 @@
             "value": "การใช้ในเนื้อหาทางเพศ"
           }
         },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hành vi tình dục"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
@@ -481,6 +697,12 @@
     "conditionUseAsAvatar": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nutzung als Avatar"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
@@ -491,6 +713,18 @@
           "stringUnit": {
             "state": "translated",
             "value": "Uso como avatar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usage comme avatar"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Penggunaan sebagai avatar"
           }
         },
         "ja": {
@@ -517,6 +751,12 @@
             "value": "การใช้เป็นอวตาร"
           }
         },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sử dụng làm avatar"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
@@ -534,6 +774,12 @@
     "conditionViolentExpressions": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gewaltdarstellungen"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
@@ -544,6 +790,18 @@
           "stringUnit": {
             "state": "translated",
             "value": "Actos violentos"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Représentations violentes"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tindakan kekerasan"
           }
         },
         "ja": {
@@ -570,6 +828,12 @@
             "value": "การใช้ในเนื้อหาความรุนแรง"
           }
         },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hành vi bạo lực"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
@@ -587,6 +851,12 @@
     "creditRequired": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erforderlich"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
@@ -597,6 +867,18 @@
           "stringUnit": {
             "state": "translated",
             "value": "Obligatoria"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obligatoire"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wajib"
           }
         },
         "ja": {
@@ -623,6 +905,12 @@
             "value": "จำเป็น"
           }
         },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bắt buộc"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
@@ -640,6 +928,12 @@
     "creditUnnecessary": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nicht erforderlich"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
@@ -650,6 +944,18 @@
           "stringUnit": {
             "state": "translated",
             "value": "No obligatoria"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Facultatif"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tidak wajib"
           }
         },
         "ja": {
@@ -676,6 +982,12 @@
             "value": "ไม่จำเป็น"
           }
         },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không bắt buộc"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
@@ -693,6 +1005,12 @@
     "failedToLoadModels": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laden fehlgeschlagen"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
@@ -703,6 +1021,18 @@
           "stringUnit": {
             "state": "translated",
             "value": "No se pudo cargar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Échec du chargement"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gagal memuat"
           }
         },
         "ja": {
@@ -729,6 +1059,12 @@
             "value": "โหลดไม่สำเร็จ"
           }
         },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không thể tải"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
@@ -746,6 +1082,12 @@
     "noModelsFound": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keine Modelle gefunden"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
@@ -756,6 +1098,18 @@
           "stringUnit": {
             "state": "translated",
             "value": "No se encontraron modelos"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun modèle trouvé"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Model tidak ditemukan"
           }
         },
         "ja": {
@@ -782,6 +1136,12 @@
             "value": "ไม่พบโมเดล"
           }
         },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không tìm thấy mô hình"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
@@ -799,6 +1159,12 @@
     "permissionAllowed": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erlaubt"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
@@ -809,6 +1175,18 @@
           "stringUnit": {
             "state": "translated",
             "value": "Permitido"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autorisé"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diizinkan"
           }
         },
         "ja": {
@@ -835,6 +1213,12 @@
             "value": "อนุญาต"
           }
         },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cho phép"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
@@ -852,6 +1236,12 @@
     "permissionDisallowed": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nicht erlaubt"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
@@ -862,6 +1252,18 @@
           "stringUnit": {
             "state": "translated",
             "value": "No permitido"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Non autorisé"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tidak diizinkan"
           }
         },
         "ja": {
@@ -888,6 +1290,12 @@
             "value": "ไม่อนุญาต"
           }
         },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không cho phép"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
@@ -905,6 +1313,12 @@
     "permissionUnspecified": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nicht festgelegt"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
@@ -915,6 +1329,18 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sin especificar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Non défini"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Belum diatur"
           }
         },
         "ja": {
@@ -941,6 +1367,12 @@
             "value": "ไม่ได้ระบุ"
           }
         },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chưa đặt"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
@@ -958,6 +1390,12 @@
     "personalCommercialNonprofit": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nur nicht kommerziell"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
@@ -968,6 +1406,18 @@
           "stringUnit": {
             "state": "translated",
             "value": "Solo actividades sin fines de lucro"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activités non lucratives uniquement"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hanya kegiatan nirlaba"
           }
         },
         "ja": {
@@ -994,6 +1444,12 @@
             "value": "เฉพาะกิจกรรมที่ไม่แสวงหากำไร"
           }
         },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chỉ hoạt động phi lợi nhuận"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
@@ -1011,6 +1467,12 @@
     "preview3D": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "3D-Vorschau"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
@@ -1021,6 +1483,18 @@
           "stringUnit": {
             "state": "translated",
             "value": "Vista previa 3D"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aperçu 3D"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pratinjau 3D"
           }
         },
         "ja": {
@@ -1047,6 +1521,12 @@
             "value": "ดูตัวอย่าง 3D"
           }
         },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xem trước 3D"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
@@ -1064,6 +1544,12 @@
     "preview3DHint": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ziehe, um das Modell zu drehen."
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
@@ -1074,6 +1560,18 @@
           "stringUnit": {
             "state": "translated",
             "value": "Arrastra para girar el modelo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Faites glisser pour faire pivoter le modèle."
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seret untuk memutar model."
           }
         },
         "ja": {
@@ -1100,6 +1598,12 @@
             "value": "ลากเพื่อหมุนโมเดล"
           }
         },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kéo để xoay mô hình."
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
@@ -1117,6 +1621,12 @@
     "privateModel": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Privat"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
@@ -1127,6 +1637,18 @@
           "stringUnit": {
             "state": "translated",
             "value": "Privado"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Privé"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pribadi"
           }
         },
         "ja": {
@@ -1153,6 +1675,12 @@
             "value": "ส่วนตัว"
           }
         },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Riêng tư"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
@@ -1170,6 +1698,12 @@
     "retry": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erneut versuchen"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
@@ -1180,6 +1714,18 @@
           "stringUnit": {
             "state": "translated",
             "value": "Reintentar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Réessayer"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coba Lagi"
           }
         },
         "ja": {
@@ -1206,6 +1752,12 @@
             "value": "ลองอีกครั้ง"
           }
         },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thử lại"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
@@ -1223,6 +1775,12 @@
     "signInFailed": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anmeldung fehlgeschlagen"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
@@ -1233,6 +1791,18 @@
           "stringUnit": {
             "state": "translated",
             "value": "No se pudo iniciar sesión"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Échec de la connexion"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gagal masuk"
           }
         },
         "ja": {
@@ -1259,6 +1829,12 @@
             "value": "เข้าสู่ระบบไม่สำเร็จ"
           }
         },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đăng nhập không thành công"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
@@ -1276,6 +1852,12 @@
     "signInToVRoidHub": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bei VRoid Hub anmelden"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
@@ -1286,6 +1868,18 @@
           "stringUnit": {
             "state": "translated",
             "value": "Iniciar sesión en VRoid Hub"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se connecter à VRoid Hub"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Masuk ke VRoid Hub"
           }
         },
         "ja": {
@@ -1312,6 +1906,12 @@
             "value": "เข้าสู่ระบบ VRoid Hub"
           }
         },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đăng nhập vào VRoid Hub"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
@@ -1329,6 +1929,12 @@
     "usageConditions": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nutzungsbedingungen der Modelldaten"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
@@ -1339,6 +1945,18 @@
           "stringUnit": {
             "state": "translated",
             "value": "Condiciones de uso del modelo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conditions d’utilisation du modèle"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ketentuan Penggunaan Data Model"
           }
         },
         "ja": {
@@ -1365,6 +1983,12 @@
             "value": "เงื่อนไขการใช้ข้อมูลโมเดล"
           }
         },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Điều kiện sử dụng dữ liệu mô hình"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
@@ -1382,6 +2006,12 @@
     "usageConditionsUnavailable": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Nutzungsbedingungen konnten nicht abgerufen werden. Sieh sie dir auf VRoid Hub an."
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
@@ -1392,6 +2022,18 @@
           "stringUnit": {
             "state": "translated",
             "value": "No se pudieron obtener las condiciones de uso. Consúltalas en VRoid Hub."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de récupérer les conditions d’utilisation. Consultez-les sur VRoid Hub."
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ketentuan penggunaan tidak dapat diambil. Periksa di VRoid Hub."
           }
         },
         "ja": {
@@ -1418,6 +2060,12 @@
             "value": "ไม่สามารถดึงเงื่อนไขการใช้งานได้ โปรดตรวจสอบใน VRoid Hub"
           }
         },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không thể tải điều kiện sử dụng. Hãy kiểm tra trên VRoid Hub."
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
@@ -1435,6 +2083,12 @@
     "vroidHubSignInDescription": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Melde dich bei VRoid Hub an, um deine eigenen Modelle und Modelle, die dir gefallen, zu verwenden."
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
@@ -1445,6 +2099,18 @@
           "stringUnit": {
             "state": "translated",
             "value": "Inicia sesión en VRoid Hub para usar tus modelos y los que te gustan."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connectez-vous à VRoid Hub pour utiliser vos modèles et vos coups de cœur."
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Masuk ke VRoid Hub untuk menggunakan model Anda dan model yang Anda sukai."
           }
         },
         "ja": {
@@ -1469,6 +2135,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "เข้าสู่ระบบ VRoid Hub เพื่อใช้โมเดลของคุณและโมเดลที่คุณถูกใจ"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đăng nhập vào VRoid Hub để dùng các mô hình của bạn và các mô hình bạn đã thích."
           }
         },
         "zh-Hans": {

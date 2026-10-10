@@ -20,6 +20,18 @@ public final class SceneManager {
 
     public var currentSceneId: Int32 { currentScene.id }
 
+    /// nil until the user changes it, so the renderer's default applies
+    public var currentLighting: VCamScene.Lighting? {
+        currentScene.lighting
+    }
+
+    /// Changes only what is in memory, so a value that follows a drag can be saved once at the end
+    /// with ``saveCurrentSceneAndObjects()``
+    public func setCurrentLighting(_ lighting: VCamScene.Lighting?) {
+        guard let index = scenes.index(ofId: currentSceneId) else { return }
+        scenes[index].lighting = lighting
+    }
+
     /// Scenes are kept per orientation so each keeps its own order.
     /// Both orientations always hold at least one scene by construction.
     private struct OrientedScenes {
@@ -215,7 +227,7 @@ public final class SceneManager {
     /// changes nothing.
     public func saveCurrentScene(objects: [SceneObject]) throws {
         let dataStore = VCamSceneDataStore(sceneId: currentSceneId)
-        let scene = try dataStore.makeScene(name: currentScene.name, objects: objects)
+        let scene = try dataStore.makeScene(name: currentScene.name, objects: objects, lighting: currentScene.lighting)
         try dataStore.save(scene)
         update(scene)
     }

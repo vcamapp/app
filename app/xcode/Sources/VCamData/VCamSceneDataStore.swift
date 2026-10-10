@@ -134,13 +134,14 @@ extension VCamSceneDataStore {
 
     /// Encoding is all-or-nothing so that an object which can't be converted is never
     /// dropped from an otherwise successfully saved scene.
-    public func makeScene(name: String, objects: [SceneObject]) throws -> VCamScene {
+    public func makeScene(name: String, objects: [SceneObject], lighting: VCamScene.Lighting?) throws -> VCamScene {
         uniDebugLog("makeScene: \(objects.count)")
         return .init(
             id: sceneId,
             name: name,
             objects: try objects.map { try $0.encodeScene() },
-            aspectRatio: MainTexture.shared.aspectRatio
+            aspectRatio: MainTexture.shared.aspectRatio,
+            lighting: lighting
         )
     }
 

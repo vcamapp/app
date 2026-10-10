@@ -3842,6 +3842,29 @@
         }
       }
     },
+    "lighting": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lighting"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ライティング"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "조명"
+          }
+        }
+      }
+    },
     "linear": {
       "extractionState": "manual",
       "localizations": {
