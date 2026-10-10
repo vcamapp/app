@@ -13,6 +13,14 @@ struct SIMDTests {
     }
 
     @Test
+    func yawKeepsTheTurnAndDropsTheTilt() {
+        let turn = simd_quatf(angle: .pi / 2, axis: SIMD3(0, 1, 0))
+        let lookingDown = simd_quatf(angle: -.pi / 6, axis: SIMD3(1, 0, 0))
+        #expect((turn * lookingDown).yaw.degrees(to: turn) < 0.01)
+        #expect(simd_quatf(ix: 0, iy: 0, iz: 0, r: 1).yaw.degrees(to: simd_quatf(ix: 0, iy: 0, iz: 0, r: 1)) < 0.01)
+    }
+
+    @Test
     func composesYawThenPitchThenRoll() {
         let angles = SIMD3<Float>(-15, 60, 10) * .pi / 180
         let expected = simd_quatf(angle: angles.y, axis: SIMD3(0, 1, 0))

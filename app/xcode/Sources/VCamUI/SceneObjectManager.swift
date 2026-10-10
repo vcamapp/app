@@ -16,6 +16,8 @@ public final class SceneObjectManager {
     /// The subtitle overlays every scene, so it is kept out of the scene's object list.
     public internal(set) var subtitleObject: SceneObject?
     @ObservationIgnored private var loadGeneration = 0
+    /// `loadObjects` is in progress and `objects` does not yet hold the scene
+    @ObservationIgnored private(set) var isLoading = false
 
     private init() {
         NotificationCenter.default.addObserver(
@@ -313,6 +315,9 @@ extension SceneObjectManager {
         // Abandon this load when a newer one starts while awaiting screen capture creation
         loadGeneration &+= 1
         let generation = loadGeneration
+        isLoading = true
+        // A newer load that took over clears the flag itself when it finishes
+        defer { if generation == loadGeneration { isLoading = false } }
 
         let dataStore = VCamSceneDataStore(sceneId: scene.id)
 

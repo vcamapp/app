@@ -218,6 +218,8 @@ public final class SceneManager {
     }
 
     public func saveCurrentSceneAndObjects() throws {
+        // The object list is empty while a scene loads, so saving then would drop every object of the scene
+        guard !SceneObjectManager.shared.isLoading else { return }
         // Object edits reach the subtitle too, which persists outside the scene
         SubtitleTextObject.persistStyle()
         try saveCurrentScene(objects: SceneObjectManager.shared.objects)
@@ -227,7 +229,7 @@ public final class SceneManager {
     /// changes nothing.
     public func saveCurrentScene(objects: [SceneObject]) throws {
         let dataStore = VCamSceneDataStore(sceneId: currentSceneId)
-        let scene = try dataStore.makeScene(name: currentScene.name, objects: objects, lighting: currentScene.lighting)
+        let scene = try dataStore.makeScene(updating: currentScene, objects: objects)
         try dataStore.save(scene)
         update(scene)
     }

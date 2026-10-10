@@ -82,4 +82,10 @@ public extension simd_quatf {
     @inlinable func degrees(to other: simd_quatf) -> Float {
         angle(to: other) * 180 / .pi
     }
+
+    /// The turn about the Y axis alone, taken from where the forward (-Z) vector points, so pitch and roll are dropped
+    @inlinable var yaw: simd_quatf {
+        let forward = act(SIMD3(0, 0, -1))
+        return simd_quatf(angle: atan2(-forward.x, -forward.z), axis: SIMD3(0, 1, 0))
+    }
 }

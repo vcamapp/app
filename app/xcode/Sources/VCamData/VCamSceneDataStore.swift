@@ -132,17 +132,16 @@ extension VCamSceneDataStore {
         return Float(size.height) / Float(size.width)
     }
 
+    /// Keeps everything of `scene` but its objects, so scene-level values (name, lighting) need no plumbing here.
     /// Encoding is all-or-nothing so that an object which can't be converted is never
     /// dropped from an otherwise successfully saved scene.
-    public func makeScene(name: String, objects: [SceneObject], lighting: VCamScene.Lighting?) throws -> VCamScene {
+    public func makeScene(updating scene: VCamScene, objects: [SceneObject]) throws -> VCamScene {
         uniDebugLog("makeScene: \(objects.count)")
-        return .init(
-            id: sceneId,
-            name: name,
-            objects: try objects.map { try $0.encodeScene() },
-            aspectRatio: MainTexture.shared.aspectRatio,
-            lighting: lighting
-        )
+        var scene = scene
+        scene.objects = try objects.map { try $0.encodeScene() }
+        scene.aspectRatio = MainTexture.shared.aspectRatio
+        scene.version = VCamScene.currentVersion
+        return scene
     }
 
     private func addSceneIdIfNeeded() throws {

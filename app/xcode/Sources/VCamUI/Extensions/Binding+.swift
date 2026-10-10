@@ -12,7 +12,7 @@ public extension Binding where Value: Sendable {
     }
 }
 
-public extension Binding where Value == Double {
+public extension Binding where Value: BinaryFloatingPoint & Sendable {
     @MainActor
     func map<T: BinaryFloatingPoint & Sendable>() -> Binding<T> {
         self.map(get: { T.init($0) }, set: Value.init)
