@@ -36,6 +36,8 @@ public struct VRoidPreviewView: View {
                     dragStartYaw = nil
                 }
         )
+        // The rendered model is never mirrored, so a right-to-left layout must not mirror the drag either
+        .environment(\.layoutDirection, .leftToRight)
         .accessibilityLabel(String(localized: .preview3D))
         .accessibilityHint(String(localized: .preview3Dhint))
         .task {

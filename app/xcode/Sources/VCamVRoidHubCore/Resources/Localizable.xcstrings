@@ -4,6 +4,12 @@
     "conditionAntisocialHateUse": {
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الأفعال المعادية للمجتمع والكراهية"
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "translated",
@@ -32,6 +38,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tindakan antisosial/kebencian"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atti antisociali o d’odio"
           }
         },
         "ja": {
@@ -81,6 +93,12 @@
     "conditionCorporateCommercialUse": {
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "استخدام الشركات"
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "translated",
@@ -109,6 +127,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Penggunaan korporat"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uso aziendale"
           }
         },
         "ja": {
@@ -158,6 +182,12 @@
     "conditionCredit": {
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ذكر المصدر"
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "translated",
@@ -186,6 +216,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Atribusi"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Attribuzione"
           }
         },
         "ja": {
@@ -235,6 +271,12 @@
     "conditionModification": {
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "التعديل"
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "translated",
@@ -263,6 +305,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Modifikasi"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modifiche"
           }
         },
         "ja": {
@@ -312,6 +360,12 @@
     "conditionModifiedRedistribution": {
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "إعادة توزيع النموذج المعدَّل"
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "translated",
@@ -340,6 +394,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Redistribusi model yang dimodifikasi"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ridistribuzione del modello modificato"
           }
         },
         "ja": {
@@ -389,6 +449,12 @@
     "conditionPersonalCommercialUse": {
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الاستخدام التجاري الفردي"
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "translated",
@@ -417,6 +483,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Penggunaan komersial perorangan"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uso commerciale individuale"
           }
         },
         "ja": {
@@ -466,6 +538,12 @@
     "conditionPoliticalReligiousUse": {
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الأنشطة السياسية والدينية"
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "translated",
@@ -494,6 +572,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tindakan politik/keagamaan"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atti politici o religiosi"
           }
         },
         "ja": {
@@ -543,6 +627,12 @@
     "conditionRedistribution": {
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "إعادة التوزيع"
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "translated",
@@ -571,6 +661,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Redistribusi"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ridistribuzione"
           }
         },
         "ja": {
@@ -620,6 +716,12 @@
     "conditionSexualExpressions": {
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "المحتوى الجنسي"
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "translated",
@@ -648,6 +750,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tindakan seksual"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atti sessuali"
           }
         },
         "ja": {
@@ -697,6 +805,12 @@
     "conditionUseAsAvatar": {
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الاستخدام كأفاتار"
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "translated",
@@ -725,6 +839,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Penggunaan sebagai avatar"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uso come avatar"
           }
         },
         "ja": {
@@ -774,6 +894,12 @@
     "conditionViolentExpressions": {
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "المحتوى العنيف"
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "translated",
@@ -802,6 +928,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tindakan kekerasan"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atti violenti"
           }
         },
         "ja": {
@@ -851,6 +983,12 @@
     "creditRequired": {
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مطلوب"
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "translated",
@@ -879,6 +1017,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Wajib"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obbligatoria"
           }
         },
         "ja": {
@@ -928,6 +1072,12 @@
     "creditUnnecessary": {
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "غير مطلوب"
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "translated",
@@ -956,6 +1106,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tidak wajib"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Non obbligatoria"
           }
         },
         "ja": {
@@ -1005,6 +1161,12 @@
     "failedToLoadModels": {
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تعذّر التحميل"
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "translated",
@@ -1033,6 +1195,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Gagal memuat"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossibile caricare"
           }
         },
         "ja": {
@@ -1082,6 +1250,12 @@
     "noModelsFound": {
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لم يتم العثور على نماذج"
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "translated",
@@ -1110,6 +1284,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Model tidak ditemukan"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nessun modello trovato"
           }
         },
         "ja": {
@@ -1159,6 +1339,12 @@
     "permissionAllowed": {
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مسموح"
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "translated",
@@ -1187,6 +1373,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Diizinkan"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consentito"
           }
         },
         "ja": {
@@ -1236,6 +1428,12 @@
     "permissionDisallowed": {
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "غير مسموح"
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "translated",
@@ -1264,6 +1462,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tidak diizinkan"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Non consentito"
           }
         },
         "ja": {
@@ -1313,6 +1517,12 @@
     "permissionUnspecified": {
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "غير محدد"
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "translated",
@@ -1341,6 +1551,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Belum diatur"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Non impostato"
           }
         },
         "ja": {
@@ -1390,6 +1606,12 @@
     "personalCommercialNonprofit": {
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الأنشطة غير الربحية فقط"
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "translated",
@@ -1418,6 +1640,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hanya kegiatan nirlaba"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo attività senza scopo di lucro"
           }
         },
         "ja": {
@@ -1467,6 +1695,12 @@
     "preview3D": {
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "معاينة ثلاثية الأبعاد"
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "translated",
@@ -1495,6 +1729,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pratinjau 3D"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anteprima 3D"
           }
         },
         "ja": {
@@ -1544,6 +1784,12 @@
     "preview3DHint": {
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اسحب لتدوير النموذج."
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "translated",
@@ -1572,6 +1818,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Seret untuk memutar model."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trascina per ruotare il modello."
           }
         },
         "ja": {
@@ -1621,6 +1873,12 @@
     "privateModel": {
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "خاص"
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "translated",
@@ -1649,6 +1907,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pribadi"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Privato"
           }
         },
         "ja": {
@@ -1698,6 +1962,12 @@
     "retry": {
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "إعادة المحاولة"
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "translated",
@@ -1726,6 +1996,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Coba Lagi"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Riprova"
           }
         },
         "ja": {
@@ -1775,6 +2051,12 @@
     "signInFailed": {
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تعذّر تسجيل الدخول"
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "translated",
@@ -1803,6 +2085,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Gagal masuk"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accesso non riuscito"
           }
         },
         "ja": {
@@ -1852,6 +2140,12 @@
     "signInToVRoidHub": {
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تسجيل الدخول إلى VRoid Hub"
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "translated",
@@ -1880,6 +2174,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Masuk ke VRoid Hub"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accedi a VRoid Hub"
           }
         },
         "ja": {
@@ -1929,6 +2229,12 @@
     "usageConditions": {
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "شروط استخدام بيانات النموذج"
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "translated",
@@ -1957,6 +2263,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ketentuan Penggunaan Data Model"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Condizioni d’uso del modello"
           }
         },
         "ja": {
@@ -2006,6 +2318,12 @@
     "usageConditionsUnavailable": {
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تعذّر جلب شروط الاستخدام. تحقّق منها على VRoid Hub."
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "translated",
@@ -2034,6 +2352,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ketentuan penggunaan tidak dapat diambil. Periksa di VRoid Hub."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossibile ottenere le condizioni d’uso. Consultale su VRoid Hub."
           }
         },
         "ja": {
@@ -2083,6 +2407,12 @@
     "vroidHubSignInDescription": {
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "سجّل الدخول إلى VRoid Hub لاستخدام نماذجك والنماذج التي أعجبتك."
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "translated",
@@ -2111,6 +2441,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Masuk ke VRoid Hub untuk menggunakan model Anda dan model yang Anda sukai."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accedi a VRoid Hub per usare i tuoi modelli e quelli che ti piacciono."
           }
         },
         "ja": {
