@@ -269,7 +269,7 @@ final class TrackingTraceWriter: Sendable {
         handles.withLock { handles in
             if let handle = handles[file] { return handle }
             let url = directory.appending(path: file.rawValue)
-            guard FileManager.default.createFile(atPath: url.path, contents: nil),
+            guard FileManager.default.createFile(atPath: url.path(percentEncoded: false), contents: nil),
                   let handle = try? FileHandle(forWritingTo: url) else { return nil }
             handles[file] = handle
             return handle

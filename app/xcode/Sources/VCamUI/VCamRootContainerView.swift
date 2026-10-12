@@ -46,7 +46,7 @@ public extension VCamRootContainerView {
         case .image:
             SceneObjectManager.shared.addImage(url: url)
         case .html:
-            NSApp.activate(ignoringOtherApps: true) // To present the sheet, the window must be activated.
+            NSApp.activate() // To present the sheet, the window must be activated.
             Task {
                 try? await Task.sleep(for: .milliseconds(500))
                 WebRenderer.showPreferencesForAdding(path: url.absoluteString)
@@ -84,7 +84,7 @@ public extension VCamRootContainerView {
 #if !FEATURE_3
             // A model is a directory here, so it is matched before the file extensions
             var isDirectory: ObjCBool = false
-            if FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory), isDirectory.boolValue {
+            if FileManager.default.fileExists(atPath: url.path(percentEncoded: false), isDirectory: &isDirectory), isDirectory.boolValue {
                 self = .model
                 return
             }

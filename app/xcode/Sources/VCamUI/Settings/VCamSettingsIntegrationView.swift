@@ -76,7 +76,11 @@ public struct VCamSettingsIntegrationView: View {
                     Button {
                         Task {
                             if facialMocapReceiver.connectionStatus == .disconnected {
-                                try await Tracking.shared.iFacialMocapReceiver.connect(ip: integrationFacialMocapIp)
+                                do {
+                                    try await Tracking.shared.iFacialMocapReceiver.connect(ip: integrationFacialMocapIp)
+                                } catch {
+                                    Logger.error(error)
+                                }
                             } else {
                                 await Tracking.shared.iFacialMocapReceiver.stop()
                             }

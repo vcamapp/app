@@ -50,7 +50,7 @@ final class UDPDatagramSession {
             }
         }
         listener.newConnectionHandler = { [weak self] connection in
-            Task { @MainActor in
+            Task { @MainActor [connection] in
                 guard let self else { return }
                 self.replaceConnection(with: connection)
                 onConnectionStarted()

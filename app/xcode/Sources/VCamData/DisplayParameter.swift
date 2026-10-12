@@ -104,7 +104,7 @@ public final class DisplayParameterPresets {
     }
 
     private func load() {
-        guard FileManager.default.fileExists(atPath: fileURL.path) else {
+        guard FileManager.default.fileExists(atPath: fileURL.path(percentEncoded: false)) else {
             parameters = [DisplayParameter()]
             isLoadFailed = false
             return

@@ -102,7 +102,7 @@ struct AvatarImportManagerTests {
             try await manager.commit(
                 importId: importId, connectionID: connectionID, load: false, modelManager: ModelManager(models: []))
         }
-        #expect(!FileManager.default.fileExists(atPath: fileURL.path))
+        #expect(!FileManager.default.fileExists(atPath: fileURL.path(percentEncoded: false)))
     }
 
     @Test
@@ -132,6 +132,6 @@ struct AvatarImportManagerTests {
 
         manager.cancelAll(connectionID: connectionID)
         #expect(manager.stagedFileURL(importId: importId) == nil)
-        #expect(!FileManager.default.fileExists(atPath: fileURL.path))
+        #expect(!FileManager.default.fileExists(atPath: fileURL.path(percentEncoded: false)))
     }
 }

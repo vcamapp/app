@@ -160,7 +160,7 @@ public final class WindowManager {
         isWindowClosed = false
         NSApp.setActivationPolicy(.regular)
         window?.setIsVisible(true)
-        NSApp.activate(ignoringOtherApps: true)
+        NSApp.activate()
         VCamSystem.shared.startSystem()
     }
 

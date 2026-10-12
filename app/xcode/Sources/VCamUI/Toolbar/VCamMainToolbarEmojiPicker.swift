@@ -45,8 +45,13 @@ public struct VCamMainToolbarEmojiPicker: View {
     }
 
     private func sendEmoji(_ emoji: String) {
+        let action = VCamEmojiAction(configuration: .init(emoji: emoji))
         Task {
-            try await VCamEmojiAction(configuration: .init(emoji: emoji))(context: .empty)
+            do {
+                try await action(context: .empty)
+            } catch {
+                VCamAlert.showError(title: action.name, message: error.localizedDescription)
+            }
         }
     }
 }

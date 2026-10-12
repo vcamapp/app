@@ -46,8 +46,8 @@ final class EventBridge {
         guard isActive else { return }
         withObservationTracking {
             _ = uniState.isMotionPlaying
-        } onChange: {
-            Task { @MainActor [weak self] in
+        } onChange: { [weak self] in
+            Task { @MainActor in
                 guard let self, self.isActive else { return }
                 let current = self.uniState.isMotionPlaying
                 for (motionId, isPlaying) in current where isPlaying && previous[motionId] != true {
@@ -65,8 +65,8 @@ final class EventBridge {
         guard isActive else { return }
         withObservationTracking {
             _ = uniState.currentExpressionName
-        } onChange: {
-            Task { @MainActor [weak self] in
+        } onChange: { [weak self] in
+            Task { @MainActor in
                 guard let self, self.isActive else { return }
                 let current = self.uniState.currentExpressionName
                 if let current, current != previous {
@@ -81,8 +81,8 @@ final class EventBridge {
         guard isActive else { return }
         withObservationTracking {
             _ = uniState.subtitle
-        } onChange: {
-            Task { @MainActor [weak self] in
+        } onChange: { [weak self] in
+            Task { @MainActor in
                 guard let self, self.isActive else { return }
                 let current = self.uniState.subtitle
                 if current != previous {
@@ -97,8 +97,8 @@ final class EventBridge {
         guard isActive else { return }
         withObservationTracking {
             _ = SceneControl.provider?.activeScene?.id
-        } onChange: {
-            Task { @MainActor [weak self] in
+        } onChange: { [weak self] in
+            Task { @MainActor in
                 guard let self, self.isActive else { return }
                 let current = SceneControl.provider?.activeScene?.id
                 if let current, current != previous {

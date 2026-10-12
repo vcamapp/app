@@ -32,7 +32,7 @@ package enum ModelMetaLoader {
         let fileManager = FileManager.default
         var isDirectory: ObjCBool = false
 
-        if fileManager.fileExists(atPath: url.path, isDirectory: &isDirectory) {
+        if fileManager.fileExists(atPath: url.path(percentEncoded: false), isDirectory: &isDirectory) {
             if isDirectory.boolValue {
                 return live2DModelJSON(in: url)
             }
@@ -76,7 +76,7 @@ package enum ModelMetaLoader {
 
     private static func fallbackName(for url: URL) -> String {
         var isDirectory: ObjCBool = false
-        if FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory), !isDirectory.boolValue {
+        if FileManager.default.fileExists(atPath: url.path(percentEncoded: false), isDirectory: &isDirectory), !isDirectory.boolValue {
             return url.deletingPathExtension().lastPathComponent
         }
         return url.lastPathComponent

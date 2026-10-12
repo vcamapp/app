@@ -21,7 +21,7 @@ enum SystemSettingsLink {
         URL(string: "x-apple.systempreferences:com.apple.Localization-Settings.extension?Apps"),
         URL(string: "x-apple.systempreferences:com.apple.Localization-Settings.extension"),
         URL(string: "x-apple.systempreferences:com.apple.systempreferences.GeneralSettings"),
-        URL(fileURLWithPath: "/System/Applications/System Settings.app"),
+        URL(filePath: "/System/Applications/System Settings.app", directoryHint: .isDirectory),
     ].compactMap { $0 }
 
     @MainActor

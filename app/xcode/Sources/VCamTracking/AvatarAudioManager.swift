@@ -34,11 +34,11 @@ public final class AvatarAudioManager {
                 UniBridge.shared.micAudioLevel(CGFloat(level))
             }
         }
-        audioManager.setOnUpdateAudioBuffer { buffer, time, latency in
+        audioManager.setOnUpdateAudioBuffer { [weak self] buffer, time, latency in
             // Audio buffer is only accessed synchronously and not stored,
             // so it's safe to pass to main thread despite not being Sendable
             nonisolated(unsafe) let unsafeBuffer = buffer
-            DispatchQueue.runOnMain { [weak self] in
+            DispatchQueue.runOnMain {
                 guard let self else { return }
                 if self.usage.contains(.lipSync) { // Ensure no malfunctions during recording
                     self.audioExpressionEstimator.analyze(buffer: unsafeBuffer, time: time)

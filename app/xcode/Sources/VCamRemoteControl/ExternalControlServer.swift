@@ -68,8 +68,8 @@ package final class ExternalControlServer {
         parameters.defaultProtocolStack.applicationProtocols.insert(webSocketOptions, at: 0)
 
         let listener = try NWListener(using: parameters)
-        listener.newConnectionHandler = { connection in
-            Task { @MainActor [weak self] in
+        listener.newConnectionHandler = { [weak self] connection in
+            Task { @MainActor in
                 self?.accept(connection)
             }
         }
@@ -126,8 +126,8 @@ private final class ExternalControlConnection {
     }
 
     func start() {
-        connection.stateUpdateHandler = { state in
-            Task { @MainActor [weak self] in
+        connection.stateUpdateHandler = { [weak self] state in
+            Task { @MainActor in
                 guard let self else { return }
                 switch state {
                 case .failed, .cancelled:
@@ -152,10 +152,10 @@ private final class ExternalControlConnection {
     }
 
     private func receiveNextMessage() {
-        connection.receiveMessage { content, context, _, error in
+        connection.receiveMessage { [weak self] content, context, _, error in
             let metadata = context?.protocolMetadata(definition: NWProtocolWebSocket.definition) as? NWProtocolWebSocket.Metadata
             let isBinary = metadata?.opcode == .binary
-            Task { @MainActor [weak self] in
+            Task { @MainActor in
                 guard let self else { return }
                 guard let content, error == nil else {
                     self.connection.cancel()

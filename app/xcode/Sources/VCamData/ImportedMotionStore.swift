@@ -48,15 +48,18 @@ public final class ImportedMotionStore {
     /// Add it to the manifest with addRecord only after the registration succeeds
     public func stageMotionFile(from sourceURL: URL, id: UUID) async throws -> URL {
         let destinationURL = filesDirectory.appending(path: Self.fileName(id: id))
-        // Copy off the main actor so that large files do not block the UI
-        try await Task.detached {
-            try FileManager.default.createDirectoryIfNeeded(at: destinationURL.deletingLastPathComponent())
-            if FileManager.default.fileExists(atPath: destinationURL.path) {
-                try FileManager.default.removeItem(at: destinationURL)
-            }
-            try FileManager.default.copyItem(at: sourceURL, to: destinationURL)
-        }.value
+        try await Self.copyFile(from: sourceURL, to: destinationURL)
         return destinationURL
+    }
+
+    /// Runs off the main actor so that large files do not block the UI
+    @concurrent
+    private nonisolated static func copyFile(from sourceURL: URL, to destinationURL: URL) async throws {
+        try FileManager.default.createDirectoryIfNeeded(at: destinationURL.deletingLastPathComponent())
+        if FileManager.default.fileExists(atPath: destinationURL.path(percentEncoded: false)) {
+            try FileManager.default.removeItem(at: destinationURL)
+        }
+        try FileManager.default.copyItem(at: sourceURL, to: destinationURL)
     }
 
     public func discardStagedFile(id: UUID) {
@@ -109,7 +112,7 @@ public final class ImportedMotionStore {
     public func removeOrphanedFiles() {
         guard !isManifestLoadFailed else { return }
         let validFileNames = Set(records.map { Self.fileName(id: $0.id) })
-        let fileNames = (try? FileManager.default.contentsOfDirectory(atPath: filesDirectory.path)) ?? []
+        let fileNames = (try? FileManager.default.contentsOfDirectory(atPath: filesDirectory.path(percentEncoded: false))) ?? []
         for fileName in fileNames where !validFileNames.contains(fileName) {
             try? FileManager.default.removeItem(at: filesDirectory.appending(path: fileName))
         }
@@ -158,7 +161,7 @@ public final class ImportedMotionStore {
     }
 
     private static func loadManifest(at url: URL) throws -> Manifest? {
-        guard FileManager.default.fileExists(atPath: url.path) else { return nil }
+        guard FileManager.default.fileExists(atPath: url.path(percentEncoded: false)) else { return nil }
         let data = try Data(contentsOf: url)
         let manifest = try JSONDecoder().decode(Manifest.self, from: data)
         // Refuse manifests written by a newer app so they are not overwritten with a downgraded format

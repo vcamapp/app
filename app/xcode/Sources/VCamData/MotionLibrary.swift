@@ -93,7 +93,7 @@ public final class MotionLibrary {
             try Task.checkCancellation()
             try await UniBridge.registerImportedMotion(
                 id: record.motionID,
-                path: fileURL.path,
+                path: fileURL.path(percentEncoded: false),
                 axisMask: record.translationAxes.rawValue,
                 loadImmediately: true,
                 isPose: record.isPose
@@ -119,7 +119,7 @@ public final class MotionLibrary {
         }
         try await UniBridge.registerImportedMotion(
             id: motionID,
-            path: fileURL.path,
+            path: fileURL.path(percentEncoded: false),
             axisMask: record.translationAxes.rawValue,
             loadImmediately: true,
             isPose: true
@@ -130,7 +130,7 @@ public final class MotionLibrary {
         for record in store.records {
             UniBridge.registerImportedMotion(
                 id: record.motionID,
-                path: store.fileURL(for: record).path,
+                path: store.fileURL(for: record).path(percentEncoded: false),
                 axisMask: record.translationAxes.rawValue,
                 loadImmediately: false,
                 isPose: record.isPose,
@@ -149,7 +149,7 @@ public final class MotionLibrary {
             // The pose flag is part of the engine's asset, so register again (the engine reloads it)
             UniBridge.registerImportedMotion(
                 id: motionID,
-                path: store.fileURL(for: before).path,
+                path: store.fileURL(for: before).path(percentEncoded: false),
                 axisMask: axes.rawValue,
                 loadImmediately: false,
                 isPose: isPose,

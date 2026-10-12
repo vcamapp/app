@@ -148,7 +148,7 @@ private struct LicenseStatusLabel: View {
                     Text(.commercialLicenseActive)
                         .font(.headline)
                     if let expiryDate {
-                        (Text(.expiryDate) + Text(expiryDate, style: .date))
+                        Text(verbatim: "\(String(localized: .expiryDate))\(expiryDate.formatted(date: .long, time: .omitted))")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -178,7 +178,7 @@ private struct LicenseStatusLabel: View {
                     Text(.licenseExpired)
                         .font(.headline)
                     if let expiryDate {
-                        (Text(.expiryDate) + Text(expiryDate, style: .date))
+                        Text(verbatim: "\(String(localized: .expiryDate))\(expiryDate.formatted(date: .long, time: .omitted))")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }

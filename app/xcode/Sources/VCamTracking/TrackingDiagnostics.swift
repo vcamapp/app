@@ -66,9 +66,7 @@ public final class TrackingDiagnostics {
         recordingDirectory = nil
         isArchiving = true
         defer { isArchiving = false }
-        lastArchive = await Task.detached(priority: .userInitiated) {
-            Self.archive(directory)
-        }.value
+        lastArchive = await Self.archive(directory)
     }
 
     public func revealLastArchive() {
@@ -158,7 +156,8 @@ public final class TrackingDiagnostics {
 
     /// Zips the directory next to itself. The coordinator produces the archive for us and
     /// the directory is kept, so the raw files stay available for local analysis
-    nonisolated private static func archive(_ directory: URL) -> URL? {
+    @concurrent
+    nonisolated private static func archive(_ directory: URL) async -> URL? {
         let destination = directory.deletingLastPathComponent().appending(path: directory.lastPathComponent + ".zip")
         var coordinatorError: NSError?
         var result: URL?

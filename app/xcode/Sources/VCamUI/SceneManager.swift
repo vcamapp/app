@@ -131,23 +131,29 @@ public final class SceneManager {
         }
 
         do {
-            try await Task.detached(priority: .userInitiated) {
-                let sourceDataStore = VCamSceneDataStore(sceneId: sourceSceneID)
-                let duplicatedDataStore = VCamSceneDataStore(sceneId: duplicatedSceneID)
-                for imageID in imageIDs {
-                    _ = try duplicatedDataStore.copyData(
-                        fromURL: sourceDataStore.dataURL(id: imageID),
-                        newUUID: imageID
-                    )
-                }
-            }.value
+            try await Self.copyImages(imageIDs, fromScene: sourceSceneID, toScene: duplicatedSceneID)
             try add(duplicatedScene)
         } catch {
-            await Task.detached {
-                try? VCamSceneDataStore(sceneId: duplicatedSceneID).delete()
-            }.value
+            await Self.deleteSceneData(sceneID: duplicatedSceneID)
             throw error
         }
+    }
+
+    @concurrent
+    private nonisolated static func copyImages(_ imageIDs: [String], fromScene sourceSceneID: Int32, toScene destinationSceneID: Int32) async throws {
+        let sourceDataStore = VCamSceneDataStore(sceneId: sourceSceneID)
+        let destinationDataStore = VCamSceneDataStore(sceneId: destinationSceneID)
+        for imageID in imageIDs {
+            _ = try destinationDataStore.copyData(
+                fromURL: sourceDataStore.dataURL(id: imageID),
+                newUUID: imageID
+            )
+        }
+    }
+
+    @concurrent
+    private nonisolated static func deleteSceneData(sceneID: Int32) async {
+        try? VCamSceneDataStore(sceneId: sceneID).delete()
     }
 
     public func update(_ scene: VCamScene) {

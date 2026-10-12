@@ -36,7 +36,10 @@ private enum RecordingError: LocalizedError {
 public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
     public static let shared = VideoRecorder()
 
-    public private(set) var state: RecordingState = .idle
+    public private(set) var state: RecordingState = .idle {
+        // Writing the file after stop() is still output
+        didSet { FrameOutputActivity.shared.isRecording = state != .idle }
+    }
     public var isRecording: Bool {
         state == .recording
     }

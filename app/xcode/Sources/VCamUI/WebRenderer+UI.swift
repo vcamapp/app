@@ -175,7 +175,7 @@ private struct WebRendererURLRow: View {
                         guard let url = FileUtility.openFile(type: .html),
                               let bookmarkData = try? url.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
                         else { return }
-                        path = url.path
+                        path = url.path(percentEncoded: false)
                         pathBookmarkData = bookmarkData
                     } label: {
                         Text(.pick)

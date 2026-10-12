@@ -51,16 +51,10 @@ public final class ModelManager {
         let modelDirectory = modelInfo.rootURL
         do {
             // The copy is what the user waits for, so keep it and the metadata parse off
-            // the main actor and let them run against the source at the same time
-            let copy = Task.detached(priority: .userInitiated) { [destinationURL = modelInfo.modelURL] in
-                try FileManager.default.createDirectoryIfNeeded(at: modelDirectory)
-                try FileManager.default.copyItem(at: source, to: destinationURL)
-            }
-            let metadata = Task.detached(priority: .userInitiated) {
-                try? ModelMetaLoader.load(from: source)
-            }
-
-            try await copy.value
+            // the main actor and let them run against the source at the same time.
+            // The parse is unstructured so that a failed copy doesn't wait for it
+            let metadata = Task { await Self.loadMeta(from: source) }
+            try await Self.copyModel(from: source, to: modelInfo.modelURL, in: modelDirectory)
             let meta = await metadata.value
 #if FEATURE_3
             modelInfo.displayName = name ?? source.deletingPathExtension().lastPathComponent
@@ -78,11 +72,27 @@ public final class ModelManager {
         }
     }
 
+    @concurrent
+    private nonisolated static func copyModel(from source: URL, to destinationURL: URL, in modelDirectory: URL) async throws {
+        try FileManager.default.createDirectoryIfNeeded(at: modelDirectory)
+        try FileManager.default.copyItem(at: source, to: destinationURL)
+    }
+
+    @concurrent
+    private nonisolated static func loadMeta(from source: URL) async -> ModelMeta? {
+        try? ModelMetaLoader.load(from: source)
+    }
+
     public func deleteModel(_ item: ModelItem) throws {
         // Legacy directories are named after untrusted model metadata, so a crafted
         // name such as ".." must never let the delete escape the models directory
         let modelDirectory = item.model.rootURL.standardizedFileURL
-        guard modelDirectory.path.hasPrefix(Models.modelsDirectory.standardizedFileURL.path + "/") else {
+        // Compare components, not path strings: a directory URL's path keeps its trailing slash,
+        // so a name such as "." would pass a prefix check as the models directory itself
+        let components = modelDirectory.pathComponents
+        let modelsDirectoryComponents = Models.modelsDirectory.standardizedFileURL.pathComponents
+        guard components.count > modelsDirectoryComponents.count,
+              components.starts(with: modelsDirectoryComponents) else {
             throw ModelManagerError.invalidModelDirectory
         }
         // Update the metadata first; if removing the directory fails afterwards,
@@ -93,7 +103,7 @@ public final class ModelManager {
                 lastModelId = nil
             }
         }
-        if FileManager.default.fileExists(atPath: modelDirectory.path) {
+        if FileManager.default.fileExists(atPath: modelDirectory.path(percentEncoded: false)) {
             try FileManager.default.removeItem(at: modelDirectory)
         }
     }
@@ -144,7 +154,7 @@ public final class ModelManager {
         let persistedModels = modelItems.map(\.model)
         modelItems = modelItems.map { item in
             let url = item.model.modelURL
-            let status: ModelItem.ModelStatus = FileManager.default.fileExists(atPath: url.path) ? .valid : .missing
+            let status: ModelItem.ModelStatus = FileManager.default.fileExists(atPath: url.path(percentEncoded: false)) ? .valid : .missing
             return ModelItem(model: item.model, status: status, thumbnail: item.thumbnail)
         }
         scanForNewModels()
@@ -163,9 +173,7 @@ public final class ModelManager {
         let models = modelItems.filter { $0.thumbnail == nil }.map(\.model)
         guard !models.isEmpty else { return }
         Task {
-            let thumbnails = await Task.detached(priority: .utility) {
-                models.map { ($0.id, $0.loadThumbnailData()) }
-            }.value
+            let thumbnails = await Self.loadThumbnails(of: models)
             for (id, thumbnail) in thumbnails {
                 guard let thumbnail, let index = modelItems.index(ofId: id) else { continue }
                 let item = modelItems[index]
@@ -174,8 +182,13 @@ public final class ModelManager {
         }
     }
 
+    @concurrent
+    private nonisolated static func loadThumbnails(of models: [Models.Model]) async -> [(UUID, Data?)] {
+        models.map { ($0.id, $0.loadThumbnailData()) }
+    }
+
     private func scanForNewModels() {
-        guard FileManager.default.fileExists(atPath: Models.modelsDirectory.path) else { return }
+        guard FileManager.default.fileExists(atPath: Models.modelsDirectory.path(percentEncoded: false)) else { return }
 
         do {
             let contents = try FileManager.default.contentsOfDirectory(
@@ -191,7 +204,7 @@ public final class ModelManager {
                 guard name != Models.metaFileName, !existingNames.contains(name) else { continue }
 
                 let modelFile = directory.appending(path: Models.modelFileName)
-                guard FileManager.default.fileExists(atPath: modelFile.path) else { continue }
+                guard FileManager.default.fileExists(atPath: modelFile.path(percentEncoded: false)) else { continue }
 
                 let createdAt = (try? modelFile.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? .now
                 let modelInfo = Models.Model(name: name, type: Models.modelType, createdAt: createdAt)
@@ -212,7 +225,7 @@ public final class ModelManager {
     }
 
     private func loadMeta() {
-        guard FileManager.default.fileExists(atPath: Models.metaURL.path) else { return }
+        guard FileManager.default.fileExists(atPath: Models.metaURL.path(percentEncoded: false)) else { return }
         do {
             let data = try Data(contentsOf: Models.metaURL)
             let meta = try JSONDecoder().decode(Models.self, from: data)

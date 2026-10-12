@@ -34,6 +34,7 @@ public final class VCamSystem {
 
         VirtualCamera.onConsumersChanged = { [weak self] hasConsumers in
             Task { @MainActor in
+                FrameOutputActivity.shared.isVirtualCameraStreaming = hasConsumers
                 if hasConsumers {
                     self?.startSystem()
                 } else {
@@ -104,7 +105,7 @@ public final class VCamSystem {
     public func relaunch() {
         // Launch the new instance after this instance has exited to avoid conflicts over the virtual camera
         let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/bin/sh")
+        process.executableURL = URL(filePath: "/bin/sh")
         process.arguments = ["-c", "while /bin/kill -0 \(ProcessInfo.processInfo.processIdentifier) 2>/dev/null; do sleep 0.2; done; sleep 0.5; open -n \"$0\"", Bundle.main.bundlePath]
         try? process.run()
         if UniBridge.shared.triggerMapper.isRegistered {

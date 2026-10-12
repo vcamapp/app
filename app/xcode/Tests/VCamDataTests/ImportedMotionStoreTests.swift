@@ -21,7 +21,7 @@ struct ImportedMotionStoreTests {
         let sourceURL = try makeSourceFile(in: directory)
         let id = UUID()
         let fileURL = try await store.stageMotionFile(from: sourceURL, id: id)
-        #expect(FileManager.default.fileExists(atPath: fileURL.path))
+        #expect(FileManager.default.fileExists(atPath: fileURL.path(percentEncoded: false)))
 
         let record = ImportedMotionRecord(
             id: id,
@@ -92,7 +92,7 @@ struct ImportedMotionStoreTests {
 
         try store.remove(id: id)
         #expect(store.records.isEmpty)
-        #expect(!FileManager.default.fileExists(atPath: fileURL.path))
+        #expect(!FileManager.default.fileExists(atPath: fileURL.path(percentEncoded: false)))
     }
 
     @Test
@@ -187,7 +187,7 @@ struct ImportedMotionStoreTests {
         try store.addRecord(record)
 
         store.removeOrphanedFiles()
-        #expect(FileManager.default.fileExists(atPath: fileURL.path))
-        #expect(!FileManager.default.fileExists(atPath: orphanURL.path))
+        #expect(FileManager.default.fileExists(atPath: fileURL.path(percentEncoded: false)))
+        #expect(!FileManager.default.fileExists(atPath: orphanURL.path(percentEncoded: false)))
     }
 }

@@ -57,7 +57,7 @@ package final class AvatarImportManager {
         let directoryURL = stagingDirectory.appending(path: id.uuidString)
         let fileURL = directoryURL.appending(path: filename)
         try FileManager.default.createDirectory(at: directoryURL, withIntermediateDirectories: true)
-        guard FileManager.default.createFile(atPath: fileURL.path, contents: nil) else {
+        guard FileManager.default.createFile(atPath: fileURL.path(percentEncoded: false), contents: nil) else {
             try? FileManager.default.removeItem(at: directoryURL)
             throw AvatarImportManagerError.invalidUpload
         }

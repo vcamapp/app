@@ -47,7 +47,7 @@ public struct VCamSceneDataStore {
             try addSceneIdIfNeeded()
         }
         try data.write(to: url, options: .atomic)
-        uniDebugLog("scene saved: " + url.path)
+        uniDebugLog("scene saved: " + url.path(percentEncoded: false))
     }
 
     public func copyData(fromURL url: URL, newUUID: String = UUID().uuidString) throws -> URL {
@@ -92,7 +92,7 @@ public struct VCamSceneDataStore {
     }
 
     public func delete() throws {
-        guard FileManager.default.fileExists(atPath: sceneRootURL.path) else { return }
+        guard FileManager.default.fileExists(atPath: sceneRootURL.path(percentEncoded: false)) else { return }
         try FileManager.default.removeItem(at: sceneRootURL)
     }
 }
@@ -103,7 +103,7 @@ extension VCamSceneDataStore {
         let loadedSceneIdSet = Set(loadedSceneIds)
         let unavailableSceneIds = metadata.sceneIds.filter {
             !loadedSceneIdSet.contains($0)
-                && FileManager.default.fileExists(atPath: URL.scene(sceneId: $0).path)
+                && FileManager.default.fileExists(atPath: URL.scene(sceneId: $0).path(percentEncoded: false))
         }
         metadata.sceneIds = loadedSceneIds + unavailableSceneIds
         try metadata.save()
@@ -167,7 +167,7 @@ extension VCamSceneDataStore {
                     switch $0.type {
                     case .avatar, .screen, .captureDevice, .web, .text, .wind: ()
                     case let .image(imageId, _):
-                        if !FileManager.default.fileExists(atPath: dataStore.dataURL(id: imageId).path) {
+                        if !FileManager.default.fileExists(atPath: dataStore.dataURL(id: imageId).path(percentEncoded: false)) {
                             return nil
                         }
                     }
@@ -187,7 +187,7 @@ extension VCamSceneDataStore {
                 // A scene that fails to load is never deleted, since the failure can be transient.
                 // It stays registered so the next launch retries it.
                 Logger.error(error)
-                if FileManager.default.fileExists(atPath: dataStore.sceneURL.path) {
+                if FileManager.default.fileExists(atPath: dataStore.sceneURL.path(percentEncoded: false)) {
                     validIds.append(id)
                 }
             }

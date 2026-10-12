@@ -59,10 +59,9 @@ extension Migration {
         var metadata = try VCamShortcutMetadata.load()
         guard metadata.version == 1 else { return }
 
-        let temporaryDirectoryURL = URL(fileURLWithPath: NSTemporaryDirectory())
         for id in metadata.ids {
             let url = URL.shortcutDirectory(id: id)
-            let temporaryURL = temporaryDirectoryURL.appending(path: id.uuidString)
+            let temporaryURL = URL.temporaryDirectory.appending(path: id.uuidString)
             do {
                 try FileManager.default.moveItem(at: url, to: temporaryURL)
                 try FileManager.default.createDirectoryIfNeeded(at: url)
@@ -144,7 +143,7 @@ extension Migration {
 #endif
         Logger.log("Migrating models from \(version.map(String.init).joined(separator: "."))")
 
-        guard FileManager.default.fileExists(atPath: oldPath.path) else { return }
+        guard FileManager.default.fileExists(atPath: oldPath.path(percentEncoded: false)) else { return }
 
         do {
             let item = try await ModelManager.shared.saveModel(from: oldPath)

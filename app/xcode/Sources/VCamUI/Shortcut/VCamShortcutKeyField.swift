@@ -19,7 +19,7 @@ struct VCamShortcutKeyField: View {
         Button {
             isKeyRecordingPresented = true
         } label: {
-            TextField(text: .constant(keyWithPadding), prompt: Text(.shortcutKey) + Text(verbatim: "  ")) { EmptyView() }
+            TextField(text: .constant(keyWithPadding), prompt: Text(verbatim: "\(String(localized: .shortcutKey))  ")) { EmptyView() }
                 .textFieldStyle(.roundedBorder)
                 .multilineTextAlignment(.leading)
                 .allowsHitTesting(false)

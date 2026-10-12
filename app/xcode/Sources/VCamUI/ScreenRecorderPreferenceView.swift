@@ -61,12 +61,9 @@ public struct ScreenRecorderPreferenceView: View {
 
                 LivePreview(source: previewSource)
                     .modifier(CropViewModifier(rect: $cropRect))
-                    .overlay(GeometryReader { proxy in
-                        Color.clear
-                            .onChange(of: proxy.size, initial: true) { _, size in
-                                cropPreviewSize = size
-                            }
-                    })
+                    .onGeometryChange(for: CGSize.self, of: \.size) { size in
+                        cropPreviewSize = size
+                    }
             }
             .onAppear {
                 screenRecorder.didOutputPreviewFrame = { [previewSource] frame in

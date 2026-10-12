@@ -18,7 +18,7 @@ public struct FlatButton<LabelItem: View>: View {
             label
         }
         .background(flatButtonStyle.backgroundColor)
-        .cornerRadius(flatButtonStyle.cornerRadius)
+        .clipShape(.rect(cornerRadius: flatButtonStyle.cornerRadius))
         .macHoverEffect(padding: 0)
         .modifier(TapGestureModifier(action: action, doubleTapAction: doubleTapAction))
         .accessibilityAddTraits(.isButton)

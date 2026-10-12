@@ -252,8 +252,10 @@ extension ScreenRecorder: SCStreamOutput {
                 self.didOutputPreviewFrame?(frame)
             }
         } else if type == .audio {
+            // The buffer is handed over to the main actor as is; nothing here touches it afterwards
+            nonisolated(unsafe) let buffer = sampleBuffer
             DispatchQueue.runOnMain {
-                self.didAudioOutput?(sampleBuffer)
+                self.didAudioOutput?(buffer)
             }
         }
     }
@@ -444,5 +446,3 @@ public extension ScreenRecorder.CaptureType {
         }
     }
 }
-
-extension CMSampleBuffer: @retroactive @unchecked Sendable {}

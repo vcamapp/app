@@ -128,7 +128,7 @@ private struct TakePhotoView: View {
         let baseName = "vcam_\(Date().yyyyMMddHHmmss)"
         var url = destination.appending(path: "\(baseName).png")
         var suffix = 2
-        while FileManager.default.fileExists(atPath: url.path) {
+        while FileManager.default.fileExists(atPath: url.path(percentEncoded: false)) {
             url = destination.appending(path: "\(baseName)-\(suffix).png")
             suffix += 1
         }
@@ -215,7 +215,7 @@ extension VCamRecordingView {
         let destination: URL
         if screenshotDestination.isEmpty {
             try pickDestination()
-            destination = URL(fileURLWithPath: screenshotDestinationString)
+            destination = URL(filePath: screenshotDestinationString, directoryHint: .checkFileSystem)
         } else {
             var isStale = false
             destination = try URL(

@@ -62,6 +62,6 @@ struct RecoverablePersistenceTests {
 
         #expect(!presets.isLoadFailed)
         #expect(presets.parameters.count == 2)
-        #expect(FileManager.default.fileExists(atPath: fileURL.path))
+        #expect(FileManager.default.fileExists(atPath: fileURL.path(percentEncoded: false)))
     }
 }

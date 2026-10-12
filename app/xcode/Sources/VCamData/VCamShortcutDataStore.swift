@@ -12,7 +12,7 @@ public struct VCamShortcutDataStore {
         var existingIds: [UUID] = []
         for id in metadata.ids {
             let url = URL.shortcutData(id: id)
-            guard FileManager.default.fileExists(atPath: url.path) else { continue }
+            guard FileManager.default.fileExists(atPath: url.path(percentEncoded: false)) else { continue }
             // An unreadable shortcut stays registered so that it comes back once it can be read again
             existingIds.append(id)
             do {
@@ -50,7 +50,7 @@ public struct VCamShortcutDataStore {
         let loadedIdSet = Set(loadedIds)
         let unavailableIds = metadata.ids.filter {
             !loadedIdSet.contains($0)
-                && FileManager.default.fileExists(atPath: URL.shortcutData(id: $0).path)
+                && FileManager.default.fileExists(atPath: URL.shortcutData(id: $0).path(percentEncoded: false))
         }
         metadata.ids = loadedIds + unavailableIds
         try metadata.save()

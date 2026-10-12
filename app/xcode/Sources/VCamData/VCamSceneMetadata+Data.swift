@@ -3,7 +3,7 @@ import VCamEntity
 
 public extension VCamSceneMetadata {
     static func loadOrCreate(from url: URL = .sceneMetadata) throws -> VCamSceneMetadata {
-        guard FileManager.default.fileExists(atPath: url.path) else {
+        guard FileManager.default.fileExists(atPath: url.path(percentEncoded: false)) else {
             return .init()
         }
         return try load(from: url)

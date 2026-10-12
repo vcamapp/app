@@ -40,9 +40,9 @@ public enum AvatarControl {
     public static func load(_ item: ModelItem, modelManager: ModelManager = .shared) throws {
         guard item.status == .valid else { return }
 #if FEATURE_3
-        UniBridge.loadVRM(path: item.model.modelURL.path)
+        UniBridge.loadVRM(path: item.model.modelURL.path(percentEncoded: false))
 #else
-        UniBridge.shared.loadModel(item.model.modelURL.path)
+        UniBridge.shared.loadModel(item.model.modelURL.path(percentEncoded: false))
 #endif
         try recordLoad(of: item, modelManager: modelManager)
     }
@@ -60,7 +60,7 @@ public enum AvatarControl {
     /// nor allows exporting. The stored VRoid reference is left untouched so a transient failure can be retried
     public static func load(vroidModelFileURL: URL) async throws {
         onLoad?(nil)
-        try await UniBridge.loadVRM(path: vroidModelFileURL.path, source: .vroidHub)
+        try await UniBridge.loadVRM(path: vroidModelFileURL.path(percentEncoded: false), source: .vroidHub)
     }
 #endif
 }

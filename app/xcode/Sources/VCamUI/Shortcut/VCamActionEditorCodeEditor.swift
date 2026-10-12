@@ -40,7 +40,7 @@ struct VCamActionEditorCodeEditor: View {
     }
 
     private func openScript() {
-        if !FileManager.default.fileExists(atPath: url.path) {
+        if !FileManager.default.fileExists(atPath: url.path(percentEncoded: false)) {
             try? FileManager.default.createDirectoryIfNeeded(at: .shortcutResourceActionDirectory(id: id, actionId: actionId))
             try? "".write(to: url, atomically: true, encoding: .utf8)
         }
