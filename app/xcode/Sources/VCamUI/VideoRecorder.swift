@@ -263,6 +263,8 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
     /// Appends a frame whose copy has landed
     private func append(_ pixelBuffer: CVPixelBuffer, at presentationTime: CMTime) {
         guard case .recording = state, let assetWriterAdaptor = assetVideoWriterAdaptor else { return }
+        // Readiness can drop while the GPU copies the frame, and appending then raises an exception
+        guard assetWriterAdaptor.assetWriterInput.isReadyForMoreMediaData else { return }
         guard assetWriterAdaptor.append(pixelBuffer, withPresentationTime: presentationTime) else {
             // Distinguish a failed writer from transient backpressure; only the former ends the recording
             if let assetwriter, assetwriter.status != .writing {
