@@ -14,12 +14,15 @@ public struct VCamShortcut: Codable, Identifiable, Equatable, Sendable {
 
 public extension VCamShortcut {
     struct ShortcutKey: Codable, Equatable, Sendable {
-        public init(character: String, modifiers: UInt) {
+        public init(character: String, keyCode: UInt16?, modifiers: UInt) {
             self.character = character
+            self.keyCode = keyCode
             self.modifiers = modifiers
         }
 
         public let character: String
+        /// Keys saved by versions that only recorded the character have no key code
+        public let keyCode: UInt16?
         public let modifiers: UInt
     }
 }

@@ -6,13 +6,9 @@ struct VCamShortcutKeyField: View {
 
     @State private var isKeyRecordingPresented = false
 
-    var keyCombination: KeyCombination? {
-        shortcutKey.map { .init(key: $0.character, modifiers: .init(rawValue: $0.modifiers)) }
-    }
-
     var keyWithPadding: String {
-        guard let keyCombination else { return "" }
-        return "\(keyCombination)  "
+        guard let shortcutKey else { return "" }
+        return "\(shortcutKey.keyCombination)  "
     }
 
     var body: some View {
@@ -26,7 +22,10 @@ struct VCamShortcutKeyField: View {
         }
         .buttonStyle(.borderless)
         .keyRecordingPopover(isPresented: $isKeyRecordingPresented) {
-            shortcutKey = .init(character: $0.key, modifiers: $0.modifiers.rawValue)
+            shortcutKey = .init($0)
+        }
+        .onChange(of: isKeyRecordingPresented) { _, isPresented in
+            VCamShortcutManager.shared.setHotKeysSuspended(isPresented)
         }
         .overlay(alignment: .trailing) {
             Button {
@@ -48,5 +47,5 @@ struct VCamShortcutKeyField: View {
 }
 
 #Preview {
-    VCamShortcutKeyField(shortcutKey: .constant(VCamShortcut.ShortcutKey(character: "a", modifiers: 0)))
+    VCamShortcutKeyField(shortcutKey: .constant(VCamShortcut.ShortcutKey(character: "a", keyCode: 0, modifiers: NSEvent.ModifierFlags.command.rawValue)))
 }

@@ -78,6 +78,7 @@ public final class VCamSystem {
         Tracking.shared.configure()
         RenderTextureManager.shared.resume()
         PasteboardObserver.shared.observe()
+        VCamShortcutManager.shared.startHotKeys()
 #if FEATURE_API
         ExternalControlServer.shared.startIfEnabled()
 #endif
@@ -123,6 +124,7 @@ public final class VCamSystem {
         VideoRecorder.shared.stop()
         RenderTextureManager.shared.pause()
         PasteboardObserver.shared.dispose()
+        VCamShortcutManager.shared.stopHotKeys()
 #if FEATURE_API
         ExternalControlServer.shared.stop()
 #endif

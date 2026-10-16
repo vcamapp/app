@@ -11,29 +11,6 @@ public extension VCamShortcut {
     }
 }
 
-public extension View {
-    @ViewBuilder func keyboardShortcut(_ shortcutKey: VCamShortcut.ShortcutKey?, action: @escaping () -> Void) -> some View {
-        if let shortcutKey {
-            // Workaround to make shortcut keys work on any button
-            let hiddenButton = Button(action: action) {
-                EmptyView()
-            }
-                .frame(width: 0, height: 0)
-                .opacity(0)
-                .allowsHitTesting(false)
-
-            background {
-                let key = KeyEquivalent(Character(shortcutKey.character))
-                hiddenButton
-                    .keyboardShortcut(key, modifiers: shortcutKey.eventModifiers)
-            }
-
-        } else {
-            self
-        }
-    }
-}
-
 extension AnyVCamActionConfiguration {
     func action() -> any VCamAction {
         switch self {

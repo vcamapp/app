@@ -13,14 +13,18 @@ public struct VCamShortcutBuilderView: View {
     public var body: some View {
         HSplitView {
             List {
-                HStack(spacing: 0) {
-                    TextField(text: $shortcut.title) {
-                        Text(.title)
-                    }
-                    .textFieldStyle(.roundedBorder)
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(spacing: 0) {
+                        TextField(text: $shortcut.title) {
+                            Text(.title)
+                        }
+                        .textFieldStyle(.roundedBorder)
 
-                    VCamShortcutKeyField(shortcutKey: $shortcut.shortcutKey)
-                        .padding(.trailing, 8)
+                        VCamShortcutKeyField(shortcutKey: $shortcut.shortcutKey)
+                            .padding(.trailing, 8)
+                    }
+
+                    VCamShortcutKeyWarning(shortcut: shortcut)
                 }
 
                 ForEach($shortcut.configurations) { $configuration in
@@ -173,6 +177,22 @@ private final class KeyPathBox<Root, Value>: @unchecked Sendable {
 
     init(_ keyPath: WritableKeyPath<Root, Value>) {
         self.keyPath = keyPath
+    }
+}
+
+private struct VCamShortcutKeyWarning: View {
+    let shortcut: VCamShortcut
+
+    var body: some View {
+        if VCamShortcutManager.shared.unavailableHotKeyShortcutIDs.contains(shortcut.id) {
+            Text(.shortcutKeyUnavailable)
+                .foregroundStyle(.red)
+                .font(.footnote)
+        } else if shortcut.shortcutKey?.keyCombination.isCommonAppShortcut == true {
+            Text(.shortcutKeyOverridesOtherApps)
+                .foregroundStyle(.secondary)
+                .font(.footnote)
+        }
     }
 }
 

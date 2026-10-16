@@ -23,7 +23,6 @@ private struct ShortcutGridContent: View {
     let shortcutManager: VCamShortcutManager
 
     @State private var dragging: VCamShortcut?
-    @State private var runningShortcut: VCamShortcut?
 
     var body: some View {
         if shortcutManager.shortcuts.isEmpty {
@@ -34,10 +33,10 @@ private struct ShortcutGridContent: View {
                     addButton
 
                     ForEach(shortcutManager.shortcuts) { shortcut in
-                        let isRunning = runningShortcut == shortcut
+                        let isRunning = shortcutManager.runningShortcutIDs.contains(shortcut.id)
 
                         FlatButton {
-                            runShortcut(shortcut)
+                            shortcutManager.run(shortcut)
                         } doubleTapAction: {
                             editShortcut(shortcut)
                         } label: {
@@ -71,10 +70,6 @@ private struct ShortcutGridContent: View {
                             }
                         }
                         .onDragMove(item: shortcut, items: { shortcutManager.shortcuts }, dragging: $dragging, onMove: shortcutManager.move)
-                        .keyboardShortcut(shortcut.shortcutKey) {
-                            guard !isRunning else { return }
-                            runShortcut(shortcut)
-                        }
                     }
                 }
             }
@@ -88,14 +83,6 @@ private struct ShortcutGridContent: View {
             Image(systemName: "plus")
         }
         .flatButtonStyle(.filled())
-    }
-
-    private func runShortcut(_ shortcut: VCamShortcut) {
-        Task { @MainActor in
-            runningShortcut = shortcut
-            await VCamShortcutRunner.shared.run(shortcut)
-            runningShortcut = nil
-        }
     }
 
     private func addShortcut() {
