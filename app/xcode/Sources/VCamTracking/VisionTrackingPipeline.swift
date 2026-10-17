@@ -93,7 +93,8 @@ struct VisionTrackingConfigurationSnapshot: Sendable, Equatable {
 
     /// Capturing in BGRA saves the alternative hand backend a per-frame GPU conversion.
     /// The alternative face backend only accepts the biplanar default, so it wins when both are active.
-    /// Vision performs the same on either format, so the default stays 420f as recommended by TN3121.
+    /// Vision performs the same on either format, so the default stays biplanar as recommended by
+    /// TN3121; the session picks the range the camera delivers natively.
     var capturePixelFormat: OSType {
         shouldUseAlternativeHandMapper && !shouldUseAlternativeFaceProvider
             ? kCVPixelFormatType_32BGRA

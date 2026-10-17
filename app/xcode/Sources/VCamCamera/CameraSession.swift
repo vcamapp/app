@@ -43,6 +43,7 @@ public actor CameraSession {
     private var deviceInput: AVCaptureDeviceInput?
     private var captureDevice: AVCaptureDevice?
     private var requestedFPS: Int
+    private var requestedPixelFormat = CameraSession.defaultPixelFormat
     private var desiredFormat: DeviceFormat?
 
     private struct DeviceFormat {
@@ -52,10 +53,21 @@ public actor CameraSession {
     }
 
     /// The lightest format cameras deliver natively; consumers that need another
-    /// format request it per configuration via `setFrameHandler`.
+    /// format request it per configuration via `setFrameHandler`. A camera whose
+    /// own output is the video-range variant gets that one instead, so the capture
+    /// pipeline does not convert the range on every frame (`effectivePixelFormat`).
     // see: https://developer.apple.com/documentation/technotes/tn3121-selecting-a-pixel-format-for-an-avcapturevideodataoutput
     // see: https://developer.apple.com/documentation/vision/recognizing_objects_in_live_capture
     public static let defaultPixelFormat = kCVPixelFormatType_420YpCbCr8BiPlanarFullRange
+
+    /// The format to ask the output for: the requested one, except that the biplanar
+    /// default follows the range the device delivers natively. Every consumer of the
+    /// default reads the range from the buffer, so neither variant needs a conversion.
+    package static func effectivePixelFormat(requested: OSType, deviceMediaSubType: FourCharCode?) -> OSType {
+        guard requested == defaultPixelFormat,
+              deviceMediaSubType == kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange else { return requested }
+        return kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange
+    }
 
     public init(initialFPS: Int = 24) {
         let output = AVCaptureVideoDataOutput()
@@ -79,10 +91,14 @@ public actor CameraSession {
         if let delegate = videoOutputDelegate {
             videoOutput.setSampleBufferDelegate(delegate, queue: videoOutputQueue)
         }
-        applyPixelFormat(pixelFormat)
+        requestedPixelFormat = pixelFormat
+        applyRequestedPixelFormat()
     }
 
-    private func applyPixelFormat(_ pixelFormat: OSType) {
+    private func applyRequestedPixelFormat() {
+        let pixelFormat = Self.effectivePixelFormat(
+            requested: requestedPixelFormat,
+            deviceMediaSubType: desiredFormat.map { CMFormatDescriptionGetMediaSubType($0.format.formatDescription) })
         let key = kCVPixelBufferPixelFormatTypeKey as String
         guard videoOutput.videoSettings?[key] as? Int != Int(pixelFormat) else { return }
         session.beginConfiguration()
@@ -178,6 +194,7 @@ public actor CameraSession {
         captureDevice = device
         requestedFPS = fps
         desiredFormat = format
+        applyRequestedPixelFormat()
         videoOutput.connection(with: .video)?.isEnabled = true
 
         Logger.log(
