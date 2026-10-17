@@ -2,6 +2,7 @@ import Foundation
 import Testing
 @testable import VCamUI
 
+@MainActor
 @Suite
 struct KeyboardLayoutTests {
     @Test

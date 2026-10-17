@@ -14,15 +14,19 @@ extension VCamShortcut.ShortcutKey {
         self.init(character: keyCombination.key, keyCode: keyCombination.keyCode, modifiers: keyCombination.modifiers.rawValue)
     }
 
+    @MainActor
     var keyCombination: KeyCombination {
         .init(key: character, keyCode: resolvedKeyCode, modifiers: .init(rawValue: modifiers))
     }
 
+    @MainActor
     var resolvedKeyCode: UInt16? {
         keyCode ?? KeyboardLayout.keyCode(for: character)
     }
 }
 
+/// Text Input Sources APIs must be called on the main thread
+@MainActor
 enum KeyboardLayout {
     /// The recorded character already reflects Shift, so both the plain and shifted layers are searched
     static func keyCode(for character: String) -> UInt16? {
