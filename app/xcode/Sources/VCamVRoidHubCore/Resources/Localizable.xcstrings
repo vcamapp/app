@@ -58,16 +58,34 @@
             "value": "반사회적·혐오 표현에서의 이용"
           }
         },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Perbuatan antisosial/kebencian"
+          }
+        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Atos antissociais ou de ódio"
           }
         },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Антисоциальные действия и ненависть"
+          }
+        },
         "th": {
           "stringUnit": {
             "state": "translated",
             "value": "การใช้ในทางต่อต้านสังคมหรือสร้างความเกลียดชัง"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Antisosyal/nefret içeren eylemler"
           }
         },
         "vi": {
@@ -147,16 +165,34 @@
             "value": "법인 이용"
           }
         },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Penggunaan korporat"
+          }
+        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Uso corporativo"
           }
         },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Корпоративное использование"
+          }
+        },
         "th": {
           "stringUnit": {
             "state": "translated",
             "value": "การใช้งานโดยนิติบุคคล"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kurumsal kullanım"
           }
         },
         "vi": {
@@ -236,16 +272,34 @@
             "value": "크레딧 표기"
           }
         },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atribusi"
+          }
+        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Atribuição"
           }
         },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Указание авторства"
+          }
+        },
         "th": {
           "stringUnit": {
             "state": "translated",
             "value": "การให้เครดิต"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atıf"
           }
         },
         "vi": {
@@ -325,16 +379,34 @@
             "value": "개변"
           }
         },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pengubahsuaian"
+          }
+        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Modificações"
           }
         },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Изменение"
+          }
+        },
         "th": {
           "stringUnit": {
             "state": "translated",
             "value": "การดัดแปลง"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Değişiklik yapma"
           }
         },
         "vi": {
@@ -414,16 +486,34 @@
             "value": "개변물의 재배포"
           }
         },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pengedaran semula model yang diubah suai"
+          }
+        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Redistribuição do modelo modificado"
           }
         },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Распространение изменённой модели"
+          }
+        },
         "th": {
           "stringUnit": {
             "state": "translated",
             "value": "การเผยแพร่ซ้ำโมเดลที่ดัดแปลง"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Değiştirilmiş modelin yeniden dağıtımı"
           }
         },
         "vi": {
@@ -503,16 +593,34 @@
             "value": "개인의 상업적 이용"
           }
         },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Penggunaan komersial individu"
+          }
+        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Uso comercial individual"
           }
         },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Личное коммерческое использование"
+          }
+        },
         "th": {
           "stringUnit": {
             "state": "translated",
             "value": "การใช้เชิงพาณิชย์โดยบุคคล"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bireysel ticari kullanım"
           }
         },
         "vi": {
@@ -592,16 +700,34 @@
             "value": "종교·정치 목적에서의 이용"
           }
         },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Perbuatan politik/keagamaan"
+          }
+        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Atos políticos ou religiosos"
           }
         },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Политические и религиозные цели"
+          }
+        },
         "th": {
           "stringUnit": {
             "state": "translated",
             "value": "การใช้เพื่อวัตถุประสงค์ทางการเมืองหรือศาสนา"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Siyasi/dini eylemler"
           }
         },
         "vi": {
@@ -681,16 +807,34 @@
             "value": "재배포"
           }
         },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pengedaran semula"
+          }
+        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Redistribuição"
           }
         },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Распространение"
+          }
+        },
         "th": {
           "stringUnit": {
             "state": "translated",
             "value": "การเผยแพร่ซ้ำ"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yeniden dağıtım"
           }
         },
         "vi": {
@@ -770,16 +914,34 @@
             "value": "성적 표현에서의 이용"
           }
         },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Perbuatan seksual"
+          }
+        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Atos sexuais"
           }
         },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сексуальный контент"
+          }
+        },
         "th": {
           "stringUnit": {
             "state": "translated",
             "value": "การใช้ในเนื้อหาทางเพศ"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cinsel eylemler"
           }
         },
         "vi": {
@@ -859,16 +1021,34 @@
             "value": "아바타 이용"
           }
         },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Penggunaan sebagai avatar"
+          }
+        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Uso como avatar"
           }
         },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Использование как аватар"
+          }
+        },
         "th": {
           "stringUnit": {
             "state": "translated",
             "value": "การใช้เป็นอวตาร"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avatar olarak kullanım"
           }
         },
         "vi": {
@@ -948,16 +1128,34 @@
             "value": "폭력 표현에서의 이용"
           }
         },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Perbuatan ganas"
+          }
+        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Atos violentos"
           }
         },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Насилие"
+          }
+        },
         "th": {
           "stringUnit": {
             "state": "translated",
             "value": "การใช้ในเนื้อหาความรุนแรง"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Şiddet içeren eylemler"
           }
         },
         "vi": {
@@ -1037,16 +1235,34 @@
             "value": "필요"
           }
         },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diperlukan"
+          }
+        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Obrigatória"
           }
         },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Требуется"
+          }
+        },
         "th": {
           "stringUnit": {
             "state": "translated",
             "value": "จำเป็น"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gerekli"
           }
         },
         "vi": {
@@ -1126,16 +1342,34 @@
             "value": "불필요"
           }
         },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tidak diperlukan"
+          }
+        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Não obrigatória"
           }
         },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не требуется"
+          }
+        },
         "th": {
           "stringUnit": {
             "state": "translated",
             "value": "ไม่จำเป็น"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gerekli değil"
           }
         },
         "vi": {
@@ -1215,16 +1449,34 @@
             "value": "불러오기에 실패했습니다"
           }
         },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gagal dimuatkan"
+          }
+        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Falha ao carregar"
           }
         },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не удалось загрузить"
+          }
+        },
         "th": {
           "stringUnit": {
             "state": "translated",
             "value": "โหลดไม่สำเร็จ"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yüklenemedi"
           }
         },
         "vi": {
@@ -1304,16 +1556,34 @@
             "value": "모델을 찾을 수 없습니다"
           }
         },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiada model ditemui"
+          }
+        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Nenhum modelo encontrado"
           }
         },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Модели не найдены"
+          }
+        },
         "th": {
           "stringUnit": {
             "state": "translated",
             "value": "ไม่พบโมเดล"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Model bulunamadı"
           }
         },
         "vi": {
@@ -1393,16 +1663,34 @@
             "value": "허용"
           }
         },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Benarkan"
+          }
+        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Permitido"
           }
         },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разрешено"
+          }
+        },
         "th": {
           "stringUnit": {
             "state": "translated",
             "value": "อนุญาต"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İzin verilir"
           }
         },
         "vi": {
@@ -1482,16 +1770,34 @@
             "value": "허용 안 함"
           }
         },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jangan benarkan"
+          }
+        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Não permitido"
           }
         },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запрещено"
+          }
+        },
         "th": {
           "stringUnit": {
             "state": "translated",
             "value": "ไม่อนุญาต"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İzin verilmez"
           }
         },
         "vi": {
@@ -1571,16 +1877,34 @@
             "value": "미설정"
           }
         },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tidak ditetapkan"
+          }
+        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Não definido"
           }
         },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не указано"
+          }
+        },
         "th": {
           "stringUnit": {
             "state": "translated",
             "value": "ไม่ได้ระบุ"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Belirtilmemiş"
           }
         },
         "vi": {
@@ -1660,16 +1984,34 @@
             "value": "비영리 활동만"
           }
         },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktiviti bukan untung sahaja"
+          }
+        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Somente atividades sem fins lucrativos"
           }
         },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Только некоммерческая деятельность"
+          }
+        },
         "th": {
           "stringUnit": {
             "state": "translated",
             "value": "เฉพาะกิจกรรมที่ไม่แสวงหากำไร"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yalnızca kâr amacı gütmeyen etkinlikler"
           }
         },
         "vi": {
@@ -1749,16 +2091,34 @@
             "value": "3D 미리보기"
           }
         },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pratonton 3D"
+          }
+        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Prévia 3D"
           }
         },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "3D-просмотр"
+          }
+        },
         "th": {
           "stringUnit": {
             "state": "translated",
             "value": "ดูตัวอย่าง 3D"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "3D Önizleme"
           }
         },
         "vi": {
@@ -1838,16 +2198,34 @@
             "value": "드래그하여 모델을 회전할 수 있습니다."
           }
         },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seret untuk memutar model."
+          }
+        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Arraste para girar o modelo."
           }
         },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перетащите, чтобы повернуть модель."
+          }
+        },
         "th": {
           "stringUnit": {
             "state": "translated",
             "value": "ลากเพื่อหมุนโมเดล"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modeli döndürmek için sürükleyin."
           }
         },
         "vi": {
@@ -1927,16 +2305,34 @@
             "value": "비공개"
           }
         },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Peribadi"
+          }
+        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Privado"
           }
         },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скрытая"
+          }
+        },
         "th": {
           "stringUnit": {
             "state": "translated",
             "value": "ส่วนตัว"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gizli"
           }
         },
         "vi": {
@@ -2016,16 +2412,34 @@
             "value": "다시 시도"
           }
         },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuba Semula"
+          }
+        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Tentar Novamente"
           }
         },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Повторить"
+          }
+        },
         "th": {
           "stringUnit": {
             "state": "translated",
             "value": "ลองอีกครั้ง"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yeniden Dene"
           }
         },
         "vi": {
@@ -2105,16 +2519,34 @@
             "value": "로그인에 실패했습니다"
           }
         },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Daftar masuk gagal"
+          }
+        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Falha ao entrar"
           }
         },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не удалось войти"
+          }
+        },
         "th": {
           "stringUnit": {
             "state": "translated",
             "value": "เข้าสู่ระบบไม่สำเร็จ"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giriş yapılamadı"
           }
         },
         "vi": {
@@ -2194,16 +2626,34 @@
             "value": "VRoid Hub에 로그인"
           }
         },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Daftar Masuk ke VRoid Hub"
+          }
+        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Entrar no VRoid Hub"
           }
         },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Войти в VRoid Hub"
+          }
+        },
         "th": {
           "stringUnit": {
             "state": "translated",
             "value": "เข้าสู่ระบบ VRoid Hub"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VRoid Hub'a Giriş Yap"
           }
         },
         "vi": {
@@ -2283,16 +2733,34 @@
             "value": "모델 데이터 이용 조건"
           }
         },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Syarat Penggunaan Data Model"
+          }
+        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Condições de uso do modelo"
           }
         },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Условия использования модели"
+          }
+        },
         "th": {
           "stringUnit": {
             "state": "translated",
             "value": "เงื่อนไขการใช้ข้อมูลโมเดล"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Model Verisi Kullanım Koşulları"
           }
         },
         "vi": {
@@ -2372,16 +2840,34 @@
             "value": "이용 조건을 가져올 수 없습니다. VRoid Hub에서 확인해 주세요."
           }
         },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Syarat penggunaan tidak dapat diperoleh. Semaknya di VRoid Hub."
+          }
+        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Não foi possível obter as condições de uso. Confira no VRoid Hub."
           }
         },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не удалось получить условия использования. Проверьте их на VRoid Hub."
+          }
+        },
         "th": {
           "stringUnit": {
             "state": "translated",
             "value": "ไม่สามารถดึงเงื่อนไขการใช้งานได้ โปรดตรวจสอบใน VRoid Hub"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kullanım koşulları alınamadı. VRoid Hub'da kontrol edin."
           }
         },
         "vi": {
@@ -2461,16 +2947,34 @@
             "value": "VRoid Hub에 로그인하면 내 모델과 하트한 모델을 이용할 수 있습니다."
           }
         },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Daftar masuk ke VRoid Hub untuk menggunakan model anda dan model yang anda suka."
+          }
+        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Entre no VRoid Hub para usar seus modelos e os modelos curtidos."
           }
         },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Войдите в VRoid Hub, чтобы использовать свои и понравившиеся модели."
+          }
+        },
         "th": {
           "stringUnit": {
             "state": "translated",
             "value": "เข้าสู่ระบบ VRoid Hub เพื่อใช้โมเดลของคุณและโมเดลที่คุณถูกใจ"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kendi modellerinizi ve beğendiğiniz modelleri kullanmak için VRoid Hub'a giriş yapın."
           }
         },
         "vi": {
