@@ -126,6 +126,9 @@ final class VRoidPreviewModel {
            let lowerArm = vrmEntity.humanoid.node(for: .rightLowerArm) {
             lowerArmFromTPose(upperArm: upperArm, lowerArm: lowerArm)
         }
+        // Skinning re-solves only joints the runtime moved itself, so bones posed
+        // from outside stay in the T-pose until the skin pose is invalidated
+        vrmEntity.invalidateSkinPose()
     }
 
     private func lowerArmFromTPose(upperArm: Entity, lowerArm: Entity) {
