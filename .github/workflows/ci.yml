@@ -9,14 +9,14 @@ on:
   workflow_dispatch:
 
 env:
-  DEVELOPER_DIR: "/Applications/Xcode_26.6.app/Contents/Developer"
+  DEVELOPER_DIR: "/Applications/Xcode_27.2.app/Contents/Developer"
 
 permissions:
   contents: read
 
 jobs:
   build-package:
-    runs-on: macos-26
+    runs-on: xcode-27
 
     steps:
       - uses: actions/checkout@main
@@ -24,7 +24,7 @@ jobs:
         run: set -o pipefail && make test-package | xcpretty
 
   build-ui-preview:
-    runs-on: macos-26
+    runs-on: xcode-27
 
     steps:
       - uses: actions/checkout@main
@@ -32,7 +32,7 @@ jobs:
         run: set -o pipefail && make build-ui-preview | xcpretty
 
   test-ui-preview:
-    runs-on: macos-26
+    runs-on: xcode-27
     if: false # Temporarily disabled
     steps:
       - uses: actions/checkout@main
