@@ -4377,19 +4377,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Reduces jitter from packet drops (adds latency). Applies to VCamMocap and iFacialMocap. "
+            "value": "Reduces jitter from packet drops (adds latency). Applies to VCam Mocap and iFacialMocap. "
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "通信途切れのカクつきを緩和します（遅延が増えます）。VCamMocapとiFacialMocapに適用されます。"
+            "value": "通信途切れのカクつきを緩和します（遅延が増えます）。VCam MocapとiFacialMocapに適用されます。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "통신이 끊길 때 생기는 끊김을 완화합니다 (지연이 늘어납니다). VCamMocap과 iFacialMocap에 적용됩니다."
+            "value": "통신이 끊길 때 생기는 끊김을 완화합니다 (지연이 늘어납니다). VCam Mocap과 iFacialMocap에 적용됩니다."
           }
         }
       }

@@ -37,7 +37,7 @@ public struct VCamSettingsIntegrationView: View {
                     }
                 }
             }
-            FeatureView(title: "VCamMocap") {
+            FeatureView(title: "VCam Mocap") {
                 LabeledContent {
                     VCamMotionReceiverStatusView()
 

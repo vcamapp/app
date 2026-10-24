@@ -151,7 +151,7 @@ extension TrackingMethod.Face {
         case .disabled: return String(localized: .none)
         case .default: return String(localized: .default)
         case .iFacialMocap: return "iFacialMocap"
-        case .vcamMocap: return "VCamMocap"
+        case .vcamMocap: return "VCam Mocap"
         }
     }
 }
@@ -161,7 +161,7 @@ extension TrackingMethod.Hand {
         switch self {
         case .disabled: return String(localized: .none)
         case .default: return String(localized: .default)
-        case .vcamMocap: return "VCamMocap"
+        case .vcamMocap: return "VCam Mocap"
 #if ENABLE_MOCOPI
         case .mocopi: return "mocopi"
 #endif
@@ -174,7 +174,7 @@ extension TrackingMethod.Finger {
         switch self {
         case .disabled: return String(localized: .none)
         case .default: return String(localized: .default)
-        case .vcamMocap: return "VCamMocap"
+        case .vcamMocap: return "VCam Mocap"
         }
     }
 }

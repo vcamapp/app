@@ -56,7 +56,7 @@ final class LaunchScreenshotTests: XCTestCase {
 
             XCTContext.runActivity(named: "\(activity.name) - Integration") { activity in
                 app.cells["settings.tab.integration"].click()
-                _ = app.staticTexts["VCamMocap"].waitForExistence(timeout: 5)
+                _ = app.staticTexts["VCam Mocap"].waitForExistence(timeout: 5)
                 add(.keepAlways(screenshot: app.screenshot(), activity: activity))
             }
 
