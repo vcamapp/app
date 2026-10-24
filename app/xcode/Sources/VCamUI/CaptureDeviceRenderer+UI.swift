@@ -115,7 +115,12 @@ public extension CaptureDeviceRenderer {
                 let drawer = try CaptureDeviceRenderer(device: device, cropRect: cropRect)
                 result(drawer)
             } catch {
+                // The device can be unusable for reasons outside the app (e.g. a Continuity
+                // Camera that another app holds), so tell the user instead of adding nothing
                 Logger.error(error)
+                Task {
+                    await VCamAlert.showModal(title: String(localized: .failure), message: error.localizedDescription, canCancel: false)
+                }
             }
         }
     }
