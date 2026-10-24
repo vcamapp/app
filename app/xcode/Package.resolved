@@ -2,6 +2,15 @@
   "originHash" : "889165a526dede7855b8ddc5186632e8de3180b9e8d3c5a3b645cd9fbba3b4f1",
   "pins" : [
     {
+      "identity" : "swift-simd-compat",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/tattn/swift-simd-compat",
+      "state" : {
+        "revision" : "24e1f0631ff8ace74c594e46eba0bb68cd1caa79",
+        "version" : "0.1.0"
+      }
+    },
+    {
       "identity" : "swift-vroid-sdk",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tattn/swift-vroid-sdk",
@@ -16,7 +25,7 @@
       "location" : "https://github.com/tattn/VRMKit",
       "state" : {
         "branch" : "main",
-        "revision" : "0b634b1f78a7246f21de03f82a4680da6e3a8ecf"
+        "revision" : "6302146e58862fd00402a17be1f2c0dbff6dd167"
       }
     }
   ],
