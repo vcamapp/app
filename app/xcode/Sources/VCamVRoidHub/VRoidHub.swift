@@ -1,5 +1,6 @@
 import Foundation
 import VCamData
+import VCamEntity
 import VCamLogger
 import VCamVRoidHubCore
 import VRoidSDK

@@ -81,6 +81,7 @@ if isThree {
     )
     package.targets.append(contentsOf: [
         .target(name: "VCamVRoidHubCore", dependencies: [
+            "VCamEntity",
             .product(name: "VRoidSDK", package: "swift-vroid-sdk"),
             .product(name: "VRMRealityKit", package: "VRMKit"),
         ], resources: [
@@ -89,6 +90,7 @@ if isThree {
         .target(name: "VCamVRoidHub", dependencies: [
             "VCamVRoidHubCore",
             "VCamData",
+            "VCamEntity",
             "VCamLogger",
             .product(name: "VRoidSDK", package: "swift-vroid-sdk"),
         ], resources: [
