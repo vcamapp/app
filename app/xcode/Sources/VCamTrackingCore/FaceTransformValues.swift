@@ -77,7 +77,7 @@ package enum FaceTransformValues {
     }
 }
 
-private extension BlendShape {
+public extension BlendShape {
     /// ARKit-style trackers raise eyeBlink as the lids follow a downward gaze,
     /// leaving the avatar half-asleep whenever it looks down. Cancel that share
     /// of the blink, rescaled so an intentional blink still reaches 1.
