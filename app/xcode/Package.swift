@@ -22,6 +22,8 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/tattn/VRMKit", branch: "main"),
+        // Stands in for `simd`: `simd` itself on Apple platforms, the same types and functions elsewhere
+        .package(url: "https://github.com/tattn/swift-simd-compat", from: "0.1.0"),
     ],
     targets: [
         .target(name: "VCamUI", dependencies: [
@@ -34,13 +36,19 @@ let package = Package(
             .copy("Resources/openrpc.json"),
         ]),
         .target(name: "VCamData", dependencies: ["VCamBridge", "VCamEntity", "VCamLogger", "VCamTrackingCore"]),
-        .target(name: "VCamEntity", dependencies: ["VCamDefaults"]),
+        // Builds off Apple platforms too (without the settings in UserDefaults), so other apps can share the avatar types
+        .target(name: "VCamEntity", dependencies: [
+            .target(name: "VCamDefaults", condition: .when(platforms: [.macOS, .iOS])),
+            .product(name: "SIMDCompat", package: "swift-simd-compat"),
+        ]),
         .target(name: "VCamMedia", dependencies: ["VCamEntity", "VCamLogger"]),
         .target(name: "VCamBridge", dependencies: ["VCamEntity", "VCamTrackingCore"]),
         .target(name: "VCamTracking", dependencies: ["VCamTrackingCore", "VCamCamera", "VCamMotionV1"]),
         // Platform-independent tracking math shared with other apps
-        .target(name: "VCamTrackingCore", dependencies: ["VCamEntity", "VCamMotionV1", "VCamLogger"]),
-        .target(name: "VCamMotionV1", dependencies: []),
+        .target(name: "VCamTrackingCore", dependencies: [
+            "VCamEntity", "VCamMotionV1", "VCamLogger", .product(name: "SIMDCompat", package: "swift-simd-compat"),
+        ]),
+        .target(name: "VCamMotionV1", dependencies: [.product(name: "SIMDCompat", package: "swift-simd-compat")]),
         .target(name: "VCamCamera", dependencies: ["VCamMedia", "VCamData", "VCamLogger"]),
 
         .target(name: "VCamLogger", dependencies: []),

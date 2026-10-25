@@ -1,3 +1,4 @@
+#if canImport(Darwin)
 import Foundation
 
 public extension Notification.Name {
@@ -8,3 +9,4 @@ public extension Notification.Name {
     static let aspectRatioDidChange = Notification.Name("vcam.aspectRatioDidChange")
     static let screenResolutionDidChange = Notification.Name("vcam.screenResolutionDidChange")
 }
+#endif

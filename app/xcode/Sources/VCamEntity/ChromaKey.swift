@@ -1,3 +1,4 @@
+#if canImport(CoreImage)
 //
 //  ChromaKey.swift
 //  
@@ -46,3 +47,4 @@ enum ChromaKey {
         return filter
     }
 }
+#endif

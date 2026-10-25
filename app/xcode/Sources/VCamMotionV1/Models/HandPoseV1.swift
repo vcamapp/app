@@ -1,4 +1,4 @@
-import simd
+import SIMDCompat
 
 @available(iOS 26.0, macOS 26.0, *)
 public struct HandPoseV1: Sendable {

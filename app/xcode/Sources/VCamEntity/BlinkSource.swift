@@ -1,9 +1,15 @@
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
+#if canImport(VCamDefaults)
 import VCamDefaults
+#endif
 
 /// Which tracked blink reaches the avatar. Only meaningful while a face tracking
 /// method delivers blinks; without one the avatar always blinks on its own.
-public enum BlinkSource: String, CaseIterable, Identifiable, UserDefaultsValue {
+public enum BlinkSource: String, CaseIterable, Identifiable, Sendable {
     /// Each eye follows its own tracked blink
     case both
     /// Both eyes follow the subject's left eye
@@ -15,3 +21,7 @@ public enum BlinkSource: String, CaseIterable, Identifiable, UserDefaultsValue {
 
     public var id: Self { self }
 }
+
+#if canImport(VCamDefaults)
+extension BlinkSource: UserDefaultsValue {}
+#endif

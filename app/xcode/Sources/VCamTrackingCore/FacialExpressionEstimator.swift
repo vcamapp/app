@@ -1,3 +1,4 @@
+#if canImport(Darwin)
 import Vision
 import VCamEntity
 
@@ -18,3 +19,4 @@ public struct FacialExpressionEstimator {
 
     public private(set) var estimate: (_ landmark: FaceObservation.Landmarks2D, _ observation: FaceObservation) -> FacialExpression
 }
+#endif

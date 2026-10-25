@@ -1,5 +1,9 @@
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
-import simd
+#endif
+import SIMDCompat
 
 /// One accessory placement sent to the engine.
 /// TRS values are in glTF space; the engine converts them to its own axes

@@ -1,3 +1,4 @@
+#if canImport(Darwin)
 import Foundation
 import simd
 import Vision
@@ -201,3 +202,4 @@ private extension VNRecognizedPoint {
         .init(Float(x), Float(y))
     }
 }
+#endif

@@ -5,11 +5,17 @@
 //  Created by Tatsuya Tanaka on 2023/01/06.
 //
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
+#if canImport(VCamDefaults)
 import VCamDefaults
+#endif
 
 public enum TrackingMethod {
-    public enum Face: String, CaseIterable, Equatable, Identifiable, UserDefaultsValue {
+    public enum Face: String, CaseIterable, Equatable, Identifiable, Sendable {
         case disabled
         case `default`
         case vcamMocap
@@ -25,7 +31,7 @@ public enum TrackingMethod {
         }
     }
 
-    public enum Hand: String, CaseIterable, Equatable, Identifiable, UserDefaultsValue {
+    public enum Hand: String, CaseIterable, Equatable, Identifiable, Sendable {
         case disabled
         case `default`
         case vcamMocap
@@ -36,7 +42,7 @@ public enum TrackingMethod {
         public var id: Self { self }
     }
 
-    public enum Finger: String, CaseIterable, Equatable, Identifiable, UserDefaultsValue  {
+    public enum Finger: String, CaseIterable, Equatable, Identifiable, Sendable {
         case disabled
         case `default`
         case vcamMocap
@@ -44,3 +50,9 @@ public enum TrackingMethod {
         public var id: Self { self }
     }
 }
+
+#if canImport(VCamDefaults)
+extension TrackingMethod.Face: UserDefaultsValue {}
+extension TrackingMethod.Hand: UserDefaultsValue {}
+extension TrackingMethod.Finger: UserDefaultsValue {}
+#endif

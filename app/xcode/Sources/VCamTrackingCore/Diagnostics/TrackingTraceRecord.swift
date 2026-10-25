@@ -1,3 +1,4 @@
+#if canImport(Darwin)
 import Foundation
 import VCamMotionV1
 
@@ -235,3 +236,4 @@ public enum TrackingTraceFile: String, CaseIterable, Sendable {
     case engine = "engine.jsonl"
     case events = "events.jsonl"
 }
+#endif

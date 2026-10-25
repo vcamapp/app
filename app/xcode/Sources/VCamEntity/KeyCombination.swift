@@ -1,5 +1,10 @@
+#if canImport(Carbon)
 #if canImport(AppKit)
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 import class AppKit.NSEvent
 import Carbon.HIToolbox.Events
 
@@ -94,4 +99,5 @@ public struct KeyCombination: Equatable, CustomStringConvertible, Sendable {
         }
     }
 }
+#endif
 #endif

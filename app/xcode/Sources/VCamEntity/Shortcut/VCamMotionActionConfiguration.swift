@@ -1,4 +1,8 @@
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 public struct VCamMotionActionConfiguration: VCamActionConfiguration {
     public var id = UUID()

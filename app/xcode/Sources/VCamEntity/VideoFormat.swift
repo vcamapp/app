@@ -5,7 +5,11 @@
 //  Created by Tatsuya Tanaka on 2022/04/22.
 //
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 public enum VideoFormat: String, CaseIterable, Identifiable, Sendable {
     case mp4, mov, m4v, hevcWithAlpha

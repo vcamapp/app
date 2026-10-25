@@ -1,4 +1,5 @@
-import simd
+import SIMDCompat
+#if canImport(CoreGraphics)
 import struct CoreGraphics.CGPoint
 
 public extension SIMD2<Float> {
@@ -6,6 +7,7 @@ public extension SIMD2<Float> {
         self = .init(Float(point.x), Float(point.y))
     }
 }
+#endif
 
 public extension simd_float4x4 {
     @inlinable var translation: SIMD3<Float> {

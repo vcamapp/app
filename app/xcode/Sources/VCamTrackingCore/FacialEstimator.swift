@@ -1,3 +1,4 @@
+#if canImport(Darwin)
 //
 //  FacialEstimator.swift
 //
@@ -43,3 +44,4 @@ public struct FacialEstimator {
     public private(set) var prevRawEyeballY: () -> Float
     public private(set) var estimate: (VisionLandmarks) -> Facial
 }
+#endif

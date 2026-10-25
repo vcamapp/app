@@ -1,3 +1,4 @@
+#if canImport(Darwin)
 import Foundation
 
 public struct Version: Sendable {
@@ -110,3 +111,4 @@ extension Version: Codable {
         try container.encode(description)
     }
 }
+#endif

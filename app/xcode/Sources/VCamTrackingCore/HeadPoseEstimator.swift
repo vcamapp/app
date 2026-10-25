@@ -1,3 +1,4 @@
+#if canImport(Darwin)
 import Vision
 
 public protocol HeadPoseEstimator {
@@ -38,3 +39,4 @@ private final class EmptyHeadPoseEstimator: HeadPoseEstimator {
         (.zero, .zero)
     }
 }
+#endif

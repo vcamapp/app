@@ -1,4 +1,8 @@
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 package struct MotionSequenceState: Sendable {
     private(set) var sessionID: UInt32?

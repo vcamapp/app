@@ -1,6 +1,11 @@
+#if canImport(CoreGraphics)
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 import CoreGraphics
-import simd
+import SIMDCompat
 
 /// An object that stores its own canvas-relative placement.
 public protocol SceneObjectPlaceable: AnyObject {
@@ -229,3 +234,4 @@ public extension SceneObject {
         }
     }
 }
+#endif

@@ -1,13 +1,13 @@
 {
-  "originHash" : "889165a526dede7855b8ddc5186632e8de3180b9e8d3c5a3b645cd9fbba3b4f1",
+  "originHash" : "b8fe869d290adca71ad430ca4f178fec3817e7611268d67db3a59a15d7839066",
   "pins" : [
     {
       "identity" : "swift-simd-compat",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tattn/swift-simd-compat",
       "state" : {
-        "revision" : "24e1f0631ff8ace74c594e46eba0bb68cd1caa79",
-        "version" : "0.1.0"
+        "revision" : "f1d3f322c47831eef56ffca29791d719575201ee",
+        "version" : "0.1.1"
       }
     },
     {
@@ -25,7 +25,7 @@
       "location" : "https://github.com/tattn/VRMKit",
       "state" : {
         "branch" : "main",
-        "revision" : "2a792bf7076b1e90786fbbd2e91ee4ec89006c60"
+        "revision" : "2005c253a74f295b0b6ad719e7c9587ace10abc6"
       }
     }
   ],

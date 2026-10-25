@@ -1,3 +1,4 @@
+#if canImport(Darwin)
 import Foundation
 import Accelerate
 
@@ -145,3 +146,4 @@ public struct TrackingResamplerRecovery: Sendable {
         return values
     }
 }
+#endif

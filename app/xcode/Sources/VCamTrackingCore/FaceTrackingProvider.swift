@@ -1,3 +1,4 @@
+#if canImport(Darwin)
 import CoreMedia
 import simd
 import VCamMotionV1
@@ -32,3 +33,4 @@ public protocol FaceTrackingProvider: AnyObject {
     func process(sampleBuffer: CMSampleBuffer, captureSize: CGSize) -> CameraFaceTrackingResult?
     func calibrate()
 }
+#endif

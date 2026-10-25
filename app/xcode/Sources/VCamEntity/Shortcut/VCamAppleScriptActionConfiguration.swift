@@ -5,7 +5,11 @@
 //  Created by Tatsuya Tanaka on 2023/04/16.
 //
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 public struct VCamAppleScriptActionConfiguration: VCamActionConfiguration {
     public init(id: UUID = UUID()) {

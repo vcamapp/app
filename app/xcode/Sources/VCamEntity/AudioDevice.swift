@@ -1,5 +1,9 @@
 #if os(macOS)
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 import struct AVFAudio.AudioDeviceID
 
 public struct AudioDevice: Hashable, Identifiable, Sendable {

@@ -1,4 +1,8 @@
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 public struct VCamSubtitleActionConfiguration: VCamActionConfiguration {
     public init(id: UUID = UUID(), text: String = "") {

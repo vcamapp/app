@@ -5,7 +5,11 @@
 //  Created by Tatsuya Tanaka on 2022/06/17.
 //
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 public struct ImageFilterConfiguration: Codable, Sendable {
     public init(filters: [ImageFilterConfiguration.Filter]) {

@@ -1,3 +1,4 @@
+#if canImport(Darwin)
 //
 //  NSError+.swift
 //  
@@ -12,3 +13,4 @@ public extension NSError {
         NSError(domain: "com.github.vcamapp.error", code: code, userInfo: [NSLocalizedDescriptionKey: message])
     }
 }
+#endif

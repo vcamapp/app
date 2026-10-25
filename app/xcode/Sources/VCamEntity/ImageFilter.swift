@@ -1,3 +1,4 @@
+#if canImport(CoreImage)
 //
 //  ImageFilter.swift
 //  
@@ -42,3 +43,4 @@ public struct ImageFilter {
         }
     }
 }
+#endif

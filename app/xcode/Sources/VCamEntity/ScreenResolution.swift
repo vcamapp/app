@@ -1,3 +1,4 @@
+#if canImport(AVFoundation)
 import AVFoundation
 
 public enum ScreenResolution: Identifiable, CaseIterable, Sendable {
@@ -119,3 +120,4 @@ extension AVOutputSettingsAssistant {
         return preset
     }
 }
+#endif

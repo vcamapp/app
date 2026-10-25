@@ -1,4 +1,8 @@
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 @available(iOS 26.0, macOS 26.0, *)
 public enum MotionPacketV1Encoder {

@@ -1,3 +1,4 @@
+#if canImport(Darwin)
 import Foundation
 
 public extension CGSize {
@@ -11,3 +12,4 @@ public extension CGSize {
         .init(width: left.width * right, height: left.height * right)
     }
 }
+#endif

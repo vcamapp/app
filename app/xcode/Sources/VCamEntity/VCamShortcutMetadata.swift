@@ -6,7 +6,11 @@
 //
 
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 public struct VCamShortcutMetadata: Codable {
     public init(version: Int = 2, ids: [UUID] = []) {

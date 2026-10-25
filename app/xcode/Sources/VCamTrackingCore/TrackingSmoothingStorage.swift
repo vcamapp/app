@@ -1,3 +1,4 @@
+#if canImport(Darwin)
 import Synchronization
 
 /// One instance is shared by every `TrackingResampler` a receiver owns, so a
@@ -25,3 +26,4 @@ package final class TrackingSmoothingStorage: Sendable {
         { [self] in settings() }
     }
 }
+#endif

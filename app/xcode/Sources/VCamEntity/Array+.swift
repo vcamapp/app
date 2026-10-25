@@ -1,4 +1,8 @@
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 public extension Array where Element: Identifiable {
     func index(ofId id: Element.ID) -> Int? {

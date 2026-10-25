@@ -1,3 +1,4 @@
+#if canImport(Darwin)
 import Foundation
 
 public extension Bundle {
@@ -14,3 +15,4 @@ public extension Bundle {
             ?? "VCam"
     }
 }
+#endif

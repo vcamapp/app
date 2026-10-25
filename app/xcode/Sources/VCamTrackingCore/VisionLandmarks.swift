@@ -1,3 +1,4 @@
+#if canImport(Darwin)
 import Foundation
 import simd
 import Vision
@@ -57,3 +58,4 @@ public struct VisionLandmarks {
         noseHeight = simd_fast_distance(noseTop, noseBottom)
     }
 }
+#endif

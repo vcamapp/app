@@ -1,4 +1,8 @@
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 public struct VCamColor: Codable, Equatable, Hashable, Sendable {
     public init(red: Float, green: Float, blue: Float, alpha: Float = 1) {

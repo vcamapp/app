@@ -1,3 +1,4 @@
+#if canImport(Darwin)
 import Foundation
 
 public extension VCamScene {
@@ -47,3 +48,4 @@ private extension VCamScene.RenderTexture {
         crop.height *= scale
     }
 }
+#endif

@@ -1,5 +1,9 @@
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
-import simd
+#endif
+import SIMDCompat
 
 public struct VCamMotion: Equatable, Sendable {
     public var version: UInt32

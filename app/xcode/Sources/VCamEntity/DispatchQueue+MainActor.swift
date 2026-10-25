@@ -1,3 +1,4 @@
+#if canImport(Darwin)
 import Foundation
 
 extension DispatchQueue {
@@ -11,3 +12,4 @@ extension DispatchQueue {
         }
     }
 }
+#endif

@@ -1,3 +1,4 @@
+#if canImport(CoreImage)
 import CoreImage
 
 public struct CapturedFrame {
@@ -11,3 +12,4 @@ public struct CapturedFrame {
         CIImage(cvPixelBuffer: buffer)
     }
 }
+#endif

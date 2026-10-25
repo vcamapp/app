@@ -1,3 +1,4 @@
+#if canImport(Darwin)
 //
 //  RevisedMovingAverage.swift
 //  
@@ -107,3 +108,4 @@ public enum RevisedMovingAverageWeight {
         }
     }
 }
+#endif

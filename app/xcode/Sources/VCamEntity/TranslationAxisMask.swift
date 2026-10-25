@@ -1,4 +1,8 @@
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 public struct TranslationAxisMask: OptionSet, Codable, Hashable, Sendable {
     public let rawValue: UInt8

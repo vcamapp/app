@@ -1,4 +1,8 @@
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 public struct BlendShape: Equatable, Sendable {
     public var lookAtPoint: SIMD2<Float> = .zero

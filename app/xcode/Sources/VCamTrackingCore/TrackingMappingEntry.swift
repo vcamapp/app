@@ -1,5 +1,9 @@
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
-import simd
+#endif
+import SIMDCompat
 
 public struct TrackingMappingEntry: Codable, Sendable, Hashable, Identifiable {
     public let id: UUID

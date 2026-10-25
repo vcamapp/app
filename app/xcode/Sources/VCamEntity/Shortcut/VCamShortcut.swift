@@ -1,4 +1,8 @@
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 public struct VCamShortcut: Codable, Identifiable, Equatable, Sendable {
     public var id: UUID

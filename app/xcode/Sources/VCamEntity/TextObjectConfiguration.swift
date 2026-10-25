@@ -1,4 +1,8 @@
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 public struct TextObjectConfiguration: Codable, Equatable, Hashable, Sendable {
     /// The closest bundled face to San Francisco (SF itself is a hidden dot-prefixed font

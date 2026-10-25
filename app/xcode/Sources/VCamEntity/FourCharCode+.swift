@@ -1,3 +1,4 @@
+#if canImport(Darwin)
 //
 //  FourCharCode+.swift
 //  
@@ -42,3 +43,4 @@ extension FourCharCode: @retroactive ExpressibleByStringLiteral {
         return String(decoding: bytes, as: UTF8.self)
     }
 }
+#endif

@@ -1,3 +1,4 @@
+#if canImport(Darwin)
 import Foundation
 import Synchronization
 import VCamMotionV1
@@ -276,3 +277,4 @@ final class TrackingTraceWriter: Sendable {
         }
     }
 }
+#endif

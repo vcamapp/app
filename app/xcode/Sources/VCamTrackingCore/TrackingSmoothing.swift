@@ -1,3 +1,4 @@
+#if canImport(Darwin)
 public struct TrackingSmoothing: Sendable {
     /// Normalized value in 0.0...1.0.
     public let value: Double
@@ -33,3 +34,4 @@ public struct TrackingSmoothing: Sendable {
         )
     }
 }
+#endif

@@ -1,5 +1,9 @@
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
-import simd
+#endif
+import SIMDCompat
 import VCamMotionV1
 
 package enum MotionPacketV1Decoder {

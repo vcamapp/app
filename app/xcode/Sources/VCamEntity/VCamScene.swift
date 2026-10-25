@@ -1,3 +1,4 @@
+#if canImport(Darwin)
 import Foundation
 
 public struct VCamScene: Codable, Identifiable, Sendable {
@@ -223,3 +224,4 @@ public extension VCamScene {
         }
     }
 }
+#endif

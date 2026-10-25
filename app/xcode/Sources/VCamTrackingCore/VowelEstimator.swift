@@ -1,9 +1,14 @@
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
-import simd
+#endif
+import SIMDCompat
 import VCamEntity
 import VCamMotionV1
 
 public enum VowelEstimator {
+    #if canImport(Vision)
     public static func estimate(_ landmarks: VisionLandmarks) -> Vowel {
         let mouthWide = simd_fast_distance(landmarks.rightMouth, landmarks.leftMouth) / simd_fast_distance(landmarks.rightJaw, landmarks.leftJaw)
         if mouthWide < 0.6 { // Judge 'u' based on the ratio of jaw width to mouth width
@@ -14,6 +19,7 @@ public enum VowelEstimator {
             return .a
         }
     }
+    #endif
 
     public static func estimate(blendShape: BlendShape) -> Vowel {
         if blendShape.mouthPucker > 0.5 {

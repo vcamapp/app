@@ -1,3 +1,4 @@
+#if canImport(Darwin)
 import Foundation
 import Synchronization
 import VCamEntity
@@ -179,3 +180,4 @@ public enum TrackingFrameSampling {
         }
     }
 }
+#endif
