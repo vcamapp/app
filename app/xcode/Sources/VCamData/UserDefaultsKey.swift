@@ -31,6 +31,7 @@ public extension UserDefaults.Key {
     static var screenshotWaitTime: Key<Double> { .init("vc_screenshot_wait", default: 0) }
     static var screenshotDestination: Key<Data> { .init("vc_screenshot_dest", default: .init()) }
     static var recordingVideoFormat: Key<String> { .init("vc_rec_videoformat", default: "mp4") }
+    static var recordMicSound: Key<Bool> { .init("vc_rec_micsound", default: true) }
     static var recordSystemSound: Key<Bool> { .init("vc_rec_systemsound", default: false) }
     static var recordMicSyncOffset: Key<Int> { .init("vc_rec_mic_sync_offset", default: -160) }
     static var integrationVCamMocap: Key<Bool> { .init("vc_intg_vcammocap", default: false) }

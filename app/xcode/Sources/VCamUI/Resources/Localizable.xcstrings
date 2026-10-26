@@ -1910,6 +1910,29 @@
         }
       }
     },
+    "desktopAudio": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desktop audio [β]"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PCの音声 [β]"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PC 소리 [β]"
+          }
+        }
+      }
+    },
     "destinationToSave": {
       "extractionState": "manual",
       "localizations": {
@@ -5862,6 +5885,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "수정자 키를 하나 이상 조합해 주세요. F13~F20은 단독으로 사용할 수 있습니다"
+          }
+        }
+      }
+    },
+    "recordMicAudio": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Record microphone audio"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "マイクの音声を録音"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "마이크 소리 녹음"
           }
         }
       }

@@ -1,47 +1,8 @@
 import Foundation
 import SoundAnalysis
-import Accelerate
 import VCamEntity
 import AVFAudio
 import Synchronization
-
-private final class AudioLevelCalculator: Sendable {
-    private struct State: Sendable {
-        var averagePowerForChannel0: Float = 0
-    }
-
-    private let levelLowPassTrig: Float32 = 0.30
-    private let state = Mutex(State())
-
-    func reset() {
-        state.withLock {
-            $0.averagePowerForChannel0 = 0
-        }
-    }
-
-    func computeAudioLevel(from buffer: AVAudioPCMBuffer) -> Float {
-        guard buffer.format.channelCount > 0,
-              let channelData = buffer.floatChannelData else {
-            return 0
-        }
-
-        let samples = channelData[0]
-        let frameCount = vDSP_Length(buffer.frameLength)
-
-        var avgValue: Float = 0
-        vDSP_meamgv(samples, 1, &avgValue, frameCount)
-
-        var value: Float = -100
-        if avgValue != 0 {
-            value = 20.0 * log10f(avgValue)
-        }
-
-        return state.withLock { state in
-            state.averagePowerForChannel0 = (levelLowPassTrig * value) + ((1 - levelLowPassTrig) * state.averagePowerForChannel0)
-            return Float(100 + state.averagePowerForChannel0) / 100.0
-        }
-    }
-}
 
 private final class ExpressionAnalyzerState: Sendable {
     private struct State: @unchecked Sendable {
@@ -85,7 +46,7 @@ private final class ExpressionAnalyzerState: Sendable {
 }
 
 public final class AudioExpressionEstimator: NSObject, Sendable {
-    private let audioLevelCalculator = AudioLevelCalculator()
+    private let audioLevelMeter = AudioLevelMeter()
     private let analyzerState = ExpressionAnalyzerState()
     private let callbackState = CallbackState()
 
@@ -102,19 +63,19 @@ public final class AudioExpressionEstimator: NSObject, Sendable {
     }
 
     public func configure(format: AVAudioFormat) {
-        audioLevelCalculator.reset()
+        audioLevelMeter.reset()
         analyzerState.configure(format: format, observer: self)
     }
 
     public func reset() {
-        audioLevelCalculator.reset()
+        audioLevelMeter.reset()
         analyzerState.reset()
         callbackState.reset()
     }
 
     /// Runs synchronously on the caller's thread, callbacks included
     public func analyze(buffer: AVAudioPCMBuffer, time: AVAudioTime) {
-        let level = audioLevelCalculator.computeAudioLevel(from: buffer)
+        let level = audioLevelMeter.level(of: buffer)
 
         callbackState.notifyAudioLevel(level)
 

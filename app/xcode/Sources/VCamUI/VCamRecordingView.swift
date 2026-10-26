@@ -143,12 +143,12 @@ private struct RecordVideoView: View {
     @Bindable private var recorder = VideoRecorder.shared
 
     @AppStorage(key: .recordingVideoFormat) var recordingVideoFormat
+    @AppStorage(key: .recordMicSound) var recordMicSound
     @AppStorage(key: .recordSystemSound) var recordSystemSound
-    @AppStorage(key: .recordMicSyncOffset) var recordMicSyncOffset
 
     var body: some View {
         GroupBox {
-            VStack {
+            VStack(alignment: .leading) {
                 HStack {
                     Button {
                         if recorder.isRecording {
@@ -157,10 +157,7 @@ private struct RecordVideoView: View {
                             startRecording()
                         }
                     } label: {
-                        HStack(spacing: 4) {
-                            Image(systemName: "video")
-                            Text(recorder.isRecording ? .stopRecording : .startRecording)
-                        }
+                        RecordButtonLabel(recordingStartedAt: recorder.recordingStartedAt)
                     }
                     .controlSize(.large)
                     .disabled(recorder.state == .preparing || recorder.state == .finishing)
@@ -173,19 +170,31 @@ private struct RecordVideoView: View {
                     } label: {
                         Text(.videoFormat)
                     }
+                    .fixedSize()
                     .disabled(recorder.isRecording)
                 }
-                GroupBox {
-                    HStack(spacing: 16) {
-                        Toggle(isOn: $recordSystemSound) {
-                            Text(.recordDesktopAudio)
-                        }
-                        Divider()
-                        ValueEditField.emptyValueLabel(.micSyncOffset, value: $recordMicSyncOffset.map(), type: .stepper)
-                            .disabled(!recordSystemSound)
-                            .opacity(recordSystemSound ? 1 : 0.5)
+                HStack {
+                    AudioSourceToggle(
+                        isOn: $recordMicSound,
+                        title: .mic,
+                        help: .recordMicAudio,
+                        systemImage: "mic.fill",
+                        offSystemImage: "mic.slash.fill",
+                        level: recorder.micLevel
+                    )
+                    AudioSourceToggle(
+                        isOn: $recordSystemSound,
+                        title: .desktopAudio,
+                        help: .recordDesktopAudio,
+                        systemImage: "speaker.wave.2.fill",
+                        offSystemImage: "speaker.slash.fill",
+                        level: recorder.desktopAudioLevel
+                    )
+                    if recordMicSound && recordSystemSound {
+                        MicSyncOffsetButton()
                     }
                 }
+                .disabled(recorder.isRecording)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
@@ -201,10 +210,112 @@ private struct RecordVideoView: View {
                 name: "vcam_\(Date().yyyyMMddHHmmss)",
                 format: format,
                 screenResolution: uniState.screenResolution,
+                capturesMicAudio: recordMicSound,
                 capturesSystemAudio: recordSystemSound
             )
         } catch {
             print(error)
+        }
+    }
+}
+
+private struct RecordButtonLabel: View {
+    let recordingStartedAt: Date?
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        if let recordingStartedAt {
+            HStack(spacing: 6) {
+                Image(systemName: "record.circle.fill")
+                    .foregroundStyle(.red)
+                    .symbolEffect(.pulse, options: .repeating, isActive: !reduceMotion)
+                Text(timerInterval: recordingStartedAt...Date.distantFuture, countsDown: false)
+                    .monospacedDigit()
+                Text(.stopRecording)
+            }
+        } else {
+            HStack(spacing: 4) {
+                Image(systemName: "video")
+                Text(.startRecording)
+            }
+        }
+    }
+}
+
+private struct AudioSourceToggle: View {
+    @Binding var isOn: Bool
+    let title: LocalizedStringResource
+    let help: LocalizedStringResource
+    let systemImage: String
+    let offSystemImage: String
+    let level: Float
+
+    var body: some View {
+        Toggle(isOn: $isOn) {
+            Label {
+                Text(title)
+            } icon: {
+                Image(systemName: isOn ? systemImage : offSystemImage)
+                    .foregroundStyle(isOn ? .primary : .secondary)
+            }
+        }
+        .toggleStyle(.button)
+        .help(Text(help))
+        .overlay(alignment: .bottomLeading) {
+            if isOn {
+                LevelBar(level: level)
+                    .padding(.horizontal, 6)
+                    .padding(.bottom, 2)
+            }
+        }
+    }
+}
+
+private struct LevelBar: View {
+    let level: Float
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        GeometryReader { proxy in
+            Capsule()
+                .fill(.primary)
+                .frame(width: proxy.size.width * displayedFraction)
+                .animation(reduceMotion ? nil : .linear(duration: 0.1), value: displayedFraction)
+        }
+        .frame(height: 2)
+        .accessibilityHidden(true)
+    }
+
+    /// The meter reads -100 dB as 0, which leaves room noise around 0.4;
+    /// showing only -60...0 dB keeps a quiet room empty and speech visibly moving
+    private var displayedFraction: CGFloat {
+        CGFloat(min(max((level - 0.4) / 0.6, 0), 1))
+    }
+}
+
+private struct MicSyncOffsetButton: View {
+    @State private var isPresented = false
+
+    @AppStorage(key: .recordMicSyncOffset) var recordMicSyncOffset
+
+    var body: some View {
+        Button {
+            isPresented = true
+        } label: {
+            Label {
+                Text(verbatim: "\(recordMicSyncOffset) ms")
+                    .monospacedDigit()
+            } icon: {
+                Image(systemName: "timer")
+            }
+        }
+        .help(Text(.micSyncOffset))
+        .popover(isPresented: $isPresented) {
+            ValueEditField.emptyValueLabel(.micSyncOffset, value: $recordMicSyncOffset.map(), type: .stepper)
+                .frame(width: 260)
+                .padding()
         }
     }
 }

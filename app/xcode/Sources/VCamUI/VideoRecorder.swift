@@ -43,6 +43,10 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
     public var isRecording: Bool {
         state == .recording
     }
+    public private(set) var recordingStartedAt: Date?
+    /// Levels of the audio written to the file, in the range of ``AudioLevelMeter``
+    public private(set) var micLevel: Float = 0
+    public private(set) var desktopAudioLevel: Float = 0
 
     @ObservationIgnored private var assetwriter: AVAssetWriter?
     @ObservationIgnored private var assetVideoWriterAdaptor: AVAssetWriterInputPixelBufferAdaptor?
@@ -63,21 +67,29 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
 
     @ObservationIgnored private var converter: AudioConverter?
     private let expectedFormat = AVAudioFormat(standardFormatWithSampleRate: 48000, channels: 1)!
+    private static let audioOutputSettings: [String: any Sendable] = [
+        AVFormatIDKey: kAudioFormatMPEG4AAC,
+        AVNumberOfChannelsKey: 1,
+        AVSampleRateKey: 48000,
+        AVEncoderBitRateKey: 128000
+    ]
     @ObservationIgnored private var systemAudioRecorder: ScreenRecorder?
+    @ObservationIgnored private let micLevelMeter = AudioLevelMeter()
+    @ObservationIgnored private let desktopAudioLevelMeter = AudioLevelMeter()
 
-    public func start(with outputDirectory: URL, name: String, format: VideoFormat, screenResolution: ScreenResolution, capturesSystemAudio: Bool) throws {
+    public func start(with outputDirectory: URL, name: String, format: VideoFormat, screenResolution: ScreenResolution, capturesMicAudio: Bool, capturesSystemAudio: Bool) throws {
         Logger.log("")
         guard case .idle = state else { return }
         state = .preparing
         do {
-            try startRecording(with: outputDirectory, name: name, format: format, screenResolution: screenResolution, capturesSystemAudio: capturesSystemAudio)
+            try startRecording(with: outputDirectory, name: name, format: format, screenResolution: screenResolution, capturesMicAudio: capturesMicAudio, capturesSystemAudio: capturesSystemAudio)
         } catch {
             failRecording(error)
             throw error
         }
     }
 
-    private func startRecording(with outputDirectory: URL, name: String, format: VideoFormat, screenResolution: ScreenResolution, capturesSystemAudio: Bool) throws {
+    private func startRecording(with outputDirectory: URL, name: String, format: VideoFormat, screenResolution: ScreenResolution, capturesMicAudio: Bool, capturesSystemAudio: Bool) throws {
         temporaryOutputURL = outputDirectory.appending(path: "\(name)_tmp.\(format.extension)")
         outputURL = outputDirectory.appending(path: "\(name).\(format.extension)")
 
@@ -96,12 +108,7 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
             kCVPixelBufferMetalCompatibilityKey as String: true,
         ])
 
-        let assetAudioWriterInput = AVAssetWriterInput(mediaType: .audio, outputSettings: [
-            AVFormatIDKey: kAudioFormatMPEG4AAC,
-            AVNumberOfChannelsKey: 1,
-            AVSampleRateKey: 48000,
-            AVEncoderBitRateKey: 128000
-        ])
+        let assetAudioWriterInput = capturesMicAudio ? AVAssetWriterInput(mediaType: .audio, outputSettings: Self.audioOutputSettings) : nil
 
         let assetPCAudioWriterInput = capturesSystemAudio ? AVAssetWriterInput(mediaType: .audio, outputSettings: [
             AVFormatIDKey: kAudioFormatLinearPCM,
@@ -114,13 +121,15 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
         ]) : nil
 
         assetVideoWriterInput.expectsMediaDataInRealTime = true
-        assetAudioWriterInput.expectsMediaDataInRealTime = true
+        assetAudioWriterInput?.expectsMediaDataInRealTime = true
         assetPCAudioWriterInput?.expectsMediaDataInRealTime = true
 
         guard assetwriter.canAdd(assetVideoWriterInput) else { throw RecordingError.cannotAddInput(.video) }
         assetwriter.add(assetVideoWriterInput)
-        guard assetwriter.canAdd(assetAudioWriterInput) else { throw RecordingError.cannotAddInput(.audio) }
-        assetwriter.add(assetAudioWriterInput)
+        if let assetAudioWriterInput {
+            guard assetwriter.canAdd(assetAudioWriterInput) else { throw RecordingError.cannotAddInput(.audio) }
+            assetwriter.add(assetAudioWriterInput)
+        }
         if let assetPCAudioWriterInput {
             guard assetwriter.canAdd(assetPCAudioWriterInput) else { throw RecordingError.cannotAddInput(.audio) }
             assetwriter.add(assetPCAudioWriterInput)
@@ -137,6 +146,7 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
         self.assetPCAudioWriterInput = assetPCAudioWriterInput
 
         state = .recording
+        recordingStartedAt = .now
         frameCount = 0
         sampleCount = 0
         pcSampleCount = 0
@@ -152,7 +162,9 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
             }
         }
 
-        AvatarAudioManager.shared.start(usage: .record)
+        if capturesMicAudio {
+            AvatarAudioManager.shared.start(usage: .record)
+        }
     }
 
     public func stop() {
@@ -164,10 +176,9 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
             return
         }
         state = .finishing
-        let audioOutputSettings = assetAudioWriterInput?.outputSettings as? [String: any Sendable] ?? [:]
         let capturedSystemAudio = assetPCAudioWriterInput != nil
 
-        releaseWriterInputs()
+        releaseRecordingSession()
         AvatarAudioManager.shared.stop(usage: .record)
 
         guard let assetwriter else {
@@ -194,14 +205,14 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
                             asset: AVURLAsset(url: self.temporaryOutputURL),
                             outputURL: self.outputURL,
                             fileType: assetwriter.outputFileType,
-                            audioOutputSettings: audioOutputSettings
+                            audioOutputSettings: Self.audioOutputSettings
                         )
                     } catch VideoConverter.ConversionError.noAudioTracks {
                         // Keep the video even when no audio sample arrived
                         try FileManager.default.moveItem(at: self.temporaryOutputURL, to: self.outputURL)
                     }
                 } else {
-                    // The mic track is already AAC, so the first-pass file is final as is
+                    // The mic track, if any, is already AAC, so the first-pass file is final as is
                     try FileManager.default.moveItem(at: self.temporaryOutputURL, to: self.outputURL)
                 }
                 self.state = .idle
@@ -275,7 +286,9 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
     }
 
     public func renderAudioFrame(_ pcmBuffer: AVAudioPCMBuffer, time: AVAudioTime, latency: TimeInterval, device: AudioDevice?) async {
-        guard case .recording = state, frameCount > 0 else { return }
+        // Lip sync keeps the mic running even when the recording leaves it out
+        guard case .recording = state, frameCount > 0, assetAudioWriterInput != nil else { return }
+        micLevel = micLevelMeter.level(of: pcmBuffer)
 
         if sampleCount <= 0 {
             var timeInterval = time.timeIntervalSince(hostTime: baseHostTime)
@@ -324,6 +337,7 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
               let sampleRate = (formatDescription.audioStreamBasicDescription?.mSampleRate).flatMap(TimeInterval.init),
               var sampleTimingInfo = (try? sampleBuffer.sampleTimingInfos())?.first
         else { return }
+        desktopAudioLevel = desktopAudioLevelMeter.level(of: sampleBuffer)
 
         if pcSampleCount == 0 {
             let baseMediaTime = AVAudioTime.seconds(forHostTime: baseHostTime) // = CACurrentMediaTime
@@ -369,11 +383,16 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
         return try? CMSampleBuffer.create(pcmBuffer: pcmBuffer, sampleCount: sampleCount)
     }
 
-    private func releaseWriterInputs() {
+    private func releaseRecordingSession() {
         assetVideoWriterAdaptor = nil
         assetAudioWriterInput = nil
         assetPCAudioWriterInput = nil
         converter = nil
+        recordingStartedAt = nil
+        micLevel = 0
+        desktopAudioLevel = 0
+        micLevelMeter.reset()
+        desktopAudioLevelMeter.reset()
     }
 
     private func failRecording(_ error: Error) {
@@ -382,7 +401,7 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
             assetwriter.cancelWriting()
         }
         assetwriter = nil
-        releaseWriterInputs()
+        releaseRecordingSession()
         if let systemAudioRecorder {
             Task { await systemAudioRecorder.stopCapture() }
         }
