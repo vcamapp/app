@@ -18,6 +18,11 @@ public struct VCamFaceMotion: Equatable, Sendable {
         blendShape.horizontallyMirrored()
     }
 
+    /// The shapes after the same presentation step as `perfectSync`, for senders that forward them by name
+    public func presentedBlendShape(mirrored: Bool) -> BlendShape {
+        FaceTransformValues.presentationBlendShape(anatomicalBlendShape, mirrored: mirrored)
+    }
+
     public func vcamHeadTransform(useEyeTracking: Bool, useVowelEstimation: Bool, mirrored: Bool) -> [Float] {
         FaceTransformValues.vcamHeadTransform(
             translation: head.translation,

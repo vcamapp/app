@@ -55,7 +55,7 @@ package enum FaceTransformValues {
 
     /// The blink compensation runs first, on anatomical values, so each blink pairs
     /// with its own eye's downward gaze regardless of the presentation.
-    private static func presentationBlendShape(_ blendShape: BlendShape, mirrored: Bool) -> BlendShape {
+    package static func presentationBlendShape(_ blendShape: BlendShape, mirrored: Bool) -> BlendShape {
         let compensated = blendShape.compensatingBlinkForDownwardGaze()
         return mirrored ? compensated.horizontallyMirrored() : compensated
     }
@@ -77,7 +77,7 @@ package enum FaceTransformValues {
     }
 }
 
-public extension BlendShape {
+private extension BlendShape {
     /// ARKit-style trackers raise eyeBlink as the lids follow a downward gaze,
     /// leaving the avatar half-asleep whenever it looks down. Cancel that share
     /// of the blink, rescaled so an intentional blink still reaches 1.
