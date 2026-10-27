@@ -180,7 +180,7 @@ private struct RecordVideoView: View {
                         help: .recordMicAudio,
                         systemImage: "mic.fill",
                         offSystemImage: "mic.slash.fill",
-                        level: recorder.micLevel
+                        level: \.micLevel
                     )
                     AudioSourceToggle(
                         isOn: $recordSystemSound,
@@ -188,7 +188,7 @@ private struct RecordVideoView: View {
                         help: .recordDesktopAudio,
                         systemImage: "speaker.wave.2.fill",
                         offSystemImage: "speaker.slash.fill",
-                        level: recorder.desktopAudioLevel
+                        level: \.desktopAudioLevel
                     )
                     if recordMicSound && recordSystemSound {
                         MicSyncOffsetButton()
@@ -249,7 +249,7 @@ private struct AudioSourceToggle: View {
     let help: LocalizedStringResource
     let systemImage: String
     let offSystemImage: String
-    let level: Float
+    let level: KeyPath<VideoRecorder, Float>
 
     var body: some View {
         Toggle(isOn: $isOn) {
@@ -272,9 +272,11 @@ private struct AudioSourceToggle: View {
     }
 }
 
+/// Reads the level itself, so a new audio buffer redraws only the bar
 private struct LevelBar: View {
-    let level: Float
+    let level: KeyPath<VideoRecorder, Float>
 
+    private let recorder = VideoRecorder.shared
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
@@ -291,7 +293,7 @@ private struct LevelBar: View {
     /// The meter reads -100 dB as 0, which leaves room noise around 0.4;
     /// showing only -60...0 dB keeps a quiet room empty and speech visibly moving
     private var displayedFraction: CGFloat {
-        CGFloat(min(max((level - 0.4) / 0.6, 0), 1))
+        CGFloat(min(max((recorder[keyPath: level] - 0.4) / 0.6, 0), 1))
     }
 }
 

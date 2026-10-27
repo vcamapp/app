@@ -288,7 +288,7 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
     public func renderAudioFrame(_ pcmBuffer: AVAudioPCMBuffer, time: AVAudioTime, latency: TimeInterval, device: AudioDevice?) async {
         // Lip sync keeps the mic running even when the recording leaves it out
         guard case .recording = state, frameCount > 0, assetAudioWriterInput != nil else { return }
-        micLevel = micLevelMeter.level(of: pcmBuffer)
+        updateLevel(\.micLevel, to: micLevelMeter.level(of: pcmBuffer))
 
         if sampleCount <= 0 {
             var timeInterval = time.timeIntervalSince(hostTime: baseHostTime)
@@ -337,7 +337,7 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
               let sampleRate = (formatDescription.audioStreamBasicDescription?.mSampleRate).flatMap(TimeInterval.init),
               var sampleTimingInfo = (try? sampleBuffer.sampleTimingInfos())?.first
         else { return }
-        desktopAudioLevel = desktopAudioLevelMeter.level(of: sampleBuffer)
+        updateLevel(\.desktopAudioLevel, to: desktopAudioLevelMeter.level(of: sampleBuffer))
 
         if pcSampleCount == 0 {
             let baseMediaTime = AVAudioTime.seconds(forHostTime: baseHostTime) // = CACurrentMediaTime
@@ -381,6 +381,13 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
             sampleCount += CMTimeValue(pcmBuffer.frameLength)
         }
         return try? CMSampleBuffer.create(pcmBuffer: pcmBuffer, sampleCount: sampleCount)
+    }
+
+    /// Every audio buffer moves the smoothed level a little; steps this small stay under
+    /// a pixel on the meter, so they are dropped instead of waking its observers
+    private func updateLevel(_ level: ReferenceWritableKeyPath<VideoRecorder, Float>, to newValue: Float) {
+        guard abs(self[keyPath: level] - newValue) >= 0.002 else { return }
+        self[keyPath: level] = newValue
     }
 
     private func releaseRecordingSession() {
