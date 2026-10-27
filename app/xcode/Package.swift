@@ -72,7 +72,7 @@ let isAPIEnabled = Context.environment["VCAM_FEATURE_API"] == "1"
 
 if isThree {
     package.dependencies.append(
-        .package(url: "https://github.com/tattn/swift-vroid-sdk", from: "0.1.3")
+        .package(url: "https://github.com/tattn/swift-vroid-sdk", from: "0.2.0")
     )
     // The platform-neutral part of the VRoid Hub integration (session, paging,
     // conditions of use, 3D preview) is shared with the iOS app as a product

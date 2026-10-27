@@ -53,27 +53,6 @@ public struct VRoidHubLoadFailedView: View {
     }
 }
 
-extension VRoidCharacterModel {
-    /// `name` is often nil on the live API; the character name is the
-    /// user-visible one in that case
-    public var displayName: String {
-        name ?? character?.name ?? id
-    }
-}
-
-extension VRoidImageSet {
-    /// Not every variant is present: user icons come only as sq170/sq50 on
-    /// the live API, so fall through the whole set
-    public var thumbnailURL: URL? {
-        sq300?.url ?? w300?.url ?? sq170?.url ?? sq150?.url
-            ?? sq600?.url ?? w600?.url ?? original?.url ?? sq50?.url
-    }
-
-    public var largeURL: URL? {
-        w600?.url ?? original?.url ?? sq600?.url ?? thumbnailURL
-    }
-}
-
 public struct VRoidHubModelGridView: View {
     let modelList: VRoidHubModelList
     let tab: VRoidHubModelList.Tab
