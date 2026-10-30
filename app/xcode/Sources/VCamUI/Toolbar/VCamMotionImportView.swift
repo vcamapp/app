@@ -5,10 +5,12 @@ import VCamData
 struct VCamMotionImportView: View {
     init(sourceURL: URL) {
         self.sourceURL = sourceURL
+        importNote = MotionLibrary.shared.converter(for: sourceURL)?.importNote
         _displayName = State(initialValue: sourceURL.deletingPathExtension().lastPathComponent)
     }
 
     let sourceURL: URL
+    private let importNote: String?
 
     @State private var displayName: String
     @State private var translationAxes: TranslationAxisMask = .all
@@ -22,6 +24,15 @@ struct VCamMotionImportView: View {
     var body: some View {
         VStack(spacing: 0) {
             MotionSettingsFields(displayName: $displayName, translationAxes: $translationAxes, isLoop: $isLoop, isPose: $isPose)
+
+            if let importNote {
+                Text(importNote)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding([.horizontal, .bottom])
+            }
 
             HStack {
                 Spacer()
@@ -41,7 +52,7 @@ struct VCamMotionImportView: View {
             }
             .padding([.horizontal, .bottom])
         }
-        .frame(width: 360, height: 320)
+        .frame(width: 360, height: importNote == nil ? 320 : 400)
         .onDisappear {
             // Closing the window cancels an in-flight import
             importTask?.cancel()
@@ -64,7 +75,11 @@ struct VCamMotionImportView: View {
                 // The staged file and the engine-side registration are cleaned up by importMotion
             } catch {
                 isImporting = false
-                let message = (error as? VrmaMotionError)?.localizedMessage ?? String(localized: .failedToLoadMotion)
+                let message = switch error {
+                case let error as VrmaMotionError: error.localizedMessage
+                case let error as MotionFileConversionError: error.message
+                default: String(localized: .failedToLoadMotion)
+                }
                 await VCamAlert.showModal(title: String(localized: .failure), message: message, canCancel: false)
             }
         }

@@ -22,6 +22,12 @@ public final class MotionLibrary {
     /// Session-scoped loop settings of built-in motions (not persisted)
     private var builtInLoopStates: [String: Bool] = [:]
 
+    public var converters: [MotionFileConverter] = []
+
+    public var importableFileExtensions: [String] {
+        ["vrma"] + converters.map(\.fileExtension)
+    }
+
     public init(store: ImportedMotionStore = ImportedMotionStore()) {
         self.store = store
     }
@@ -79,6 +85,11 @@ public final class MotionLibrary {
 
     // MARK: - Import
 
+    public func converter(for sourceURL: URL) -> MotionFileConverter? {
+        let fileExtension = sourceURL.pathExtension.lowercased()
+        return converters.first { $0.fileExtension == fileExtension }
+    }
+
     public func importMotion(from sourceURL: URL, displayName: String, translationAxes: TranslationAxisMask, isLoop: Bool, isPose: Bool = false) async throws -> ImportedMotionRecord {
         let id = UUID()
         let record = ImportedMotionRecord(
@@ -88,7 +99,11 @@ public final class MotionLibrary {
             isLoop: isLoop,
             isPose: isPose
         )
-        let fileURL = try await store.stageMotionFile(from: sourceURL, id: id)
+        let fileURL = if let converter = converter(for: sourceURL) {
+            try await store.stageMotionFile(data: Self.convert(sourceURL, with: converter, name: displayName), id: id)
+        } else {
+            try await store.stageMotionFile(from: sourceURL, id: id)
+        }
         do {
             try Task.checkCancellation()
             try await UniBridge.registerImportedMotion(
@@ -106,6 +121,12 @@ public final class MotionLibrary {
             throw error
         }
         return record
+    }
+
+    /// Runs off the main actor so that converting a long motion does not block the UI
+    @concurrent
+    private nonisolated static func convert(_ sourceURL: URL, with converter: MotionFileConverter, name: String) async throws -> Data {
+        try converter.convert(Data(contentsOf: sourceURL), name)
     }
 
     /// Overwrites an imported motion's file with a still pose edited in the pose editor.

@@ -1,5 +1,6 @@
 import AppKit
 import UniformTypeIdentifiers
+import VCamData
 
 public enum FileUtility {
     public enum FileType: Int {
@@ -7,7 +8,7 @@ public enum FileUtility {
         case model
         case image
         case html
-        case vrma
+        case motion
     }
 
     @MainActor
@@ -21,8 +22,8 @@ public enum FileUtility {
             return openFile(with: [.image])
         case .html:
             return openFile(with: [.html])
-        case .vrma:
-            return openFile(withExtensions: ["vrma"])
+        case .motion:
+            return openFile(withExtensions: MotionLibrary.shared.importableFileExtensions)
         }
     }
 

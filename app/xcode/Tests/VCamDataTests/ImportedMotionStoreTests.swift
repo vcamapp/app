@@ -40,6 +40,19 @@ struct ImportedMotionStoreTests {
         #expect(restoredRecord.isLoop == true)
     }
 
+    /// Converted motions are staged from memory under the same file name as copied ones
+    @Test
+    func stagedDataIsWrittenAsTheMotionFile() async throws {
+        let directory = try makeTemporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: directory) }
+
+        let store = makeImportedMotionStore(in: directory)
+        let id = UUID()
+        let fileURL = try await store.stageMotionFile(data: Data("converted".utf8), id: id)
+        #expect(fileURL.lastPathComponent == ImportedMotionStore.fileName(id: id))
+        #expect(try Data(contentsOf: fileURL) == Data("converted".utf8))
+    }
+
     @Test
     func settingsUpdatesPersistAndKeepTheID() throws {
         let directory = try makeTemporaryDirectory()

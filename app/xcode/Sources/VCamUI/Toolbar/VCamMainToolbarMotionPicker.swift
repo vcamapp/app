@@ -81,7 +81,7 @@ private struct CustomMotionSection: View {
     }
 
     private func startImport() {
-        guard let url = FileUtility.openFile(type: .vrma) else { return }
+        guard let url = FileUtility.openFile(type: .motion) else { return }
         // The popover closes when the file dialog opens, so present these in standalone windows
         MacWindowManager.shared.reopen(VCamMotionImportView(sourceURL: url))
     }

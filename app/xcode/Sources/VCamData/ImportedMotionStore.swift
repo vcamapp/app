@@ -52,6 +52,12 @@ public final class ImportedMotionStore {
         return destinationURL
     }
 
+    public func stageMotionFile(data: Data, id: UUID) async throws -> URL {
+        let destinationURL = filesDirectory.appending(path: Self.fileName(id: id))
+        try await Self.writeFile(data, to: destinationURL)
+        return destinationURL
+    }
+
     /// Runs off the main actor so that large files do not block the UI
     @concurrent
     private nonisolated static func copyFile(from sourceURL: URL, to destinationURL: URL) async throws {
@@ -60,6 +66,12 @@ public final class ImportedMotionStore {
             try FileManager.default.removeItem(at: destinationURL)
         }
         try FileManager.default.copyItem(at: sourceURL, to: destinationURL)
+    }
+
+    @concurrent
+    private nonisolated static func writeFile(_ data: Data, to destinationURL: URL) async throws {
+        try FileManager.default.createDirectoryIfNeeded(at: destinationURL.deletingLastPathComponent())
+        try data.write(to: destinationURL, options: .atomic)
     }
 
     public func discardStagedFile(id: UUID) {
