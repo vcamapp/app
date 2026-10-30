@@ -37,6 +37,9 @@ public extension UserDefaults.Key {
     static var integrationVCamMocap: Key<Bool> { .init("vc_intg_vcammocap", default: false) }
     static var integrationFacialMocapIp: Key<String> { .init("vc_intg_facialmocap_ip", default: "192.168.0.1") }
     static var integrationMocopi: Key<Bool> { .init("vc_intg_mocopi", default: false) }
+    static var integrationVMCProtocol: Key<Bool> { .init("vc_intg_vmc", default: false) }
+    static var integrationVMCProtocolPort: Key<Int> { .init("vc_intg_vmc_port", default: 39539) }
+    static var integrationVMCProtocolExpressions: Key<Bool> { .init("vc_intg_vmc_expressions", default: true) }
     static var integrationExternalControl: Key<Bool> { .init("vc_intg_external_control", default: false) }
     static var integrationExternalControlPort: Key<Int> { .init("vc_intg_external_control_port", default: 34965) }
     static var mocapNetworkInterpolation: Key<Double> { .init("vc_mocap_network_interpolation", default: 1.0) }

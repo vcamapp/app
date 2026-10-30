@@ -34,6 +34,7 @@ public final class Tracking {
     public let webCamera = AvatarWebCamera()
     public let iFacialMocapReceiver: FacialMocapReceiver
     public let vcamMotionReceiver = VCamMotionReceiver()
+    public let vmcProtocolReceiver: VMCProtocolReceiver
 
     private let vcamMotionTracking: VCamMotionTracking
     @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
@@ -42,6 +43,7 @@ public final class Tracking {
         let smoothing = TrackingSmoothing(value: UserDefaults.standard.value(for: .mocapNetworkInterpolation))
         iFacialMocapReceiver = FacialMocapReceiver(smoothing: smoothing)
         vcamMotionTracking = VCamMotionTracking(smoothing: smoothing)
+        vmcProtocolReceiver = VMCProtocolReceiver(smoothing: smoothing)
 
         UserDefaults.standard.publisher(for: \.vc_use_eye_tracking, options: [.initial, .new])
             .sink { [unowned self] in
@@ -67,6 +69,7 @@ public final class Tracking {
                 let smoothing = TrackingSmoothing(value: value)
                 vcamMotionTracking.updateSmoothing(smoothing)
                 iFacialMocapReceiver.updateSmoothing(smoothing)
+                vmcProtocolReceiver.updateSmoothing(smoothing)
             }
             .store(in: &cancellables)
     }
@@ -108,6 +111,14 @@ public final class Tracking {
                 // Roll the setting back so the UI doesn't claim the receiver is running
                 Logger.error(error)
                 UserDefaults.standard.set(false, for: .integrationVCamMocap)
+            }
+        }
+        if UserDefaults.standard.value(for: .integrationVMCProtocol), RenderingFeature.supported.contains(.vmcProtocol) {
+            do {
+                try startVMCProtocolReceiver()
+            } catch {
+                Logger.error(error)
+                UserDefaults.standard.set(false, for: .integrationVMCProtocol)
             }
         }
     }
@@ -373,6 +384,11 @@ public final class Tracking {
                 handConfiguration: webCamera.handTracking.configuration
             )
         }
+    }
+
+    public func startVMCProtocolReceiver() throws {
+        vmcProtocolReceiver.receivesExpressions = UserDefaults.standard.value(for: .integrationVMCProtocolExpressions)
+        try vmcProtocolReceiver.start(port: UserDefaults.standard.value(for: .integrationVMCProtocolPort))
     }
 
     private func stopFaceResamplers() {

@@ -8488,6 +8488,52 @@
         }
       }
     },
+    "vmcProtocolHelp": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moves the avatar with the bones and expressions that motion capture apps such as VSeeFace and XR Animator send over the VMC Protocol. In the sending app, set the destination to this Mac's IP address and the port above."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VSeeFace や XR Animator などのモーションキャプチャアプリが VMC Protocol で送るボーンと表情で、アバターを動かします。送る側のアプリで、送り先をこの Mac の IP アドレスと上のポートにしてください。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VSeeFace, XR Animator 등의 모션 캡처 앱이 VMC Protocol로 보내는 본과 표정으로 아바타를 움직입니다. 보내는 앱에서 전송 대상을 이 Mac의 IP 주소와 위의 포트로 설정하세요."
+          }
+        }
+      }
+    },
+    "vmcProtocolReceivesExpressions": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Receive expressions"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "表情も受け取る"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "표정도 받기"
+          }
+        }
+      }
+    },
     "vrmaRequiresVRM1Message": {
       "extractionState": "manual",
       "localizations": {

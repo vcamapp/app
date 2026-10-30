@@ -15,11 +15,14 @@ public struct RenderingFeature: OptionSet, Sendable {
     /// Driving the whole body from an external motion capture device
     public static let fullBodyTracking = RenderingFeature(rawValue: 1 << 5)
     public static let urp = RenderingFeature(rawValue: 1 << 6)
+    /// Driving the avatar from a performer over the VMC Protocol
+    public static let vmcProtocol = RenderingFeature(rawValue: 1 << 7)
 
-    public static let all: RenderingFeature = [
+    /// The features of the engine
+    public static let engine: RenderingFeature = [
         .postEffect, .shadow, .qualityLevel, .vSync, .meshOptimization, .fullBodyTracking, .urp
     ]
 
-    /// The features the running engine implements. Must be set before the UI is built.
-    @MainActor public static var supported = RenderingFeature.all
+    /// The features the running renderer implements. Must be set before the UI is built.
+    @MainActor public static var supported = RenderingFeature.engine
 }

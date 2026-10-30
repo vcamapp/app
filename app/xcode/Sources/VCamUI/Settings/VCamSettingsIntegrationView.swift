@@ -110,11 +110,74 @@ public struct VCamSettingsIntegrationView: View {
             }
 #endif
 #endif
+            if RenderingFeature.supported.contains(.vmcProtocol) {
+                VMCProtocolSettingView()
+            }
 #if FEATURE_API
             ExternalControlSettingView()
 #endif
         }
         .formStyle(.grouped)
+    }
+}
+
+private struct VMCProtocolSettingView: View {
+    @AppStorage(key: .integrationVMCProtocol) private var integrationVMCProtocol
+    @AppStorage(key: .integrationVMCProtocolPort) private var integrationVMCProtocolPort
+    @AppStorage(key: .integrationVMCProtocolExpressions) private var integrationVMCProtocolExpressions
+
+    @Bindable private var receiver = Tracking.shared.vmcProtocolReceiver
+
+    var body: some View {
+        VCamSettingsIntegrationView.FeatureView(title: "VMC Protocol") {
+            LabeledContent {
+                ReceiverStatusView(connectionStatus: receiver.connectionStatus)
+
+                Toggle(isOn: $integrationVMCProtocol) {
+                    Text(.enable)
+                }
+                .labelsHidden()
+                .toggleStyle(.switch)
+            } label: {
+                Text(.enable)
+            }
+            .onChange(of: integrationVMCProtocol) { _, newValue in
+                if newValue {
+                    do {
+                        try Tracking.shared.startVMCProtocolReceiver()
+                    } catch {
+                        // Roll the toggle back so the UI doesn't claim the receiver is running
+                        Logger.error(error)
+                        integrationVMCProtocol = false
+                    }
+                } else {
+                    receiver.stop()
+                }
+            }
+
+            LabeledContent {
+                TextField(value: $integrationVMCProtocolPort, format: .number.grouping(.never)) {
+                    Text(verbatim: "Port")
+                }
+                .textFieldStyle(.roundedBorder)
+                .labelsHidden()
+                .frame(maxWidth: 100)
+                .disabled(integrationVMCProtocol)
+            } label: {
+                Text(verbatim: "Port")
+            }
+
+            Toggle(isOn: $integrationVMCProtocolExpressions) {
+                Text(.vmcProtocolReceivesExpressions)
+            }
+            .onChange(of: integrationVMCProtocolExpressions) { _, newValue in
+                receiver.receivesExpressions = newValue
+            }
+
+            Text(.vmcProtocolHelp)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+        }
     }
 }
 
