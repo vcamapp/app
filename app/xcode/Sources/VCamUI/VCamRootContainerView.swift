@@ -59,8 +59,15 @@ public extension VCamRootContainerView {
     /// exactly like the ones loaded from the model list
     private func loadAvatar(from url: URL) {
         Task {
+            let item: ModelItem
             do {
-                let item = try await ModelManager.shared.saveModel(from: url)
+                item = try await ModelManager.shared.saveModel(from: url)
+            } catch {
+                Logger.error(error)
+                VCamAlert.showError(title: String(localized: .failedToAddModel), message: error.localizedDescription)
+                return
+            }
+            do {
                 try AvatarControl.load(item)
             } catch {
                 Logger.error(error)

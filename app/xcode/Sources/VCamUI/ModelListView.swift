@@ -75,6 +75,7 @@ public struct ModelListView: View {
                 selectedModelId = model.id
             } catch {
                 Logger.error(error)
+                VCamAlert.showError(title: String(localized: .failedToAddModel), message: error.localizedDescription)
             }
         }
     }

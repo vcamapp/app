@@ -103,7 +103,12 @@ public final class SceneManager {
 
     private static func createAndSaveNewScene(isLandscape: Bool) -> VCamScene {
         let scene = createNewScene(isLandscape: isLandscape)
-        try? VCamSceneDataStore(sceneId: scene.id).saveNew(scene)
+        do {
+            try VCamSceneDataStore(sceneId: scene.id).saveNew(scene)
+        } catch {
+            // The ID is registered before the file is written, so a failure here leaves an ID without data
+            Logger.error(error)
+        }
         return scene
     }
 

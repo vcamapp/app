@@ -2830,6 +2830,29 @@
         }
       }
     },
+    "failedToAddModel": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failed to add the model."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "モデルを追加できませんでした。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모델을 추가하지 못했습니다."
+          }
+        }
+      }
+    },
     "failedToInstallCameraExtension": {
       "extractionState": "manual",
       "localizations": {
@@ -2895,6 +2918,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "PC 소리를 녹음하지 못했습니다."
+          }
+        }
+      }
+    },
+    "failedToStartRecording": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failed to start recording."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "録画を開始できませんでした。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "녹화를 시작하지 못했습니다."
           }
         }
       }
@@ -4436,6 +4482,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "모델"
+          }
+        }
+      }
+    },
+    "modelFileIsBroken": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The file isn't a VRM, or it is broken or only partly downloaded."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VRMではないか、壊れているか、途中までしかダウンロードされていないファイルです。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VRM이 아니거나, 손상되었거나, 일부만 다운로드된 파일입니다."
           }
         }
       }

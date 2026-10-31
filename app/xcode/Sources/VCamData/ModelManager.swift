@@ -75,8 +75,42 @@ public final class ModelManager {
     @concurrent
     private nonisolated static func copyModel(from source: URL, to destinationURL: URL, in modelDirectory: URL) async throws {
         try FileManager.default.createDirectoryIfNeeded(at: modelDirectory)
-        try FileManager.default.copyItem(at: source, to: destinationURL)
+        // A file in iCloud Drive can be a placeholder; a coordinated read waits for the download,
+        // where a plain copy fails with a timeout
+        var coordinationError: NSError?
+        var copyError: (any Error)?
+        NSFileCoordinator().coordinate(readingItemAt: source, options: [], error: &coordinationError) { url in
+            do {
+#if FEATURE_3
+                try validateGLBHeader(at: url)
+#endif
+                try FileManager.default.copyItem(at: url, to: destinationURL)
+            } catch {
+                copyError = error
+            }
+        }
+        if let error = coordinationError ?? copyError {
+            throw error
+        }
     }
+
+#if FEATURE_3
+    /// The engine reads the whole model on every restore, so a file that isn't a GLB or was cut off
+    /// mid-download is refused here instead of being registered and failing at each launch.
+    /// Only the header is checked: the engine accepts models that a full parse here would reject
+    private nonisolated static func validateGLBHeader(at url: URL) throws {
+        let handle = try FileHandle(forReadingFrom: url)
+        defer { try? handle.close() }
+        guard let header = try handle.read(upToCount: 12), header.count == 12,
+              header.prefix(4).elementsEqual("glTF".utf8) else {
+            throw ModelManagerError.invalidModelFile
+        }
+        let declaredLength = header[8..<12].reversed().reduce(UInt64(0)) { $0 << 8 | UInt64($1) }
+        guard declaredLength <= (try handle.seekToEnd()) else {
+            throw ModelManagerError.invalidModelFile
+        }
+    }
+#endif
 
     @concurrent
     private nonisolated static func loadMeta(from source: URL) async -> ModelMeta? {
@@ -267,4 +301,5 @@ public enum ModelManagerError: Error {
     case modelURLNotFound
     case invalidImage
     case invalidModelDirectory
+    case invalidModelFile
 }

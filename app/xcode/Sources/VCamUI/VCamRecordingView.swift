@@ -214,7 +214,11 @@ private struct RecordVideoView: View {
                 capturesSystemAudio: recordSystemSound
             )
         } catch {
-            print(error)
+            if (error as? CocoaError)?.code == .fileWriteNoPermission {
+                // The kept folder can't be written to, so the next attempt asks for another one
+                UserDefaults.standard.remove(for: .screenshotDestination)
+            }
+            VCamAlert.showError(title: String(localized: .failedToStartRecording), message: error.localizedDescription)
         }
     }
 }

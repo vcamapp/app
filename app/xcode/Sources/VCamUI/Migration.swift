@@ -9,13 +9,19 @@ public struct Migration {
     @concurrent
     public static func migrate() async {
         let previousVersion = UserDefaults.standard.value(for: .previousVersion)
+        let version = previousVersion.components(separatedBy: ".").compactMap(Int.init)
+
+        if installsVirtualCamera(previousVersion: previousVersion, version: version), VirtualCamera.backend?.isInstallable == false {
+            // The previous version stays unrecorded so that the migrations run again once the app has been moved
+            await VCamAlert.showModal(title: String(localized: .failure), message: String(localized: .moveAppToApplicationsFolder), canCancel: false)
+            return
+        }
         defer {
             UserDefaults.standard.set(Bundle.main.version, for: .previousVersion)
         }
 
         await migrationFirst(previousVersion: previousVersion)
 
-        let version = previousVersion.components(separatedBy: ".").compactMap(Int.init)
         guard version.count == 3 else { return }
 
         do {
@@ -33,6 +39,18 @@ public struct Migration {
 }
 
 extension Migration {
+    private static func installsVirtualCamera(previousVersion: String, version: [Int]) -> Bool {
+#if FEATURE_3
+        previousVersion.isEmpty || (version.count == 3 && isBefore0131(version))
+#else
+        previousVersion.isEmpty
+#endif
+    }
+
+    private static func isBefore0131(_ version: [Int]) -> Bool {
+        version[0] == 0 && (version[1] < 13 || (version[1] == 13 && version[2] < 1))
+    }
+
     @concurrent
     static func migrationFirst(previousVersion: String) async {
         guard previousVersion.isEmpty else { return }
@@ -108,7 +126,7 @@ extension Migration {
     @MainActor
     static func migration0131(version: [Int]) async throws {
         // If updated from a version prior to 0.13.1
-        guard version[0] == 0 && (version[1] < 13 || (version[1] == 13 && version[2] < 1)) else { return }
+        guard isBefore0131(version) else { return }
         Logger.log("Migrating to 0.13.1 from \(version.map(String.init).joined(separator: "."))")
 
         await VCamAlert.showModal(
