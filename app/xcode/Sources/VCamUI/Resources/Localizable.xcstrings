@@ -8563,19 +8563,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Moves the avatar with the bones and expressions that motion capture apps such as VSeeFace and XR Animator send over the VMC Protocol. In the sending app, set the destination to this Mac's IP address and the port above."
+            "value": "Moves the avatar in sync with apps that send data over the VMC Protocol. In the sending app, set the destination to this Mac's IP address and the port above."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "VSeeFace や XR Animator などのモーションキャプチャアプリが VMC Protocol で送るボーンと表情で、アバターを動かします。送る側のアプリで、送り先をこの Mac の IP アドレスと上のポートにしてください。"
+            "value": "VMC Protocol で送信するアプリと連携して、アバターを動かします。送信側のアプリで、送信先をこの Mac の IP アドレスと上のポートにしてください。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "VSeeFace, XR Animator 등의 모션 캡처 앱이 VMC Protocol로 보내는 본과 표정으로 아바타를 움직입니다. 보내는 앱에서 전송 대상을 이 Mac의 IP 주소와 위의 포트로 설정하세요."
+            "value": "VMC Protocol로 전송하는 앱과 연동하여 아바타를 움직입니다. 전송 측 앱에서 전송 대상을 이 Mac의 IP 주소와 위의 포트로 설정하세요."
           }
         }
       }
