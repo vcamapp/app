@@ -136,6 +136,8 @@ struct TextFillSection: View {
                 }
 
                 ForEach(gradient.stops) { $stop in
+                    // Read when the row is built: the binding looks up by index and goes out of range once the row is removed
+                    let id = stop.id
                     HStack(spacing: 8) {
                         LabeledColorPicker(.gradient, color: $stop.color)
                         Spacer()
@@ -145,7 +147,7 @@ struct TextFillSection: View {
                         Text(verbatim: "%")
                             .foregroundStyle(.secondary)
                         InspectorIconButton(systemImage: "minus", help: .delete) {
-                            gradient.stops.wrappedValue.remove(byId: stop.id)
+                            gradient.stops.wrappedValue.remove(byId: id)
                         }
                     }
                 }
@@ -176,13 +178,14 @@ struct TextOutlineSection: View {
             }
         } content: {
             ForEach($outlines) { $outline in
+                let id = outline.id
                 HStack(spacing: 8) {
                     LabeledColorPicker(.outline, color: $outline.color)
                     Spacer()
                     LabeledField(.width, value: $outline.width, width: 56)
                     Stepper(value: $outline.width, in: 0...200, step: 1) { EmptyView() }
                     InspectorIconButton(systemImage: "minus", help: .delete) {
-                        outlines.remove(byId: outline.id)
+                        outlines.remove(byId: id)
                     }
                 }
             }
@@ -200,8 +203,9 @@ struct TextEffectsSection: View {
             }
         } content: {
             ForEach($effects) { $effect in
+                let id = effect.id
                 TextEffectRow(effect: $effect) {
-                    effects.remove(byId: effect.id)
+                    effects.remove(byId: id)
                 }
             }
         }

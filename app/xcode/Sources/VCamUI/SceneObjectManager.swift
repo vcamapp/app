@@ -299,6 +299,11 @@ public final class SceneObjectManager {
     private func fitSize(_ size: CGSize, regionSize: CGSize) -> CGSize {
         let canvasSize = MainTexture.shared.canvasSize
 
+        // A texture without a size has no aspect ratio to keep, and dividing by it gives NaN, which traps the Int conversion of the allocation
+        guard size.width > 0, size.height > 0 else {
+            return regionSize.width < 0 ? canvasSize * 0.8 : CGSize(width: canvasSize.width * regionSize.width, height: canvasSize.height * regionSize.height)
+        }
+
         if regionSize.width < 0 { // Can't compare with .invalid, so determine based on whether it's less than 0
             var fittedSize = canvasSize * 0.8
             fittedSize.scaleToFit(size: size)

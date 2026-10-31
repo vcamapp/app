@@ -249,13 +249,10 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
         }
         guard let pixelBufferWriter else { return }
 
-        if frameCount == 0 {
+        let isFirstFrame = frameCount == 0
+        if isFirstFrame {
             startDate = Date()
             baseHostTime = mach_absolute_time()
-
-            // Start the session just before appending to avoid latency,
-            // as the video's expectsMediaDataInRealTime is true
-            assetwriter?.startSession(atSourceTime: CMTime.zero)
         }
         // Stamped while encoding so the recording follows the frame, not the GPU
         let presentationTime = currentPresentationTime
@@ -268,6 +265,11 @@ public final class VideoRecorder { // TODO: Migrate new API for macOS 26+
                 self.append(buffer, at: presentationTime)
             }
         }) else { return }
+        if isFirstFrame {
+            // Started just before the first append to avoid latency, as the video's expectsMediaDataInRealTime is true.
+            // Waits for a frame that is actually on its way, since starting the session twice raises an exception
+            assetwriter?.startSession(atSourceTime: .zero)
+        }
         frameCount += 1
     }
 
