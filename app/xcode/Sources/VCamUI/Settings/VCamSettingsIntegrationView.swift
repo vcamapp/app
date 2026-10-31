@@ -34,6 +34,19 @@ public struct VCamSettingsIntegrationView: View {
                     HStack {
                         Text(verbatim: "IP:")
                         Text(ipAddress)
+                        Button {
+                            NSPasteboard.general.clearContents()
+                            NSPasteboard.general.setString(ipAddress, forType: .string)
+                        } label: {
+                            Label {
+                                Text(.copy)
+                            } icon: {
+                                Image(systemName: "doc.on.doc")
+                            }
+                            .labelStyle(.iconOnly)
+                        }
+                        .buttonStyle(.borderless)
+                        .help(Text(.copy))
                     }
                 }
             }
