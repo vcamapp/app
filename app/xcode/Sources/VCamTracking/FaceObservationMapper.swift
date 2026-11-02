@@ -3,7 +3,10 @@ import Vision
 import VCamTrackingCore
 
 struct FaceObservationMapper {
-    private let request = DetectFaceLandmarksRequest()
+    /// `VisionLandmarks` reads `allPoints` by index in the 76-point layout of revision 3.
+    /// Revision 4 (the default from macOS 27) has 98 points in another order, which breaks
+    /// blink and mouth estimation while head pose still looks fine.
+    private let request = DetectFaceLandmarksRequest(.revision3)
 
     /// Reusing the previous observation via `inputFaceObservations` skips the costly
     /// full-frame face detector. Landmarks are still recomputed on reused frames, but
