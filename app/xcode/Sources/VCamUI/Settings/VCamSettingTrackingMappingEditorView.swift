@@ -52,8 +52,8 @@ public struct VCamSettingTrackingMappingEditorView: View {
             if supportsPerfectSyncMode {
                 ToolbarItem(placement: .automatic) {
                     Picker(.trackingMode, selection: $store.selectedMode) {
-                        modeLabel(.blendShape, activeMode: activeMode).tag(TrackingMode.blendShape)
                         modeLabel(.perfectSync, activeMode: activeMode).tag(TrackingMode.perfectSync)
+                        modeLabel(.blendShape, activeMode: activeMode).tag(TrackingMode.blendShape)
                     }
                     .pickerStyle(.segmented)
                 }

@@ -3451,29 +3451,6 @@
         }
       }
     },
-    "highPrecision": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "High Precision"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "高精度"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "고정밀"
-          }
-        }
-      }
-    },
     "hueShift": {
       "extractionState": "manual",
       "localizations": {
@@ -4781,29 +4758,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "없음"
-          }
-        }
-      }
-    },
-    "normal": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Normal"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "通常"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "일반"
           }
         }
       }
@@ -8116,6 +8070,52 @@
           "stringUnit": {
             "state": "translated",
             "value": "트래킹 모드"
+          }
+        }
+      }
+    },
+    "trackingModeHighPrecisionStandard": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "High precision / Standard"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "高精度・通常"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "고정밀·일반"
+          }
+        }
+      }
+    },
+    "trackingModeLegacy": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Legacy"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "旧方式"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이전 방식"
           }
         }
       }
