@@ -75,6 +75,8 @@ public final class Tracking {
     }
 
     public func syncPerfectSyncAvailability() {
+        // The model may finish loading after the system starts, so the UI's copy has to follow each load
+        UniState.shared.initializeFromEngine()
         stopFaceResamplers()
         reconcileLipSyncState()
         if supportsPerfectSyncMapping {
