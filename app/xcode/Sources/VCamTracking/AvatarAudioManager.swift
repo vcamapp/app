@@ -12,8 +12,14 @@ public final class AvatarAudioManager {
 
     public var videoRecorderRenderAudioFrame: @MainActor (AVAudioPCMBuffer, AVAudioTime, TimeInterval, AudioDevice?) -> Void = { _, _, _, _ in }
 
+    /// Receives each vowel heard in the microphone, and nil once the estimation stops.
+    /// No estimation runs unless the renderer sets this, since it is what cross-fades the mouth shapes.
+    public static var vowelHandler: (@MainActor (Vowel?) -> Void)?
+
     private let audioManager = AudioManager()
     private let audioExpressionEstimator = AudioExpressionEstimator()
+    private var vowelEstimator = AudioVowelEstimator()
+    private var isVowelEstimationEnabled = UserDefaults.standard.value(for: .useMicVowelEstimation)
     private var usage = Usage()
     private var startTask: Task<Void, Never>?
 
@@ -27,11 +33,12 @@ public final class AvatarAudioManager {
     }
 
     init() {
-        audioExpressionEstimator.setOnAudioLevelUpdate { level in
+        audioExpressionEstimator.setOnAudioLevelUpdate { [weak self] level in
             // analyze() is always called on the main thread (see setOnUpdateAudioBuffer below)
             // and invokes this callback synchronously
             MainActor.assumeIsolated {
-                UniBridge.shared.micAudioLevel(CGFloat(level))
+                let isRoomNoise = self?.isHearingOnlyRoomNoise ?? false
+                UniBridge.shared.micAudioLevel(isRoomNoise ? 0 : CGFloat(level))
             }
         }
         audioManager.setOnUpdateAudioBuffer { [weak self] buffer, time, latency in
@@ -65,6 +72,13 @@ public final class AvatarAudioManager {
         guard !isRecording else { return }
 
         activeInputDevice = currentInputDevice
+        if Self.vowelHandler != nil {
+            audioManager.setOnCaptureSamples { [weak self] samples, sampleRate in
+                DispatchQueue.runOnMain {
+                    self?.estimateVowel(from: samples, sampleRate: sampleRate)
+                }
+            }
+        }
         setEmotionEnabled(UniState.shared.value(for: .useEmotion))
 
         if isSystemSoundRecording {
@@ -92,6 +106,7 @@ public final class AvatarAudioManager {
         startTask = nil
         audioManager.stopRecording()
         audioExpressionEstimator.reset()
+        resetVowelEstimation()
     }
 
     public func setEmotionEnabled(_ isEnabled: Bool) {
@@ -105,6 +120,33 @@ public final class AvatarAudioManager {
         } else {
             audioExpressionEstimator.setOnUpdate(nil)
         }
+    }
+
+    public func setVowelEstimationEnabled(_ isEnabled: Bool) {
+        isVowelEstimationEnabled = isEnabled
+        resetVowelEstimation()
+    }
+
+    private var estimatesVowel: Bool {
+        isVowelEstimationEnabled && Self.vowelHandler != nil
+    }
+
+    /// Room noise alone can open the mouth once the sensitivity is raised. Only the estimator tracks the noise, so without it the level decides as is.
+    private var isHearingOnlyRoomNoise: Bool {
+        estimatesVowel && !vowelEstimator.isVoiceAudible
+    }
+
+    private func estimateVowel(from samples: [Float], sampleRate: Double) {
+        guard usage.contains(.lipSync), estimatesVowel else { return }
+        let vowel = samples.withUnsafeBufferPointer { vowelEstimator.estimate(samples: $0, sampleRate: sampleRate) }
+        if let vowel {
+            Self.vowelHandler?(vowel)
+        }
+    }
+
+    private func resetVowelEstimation() {
+        vowelEstimator.reset()
+        Self.vowelHandler?(nil)
     }
 
     public func setAudioDevice(_ audioDevice: AudioDevice) {

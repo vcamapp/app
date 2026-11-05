@@ -17,6 +17,8 @@ public struct RenderingFeature: OptionSet, Sendable {
     public static let urp = RenderingFeature(rawValue: 1 << 6)
     /// Driving the avatar from a performer over the VMC Protocol
     public static let vmcProtocol = RenderingFeature(rawValue: 1 << 7)
+    /// Shaping the mouth from the vowels heard in the microphone
+    public static let micVowelEstimation = RenderingFeature(rawValue: 1 << 8)
 
     /// The features of the engine
     public static let engine: RenderingFeature = [

@@ -8350,6 +8350,29 @@
         }
       }
     },
+    "useMicVowelEstimation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use vowel estimation by microphone"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "マイクで母音を推定する"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "마이크로 모음 추정"
+          }
+        }
+      }
+    },
     "useVowelEstimation": {
       "extractionState": "manual",
       "localizations": {

@@ -70,7 +70,6 @@ public final class AudioExpressionEstimator: NSObject, Sendable {
     public func reset() {
         audioLevelMeter.reset()
         analyzerState.reset()
-        callbackState.reset()
     }
 
     /// Runs synchronously on the caller's thread, callbacks included
@@ -98,13 +97,6 @@ private final class CallbackState: Sendable {
 
     func setOnAudioLevelUpdate(_ handler: (@Sendable (Float) -> Void)?) {
         state.withLock { $0.onAudioLevelUpdate = handler }
-    }
-
-    func reset() {
-        state.withLock {
-            $0.onUpdate = nil
-            $0.onAudioLevelUpdate = nil
-        }
     }
 
     func notifyExpression(_ expression: FacialExpression) {

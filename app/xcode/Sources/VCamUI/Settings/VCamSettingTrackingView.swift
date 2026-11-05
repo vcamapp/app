@@ -11,6 +11,7 @@ public struct VCamSettingTrackingView: View {
     @AppStorage(key: .eyeTrackingIntensityX) private var eyeTrackingIntensityX
     @AppStorage(key: .eyeTrackingIntensityY) private var eyeTrackingIntensityY
     @AppStorage(key: .useVowelEstimation) private var useVowelEstimation
+    @AppStorage(key: .useMicVowelEstimation) private var useMicVowelEstimation
     @AppStorage(key: .useEyeTracking) private var useEyeTracking
     @AppStorage(key: .mirrorTracking) private var mirrorTracking
     @AppStorage(key: .fingerTrackingOpenIntensity) private var fingerTrackingOpenIntensity
@@ -43,6 +44,14 @@ public struct VCamSettingTrackingView: View {
             Section {
                 if uniState.currentLipSync == .mic, !Tracking.shared.micLipSyncDisabled {
                     ValueEditField(.lipSyncSensitivity, value: $state.lipSyncMicIntensity, type: .slider(0.1...3))
+                    if RenderingFeature.supported.contains(.micVowelEstimation) {
+                        Toggle(isOn: $useMicVowelEstimation) {
+                            Text(.useMicVowelEstimation)
+                        }
+                        .onChange(of: useMicVowelEstimation) { _, newValue in
+                            AvatarAudioManager.shared.setVowelEstimationEnabled(newValue)
+                        }
+                    }
                 }
                 ValueEditField(.fpsCamera, value: $cameraFps.map(), type: .slider(1...60) {
                     guard !$0 else { return }
