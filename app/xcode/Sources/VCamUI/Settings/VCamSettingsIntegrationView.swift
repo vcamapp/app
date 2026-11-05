@@ -51,29 +51,12 @@ public struct VCamSettingsIntegrationView: View {
                 }
             }
             FeatureView(title: "VCam Mocap") {
-                LabeledContent {
+                EnableToggleRow(isOn: $integrationVCamMocap) {
+                    try Tracking.shared.startVCamMotionReceiver()
+                } stop: {
+                    Tracking.shared.vcamMotionReceiver.stop()
+                } status: {
                     VCamMotionReceiverStatusView()
-
-                    Toggle(isOn: $integrationVCamMocap) {
-                        Text(.enable)
-                    }
-                    .labelsHidden()
-                    .toggleStyle(.switch)
-                } label: {
-                    Text(.enable)
-                }
-                .onChange(of: integrationVCamMocap) { _, newValue in
-                    if newValue {
-                        do {
-                            try Tracking.shared.startVCamMotionReceiver()
-                        } catch {
-                            // Roll the toggle back so the UI doesn't claim the receiver is running
-                            Logger.error(error)
-                            integrationVCamMocap = false
-                        }
-                    } else {
-                        Tracking.shared.vcamMotionReceiver.stop()
-                    }
                 }
             }
             FeatureView(title: "iFacialMocap") {
@@ -143,42 +126,15 @@ private struct VMCProtocolSettingView: View {
 
     var body: some View {
         VCamSettingsIntegrationView.FeatureView(title: "VMC Protocol") {
-            LabeledContent {
+            EnableToggleRow(isOn: $integrationVMCProtocol) {
+                try Tracking.shared.startVMCProtocolReceiver()
+            } stop: {
+                receiver.stop()
+            } status: {
                 ReceiverStatusView(connectionStatus: receiver.connectionStatus)
-
-                Toggle(isOn: $integrationVMCProtocol) {
-                    Text(.enable)
-                }
-                .labelsHidden()
-                .toggleStyle(.switch)
-            } label: {
-                Text(.enable)
-            }
-            .onChange(of: integrationVMCProtocol) { _, newValue in
-                if newValue {
-                    do {
-                        try Tracking.shared.startVMCProtocolReceiver()
-                    } catch {
-                        // Roll the toggle back so the UI doesn't claim the receiver is running
-                        Logger.error(error)
-                        integrationVMCProtocol = false
-                    }
-                } else {
-                    receiver.stop()
-                }
             }
 
-            LabeledContent {
-                TextField(value: $integrationVMCProtocolPort, format: .number.grouping(.never)) {
-                    Text(verbatim: "Port")
-                }
-                .textFieldStyle(.roundedBorder)
-                .labelsHidden()
-                .frame(maxWidth: 100)
-                .disabled(integrationVMCProtocol)
-            } label: {
-                Text(verbatim: "Port")
-            }
+            PortRow(port: $integrationVMCProtocolPort, isLocked: integrationVMCProtocol)
 
             Toggle(isOn: $integrationVMCProtocolExpressions) {
                 Text(.vmcProtocolReceivesExpressions)
@@ -201,47 +157,20 @@ private struct ExternalControlSettingView: View {
 
     var body: some View {
         VCamSettingsIntegrationView.FeatureView(title: "VCam API") {
-            LabeledContent {
+            EnableToggleRow(isOn: $integrationExternalControl) {
+                try ExternalControlServer.shared.startWithSavedPort()
+            } stop: {
+                ExternalControlServer.shared.stop()
+            } status: {
                 if ExternalControlServer.shared.isRunning {
                     Text(verbatim: "ws://127.0.0.1:\(integrationExternalControlPort)")
                         .font(.callout)
                         .foregroundStyle(.secondary)
                         .textSelection(.enabled)
                 }
-
-                Toggle(isOn: $integrationExternalControl) {
-                    Text(.enable)
-                }
-                .labelsHidden()
-                .toggleStyle(.switch)
-            } label: {
-                Text(.enable)
-            }
-            .onChange(of: integrationExternalControl) { _, newValue in
-                if newValue {
-                    do {
-                        try ExternalControlServer.shared.startWithSavedPort()
-                    } catch {
-                        // Roll the toggle back so the UI doesn't claim the server is running
-                        Logger.error(error)
-                        integrationExternalControl = false
-                    }
-                } else {
-                    ExternalControlServer.shared.stop()
-                }
             }
 
-            LabeledContent {
-                TextField(value: $integrationExternalControlPort, format: .number.grouping(.never)) {
-                    Text(verbatim: "Port")
-                }
-                .textFieldStyle(.roundedBorder)
-                .labelsHidden()
-                .frame(maxWidth: 100)
-                .disabled(integrationExternalControl)
-            } label: {
-                Text(verbatim: "Port")
-            }
+            PortRow(port: $integrationExternalControlPort, isLocked: integrationExternalControl)
 
             Text(.externalControlHelp)
                 .font(.caption2)
@@ -250,6 +179,61 @@ private struct ExternalControlSettingView: View {
     }
 }
 #endif
+
+/// Starts and stops a listener with its toggle, next to its status
+private struct EnableToggleRow<Status: View>: View {
+    @Binding var isOn: Bool
+    let start: () throws -> Void
+    let stop: () -> Void
+    @ViewBuilder let status: Status
+
+    var body: some View {
+        LabeledContent {
+            status
+
+            Toggle(isOn: $isOn) {
+                Text(.enable)
+            }
+            .labelsHidden()
+            .toggleStyle(.switch)
+        } label: {
+            Text(.enable)
+        }
+        .onChange(of: isOn) { _, newValue in
+            if newValue {
+                do {
+                    try start()
+                } catch {
+                    // Roll the toggle back so the UI doesn't claim the listener is running
+                    Logger.error(error)
+                    isOn = false
+                }
+            } else {
+                stop()
+            }
+        }
+    }
+}
+
+/// Locked while the listener is enabled, since it keeps the port it started on
+private struct PortRow: View {
+    @Binding var port: Int
+    let isLocked: Bool
+
+    var body: some View {
+        LabeledContent {
+            TextField(value: $port, format: .number.grouping(.never)) {
+                Text(verbatim: "Port")
+            }
+            .textFieldStyle(.roundedBorder)
+            .labelsHidden()
+            .frame(maxWidth: 100)
+            .disabled(isLocked)
+        } label: {
+            Text(verbatim: "Port")
+        }
+    }
+}
 
 private struct ReceiverStatusView: View {
     let connectionStatus: ConnectionStatus
