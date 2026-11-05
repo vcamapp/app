@@ -2,7 +2,6 @@ import Foundation
 import Network
 import Observation
 import VCamMotionV1
-import VCamLogger
 import VCamTrackingCore
 
 public enum VCamMotionProtocolVersion: Equatable, Sendable {
@@ -29,7 +28,7 @@ public final class VCamMotionReceiver {
     public private(set) var motionProtocolVersion: VCamMotionProtocolVersion?
 
     @ObservationIgnored private var shouldAutoReconnect = true
-    @ObservationIgnored private var restartRetryTask: Task<Void, Never>?
+    @ObservationIgnored private let restartRetry = ListenerRestartRetry()
     @ObservationIgnored private let timeoutWatchdog = DataTimeoutWatchdog(timeout: .seconds(2))
 
     public init() {}
@@ -154,7 +153,7 @@ public final class VCamMotionReceiver {
 
     public func stop() {
         shouldAutoReconnect = false
-        cancelRestartRetry()
+        restartRetry.cancel()
         stopInternal()
     }
 
@@ -181,28 +180,13 @@ public final class VCamMotionReceiver {
 
     private func restartIfNeeded() {
         TrackingTraceRecorder.shared.recordEvent("vcamMotion.restart")
-        cancelRestartRetry()
-        guard shouldAutoReconnect, let tracking, let settings else {
-            stopInternal()
-            return
-        }
+        restartRetry.cancel()
         stopInternal()
-        do {
+        guard shouldAutoReconnect, let tracking, let settings else { return }
+        restartRetry.start {
             try start(with: tracking, settings: settings)
-        } catch {
-            // A failed restart leaves no listener or watchdog to trigger
-            // another reconnect, so retry after a delay.
-            Logger.log("Restart failed: \(error.localizedDescription)")
-            restartRetryTask = Task { [weak self] in
-                try? await Task.sleep(for: .seconds(1))
-                guard !Task.isCancelled else { return }
-                self?.restartIfNeeded()
-            }
+        } orRetry: { [weak self] in
+            self?.restartIfNeeded()
         }
-    }
-
-    private func cancelRestartRetry() {
-        restartRetryTask?.cancel()
-        restartRetryTask = nil
     }
 }
