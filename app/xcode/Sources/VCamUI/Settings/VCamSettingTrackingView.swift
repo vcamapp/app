@@ -23,6 +23,14 @@ public struct VCamSettingTrackingView: View {
     @Environment(UniState.self) private var uniState
     private var tracking = Tracking.shared
 
+    private var showsCameraLipSyncSettings: Bool {
+        uniState.currentLipSync == .camera
+    }
+
+    private var showsMicLipSyncSettings: Bool {
+        uniState.currentLipSync == .mic && !Tracking.shared.micLipSyncDisabled
+    }
+
     public var body: some View {
         @Bindable var state = uniState
 
@@ -37,12 +45,14 @@ public struct VCamSettingTrackingView: View {
                 TrackingDeviceView()
             }
 
-            Toggle(isOn: $useVowelEstimation) {
-                Text(.useVowelEstimation)
+            if showsCameraLipSyncSettings {
+                Toggle(isOn: $useVowelEstimation) {
+                    Text(.useVowelEstimation)
+                }
             }
 
             Section {
-                if uniState.currentLipSync == .mic, !Tracking.shared.micLipSyncDisabled {
+                if showsMicLipSyncSettings {
                     ValueEditField(.lipSyncSensitivity, value: $state.lipSyncMicIntensity, type: .slider(0.1...3))
                     if RenderingFeature.supported.contains(.micVowelEstimation) {
                         Toggle(isOn: $useMicVowelEstimation) {
@@ -124,6 +134,7 @@ public struct VCamSettingTrackingView: View {
             }
         }
         .formStyle(.grouped)
+        .animation(.default, value: uniState.currentLipSync)
     }
 
     /// Without a face source the avatar blinks on its own whatever is selected

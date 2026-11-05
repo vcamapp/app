@@ -19,6 +19,8 @@ public struct RenderingFeature: OptionSet, Sendable {
     public static let vmcProtocol = RenderingFeature(rawValue: 1 << 7)
     /// Shaping the mouth from the vowels heard in the microphone
     public static let micVowelEstimation = RenderingFeature(rawValue: 1 << 8)
+    /// Moving the mouth with the microphone while Perfect Sync tracking moves the rest of the face
+    public static let micLipSyncWithPerfectSync = RenderingFeature(rawValue: 1 << 9)
 
     /// The features of the engine
     public static let engine: RenderingFeature = [

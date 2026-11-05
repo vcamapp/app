@@ -348,6 +348,7 @@ public final class Tracking {
 
     public var micLipSyncDisabled: Bool {
         faceTrackingSupportsPerfectSync && UniBridge.shared.hasPerfectSyncBlendShape
+            && !RenderingFeature.supported.contains(.micLipSyncWithPerfectSync)
     }
 
     /// The mapping mode every face tracking source routes data to, or nil while no face tracking runs.
@@ -365,8 +366,8 @@ public final class Tracking {
         UniBridge.shared.hasPerfectSyncBlendShape
     }
 
-    /// Perfect Sync drives the mouth on its own, so the mic is suppressed while it is active
-    /// without touching the user's choice, which takes effect again once Perfect Sync stops.
+    /// Where the renderer can't combine the two, Perfect Sync drives the mouth on its own, so the mic is suppressed
+    /// while it is active without touching the user's choice, which takes effect again once Perfect Sync stops.
     private func reconcileLipSyncState() {
         if UniState.shared.currentLipSync == .mic, !micLipSyncDisabled {
             AvatarAudioManager.shared.start(usage: .lipSync)
