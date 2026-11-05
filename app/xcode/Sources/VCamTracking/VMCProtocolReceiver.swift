@@ -2,7 +2,6 @@ import Foundation
 import Network
 import Observation
 import Synchronization
-import VCamLogger
 import VCamTrackingCore
 
 /// Listens as a VMC Protocol marionette: a performer (a motion capture app) sends the bones and expressions of
@@ -24,11 +23,11 @@ public final class VMCProtocolReceiver {
     @ObservationIgnored private let session = UDPDatagramSession()
     @ObservationIgnored nonisolated private let smoothingStorage: TrackingSmoothingStorage
     @ObservationIgnored nonisolated private let resampler: TrackingResampler
-    /// Written on the receive queue, and reset from the main actor when the performer is gone
-    @ObservationIgnored nonisolated private let performer = Mutex(VMCPerformerState())
+    /// Written on the receive queue, and taken or reset from the main actor
+    @ObservationIgnored nonisolated private let inbox = Mutex(Inbox())
     @ObservationIgnored private let relay: FrameRelay
     @ObservationIgnored private var port: NWEndpoint.Port?
-    @ObservationIgnored private var restartRetryTask: Task<Void, Never>?
+    @ObservationIgnored private let restartRetry = ListenerRestartRetry()
     @ObservationIgnored private let timeoutWatchdog = DataTimeoutWatchdog(timeout: .seconds(1))
 
     public init(smoothing: TrackingSmoothing) {
@@ -37,7 +36,7 @@ public final class VMCProtocolReceiver {
         let relay = FrameRelay()
         self.relay = relay
         resampler = TrackingResampler(label: "vmc", settingsProvider: smoothingStorage.settingsProvider) { @MainActor values in
-            relay.deliver(VMCPerformerState.frame(fromResamplerValues: values, expressions: nil))
+            relay.deliver(VMCPerformerState.frame(fromResamplerValues: values))
         }
     }
 
@@ -57,10 +56,12 @@ public final class VMCProtocolReceiver {
             },
             onReady: {},
             receive: { [weak self] data, receivedAt in
-                self.flatMap { Self.receive(data, receivedAt: receivedAt, performer: $0.performer) }
+                self.map { Self.receive(data, receivedAt: receivedAt, inbox: $0.inbox) } ?? false
             },
-            onData: { [weak self] received in
-                self?.handle(received)
+            onData: { [weak self] updated in
+                if updated {
+                    self?.takeReceived()
+                }
             }
         )
         self.port = endpointPort
@@ -69,7 +70,7 @@ public final class VMCProtocolReceiver {
 
     public func stop() {
         port = nil
-        cancelRestartRetry()
+        restartRetry.cancel()
         stopInternal()
     }
 
@@ -82,6 +83,24 @@ public final class VMCProtocolReceiver {
         }
     }
 
+    /// A performer may split a frame over several bundles, each its own datagram. They pile up here, and the main
+    /// actor takes only the latest values, so the frame reaches the resampler once instead of once per bundle
+    private struct Inbox: Sendable {
+        var performer = VMCPerformerState()
+        /// What changed since the main actor last took it
+        var pending = VMCPerformerState.Update()
+        /// When the latest values of the body arrived
+        var receivedAt: TimeInterval = 0
+
+        mutating func takePending() -> Received? {
+            guard !pending.isEmpty else { return nil }
+            defer { pending = VMCPerformerState.Update() }
+            return Received(values: pending.movesBody ? performer.resamplerValues : nil,
+                            expressions: pending.appliesExpressions ? performer.expressions : nil,
+                            receivedAt: receivedAt)
+        }
+    }
+
     private struct Received: Sendable {
         var values: [Float]?
         /// Set when `/VMC/Ext/Blend/Apply` arrived
@@ -89,21 +108,22 @@ public final class VMCProtocolReceiver {
         var receivedAt: TimeInterval
     }
 
+    /// Whether the datagram changed anything for the main actor to take
     nonisolated private static func receive(_ data: Data, receivedAt: TimeInterval,
-                                            performer: borrowing Mutex<VMCPerformerState>) -> Received? {
-        let messages = OSCPacketReader.messages(in: data)
-        guard !messages.isEmpty else { return nil }
-        return performer.withLock { performer in
-            let update = performer.receive(messages)
-            guard update.movesBody || update.appliesExpressions else { return nil }
-            return Received(values: update.movesBody ? performer.resamplerValues : nil,
-                            expressions: update.appliesExpressions ? performer.expressions : nil,
-                            receivedAt: receivedAt)
+                                            inbox: borrowing Mutex<Inbox>) -> Bool {
+        inbox.withLock { inbox in
+            let update = inbox.performer.receive(data)
+            if update.movesBody {
+                inbox.receivedAt = receivedAt
+            }
+            inbox.pending.merge(update)
+            return !update.isEmpty
         }
     }
 
-    private func handle(_ received: Received?) {
-        guard let received else { return }
+    /// Each changing datagram hops here, so a hop finds nothing once an earlier one has taken its values
+    private func takeReceived() {
+        guard let received = inbox.withLock({ $0.takePending() }) else { return }
         timeoutWatchdog.markDataReceived()
         if connectionStatus != .connected {
             connectionStatus = .connected
@@ -138,7 +158,7 @@ public final class VMCProtocolReceiver {
         timeoutWatchdog.stop()
         connectionStatus = session.isRunning ? .connecting : .disconnected
         resampler.stop()
-        performer.withLock { $0.reset() }
+        inbox.withLock { $0 = Inbox() }
         relay.reset()
         Self.frameHandler?(nil)
     }
@@ -149,28 +169,14 @@ public final class VMCProtocolReceiver {
     }
 
     private func restartIfNeeded() {
-        cancelRestartRetry()
-        guard let port else {
-            stopInternal()
-            return
-        }
+        restartRetry.cancel()
         stopInternal()
-        do {
+        guard let port else { return }
+        restartRetry.start {
             try start(port: Int(port.rawValue))
-        } catch {
-            // A failed restart leaves no listener to trigger another one, so retry after a delay
-            Logger.log("Restart failed: \(error.localizedDescription)")
-            restartRetryTask = Task { [weak self] in
-                try? await Task.sleep(for: .seconds(1))
-                guard !Task.isCancelled else { return }
-                self?.restartIfNeeded()
-            }
+        } orRetry: { [weak self] in
+            self?.restartIfNeeded()
         }
-    }
-
-    private func cancelRestartRetry() {
-        restartRetryTask?.cancel()
-        restartRetryTask = nil
     }
 }
 

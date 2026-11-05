@@ -1,7 +1,12 @@
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
 import SIMDCompat
 
-/// The latest values a VMC Protocol performer has sent, folded from its messages. A bone keeps its last value
-/// until `reset()`: a performer may split a frame over datagrams, and each datagram only refreshes what it carries
+/// The latest values a VMC Protocol performer has sent, folded from its packets. A bone keeps its last value:
+/// a performer may split a frame over datagrams, and each datagram only refreshes what it carries
 package struct VMCPerformerState: Sendable {
     package typealias Transform = VMCPerformerFrame.Transform
 
@@ -10,68 +15,114 @@ package struct VMCPerformerState: Sendable {
         package var movesBody = false
         /// `/VMC/Ext/Blend/Apply` arrived
         package var appliesExpressions = false
+
+        package init() {}
+
+        package var isEmpty: Bool { !movesBody && !appliesExpressions }
+
+        package mutating func merge(_ other: Update) {
+            movesBody = movesBody || other.movesBody
+            appliesExpressions = appliesExpressions || other.appliesExpressions
+        }
     }
 
-    private var root: Transform?
-    private var bones = [Transform?](repeating: nil, count: VMCBone.allCases.count)
+    /// For `TrackingResampler`: the root, then each `VMCBone` in order, as position xyz and rotation xyzw.
+    /// What has not arrived yet is NaN, which stays NaN through the interpolation
+    package private(set) var resamplerValues = [Float](repeating: .nan, count: Self.resamplerValueCount)
     private var pendingExpressions: [String: Float] = [:]
     package private(set) var expressions: [String: Float]?
+    /// The weight names in the order of the last frame, reused while the performer keeps sending them in that order
+    private var expressionNames: [String] = []
+    /// The weights read since the last `/VMC/Ext/Blend/Apply`
+    private var expressionCount = 0
 
     package init() {}
 
-    package mutating func reset() {
-        self = VMCPerformerState()
-    }
-
-    package mutating func receive(_ messages: [OSCMessage]) -> Update {
+    package mutating func receive(_ packet: Data) -> Update {
         var update = Update()
-        for message in messages {
-            switch message.address {
-            case "/VMC/Ext/Root/Pos":
-                guard let transform = Self.transform(in: message) else { continue }
-                root = Self.aligned(transform, to: root)
-                update.movesBody = true
-            case "/VMC/Ext/Bone/Pos":
-                guard let name = message.string(at: 0), let index = Self.boneIndices[name],
-                      let transform = Self.transform(in: message) else { continue }
-                bones[index] = Self.aligned(transform, to: bones[index])
-                update.movesBody = true
-            case "/VMC/Ext/Blend/Val":
-                guard let name = message.string(at: 0), let value = message.float(at: 1) else { continue }
-                pendingExpressions[name] = value
-            case "/VMC/Ext/Blend/Apply":
-                expressions = pendingExpressions
-                pendingExpressions.removeAll(keepingCapacity: true)
-                update.appliesExpressions = true
-            default:
-                continue
+        packet.withUnsafeBytes { bytes in
+            OSCPacketReader.forEachMessage(in: bytes) { message in
+                receive(message, into: &update)
             }
         }
         return update
     }
 
-    // MARK: - Resampling
-
-    /// The root, then each `VMCBone` in order, as position xyz and rotation xyzw
-    package static let resamplerValueCount = (1 + VMCBone.allCases.count) * 7
-
-    /// For `TrackingResampler`. What has not arrived yet is NaN, which stays NaN through the interpolation
-    package var resamplerValues: [Float] {
-        var values: [Float] = []
-        values.reserveCapacity(Self.resamplerValueCount)
-        for transform in [root] + bones {
-            if let transform {
-                let rotation = transform.rotation.vector
-                values += [transform.position.x, transform.position.y, transform.position.z,
-                           rotation.x, rotation.y, rotation.z, rotation.w]
-            } else {
-                values += [Float](repeating: .nan, count: 7)
-            }
+    private mutating func receive(_ message: OSCMessageView, into update: inout Update) {
+        var arguments = message.arguments
+        if message.hasAddress("/VMC/Ext/Bone/Pos") {
+            guard case .string(let name)? = arguments.next(), let index = BoneNames.index(of: name),
+                  receiveTransform(from: &arguments, at: index + 1) else { return }
+            update.movesBody = true
+        } else if message.hasAddress("/VMC/Ext/Blend/Val") {
+            guard case .string(let name)? = arguments.next(), let value = arguments.next()?.number else { return }
+            pendingExpressions[expressionName(name)] = value
+        } else if message.hasAddress("/VMC/Ext/Root/Pos") {
+            // The root's name is not used
+            _ = arguments.next()
+            guard receiveTransform(from: &arguments, at: 0) else { return }
+            update.movesBody = true
+        } else if message.hasAddress("/VMC/Ext/Blend/Apply") {
+            expressions = pendingExpressions
+            pendingExpressions.removeAll(keepingCapacity: true)
+            expressionCount = 0
+            update.appliesExpressions = true
         }
-        return values
     }
 
-    package static func frame(fromResamplerValues values: [Float], expressions: [String: Float]?) -> VMCPerformerFrame {
+    /// `fff ffff`. Extra arguments after the rotation (the scale and offset of the root) are ignored
+    private mutating func receiveTransform(from arguments: inout OSCArguments, at slot: Int) -> Bool {
+        var floats = SIMD8<Float>()
+        for index in 0..<7 {
+            guard let value = arguments.next()?.number, value.isFinite else { return false }
+            floats[index] = value
+        }
+        let rotation = simd_quatf(ix: floats[3], iy: floats[4], iz: floats[5], r: floats[6])
+        guard simd_length(rotation.vector) > 0.0001 else { return false }
+        var vector = simd_normalize(rotation).vector
+        let base = slot * 7
+        let previous = SIMD4(resamplerValues[base + 3], resamplerValues[base + 4],
+                             resamplerValues[base + 5], resamplerValues[base + 6])
+        // The resampler interpolates the quaternion componentwise, so each one stays on the side of the previous one.
+        // A slot that has not arrived yet is NaN, which never compares below zero
+        if simd_dot(previous, vector) < 0 {
+            vector = -vector
+        }
+        for index in 0..<3 {
+            resamplerValues[base + index] = floats[index]
+        }
+        for index in 0..<4 {
+            resamplerValues[base + 3 + index] = vector[index]
+        }
+        return true
+    }
+
+    /// Performers send the same names in the same order every frame, so a name is made only when it changes
+    private mutating func expressionName(_ bytes: UnsafeRawBufferPointer) -> String {
+        defer { expressionCount += 1 }
+        if expressionCount < expressionNames.count {
+            if expressionNames[expressionCount].utf8.elementsEqual(bytes) {
+                return expressionNames[expressionCount]
+            }
+            let name = String(decoding: bytes, as: UTF8.self)
+            expressionNames[expressionCount] = name
+            return name
+        }
+        let name = String(decoding: bytes, as: UTF8.self)
+        // A performer that never applies would otherwise grow this without bound
+        if expressionNames.count < Self.maximumExpressionNameCount {
+            expressionNames.append(name)
+        }
+        return name
+    }
+
+    private static let maximumExpressionNameCount = 256
+
+    // MARK: - Resampling
+
+    package static let resamplerValueCount = (1 + VMCBone.allCases.count) * 7
+
+    package static func frame(fromResamplerValues values: [Float]) -> VMCPerformerFrame {
         precondition(values.count == resamplerValueCount, "VMC resampler values size mismatch")
         func transform(at slot: Int) -> Transform? {
             let base = slot * 7
@@ -85,25 +136,24 @@ package struct VMCPerformerState: Sendable {
         for (index, bone) in VMCBone.allCases.enumerated() {
             bones[bone] = transform(at: index + 1)
         }
-        return VMCPerformerFrame(root: transform(at: 0), bones: bones, expressions: expressions)
+        return VMCPerformerFrame(root: transform(at: 0), bones: bones)
+    }
+}
+
+/// Finds a bone by the bytes of its name, without making a String
+private enum BoneNames {
+    private static let names = VMCBone.allCases.map { Array($0.rawValue.utf8) }
+    private static let indices = Dictionary(
+        uniqueKeysWithValues: names.enumerated().map { ($1.withUnsafeBytes(BoneNames.hash), $0) }
+    )
+
+    static func index(of name: UnsafeRawBufferPointer) -> Int? {
+        guard let index = indices[hash(name)], names[index].elementsEqual(name) else { return nil }
+        return index
     }
 
-    // MARK: - Messages
-
-    private static let boneIndices = Dictionary(uniqueKeysWithValues: VMCBone.allCases.enumerated().map { ($1.rawValue, $0) })
-
-    /// `s fff ffff`. Extra arguments after the rotation (the scale and offset of the root) are ignored
-    private static func transform(in message: OSCMessage) -> Transform? {
-        let floats = (1...7).compactMap { message.float(at: $0) }
-        guard floats.count == 7, floats.allSatisfy(\.isFinite) else { return nil }
-        let rotation = simd_quatf(ix: floats[3], iy: floats[4], iz: floats[5], r: floats[6])
-        guard simd_length(rotation.vector) > 0.0001 else { return nil }
-        return Transform(position: SIMD3(floats[0], floats[1], floats[2]), rotation: simd_normalize(rotation))
-    }
-
-    /// The resampler interpolates the quaternion componentwise, so each one stays on the side of the previous one
-    private static func aligned(_ transform: Transform, to previous: Transform?) -> Transform {
-        guard let previous, simd_dot(previous.rotation.vector, transform.rotation.vector) < 0 else { return transform }
-        return Transform(position: transform.position, rotation: simd_quatf(vector: -transform.rotation.vector))
+    /// FNV-1a
+    private static func hash(_ bytes: UnsafeRawBufferPointer) -> UInt64 {
+        bytes.reduce(0xcbf2_9ce4_8422_2325) { ($0 ^ UInt64($1)) &* 0x100_0000_01b3 }
     }
 }
