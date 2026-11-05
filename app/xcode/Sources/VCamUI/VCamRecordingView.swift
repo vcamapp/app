@@ -2,6 +2,7 @@ import SwiftUI
 import VCamEntity
 import VCamData
 import VCamBridge
+import VCamLogger
 
 public struct VCamRecordingView: View {
     public init() {}
@@ -10,11 +11,13 @@ public struct VCamRecordingView: View {
 
     @AppStorage(key: .screenshotDestination) var screenshotDestination
 
+    private let destination = RecordingDestination()
+
     public var body: some View {
         VStack {
             HStack {
-                TakePhotoView(destinationURL: setDestinationURL)
-                RecordVideoView(destinationURL: setDestinationURL)
+                TakePhotoView(destination: destination)
+                RecordVideoView(destination: destination)
             }
 
             GroupBox {
@@ -24,7 +27,7 @@ public struct VCamRecordingView: View {
                         .textFieldStyle(.roundedBorder)
                         .disabled(true)
                     Button {
-                        try? pickDestination()
+                        _ = try? destination.pick()
                     } label: {
                         Image(systemName: "folder.fill")
                     }
@@ -34,16 +37,14 @@ public struct VCamRecordingView: View {
             Spacer()
                 .layoutPriority(1)
         }
-        .onAppear {
-            if !screenshotDestination.isEmpty {
-                _ = try? setDestinationURL()
-            }
+        .onChange(of: screenshotDestination, initial: true) {
+            screenshotDestinationString = destination.keptFolder()?.path ?? ""
         }
     }
 }
 
 private struct TakePhotoView: View {
-    let destinationURL: () throws -> URL
+    let destination: RecordingDestination
 
     @State private var restWaitTime = 0
     @State private var screenshotTask: Task<Void, Never>?
@@ -104,22 +105,13 @@ private struct TakePhotoView: View {
                 }
                 try Task.checkCancellation()
 
-                let destination = try destinationURL()
-                guard let image = MainTexture.shared.snapshot()?.nsImage() else { return }
-                let isAccessing = destination.startAccessingSecurityScopedResource()
-                defer {
-                    if isAccessing {
-                        destination.stopAccessingSecurityScopedResource()
-                    }
+                try destination.save { folder in
+                    guard let image = MainTexture.shared.snapshot()?.nsImage() else { return }
+                    try image.writeAsPNG(to: nextScreenshotURL(in: folder))
                 }
-
-                let url = nextScreenshotURL(in: destination)
-                try image.writeAsPNG(to: url)
+            } catch is CancellationError {
             } catch {
-                if !Task.isCancelled {
-                    print(error)
-                    UserDefaults.standard.remove(for: .screenshotDestination)
-                }
+                Logger.error(error)
             }
         }
     }
@@ -137,7 +129,7 @@ private struct TakePhotoView: View {
 }
 
 private struct RecordVideoView: View {
-    let destinationURL: () throws -> URL
+    let destination: RecordingDestination
 
     @Environment(UniState.self) private var uniState
     @Bindable private var recorder = VideoRecorder.shared
@@ -202,22 +194,19 @@ private struct RecordVideoView: View {
 
     private func startRecording() {
         do {
-            let ext = recordingVideoFormat
-            let format = VideoFormat(rawValue: ext) ?? .mp4
-            let destination = try destinationURL()
-            try recorder.start(
-                with: destination,
-                name: "vcam_\(Date().yyyyMMddHHmmss)",
-                format: format,
-                screenResolution: uniState.screenResolution,
-                capturesMicAudio: recordMicSound,
-                capturesSystemAudio: recordSystemSound
-            )
-        } catch {
-            if (error as? CocoaError)?.code == .fileWriteNoPermission {
-                // The kept folder can't be written to, so the next attempt asks for another one
-                UserDefaults.standard.remove(for: .screenshotDestination)
+            let format = VideoFormat(rawValue: recordingVideoFormat) ?? .mp4
+            try destination.save { folder in
+                try recorder.start(
+                    with: folder,
+                    name: "vcam_\(Date().yyyyMMddHHmmss)",
+                    format: format,
+                    screenResolution: uniState.screenResolution,
+                    capturesMicAudio: recordMicSound,
+                    capturesSystemAudio: recordSystemSound
+                )
             }
+        } catch is CancellationError {
+        } catch {
             VCamAlert.showError(title: String(localized: .failedToStartRecording), message: error.localizedDescription)
         }
     }
@@ -323,41 +312,6 @@ private struct MicSyncOffsetButton: View {
                 .frame(width: 260)
                 .padding()
         }
-    }
-}
-
-extension VCamRecordingView {
-    @discardableResult
-    private func setDestinationURL() throws -> URL {
-        let destination: URL
-        if screenshotDestination.isEmpty {
-            try pickDestination()
-            destination = URL(filePath: screenshotDestinationString, directoryHint: .checkFileSystem)
-        } else {
-            var isStale = false
-            destination = try URL(
-                resolvingBookmarkData: screenshotDestination,
-                options: .withSecurityScope,
-                relativeTo: nil,
-                bookmarkDataIsStale: &isStale
-            )
-            screenshotDestinationString = destination.path
-        }
-        return destination
-    }
-
-    private func pickDestination() throws {
-        guard let url = FileUtility.pickDirectory() else {
-            throw NSError(domain: "com.github.tattn.vcam.error.screenshot", code: 0)
-        }
-
-        let bookmarkData = try url.bookmarkData(
-            options: .withSecurityScope,
-            includingResourceValuesForKeys: nil,
-            relativeTo: nil
-        )
-        screenshotDestination = bookmarkData
-        screenshotDestinationString = url.path
     }
 }
 
