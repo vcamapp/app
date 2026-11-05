@@ -110,7 +110,7 @@ public final class AvatarWebCamera {
     private var isAlternativeHandTrackingEnabled = false
 
     // Persisted by the module that injects faceTrackingProviderFactory
-    private var isHighPrecisionFaceTrackingEnabled = false
+    private var isAlternativeFaceTrackingEnabled = false
 
     /// The device tracking uses now, or would use when started
     public var currentCaptureDevice: AVCaptureDevice? {
@@ -302,8 +302,8 @@ public final class AvatarWebCamera {
         applyVisionConfiguration()
     }
 
-    public func setHighPrecisionFaceTrackingEnabled(_ isEnabled: Bool) {
-        isHighPrecisionFaceTrackingEnabled = isEnabled
+    public func setAlternativeFaceTrackingEnabled(_ isEnabled: Bool) {
+        isAlternativeFaceTrackingEnabled = isEnabled
         applyVisionConfiguration()
     }
 
@@ -354,7 +354,7 @@ public final class AvatarWebCamera {
                 isFingerEnabled: configuration.isFingerEnabled
             ),
             usesAlternativeHandMapper: isAlternativeHandTrackingEnabled && handPoseMapperFactory != nil,
-            usesAlternativeFaceProvider: isHighPrecisionFaceTrackingEnabled && faceTrackingProviderFactory != nil
+            usesAlternativeFaceProvider: isAlternativeFaceTrackingEnabled && faceTrackingProviderFactory != nil
         )
     }
 

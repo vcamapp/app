@@ -99,7 +99,7 @@ public final class TrackingDiagnostics {
             mappings: .init(blendShape: tracking.mappings.blendShape, perfectSync: tracking.mappings.perfectSync),
             extra: [
                 "useEyeTracking": "\(tracking.useEyeTracking)",
-                "highPrecisionFaceTracking": "\(tracking.usesHighPrecisionFaceTracking)",
+                "alternativeFaceTracking": "\(tracking.usesAlternativeFaceTracking)",
                 "alternativeHandTracking": "\(tracking.usesAlternativeHandTracking)",
                 "connection": "\(tracking.vcamMotionReceiver.connectionStatus)",
             ]

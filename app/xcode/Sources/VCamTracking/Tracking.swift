@@ -27,7 +27,7 @@ public final class Tracking {
     @ObservationIgnored private var usesMocopi = false
 
     public private(set) var usesAlternativeHandTracking = false
-    public private(set) var usesHighPrecisionFaceTracking = false
+    public private(set) var usesAlternativeFaceTracking = false
 
     public var mappings = TrackingMappings()
 
@@ -277,11 +277,11 @@ public final class Tracking {
         webCamera.setAlternativeHandTrackingEnabled(isEnabled)
     }
 
-    /// Swaps the Mac camera face backend for the experimental full-blend-shape one,
+    /// Swaps the Mac camera face backend for the injected full-blend-shape one,
     /// which drives Perfect Sync like a Perfect Sync tracking method
-    public func setHighPrecisionFaceTrackingEnabled(_ isEnabled: Bool) {
-        usesHighPrecisionFaceTracking = isEnabled
-        webCamera.setHighPrecisionFaceTrackingEnabled(isEnabled)
+    public func setAlternativeFaceTrackingEnabled(_ isEnabled: Bool) {
+        usesAlternativeFaceTracking = isEnabled
+        webCamera.setAlternativeFaceTrackingEnabled(isEnabled)
         reconcileLipSyncState()
         applyFaceMappingsToEngine()
     }
@@ -343,7 +343,7 @@ public final class Tracking {
     }
 
     public var faceTrackingSupportsPerfectSync: Bool {
-        faceTrackingMethod.supportsPerfectSync || (faceTrackingMethod == .default && usesHighPrecisionFaceTracking)
+        faceTrackingMethod.supportsPerfectSync || (faceTrackingMethod == .default && usesAlternativeFaceTracking)
     }
 
     public var micLipSyncDisabled: Bool {
