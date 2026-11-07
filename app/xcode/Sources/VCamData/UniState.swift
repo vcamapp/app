@@ -314,8 +314,8 @@ public final class UniState {
     }
 
     public var currentLipSync: LipSyncType {
-        get { lipSyncWebCam ? .camera : .mic }
-        set { lipSyncWebCam = newValue == .camera }
+        get { lipSyncWebCam ? .faceTracking : .mic }
+        set { lipSyncWebCam = newValue == .faceTracking }
     }
 
     // MARK: - Engine Initialization

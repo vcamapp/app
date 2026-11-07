@@ -30,11 +30,7 @@ public struct TrackingDeviceView: View {
                 }
             } label: {
                 Text(.camera)
-            }
-            if tracking.webCamera.isUsingFallbackDevice {
-                Text(fallbackNotice)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                Text(cameraDescription)
             }
         } else {
             Picker(selection: .constant(0)) {
@@ -64,12 +60,18 @@ public struct TrackingDeviceView: View {
                 Text(.mic)
             }
         }
-        Picker(selection: $tracking.lipSyncType) {
+        Picker(selection: Binding(
+            get: { tracking.activeLipSyncType },
+            set: { tracking.lipSyncType = $0 }
+        )) {
             ForEach(LipSyncType.allCases) { type in
-                Text(type.name).tag(type)
+                Text(type.name(faceTrackingMethod: tracking.faceTrackingMethod)).tag(type)
             }
         } label: {
             Text(.lipSync)
+            if tracking.micLipSyncDisabled {
+                Text(.lipSyncLockedDescription)
+            }
         }
         .disabled(tracking.micLipSyncDisabled)
         .onReceive(NotificationCenter.default.publisher(for: .deviceWasChanged)) { _ in
@@ -80,6 +82,21 @@ public struct TrackingDeviceView: View {
         .onChange(of: tracking.webCamera.activeCaptureDevice) { _, _ in
             captureDevice = Tracking.shared.webCamera.currentCaptureDevice
         }
+    }
+
+    private var cameraDescription: String {
+        tracking.webCamera.isUsingFallbackDevice ? "\(cameraUsageNotice)\n\(fallbackNotice)" : cameraUsageNotice
+    }
+
+    private var cameraUsageNotice: String {
+        let webCamera = tracking.webCamera
+        guard webCamera.isInUse else { return String(localized: .cameraNotInUse) }
+        var uses: [String] = []
+        if webCamera.usage.contains(.faceTracking) { uses.append(String(localized: .faceEyeMouth)) }
+        if webCamera.usage.contains(.handTracking) { uses.append(String(localized: .hand)) }
+        if webCamera.usage.contains(.fingerTracking) { uses.append(String(localized: .finger)) }
+        if webCamera.isEmotionEnabled { uses.append(String(localized: .cameraUsageEmotion)) }
+        return String(localized: .cameraInUse(uses.formatted(.list(type: .and))))
     }
 
     private var fallbackNotice: String {

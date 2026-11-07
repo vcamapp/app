@@ -351,6 +351,21 @@ public final class Tracking {
             && !RenderingFeature.supported.contains(.micLipSyncWithPerfectSync)
     }
 
+    public var activeLipSyncType: LipSyncType {
+        micLipSyncDisabled ? .faceTracking : lipSyncType
+    }
+
+    /// The other sources always estimate the vowel, and Perfect Sync sends no vowel.
+    /// Takes the model's Perfect Sync support as an argument so an observable state can drive it.
+    public func usesVowelEstimationSetting(hasPerfectSyncBlendShape: Bool) -> Bool {
+        guard activeFaceMappingMode(hasPerfectSyncBlendShape: hasPerfectSyncBlendShape) == .blendShape else { return false }
+        switch faceTrackingMethod {
+        case .default: return !usesAlternativeFaceTracking
+        case .vcamMocap: return true
+        case .disabled, .iFacialMocap: return false
+        }
+    }
+
     /// The mapping mode every face tracking source routes data to, or nil while no face tracking runs.
     public var activeFaceMappingMode: TrackingMode? {
         activeFaceMappingMode(hasPerfectSyncBlendShape: UniBridge.shared.hasPerfectSyncBlendShape)

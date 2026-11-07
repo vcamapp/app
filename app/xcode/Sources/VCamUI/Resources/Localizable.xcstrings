@@ -1082,6 +1082,75 @@
         }
       }
     },
+    "cameraInUse %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In use for: %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用中: %@"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "사용 중: %@"
+          }
+        }
+      }
+    },
+    "cameraNotInUse": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not in use with the current settings."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今の設定では使用していません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "현재 설정에서는 사용하지 않습니다."
+          }
+        }
+      }
+    },
+    "cameraUsageEmotion": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emotion estimation"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "感情推定"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "감정 추정"
+          }
+        }
+      }
+    },
     "cancel": {
       "extractionState": "manual",
       "localizations": {
@@ -4045,6 +4114,52 @@
           "stringUnit": {
             "state": "translated",
             "value": "립싱크"
+          }
+        }
+      }
+    },
+    "lipSyncFaceTracking %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Face tracking (%@)"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "顔トラッキング (%@)"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "페이스 트래킹 (%@)"
+          }
+        }
+      }
+    },
+    "lipSyncLockedDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Models that support Perfect Sync move the mouth with face tracking too, so this can’t be changed."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "パーフェクトシンク対応モデルは口も顔トラッキングで動くため、変更できません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "퍼펙트 싱크를 지원하는 모델은 입도 페이스 트래킹으로 움직이므로 변경할 수 없습니다."
           }
         }
       }
@@ -8563,19 +8678,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Use vowel estimation by camera"
+            "value": "Use vowel estimation by face tracking"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "カメラで母音を推定する"
+            "value": "顔トラッキングで母音を推定する"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "카메라로 모음 추정"
+            "value": "페이스 트래킹으로 모음 추정"
           }
         }
       }

@@ -23,8 +23,9 @@ public struct VCamSettingTrackingView: View {
     @Environment(UniState.self) private var uniState
     private var tracking = Tracking.shared
 
-    private var showsCameraLipSyncSettings: Bool {
-        uniState.currentLipSync == .camera
+    private var showsVowelEstimationSetting: Bool {
+        uniState.currentLipSync == .faceTracking
+            && tracking.usesVowelEstimationSetting(hasPerfectSyncBlendShape: uniState.hasPerfectSyncBlendShape)
     }
 
     private var showsMicLipSyncSettings: Bool {
@@ -45,7 +46,7 @@ public struct VCamSettingTrackingView: View {
                 TrackingDeviceView()
             }
 
-            if showsCameraLipSyncSettings {
+            if showsVowelEstimationSetting {
                 Toggle(isOn: $useVowelEstimation) {
                     Text(.useVowelEstimation)
                 }
@@ -63,10 +64,12 @@ public struct VCamSettingTrackingView: View {
                         }
                     }
                 }
-                ValueEditField(.fpsCamera, value: $cameraFps.map(), type: .slider(1...60) {
-                    guard !$0 else { return }
-                    Tracking.shared.webCamera.setFPS(cameraFps)
-                })
+                if tracking.webCamera.isInUse {
+                    ValueEditField(.fpsCamera, value: $cameraFps.map(), type: .slider(1...60) {
+                        guard !$0 else { return }
+                        Tracking.shared.webCamera.setFPS(cameraFps)
+                    })
+                }
             }
 
 #if FEATURE_3

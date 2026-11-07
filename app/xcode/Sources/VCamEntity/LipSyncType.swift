@@ -11,9 +11,9 @@ import FoundationEssentials
 import Foundation
 #endif
 
-public enum LipSyncType: Identifiable, CaseIterable, Hashable {
+public enum LipSyncType: Identifiable, CaseIterable, Hashable, Sendable {
     case mic
-    case camera
-    
+    case faceTracking
+
     public var id: Self { self }
 }

@@ -106,6 +106,10 @@ public final class AvatarWebCamera {
         }
     }
 
+    public var isInUse: Bool {
+        !usage.isEmpty || isEmotionEnabled
+    }
+
     // Persisted by the module that injects handPoseMapperFactory
     private var isAlternativeHandTrackingEnabled = false
 
