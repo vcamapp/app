@@ -49,18 +49,12 @@ public final class WindowManager {
             windowRef.setFrameAutosaveName("UnityPlayerVCamUI")
             windowRef.makeKeyAndOrderFront(nil)
             self.window = windowRef
-        } else if let window = NSApp.mainOrFirstWindow {
+        } else if let window = Self.usesEngineView ? NSApp.mainOrFirstWindow : makeAppWindow() {
             window.appearance = NSAppearance(named: .darkAqua)
             window.title = Bundle.main.displayName
             window.titlebarAppearsTransparent = true
             window.backgroundColor = .clear
-            window.styleMask = [
-                .titled,
-                .closable,
-                .miniaturizable,
-                .resizable,
-                .fullSizeContentView,
-            ]
+            window.styleMask = Self.appWindowStyle
             window.collectionBehavior = [.fullScreenNone]
             window.titleVisibility = .visible
             window.minSize = .init(width: 800, height: 450)
@@ -71,6 +65,30 @@ public final class WindowManager {
         if let window {
             observeResize(of: window)
         }
+    }
+
+    private static let appWindowStyle: NSWindow.StyleMask = [
+        .titled,
+        .closable,
+        .miniaturizable,
+        .resizable,
+        .fullSizeContentView,
+    ]
+
+    private func makeAppWindow() -> NSWindow {
+        let window = NSWindow(
+            contentRect: NSRect(origin: .zero, size: size),
+            styleMask: Self.appWindowStyle,
+            backing: .buffered,
+            defer: false
+        )
+        window.isReleasedWhenClosed = false
+        window.center()
+        let frameName = "VCamMainWindow"
+        window.setFrameUsingName(frameName)
+        window.setFrameAutosaveName(frameName)
+        window.makeKeyAndOrderFront(nil)
+        return window
     }
 
     private func observeResize(of window: NSWindow) {
@@ -196,7 +214,7 @@ public final class WindowManager {
 
     /// Only for builds without an engine; an engine build handles the close button on the engine side
     private func installCloseInterceptor(on window: NSWindow) {
-        closeInterceptor = WindowCloseInterceptor(next: window.delegate) { [weak self] in
+        closeInterceptor = WindowCloseInterceptor { [weak self] in
             guard let self else { return }
             // The menu bar item is the only way back, so without it closing means quitting
             if UniState.shared.useAddToMacOSMenuBar {
@@ -213,30 +231,17 @@ public final class WindowManager {
     }
 }
 
-/// Turns the close button into "hide to the menu bar", leaving the window's own delegate in
-/// charge of everything else. SwiftUI installs one for its own scene bookkeeping, so it has to
-/// stay in the chain rather than be replaced
+/// Turns the close button into "hide to the menu bar"
 @MainActor
 private final class WindowCloseInterceptor: NSObject, NSWindowDelegate {
-    // Read by the nonisolated NSObject forwarding overrides; the reference never changes
-    nonisolated(unsafe) private let next: (any NSWindowDelegate)?
     private let onClose: () -> Void
 
-    init(next: (any NSWindowDelegate)?, onClose: @escaping () -> Void) {
-        self.next = next
+    init(onClose: @escaping () -> Void) {
         self.onClose = onClose
     }
 
     func windowShouldClose(_ sender: NSWindow) -> Bool {
         onClose()
         return false
-    }
-
-    override func responds(to selector: Selector!) -> Bool {
-        super.responds(to: selector) || next?.responds(to: selector) == true
-    }
-
-    override func forwardingTarget(for selector: Selector!) -> Any? {
-        next
     }
 }
