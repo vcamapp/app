@@ -26,6 +26,8 @@ public final class AppMenu: NSObject {
             menu = NSMenu()
             mainMenu = Self.makeSubMenu(menu: menu, title: Bundle.main.displayName, items: [])
             NSApp.mainMenu = menu
+            // AppKit would otherwise add the tab items to the Window menu, for windows that never show tabs
+            NSWindow.allowsAutomaticWindowTabbing = false
         }
 
         super.init()
@@ -61,28 +63,60 @@ public final class AppMenu: NSObject {
     }
 
     private func setupEditMenu(subMenu: NSMenu) {
-        Self.makeSubMenu(menu: subMenu, title: String(localized: .edit), items: [
+        var items: [NSMenuItem] = [
             NSMenuItem(title: String(localized: .cut), action: #selector(NSText.cut(_:)), keyEquivalent: "x"),
             NSMenuItem(title: String(localized: .copy), action: #selector(NSText.copy(_:)), keyEquivalent: "c"),
             NSMenuItem(title: String(localized: .paste), action: #selector(NSText.paste(_:)), keyEquivalent: "v"),
             NSMenuItem(title: String(localized: .selectAll), action: #selector(NSText.selectAll(_:)), keyEquivalent: "a"),
-        ])
+        ]
+        if !UniBridge.isEngineApp {
+            let redo = NSMenuItem(title: String(localized: .redo), action: Selector(("redo:")), keyEquivalent: "z")
+            redo.keyEquivalentModifierMask = [.command, .shift]
+            items.insert(contentsOf: [
+                NSMenuItem(title: String(localized: .undo), action: Selector(("undo:")), keyEquivalent: "z"),
+                redo,
+                .separator(),
+            ], at: 0)
+        }
+        Self.makeSubMenu(menu: subMenu, title: String(localized: .edit), items: items)
     }
 }
 
 // MARK: - Main
 private extension AppMenu {
     private func setupMainMenu(subMenu: NSMenu) {
-        let quitItem = makeMenuItem(title: String(localized: .quitVCam(Bundle.main.displayName)), action: #selector(quit), keyEquivalent: "q")
-        subMenu.items.insert(quitItem, at: 0)
-        subMenu.items.insert(.separator(), at: 0)
-        let updateItem = makeMenuItem(title: String(localized: .checkForUpdates), action: #selector(checkUpdates))
-        subMenu.items.insert(updateItem, at: 0)
-        subMenu.items.insert(.separator(), at: 0)
-        let preferenceItem = makeMenuItem(title: String(localized: .settings), action: #selector(openPreferences), keyEquivalent: ",")
-        subMenu.items.insert(preferenceItem, at: 0)
-        let aboutItem = makeMenuItem(title: String(localized: .aboutApp(Bundle.main.displayName)), action: #selector(about))
-        subMenu.items.insert(aboutItem, at: 0)
+        var items: [NSMenuItem] = [
+            makeMenuItem(title: String(localized: .aboutApp(Bundle.main.displayName)), action: #selector(about)),
+            makeMenuItem(title: String(localized: .settings), action: #selector(openPreferences), keyEquivalent: ","),
+            .separator(),
+            makeMenuItem(title: String(localized: .checkForUpdates), action: #selector(checkUpdates)),
+            .separator(),
+        ]
+        // The engine's own application menu already has the services and hide items
+        if !UniBridge.isEngineApp {
+            items += makeSystemItems()
+        }
+        items.append(makeMenuItem(title: String(localized: .quitVCam(Bundle.main.displayName)), action: #selector(quit), keyEquivalent: "q"))
+        subMenu.items.insert(contentsOf: items, at: 0)
+    }
+
+    private func makeSystemItems() -> [NSMenuItem] {
+        let servicesItem = NSMenuItem(title: String(localized: .services), action: nil, keyEquivalent: "")
+        let servicesMenu = NSMenu(title: servicesItem.title)
+        servicesItem.submenu = servicesMenu
+        NSApp.servicesMenu = servicesMenu
+
+        let hideOthers = NSMenuItem(title: String(localized: .hideOthers), action: #selector(NSApplication.hideOtherApplications(_:)), keyEquivalent: "h")
+        hideOthers.keyEquivalentModifierMask = [.command, .option]
+
+        return [
+            servicesItem,
+            .separator(),
+            NSMenuItem(title: String(localized: .hideApp(Bundle.main.displayName)), action: #selector(NSApplication.hide(_:)), keyEquivalent: "h"),
+            hideOthers,
+            NSMenuItem(title: String(localized: .showAll), action: #selector(NSApplication.unhideAllApplications(_:)), keyEquivalent: ""),
+            .separator(),
+        ]
     }
 
     @objc private func quit() {
@@ -196,11 +230,26 @@ private extension AppMenu {
     private func setupWindowMenu(subMenu: NSMenu) {
         let alwaysOnTop = makeMenuItem(title: String(localized: .alwaysOnTop), action: #selector(toggleAlwaysOnTop))
         alwaysOnTop.state = UserDefaults.standard.value(for: .alwaysOnTopEnabled) ? .on : .off
-        Self.makeSubMenu(menu: subMenu, title: String(localized: .window), items: [
+        var items: [NSMenuItem] = [
             alwaysOnTop,
             .separator(),
             makeMenuItem(title: String(localized: .resetWindowSize), action: #selector(resetWindowSize)),
-        ])
+        ]
+        if !UniBridge.isEngineApp {
+            items.insert(contentsOf: [
+                NSMenuItem(title: String(localized: .minimize), action: #selector(NSWindow.performMiniaturize(_:)), keyEquivalent: "m"),
+                NSMenuItem(title: String(localized: .zoom), action: #selector(NSWindow.performZoom(_:)), keyEquivalent: ""),
+                .separator(),
+            ], at: 0)
+            items += [
+                .separator(),
+                NSMenuItem(title: String(localized: .bringAllToFront), action: #selector(NSApplication.arrangeInFront(_:)), keyEquivalent: ""),
+            ]
+        }
+        let windowMenu = Self.makeSubMenu(menu: subMenu, title: String(localized: .window), items: items)
+        if !UniBridge.isEngineApp {
+            NSApp.windowsMenu = windowMenu
+        }
     }
 
     @objc private func toggleAlwaysOnTop(_ sender: NSMenuItem) {
@@ -217,9 +266,12 @@ private extension AppMenu {
 // MARK: - Help
 private extension AppMenu {
     private func setupHelpMenu(subMenu: NSMenu) {
-        Self.makeSubMenu(menu: subMenu, title: String(localized: .help), items: [
+        let helpMenu = Self.makeSubMenu(menu: subMenu, title: String(localized: .help), items: [
             makeMenuItem(title: String(localized: .viewDocumentation), action: #selector(help)),
         ])
+        if !UniBridge.isEngineApp {
+            NSApp.helpMenu = helpMenu
+        }
     }
 
     @objc private func help() {
