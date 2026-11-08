@@ -1,6 +1,7 @@
 import Foundation
 import Network
 import Observation
+import VCamControl
 import VCamData
 import VCamLogger
 
@@ -8,9 +9,9 @@ package enum ExternalControlServerError: Error {
     case invalidPort
 }
 
-/// The localhost WebSocket server exposing the VCam RPC API.
-/// It binds to 127.0.0.1 only, and rejects handshakes carrying an Origin
-/// header so that web pages cannot reach the API from a browser.
+/// The WebSocket server exposing the VCam RPC API.
+/// It always listens on 127.0.0.1, and also on every interface when network access is on.
+/// Both reject handshakes carrying an Origin header so that web pages cannot reach the API from a browser.
 @MainActor
 @Observable
 package final class ExternalControlServer {
@@ -21,9 +22,12 @@ package final class ExternalControlServer {
 
     package private(set) var isRunning = false
 
-    @ObservationIgnored private var listener: NWListener?
+    @ObservationIgnored private var listeners: [NWListener] = []
     @ObservationIgnored private var connections: [UUID: ExternalControlConnection] = [:]
     @ObservationIgnored private let eventBridge = EventBridge()
+    @ObservationIgnored private var pendingRestart: Task<Void, any Error>?
+    /// Lets a restart that was waiting tell that the user stopped the server meanwhile
+    @ObservationIgnored private var stopCount = 0
 
     package init() {}
 
@@ -40,55 +44,129 @@ package final class ExternalControlServer {
     }
 
     package func startWithSavedPort() throws {
+        try start(port: Self.savedPort(), networkAccess: .saved)
+    }
+
+    /// Applies changed settings to the running server, dropping its clients
+    package func restartWithSavedPort() async throws {
+        try await restart(port: Self.savedPort(), networkAccess: .saved)
+    }
+
+    func restart(port: UInt16, networkAccess: ExternalControlNetworkAccess) async throws {
+        try await scheduleRestart(port: port, networkAccess: networkAccess).value
+    }
+
+    /// Runs after any restart still in progress, since overlapping ones would bind the port before the other releases it
+    func scheduleRestart(port: UInt16, networkAccess: ExternalControlNetworkAccess) -> Task<Void, any Error> {
+        let previous = pendingRestart
+        let stopCount = stopCount
+        let restart = Task {
+            _ = await previous?.result
+            let oldListeners = listeners
+            listeners.removeAll()
+            // Keeps isRunning so the settings do not show the server stopping for the moment it restarts
+            stopListening()
+            // Binding the port again fails while the old listeners still hold it
+            for listener in oldListeners {
+                await Self.cancel(listener)
+            }
+            guard stopCount == self.stopCount else { return }
+            try start(port: port, networkAccess: networkAccess)
+        }
+        pendingRestart = restart
+        return restart
+    }
+
+    private static func savedPort() throws -> UInt16 {
         guard let port = UInt16(exactly: UserDefaults.standard.value(for: .integrationExternalControlPort)) else {
             throw ExternalControlServerError.invalidPort
         }
-        try start(port: port)
+        return port
     }
 
-    package func start(port: UInt16) throws {
-        stop()
+    package func start(port: UInt16, networkAccess: ExternalControlNetworkAccess = .disabled) throws {
+        stopListening()
+        isRunning = false
 
         guard let port = NWEndpoint.Port(rawValue: port) else {
             throw ExternalControlServerError.invalidPort
         }
+        do {
+            listeners.append(try makeListener(port: port, isLoopbackOnly: true, token: nil))
+            if case .enabled(let token) = networkAccess {
+                // Connections to 127.0.0.1 still reach the loopback listener, which binds the more specific address
+                listeners.append(try makeListener(port: port, isLoopbackOnly: false, token: token))
+            }
+        } catch {
+            stopListening()
+            throw error
+        }
+        isRunning = true
+        eventBridge.start()
+        UploadStaging.shared.removeAll()
+    }
+
+    package func stop() {
+        stopCount += 1
+        stopListening()
+        isRunning = false
+    }
+
+    private func stopListening() {
+        eventBridge.stop()
+        for listener in listeners {
+            listener.cancel()
+        }
+        listeners.removeAll()
+        for connection in connections.values {
+            connection.cancel()
+        }
+        connections.removeAll()
+    }
+
+    /// - Parameter token: Required from every client when set
+    private func makeListener(port: NWEndpoint.Port, isLoopbackOnly: Bool, token: String?) throws -> NWListener {
         let parameters = NWParameters.tcp
-        // Never expose the API beyond this Mac
-        parameters.requiredLocalEndpoint = NWEndpoint.hostPort(host: .ipv4(.loopback), port: port)
+        if isLoopbackOnly {
+            parameters.requiredLocalEndpoint = .hostPort(host: .ipv4(.loopback), port: port)
+        }
         parameters.allowLocalEndpointReuse = true
 
         let webSocketOptions = NWProtocolWebSocket.Options()
         webSocketOptions.autoReplyPing = true
         webSocketOptions.maximumMessageSize = Self.maximumMessageSize
-        // Browsers always send an Origin header; native clients normally do not
         webSocketOptions.setClientRequestHandler(.main) { _, headers in
-            let hasOrigin = headers.contains { $0.name.lowercased() == "origin" }
-            return .init(status: hasOrigin ? .reject : .accept, subprotocol: nil)
+            // Browsers always send an Origin header; native clients normally do not
+            let hasOrigin = headers.contains { $0.name.caseInsensitiveCompare("origin") == .orderedSame }
+            let isAuthorized = token.map { ExternalControlToken.authorizes(headers, token: $0) } ?? true
+            return .init(status: !hasOrigin && isAuthorized ? .accept : .reject, subprotocol: nil)
         }
         parameters.defaultProtocolStack.applicationProtocols.insert(webSocketOptions, at: 0)
 
-        let listener = try NWListener(using: parameters)
+        let listener = try isLoopbackOnly ? NWListener(using: parameters) : NWListener(using: parameters, on: port)
         listener.newConnectionHandler = { [weak self] connection in
             Task { @MainActor in
                 self?.accept(connection)
             }
         }
+        listener.stateUpdateHandler = { state in
+            if case .failed(let error) = state {
+                Logger.error(error)
+            }
+        }
         listener.start(queue: .main)
-        self.listener = listener
-        isRunning = true
-        eventBridge.start()
-        AvatarImportManager.shared.removeAllStaging()
+        return listener
     }
 
-    package func stop() {
-        eventBridge.stop()
-        listener?.cancel()
-        listener = nil
-        for connection in connections.values {
-            connection.cancel()
+    /// Returns once the listener has released its port
+    private static func cancel(_ listener: NWListener) async {
+        await withCheckedContinuation { continuation in
+            listener.stateUpdateHandler = { state in
+                guard case .cancelled = state else { return }
+                continuation.resume()
+            }
+            listener.cancel()
         }
-        connections.removeAll()
-        isRunning = false
     }
 
     private func accept(_ connection: NWConnection) {
@@ -99,13 +177,26 @@ package final class ExternalControlServer {
         let client = ExternalControlConnection(connection: connection) { [weak self] id in
             self?.connections[id] = nil
             EventPublisher.shared.disconnect(id: id)
-            AvatarImportManager.shared.cancelAll(connectionID: id)
+            UploadStaging.shared.cancelAll(connectionID: id)
         }
         connections[client.id] = client
         EventPublisher.shared.connect(id: client.id) { [weak client] body in
             client?.send(body)
         }
         client.start()
+    }
+}
+
+/// Whether clients on other devices may connect, and the token they must present
+package enum ExternalControlNetworkAccess: Equatable, Sendable {
+    case disabled
+    /// - Parameter token: nil accepts clients without one
+    case enabled(token: String?)
+
+    static var saved: Self {
+        guard UserDefaults.standard.value(for: .integrationExternalControlNetworkAccess) else { return .disabled }
+        let requiresToken = UserDefaults.standard.value(for: .integrationExternalControlRequiresToken)
+        return .enabled(token: requiresToken ? ExternalControlToken.saved() : nil)
     }
 }
 
@@ -162,8 +253,8 @@ private final class ExternalControlConnection {
                     return
                 }
                 if isBinary {
-                    // Binary frames carry avatar upload chunks (see avatar.import.begin)
-                    AvatarImportManager.shared.receiveFrame(content, connectionID: self.id)
+                    // Binary frames carry upload chunks (see avatar.import.begin)
+                    UploadStaging.shared.receiveFrame(content, connectionID: self.id)
                 } else {
                     self.handle(content)
                 }

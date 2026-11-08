@@ -31,8 +31,8 @@ let package = Package(
         ], resources: [
             .process("Resources"),
         ]),
-        .target(name: "VCamControl", dependencies: ["VCamData", "VCamBridge", "VCamLogger"]),
-        .target(name: "VCamRemoteControl", dependencies: ["VCamControl", "VCamData", "VCamBridge", "VCamEntity", "VCamLogger"], resources: [
+        .target(name: "VCamControl", dependencies: ["VCamData", "VCamBridge", "VCamEntity", "VCamLogger", "VCamTrackingCore"]),
+        .target(name: "VCamRemoteControl", dependencies: ["VCamControl", "VCamData", "VCamBridge", "VCamEntity", "VCamLogger", "VCamTrackingCore"], resources: [
             .copy("Resources/openrpc.json"),
         ]),
         .target(name: "VCamData", dependencies: ["VCamBridge", "VCamEntity", "VCamLogger", "VCamTrackingCore"]),
@@ -69,7 +69,6 @@ let package = Package(
 )
 
 let isThree = Context.environment["VCAM_VARIANT"] != "2"
-let isAPIEnabled = Context.environment["VCAM_FEATURE_API"] == "1"
 
 if isThree {
     package.dependencies.append(
@@ -115,10 +114,6 @@ for target in package.targets {
         swiftSettings.append(contentsOf: [
             .define("ENABLE_ACCOUNT"),
         ])
-    }
-
-    if isAPIEnabled {
-        swiftSettings.append(.define("FEATURE_API"))
     }
 
     target.swiftSettings = swiftSettings

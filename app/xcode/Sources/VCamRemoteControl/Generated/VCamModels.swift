@@ -3,6 +3,13 @@
 
 import Foundation
 
+package enum AnimationEasing: String, Codable, CaseIterable, Sendable {
+    case linear
+    case easeIn
+    case easeOut
+    case easeInOut
+}
+
 package struct Avatar: Codable, Hashable, Sendable {
     package var id: UUID
     package var name: String
@@ -22,7 +29,7 @@ package struct Expression: Codable, Hashable, Sendable {
 }
 
 package struct ExpressionWeight: Codable, Hashable, Sendable {
-    /// A VRM 1.0 preset name, or the model's name for a custom expression.
+    /// An expression name as expression.list gives it.
     package var name: String
     /// 0 takes the expression off; 1 wears it in full.
     package var weight: Double
@@ -64,16 +71,75 @@ package struct JointTarget: Codable, Hashable, Sendable {
 }
 
 package struct Motion: Codable, Hashable, Sendable {
+    /// Seconds; absent when it can't be told, such as when no avatar is loaded.
+    package var duration: Double?
     /// A stable motion ID: "builtin:<name>" or "vrma:<UUID>".
     package var id: String
     /// The motion's current loop setting.
     package var isLoop: Bool
     package var name: String
 
-    package init(id: String, isLoop: Bool, name: String) {
+    package init(duration: Double? = nil, id: String, isLoop: Bool, name: String) {
+        self.duration = duration
         self.id = id
         self.isLoop = isLoop
         self.name = name
+    }
+}
+
+package enum ObjectInfoType: String, Codable, CaseIterable, Sendable {
+    case avatar
+    case image
+    case video
+    case screen
+    case videoCapture
+    case web
+    case text
+    case wind
+}
+
+package struct ObjectInfo: Codable, Hashable, Sendable {
+    package var id: Int
+    package var isHidden: Bool
+    package var isLocked: Bool
+    package var name: String
+    package var placement: ObjectPlacement?
+    package var type: ObjectInfoType
+
+    package init(id: Int, isHidden: Bool, isLocked: Bool, name: String, placement: ObjectPlacement? = nil, type: ObjectInfoType) {
+        self.id = id
+        self.isHidden = isHidden
+        self.isLocked = isLocked
+        self.name = name
+        self.placement = placement
+        self.type = type
+    }
+}
+
+package struct ObjectPlacement: Codable, Hashable, Sendable {
+    package var height: Double
+    package var width: Double
+    package var x: Double
+    package var y: Double
+
+    package init(height: Double, width: Double, x: Double, y: Double) {
+        self.height = height
+        self.width = width
+        self.x = x
+        self.y = y
+    }
+}
+
+/// Omitted values stay as they are. Height follows the width so that the object keeps its aspect ratio.
+package struct ObjectPlacementUpdate: Codable, Hashable, Sendable {
+    package var width: Double?
+    package var x: Double?
+    package var y: Double?
+
+    package init(width: Double? = nil, x: Double? = nil, y: Double? = nil) {
+        self.width = width
+        self.x = x
+        self.y = y
     }
 }
 
@@ -84,6 +150,229 @@ package struct Scene: Codable, Hashable, Sendable {
     package init(id: Int, name: String) {
         self.id = id
         self.name = name
+    }
+}
+
+package struct SceneLighting: Codable, Hashable, Sendable {
+    /// Degrees around the avatar as seen from the background: 0 lights it from the camera's side, negative from the left of the screen, 180 from behind.
+    package var azimuth: Double
+    /// Degrees above the horizon: 90 is straight overhead.
+    package var elevation: Double
+    package var rim: SceneLightingRim?
+    /// From 0 to 1: 0 lights the avatar evenly, 1 leaves the side away from the light unlit.
+    package var shadow: Double
+    package var shadowColor: String
+
+    package init(azimuth: Double, elevation: Double, rim: SceneLightingRim? = nil, shadow: Double, shadowColor: String) {
+        self.azimuth = azimuth
+        self.elevation = elevation
+        self.rim = rim
+        self.shadow = shadow
+        self.shadowColor = shadowColor
+    }
+}
+
+package struct SceneLightingRim: Codable, Hashable, Sendable {
+    package var color: String
+    package var intensity: Double
+
+    package init(color: String, intensity: Double) {
+        self.color = color
+        self.intensity = intensity
+    }
+}
+
+/// Omitted values stay as they are.
+package struct SubtitlePlacement: Codable, Hashable, Sendable {
+    /// The bottom edge, measured upward from the center of the canvas, as a fraction of the canvas height.
+    package var bottomY: Double?
+    /// A multiplier of the default size.
+    package var size: Double?
+    /// The offset of the center from the center of the canvas, as a fraction of the canvas width.
+    package var x: Double?
+
+    package init(bottomY: Double? = nil, size: Double? = nil, x: Double? = nil) {
+        self.bottomY = bottomY
+        self.size = size
+        self.x = x
+    }
+}
+
+package struct TextBackground: Codable, Hashable, Sendable {
+    package var color: String
+    package var cornerRadius: Double?
+    package var padding: Double?
+
+    package init(color: String, cornerRadius: Double? = nil, padding: Double? = nil) {
+        self.color = color
+        self.cornerRadius = cornerRadius
+        self.padding = padding
+    }
+}
+
+package enum TextGradientKind: String, Codable, CaseIterable, Sendable {
+    case linear
+    case radial
+}
+
+package struct TextGradient: Codable, Hashable, Sendable {
+    /// Degrees of a linear gradient: 0 runs left to right, 90 top to bottom.
+    package var direction: Double?
+    package var kind: TextGradientKind?
+    package var stops: [TextGradientStop]
+
+    package init(direction: Double? = nil, kind: TextGradientKind? = nil, stops: [TextGradientStop]) {
+        self.direction = direction
+        self.kind = kind
+        self.stops = stops
+    }
+}
+
+package struct TextGradientStop: Codable, Hashable, Sendable {
+    /// #RRGGBB or #RRGGBBAA.
+    package var color: String
+    /// From 0 to 1.
+    package var location: Double
+
+    package init(color: String, location: Double) {
+        self.color = color
+        self.location = location
+    }
+}
+
+package struct TextOutline: Codable, Hashable, Sendable {
+    package var color: String
+    package var width: Double
+
+    package init(color: String, width: Double) {
+        self.color = color
+        self.width = width
+    }
+}
+
+package struct TextPreset: Codable, Hashable, Sendable {
+    package var id: String
+    package var name: String
+
+    package init(id: String, name: String) {
+        self.id = id
+        self.name = name
+    }
+}
+
+package struct TextShadow: Codable, Hashable, Sendable {
+    package var blur: Double?
+    package var color: String
+    package var x: Double?
+    /// Positive moves the shadow down.
+    package var y: Double?
+
+    package init(blur: Double? = nil, color: String, x: Double? = nil, y: Double? = nil) {
+        self.blur = blur
+        self.color = color
+        self.x = x
+        self.y = y
+    }
+}
+
+package enum TextStyleAlignment: String, Codable, CaseIterable, Sendable {
+    case leading
+    case center
+    case trailing
+    case justified
+}
+
+package enum TextStyleTextTransform: String, Codable, CaseIterable, Sendable {
+    case none
+    case uppercase
+    case lowercase
+    case capitalized
+}
+
+/// Omitted values stay as they are.
+package struct TextStyle: Codable, Hashable, Sendable {
+    package var alignment: TextStyleAlignment?
+    package var background: TextBackground?
+    /// The blur radius. 0 removes the blur.
+    package var blur: Double?
+    /// #RRGGBB or #RRGGBBAA. Replaces a gradient.
+    package var color: String?
+    /// An empty array removes them.
+    package var dropShadows: [TextShadow]?
+    /// A PostScript name from text.listFonts.
+    package var fontName: String?
+    /// The size the text is laid out at, from 8 to 1024. Outlines, shadows and paddings are in the same units. The size on the canvas comes from the placement.
+    package var fontSize: Double?
+    package var gradient: TextGradient?
+    package var hasStrikethrough: Bool?
+    /// An empty array removes them.
+    package var innerShadows: [TextShadow]?
+    package var isUnderlined: Bool?
+    package var isVertical: Bool?
+    package var letterSpacing: Double?
+    /// A multiplier: 1 is the font's default.
+    package var lineHeight: Double?
+    /// The first is the topmost. An empty array removes them.
+    package var outlines: [TextOutline]?
+    package var textTransform: TextStyleTextTransform?
+    /// Wraps lines after this many fullwidth characters. 0 wraps only at explicit line breaks.
+    package var wrapCharacters: Double?
+
+    package init(alignment: TextStyleAlignment? = nil, background: TextBackground? = nil, blur: Double? = nil, color: String? = nil, dropShadows: [TextShadow]? = nil, fontName: String? = nil, fontSize: Double? = nil, gradient: TextGradient? = nil, hasStrikethrough: Bool? = nil, innerShadows: [TextShadow]? = nil, isUnderlined: Bool? = nil, isVertical: Bool? = nil, letterSpacing: Double? = nil, lineHeight: Double? = nil, outlines: [TextOutline]? = nil, textTransform: TextStyleTextTransform? = nil, wrapCharacters: Double? = nil) {
+        self.alignment = alignment
+        self.background = background
+        self.blur = blur
+        self.color = color
+        self.dropShadows = dropShadows
+        self.fontName = fontName
+        self.fontSize = fontSize
+        self.gradient = gradient
+        self.hasStrikethrough = hasStrikethrough
+        self.innerShadows = innerShadows
+        self.isUnderlined = isUnderlined
+        self.isVertical = isVertical
+        self.letterSpacing = letterSpacing
+        self.lineHeight = lineHeight
+        self.outlines = outlines
+        self.textTransform = textTransform
+        self.wrapCharacters = wrapCharacters
+    }
+}
+
+/// `connecting` means VCam is waiting for the source to send data.
+package enum TrackingSourceStatus: String, Codable, CaseIterable, Sendable {
+    case disconnected
+    case connecting
+    case connected
+}
+
+package struct TrackingSource: Codable, Hashable, Sendable {
+    package var id: String
+    /// `connecting` means VCam is waiting for the source to send data.
+    package var status: TrackingSourceStatus
+
+    package init(id: String, status: TrackingSourceStatus) {
+        self.id = id
+        self.status = status
+    }
+}
+
+package struct VideoState: Codable, Hashable, Sendable {
+    /// The length in seconds.
+    package var duration: Double
+    package var isLooping: Bool
+    package var isMuted: Bool
+    /// False once paused or past the end of a video that does not loop. A hidden object can report true while waiting to be shown.
+    package var isPlaying: Bool
+    /// The current position in seconds.
+    package var time: Double
+
+    package init(duration: Double, isLooping: Bool, isMuted: Bool, isPlaying: Bool, time: Double) {
+        self.duration = duration
+        self.isLooping = isLooping
+        self.isMuted = isMuted
+        self.isPlaying = isPlaying
+        self.time = time
     }
 }
 
@@ -105,14 +394,17 @@ package struct AppGetInfoResult: Codable, Hashable, Sendable {
 package struct StateGetResult: Codable, Hashable, Sendable {
     /// The last loaded avatar from the avatar library; absent when the current avatar was loaded directly from a file.
     package var avatarId: UUID?
-    /// The currently applied expression; absent when none is applied.
-    package var expressionName: String?
+    /// The applied expressions; empty when none is applied.
+    package var expressions: [ExpressionWeight]
     package var playingMotionIds: [String]
+    /// The subtitle text; empty when the subtitle is hidden.
+    package var subtitle: String
 
-    package init(avatarId: UUID? = nil, expressionName: String? = nil, playingMotionIds: [String]) {
+    package init(avatarId: UUID? = nil, expressions: [ExpressionWeight], playingMotionIds: [String], subtitle: String) {
         self.avatarId = avatarId
-        self.expressionName = expressionName
+        self.expressions = expressions
         self.playingMotionIds = playingMotionIds
+        self.subtitle = subtitle
     }
 }
 
@@ -129,6 +421,156 @@ package struct AvatarImportCommitResult: Codable, Hashable, Sendable {
 
     package init(avatarId: UUID) {
         self.avatarId = avatarId
+    }
+}
+
+package enum GazeSetMode: String, Codable, CaseIterable, Sendable {
+    case auto
+    case camera
+    case direction
+}
+
+package struct MotionImportBeginResult: Codable, Hashable, Sendable {
+    package var importId: UUID
+
+    package init(importId: UUID) {
+        self.importId = importId
+    }
+}
+
+package struct MotionImportCommitResult: Codable, Hashable, Sendable {
+    /// Seconds; absent when it can't be told.
+    package var duration: Double?
+    package var motionId: String
+
+    package init(duration: Double? = nil, motionId: String) {
+        self.duration = duration
+        self.motionId = motionId
+    }
+}
+
+package struct SceneGetLightingResult: Codable, Hashable, Sendable {
+    package var lighting: SceneLighting?
+
+    package init(lighting: SceneLighting? = nil) {
+        self.lighting = lighting
+    }
+}
+
+package struct CanvasGetResult: Codable, Hashable, Sendable {
+    package var height: Int
+    package var width: Int
+
+    package init(height: Int, width: Int) {
+        self.height = height
+        self.width = width
+    }
+}
+
+package enum FrameCaptureFormat: String, Codable, CaseIterable, Sendable {
+    case png
+    case jpeg
+}
+
+package struct FrameCaptureResult: Codable, Hashable, Sendable {
+    /// The image, base64 encoded.
+    package var data: String
+    package var height: Int
+    package var mimeType: String
+    package var width: Int
+
+    package init(data: String, height: Int, mimeType: String, width: Int) {
+        self.data = data
+        self.height = height
+        self.mimeType = mimeType
+        self.width = width
+    }
+}
+
+package struct ObjectDuplicateResult: Codable, Hashable, Sendable {
+    package var objectId: Int
+
+    package init(objectId: Int) {
+        self.objectId = objectId
+    }
+}
+
+package struct TextAddResult: Codable, Hashable, Sendable {
+    package var objectId: Int
+
+    package init(objectId: Int) {
+        self.objectId = objectId
+    }
+}
+
+package struct TextGetResult: Codable, Hashable, Sendable {
+    package var style: TextStyle
+    package var text: String
+
+    package init(style: TextStyle, text: String) {
+        self.style = style
+        self.text = text
+    }
+}
+
+package struct TrackingGetStateResult: Codable, Hashable, Sendable {
+    package var sources: [TrackingSource]
+
+    package init(sources: [TrackingSource]) {
+        self.sources = sources
+    }
+}
+
+package struct SubtitleGetStyleResult: Codable, Hashable, Sendable {
+    package var placement: SubtitlePlacement
+    package var style: TextStyle
+
+    package init(placement: SubtitlePlacement, style: TextStyle) {
+        self.placement = placement
+        self.style = style
+    }
+}
+
+package struct ImageImportBeginResult: Codable, Hashable, Sendable {
+    package var importId: UUID
+
+    package init(importId: UUID) {
+        self.importId = importId
+    }
+}
+
+package struct ImageImportCommitResult: Codable, Hashable, Sendable {
+    package var objectId: Int
+
+    package init(objectId: Int) {
+        self.objectId = objectId
+    }
+}
+
+package struct VideoImportBeginResult: Codable, Hashable, Sendable {
+    package var importId: UUID
+
+    package init(importId: UUID) {
+        self.importId = importId
+    }
+}
+
+package struct VideoImportCommitResult: Codable, Hashable, Sendable {
+    /// The length in seconds.
+    package var duration: Double
+    package var objectId: Int
+
+    package init(duration: Double, objectId: Int) {
+        self.duration = duration
+        self.objectId = objectId
+    }
+}
+
+package struct WebAddResult: Codable, Hashable, Sendable {
+    package var objectId: Int
+
+    package init(objectId: Int) {
+        self.objectId = objectId
     }
 }
 
@@ -170,6 +612,8 @@ package struct PoseSaveAsMotionResult: Codable, Hashable, Sendable {
 package enum VCamError: JSONRPCErrorConvertible, Hashable, Sendable {
     /// Avatar was not found. (code 1001)
     case avatarNotFound(JSONRPCErrorObject)
+    /// The avatar could not be loaded. (code 1022)
+    case avatarLoadFailed(JSONRPCErrorObject)
     /// This operation is not supported by this VCam. (code 1008)
     case unsupportedOperation(JSONRPCErrorObject)
     /// Import failed. (code 1007)
@@ -182,10 +626,32 @@ package enum VCamError: JSONRPCErrorConvertible, Hashable, Sendable {
     case expressionNotFound(JSONRPCErrorObject)
     /// Motion was not found. (code 1002)
     case motionNotFound(JSONRPCErrorObject)
+    /// The uploaded file is not a valid motion. (code 1023)
+    case invalidMotion(JSONRPCErrorObject)
     /// VCam is not ready. (code 1000)
     case notReady(JSONRPCErrorObject)
     /// Scene was not found. (code 1004)
     case sceneNotFound(JSONRPCErrorObject)
+    /// The last scene cannot be removed. (code 1018)
+    case sceneNotRemovable(JSONRPCErrorObject)
+    /// Frame capture is not allowed in the VCam API settings. (code 1019)
+    case frameCaptureDisabled(JSONRPCErrorObject)
+    /// Object was not found. (code 1012)
+    case objectNotFound(JSONRPCErrorObject)
+    /// The object is locked. (code 1013)
+    case objectLocked(JSONRPCErrorObject)
+    /// This object has no placement on the canvas. (code 1015)
+    case objectHasNoPlacement(JSONRPCErrorObject)
+    /// This object cannot be duplicated. (code 1016)
+    case objectNotDuplicable(JSONRPCErrorObject)
+    /// This object cannot be removed. (code 1017)
+    case objectNotRemovable(JSONRPCErrorObject)
+    /// This operation does not apply to this type of object. (code 1014)
+    case objectTypeMismatch(JSONRPCErrorObject)
+    /// The uploaded file is not a valid image. (code 1020)
+    case invalidImage(JSONRPCErrorObject)
+    /// The uploaded file is not a video that can be played. (code 1024)
+    case invalidVideo(JSONRPCErrorObject)
     /// The pose editor is not open. (code 1009)
     case poseEditorNotOpen(JSONRPCErrorObject)
     /// Bone was not found. (code 1010)
@@ -196,14 +662,26 @@ package enum VCamError: JSONRPCErrorConvertible, Hashable, Sendable {
     package init?(_ error: JSONRPCErrorObject) {
         switch error.code {
         case 1001: self = .avatarNotFound(error)
+        case 1022: self = .avatarLoadFailed(error)
         case 1008: self = .unsupportedOperation(error)
         case 1007: self = .importFailed(error)
         case 1005: self = .importNotFound(error)
         case 1006: self = .invalidVrm(error)
         case 1003: self = .expressionNotFound(error)
         case 1002: self = .motionNotFound(error)
+        case 1023: self = .invalidMotion(error)
         case 1000: self = .notReady(error)
         case 1004: self = .sceneNotFound(error)
+        case 1018: self = .sceneNotRemovable(error)
+        case 1019: self = .frameCaptureDisabled(error)
+        case 1012: self = .objectNotFound(error)
+        case 1013: self = .objectLocked(error)
+        case 1015: self = .objectHasNoPlacement(error)
+        case 1016: self = .objectNotDuplicable(error)
+        case 1017: self = .objectNotRemovable(error)
+        case 1014: self = .objectTypeMismatch(error)
+        case 1020: self = .invalidImage(error)
+        case 1024: self = .invalidVideo(error)
         case 1009: self = .poseEditorNotOpen(error)
         case 1010: self = .boneNotFound(error)
         case 1011: self = .boneNotMovable(error)
@@ -215,14 +693,26 @@ package enum VCamError: JSONRPCErrorConvertible, Hashable, Sendable {
     package var errorObject: JSONRPCErrorObject {
         switch self {
         case .avatarNotFound(let error): return error
+        case .avatarLoadFailed(let error): return error
         case .unsupportedOperation(let error): return error
         case .importFailed(let error): return error
         case .importNotFound(let error): return error
         case .invalidVrm(let error): return error
         case .expressionNotFound(let error): return error
         case .motionNotFound(let error): return error
+        case .invalidMotion(let error): return error
         case .notReady(let error): return error
         case .sceneNotFound(let error): return error
+        case .sceneNotRemovable(let error): return error
+        case .frameCaptureDisabled(let error): return error
+        case .objectNotFound(let error): return error
+        case .objectLocked(let error): return error
+        case .objectHasNoPlacement(let error): return error
+        case .objectNotDuplicable(let error): return error
+        case .objectNotRemovable(let error): return error
+        case .objectTypeMismatch(let error): return error
+        case .invalidImage(let error): return error
+        case .invalidVideo(let error): return error
         case .poseEditorNotOpen(let error): return error
         case .boneNotFound(let error): return error
         case .boneNotMovable(let error): return error
@@ -232,6 +722,11 @@ package enum VCamError: JSONRPCErrorConvertible, Hashable, Sendable {
     /// Avatar was not found. (code 1001)
     package static func avatarNotFound(data: JSONValue? = nil) -> Self {
         .avatarNotFound(JSONRPCErrorObject(code: 1001, message: "Avatar was not found.", data: data))
+    }
+
+    /// The avatar could not be loaded. (code 1022)
+    package static func avatarLoadFailed(data: JSONValue? = nil) -> Self {
+        .avatarLoadFailed(JSONRPCErrorObject(code: 1022, message: "The avatar could not be loaded.", data: data))
     }
 
     /// This operation is not supported by this VCam. (code 1008)
@@ -264,6 +759,11 @@ package enum VCamError: JSONRPCErrorConvertible, Hashable, Sendable {
         .motionNotFound(JSONRPCErrorObject(code: 1002, message: "Motion was not found.", data: data))
     }
 
+    /// The uploaded file is not a valid motion. (code 1023)
+    package static func invalidMotion(data: JSONValue? = nil) -> Self {
+        .invalidMotion(JSONRPCErrorObject(code: 1023, message: "The uploaded file is not a valid motion.", data: data))
+    }
+
     /// VCam is not ready. (code 1000)
     package static func notReady(data: JSONValue? = nil) -> Self {
         .notReady(JSONRPCErrorObject(code: 1000, message: "VCam is not ready.", data: data))
@@ -272,6 +772,56 @@ package enum VCamError: JSONRPCErrorConvertible, Hashable, Sendable {
     /// Scene was not found. (code 1004)
     package static func sceneNotFound(data: JSONValue? = nil) -> Self {
         .sceneNotFound(JSONRPCErrorObject(code: 1004, message: "Scene was not found.", data: data))
+    }
+
+    /// The last scene cannot be removed. (code 1018)
+    package static func sceneNotRemovable(data: JSONValue? = nil) -> Self {
+        .sceneNotRemovable(JSONRPCErrorObject(code: 1018, message: "The last scene cannot be removed.", data: data))
+    }
+
+    /// Frame capture is not allowed in the VCam API settings. (code 1019)
+    package static func frameCaptureDisabled(data: JSONValue? = nil) -> Self {
+        .frameCaptureDisabled(JSONRPCErrorObject(code: 1019, message: "Frame capture is not allowed in the VCam API settings.", data: data))
+    }
+
+    /// Object was not found. (code 1012)
+    package static func objectNotFound(data: JSONValue? = nil) -> Self {
+        .objectNotFound(JSONRPCErrorObject(code: 1012, message: "Object was not found.", data: data))
+    }
+
+    /// The object is locked. (code 1013)
+    package static func objectLocked(data: JSONValue? = nil) -> Self {
+        .objectLocked(JSONRPCErrorObject(code: 1013, message: "The object is locked.", data: data))
+    }
+
+    /// This object has no placement on the canvas. (code 1015)
+    package static func objectHasNoPlacement(data: JSONValue? = nil) -> Self {
+        .objectHasNoPlacement(JSONRPCErrorObject(code: 1015, message: "This object has no placement on the canvas.", data: data))
+    }
+
+    /// This object cannot be duplicated. (code 1016)
+    package static func objectNotDuplicable(data: JSONValue? = nil) -> Self {
+        .objectNotDuplicable(JSONRPCErrorObject(code: 1016, message: "This object cannot be duplicated.", data: data))
+    }
+
+    /// This object cannot be removed. (code 1017)
+    package static func objectNotRemovable(data: JSONValue? = nil) -> Self {
+        .objectNotRemovable(JSONRPCErrorObject(code: 1017, message: "This object cannot be removed.", data: data))
+    }
+
+    /// This operation does not apply to this type of object. (code 1014)
+    package static func objectTypeMismatch(data: JSONValue? = nil) -> Self {
+        .objectTypeMismatch(JSONRPCErrorObject(code: 1014, message: "This operation does not apply to this type of object.", data: data))
+    }
+
+    /// The uploaded file is not a valid image. (code 1020)
+    package static func invalidImage(data: JSONValue? = nil) -> Self {
+        .invalidImage(JSONRPCErrorObject(code: 1020, message: "The uploaded file is not a valid image.", data: data))
+    }
+
+    /// The uploaded file is not a video that can be played. (code 1024)
+    package static func invalidVideo(data: JSONValue? = nil) -> Self {
+        .invalidVideo(JSONRPCErrorObject(code: 1024, message: "The uploaded file is not a video that can be played.", data: data))
     }
 
     /// The pose editor is not open. (code 1009)

@@ -213,25 +213,3 @@ struct AudioVowelEstimatorTests {
         #expect(Self.feed(faintVowel, sampleRate: 48_000, to: &estimator).isEmpty)
     }
 }
-
-@Suite
-struct AudioExpressionEstimatorTests {
-    @Test
-    func keepsReportingTheLevelAfterReset() throws {
-        let estimator = AudioExpressionEstimator()
-        let received = LevelBox()
-        estimator.setOnAudioLevelUpdate { received.value = $0 }
-
-        estimator.reset()
-
-        let format = try #require(AVAudioFormat(standardFormatWithSampleRate: 48_000, channels: 1))
-        let buffer = try #require(AVAudioPCMBuffer(pcmFormat: format, frameCapacity: 1024))
-        buffer.frameLength = 1024
-        estimator.analyze(buffer: buffer, time: .init(sampleTime: 0, atRate: 48_000))
-        #expect(received.value != nil)
-    }
-}
-
-private final class LevelBox: @unchecked Sendable {
-    var value: Float?
-}

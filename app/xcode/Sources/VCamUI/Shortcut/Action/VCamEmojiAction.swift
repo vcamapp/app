@@ -1,4 +1,5 @@
 import AppKit
+import VCamControl
 import VCamEntity
 import struct SwiftUI.Image
 
@@ -16,6 +17,6 @@ public struct VCamEmojiAction: VCamAction {
         guard !configuration.emoji.isEmpty else {
             throw VCamActionError(String(localized: .isNotSetYet(String(localized: .emoji))))
         }
-        EmojiStamp.show?(try configuration.emoji.drawImage())
+        try EmojiControl.show(configuration.emoji)
     }
 }

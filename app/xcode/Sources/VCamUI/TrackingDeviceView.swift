@@ -3,6 +3,7 @@ import AVFoundation
 import VCamTracking
 import VCamBridge
 import VCamCamera
+import VCamData
 import VCamEntity
 
 public struct TrackingDeviceView: View {
@@ -12,6 +13,7 @@ public struct TrackingDeviceView: View {
 
     @State private var captureDevice: AVCaptureDevice? = Tracking.shared.webCamera.currentCaptureDevice
     @State private var audioDevice: AudioDevice? = AvatarAudioManager.shared.currentInputDevice
+    @AppStorage(key: .cameraFps) private var cameraFps
 
     public var body: some View {
         let cameras = Camera.cameras()
@@ -39,41 +41,35 @@ public struct TrackingDeviceView: View {
                 Text(.camera)
             }
         }
-        if let firstDevice = audioDevices.first {
-            Picker(selection: Binding(
-                get: { audioDevice ?? firstDevice },
-                set: { newDevice in
-                    audioDevice = newDevice
-                    AvatarAudioManager.shared.setAudioDevice(newDevice)
+        if tracking.webCamera.isInUse {
+            ValueEditField(.fpsCamera, value: $cameraFps.map(), type: .slider(1...60) {
+                guard !$0 else { return }
+                Tracking.shared.webCamera.setFPS(cameraFps)
+            }, precision: .fractionLength(0))
+        }
+        Group {
+            if let firstDevice = audioDevices.first {
+                Picker(selection: Binding(
+                    get: { audioDevice ?? firstDevice },
+                    set: { newDevice in
+                        audioDevice = newDevice
+                        AvatarAudioManager.shared.setAudioDevice(newDevice)
+                    }
+                )) {
+                    ForEach(audioDevices) { device in
+                        Text(device.name()).tag(device)
+                    }
+                } label: {
+                    Text(.mic)
                 }
-            )) {
-                ForEach(audioDevices) { device in
-                    Text(device.name()).tag(device)
+            } else {
+                Picker(selection: .constant(0)) {
+                    Text(.isNotFound(String(localized: .mic))).tag(0)
+                } label: {
+                    Text(.mic)
                 }
-            } label: {
-                Text(.mic)
-            }
-        } else {
-            Picker(selection: .constant(0)) {
-                Text(.isNotFound(String(localized: .mic))).tag(0)
-            } label: {
-                Text(.mic)
             }
         }
-        Picker(selection: Binding(
-            get: { tracking.activeLipSyncType },
-            set: { tracking.lipSyncType = $0 }
-        )) {
-            ForEach(LipSyncType.allCases) { type in
-                Text(type.name(faceTrackingMethod: tracking.faceTrackingMethod)).tag(type)
-            }
-        } label: {
-            Text(.lipSync)
-            if tracking.micLipSyncDisabled {
-                Text(.lipSyncLockedDescription)
-            }
-        }
-        .disabled(tracking.micLipSyncDisabled)
         .onReceive(NotificationCenter.default.publisher(for: .deviceWasChanged)) { _ in
             captureDevice = Tracking.shared.webCamera.currentCaptureDevice
             audioDevice = AvatarAudioManager.shared.currentInputDevice

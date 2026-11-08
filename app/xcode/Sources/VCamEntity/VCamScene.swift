@@ -45,6 +45,7 @@ public extension VCamScene {
     enum ObjectType: Codable, Sendable {
         case avatar(state: Solid, zoom: Float?) // zoom: [Added 0.15.5] nil = 1
         case image(id: String, state: Image)
+        case video(id: String, state: Video) // id includes the file extension
         case screen(id: String, state: ScreenCapture)
         case captureDevice(id: String, state: RenderTexture)
         case web(state: Web)
@@ -98,6 +99,18 @@ public extension VCamScene {
         public var rect: CGRect {
             .init(x: CGFloat(x), y: CGFloat(y), width: CGFloat(width), height: CGFloat(height))
         }
+    }
+
+    struct Video: Codable, Sendable {
+        public init(texture: RenderTexture, isLooping: Bool, isMuted: Bool) {
+            self.texture = texture
+            self.isLooping = isLooping
+            self.isMuted = isMuted
+        }
+
+        public var texture: RenderTexture
+        public var isLooping: Bool
+        public var isMuted: Bool
     }
 
     struct Plane: Codable, Sendable {

@@ -1,4 +1,5 @@
 import SwiftUI
+import VCamControl
 import VCamEntity
 import VCamLogger
 
@@ -36,7 +37,7 @@ public struct VCamSceneListView: View {
                     }
                     if sceneManager.currentSceneId != newId {
                         Task {
-                            try? await sceneManager.loadScene(id: newId)
+                            try? await SceneControl.loadScene(id: newId, animation: nil, on: sceneManager)
                         }
                     }
                     selectedId = newId

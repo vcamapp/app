@@ -2,10 +2,12 @@ import Foundation
 import Observation
 import VCamControl
 import VCamData
+import VCamTrackingCore
 
 /// Feeds VCam state changes into the EventPublisher while the server runs.
-/// Motion, expression and subtitle changes are observed on UniState, which
-/// reflects them regardless of the source (the UI, shortcuts, or the API);
+/// Motion, expression and subtitle changes are observed on UniState, and object
+/// changes on the scene's objects, which reflect them regardless of the source
+/// (the UI, shortcuts, or the API);
 /// avatar loads hook into AvatarControl because there is no completion signal.
 @MainActor
 final class EventBridge {
@@ -25,9 +27,11 @@ final class EventBridge {
             self?.publish(.avatarLoaded(avatarId: avatarId))
         }
         observeMotionPlaying(previous: uniState.isMotionPlaying)
-        observeExpression(previous: uniState.currentExpressionName)
+        observeExpression(previous: uniState.currentExpressions)
         observeScene(previous: SceneControl.provider?.activeScene?.id)
         observeSubtitle(previous: uniState.subtitle)
+        observeTracking(previous: trackingStatuses)
+        observeObjects(previous: objects)
     }
 
     func stop() {
@@ -61,16 +65,16 @@ final class EventBridge {
         }
     }
 
-    private func observeExpression(previous: String?) {
+    private func observeExpression(previous: [AppliedExpression]) {
         guard isActive else { return }
         withObservationTracking {
-            _ = uniState.currentExpressionName
+            _ = uniState.currentExpressions
         } onChange: { [weak self] in
             Task { @MainActor in
                 guard let self, self.isActive else { return }
-                let current = self.uniState.currentExpressionName
-                if let current, current != previous {
-                    self.publish(.expressionChanged(name: current))
+                let current = self.uniState.currentExpressions
+                if current != previous {
+                    self.publish(.expressionChanged(expressions: current.map { ExpressionWeight(name: $0.name, weight: $0.weight) }))
                 }
                 self.observeExpression(previous: current)
             }
@@ -105,6 +109,54 @@ final class EventBridge {
                     self.publish(.sceneLoaded(sceneId: Int(current)))
                 }
                 self.observeScene(previous: current)
+            }
+        }
+    }
+
+    private var objects: [SceneObjectControl.Object] {
+        SceneObjectControl.provider?.objects ?? []
+    }
+
+    private func observeObjects(previous: [SceneObjectControl.Object]) {
+        guard isActive else { return }
+        withObservationTracking {
+            _ = objects
+        } onChange: { [weak self] in
+            Task { @MainActor in
+                guard let self, self.isActive else { return }
+                let current = self.objects
+                let previousById = Dictionary(uniqueKeysWithValues: previous.map { ($0.id, $0) })
+                let currentIds = Set(current.map(\.id))
+                let added = current.filter { previousById[$0.id] == nil }.map { Int($0.id) }
+                let changed = current.filter { object in previousById[object.id].map { $0 != object } ?? false }.map { Int($0.id) }
+                let removed = previous.filter { !currentIds.contains($0.id) }.map { Int($0.id) }
+                if !added.isEmpty || !changed.isEmpty || !removed.isEmpty {
+                    self.publish(.objectsChanged(added: added, changed: changed, removed: removed))
+                }
+                self.observeObjects(previous: current)
+            }
+        }
+    }
+
+    private var trackingStatuses: [String: ConnectionStatus] {
+        Dictionary(uniqueKeysWithValues: TrackingControl.provider?.sources.map { ($0.id, $0.status) } ?? [])
+    }
+
+    private func observeTracking(previous: [String: ConnectionStatus]) {
+        guard isActive else { return }
+        withObservationTracking {
+            _ = trackingStatuses
+        } onChange: { [weak self] in
+            Task { @MainActor in
+                guard let self, self.isActive else { return }
+                let current = self.trackingStatuses
+                for (sourceId, status) in current where status == .connected && previous[sourceId] != .connected {
+                    self.publish(.trackingConnected(sourceId: sourceId))
+                }
+                for (sourceId, status) in previous where status == .connected && current[sourceId] != .connected {
+                    self.publish(.trackingDisconnected(sourceId: sourceId))
+                }
+                self.observeTracking(previous: current)
             }
         }
     }

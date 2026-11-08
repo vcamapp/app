@@ -43,6 +43,10 @@ public extension UserDefaults.Key {
     static var integrationVMCProtocolExpressions: Key<Bool> { .init("vc_intg_vmc_expressions", default: true) }
     static var integrationExternalControl: Key<Bool> { .init("vc_intg_external_control", default: false) }
     static var integrationExternalControlPort: Key<Int> { .init("vc_intg_external_control_port", default: 34965) }
+    static var integrationExternalControlFrameCapture: Key<Bool> { .init("vc_intg_external_control_frame_capture", default: false) }
+    static var integrationExternalControlNetworkAccess: Key<Bool> { .init("vc_intg_external_control_network", default: false) }
+    static var integrationExternalControlRequiresToken: Key<Bool> { .init("vc_intg_external_control_requires_token", default: true) }
+    static var integrationExternalControlToken: Key<String> { .init("vc_intg_external_control_token", default: "") }
     static var mocapNetworkInterpolation: Key<Double> { .init("vc_mocap_network_interpolation", default: 1.0) }
 
     static var useAddToMacOSMenuBar: Key<Bool> { .init("vc_use_add_to_macos_menubar", default: true) }

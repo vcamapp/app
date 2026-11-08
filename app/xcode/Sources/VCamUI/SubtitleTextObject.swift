@@ -4,6 +4,7 @@ import VCamEntity
 import VCamData
 import VCamDefaults
 import VCamBridge
+import VCamControl
 
 /// Belongs to no scene: the text lives in `UniState.subtitle`, and the style and placement are
 /// stored globally so that every scene shows it. Unlike a scene text object, whose on-screen
@@ -73,6 +74,89 @@ enum SubtitleTextObject {
         SceneObjectManager.shared.setLocked(!isEditing, id: SceneObject.subtitleID)
     }
 
+    /// What's on screen when the subtitle is showing, so that a drag in the app is not undone
+    static var style: SceneObjectControl.SubtitleStyle {
+        persistStyle()
+        let style = loadStyle() ?? Style(configuration: TextObjectPreset.subtitleDefault)
+        return .init(
+            configuration: style.configuration,
+            x: style.centerX,
+            bottomY: style.bottomY,
+            size: style.scale / TextObjectPlacement.defaultScale(fontSize: style.configuration.fontSize)
+        )
+    }
+
+    private static let placementAnimation = AnimationSlot()
+
+    /// Moves the bitmap as a drag does, and rasterizes at the final size when it arrives
+    static func animateStyle(_ style: SceneObjectControl.SubtitleStyle, animation: ControlAnimation) async {
+        let start = self.style
+        var restyled = style
+        restyled.x = start.x
+        restyled.bottomY = start.bottomY
+        restyled.size = start.size
+        setStyle(restyled)
+
+        let finished = await placementAnimation.run(animation) { progress in
+            func value(_ from: Double, _ to: Double) -> Double { from + (to - from) * progress }
+            guard let current, let renderer = RenderTextureManager.shared.textRenderer(id: current.object.id) else { return }
+            // From the bitmap rather than the last frame's box, since the text can change on the way
+            let size = renderer.size * (value(start.size, style.size) / start.size) / MainTexture.shared.canvasSize
+            current.payload.region = .init(
+                origin: .init(x: value(start.x, style.x), y: value(start.bottomY, style.bottomY) + size.height / 2),
+                size: size
+            )
+        }
+        if finished {
+            setStyle(style)
+        }
+    }
+
+    static func setStyle(_ style: SceneObjectControl.SubtitleStyle) {
+        placementAnimation.cancel()
+        let style = Style(
+            configuration: style.configuration,
+            scale: style.size * TextObjectPlacement.defaultScale(fontSize: style.configuration.fontSize),
+            centerX: style.x,
+            bottomY: style.bottomY
+        )
+        save(style)
+        if !restyleShown(style) {
+            recreate()
+        }
+    }
+
+    /// Re-rasterizes the subtitle on screen rather than recreating it: a new texture shows
+    /// nothing until its first write, so the subtitle would vanish for a frame, while the shown
+    /// one stays until the new pixels replace it
+    private static func restyleShown(_ style: Style) -> Bool {
+        guard let current, let renderer = RenderTextureManager.shared.textRenderer(id: current.object.id) else { return false }
+        let shownPlacement = current.object.type.normalizedPlacement
+        let layout = layout(of: style, text: current.payload.configuration.text)
+        renderer.layout = layout
+        if let shownPlacement {
+            RenderTextureManager.shared.holdPlacement(shownPlacement, id: current.object.id)
+        }
+        current.payload.configuration = layout.configuration
+        current.payload.region = region(of: style, bitmapSize: renderer.size)
+        SceneObjectManager.shared.addSubtitle(current.object)
+        return true
+    }
+
+    private static func layout(of style: Style, text: String) -> TextRenderer.Layout {
+        var configuration = style.configuration
+        configuration.text = text
+        let scale = TextObjectPlacement.normalizedScale(style.scale, fontSize: configuration.fontSize)
+        configuration.wrapCharacters = TextObjectPlacement.wrapCharacters(forScale: scale, fontSize: configuration.fontSize)
+        return .init(configuration: configuration, displayScale: scale)
+    }
+
+    /// Centered on the stored x, standing on the stored bottom edge
+    private static func region(of style: Style, bitmapSize: CGSize) -> CGRect {
+        let size = bitmapSize / MainTexture.shared.canvasSize
+        return .init(origin: .init(x: style.centerX, y: style.bottomY + size.height / 2), size: size)
+    }
+
     private static func resetPlacement() {
         if let style = loadStyle() {
             save(Style(configuration: style.configuration))
@@ -140,20 +224,12 @@ enum SubtitleTextObject {
             apply(configuration, to: current.object, payload: current.payload)
         } else {
             let style = loadStyle() ?? Style(configuration: TextObjectPreset.subtitleDefault)
-            var configuration = style.configuration
-            configuration.text = text
-            let scale = TextObjectPlacement.normalizedScale(style.scale, fontSize: configuration.fontSize)
-            let canvasSize = MainTexture.shared.canvasSize
-            configuration.wrapCharacters = TextObjectPlacement.wrapCharacters(forScale: scale, fontSize: configuration.fontSize)
-            let renderer = TextRenderer(layout: .init(configuration: configuration, displayScale: scale))
+            let layout = layout(of: style, text: text)
+            let renderer = TextRenderer(layout: layout)
             RenderTextureManager.shared.set(renderer, id: SceneObject.subtitleID)
-            let size = renderer.size / canvasSize
             manager.addSubtitle(.init(
                 id: SceneObject.subtitleID,
-                type: .text(.init(configuration: configuration, region: .init(
-                    origin: .init(x: style.centerX, y: style.bottomY + size.height / 2),
-                    size: size
-                ))),
+                type: .text(.init(configuration: layout.configuration, region: region(of: style, bitmapSize: renderer.size))),
                 name: String(localized: .subtitle),
                 isHidden: false,
                 isLocked: !isStyleEditorOpen

@@ -3,6 +3,7 @@ import VCamBridge
 import VCamControl
 import VCamData
 import VCamEntity
+import VCamTrackingCore
 
 /// Implements the public API on top of the Control Layer. The transport
 /// layer creates one instance per connection so that event subscriptions
@@ -19,6 +20,8 @@ package struct VCamAPIService: VCamHandler {
     private let uniState: UniState
     private let eventPublisher: EventPublisher
     private let importManager: AvatarImportManager
+    private let sceneObjects: SceneObjectAPIHandler
+    private let motions: MotionAPIHandler
 
     package init(
         connectionID: UUID,
@@ -34,17 +37,31 @@ package struct VCamAPIService: VCamHandler {
         self.uniState = uniState
         self.eventPublisher = eventPublisher
         self.importManager = importManager
+        sceneObjects = SceneObjectAPIHandler(connectionID: connectionID, staging: importManager.staging)
+        motions = MotionAPIHandler(connectionID: connectionID, library: motionLibrary, staging: importManager.staging)
     }
 
     @MainActor
     package func appGetInfo() async throws -> AppGetInfoResult {
-        var capabilities = ["avatar", "motion", "expression", "scene", "camera", "subtitle", "events"]
+        var capabilities = ["avatar", "motion", "expression", "scene", "camera", "subtitle", "tracking", "events"]
 #if FEATURE_3
         capabilities.append("vrma")
         capabilities.append("avatarImport")
 #endif
         if PoseControl.provider != nil {
             capabilities.append("poseEditor")
+        }
+        if EmojiControl.presentStamp != nil {
+            capabilities.append("emoji")
+        }
+        if SceneObjectControl.provider != nil {
+            capabilities.append("sceneObjects")
+        }
+        if RenderingFeature.supported.contains(.sceneLighting) {
+            capabilities.append("sceneLighting")
+        }
+        if UserDefaults.standard.value(for: .integrationExternalControlFrameCapture) {
+            capabilities.append("frameCapture")
         }
         return AppGetInfoResult(
             apiVersion: APISpecification.apiVersion,
@@ -57,8 +74,9 @@ package struct VCamAPIService: VCamHandler {
     package func stateGet() async throws -> StateGetResult {
         StateGetResult(
             avatarId: modelManager.lastLoadedModelId,
-            expressionName: uniState.currentExpressionName,
-            playingMotionIds: uniState.isMotionPlaying.filter(\.value).keys.sorted()
+            expressions: uniState.currentExpressions.map { ExpressionWeight(name: $0.name, weight: $0.weight) },
+            playingMotionIds: uniState.isMotionPlaying.filter(\.value).keys.sorted(),
+            subtitle: uniState.subtitle
         )
     }
 
@@ -72,7 +90,11 @@ package struct VCamAPIService: VCamHandler {
         guard let item = modelManager.modelItems.find(byId: avatarId), item.status == .valid else {
             throw VCamError.avatarNotFound(data: .errorCode("avatar_not_found"))
         }
-        try AvatarControl.load(item, modelManager: modelManager)
+        do {
+            try await AvatarControl.loadAndWait(item, modelManager: modelManager)
+        } catch is ModelLoadError {
+            throw VCamError.avatarLoadFailed(data: .errorCode("avatar_load_failed"))
+        }
         return true
     }
 
@@ -100,9 +122,9 @@ package struct VCamAPIService: VCamHandler {
                 modelManager: modelManager
             )
             return AvatarImportCommitResult(avatarId: avatarId)
-        } catch AvatarImportManagerError.importNotFound {
+        } catch UploadError.importNotFound {
             throw VCamError.importNotFound(data: .errorCode("import_not_found"))
-        } catch AvatarImportManagerError.invalidModel {
+        } catch UploadError.invalidContent {
             throw VCamError.invalidVrm(data: .errorCode("invalid_vrm"))
         } catch {
             throw VCamError.importFailed(data: .errorCode("import_failed"))
@@ -125,31 +147,87 @@ package struct VCamAPIService: VCamHandler {
     }
 
     @MainActor
-    package func expressionSet(name: String) async throws -> Bool {
-        guard uniState.expressions.contains(where: { $0.name == name }) else {
-            throw VCamError.expressionNotFound(data: .errorCode("expression_not_found"))
+    package func expressionSet(expressions: [ExpressionWeight], duration: Double?, easing: AnimationEasing?) async throws -> Bool {
+        var applied: [AppliedExpression] = []
+        for expression in expressions {
+            // The list's own spelling: names reach the renderer byte for byte, while Swift compares them by canonical equivalence
+            guard let known = uniState.expressions.first(where: { $0.name == expression.name }) else {
+                throw VCamError.expressionNotFound(data: .errorCode("expression_not_found"))
+            }
+            guard (0...1).contains(expression.weight) else {
+                throw TextStyleMapping.invalidParameter("weight", "expected a number from 0 to 1")
+            }
+            guard !applied.contains(where: { $0.name == known.name }) else {
+                throw TextStyleMapping.invalidParameter("expressions", "expected each name once")
+            }
+            applied.append(AppliedExpression(name: known.name, weight: expression.weight))
         }
-        ExpressionControl.apply(name: name)
+        let animation = try AnimationMapping.animation(duration: duration, easing: easing)
+        await ExpressionControl.apply(applied, animation: animation, state: uniState)
+        return true
+    }
+
+    @MainActor
+    package func gazeSet(mode: GazeSetMode, yaw: Double?, pitch: Double?, movesHead: Bool?) async throws -> Bool {
+        let target: GazeControl.Target
+        switch mode {
+        case .auto:
+            target = .auto
+        case .camera:
+            target = .camera
+        case .direction:
+            let yaw = yaw ?? 0
+            let pitch = pitch ?? 0
+            guard (-90...90).contains(yaw) else {
+                throw TextStyleMapping.invalidParameter("yaw", "expected degrees from -90 to 90")
+            }
+            guard (-45...45).contains(pitch) else {
+                throw TextStyleMapping.invalidParameter("pitch", "expected degrees from -45 to 45")
+            }
+            target = .direction(yaw: Float(yaw), pitch: Float(pitch))
+        }
+        GazeControl.look(at: target, movesHead: movesHead ?? true)
         return true
     }
 
     @MainActor
     package func motionList() async throws -> [Motion] {
-        motionLibrary.allMotions.map {
-            Motion(
-                id: $0.id,
-                isLoop: motionLibrary.isLoopEnabled(for: $0.id, trigger: .api),
-                name: $0.displayName
-            )
-        }
+        await motions.list()
     }
 
     @MainActor
-    package func motionPlay(motionId: String, loop: Bool?) async throws -> Bool {
+    package func motionPlay(motionId: String, loop: Bool?, wait: Bool?) async throws -> Bool {
         guard motionLibrary.allMotions.contains(where: { $0.id == motionId }) else {
             throw VCamError.motionNotFound(data: .errorCode("motion_not_found"))
         }
-        MotionControl.play(id: motionId, isLoop: loop ?? motionLibrary.isLoopEnabled(for: motionId, trigger: .api))
+        let isLoop = loop ?? motionLibrary.isLoopEnabled(for: motionId, trigger: .api)
+        MotionControl.play(id: motionId, isLoop: isLoop)
+        let isPose = motionLibrary.record(for: motionId)?.isPose ?? false
+        if wait == true, !isLoop, !isPose {
+            await MotionControl.waitUntilStopped(id: motionId, state: uniState)
+        }
+        return true
+    }
+
+    @MainActor
+    package func motionImportBegin(filename: String) async throws -> MotionImportBeginResult {
+        MotionImportBeginResult(importId: try motions.beginImport(filename: filename))
+    }
+
+    @MainActor
+    package func motionImportCommit(importId: UUID, name: String?, loop: Bool?, isPose: Bool?) async throws -> MotionImportCommitResult {
+        try await motions.commitImport(importId: importId, name: name, loop: loop, isPose: isPose)
+    }
+
+    @MainActor
+    package func motionImportCancel(importId: UUID) async throws -> Bool {
+        try motions.cancelImport(importId: importId)
+        return true
+    }
+
+    @MainActor
+    package func motionRemove(motionId: String) async throws -> Bool {
+        try motions.remove(motionId: motionId)
         return true
     }
 
@@ -163,28 +241,278 @@ package struct VCamAPIService: VCamHandler {
     }
 
     @MainActor
+    package func sceneList() async throws -> [Scene] {
+        guard let provider = SceneControl.provider else {
+            throw VCamError.notReady(data: .errorCode("not_ready"))
+        }
+        return provider.sceneList.map(Self.scene)
+    }
+
+    @MainActor
     package func sceneGet() async throws -> Scene {
         guard let scene = SceneControl.provider?.activeScene else {
             throw VCamError.notReady(data: .errorCode("not_ready"))
         }
-        return Scene(id: Int(scene.id), name: scene.name)
+        return Self.scene(scene)
+    }
+
+    private static func scene(_ scene: SceneControl.Scene) -> Scene {
+        Scene(id: Int(scene.id), name: scene.name)
     }
 
     @MainActor
-    package func sceneLoad(sceneId: Int) async throws -> Bool {
+    package func sceneLoad(sceneId: Int, duration: Double?, easing: AnimationEasing?) async throws -> Bool {
+        let animation = try AnimationMapping.animation(duration: duration, easing: easing)
         guard let provider = SceneControl.provider else {
             throw VCamError.notReady(data: .errorCode("not_ready"))
         }
         guard let id = Int32(exactly: sceneId), provider.sceneList.contains(where: { $0.id == id }) else {
             throw VCamError.sceneNotFound(data: .errorCode("scene_not_found"))
         }
-        try await provider.loadScene(id: id)
+        try await SceneControl.loadScene(id: id, animation: animation, on: provider)
+        return true
+    }
+
+    @MainActor
+    package func sceneCreate(name: String?) async throws -> Scene {
+        try await withSceneProvider { Self.scene(try await $0.createScene(name: name)) }
+    }
+
+    @MainActor
+    package func sceneDuplicate(sceneId: Int, name: String?) async throws -> Scene {
+        let id = try Self.sceneID(sceneId)
+        return try await withSceneProvider { Self.scene(try await $0.duplicateScene(id: id, name: name)) }
+    }
+
+    @MainActor
+    package func sceneRename(sceneId: Int, name: String) async throws -> Bool {
+        let id = try Self.sceneID(sceneId)
+        try await withSceneProvider { try $0.renameScene(id: id, name: name) }
+        return true
+    }
+
+    @MainActor
+    package func sceneMove(sceneId: Int, index: Int) async throws -> Bool {
+        let id = try Self.sceneID(sceneId)
+        try await withSceneProvider { try $0.moveScene(id: id, toIndex: index) }
+        return true
+    }
+
+    @MainActor
+    package func sceneRemove(sceneId: Int) async throws -> Bool {
+        let id = try Self.sceneID(sceneId)
+        try await withSceneProvider { try await $0.removeScene(id: id) }
+        return true
+    }
+
+    @MainActor
+    package func sceneGetLighting() async throws -> SceneGetLightingResult {
+        try Self.requireSceneLighting()
+        return try await withSceneProvider { provider in
+            SceneGetLightingResult(lighting: provider.lighting.map(SceneLightingMapping.apiLighting))
+        }
+    }
+
+    @MainActor
+    package func sceneSetLighting(lighting: SceneLighting?) async throws -> Bool {
+        try Self.requireSceneLighting()
+        let lighting = try lighting.map(SceneLightingMapping.lighting)
+        try await withSceneProvider { try $0.setLighting(lighting) }
+        return true
+    }
+
+    private static func requireSceneLighting() throws {
+        guard RenderingFeature.supported.contains(.sceneLighting) else {
+            throw VCamError.unsupportedOperation(data: .errorCode("unsupported_operation"))
+        }
+    }
+
+    private static func sceneID(_ value: Int) throws -> Int32 {
+        guard let id = Int32(exactly: value) else {
+            throw VCamError.sceneNotFound(data: .errorCode("scene_not_found"))
+        }
+        return id
+    }
+
+    private func withSceneProvider<Result>(_ body: (any SceneControlling) async throws -> Result) async throws -> Result {
+        guard let provider = SceneControl.provider else {
+            throw VCamError.notReady(data: .errorCode("not_ready"))
+        }
+        do {
+            return try await body(provider)
+        } catch SceneControlError.notFound {
+            throw VCamError.sceneNotFound(data: .errorCode("scene_not_found"))
+        } catch SceneControlError.notRemovable {
+            throw VCamError.sceneNotRemovable(data: .errorCode("scene_not_removable"))
+        }
+    }
+
+    @MainActor
+    package func canvasGet() async throws -> CanvasGetResult {
+        let size = MainTexture.shared.size
+        return CanvasGetResult(height: Int(size.height), width: Int(size.width))
+    }
+
+    @MainActor
+    package func frameCapture(maxWidth: Int?, format: FrameCaptureFormat?) async throws -> FrameCaptureResult {
+        guard UserDefaults.standard.value(for: .integrationExternalControlFrameCapture) else {
+            throw VCamError.frameCaptureDisabled(data: .errorCode("frame_capture_disabled"))
+        }
+        if let maxWidth, maxWidth <= 0 {
+            throw TextStyleMapping.invalidParameter("maxWidth", "expected a positive number")
+        }
+        // A change made just before this call is still on its way to the frame: text, for one,
+        // re-rasterizes into a new texture, and is missing from the frames until that is done
+        try await Task.sleep(for: Self.frameCaptureSettleDelay)
+        guard let image = MainTexture.shared.snapshot() else {
+            throw VCamError.notReady(data: .errorCode("not_ready"))
+        }
+        return try await FrameCapture.encode(image, maxWidth: maxWidth, format: format ?? .jpeg)
+    }
+
+    private static let frameCaptureSettleDelay = Duration.milliseconds(150)
+
+    // MARK: - Objects
+
+    @MainActor
+    package func objectList() async throws -> [ObjectInfo] {
+        try await sceneObjects.list()
+    }
+
+    @MainActor
+    package func objectUpdate(objectId: Int, name: String?, isHidden: Bool?, isLocked: Bool?, placement: ObjectPlacementUpdate?, duration: Double?, easing: AnimationEasing?) async throws -> Bool {
+        let animation = try AnimationMapping.animation(duration: duration, easing: easing)
+        try await sceneObjects.update(objectId: objectId, name: name, isHidden: isHidden, isLocked: isLocked, placement: placement, animation: animation)
+        return true
+    }
+
+    @MainActor
+    package func objectMove(objectId: Int, index: Int) async throws -> Bool {
+        try await sceneObjects.move(objectId: objectId, index: index)
+        return true
+    }
+
+    @MainActor
+    package func objectDuplicate(objectId: Int) async throws -> ObjectDuplicateResult {
+        ObjectDuplicateResult(objectId: try await sceneObjects.duplicate(objectId: objectId))
+    }
+
+    @MainActor
+    package func objectRemove(objectId: Int) async throws -> Bool {
+        try await sceneObjects.remove(objectId: objectId)
+        return true
+    }
+
+    @MainActor
+    package func textAdd(text: String, name: String?, preset: String?, style: TextStyle?, placement: ObjectPlacementUpdate?) async throws -> TextAddResult {
+        TextAddResult(objectId: try await sceneObjects.addText(text: text, name: name, preset: preset, style: style, placement: placement))
+    }
+
+    @MainActor
+    package func textGet(objectId: Int) async throws -> TextGetResult {
+        try await sceneObjects.getText(objectId: objectId)
+    }
+
+    @MainActor
+    package func textUpdate(objectId: Int, text: String?, preset: String?, style: TextStyle?) async throws -> Bool {
+        try await sceneObjects.updateText(objectId: objectId, text: text, preset: preset, style: style)
+        return true
+    }
+
+    @MainActor
+    package func textListPresets() async throws -> [TextPreset] {
+        try await sceneObjects.listTextPresets()
+    }
+
+    @MainActor
+    package func textListFonts() async throws -> [String] {
+        try await sceneObjects.listFonts()
+    }
+
+    @MainActor
+    package func subtitleGetStyle() async throws -> SubtitleGetStyleResult {
+        try await sceneObjects.subtitleStyle()
+    }
+
+    @MainActor
+    package func subtitleSetStyle(preset: String?, style: TextStyle?, placement: SubtitlePlacement?, duration: Double?, easing: AnimationEasing?) async throws -> Bool {
+        let animation = try AnimationMapping.animation(duration: duration, easing: easing)
+        try await sceneObjects.setSubtitleStyle(preset: preset, style: style, placement: placement, animation: animation)
+        return true
+    }
+
+    @MainActor
+    package func imageImportBegin(filename: String) async throws -> ImageImportBeginResult {
+        ImageImportBeginResult(importId: try sceneObjects.beginImageImport(filename: filename))
+    }
+
+    @MainActor
+    package func imageImportCommit(importId: UUID, name: String?, placement: ObjectPlacementUpdate?) async throws -> ImageImportCommitResult {
+        ImageImportCommitResult(objectId: try await sceneObjects.commitImageImport(importId: importId, name: name, placement: placement))
+    }
+
+    @MainActor
+    package func imageImportCancel(importId: UUID) async throws -> Bool {
+        try sceneObjects.cancelImageImport(importId: importId)
+        return true
+    }
+
+    @MainActor
+    package func videoImportBegin(filename: String) async throws -> VideoImportBeginResult {
+        VideoImportBeginResult(importId: try sceneObjects.beginVideoImport(filename: filename))
+    }
+
+    @MainActor
+    package func videoImportCommit(importId: UUID, name: String?, placement: ObjectPlacementUpdate?, isLooping: Bool?, isMuted: Bool?) async throws -> VideoImportCommitResult {
+        try await sceneObjects.commitVideoImport(importId: importId, name: name, placement: placement, isLooping: isLooping, isMuted: isMuted)
+    }
+
+    @MainActor
+    package func videoImportCancel(importId: UUID) async throws -> Bool {
+        try sceneObjects.cancelVideoImport(importId: importId)
+        return true
+    }
+
+    @MainActor
+    package func videoGet(objectId: Int) async throws -> VideoState {
+        try await sceneObjects.video(objectId: objectId)
+    }
+
+    @MainActor
+    package func videoUpdate(objectId: Int, isPlaying: Bool?, time: Double?, isLooping: Bool?, isMuted: Bool?) async throws -> VideoState {
+        try await sceneObjects.updateVideo(objectId: objectId, isPlaying: isPlaying, time: time, isLooping: isLooping, isMuted: isMuted)
+    }
+
+    @MainActor
+    package func webAdd(url: String, name: String?, width: Int?, height: Int?, fps: Int?, placement: ObjectPlacementUpdate?) async throws -> WebAddResult {
+        WebAddResult(objectId: try await sceneObjects.addWeb(url: url, name: name, width: width, height: height, fps: fps, placement: placement))
+    }
+
+    @MainActor
+    package func webUpdate(objectId: Int, url: String?, width: Int?, height: Int?, fps: Int?) async throws -> Bool {
+        try await sceneObjects.updateWeb(objectId: objectId, url: url, width: width, height: height, fps: fps)
         return true
     }
 
     @MainActor
     package func cameraReset() async throws -> Bool {
         CameraControl.resetCamera()
+        return true
+    }
+
+    @MainActor
+    package func cameraAdjust(panX: Double?, panY: Double?, orbitX: Double?, orbitY: Double?, zoom: Double?, duration: Double?, easing: AnimationEasing?) async throws -> Bool {
+        let amounts = [panX, panY, orbitX, orbitY].map { $0 ?? 0 }
+        guard amounts.allSatisfy(\.isFinite) else {
+            throw TextStyleMapping.invalidParameter("camera", "expected finite numbers")
+        }
+        let zoom = zoom ?? 1
+        guard (0.1...10).contains(zoom) else {
+            throw TextStyleMapping.invalidParameter("zoom", "expected a magnification from 0.1 to 10")
+        }
+        let animation = try AnimationMapping.animation(duration: duration, easing: easing)
+        let adjustment = CameraControl.Adjustment(panX: Float(amounts[0]), panY: Float(amounts[1]), orbitX: Float(amounts[2]), orbitY: Float(amounts[3]), zoom: Float(zoom))
+        await CameraControl.adjust(adjustment, animation: animation)
         return true
     }
 
@@ -198,6 +526,36 @@ package struct VCamAPIService: VCamHandler {
     package func subtitleClear() async throws -> Bool {
         uniState.subtitle = ""
         return true
+    }
+
+    @MainActor
+    package func emojiShow(emoji: String) async throws -> Bool {
+        guard EmojiControl.presentStamp != nil else {
+            throw VCamError.unsupportedOperation(data: .errorCode("unsupported_operation"))
+        }
+        guard emoji.count == 1, emoji.unicodeScalars.first?.properties.isEmoji == true else {
+            throw JSONRPCErrorObject(code: -32602, message: "Invalid parameter \"emoji\": expected a single emoji")
+        }
+        try EmojiControl.show(emoji)
+        return true
+    }
+
+    @MainActor
+    package func trackingGetState() async throws -> TrackingGetStateResult {
+        guard let provider = TrackingControl.provider else {
+            throw VCamError.notReady(data: .errorCode("not_ready"))
+        }
+        return TrackingGetStateResult(sources: provider.sources.map {
+            TrackingSource(id: $0.id, status: Self.trackingStatus($0.status))
+        })
+    }
+
+    private static func trackingStatus(_ status: ConnectionStatus) -> TrackingSourceStatus {
+        switch status {
+        case .disconnected: .disconnected
+        case .connecting: .connecting
+        case .connected: .connected
+        }
     }
 
     // MARK: - Pose
@@ -371,12 +729,5 @@ package struct VCamAPIService: VCamHandler {
     @MainActor
     package func rpcDiscover() async throws -> [String: JSONValue] {
         try JSONDecoder().decode([String: JSONValue].self, from: APISpecification.data)
-    }
-}
-
-private extension JSONValue {
-    /// The `error.data` payload carrying the stable string identifier
-    static func errorCode(_ code: String) -> JSONValue {
-        .object(["code": .string(code)])
     }
 }

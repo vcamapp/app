@@ -5,7 +5,7 @@
 //  Created by Tatsuya Tanaka on 2023/01/02.
 //
 
-public enum ConnectionStatus {
+public enum ConnectionStatus: Sendable {
     case disconnected
     case connecting
     case connected

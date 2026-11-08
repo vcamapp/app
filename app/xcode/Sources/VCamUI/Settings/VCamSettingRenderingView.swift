@@ -27,11 +27,12 @@ public struct VCamSettingRenderingView: View {
                     }
                 } label: {
                     Text(.renderingQuality)
+                    Text(.renderingQualityDescription)
                 }
                 .accessibilityIdentifier("settings.rendering.quality")
             }
 
-            ValueEditField(.fpsScreen, value: $state.fps, type: .slider(10...60))
+            ValueEditField(.fpsScreen, value: $state.fps, type: .slider(10...60), precision: .fractionLength(0))
                 .disabled(uniState.useVSync)
 
             VCamSettingAvatarAppearanceView.make()

@@ -41,6 +41,7 @@ public extension SceneObject {
     enum ObjectType {
         case avatar(Avatar)
         case image(Image)
+        case video(Video)
         case screen(ScreenCapture)
         case videoCapture(VideoCapture)
         case web(Web)
@@ -50,6 +51,7 @@ public extension SceneObject {
         public var croppableTexture: (any SceneObjectCroppableTexture)? {
             switch self {
             case .avatar, .image, .text, .wind: return nil
+            case .video(let state): return state
             case .screen(let state): return state
             case .videoCapture(let state): return state
             case .web(let state): return state
@@ -85,6 +87,7 @@ public extension SceneObject {
         private var placeable: (any SceneObjectPlaceable)? {
             switch self {
             case .avatar, .image, .wind: nil
+            case let .video(state): state
             case let .screen(state): state
             case let .videoCapture(state): state
             case let .web(state): state
@@ -132,6 +135,30 @@ public extension SceneObject {
         /// A large negative offset is the "not placed yet" sentinel that asks the layout to
         /// pick the initial placement.
         public var isPlaced: Bool { offset.x >= -1000 }
+    }
+
+    final class Video: SceneObjectCroppableTexture {
+        public init(url: URL, isLooping: Bool, isMuted: Bool, textureSize: CGSize, region: CGRect = .init(origin: .zero, size: .invalid), crop: CGRect = .init(x: 0, y: 0, width: 1, height: 1), filter: ImageFilter? = nil) {
+            self.url = url
+            self.isLooping = isLooping
+            self.isMuted = isMuted
+            self.textureSize = textureSize
+            self.region = region
+            self.crop = crop
+            self.filter = filter
+        }
+
+        public var url: URL
+        public var isLooping: Bool
+        public var isMuted: Bool
+        public var textureSize: CGSize
+        public var region: CGRect
+        public var crop: CGRect
+        public var filter: ImageFilter?
+
+        public func copy() -> SceneObject.Video {
+            .init(url: url, isLooping: isLooping, isMuted: isMuted, textureSize: textureSize, region: region, crop: crop, filter: filter)
+        }
     }
 
     final class ScreenCapture: SceneObjectCroppableTexture {

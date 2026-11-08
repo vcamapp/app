@@ -1,8 +1,50 @@
 import Foundation
+import Observation
 import Testing
 import VCamControl
 import VCamData
+import VCamEntity
 @testable import VCamRemoteControl
+import VCamTrackingCore
+
+@MainActor
+@Observable
+private final class MockTrackingProvider: TrackingControlling {
+    var status = ConnectionStatus.disconnected
+
+    var sources: [TrackingControl.Source] {
+        [.init(id: "vcamMotion", status: status)]
+    }
+}
+
+@MainActor
+@Observable
+private final class MockObjectProvider: SceneObjectControlling {
+    var objects: [SceneObjectControl.Object] = []
+    var defaultTextConfiguration: TextObjectConfiguration { .init() }
+    var textPresets: [SceneObjectControl.TextPreset] { [] }
+    var fontNames: [String] { [] }
+    var subtitleStyle: SceneObjectControl.SubtitleStyle { .init(configuration: .init(), x: 0, bottomY: 0, size: 1) }
+
+    func update(id: Int32, change: SceneObjectControl.Change) throws {}
+    func animatePlacement(id: Int32, placement: SceneObjectControl.PlacementChange, animation: ControlAnimation) async throws {}
+    func animateVisibility(id: Int32, isHidden: Bool, animation: ControlAnimation) async throws {}
+    func animateSubtitleStyle(_ style: SceneObjectControl.SubtitleStyle, animation: ControlAnimation) async {}
+    func move(id: Int32, toIndex index: Int) throws {}
+    func duplicate(id: Int32) async throws -> Int32 { id }
+    func remove(id: Int32) throws {}
+    func applyingTextPreset(id: String, to configuration: TextObjectConfiguration) throws -> TextObjectConfiguration { configuration }
+    func addText(_ configuration: TextObjectConfiguration) -> Int32 { 0 }
+    func textConfiguration(id: Int32) throws -> TextObjectConfiguration { .init() }
+    func updateText(id: Int32, configuration: TextObjectConfiguration) throws {}
+    func setSubtitleStyle(_ style: SceneObjectControl.SubtitleStyle) {}
+    func addImage(fileURL: URL) throws -> Int32 { 0 }
+    func addWeb(url: URL, size: CGSize, fps: Int) -> Int32 { 0 }
+    func updateWeb(id: Int32, url: URL?, size: CGSize?, fps: Int?) throws {}
+    func addVideo(fileURL: URL, isLooping: Bool, isMuted: Bool) async throws -> Int32 { 0 }
+    func videoState(id: Int32) async throws -> SceneObjectControl.VideoState { throw SceneObjectControlError.notFound }
+    func updateVideo(id: Int32, change: SceneObjectControl.VideoChange) throws {}
+}
 
 // Serialized: the bridge swaps the global AvatarControl.onLoad hook
 @MainActor
@@ -80,7 +122,75 @@ struct EventBridgeTests {
 
         uniState.currentExpressionName = "Angry"
         await drainMainActor()
-        #expect(recorder.received == [.expressionChanged(name: "Angry")])
+        #expect(recorder.received == [.expressionChanged(expressions: [ExpressionWeight(name: "Angry", weight: 1)])])
+    }
+
+    @Test
+    func objectChangesPublishWhatChanged() async throws {
+        func object(_ id: Int32, name: String = "") -> SceneObjectControl.Object {
+            .init(id: id, kind: .text, name: name, isHidden: false, isLocked: false, placement: nil)
+        }
+        let provider = MockObjectProvider()
+        provider.objects = [object(1), object(2)]
+        let originalProvider = SceneObjectControl.provider
+        SceneObjectControl.provider = provider
+        defer {
+            SceneObjectControl.provider = originalProvider
+        }
+        let (bridge, _, recorder) = makeBridge()
+        bridge.start()
+        defer {
+            bridge.stop()
+        }
+
+        provider.objects = [object(1, name: "Renamed"), object(3)]
+        await drainMainActor()
+
+        #expect(recorder.received == [.objectsChanged(added: [3], changed: [1], removed: [2])])
+    }
+
+    @Test
+    func clearingTheExpressionPublishesNoName() async throws {
+        let (bridge, uniState, recorder) = makeBridge()
+        uniState.currentExpressionName = "Joy"
+        bridge.start()
+        defer {
+            bridge.stop()
+        }
+
+        uniState.currentExpressionName = nil
+        await drainMainActor()
+        #expect(recorder.received == [.expressionChanged(expressions: [])])
+    }
+
+    @Test
+    func trackingPublishesOnlyEnteringAndLeavingConnected() async throws {
+        let provider = MockTrackingProvider()
+        let originalProvider = TrackingControl.provider
+        TrackingControl.provider = provider
+        defer {
+            TrackingControl.provider = originalProvider
+        }
+        let (bridge, _, recorder) = makeBridge()
+        bridge.start()
+        defer {
+            bridge.stop()
+        }
+
+        provider.status = .connecting
+        await drainMainActor()
+        #expect(recorder.received.isEmpty)
+
+        provider.status = .connected
+        await drainMainActor()
+        #expect(recorder.received == [.trackingConnected(sourceId: "vcamMotion")])
+
+        provider.status = .connecting
+        await drainMainActor()
+        #expect(recorder.received == [
+            .trackingConnected(sourceId: "vcamMotion"),
+            .trackingDisconnected(sourceId: "vcamMotion"),
+        ])
     }
 
     @Test

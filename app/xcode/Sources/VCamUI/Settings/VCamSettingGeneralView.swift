@@ -5,7 +5,6 @@ import VCamEntity
 public struct VCamSettingGeneralView: View {
     public init() {}
 
-    @AppStorage(key: .useHMirror) var useHMirror
     @AppStorage(key: .useAutoConvertVRM1) var useAutoConvertVRM1
     @Environment(UniState.self) private var uniState
 
@@ -38,9 +37,6 @@ public struct VCamSettingGeneralView: View {
                     }
                 }
 #endif
-                Toggle(isOn: $useHMirror) {
-                    Text(.flipScreen)
-                }
                 Toggle(isOn: $state.useAddToMacOSMenuBar) {
                     Text(.addToMacOSMenuBar)
                 }

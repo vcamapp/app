@@ -18,6 +18,8 @@ public final class SceneObjectManager {
     @ObservationIgnored private var loadGeneration = 0
     /// `loadObjects` is in progress and `objects` does not yet hold the scene
     @ObservationIgnored private(set) var isLoading = false
+    /// Objects in the middle of a fade. Not saved, since a fade ends by changing `isHidden`
+    @ObservationIgnored private var fadingOpacities: [Int32: Float] = [:]
 
     private init() {
         NotificationCenter.default.addObserver(
@@ -26,7 +28,7 @@ public final class SceneObjectManager {
             queue: .main
         ) { _ in
             MainActor.assumeIsolated {
-                SceneObjectManager.shared.rasterizeTextForOutputSize()
+                SceneObjectManager.shared.rasterizeForOutputSize()
             }
         }
     }
@@ -35,13 +37,25 @@ public final class SceneObjectManager {
         subtitleObject.map { objects + [$0] } ?? objects
     }
 
-    /// Text is the one source rasterized for the pixels it occupies in the output; the others
+    /// Text and web pages are rasterized for the pixels they occupy in the output; the others
     /// author their bitmap at their own resolution and are unaffected.
-    private func rasterizeTextForOutputSize() {
+    private func rasterizeForOutputSize() {
         for object in allObjects {
-            guard case .text = object.type else { continue }
-            configure(object)
+            switch object.type {
+            case .text:
+                configure(object)
+            case .web:
+                fitWebCaptureToOutput(object)
+            default:
+                continue
+            }
         }
+    }
+
+    private func fitWebCaptureToOutput(_ object: SceneObject) {
+        guard case let .web(web) = object.type,
+              let renderer = RenderTextureManager.shared.drawer(id: object.id) as? WebRenderer else { return }
+        renderer.outputPixelWidth = (web.region.width * MainTexture.shared.size.width).rounded()
     }
 
     /// Runs several times per composited frame, so it avoids `allObjects`: combining the
@@ -100,9 +114,10 @@ public final class SceneObjectManager {
             )
             image.offset = .init(x: Float(placement.origin.x), y: Float(placement.origin.y))
             image.size = placement.size
-        case .screen, .videoCapture, .web:
+        case .video, .screen, .videoCapture, .web:
             guard let texture = object.type.croppableTexture else { break }
             texture.region = addTexture(object.id, region: texture.region, crop: texture.crop, textureSize: texture.textureSize)
+            fitWebCaptureToOutput(object)
         case let .text(text):
             let canvasSize = MainTexture.shared.canvasSize
             if let renderer = RenderTextureManager.shared.textRenderer(id: object.id),
@@ -131,6 +146,7 @@ public final class SceneObjectManager {
         if case .text = object.type {
             configure(object)
         }
+        fitWebCaptureToOutput(object)
         persistScene()
     }
 
@@ -138,7 +154,11 @@ public final class SceneObjectManager {
     /// the text into the box it happened to have.
     func applyText(_ configuration: TextObjectConfiguration, to object: SceneObject, payload: SceneObject.Text, horizontal: TextObjectPlacement.HorizontalAnchor, vertical: TextObjectPlacement.VerticalAnchor) {
         guard let renderer = RenderTextureManager.shared.textRenderer(id: object.id) else { return }
+        let shownPlacement = object.type.normalizedPlacement
         renderer.layout = .init(configuration: configuration, displayScale: renderer.layout.displayScale)
+        if let shownPlacement {
+            RenderTextureManager.shared.holdPlacement(shownPlacement, id: object.id)
+        }
         payload.configuration = configuration
         payload.region = TextObjectPlacement.region(bitmapSize: renderer.size, anchoredTo: payload.region, horizontal: horizontal, vertical: vertical)
     }
@@ -163,12 +183,27 @@ public final class SceneObjectManager {
     /// The object types hold their state in reference types, so a change made through them stays
     /// invisible to Observation until it's pushed back here.
     public func didChange(_ object: SceneObject) {
+        fitWebCaptureToOutput(object)
         objects.update(object)
         persistScene()
     }
 
+    /// Read by the compositor every frame
+    public func opacity(ofId id: Int32) -> Float {
+        fadingOpacities[id] ?? 1
+    }
+
+    func isFading(id: Int32) -> Bool {
+        fadingOpacities[id] != nil
+    }
+
+    func setFadingOpacity(_ opacity: Float?, id: Int32) {
+        fadingOpacities[id] = opacity
+    }
+
     public func setHidden(_ isHidden: Bool, id: Int32) {
         updateState(id) { $0.isHidden = isHidden }
+        (RenderTextureManager.shared.drawer(id: id) as? VideoFileRenderer)?.isObjectHidden = isHidden
     }
 
     public func setLocked(_ isLocked: Bool, id: Int32) {
@@ -227,6 +262,9 @@ public final class SceneObjectManager {
         case let .image(image):
             RenderTextureManager.shared.remove(id: object.id)
             VCamSceneDataStore(sceneId: SceneManager.shared.currentSceneId).removeManagedDataIfNeeded(at: image.url)
+        case let .video(video):
+            RenderTextureManager.shared.remove(id: object.id)
+            VCamSceneDataStore(sceneId: SceneManager.shared.currentSceneId).removeManagedDataIfNeeded(at: video.url)
         case .screen, .videoCapture, .web, .text:
             RenderTextureManager.shared.remove(id: object.id)
         }
@@ -353,6 +391,11 @@ extension SceneObjectManager {
                     RenderTextureManager.shared.set(renderer, id: object.id)
                     configure(sceneObject)
                 }
+            case .video:
+                if case let .video(video) = sceneObject.type {
+                    RenderTextureManager.shared.set(Self.makeRenderer(video, isObjectHidden: sceneObject.isHidden), id: object.id)
+                    configure(sceneObject)
+                }
             case let .screen(id, state):
                 do {
                     if availableContent == nil, availableContentError == nil {
@@ -414,15 +457,56 @@ extension SceneObjectManager {
         Logger.log("finish loadObjects")
         // The scene rebuild dropped every object, including the scene-independent subtitle
         SubtitleTextObject.reapply()
+        await RenderTextureManager.shared.waitForStaticTextures(timeout: .seconds(1))
     }
 }
 
 extension SceneObjectManager {
-    public func addImage(url: URL) {
+    @discardableResult
+    public func addImage(url: URL) -> Int32 {
         let renderer = ImageRenderer(imageURL: url, filter: nil)
         let id = RenderTextureManager.shared.add(renderer)
         let canvasSize = MainTexture.shared.canvasSize
         add(.init(id: id, type: .image(.init(url: url, size: .init(width: renderer.size.width / canvasSize.width, height: renderer.size.height / canvasSize.height), filter: nil)), isHidden: false, isLocked: false))
+        return id
+    }
+
+    /// Takes a copy of the file, so the caller can remove it afterward
+    /// - Throws: `VideoFileRenderer.LoadError` when the file can't be played
+    @discardableResult
+    public func addVideo(url: URL, isLooping: Bool, isMuted: Bool) async throws -> Int32 {
+        let size = try await VideoFileRenderer.size(of: url)
+        let storedURL = try VCamSceneDataStore(sceneId: SceneManager.shared.currentSceneId).copyDataKeepingExtension(fromURL: url)
+        let video = SceneObject.Video(url: storedURL, isLooping: isLooping, isMuted: isMuted, textureSize: size)
+        let id = RenderTextureManager.shared.add(Self.makeRenderer(video, isObjectHidden: false))
+        add(.init(id: id, type: .video(video), isHidden: false, isLocked: false))
+        return id
+    }
+
+    public func setVideoOptions(of object: SceneObject, isLooping: Bool? = nil, isMuted: Bool? = nil) {
+        guard case let .video(video) = object.type else { return }
+        let renderer = RenderTextureManager.shared.drawer(id: object.id) as? VideoFileRenderer
+        if let isLooping {
+            video.isLooping = isLooping
+            renderer?.isLooping = isLooping
+        }
+        if let isMuted {
+            video.isMuted = isMuted
+            renderer?.isMuted = isMuted
+        }
+        didChange(object)
+    }
+
+    private static func makeRenderer(_ video: SceneObject.Video, isObjectHidden: Bool) -> VideoFileRenderer {
+        VideoFileRenderer(
+            url: video.url,
+            size: video.textureSize,
+            cropRect: video.crop,
+            isLooping: video.isLooping,
+            isMuted: video.isMuted,
+            isObjectHidden: isObjectHidden,
+            filter: video.filter
+        )
     }
 
     public func addScreenCapture(_ recorder: ScreenRecorder) {
@@ -431,13 +515,15 @@ extension SceneObjectManager {
         add(.init(id: id, type: .screen(.init(id: screenId, captureType: config.captureType.type, textureSize: recorder.size, crop: recorder.cropRect, filter: nil)), isHidden: false, isLocked: false))
     }
 
-    public func addText(_ configuration: TextObjectConfiguration) {
+    @discardableResult
+    public func addText(_ configuration: TextObjectConfiguration) -> Int32 {
         // Glyphs start at a fixed size so that the text reads the same whatever its length;
         // the user scales the object from there
         let renderer = TextRenderer(layout: .init(configuration: configuration, displayScale: TextObjectPlacement.fittedDefaultScale(of: configuration)))
         let id = RenderTextureManager.shared.add(renderer)
         let region = CGRect(origin: .zero, size: renderer.size / MainTexture.shared.canvasSize)
         add(.init(id: id, type: .text(.init(configuration: configuration, region: region)), isHidden: false, isLocked: false))
+        return id
     }
 
     public func addVideoCapture(_ drawer: CaptureDeviceRenderer) {
@@ -449,9 +535,12 @@ extension SceneObjectManager {
 extension SceneObjectManager {
     /// Nothing is shared with the original, so editing or removing either copy leaves the other
     /// one as it was.
-    public func duplicate(_ object: SceneObject) async {
-        guard let duplicated = await makeDuplicate(of: object) else { return }
+    /// nil when the copy could not be made: the avatar, or a capture source that went away
+    @discardableResult
+    public func duplicate(_ object: SceneObject) async -> Int32? {
+        guard let duplicated = await makeDuplicate(of: object) else { return nil }
         add(duplicated)
+        return duplicated.id
     }
 
     private func makeDuplicate(of object: SceneObject) async -> SceneObject? {
@@ -470,6 +559,11 @@ extension SceneObjectManager {
                 duplicated.url = try VCamSceneDataStore(sceneId: SceneManager.shared.currentSceneId).duplicateData(at: image.url)
                 let id = renderTextureManager.add(ImageRenderer(imageURL: duplicated.url, filter: duplicated.filter))
                 return copy(id: id, type: .image(duplicated))
+            case let .video(video):
+                let duplicated = video.copy()
+                duplicated.url = try VCamSceneDataStore(sceneId: SceneManager.shared.currentSceneId).duplicateData(at: video.url)
+                let id = renderTextureManager.add(Self.makeRenderer(duplicated, isObjectHidden: object.isHidden))
+                return copy(id: id, type: .video(duplicated))
             case let .screen(screen):
                 let recorder = try await ScreenRecorder.create(id: screen.id, screenCapture: .init(
                     captureType: screen.captureType,

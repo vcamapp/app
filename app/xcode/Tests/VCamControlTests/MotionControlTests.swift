@@ -73,3 +73,35 @@ struct MotionControlTests {
         #expect(calls.isEmpty)
     }
 }
+
+@MainActor
+@Suite
+struct MotionControlWaitTests {
+    @Test
+    func waitingLastsUntilTheMotionHasPlayedAndStopped() async {
+        let state = UniState()
+        let waiting = Task { @MainActor in
+            await MotionControl.waitUntilStopped(id: "m", state: state)
+            return true
+        }
+        try? await Task.sleep(for: .milliseconds(60))
+        state.isMotionPlaying = ["m": true]
+        try? await Task.sleep(for: .milliseconds(60))
+        state.isMotionPlaying = ["m": false]
+
+        #expect(await waiting.value)
+    }
+
+    @Test
+    func waitingEndsWhenCancelled() async {
+        let state = UniState()
+        state.isMotionPlaying = ["m": true]
+        let waiting = Task { @MainActor in
+            await MotionControl.waitUntilStopped(id: "m", state: state)
+        }
+        try? await Task.sleep(for: .milliseconds(40))
+
+        waiting.cancel()
+        await waiting.value
+    }
+}

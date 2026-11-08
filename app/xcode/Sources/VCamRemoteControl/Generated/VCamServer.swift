@@ -8,11 +8,13 @@ import Foundation
 package protocol VCamHandler: Sendable {
     /// Returns the app version, API version, and capabilities
     @concurrent func appGetInfo() async throws -> AppGetInfoResult
-    /// Returns the current avatar, playing motions, and expression
+    /// Returns the current avatar, playing motions, expressions, and subtitle
     @concurrent func stateGet() async throws -> StateGetResult
     /// Lists the avatars registered in the avatar library
     @concurrent func avatarList() async throws -> [Avatar]
     /// Loads an avatar from the avatar library
+    /// 
+    /// The response comes when the avatar has loaded and expression.list lists its expressions. avatar.loaded follows the same moment.
     @concurrent func avatarLoad(avatarId: UUID) async throws -> Bool
     /// Starts uploading a VRM file to import into the avatar library
     /// 
@@ -20,32 +22,152 @@ package protocol VCamHandler: Sendable {
     @concurrent func avatarImportBegin(filename: String) async throws -> AvatarImportBeginResult
     /// Registers the uploaded file to the avatar library
     /// 
-    /// Validates the uploaded data as a VRM and registers it to the avatar library. The staging area is removed regardless of the outcome.
+    /// Validates the uploaded data as a VRM and registers it to the avatar library. The staging area is removed regardless of the outcome. With `load`, the response comes when the avatar has loaded.
     @concurrent func avatarImportCommit(importId: UUID, load: Bool?) async throws -> AvatarImportCommitResult
     /// Aborts an upload and removes its staging area
     @concurrent func avatarImportCancel(importId: UUID) async throws -> Bool
     /// Lists the expressions of the current avatar
     @concurrent func expressionList() async throws -> [Expression]
-    /// Applies an expression to the current avatar
-    @concurrent func expressionSet(name: String) async throws -> Bool
+    /// Sets the expressions on the current avatar
+    /// 
+    /// The list is the whole face: expressions left out fade to nothing, and an empty list takes every expression off. Expressions mix by their weights, and how well they mix depends on the model. With a duration, the response comes when the fade has ended. With microphone lip sync, the mouth keeps moving under the expressions.
+    @concurrent func expressionSet(expressions: [ExpressionWeight], duration: Double?, easing: AnimationEasing?) async throws -> Bool
+    /// Decides where the avatar looks
+    /// 
+    /// The eyes get there first and the head follows, so there is no duration to give. The eyes still wander a little, as they do on their own. This stays until set again, across scenes and avatars, and wins over face tracking. A head received over the VMC Protocol wins over this one's head, while the eyes still follow it.
+    @concurrent func gazeSet(mode: GazeSetMode, yaw: Double?, pitch: Double?, movesHead: Bool?) async throws -> Bool
     /// Lists the available motions (built-in and imported)
     @concurrent func motionList() async throws -> [Motion]
     /// Plays a motion
-    @concurrent func motionPlay(motionId: String, loop: Bool?) async throws -> Bool
+    @concurrent func motionPlay(motionId: String, loop: Bool?, wait: Bool?) async throws -> Bool
     /// Stops a playing motion
     @concurrent func motionStop(motionId: String) async throws -> Bool
+    /// Starts uploading a motion to add to the library
+    /// 
+    /// Send the file as binary WebSocket frames, each one the 36-byte importId followed by a chunk of at most 1 MiB. Available only when app.getInfo lists the vrma capability.
+    @concurrent func motionImportBegin(filename: String) async throws -> MotionImportBeginResult
+    /// Adds the uploaded motion to the library
+    @concurrent func motionImportCommit(importId: UUID, name: String?, loop: Bool?, isPose: Bool?) async throws -> MotionImportCommitResult
+    /// Aborts a motion upload
+    @concurrent func motionImportCancel(importId: UUID) async throws -> Bool
+    /// Removes an imported motion from the library
+    /// 
+    /// Built-in motions cannot be removed.
+    @concurrent func motionRemove(motionId: String) async throws -> Bool
+    /// Lists the scenes
+    @concurrent func sceneList() async throws -> [Scene]
     /// Returns the current scene
     @concurrent func sceneGet() async throws -> Scene
     /// Loads a scene
-    @concurrent func sceneLoad(sceneId: Int) async throws -> Bool
+    /// 
+    /// With a duration, the current frame stays on screen while the scene loads, then fades out over the new scene. The response comes when the crossfade has ended.
+    @concurrent func sceneLoad(sceneId: Int, duration: Double?, easing: AnimationEasing?) async throws -> Bool
     /// Resets the avatar and camera to the initial position
     @concurrent func cameraReset() async throws -> Bool
+    /// Creates a scene and loads it
+    @concurrent func sceneCreate(name: String?) async throws -> Scene
+    /// Copies a scene without loading the copy
+    @concurrent func sceneDuplicate(sceneId: Int, name: String?) async throws -> Scene
+    /// Renames a scene
+    @concurrent func sceneRename(sceneId: Int, name: String) async throws -> Bool
+    /// Moves a scene to a position in the list
+    @concurrent func sceneMove(sceneId: Int, index: Int) async throws -> Bool
+    /// Removes a scene and everything in it
+    /// 
+    /// The last scene of the current orientation cannot be removed.
+    @concurrent func sceneRemove(sceneId: Int) async throws -> Bool
+    /// Returns the avatar lighting of the current scene
+    /// 
+    /// `lighting` is absent while the scene uses the default light. Available only when app.getInfo lists the sceneLighting capability.
+    @concurrent func sceneGetLighting() async throws -> SceneGetLightingResult
+    /// Sets the avatar lighting of the current scene
+    /// 
+    /// Available only when app.getInfo lists the sceneLighting capability.
+    @concurrent func sceneSetLighting(lighting: SceneLighting?) async throws -> Bool
+    /// Returns the output size in pixels
+    @concurrent func canvasGet() async throws -> CanvasGetResult
+    /// Returns the current output as an image
+    /// 
+    /// Requires the user to allow frame capture in the VCam API settings; app.getInfo lists the frameCapture capability while it is allowed.
+    @concurrent func frameCapture(maxWidth: Int?, format: FrameCaptureFormat?) async throws -> FrameCaptureResult
+    /// Lists the objects of the current scene, from back to front
+    /// 
+    /// Placements are fractions of the canvas: `x` and `y` are the offset of the object's center from the center of the canvas (`y` grows upward, so -0.5 to 0.5 stays on the canvas), and `width` and `height` are its size. The subtitle is not listed; see subtitle.getStyle.
+    @concurrent func objectList() async throws -> [ObjectInfo]
+    /// Changes an object's name, visibility, lock, or placement
+    /// 
+    /// A locked object rejects every change except unlocking it, so that a layout the user fixed is not changed by accident. With a duration, the placement moves and the visibility fades, the response comes when they have ended, and another change of the same kind takes over from where the object is by then. Text looks scaled during a move and redraws sharply at the end. Wind has nothing to fade, so it changes at once.
+    @concurrent func objectUpdate(objectId: Int, name: String?, isHidden: Bool?, isLocked: Bool?, placement: ObjectPlacementUpdate?, duration: Double?, easing: AnimationEasing?) async throws -> Bool
+    /// Moves an object to a position in the stacking order
+    @concurrent func objectMove(objectId: Int, index: Int) async throws -> Bool
+    /// Copies an object in the current scene
+    @concurrent func objectDuplicate(objectId: Int) async throws -> ObjectDuplicateResult
+    /// Removes an object from the current scene
+    @concurrent func objectRemove(objectId: Int) async throws -> Bool
+    /// Adds a text object to the current scene
+    @concurrent func textAdd(text: String, name: String?, preset: String?, style: TextStyle?, placement: ObjectPlacementUpdate?) async throws -> TextAddResult
+    /// Returns the text and style of a text object
+    @concurrent func textGet(objectId: Int) async throws -> TextGetResult
+    /// Changes the text or style of a text object
+    /// 
+    /// The edge the alignment anchors stays in place, so the object grows as the text gets longer.
+    @concurrent func textUpdate(objectId: Int, text: String?, preset: String?, style: TextStyle?) async throws -> Bool
+    /// Lists the text style presets
+    @concurrent func textListPresets() async throws -> [TextPreset]
+    /// Lists the PostScript names of the installed fonts
+    @concurrent func textListFonts() async throws -> [String]
     /// Shows text as the subtitle
     /// 
     /// Replaces the subtitle with the given text. The subtitle keeps the style and placement configured in the app, and is shared by every scene. Passing an empty string is the same as subtitle.clear.
     @concurrent func subtitleSet(text: String) async throws -> Bool
     /// Hides the subtitle
     @concurrent func subtitleClear() async throws -> Bool
+    /// Shows an emoji as a temporary stamp on the frame
+    /// 
+    /// Available only when app.getInfo lists the emoji capability.
+    @concurrent func emojiShow(emoji: String) async throws -> Bool
+    /// Returns the connection state of the tracking sources
+    /// 
+    /// Covers the sources that connect from other apps and devices: `vcamMotion`, `iFacialMocap`, and `vmcProtocol`.
+    @concurrent func trackingGetState() async throws -> TrackingGetStateResult
+    /// Returns the style and placement of the subtitle
+    @concurrent func subtitleGetStyle() async throws -> SubtitleGetStyleResult
+    /// Changes the style and placement of the subtitle
+    /// 
+    /// Applies to every scene and stays after a restart. With a duration, the response comes when the placement has ended. The subtitle looks scaled during the move and redraws sharply at the end.
+    @concurrent func subtitleSetStyle(preset: String?, style: TextStyle?, placement: SubtitlePlacement?, duration: Double?, easing: AnimationEasing?) async throws -> Bool
+    /// Starts uploading an image to add to the current scene
+    /// 
+    /// Send the file as binary WebSocket frames, each one the 36-byte importId followed by a chunk of at most 1 MiB.
+    @concurrent func imageImportBegin(filename: String) async throws -> ImageImportBeginResult
+    /// Adds the uploaded image to the current scene
+    @concurrent func imageImportCommit(importId: UUID, name: String?, placement: ObjectPlacementUpdate?) async throws -> ImageImportCommitResult
+    /// Aborts an image upload
+    @concurrent func imageImportCancel(importId: UUID) async throws -> Bool
+    /// Starts uploading a video to add to the current scene
+    /// 
+    /// Send the file as binary WebSocket frames, each one the 36-byte importId followed by a chunk of at most 1 MiB. A file can be up to 512 MiB.
+    @concurrent func videoImportBegin(filename: String) async throws -> VideoImportBeginResult
+    /// Adds the uploaded video to the current scene and starts playing it
+    @concurrent func videoImportCommit(importId: UUID, name: String?, placement: ObjectPlacementUpdate?, isLooping: Bool?, isMuted: Bool?) async throws -> VideoImportCommitResult
+    /// Aborts a video upload
+    @concurrent func videoImportCancel(importId: UUID) async throws -> Bool
+    /// Returns the playback state of a video object
+    @concurrent func videoGet(objectId: Int) async throws -> VideoState
+    /// Plays, pauses or seeks a video object, or changes its options
+    /// 
+    /// Omitted values stay as they are. Playing a video that has reached its end starts it over. While the object is hidden the video stays paused and continues when it is shown.
+    @concurrent func videoUpdate(objectId: Int, isPlaying: Bool?, time: Double?, isLooping: Bool?, isMuted: Bool?) async throws -> VideoState
+    /// Adds a web page to the current scene
+    @concurrent func webAdd(url: String, name: String?, width: Int?, height: Int?, fps: Int?, placement: ObjectPlacementUpdate?) async throws -> WebAddResult
+    /// Reloads a web page object with new settings
+    /// 
+    /// Omitted values stay as they are, so passing only objectId reloads the page.
+    @concurrent func webUpdate(objectId: Int, url: String?, width: Int?, height: Int?, fps: Int?) async throws -> Bool
+    /// Moves the camera relative to where it is
+    /// 
+    /// The result is saved in the current scene. With a duration, the response comes when the move has ended, and another camera.adjust takes over from where the camera is by then.
+    @concurrent func cameraAdjust(panX: Double?, panY: Double?, orbitX: Double?, orbitY: Double?, zoom: Double?, duration: Double?, easing: AnimationEasing?) async throws -> Bool
     /// Opens the pose editor with the current avatar
     /// 
     /// Opens the pose editor window, or fronts it when it is already open, and loads the current avatar into it. The other pose methods require the editor to be open. Bone names follow VRM 1.0 (`hips`, `spine`, `leftUpperArm`, ...); rotations are degrees relative to the rest pose (T-pose), applied in Y, X, Z order around the bone's own axes, so `[0, 0, 0]` is the rest pose. Expressions are named as VRM 1.0 names its presets (`happy`, `blink`, ...) and as the model names its custom expressions; weights run from 0 to 1. Available only when app.getInfo lists the poseEditor capability. Besides rotating bones one by one with pose.set, pose.move pulls a hand, foot, elbow, knee, the head or the hips to a point and solves the limb with IK, the way dragging it in the editor does.
@@ -141,28 +263,122 @@ package struct VCamServer: Sendable {
             return try JSONRPCServer.resultResponse(id: request.id, result: result)
         case "expression.set":
             let params = JSONRPCParameters(request.params)
-            let result = try await handler.expressionSet(name: try params.required("name", at: 0))
+            let result = try await handler.expressionSet(expressions: try params.required("expressions", at: 0), duration: try params.optional("duration", at: 1), easing: try params.optional("easing", at: 2))
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "gaze.set":
+            let params = JSONRPCParameters(request.params)
+            let result = try await handler.gazeSet(mode: try params.required("mode", at: 0), yaw: try params.optional("yaw", at: 1), pitch: try params.optional("pitch", at: 2), movesHead: try params.optional("movesHead", at: 3))
             return try JSONRPCServer.resultResponse(id: request.id, result: result)
         case "motion.list":
             let result = try await handler.motionList()
             return try JSONRPCServer.resultResponse(id: request.id, result: result)
         case "motion.play":
             let params = JSONRPCParameters(request.params)
-            let result = try await handler.motionPlay(motionId: try params.required("motionId", at: 0), loop: try params.optional("loop", at: 1))
+            let result = try await handler.motionPlay(motionId: try params.required("motionId", at: 0), loop: try params.optional("loop", at: 1), wait: try params.optional("wait", at: 2))
             return try JSONRPCServer.resultResponse(id: request.id, result: result)
         case "motion.stop":
             let params = JSONRPCParameters(request.params)
             let result = try await handler.motionStop(motionId: try params.required("motionId", at: 0))
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "motion.import.begin":
+            let params = JSONRPCParameters(request.params)
+            let result = try await handler.motionImportBegin(filename: try params.required("filename", at: 0))
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "motion.import.commit":
+            let params = JSONRPCParameters(request.params)
+            let result = try await handler.motionImportCommit(importId: try params.required("importId", at: 0), name: try params.optional("name", at: 1), loop: try params.optional("loop", at: 2), isPose: try params.optional("isPose", at: 3))
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "motion.import.cancel":
+            let params = JSONRPCParameters(request.params)
+            let result = try await handler.motionImportCancel(importId: try params.required("importId", at: 0))
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "motion.remove":
+            let params = JSONRPCParameters(request.params)
+            let result = try await handler.motionRemove(motionId: try params.required("motionId", at: 0))
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "scene.list":
+            let result = try await handler.sceneList()
             return try JSONRPCServer.resultResponse(id: request.id, result: result)
         case "scene.get":
             let result = try await handler.sceneGet()
             return try JSONRPCServer.resultResponse(id: request.id, result: result)
         case "scene.load":
             let params = JSONRPCParameters(request.params)
-            let result = try await handler.sceneLoad(sceneId: try params.required("sceneId", at: 0))
+            let result = try await handler.sceneLoad(sceneId: try params.required("sceneId", at: 0), duration: try params.optional("duration", at: 1), easing: try params.optional("easing", at: 2))
             return try JSONRPCServer.resultResponse(id: request.id, result: result)
         case "camera.reset":
             let result = try await handler.cameraReset()
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "scene.create":
+            let params = JSONRPCParameters(request.params)
+            let result = try await handler.sceneCreate(name: try params.optional("name", at: 0))
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "scene.duplicate":
+            let params = JSONRPCParameters(request.params)
+            let result = try await handler.sceneDuplicate(sceneId: try params.required("sceneId", at: 0), name: try params.optional("name", at: 1))
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "scene.rename":
+            let params = JSONRPCParameters(request.params)
+            let result = try await handler.sceneRename(sceneId: try params.required("sceneId", at: 0), name: try params.required("name", at: 1))
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "scene.move":
+            let params = JSONRPCParameters(request.params)
+            let result = try await handler.sceneMove(sceneId: try params.required("sceneId", at: 0), index: try params.required("index", at: 1))
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "scene.remove":
+            let params = JSONRPCParameters(request.params)
+            let result = try await handler.sceneRemove(sceneId: try params.required("sceneId", at: 0))
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "scene.getLighting":
+            let result = try await handler.sceneGetLighting()
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "scene.setLighting":
+            let params = JSONRPCParameters(request.params)
+            let result = try await handler.sceneSetLighting(lighting: try params.optional("lighting", at: 0))
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "canvas.get":
+            let result = try await handler.canvasGet()
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "frame.capture":
+            let params = JSONRPCParameters(request.params)
+            let result = try await handler.frameCapture(maxWidth: try params.optional("maxWidth", at: 0), format: try params.optional("format", at: 1))
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "object.list":
+            let result = try await handler.objectList()
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "object.update":
+            let params = JSONRPCParameters(request.params)
+            let result = try await handler.objectUpdate(objectId: try params.required("objectId", at: 0), name: try params.optional("name", at: 1), isHidden: try params.optional("isHidden", at: 2), isLocked: try params.optional("isLocked", at: 3), placement: try params.optional("placement", at: 4), duration: try params.optional("duration", at: 5), easing: try params.optional("easing", at: 6))
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "object.move":
+            let params = JSONRPCParameters(request.params)
+            let result = try await handler.objectMove(objectId: try params.required("objectId", at: 0), index: try params.required("index", at: 1))
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "object.duplicate":
+            let params = JSONRPCParameters(request.params)
+            let result = try await handler.objectDuplicate(objectId: try params.required("objectId", at: 0))
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "object.remove":
+            let params = JSONRPCParameters(request.params)
+            let result = try await handler.objectRemove(objectId: try params.required("objectId", at: 0))
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "text.add":
+            let params = JSONRPCParameters(request.params)
+            let result = try await handler.textAdd(text: try params.required("text", at: 0), name: try params.optional("name", at: 1), preset: try params.optional("preset", at: 2), style: try params.optional("style", at: 3), placement: try params.optional("placement", at: 4))
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "text.get":
+            let params = JSONRPCParameters(request.params)
+            let result = try await handler.textGet(objectId: try params.required("objectId", at: 0))
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "text.update":
+            let params = JSONRPCParameters(request.params)
+            let result = try await handler.textUpdate(objectId: try params.required("objectId", at: 0), text: try params.optional("text", at: 1), preset: try params.optional("preset", at: 2), style: try params.optional("style", at: 3))
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "text.listPresets":
+            let result = try await handler.textListPresets()
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "text.listFonts":
+            let result = try await handler.textListFonts()
             return try JSONRPCServer.resultResponse(id: request.id, result: result)
         case "subtitle.set":
             let params = JSONRPCParameters(request.params)
@@ -170,6 +386,64 @@ package struct VCamServer: Sendable {
             return try JSONRPCServer.resultResponse(id: request.id, result: result)
         case "subtitle.clear":
             let result = try await handler.subtitleClear()
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "emoji.show":
+            let params = JSONRPCParameters(request.params)
+            let result = try await handler.emojiShow(emoji: try params.required("emoji", at: 0))
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "tracking.getState":
+            let result = try await handler.trackingGetState()
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "subtitle.getStyle":
+            let result = try await handler.subtitleGetStyle()
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "subtitle.setStyle":
+            let params = JSONRPCParameters(request.params)
+            let result = try await handler.subtitleSetStyle(preset: try params.optional("preset", at: 0), style: try params.optional("style", at: 1), placement: try params.optional("placement", at: 2), duration: try params.optional("duration", at: 3), easing: try params.optional("easing", at: 4))
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "image.import.begin":
+            let params = JSONRPCParameters(request.params)
+            let result = try await handler.imageImportBegin(filename: try params.required("filename", at: 0))
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "image.import.commit":
+            let params = JSONRPCParameters(request.params)
+            let result = try await handler.imageImportCommit(importId: try params.required("importId", at: 0), name: try params.optional("name", at: 1), placement: try params.optional("placement", at: 2))
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "image.import.cancel":
+            let params = JSONRPCParameters(request.params)
+            let result = try await handler.imageImportCancel(importId: try params.required("importId", at: 0))
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "video.import.begin":
+            let params = JSONRPCParameters(request.params)
+            let result = try await handler.videoImportBegin(filename: try params.required("filename", at: 0))
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "video.import.commit":
+            let params = JSONRPCParameters(request.params)
+            let result = try await handler.videoImportCommit(importId: try params.required("importId", at: 0), name: try params.optional("name", at: 1), placement: try params.optional("placement", at: 2), isLooping: try params.optional("isLooping", at: 3), isMuted: try params.optional("isMuted", at: 4))
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "video.import.cancel":
+            let params = JSONRPCParameters(request.params)
+            let result = try await handler.videoImportCancel(importId: try params.required("importId", at: 0))
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "video.get":
+            let params = JSONRPCParameters(request.params)
+            let result = try await handler.videoGet(objectId: try params.required("objectId", at: 0))
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "video.update":
+            let params = JSONRPCParameters(request.params)
+            let result = try await handler.videoUpdate(objectId: try params.required("objectId", at: 0), isPlaying: try params.optional("isPlaying", at: 1), time: try params.optional("time", at: 2), isLooping: try params.optional("isLooping", at: 3), isMuted: try params.optional("isMuted", at: 4))
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "web.add":
+            let params = JSONRPCParameters(request.params)
+            let result = try await handler.webAdd(url: try params.required("url", at: 0), name: try params.optional("name", at: 1), width: try params.optional("width", at: 2), height: try params.optional("height", at: 3), fps: try params.optional("fps", at: 4), placement: try params.optional("placement", at: 5))
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "web.update":
+            let params = JSONRPCParameters(request.params)
+            let result = try await handler.webUpdate(objectId: try params.required("objectId", at: 0), url: try params.optional("url", at: 1), width: try params.optional("width", at: 2), height: try params.optional("height", at: 3), fps: try params.optional("fps", at: 4))
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "camera.adjust":
+            let params = JSONRPCParameters(request.params)
+            let result = try await handler.cameraAdjust(panX: try params.optional("panX", at: 0), panY: try params.optional("panY", at: 1), orbitX: try params.optional("orbitX", at: 2), orbitY: try params.optional("orbitY", at: 3), zoom: try params.optional("zoom", at: 4), duration: try params.optional("duration", at: 5), easing: try params.optional("easing", at: 6))
             return try JSONRPCServer.resultResponse(id: request.id, result: result)
         case "pose.open":
             let result = try await handler.poseOpen()

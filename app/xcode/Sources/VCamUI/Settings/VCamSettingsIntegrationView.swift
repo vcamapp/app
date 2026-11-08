@@ -5,9 +5,7 @@ import VCamBridge
 import VCamData
 import VCamEntity
 import VCamLogger
-#if FEATURE_API
 import VCamRemoteControl
-#endif
 import Network
 
 public struct VCamSettingsIntegrationView: View {
@@ -16,6 +14,10 @@ public struct VCamSettingsIntegrationView: View {
     @AppStorage(key: .integrationFacialMocapIp) private var integrationFacialMocapIp
     @AppStorage(key: .integrationVCamMocap) private var integrationVCamMocap
     @AppStorage(key: .mocapNetworkInterpolation) private var mocapNetworkInterpolation
+    @AppStorage(key: .integrationVMCProtocol) private var integrationVMCProtocol
+    @AppStorage(key: .integrationExternalControl) private var integrationExternalControl
+    @AppStorage(key: .integrationExternalControlNetworkAccess) private var integrationExternalControlNetworkAccess
+    @AppStorage(key: .integrationExternalControlRequiresToken) private var integrationExternalControlRequiresToken
 
     @Bindable private var facialMocapReceiver = Tracking.shared.iFacialMocapReceiver
 
@@ -29,24 +31,14 @@ public struct VCamSettingsIntegrationView: View {
 
     public var body: some View {
         Form {
-            if let ipAddress = NWInterface.InterfaceType.wiredEthernet.ipv4 ?? NWInterface.InterfaceType.wifi.ipv4 {
-                FeatureView(title: "Info.") {
-                    HStack {
-                        Text(verbatim: "IP:")
+            if let ipAddress = NWInterface.thisMacIPv4 {
+                Section {
+                    LabeledContent {
                         Text(ipAddress)
-                        Button {
-                            NSPasteboard.general.clearContents()
-                            NSPasteboard.general.setString(ipAddress, forType: .string)
-                        } label: {
-                            Label {
-                                Text(.copy)
-                            } icon: {
-                                Image(systemName: "doc.on.doc")
-                            }
-                            .labelStyle(.iconOnly)
-                        }
-                        .buttonStyle(.borderless)
-                        .help(Text(.copy))
+                            .textSelection(.enabled)
+                        CopyButton(text: ipAddress)
+                    } label: {
+                        Text(.thisMacIPAddress)
                     }
                 }
             }
@@ -97,6 +89,8 @@ public struct VCamSettingsIntegrationView: View {
                 Text(.mocapNetworkInterpolationHelp)
                     .font(.caption2)
                     .foregroundStyle(.secondary)
+            } header: {
+                Text(verbatim: "VCam Mocap / iFacialMocap")
             }
 
 #if FEATURE_3
@@ -107,18 +101,28 @@ public struct VCamSettingsIntegrationView: View {
 #endif
 #endif
             if RenderingFeature.supported.contains(.vmcProtocol) {
-                VMCProtocolSettingView()
+                VMCProtocolSettingView(integrationVMCProtocol: $integrationVMCProtocol)
             }
-#if FEATURE_API
-            ExternalControlSettingView()
-#endif
+            if RenderingFeature.supported.contains(.externalControl) {
+                ExternalControlSettingView(
+                    integrationExternalControl: $integrationExternalControl,
+                    integrationExternalControlNetworkAccess: $integrationExternalControlNetworkAccess,
+                    integrationExternalControlRequiresToken: $integrationExternalControlRequiresToken
+                )
+            }
         }
         .formStyle(.grouped)
+        // Rows come and go through the form only when the form that owns the setting animates it
+        .animation(.default, value: integrationVMCProtocol)
+        .animation(.default, value: integrationExternalControl)
+        .animation(.default, value: ExternalControlServer.shared.isRunning)
+        .animation(.default, value: integrationExternalControlNetworkAccess)
+        .animation(.default, value: integrationExternalControlRequiresToken)
     }
 }
 
 private struct VMCProtocolSettingView: View {
-    @AppStorage(key: .integrationVMCProtocol) private var integrationVMCProtocol
+    @Binding var integrationVMCProtocol: Bool
     @AppStorage(key: .integrationVMCProtocolPort) private var integrationVMCProtocolPort
     @AppStorage(key: .integrationVMCProtocolExpressions) private var integrationVMCProtocolExpressions
 
@@ -134,26 +138,51 @@ private struct VMCProtocolSettingView: View {
                 ReceiverStatusView(connectionStatus: receiver.connectionStatus)
             }
 
-            PortRow(port: $integrationVMCProtocolPort, isLocked: integrationVMCProtocol)
+            if integrationVMCProtocol {
+                PortRow(port: $integrationVMCProtocolPort)
 
-            Toggle(isOn: $integrationVMCProtocolExpressions) {
-                Text(.vmcProtocolReceivesExpressions)
-            }
-            .onChange(of: integrationVMCProtocolExpressions) { _, newValue in
-                receiver.receivesExpressions = newValue
+                if RenderingFeature.supported.contains(.vmcProtocolFullPose) {
+                    Toggle(isOn: $integrationVMCProtocolExpressions) {
+                        Text(.vmcProtocolReceivesExpressions)
+                    }
+                    .onChange(of: integrationVMCProtocolExpressions) { _, newValue in
+                        receiver.receivesExpressions = newValue
+                    }
+                }
             }
 
             Text(.vmcProtocolHelp)
                 .font(.caption2)
                 .foregroundStyle(.secondary)
+
+            if !RenderingFeature.supported.contains(.vmcProtocolFullPose) {
+                Text(.vmcProtocolHeadAndTorsoOnly)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .onChange(of: integrationVMCProtocolPort) {
+            guard integrationVMCProtocol else { return }
+            receiver.stop()
+            do {
+                try Tracking.shared.startVMCProtocolReceiver()
+            } catch {
+                Logger.error(error)
+                integrationVMCProtocol = false
+            }
         }
     }
 }
 
-#if FEATURE_API
 private struct ExternalControlSettingView: View {
-    @AppStorage(key: .integrationExternalControl) private var integrationExternalControl
+    @Binding var integrationExternalControl: Bool
     @AppStorage(key: .integrationExternalControlPort) private var integrationExternalControlPort
+    @AppStorage(key: .integrationExternalControlFrameCapture) private var integrationExternalControlFrameCapture
+    @AppStorage(key: .integrationExternalControlToken) private var integrationExternalControlToken
+    @Binding var integrationExternalControlNetworkAccess: Bool
+    @Binding var integrationExternalControlRequiresToken: Bool
+
+    @State private var isRegenerateTokenConfirmationPresented = false
 
     var body: some View {
         VCamSettingsIntegrationView.FeatureView(title: "VCam API") {
@@ -170,15 +199,147 @@ private struct ExternalControlSettingView: View {
                 }
             }
 
-            PortRow(port: $integrationExternalControlPort, isLocked: integrationExternalControl)
+            if integrationExternalControl {
+                PortRow(port: $integrationExternalControlPort)
+            }
 
-            Text(.externalControlHelp)
-                .font(.caption2)
-                .foregroundStyle(.secondary)
+            VStack(spacing: 4) {
+                Text(.externalControlHelp)
+                    .foregroundStyle(.secondary)
+                Link(destination: URL(string: String(localized: .docsURLForVCamAPI))!) {
+                    Text(.seeDocumentation)
+                }
+            }
+            .font(.caption2)
+
+            if integrationExternalControl {
+                Toggle(isOn: $integrationExternalControlNetworkAccess) {
+                    Text(.externalControlAllowsNetworkAccess)
+                    Text(.externalControlNetworkAccessHelp)
+                }
+
+                if integrationExternalControlNetworkAccess {
+                    networkAccessRows
+                }
+
+                Toggle(isOn: $integrationExternalControlFrameCapture) {
+                    Text(.externalControlAllowsFrameCapture)
+                    Text(.externalControlFrameCaptureHelp)
+                }
+            }
+        }
+        .onChange(of: integrationExternalControlPort) {
+            restartIfRunning()
+        }
+        .onChange(of: integrationExternalControlNetworkAccess, initial: true) { oldValue, newValue in
+            if newValue {
+                ExternalControlToken.saved()
+            }
+            if oldValue != newValue {
+                restartIfRunning()
+            }
+        }
+        .onChange(of: integrationExternalControlRequiresToken) {
+            restartIfRunning()
+        }
+    }
+
+    @ViewBuilder
+    private var networkAccessRows: some View {
+        if let ipAddress = NWInterface.thisMacIPv4 {
+            LabeledContent {
+                let address = "ws://\(ipAddress):\(integrationExternalControlPort)"
+                Text(verbatim: address)
+                    .textSelection(.enabled)
+                CopyButton(text: address)
+            } label: {
+                Text(.externalControlAddress)
+            }
+        }
+
+        Toggle(isOn: $integrationExternalControlRequiresToken) {
+            Text(.externalControlRequiresToken)
+        }
+
+        if integrationExternalControlRequiresToken {
+            LabeledContent {
+                Text(verbatim: String(repeating: "•", count: 12))
+                    .foregroundStyle(.secondary)
+                CopyButton(text: integrationExternalControlToken)
+                Button {
+                    isRegenerateTokenConfirmationPresented = true
+                } label: {
+                    Text(.externalControlRegenerateToken)
+                }
+            } label: {
+                Text(.externalControlToken)
+                Text(.externalControlTokenHelp)
+            }
+            .confirmationDialog(Text(.externalControlRegenerateToken), isPresented: $isRegenerateTokenConfirmationPresented) {
+                Button(role: .cancel) {
+                } label: {
+                    Text(.cancel)
+                }
+
+                Button(role: .destructive) {
+                    ExternalControlToken.regenerate()
+                    // Drops the clients that connected with the old token
+                    restartIfRunning()
+                } label: {
+                    Text(.externalControlRegenerateToken)
+                }
+            } message: {
+                Text(.confirmRegenerateExternalControlToken)
+            }
+        } else {
+            Label {
+                Text(.externalControlNoTokenWarning)
+            } icon: {
+                Image(systemName: "exclamationmark.triangle.fill")
+            }
+            .font(.callout)
+            .foregroundStyle(.orange)
+        }
+    }
+
+    private func restartIfRunning() {
+        guard ExternalControlServer.shared.isRunning else { return }
+        Task {
+            do {
+                try await ExternalControlServer.shared.restartWithSavedPort()
+            } catch {
+                Logger.error(error)
+                integrationExternalControl = false
+            }
         }
     }
 }
-#endif
+
+private struct CopyButton: View {
+    let text: String
+
+    var body: some View {
+        Button {
+            NSPasteboard.general.clearContents()
+            NSPasteboard.general.setString(text, forType: .string)
+        } label: {
+            Label {
+                Text(.copy)
+            } icon: {
+                Image(systemName: "doc.on.doc")
+            }
+            .labelStyle(.iconOnly)
+        }
+        .buttonStyle(.borderless)
+        .help(Text(.copy))
+    }
+}
+
+private extension NWInterface {
+    static var thisMacIPv4: String? {
+        InterfaceType.wiredEthernet.ipv4 ?? InterfaceType.wifi.ipv4
+    }
+}
 
 /// Starts and stops a listener with its toggle, next to its status
 private struct EnableToggleRow<Status: View>: View {
@@ -188,16 +349,13 @@ private struct EnableToggleRow<Status: View>: View {
     @ViewBuilder let status: Status
 
     var body: some View {
-        LabeledContent {
-            status
-
-            Toggle(isOn: $isOn) {
+        // The status rides at the end of the label: a switch with its label hidden exposes no press action to accessibility
+        Toggle(isOn: $isOn) {
+            HStack {
                 Text(.enable)
+                Spacer()
+                status
             }
-            .labelsHidden()
-            .toggleStyle(.switch)
-        } label: {
-            Text(.enable)
         }
         .onChange(of: isOn) { _, newValue in
             if newValue {
@@ -215,10 +373,8 @@ private struct EnableToggleRow<Status: View>: View {
     }
 }
 
-/// Locked while the listener is enabled, since it keeps the port it started on
 private struct PortRow: View {
     @Binding var port: Int
-    let isLocked: Bool
 
     var body: some View {
         LabeledContent {
@@ -228,7 +384,6 @@ private struct PortRow: View {
             .textFieldStyle(.roundedBorder)
             .labelsHidden()
             .frame(maxWidth: 100)
-            .disabled(isLocked)
         } label: {
             Text(verbatim: "Port")
         }

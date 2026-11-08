@@ -30,6 +30,17 @@ extension VCamScene.Object {
                 size: .init(width: CGFloat(image.width), height: CGFloat(image.height)),
                 filter: image.filter.map(ImageFilter.init(configuration:))
             )))
+        case let .video(id, state):
+            let texture = state.texture
+            return sceneObject(type: .video(.init(
+                url: dataStore.dataURL(id: id),
+                isLooping: state.isLooping,
+                isMuted: state.isMuted,
+                textureSize: texture.textureSize,
+                region: texture.region.rect,
+                crop: texture.crop.rect,
+                filter: texture.filter.map(ImageFilter.init(configuration:))
+            )))
         case let .screen(id, state):
             let texture = state.texture
             return sceneObject(type: .screen(.init(
@@ -92,6 +103,12 @@ extension SceneObject {
                 width: Float(image.size.width),
                 height: Float(image.size.height),
                 filter: image.filter?.configuration
+            )))
+        case let .video(video):
+            return encodeScene(type: .video(id: video.url.lastPathComponent, state: .init(
+                texture: video.sceneRenderTexture,
+                isLooping: video.isLooping,
+                isMuted: video.isMuted
             )))
         case let .screen(screen):
             return encodeScene(type: .screen(id: screen.id , state: .init(

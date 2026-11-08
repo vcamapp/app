@@ -16,7 +16,7 @@ public struct VCamMainToolbarExpressionPicker: View {
                         VCamMainToolbarButton(
                             isSelected: expression.name == uniState.currentExpressionName,
                             action: {
-                                ExpressionControl.apply(name: expression.name)
+                                ExpressionControl.toggle(name: expression.name)
                             },
                             label: Text(expression.name)
                         )

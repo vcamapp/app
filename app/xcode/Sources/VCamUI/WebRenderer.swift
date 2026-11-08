@@ -12,6 +12,14 @@ public final class WebRenderer {
     public let cropRect = CGRect(x: 0, y: 0, width: 1, height: 1)
     public var filter: ImageFilter?
 
+    /// The pixels the page spans in the output, beyond which a capture only adds cost
+    public var outputPixelWidth: CGFloat? {
+        didSet {
+            guard outputPixelWidth != oldValue else { return }
+            renderWebViewTexture()
+        }
+    }
+
     private let webView: WKWebView
     private var timer: Timer?
     private var render: ((CIImage) -> Void)?
@@ -91,6 +99,7 @@ public final class WebRenderer {
             self.renderWebViewTexture()
         }
         webView.navigationDelegate = delegator
+        webView.uiDelegate = delegator
     }
 
     fileprivate func update(by metadata: VCamTagMetadata) {
@@ -148,13 +157,24 @@ public final class WebRenderer {
         // Skip the expensive web-view rasterization while no consumer is registered
         guard render != nil, !isSnapshotInFlight else { return }
         isSnapshotInFlight = true
-        webView.takeWebViewSnapshot(filter: filter) { [weak self] raw, filtered in
+        webView.takeWebViewSnapshot(with: snapshotConfiguration) { [weak self] image in
             guard let self else { return }
             self.isSnapshotInFlight = false
-            guard let raw, let filtered else { return }
-            self.lastFrame = raw
-            self.render?(filtered)
+            guard let image else { return }
+            self.lastFrame = image
+            self.render?(self.filter?.apply(to: image) ?? image)
         }
+    }
+
+    private var snapshotConfiguration: WKSnapshotConfiguration? {
+        // A blur's radius is in image pixels, so a smaller capture would make it look stronger
+        guard filter == nil, let outputPixelWidth else { return nil }
+        // snapshotWidth is in points, and the capture comes back that many times the backing scale
+        let width = outputPixelWidth / (webView.window ?? viewHolder).backingScaleFactor
+        guard width < size.width else { return nil }
+        let configuration = WKSnapshotConfiguration()
+        configuration.snapshotWidth = NSNumber(value: width)
+        return configuration
     }
 
     private func applyCurrentCSS() {
@@ -188,7 +208,7 @@ public final class WebRenderer {
         }
     }
 
-    final class WebViewDelegator: NSObject, WKNavigationDelegate {
+    final class WebViewDelegator: NSObject, WKNavigationDelegate, WKUIDelegate {
         init(didFinish: @escaping () -> Void) {
             self.didFinish = didFinish
             super.init()
@@ -198,6 +218,14 @@ public final class WebRenderer {
 
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
             didFinish()
+        }
+
+        func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
+            // Only for a mouse click, so that a page opening windows by script can't replace itself in the scene
+            if navigationAction.buttonNumber != 0 {
+                webView.load(navigationAction.request)
+            }
+            return nil
         }
     }
 
@@ -213,14 +241,28 @@ public final class WebRenderer {
 
 private extension WKWebView {
     // The completion is always called so that the caller can track in-flight snapshots
-    func takeWebViewSnapshot(filter: ImageFilter?, completion: @escaping (CIImage?, CIImage?) -> Void) {
-        takeSnapshot(with: nil) { image, _ in
-            guard let rawImage = image?.ciImage else {
-                completion(nil, nil)
+    func takeWebViewSnapshot(with configuration: WKSnapshotConfiguration?, completion: @escaping @MainActor (CIImage?) -> Void) {
+        takeSnapshot(with: configuration) { image, _ in
+            guard let cgImage = image?.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
+                completion(nil)
                 return
             }
-            completion(rawImage, filter?.apply(to: rawImage) ?? rawImage)
+            Task.detached(priority: .userInitiated) {
+                let ciImage = cgImage.bitmapCIImage()
+                await completion(ciImage)
+            }
         }
+    }
+}
+
+private extension CGImage {
+    /// Core Image would otherwise read a `CGImage` while rendering, which blocks the main thread
+    func bitmapCIImage() -> CIImage {
+        guard alphaInfo == .premultipliedFirst, byteOrderInfo == .order32Little, bitsPerPixel == 32,
+              let data = dataProvider?.data else {
+            return CIImage(cgImage: self)
+        }
+        return CIImage(bitmapData: data as Data, bytesPerRow: bytesPerRow, size: .init(width: width, height: height), format: .BGRA8, colorSpace: colorSpace)
     }
 }
 
@@ -263,8 +305,8 @@ extension WebRenderer: RenderTextureRenderer {
         }
         // Take a single frame on demand while no consumer has rendered one yet
         return await withCheckedContinuation { continuation in
-            webView.takeSnapshot(with: nil) { image, _ in
-                continuation.resume(returning: image?.ciImage ?? .empty())
+            webView.takeWebViewSnapshot(with: snapshotConfiguration) { image in
+                continuation.resume(returning: image ?? .empty())
             }
         }
     }

@@ -112,10 +112,12 @@ public final class SceneManager {
         return scene
     }
 
-    public func addNewScene() async throws {
+    @discardableResult
+    public func addNewScene() async throws -> VCamScene {
         let scene = Self.createNewScene(isLandscape: MainTexture.shared.isLandscape)
         try add(scene)
         try await loadScene(id: scene.id)
+        return scene
     }
 
     public func add(_ scene: VCamScene) throws {
@@ -125,33 +127,37 @@ public final class SceneManager {
         scenes.append(scene)
     }
 
-    public func duplicate(_ scene: VCamScene) async throws {
+    @discardableResult
+    public func duplicate(_ scene: VCamScene) async throws -> VCamScene {
         var duplicatedScene = scene
         duplicatedScene.id = Int32.random(in: 0..<Int32.max)
         let sourceSceneID = scene.id
         let duplicatedSceneID = duplicatedScene.id
-        let imageIDs: [String] = scene.objects.compactMap { object -> String? in
-            guard case let .image(id, _) = object.type else { return nil }
-            return id
+        let dataIDs: [String] = scene.objects.compactMap { object -> String? in
+            switch object.type {
+            case let .image(id, _), let .video(id, _): id
+            default: nil
+            }
         }
 
         do {
-            try await Self.copyImages(imageIDs, fromScene: sourceSceneID, toScene: duplicatedSceneID)
+            try await Self.copyData(dataIDs, fromScene: sourceSceneID, toScene: duplicatedSceneID)
             try add(duplicatedScene)
         } catch {
             await Self.deleteSceneData(sceneID: duplicatedSceneID)
             throw error
         }
+        return duplicatedScene
     }
 
     @concurrent
-    private nonisolated static func copyImages(_ imageIDs: [String], fromScene sourceSceneID: Int32, toScene destinationSceneID: Int32) async throws {
+    private nonisolated static func copyData(_ dataIDs: [String], fromScene sourceSceneID: Int32, toScene destinationSceneID: Int32) async throws {
         let sourceDataStore = VCamSceneDataStore(sceneId: sourceSceneID)
         let destinationDataStore = VCamSceneDataStore(sceneId: destinationSceneID)
-        for imageID in imageIDs {
+        for dataID in dataIDs {
             _ = try destinationDataStore.copyData(
-                fromURL: sourceDataStore.dataURL(id: imageID),
-                newUUID: imageID
+                fromURL: sourceDataStore.dataURL(id: dataID),
+                newUUID: dataID
             )
         }
     }
@@ -268,6 +274,48 @@ extension SceneManager: SceneControlling {
         let scene = currentScene
         return .init(id: scene.id, name: scene.name)
     }
+
+    public func createScene(name: String?) async throws -> SceneControl.Scene {
+        let scene = try await addNewScene()
+        guard let name else { return .init(id: scene.id, name: scene.name) }
+        try renameScene(id: scene.id, name: name)
+        return .init(id: scene.id, name: name)
+    }
+
+    public func duplicateScene(id: Int32, name: String?) async throws -> SceneControl.Scene {
+        let source = try scenes.find(byId: id).orThrow(SceneControlError.notFound)
+        let scene = try await duplicate(source)
+        guard let name else { return .init(id: scene.id, name: scene.name) }
+        try renameScene(id: scene.id, name: name)
+        return .init(id: scene.id, name: name)
+    }
+
+    public func renameScene(id: Int32, name: String) throws {
+        var scene = try scenes.find(byId: id).orThrow(SceneControlError.notFound)
+        scene.name = name
+        // Unlike the list row, which edits the selected scene, this can reach any scene
+        try VCamSceneDataStore(sceneId: id).save(scene)
+        update(scene)
+    }
+
+    public func moveScene(id: Int32, toIndex index: Int) throws {
+        let source = try scenes.index(ofId: id).orThrow(SceneControlError.notFound)
+        let target = min(max(index, 0), scenes.count - 1)
+        move(fromOffsets: IndexSet(integer: source), toOffset: target > source ? target + 1 : target)
+    }
+
+    public func removeScene(id: Int32) async throws {
+        guard scenes.find(byId: id) != nil else { throw SceneControlError.notFound }
+        guard scenes.count > 1 else { throw SceneControlError.notRemovable }
+        await remove(byId: id)
+    }
+
+    public func setLighting(_ lighting: VCamScene.Lighting?) throws {
+        setCurrentLighting(lighting)
+        try saveCurrentSceneAndObjects()
+    }
+
+    public var lighting: VCamScene.Lighting? { currentLighting }
 }
 
 private extension Array where Element == VCamScene {

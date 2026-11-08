@@ -1,3 +1,4 @@
+import Testing
 import Foundation
 @testable import VCamBridge
 
@@ -48,3 +49,9 @@ func completingModelLoads(errorCode: Int32, during body: () async throws -> Void
     try await body()
     return calls
 }
+
+/// Tests that suspend while recording take turns: the bridge has one callback, and a test
+/// that resumes after another one replaced it would miss its calls. The tests of the controls
+/// that run animations go along, since a change through those controls ends a running animation.
+@Suite(.serialized)
+enum RecordingWhileSuspendedTests {}

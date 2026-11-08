@@ -18,7 +18,7 @@ public struct VCamMainToolbar: View {
 
     public var body: some View {
         VStack(spacing: 2) {
-            Item {
+            Item(.background) {
                 isPhotoPopover.toggle()
             } label: {
                 Image(systemName: "paintpalette.fill")
@@ -30,20 +30,18 @@ public struct VCamMainToolbar: View {
             }
 
             if let makeAvatarLightingPopover = Self.makeAvatarLightingPopover {
-                Item {
+                Item(.lighting) {
                     isLightingPopover.toggle()
                 } label: {
                     Image(systemName: "sun.max.fill")
                 }
-                .help(Text(.lighting))
-                .accessibilityLabel(Text(.lighting))
                 // Opens toward the sidebar so the preview stays visible while the light is matched to it
                 .popover(isPresented: $isLightingPopover, arrowEdge: .leading) {
                     makeAvatarLightingPopover()
                 }
             }
 
-            Item {
+            Item(.emoji) {
                 isEmojiPickerPopover.toggle()
             } label: {
                 Text(verbatim: "👍")
@@ -55,7 +53,7 @@ public struct VCamMainToolbar: View {
                 .frame(width: 240)
             }
 
-            Item {
+            Item(.motion) {
                 isMotionPickerPopover.toggle()
             } label: {
                 Image(systemName: "figure.wave")
@@ -67,7 +65,7 @@ public struct VCamMainToolbar: View {
                 .frame(width: 240)
             }
 
-            Item {
+            Item(.facialExpression) {
                 isBlendShapePickerPopover.toggle()
             } label: {
                 Image(systemName: "face.smiling")
@@ -85,8 +83,15 @@ public struct VCamMainToolbar: View {
     }
 
     private struct Item<Label: View>: View {
+        init(_ title: LocalizedStringResource, action: @escaping () -> Void, @ViewBuilder label: () -> Label) {
+            self.title = title
+            self.action = action
+            self.label = label()
+        }
+
+        let title: LocalizedStringResource
         let action: () -> Void
-        @ViewBuilder let label: Label
+        let label: Label
 
         private let size: CGFloat = 18
 
@@ -97,6 +102,8 @@ public struct VCamMainToolbar: View {
                     .macHoverEffect()
             }
             .buttonStyle(.plain)
+            .help(Text(title))
+            .accessibilityLabel(Text(title))
         }
     }
 }

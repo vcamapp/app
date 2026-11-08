@@ -21,6 +21,12 @@ public struct RenderingFeature: OptionSet, Sendable {
     public static let micVowelEstimation = RenderingFeature(rawValue: 1 << 8)
     /// Moving the mouth with the microphone while Perfect Sync tracking moves the rest of the face
     public static let micLipSyncWithPerfectSync = RenderingFeature(rawValue: 1 << 9)
+    /// The VCam API that other apps on this Mac control the app through
+    public static let externalControl = RenderingFeature(rawValue: 1 << 10)
+    /// The avatar lighting each scene keeps
+    public static let sceneLighting = RenderingFeature(rawValue: 1 << 11)
+    /// Receiving every bone and the expressions over the VMC Protocol, rather than only the head and torso
+    public static let vmcProtocolFullPose = RenderingFeature(rawValue: 1 << 12)
 
     /// The features of the engine
     public static let engine: RenderingFeature = [

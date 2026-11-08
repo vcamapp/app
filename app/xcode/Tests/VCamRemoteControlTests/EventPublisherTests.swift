@@ -34,7 +34,7 @@ struct EventPublisherTests {
         publisher.subscribe(id: connectionID, events: nil)
 
         await publisher.publish(.sceneLoaded(sceneId: 1))
-        await publisher.publish(.expressionChanged(name: "Joy"))
+        await publisher.publish(.expressionChanged(expressions: [ExpressionWeight(name: "Joy", weight: 1)]))
         #expect(received.count == 2)
 
         publisher.disconnect(id: connectionID)

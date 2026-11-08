@@ -7,6 +7,8 @@ public struct UniBridgeMethodId: RawRepresentable, Sendable, Equatable {
     public static let stopMotion = Self.init(rawValue: 1)
     public static let applyExpression = Self.init(rawValue: 2)
     public static let sendHandPacketV1 = Self.init(rawValue: 3)
+    public static let applyExpressionTransition = Self.init(rawValue: 4)
+    public static let setGaze = Self.init(rawValue: 5)
 
     public static let addTrackingMapping = Self.init(rawValue: 11)
     public static let clearTrackingMapping = Self.init(rawValue: 12)
@@ -45,10 +47,54 @@ public enum CameraControlIntent: Int32, Sendable {
     case orbit = 1
     case zoom = 2
     case commit = 3
+    /// `dx` is a magnification relative to now: 2 shows the avatar twice as large
+    case magnify = 4
 }
 
 // MARK: - Payload Structures
 // A bool is 4 bytes on the engine side and would shift the field offsets, so flags are UInt8
+public enum TransitionEasing: Int32, Sendable {
+    case linear = 0
+    case easeIn = 1
+    case easeOut = 2
+    case easeInOut = 3
+}
+
+public struct ExpressionTransitionPayload {
+    public var names: UnsafePointer<UnsafePointer<CChar>>?
+    public var weights: UnsafePointer<Float>?
+    public var count: Int32
+    public var duration: Float
+    public var easing: Int32
+
+    public var expressions: [String: Float] {
+        guard let names, let weights else { return [:] }
+        return Dictionary((0..<Int(count)).map { (String(cString: names[$0]), weights[$0]) }) { first, _ in first }
+    }
+}
+
+public enum GazeMode: Int32, Sendable {
+    case auto = 0
+    case camera = 1
+    case direction = 2
+}
+
+public struct GazePayload {
+    public var mode: Int32
+    /// Degrees. Positive looks to the right of the screen
+    public var yaw: Float
+    /// Degrees. Positive looks up
+    public var pitch: Float
+    public var movesHead: UInt8
+
+    public init(mode: GazeMode, yaw: Float, pitch: Float, movesHead: Bool) {
+        self.mode = mode.rawValue
+        self.yaw = yaw
+        self.pitch = pitch
+        self.movesHead = movesHead ? 1 : 0
+    }
+}
+
 public struct PlayMotionPayload {
     public var stringPtr: UnsafePointer<CChar>?
     public var isLoop: UInt8
@@ -225,6 +271,29 @@ public extension UniBridge {
 
     static func applyExpression(name: String) {
         send(.applyExpression, string: name)
+    }
+
+    static func applyExpressionTransition(expressions: [(name: String, weight: Float)], duration: Float, easing: TransitionEasing) {
+        let names = expressions.map { UnsafePointer<CChar>(strdup($0.name)!) }
+        defer {
+            for name in names {
+                free(UnsafeMutablePointer(mutating: name))
+            }
+        }
+        names.withUnsafeBufferPointer { names in
+            expressions.map(\.weight).withUnsafeBufferPointer { weights in
+                var payload = ExpressionTransitionPayload(
+                    names: names.baseAddress, weights: weights.baseAddress, count: Int32(names.count),
+                    duration: duration, easing: easing.rawValue
+                )
+                send(.applyExpressionTransition, payload: &payload)
+            }
+        }
+    }
+
+    static func setGaze(mode: GazeMode, yaw: Float, pitch: Float, movesHead: Bool) {
+        var payload = GazePayload(mode: mode, yaw: yaw, pitch: pitch, movesHead: movesHead)
+        send(.setGaze, payload: &payload)
     }
 
     static func addTrackingMapping(mode: TrackingMode, inputKey: String, outputKey: String, inputRangeMin: Float, inputRangeMax: Float, outputRangeMin: Float, outputRangeMax: Float, filter: TrackingFilter = .none) {

@@ -72,7 +72,7 @@ public struct VCamSettingView: View {
     }
 
     public var body: some View {
-        HStack {
+        NavigationSplitView {
             List(Tab.allCases, selection: $tab) { tab in
                 Label {
                     Text(verbatim: tab.title)
@@ -82,9 +82,11 @@ public struct VCamSettingView: View {
                 }
                 .accessibilityIdentifier("settings.tab.\(tab)")
             }
-            .listStyle(.sidebar)
-            .frame(width: 150)
-
+            // navigationSplitViewColumnWidth is ignored in a window hosted by NSHostingView,
+            // which sizes the window to the sidebar's minimum width
+            .frame(minWidth: 170)
+            .toolbar(removing: .sidebarToggle)
+        } detail: {
             Group {
                 switch tab {
                 case .general:
@@ -108,6 +110,7 @@ public struct VCamSettingView: View {
                 }
             }
             .frame(minWidth: 500, maxHeight: .infinity, alignment: .top)
+            .navigationTitle(tab.title)
         }
         .disabled(recorder.isRecording)
         .rootView()
@@ -116,6 +119,8 @@ public struct VCamSettingView: View {
 
 extension VCamSettingView: MacWindow {
     public var windowTitle: String { String(localized: .settings) }
+
+    public var sceneBridgingOptions: NSHostingSceneBridgingOptions { [.toolbars, .title] }
 
     public func configureWindow(_ window: NSWindow) -> NSWindow {
         window.level = .floating

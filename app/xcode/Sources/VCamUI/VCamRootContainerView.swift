@@ -43,8 +43,8 @@ public extension VCamRootContainerView {
         switch type {
         case .model:
             loadAvatar(from: url)
-        case .image:
-            SceneObjectManager.shared.addImage(url: url)
+        case .imageOrVideo:
+            AddableSceneObject.addImageOrVideo(url: url)
         case .html:
             NSApp.activate() // To present the sheet, the window must be activated.
             Task {
@@ -84,7 +84,7 @@ public extension VCamRootContainerView {
 
     enum FileType {
         case model
-        case image
+        case imageOrVideo
         case html
 
         public init?(url: URL) {
@@ -100,11 +100,12 @@ public extension VCamRootContainerView {
             case "vrm":
                 self = .model
             case "png", "jpeg", "jpg", "tiff", "tif", "tga", "bmp":
-                self = .image
+                self = .imageOrVideo
             case "html", "htm":
                 self = .html
             default:
-                return nil
+                guard AddableSceneObject.isVideoFile(url) else { return nil }
+                self = .imageOrVideo
             }
         }
     }

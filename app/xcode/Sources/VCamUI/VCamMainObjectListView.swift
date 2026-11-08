@@ -289,6 +289,20 @@ private struct SceneObjectMenuItems: View {
             Divider()
             editButton
             filterAndFooterItems(configuration: { image.filter?.configuration }) { image.filter = $0 }
+        case let .video(video):
+            Toggle(isOn: .init(
+                get: { video.isLooping },
+                set: { SceneObjectManager.shared.setVideoOptions(of: object, isLooping: $0) }
+            )) {
+                Text(.loopPlayback)
+            }
+            Toggle(isOn: .init(
+                get: { video.isMuted },
+                set: { SceneObjectManager.shared.setVideoOptions(of: object, isMuted: $0) }
+            )) {
+                Text(.muteVideo)
+            }
+            filterAndFooterItems(configuration: { video.filter?.configuration }) { video.filter = $0 }
         case let .screen(screen):
             editButton
             filterAndFooterItems(configuration: { screen.filter?.configuration }) { screen.filter = $0 }
@@ -377,6 +391,8 @@ private func sceneObjectEditor(for object: SceneObject) -> (() -> Void)? {
             }
             SceneObjectManager.shared.update(object)
         }
+    case .video:
+        return nil
     case let .screen(screen):
         return {
             showScreenRecorderPreferenceView { recorder in

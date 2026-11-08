@@ -46,7 +46,6 @@ private final class ExpressionAnalyzerState: Sendable {
 }
 
 public final class AudioExpressionEstimator: NSObject, Sendable {
-    private let audioLevelMeter = AudioLevelMeter()
     private let analyzerState = ExpressionAnalyzerState()
     private let callbackState = CallbackState()
 
@@ -58,53 +57,29 @@ public final class AudioExpressionEstimator: NSObject, Sendable {
         callbackState.setOnUpdate(handler)
     }
 
-    public func setOnAudioLevelUpdate(_ handler: (@Sendable (Float) -> Void)?) {
-        callbackState.setOnAudioLevelUpdate(handler)
-    }
-
     public func configure(format: AVAudioFormat) {
-        audioLevelMeter.reset()
         analyzerState.configure(format: format, observer: self)
     }
 
     public func reset() {
-        audioLevelMeter.reset()
         analyzerState.reset()
     }
 
-    /// Runs synchronously on the caller's thread, callbacks included
+    /// Rate-limited to about 8 times a second
     public func analyze(buffer: AVAudioPCMBuffer, time: AVAudioTime) {
-        let level = audioLevelMeter.level(of: buffer)
-
-        callbackState.notifyAudioLevel(level)
-
-        // Expression analysis is rate-limited (~8fps)
         analyzerState.analyzeIfNeeded(buffer: buffer, sampleTime: time.sampleTime)
     }
 }
 
 private final class CallbackState: Sendable {
-    private struct State: Sendable {
-        var onUpdate: (@Sendable (FacialExpression) -> Void)?
-        var onAudioLevelUpdate: (@Sendable (Float) -> Void)?
-    }
-
-    private let state = Mutex(State())
+    private let onUpdate = Mutex<(@Sendable (FacialExpression) -> Void)?>(nil)
 
     func setOnUpdate(_ handler: (@Sendable (FacialExpression) -> Void)?) {
-        state.withLock { $0.onUpdate = handler }
-    }
-
-    func setOnAudioLevelUpdate(_ handler: (@Sendable (Float) -> Void)?) {
-        state.withLock { $0.onAudioLevelUpdate = handler }
+        onUpdate.withLock { $0 = handler }
     }
 
     func notifyExpression(_ expression: FacialExpression) {
-        state.withLock { $0.onUpdate }?(expression)
-    }
-
-    func notifyAudioLevel(_ level: Float) {
-        state.withLock { $0.onAudioLevelUpdate }?(level)
+        onUpdate.withLock { $0 }?(expression)
     }
 }
 

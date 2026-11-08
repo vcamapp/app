@@ -7,6 +7,7 @@ public enum FileUtility {
         case vrm
         case model
         case image
+        case imageOrVideo
         case html
         case motion
     }
@@ -20,6 +21,8 @@ public enum FileUtility {
             return openFile(with: [] as [UTType])
         case .image:
             return openFile(with: [.image])
+        case .imageOrVideo:
+            return openFile(with: [.image, .movie])
         case .html:
             return openFile(with: [.html])
         case .motion:

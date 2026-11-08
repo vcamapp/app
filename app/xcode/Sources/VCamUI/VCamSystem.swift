@@ -1,9 +1,7 @@
 import AppKit
 import VCamBridge
 import VCamControl
-#if FEATURE_API
 import VCamRemoteControl
-#endif
 import VCamTracking
 import VCamLogger
 import VCamCamera
@@ -31,6 +29,8 @@ public final class VCamSystem {
 
     private init() {
         SceneControl.provider = SceneManager.shared
+        TrackingControl.provider = TrackingSourceProvider()
+        SceneObjectControl.provider = SceneObjectControlProvider()
 
         VirtualCamera.onConsumersChanged = { [weak self] hasConsumers in
             Task { @MainActor in
@@ -79,9 +79,9 @@ public final class VCamSystem {
         RenderTextureManager.shared.resume()
         PasteboardObserver.shared.observe()
         VCamShortcutManager.shared.startHotKeys()
-#if FEATURE_API
-        ExternalControlServer.shared.startIfEnabled()
-#endif
+        if RenderingFeature.supported.contains(.externalControl) {
+            ExternalControlServer.shared.startIfEnabled()
+        }
         UniBridge.shared.resumeApp()
     }
 
@@ -125,9 +125,7 @@ public final class VCamSystem {
         RenderTextureManager.shared.pause()
         PasteboardObserver.shared.dispose()
         VCamShortcutManager.shared.stopHotKeys()
-#if FEATURE_API
         ExternalControlServer.shared.stop()
-#endif
     }
 }
 

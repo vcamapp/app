@@ -1,9 +1,11 @@
 import SwiftUI
 import VCamCamera
+import VCamData
 
 public struct VCamSettingVirtualCameraView: View {
     public init() {}
 
+    @AppStorage(key: .useHMirror) private var useHMirror
     @State private var isCameraExtensionInstalled = false
     @State private var isCameraExtensionStarting = false
     @State private var isAwaitingUserApproval = false
@@ -77,6 +79,12 @@ public struct VCamSettingVirtualCameraView: View {
             }
 
             Section {
+                Toggle(isOn: $useHMirror) {
+                    Text(.flipScreen)
+                }
+            }
+
+            Section {
                 Link(destination: URL(string: String(localized: .docsURLForVirtualCamera))!) {
                     Text(.seeDocumentation)
                         .font(.footnote)
@@ -91,6 +99,9 @@ public struct VCamSettingVirtualCameraView: View {
             }
         }
         .formStyle(.grouped)
+        .animation(.default, value: isAwaitingUserApproval)
+        .animation(.default, value: isCameraExtensionStarting)
+        .animation(.default, value: isCameraExtensionInstalled)
     }
 }
 

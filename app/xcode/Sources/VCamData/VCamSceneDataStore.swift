@@ -55,10 +55,19 @@ public struct VCamSceneDataStore {
         return try copyData(fromURL: url, toId: newUUID)
     }
 
+    /// For a file that can only be opened by its extension, such as a video
+    public func copyDataKeepingExtension(fromURL url: URL) throws -> URL {
+        try copyData(fromURL: url, newUUID: Self.dataId(extensionOf: url))
+    }
+
     /// Copies the data into a file of its own even when it already belongs to the scene, so
     /// that two objects never point at one file: removing either would delete it for both.
     public func duplicateData(at url: URL) throws -> URL {
-        try copyData(fromURL: url, toId: UUID().uuidString)
+        try copyData(fromURL: url, toId: Self.dataId(extensionOf: url))
+    }
+
+    private static func dataId(extensionOf url: URL) -> String {
+        url.pathExtension.isEmpty ? UUID().uuidString : "\(UUID().uuidString).\(url.pathExtension)"
     }
 
     private func copyData(fromURL url: URL, toId id: String) throws -> URL {
@@ -166,8 +175,8 @@ extension VCamSceneDataStore {
                 scene.objects = scene.objects.compactMap {
                     switch $0.type {
                     case .avatar, .screen, .captureDevice, .web, .text, .wind: ()
-                    case let .image(imageId, _):
-                        if !FileManager.default.fileExists(atPath: dataStore.dataURL(id: imageId).path(percentEncoded: false)) {
+                    case let .image(dataId, _), let .video(dataId, _):
+                        if !FileManager.default.fileExists(atPath: dataStore.dataURL(id: dataId).path(percentEncoded: false)) {
                             return nil
                         }
                     }

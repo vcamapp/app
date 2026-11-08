@@ -10,11 +10,13 @@ import FoundationNetworking
 package protocol VCamProtocol: Sendable {
     /// Returns the app version, API version, and capabilities
     @concurrent func appGetInfo() async throws -> AppGetInfoResult
-    /// Returns the current avatar, playing motions, and expression
+    /// Returns the current avatar, playing motions, expressions, and subtitle
     @concurrent func stateGet() async throws -> StateGetResult
     /// Lists the avatars registered in the avatar library
     @concurrent func avatarList() async throws -> [Avatar]
     /// Loads an avatar from the avatar library
+    /// 
+    /// The response comes when the avatar has loaded and expression.list lists its expressions. avatar.loaded follows the same moment.
     @concurrent func avatarLoad(avatarId: UUID) async throws -> Bool
     /// Starts uploading a VRM file to import into the avatar library
     /// 
@@ -22,32 +24,152 @@ package protocol VCamProtocol: Sendable {
     @concurrent func avatarImportBegin(filename: String) async throws -> AvatarImportBeginResult
     /// Registers the uploaded file to the avatar library
     /// 
-    /// Validates the uploaded data as a VRM and registers it to the avatar library. The staging area is removed regardless of the outcome.
+    /// Validates the uploaded data as a VRM and registers it to the avatar library. The staging area is removed regardless of the outcome. With `load`, the response comes when the avatar has loaded.
     @concurrent func avatarImportCommit(importId: UUID, load: Bool?) async throws -> AvatarImportCommitResult
     /// Aborts an upload and removes its staging area
     @concurrent func avatarImportCancel(importId: UUID) async throws -> Bool
     /// Lists the expressions of the current avatar
     @concurrent func expressionList() async throws -> [Expression]
-    /// Applies an expression to the current avatar
-    @concurrent func expressionSet(name: String) async throws -> Bool
+    /// Sets the expressions on the current avatar
+    /// 
+    /// The list is the whole face: expressions left out fade to nothing, and an empty list takes every expression off. Expressions mix by their weights, and how well they mix depends on the model. With a duration, the response comes when the fade has ended. With microphone lip sync, the mouth keeps moving under the expressions.
+    @concurrent func expressionSet(expressions: [ExpressionWeight], duration: Double?, easing: AnimationEasing?) async throws -> Bool
+    /// Decides where the avatar looks
+    /// 
+    /// The eyes get there first and the head follows, so there is no duration to give. The eyes still wander a little, as they do on their own. This stays until set again, across scenes and avatars, and wins over face tracking. A head received over the VMC Protocol wins over this one's head, while the eyes still follow it.
+    @concurrent func gazeSet(mode: GazeSetMode, yaw: Double?, pitch: Double?, movesHead: Bool?) async throws -> Bool
     /// Lists the available motions (built-in and imported)
     @concurrent func motionList() async throws -> [Motion]
     /// Plays a motion
-    @concurrent func motionPlay(motionId: String, loop: Bool?) async throws -> Bool
+    @concurrent func motionPlay(motionId: String, loop: Bool?, wait: Bool?) async throws -> Bool
     /// Stops a playing motion
     @concurrent func motionStop(motionId: String) async throws -> Bool
+    /// Starts uploading a motion to add to the library
+    /// 
+    /// Send the file as binary WebSocket frames, each one the 36-byte importId followed by a chunk of at most 1 MiB. Available only when app.getInfo lists the vrma capability.
+    @concurrent func motionImportBegin(filename: String) async throws -> MotionImportBeginResult
+    /// Adds the uploaded motion to the library
+    @concurrent func motionImportCommit(importId: UUID, name: String?, loop: Bool?, isPose: Bool?) async throws -> MotionImportCommitResult
+    /// Aborts a motion upload
+    @concurrent func motionImportCancel(importId: UUID) async throws -> Bool
+    /// Removes an imported motion from the library
+    /// 
+    /// Built-in motions cannot be removed.
+    @concurrent func motionRemove(motionId: String) async throws -> Bool
+    /// Lists the scenes
+    @concurrent func sceneList() async throws -> [Scene]
     /// Returns the current scene
     @concurrent func sceneGet() async throws -> Scene
     /// Loads a scene
-    @concurrent func sceneLoad(sceneId: Int) async throws -> Bool
+    /// 
+    /// With a duration, the current frame stays on screen while the scene loads, then fades out over the new scene. The response comes when the crossfade has ended.
+    @concurrent func sceneLoad(sceneId: Int, duration: Double?, easing: AnimationEasing?) async throws -> Bool
     /// Resets the avatar and camera to the initial position
     @concurrent func cameraReset() async throws -> Bool
+    /// Creates a scene and loads it
+    @concurrent func sceneCreate(name: String?) async throws -> Scene
+    /// Copies a scene without loading the copy
+    @concurrent func sceneDuplicate(sceneId: Int, name: String?) async throws -> Scene
+    /// Renames a scene
+    @concurrent func sceneRename(sceneId: Int, name: String) async throws -> Bool
+    /// Moves a scene to a position in the list
+    @concurrent func sceneMove(sceneId: Int, index: Int) async throws -> Bool
+    /// Removes a scene and everything in it
+    /// 
+    /// The last scene of the current orientation cannot be removed.
+    @concurrent func sceneRemove(sceneId: Int) async throws -> Bool
+    /// Returns the avatar lighting of the current scene
+    /// 
+    /// `lighting` is absent while the scene uses the default light. Available only when app.getInfo lists the sceneLighting capability.
+    @concurrent func sceneGetLighting() async throws -> SceneGetLightingResult
+    /// Sets the avatar lighting of the current scene
+    /// 
+    /// Available only when app.getInfo lists the sceneLighting capability.
+    @concurrent func sceneSetLighting(lighting: SceneLighting?) async throws -> Bool
+    /// Returns the output size in pixels
+    @concurrent func canvasGet() async throws -> CanvasGetResult
+    /// Returns the current output as an image
+    /// 
+    /// Requires the user to allow frame capture in the VCam API settings; app.getInfo lists the frameCapture capability while it is allowed.
+    @concurrent func frameCapture(maxWidth: Int?, format: FrameCaptureFormat?) async throws -> FrameCaptureResult
+    /// Lists the objects of the current scene, from back to front
+    /// 
+    /// Placements are fractions of the canvas: `x` and `y` are the offset of the object's center from the center of the canvas (`y` grows upward, so -0.5 to 0.5 stays on the canvas), and `width` and `height` are its size. The subtitle is not listed; see subtitle.getStyle.
+    @concurrent func objectList() async throws -> [ObjectInfo]
+    /// Changes an object's name, visibility, lock, or placement
+    /// 
+    /// A locked object rejects every change except unlocking it, so that a layout the user fixed is not changed by accident. With a duration, the placement moves and the visibility fades, the response comes when they have ended, and another change of the same kind takes over from where the object is by then. Text looks scaled during a move and redraws sharply at the end. Wind has nothing to fade, so it changes at once.
+    @concurrent func objectUpdate(objectId: Int, name: String?, isHidden: Bool?, isLocked: Bool?, placement: ObjectPlacementUpdate?, duration: Double?, easing: AnimationEasing?) async throws -> Bool
+    /// Moves an object to a position in the stacking order
+    @concurrent func objectMove(objectId: Int, index: Int) async throws -> Bool
+    /// Copies an object in the current scene
+    @concurrent func objectDuplicate(objectId: Int) async throws -> ObjectDuplicateResult
+    /// Removes an object from the current scene
+    @concurrent func objectRemove(objectId: Int) async throws -> Bool
+    /// Adds a text object to the current scene
+    @concurrent func textAdd(text: String, name: String?, preset: String?, style: TextStyle?, placement: ObjectPlacementUpdate?) async throws -> TextAddResult
+    /// Returns the text and style of a text object
+    @concurrent func textGet(objectId: Int) async throws -> TextGetResult
+    /// Changes the text or style of a text object
+    /// 
+    /// The edge the alignment anchors stays in place, so the object grows as the text gets longer.
+    @concurrent func textUpdate(objectId: Int, text: String?, preset: String?, style: TextStyle?) async throws -> Bool
+    /// Lists the text style presets
+    @concurrent func textListPresets() async throws -> [TextPreset]
+    /// Lists the PostScript names of the installed fonts
+    @concurrent func textListFonts() async throws -> [String]
     /// Shows text as the subtitle
     /// 
     /// Replaces the subtitle with the given text. The subtitle keeps the style and placement configured in the app, and is shared by every scene. Passing an empty string is the same as subtitle.clear.
     @concurrent func subtitleSet(text: String) async throws -> Bool
     /// Hides the subtitle
     @concurrent func subtitleClear() async throws -> Bool
+    /// Shows an emoji as a temporary stamp on the frame
+    /// 
+    /// Available only when app.getInfo lists the emoji capability.
+    @concurrent func emojiShow(emoji: String) async throws -> Bool
+    /// Returns the connection state of the tracking sources
+    /// 
+    /// Covers the sources that connect from other apps and devices: `vcamMotion`, `iFacialMocap`, and `vmcProtocol`.
+    @concurrent func trackingGetState() async throws -> TrackingGetStateResult
+    /// Returns the style and placement of the subtitle
+    @concurrent func subtitleGetStyle() async throws -> SubtitleGetStyleResult
+    /// Changes the style and placement of the subtitle
+    /// 
+    /// Applies to every scene and stays after a restart. With a duration, the response comes when the placement has ended. The subtitle looks scaled during the move and redraws sharply at the end.
+    @concurrent func subtitleSetStyle(preset: String?, style: TextStyle?, placement: SubtitlePlacement?, duration: Double?, easing: AnimationEasing?) async throws -> Bool
+    /// Starts uploading an image to add to the current scene
+    /// 
+    /// Send the file as binary WebSocket frames, each one the 36-byte importId followed by a chunk of at most 1 MiB.
+    @concurrent func imageImportBegin(filename: String) async throws -> ImageImportBeginResult
+    /// Adds the uploaded image to the current scene
+    @concurrent func imageImportCommit(importId: UUID, name: String?, placement: ObjectPlacementUpdate?) async throws -> ImageImportCommitResult
+    /// Aborts an image upload
+    @concurrent func imageImportCancel(importId: UUID) async throws -> Bool
+    /// Starts uploading a video to add to the current scene
+    /// 
+    /// Send the file as binary WebSocket frames, each one the 36-byte importId followed by a chunk of at most 1 MiB. A file can be up to 512 MiB.
+    @concurrent func videoImportBegin(filename: String) async throws -> VideoImportBeginResult
+    /// Adds the uploaded video to the current scene and starts playing it
+    @concurrent func videoImportCommit(importId: UUID, name: String?, placement: ObjectPlacementUpdate?, isLooping: Bool?, isMuted: Bool?) async throws -> VideoImportCommitResult
+    /// Aborts a video upload
+    @concurrent func videoImportCancel(importId: UUID) async throws -> Bool
+    /// Returns the playback state of a video object
+    @concurrent func videoGet(objectId: Int) async throws -> VideoState
+    /// Plays, pauses or seeks a video object, or changes its options
+    /// 
+    /// Omitted values stay as they are. Playing a video that has reached its end starts it over. While the object is hidden the video stays paused and continues when it is shown.
+    @concurrent func videoUpdate(objectId: Int, isPlaying: Bool?, time: Double?, isLooping: Bool?, isMuted: Bool?) async throws -> VideoState
+    /// Adds a web page to the current scene
+    @concurrent func webAdd(url: String, name: String?, width: Int?, height: Int?, fps: Int?, placement: ObjectPlacementUpdate?) async throws -> WebAddResult
+    /// Reloads a web page object with new settings
+    /// 
+    /// Omitted values stay as they are, so passing only objectId reloads the page.
+    @concurrent func webUpdate(objectId: Int, url: String?, width: Int?, height: Int?, fps: Int?) async throws -> Bool
+    /// Moves the camera relative to where it is
+    /// 
+    /// The result is saved in the current scene. With a duration, the response comes when the move has ended, and another camera.adjust takes over from where the camera is by then.
+    @concurrent func cameraAdjust(panX: Double?, panY: Double?, orbitX: Double?, orbitY: Double?, zoom: Double?, duration: Double?, easing: AnimationEasing?) async throws -> Bool
     /// Opens the pose editor with the current avatar
     /// 
     /// Opens the pose editor window, or fronts it when it is already open, and loads the current avatar into it. The other pose methods require the editor to be open. Bone names follow VRM 1.0 (`hips`, `spine`, `leftUpperArm`, ...); rotations are degrees relative to the rest pose (T-pose), applied in Y, X, Z order around the bone's own axes, so `[0, 0, 0]` is the rest pose. Expressions are named as VRM 1.0 names its presets (`happy`, `blink`, ...) and as the model names its custom expressions; weights run from 0 to 1. Available only when app.getInfo lists the poseEditor capability. Besides rotating bones one by one with pose.set, pose.move pulls a hand, foot, elbow, knee, the head or the hips to a point and solves the limb with IK, the way dragging it in the editor does.
@@ -111,7 +233,7 @@ package struct VCam: VCamProtocol {
         return try await rpc.call(method: "app.getInfo")
     }
 
-    /// Returns the current avatar, playing motions, and expression
+    /// Returns the current avatar, playing motions, expressions, and subtitle
     @concurrent package func stateGet() async throws -> StateGetResult {
         return try await rpc.call(method: "state.get")
     }
@@ -122,6 +244,8 @@ package struct VCam: VCamProtocol {
     }
 
     /// Loads an avatar from the avatar library
+    /// 
+    /// The response comes when the avatar has loaded and expression.list lists its expressions. avatar.loaded follows the same moment.
     @concurrent package func avatarLoad(avatarId: UUID) async throws -> Bool {
         struct Params: Encodable, Sendable {
             var avatarId: UUID
@@ -150,7 +274,7 @@ package struct VCam: VCamProtocol {
 
     /// Registers the uploaded file to the avatar library
     /// 
-    /// Validates the uploaded data as a VRM and registers it to the avatar library. The staging area is removed regardless of the outcome.
+    /// Validates the uploaded data as a VRM and registers it to the avatar library. The staging area is removed regardless of the outcome. With `load`, the response comes when the avatar has loaded.
     /// - Parameter load: Loads the imported avatar immediately.
     @concurrent package func avatarImportCommit(importId: UUID, load: Bool? = nil) async throws -> AvatarImportCommitResult {
         struct Params: Encodable, Sendable {
@@ -181,16 +305,40 @@ package struct VCam: VCamProtocol {
         return try await rpc.call(method: "expression.list")
     }
 
-    /// Applies an expression to the current avatar
-    @concurrent package func expressionSet(name: String) async throws -> Bool {
+    /// Sets the expressions on the current avatar
+    /// 
+    /// The list is the whole face: expressions left out fade to nothing, and an empty list takes every expression off. Expressions mix by their weights, and how well they mix depends on the model. With a duration, the response comes when the fade has ended. With microphone lip sync, the mouth keeps moving under the expressions.
+    /// - Parameter expressions: The expressions to wear. Each name may appear once.
+    /// - Parameter duration: Seconds to fade over, up to 60. Omit or pass 0 to change at once.
+    /// - Parameter easing: Defaults to easeInOut. VCam2D uses its own curve when changing to another expression.
+    @concurrent package func expressionSet(expressions: [ExpressionWeight], duration: Double? = nil, easing: AnimationEasing? = nil) async throws -> Bool {
         struct Params: Encodable, Sendable {
-            var name: String
+            var expressions: [ExpressionWeight]
+            var duration: Double?
+            var easing: AnimationEasing?
         }
         do {
-            return try await rpc.call(method: "expression.set", params: Params(name: name))
+            return try await rpc.call(method: "expression.set", params: Params(expressions: expressions, duration: duration, easing: easing))
         } catch let JSONRPCError.server(error) {
             throw VCamError(error) ?? JSONRPCError.server(error)
         }
+    }
+
+    /// Decides where the avatar looks
+    /// 
+    /// The eyes get there first and the head follows, so there is no duration to give. The eyes still wander a little, as they do on their own. This stays until set again, across scenes and avatars, and wins over face tracking. A head received over the VMC Protocol wins over this one's head, while the eyes still follow it.
+    /// - Parameter mode: `auto` returns to face tracking, or to looking ahead without it. `camera` looks into the camera. `direction` looks by `yaw` and `pitch`.
+    /// - Parameter yaw: With `direction`: degrees from straight ahead, from -90 to 90. Positive looks to the right of the screen.
+    /// - Parameter pitch: With `direction`: degrees from straight ahead, from -45 to 45. Positive looks up.
+    /// - Parameter movesHead: False moves only the eyes. Defaults to true.
+    @concurrent package func gazeSet(mode: GazeSetMode, yaw: Double? = nil, pitch: Double? = nil, movesHead: Bool? = nil) async throws -> Bool {
+        struct Params: Encodable, Sendable {
+            var mode: GazeSetMode
+            var yaw: Double?
+            var pitch: Double?
+            var movesHead: Bool?
+        }
+        return try await rpc.call(method: "gaze.set", params: Params(mode: mode, yaw: yaw, pitch: pitch, movesHead: movesHead))
     }
 
     /// Lists the available motions (built-in and imported)
@@ -200,13 +348,15 @@ package struct VCam: VCamProtocol {
 
     /// Plays a motion
     /// - Parameter loop: Overrides the motion's loop setting for this playback; the stored setting is used when omitted.
-    @concurrent package func motionPlay(motionId: String, loop: Bool? = nil) async throws -> Bool {
+    /// - Parameter wait: Responds when the motion has stopped instead of when it has started. A looping motion or a pose never stops by itself, so it responds at once. Defaults to false.
+    @concurrent package func motionPlay(motionId: String, loop: Bool? = nil, wait: Bool? = nil) async throws -> Bool {
         struct Params: Encodable, Sendable {
             var motionId: String
             var loop: Bool?
+            var wait: Bool?
         }
         do {
-            return try await rpc.call(method: "motion.play", params: Params(motionId: motionId, loop: loop))
+            return try await rpc.call(method: "motion.play", params: Params(motionId: motionId, loop: loop, wait: wait))
         } catch let JSONRPCError.server(error) {
             throw VCamError(error) ?? JSONRPCError.server(error)
         }
@@ -224,6 +374,74 @@ package struct VCam: VCamProtocol {
         }
     }
 
+    /// Starts uploading a motion to add to the library
+    /// 
+    /// Send the file as binary WebSocket frames, each one the 36-byte importId followed by a chunk of at most 1 MiB. Available only when app.getInfo lists the vrma capability.
+    /// - Parameter filename: The file name with its extension: vrma, or vmd where the app can convert it.
+    @concurrent package func motionImportBegin(filename: String) async throws -> MotionImportBeginResult {
+        struct Params: Encodable, Sendable {
+            var filename: String
+        }
+        do {
+            return try await rpc.call(method: "motion.import.begin", params: Params(filename: filename))
+        } catch let JSONRPCError.server(error) {
+            throw VCamError(error) ?? JSONRPCError.server(error)
+        }
+    }
+
+    /// Adds the uploaded motion to the library
+    /// - Parameter name: The name shown in the app. Defaults to the file name.
+    /// - Parameter loop: Defaults to false.
+    /// - Parameter isPose: Holds the pose instead of playing through, while the head, hands and fingers keep following tracking. Defaults to false.
+    @concurrent package func motionImportCommit(importId: UUID, name: String? = nil, loop: Bool? = nil, isPose: Bool? = nil) async throws -> MotionImportCommitResult {
+        struct Params: Encodable, Sendable {
+            var importId: UUID
+            var name: String?
+            var loop: Bool?
+            var isPose: Bool?
+        }
+        do {
+            return try await rpc.call(method: "motion.import.commit", params: Params(importId: importId, name: name, loop: loop, isPose: isPose))
+        } catch let JSONRPCError.server(error) {
+            throw VCamError(error) ?? JSONRPCError.server(error)
+        }
+    }
+
+    /// Aborts a motion upload
+    @concurrent package func motionImportCancel(importId: UUID) async throws -> Bool {
+        struct Params: Encodable, Sendable {
+            var importId: UUID
+        }
+        do {
+            return try await rpc.call(method: "motion.import.cancel", params: Params(importId: importId))
+        } catch let JSONRPCError.server(error) {
+            throw VCamError(error) ?? JSONRPCError.server(error)
+        }
+    }
+
+    /// Removes an imported motion from the library
+    /// 
+    /// Built-in motions cannot be removed.
+    @concurrent package func motionRemove(motionId: String) async throws -> Bool {
+        struct Params: Encodable, Sendable {
+            var motionId: String
+        }
+        do {
+            return try await rpc.call(method: "motion.remove", params: Params(motionId: motionId))
+        } catch let JSONRPCError.server(error) {
+            throw VCamError(error) ?? JSONRPCError.server(error)
+        }
+    }
+
+    /// Lists the scenes
+    @concurrent package func sceneList() async throws -> [Scene] {
+        do {
+            return try await rpc.call(method: "scene.list")
+        } catch let JSONRPCError.server(error) {
+            throw VCamError(error) ?? JSONRPCError.server(error)
+        }
+    }
+
     /// Returns the current scene
     @concurrent package func sceneGet() async throws -> Scene {
         do {
@@ -234,12 +452,18 @@ package struct VCam: VCamProtocol {
     }
 
     /// Loads a scene
-    @concurrent package func sceneLoad(sceneId: Int) async throws -> Bool {
+    /// 
+    /// With a duration, the current frame stays on screen while the scene loads, then fades out over the new scene. The response comes when the crossfade has ended.
+    /// - Parameter duration: Seconds to crossfade from the current frame over, up to 60. Omit or pass 0 to switch at once.
+    /// - Parameter easing: Defaults to easeInOut.
+    @concurrent package func sceneLoad(sceneId: Int, duration: Double? = nil, easing: AnimationEasing? = nil) async throws -> Bool {
         struct Params: Encodable, Sendable {
             var sceneId: Int
+            var duration: Double?
+            var easing: AnimationEasing?
         }
         do {
-            return try await rpc.call(method: "scene.load", params: Params(sceneId: sceneId))
+            return try await rpc.call(method: "scene.load", params: Params(sceneId: sceneId, duration: duration, easing: easing))
         } catch let JSONRPCError.server(error) {
             throw VCamError(error) ?? JSONRPCError.server(error)
         }
@@ -248,6 +472,240 @@ package struct VCam: VCamProtocol {
     /// Resets the avatar and camera to the initial position
     @concurrent package func cameraReset() async throws -> Bool {
         return try await rpc.call(method: "camera.reset")
+    }
+
+    /// Creates a scene and loads it
+    @concurrent package func sceneCreate(name: String? = nil) async throws -> Scene {
+        struct Params: Encodable, Sendable {
+            var name: String?
+        }
+        return try await rpc.call(method: "scene.create", params: Params(name: name))
+    }
+
+    /// Copies a scene without loading the copy
+    @concurrent package func sceneDuplicate(sceneId: Int, name: String? = nil) async throws -> Scene {
+        struct Params: Encodable, Sendable {
+            var sceneId: Int
+            var name: String?
+        }
+        do {
+            return try await rpc.call(method: "scene.duplicate", params: Params(sceneId: sceneId, name: name))
+        } catch let JSONRPCError.server(error) {
+            throw VCamError(error) ?? JSONRPCError.server(error)
+        }
+    }
+
+    /// Renames a scene
+    @concurrent package func sceneRename(sceneId: Int, name: String) async throws -> Bool {
+        struct Params: Encodable, Sendable {
+            var sceneId: Int
+            var name: String
+        }
+        do {
+            return try await rpc.call(method: "scene.rename", params: Params(sceneId: sceneId, name: name))
+        } catch let JSONRPCError.server(error) {
+            throw VCamError(error) ?? JSONRPCError.server(error)
+        }
+    }
+
+    /// Moves a scene to a position in the list
+    /// - Parameter index: The position in scene.list after the move.
+    @concurrent package func sceneMove(sceneId: Int, index: Int) async throws -> Bool {
+        struct Params: Encodable, Sendable {
+            var sceneId: Int
+            var index: Int
+        }
+        do {
+            return try await rpc.call(method: "scene.move", params: Params(sceneId: sceneId, index: index))
+        } catch let JSONRPCError.server(error) {
+            throw VCamError(error) ?? JSONRPCError.server(error)
+        }
+    }
+
+    /// Removes a scene and everything in it
+    /// 
+    /// The last scene of the current orientation cannot be removed.
+    @concurrent package func sceneRemove(sceneId: Int) async throws -> Bool {
+        struct Params: Encodable, Sendable {
+            var sceneId: Int
+        }
+        do {
+            return try await rpc.call(method: "scene.remove", params: Params(sceneId: sceneId))
+        } catch let JSONRPCError.server(error) {
+            throw VCamError(error) ?? JSONRPCError.server(error)
+        }
+    }
+
+    /// Returns the avatar lighting of the current scene
+    /// 
+    /// `lighting` is absent while the scene uses the default light. Available only when app.getInfo lists the sceneLighting capability.
+    @concurrent package func sceneGetLighting() async throws -> SceneGetLightingResult {
+        do {
+            return try await rpc.call(method: "scene.getLighting")
+        } catch let JSONRPCError.server(error) {
+            throw VCamError(error) ?? JSONRPCError.server(error)
+        }
+    }
+
+    /// Sets the avatar lighting of the current scene
+    /// 
+    /// Available only when app.getInfo lists the sceneLighting capability.
+    /// - Parameter lighting: Omit to return to the default light.
+    @concurrent package func sceneSetLighting(lighting: SceneLighting? = nil) async throws -> Bool {
+        struct Params: Encodable, Sendable {
+            var lighting: SceneLighting?
+        }
+        do {
+            return try await rpc.call(method: "scene.setLighting", params: Params(lighting: lighting))
+        } catch let JSONRPCError.server(error) {
+            throw VCamError(error) ?? JSONRPCError.server(error)
+        }
+    }
+
+    /// Returns the output size in pixels
+    @concurrent package func canvasGet() async throws -> CanvasGetResult {
+        return try await rpc.call(method: "canvas.get")
+    }
+
+    /// Returns the current output as an image
+    /// 
+    /// Requires the user to allow frame capture in the VCam API settings; app.getInfo lists the frameCapture capability while it is allowed.
+    /// - Parameter maxWidth: Scales the image down to this width. Defaults to the output width.
+    /// - Parameter format: Defaults to jpeg.
+    @concurrent package func frameCapture(maxWidth: Int? = nil, format: FrameCaptureFormat? = nil) async throws -> FrameCaptureResult {
+        struct Params: Encodable, Sendable {
+            var maxWidth: Int?
+            var format: FrameCaptureFormat?
+        }
+        do {
+            return try await rpc.call(method: "frame.capture", params: Params(maxWidth: maxWidth, format: format))
+        } catch let JSONRPCError.server(error) {
+            throw VCamError(error) ?? JSONRPCError.server(error)
+        }
+    }
+
+    /// Lists the objects of the current scene, from back to front
+    /// 
+    /// Placements are fractions of the canvas: `x` and `y` are the offset of the object's center from the center of the canvas (`y` grows upward, so -0.5 to 0.5 stays on the canvas), and `width` and `height` are its size. The subtitle is not listed; see subtitle.getStyle.
+    @concurrent package func objectList() async throws -> [ObjectInfo] {
+        return try await rpc.call(method: "object.list")
+    }
+
+    /// Changes an object's name, visibility, lock, or placement
+    /// 
+    /// A locked object rejects every change except unlocking it, so that a layout the user fixed is not changed by accident. With a duration, the placement moves and the visibility fades, the response comes when they have ended, and another change of the same kind takes over from where the object is by then. Text looks scaled during a move and redraws sharply at the end. Wind has nothing to fade, so it changes at once.
+    /// - Parameter name: The name shown in the object list.
+    /// - Parameter duration: Seconds to animate the placement and visibility over, up to 60. Omit or pass 0 to apply them at once.
+    /// - Parameter easing: Defaults to easeInOut.
+    @concurrent package func objectUpdate(objectId: Int, name: String? = nil, isHidden: Bool? = nil, isLocked: Bool? = nil, placement: ObjectPlacementUpdate? = nil, duration: Double? = nil, easing: AnimationEasing? = nil) async throws -> Bool {
+        struct Params: Encodable, Sendable {
+            var objectId: Int
+            var name: String?
+            var isHidden: Bool?
+            var isLocked: Bool?
+            var placement: ObjectPlacementUpdate?
+            var duration: Double?
+            var easing: AnimationEasing?
+        }
+        do {
+            return try await rpc.call(method: "object.update", params: Params(objectId: objectId, name: name, isHidden: isHidden, isLocked: isLocked, placement: placement, duration: duration, easing: easing))
+        } catch let JSONRPCError.server(error) {
+            throw VCamError(error) ?? JSONRPCError.server(error)
+        }
+    }
+
+    /// Moves an object to a position in the stacking order
+    /// - Parameter index: The position in object.list after the move: 0 is the backmost.
+    @concurrent package func objectMove(objectId: Int, index: Int) async throws -> Bool {
+        struct Params: Encodable, Sendable {
+            var objectId: Int
+            var index: Int
+        }
+        do {
+            return try await rpc.call(method: "object.move", params: Params(objectId: objectId, index: index))
+        } catch let JSONRPCError.server(error) {
+            throw VCamError(error) ?? JSONRPCError.server(error)
+        }
+    }
+
+    /// Copies an object in the current scene
+    @concurrent package func objectDuplicate(objectId: Int) async throws -> ObjectDuplicateResult {
+        struct Params: Encodable, Sendable {
+            var objectId: Int
+        }
+        do {
+            return try await rpc.call(method: "object.duplicate", params: Params(objectId: objectId))
+        } catch let JSONRPCError.server(error) {
+            throw VCamError(error) ?? JSONRPCError.server(error)
+        }
+    }
+
+    /// Removes an object from the current scene
+    @concurrent package func objectRemove(objectId: Int) async throws -> Bool {
+        struct Params: Encodable, Sendable {
+            var objectId: Int
+        }
+        do {
+            return try await rpc.call(method: "object.remove", params: Params(objectId: objectId))
+        } catch let JSONRPCError.server(error) {
+            throw VCamError(error) ?? JSONRPCError.server(error)
+        }
+    }
+
+    /// Adds a text object to the current scene
+    /// - Parameter name: The name shown in the object list.
+    /// - Parameter preset: A preset id from text.listPresets to start from.
+    /// - Parameter style: Applied on top of the preset.
+    @concurrent package func textAdd(text: String, name: String? = nil, preset: String? = nil, style: TextStyle? = nil, placement: ObjectPlacementUpdate? = nil) async throws -> TextAddResult {
+        struct Params: Encodable, Sendable {
+            var text: String
+            var name: String?
+            var preset: String?
+            var style: TextStyle?
+            var placement: ObjectPlacementUpdate?
+        }
+        return try await rpc.call(method: "text.add", params: Params(text: text, name: name, preset: preset, style: style, placement: placement))
+    }
+
+    /// Returns the text and style of a text object
+    @concurrent package func textGet(objectId: Int) async throws -> TextGetResult {
+        struct Params: Encodable, Sendable {
+            var objectId: Int
+        }
+        do {
+            return try await rpc.call(method: "text.get", params: Params(objectId: objectId))
+        } catch let JSONRPCError.server(error) {
+            throw VCamError(error) ?? JSONRPCError.server(error)
+        }
+    }
+
+    /// Changes the text or style of a text object
+    /// 
+    /// The edge the alignment anchors stays in place, so the object grows as the text gets longer.
+    /// - Parameter preset: A preset id from text.listPresets to apply first.
+    /// - Parameter style: Applied on top of the preset.
+    @concurrent package func textUpdate(objectId: Int, text: String? = nil, preset: String? = nil, style: TextStyle? = nil) async throws -> Bool {
+        struct Params: Encodable, Sendable {
+            var objectId: Int
+            var text: String?
+            var preset: String?
+            var style: TextStyle?
+        }
+        do {
+            return try await rpc.call(method: "text.update", params: Params(objectId: objectId, text: text, preset: preset, style: style))
+        } catch let JSONRPCError.server(error) {
+            throw VCamError(error) ?? JSONRPCError.server(error)
+        }
+    }
+
+    /// Lists the text style presets
+    @concurrent package func textListPresets() async throws -> [TextPreset] {
+        return try await rpc.call(method: "text.listPresets")
+    }
+
+    /// Lists the PostScript names of the installed fonts
+    @concurrent package func textListFonts() async throws -> [String] {
+        return try await rpc.call(method: "text.listFonts")
     }
 
     /// Shows text as the subtitle
@@ -263,6 +721,234 @@ package struct VCam: VCamProtocol {
     /// Hides the subtitle
     @concurrent package func subtitleClear() async throws -> Bool {
         return try await rpc.call(method: "subtitle.clear")
+    }
+
+    /// Shows an emoji as a temporary stamp on the frame
+    /// 
+    /// Available only when app.getInfo lists the emoji capability.
+    /// - Parameter emoji: A single emoji.
+    @concurrent package func emojiShow(emoji: String) async throws -> Bool {
+        struct Params: Encodable, Sendable {
+            var emoji: String
+        }
+        do {
+            return try await rpc.call(method: "emoji.show", params: Params(emoji: emoji))
+        } catch let JSONRPCError.server(error) {
+            throw VCamError(error) ?? JSONRPCError.server(error)
+        }
+    }
+
+    /// Returns the connection state of the tracking sources
+    /// 
+    /// Covers the sources that connect from other apps and devices: `vcamMotion`, `iFacialMocap`, and `vmcProtocol`.
+    @concurrent package func trackingGetState() async throws -> TrackingGetStateResult {
+        do {
+            return try await rpc.call(method: "tracking.getState")
+        } catch let JSONRPCError.server(error) {
+            throw VCamError(error) ?? JSONRPCError.server(error)
+        }
+    }
+
+    /// Returns the style and placement of the subtitle
+    @concurrent package func subtitleGetStyle() async throws -> SubtitleGetStyleResult {
+        return try await rpc.call(method: "subtitle.getStyle")
+    }
+
+    /// Changes the style and placement of the subtitle
+    /// 
+    /// Applies to every scene and stays after a restart. With a duration, the response comes when the placement has ended. The subtitle looks scaled during the move and redraws sharply at the end.
+    /// - Parameter preset: A preset id from text.listPresets to apply first.
+    /// - Parameter style: Applied on top of the preset.
+    /// - Parameter duration: Seconds to animate the placement over, up to 60. Omit or pass 0 to apply it at once. A style changes at once either way.
+    /// - Parameter easing: Defaults to easeInOut.
+    @concurrent package func subtitleSetStyle(preset: String? = nil, style: TextStyle? = nil, placement: SubtitlePlacement? = nil, duration: Double? = nil, easing: AnimationEasing? = nil) async throws -> Bool {
+        struct Params: Encodable, Sendable {
+            var preset: String?
+            var style: TextStyle?
+            var placement: SubtitlePlacement?
+            var duration: Double?
+            var easing: AnimationEasing?
+        }
+        return try await rpc.call(method: "subtitle.setStyle", params: Params(preset: preset, style: style, placement: placement, duration: duration, easing: easing))
+    }
+
+    /// Starts uploading an image to add to the current scene
+    /// 
+    /// Send the file as binary WebSocket frames, each one the 36-byte importId followed by a chunk of at most 1 MiB.
+    /// - Parameter filename: The file name with its extension: png, jpg, jpeg, gif, heic, webp, or tiff.
+    @concurrent package func imageImportBegin(filename: String) async throws -> ImageImportBeginResult {
+        struct Params: Encodable, Sendable {
+            var filename: String
+        }
+        do {
+            return try await rpc.call(method: "image.import.begin", params: Params(filename: filename))
+        } catch let JSONRPCError.server(error) {
+            throw VCamError(error) ?? JSONRPCError.server(error)
+        }
+    }
+
+    /// Adds the uploaded image to the current scene
+    /// - Parameter name: The name shown in the object list.
+    @concurrent package func imageImportCommit(importId: UUID, name: String? = nil, placement: ObjectPlacementUpdate? = nil) async throws -> ImageImportCommitResult {
+        struct Params: Encodable, Sendable {
+            var importId: UUID
+            var name: String?
+            var placement: ObjectPlacementUpdate?
+        }
+        do {
+            return try await rpc.call(method: "image.import.commit", params: Params(importId: importId, name: name, placement: placement))
+        } catch let JSONRPCError.server(error) {
+            throw VCamError(error) ?? JSONRPCError.server(error)
+        }
+    }
+
+    /// Aborts an image upload
+    @concurrent package func imageImportCancel(importId: UUID) async throws -> Bool {
+        struct Params: Encodable, Sendable {
+            var importId: UUID
+        }
+        do {
+            return try await rpc.call(method: "image.import.cancel", params: Params(importId: importId))
+        } catch let JSONRPCError.server(error) {
+            throw VCamError(error) ?? JSONRPCError.server(error)
+        }
+    }
+
+    /// Starts uploading a video to add to the current scene
+    /// 
+    /// Send the file as binary WebSocket frames, each one the 36-byte importId followed by a chunk of at most 1 MiB. A file can be up to 512 MiB.
+    /// - Parameter filename: The file name with its extension: mp4, mov, or m4v.
+    @concurrent package func videoImportBegin(filename: String) async throws -> VideoImportBeginResult {
+        struct Params: Encodable, Sendable {
+            var filename: String
+        }
+        do {
+            return try await rpc.call(method: "video.import.begin", params: Params(filename: filename))
+        } catch let JSONRPCError.server(error) {
+            throw VCamError(error) ?? JSONRPCError.server(error)
+        }
+    }
+
+    /// Adds the uploaded video to the current scene and starts playing it
+    /// - Parameter name: The name shown in the object list.
+    /// - Parameter isLooping: Whether it starts over at the end. Defaults to true. Otherwise it holds the last frame.
+    /// - Parameter isMuted: Defaults to true. Unmuted, the sound goes to the system's default output.
+    @concurrent package func videoImportCommit(importId: UUID, name: String? = nil, placement: ObjectPlacementUpdate? = nil, isLooping: Bool? = nil, isMuted: Bool? = nil) async throws -> VideoImportCommitResult {
+        struct Params: Encodable, Sendable {
+            var importId: UUID
+            var name: String?
+            var placement: ObjectPlacementUpdate?
+            var isLooping: Bool?
+            var isMuted: Bool?
+        }
+        do {
+            return try await rpc.call(method: "video.import.commit", params: Params(importId: importId, name: name, placement: placement, isLooping: isLooping, isMuted: isMuted))
+        } catch let JSONRPCError.server(error) {
+            throw VCamError(error) ?? JSONRPCError.server(error)
+        }
+    }
+
+    /// Aborts a video upload
+    @concurrent package func videoImportCancel(importId: UUID) async throws -> Bool {
+        struct Params: Encodable, Sendable {
+            var importId: UUID
+        }
+        do {
+            return try await rpc.call(method: "video.import.cancel", params: Params(importId: importId))
+        } catch let JSONRPCError.server(error) {
+            throw VCamError(error) ?? JSONRPCError.server(error)
+        }
+    }
+
+    /// Returns the playback state of a video object
+    @concurrent package func videoGet(objectId: Int) async throws -> VideoState {
+        struct Params: Encodable, Sendable {
+            var objectId: Int
+        }
+        do {
+            return try await rpc.call(method: "video.get", params: Params(objectId: objectId))
+        } catch let JSONRPCError.server(error) {
+            throw VCamError(error) ?? JSONRPCError.server(error)
+        }
+    }
+
+    /// Plays, pauses or seeks a video object, or changes its options
+    /// 
+    /// Omitted values stay as they are. Playing a video that has reached its end starts it over. While the object is hidden the video stays paused and continues when it is shown.
+    /// - Parameter time: The position to seek to, in seconds.
+    @concurrent package func videoUpdate(objectId: Int, isPlaying: Bool? = nil, time: Double? = nil, isLooping: Bool? = nil, isMuted: Bool? = nil) async throws -> VideoState {
+        struct Params: Encodable, Sendable {
+            var objectId: Int
+            var isPlaying: Bool?
+            var time: Double?
+            var isLooping: Bool?
+            var isMuted: Bool?
+        }
+        do {
+            return try await rpc.call(method: "video.update", params: Params(objectId: objectId, isPlaying: isPlaying, time: time, isLooping: isLooping, isMuted: isMuted))
+        } catch let JSONRPCError.server(error) {
+            throw VCamError(error) ?? JSONRPCError.server(error)
+        }
+    }
+
+    /// Adds a web page to the current scene
+    /// - Parameter url: An http or https URL.
+    /// - Parameter name: The name shown in the object list.
+    /// - Parameter width: The page width in pixels. Defaults to 800.
+    /// - Parameter height: The page height in pixels. Defaults to 600.
+    /// - Parameter fps: How many times per second the page is drawn. Defaults to 6.
+    @concurrent package func webAdd(url: String, name: String? = nil, width: Int? = nil, height: Int? = nil, fps: Int? = nil, placement: ObjectPlacementUpdate? = nil) async throws -> WebAddResult {
+        struct Params: Encodable, Sendable {
+            var url: String
+            var name: String?
+            var width: Int?
+            var height: Int?
+            var fps: Int?
+            var placement: ObjectPlacementUpdate?
+        }
+        return try await rpc.call(method: "web.add", params: Params(url: url, name: name, width: width, height: height, fps: fps, placement: placement))
+    }
+
+    /// Reloads a web page object with new settings
+    /// 
+    /// Omitted values stay as they are, so passing only objectId reloads the page.
+    /// - Parameter url: An http or https URL.
+    @concurrent package func webUpdate(objectId: Int, url: String? = nil, width: Int? = nil, height: Int? = nil, fps: Int? = nil) async throws -> Bool {
+        struct Params: Encodable, Sendable {
+            var objectId: Int
+            var url: String?
+            var width: Int?
+            var height: Int?
+            var fps: Int?
+        }
+        do {
+            return try await rpc.call(method: "web.update", params: Params(objectId: objectId, url: url, width: width, height: height, fps: fps))
+        } catch let JSONRPCError.server(error) {
+            throw VCamError(error) ?? JSONRPCError.server(error)
+        }
+    }
+
+    /// Moves the camera relative to where it is
+    /// 
+    /// The result is saved in the current scene. With a duration, the response comes when the move has ended, and another camera.adjust takes over from where the camera is by then.
+    /// - Parameter panX: As a fraction of the output height; positive moves the avatar right.
+    /// - Parameter panY: As a fraction of the output height; positive moves the avatar up.
+    /// - Parameter orbitX: Turns around the avatar, in the same units. VCam2D treats this as panning.
+    /// - Parameter orbitY: Turns around the avatar, in the same units. VCam2D treats this as panning.
+    /// - Parameter zoom: A magnification relative to now, from 0.1 to 10: 2 shows the avatar twice as large, 0.5 half as large.
+    /// - Parameter duration: Seconds to animate the move over, up to 60. Omit or pass 0 to apply it at once.
+    /// - Parameter easing: Defaults to easeInOut.
+    @concurrent package func cameraAdjust(panX: Double? = nil, panY: Double? = nil, orbitX: Double? = nil, orbitY: Double? = nil, zoom: Double? = nil, duration: Double? = nil, easing: AnimationEasing? = nil) async throws -> Bool {
+        struct Params: Encodable, Sendable {
+            var panX: Double?
+            var panY: Double?
+            var orbitX: Double?
+            var orbitY: Double?
+            var zoom: Double?
+            var duration: Double?
+            var easing: AnimationEasing?
+        }
+        return try await rpc.call(method: "camera.adjust", params: Params(panX: panX, panY: panY, orbitX: orbitX, orbitY: orbitY, zoom: zoom, duration: duration, easing: easing))
     }
 
     /// Opens the pose editor with the current avatar

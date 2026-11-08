@@ -11,10 +11,12 @@ struct AvatarImportManagerTests {
         validate: @escaping @MainActor (URL) throws -> Void = { _ in }
     ) -> AvatarImportManager {
         AvatarImportManager(
-            stagingDirectory: FileManager.default.temporaryDirectory
-                .appending(path: "AvatarImportManagerTests")
-                .appending(path: UUID().uuidString),
-            maximumFileSize: maximumFileSize,
+            staging: UploadStaging(
+                stagingDirectory: FileManager.default.temporaryDirectory
+                    .appending(path: "AvatarImportManagerTests")
+                    .appending(path: UUID().uuidString),
+                maximumFileSize: maximumFileSize
+            ),
             validate: validate
         )
     }
@@ -26,7 +28,7 @@ struct AvatarImportManagerTests {
     @Test
     func beginRejectsNonVrmFilenames() throws {
         let manager = Self.makeManager()
-        #expect(throws: AvatarImportManagerError.self) {
+        #expect(throws: UploadError.self) {
             try manager.begin(filename: "avatar.zip", connectionID: UUID())
         }
     }
@@ -37,13 +39,13 @@ struct AvatarImportManagerTests {
         let connectionID = UUID()
         let importId = try manager.begin(filename: "avatar.vrm", connectionID: connectionID)
 
-        manager.receiveFrame(frame(importId: importId, chunk: [1, 2]), connectionID: connectionID)
-        manager.receiveFrame(frame(importId: importId, chunk: [3]), connectionID: connectionID)
+        manager.staging.receiveFrame(frame(importId: importId, chunk: [1, 2]), connectionID: connectionID)
+        manager.staging.receiveFrame(frame(importId: importId, chunk: [3]), connectionID: connectionID)
         // Frames from other connections or with unknown ids are ignored
-        manager.receiveFrame(frame(importId: importId, chunk: [9]), connectionID: UUID())
-        manager.receiveFrame(frame(importId: UUID(), chunk: [9]), connectionID: connectionID)
+        manager.staging.receiveFrame(frame(importId: importId, chunk: [9]), connectionID: UUID())
+        manager.staging.receiveFrame(frame(importId: UUID(), chunk: [9]), connectionID: connectionID)
 
-        let fileURL = try #require(manager.stagedFileURL(importId: importId))
+        let fileURL = try #require(manager.staging.stagedFileURL(importId: importId))
         #expect(try Data(contentsOf: fileURL) == Data([1, 2, 3]))
         #expect(fileURL.lastPathComponent == "avatar.vrm")
     }
@@ -53,24 +55,24 @@ struct AvatarImportManagerTests {
         let manager = Self.makeManager(maximumFileSize: 4)
         let connectionID = UUID()
         let importId = try manager.begin(filename: "avatar.vrm", connectionID: connectionID)
-        manager.receiveFrame(frame(importId: importId, chunk: [1, 2, 3, 4, 5]), connectionID: connectionID)
+        manager.staging.receiveFrame(frame(importId: importId, chunk: [1, 2, 3, 4, 5]), connectionID: connectionID)
 
-        await #expect(throws: AvatarImportManagerError.invalidUpload) {
+        await #expect(throws: UploadError.invalidUpload) {
             try await manager.commit(
                 importId: importId, connectionID: connectionID, load: false, modelManager: ModelManager(models: []))
         }
         // The staging area is removed after commit, successful or not
-        #expect(manager.stagedFileURL(importId: importId) == nil)
+        #expect(manager.staging.stagedFileURL(importId: importId) == nil)
     }
 
     @Test
     func commitReportsInvalidModels() async throws {
-        let manager = Self.makeManager(validate: { _ in throw AvatarImportManagerError.invalidModel })
+        let manager = Self.makeManager(validate: { _ in throw UploadError.invalidContent })
         let connectionID = UUID()
         let importId = try manager.begin(filename: "avatar.vrm", connectionID: connectionID)
-        manager.receiveFrame(frame(importId: importId, chunk: [1]), connectionID: connectionID)
+        manager.staging.receiveFrame(frame(importId: importId, chunk: [1]), connectionID: connectionID)
 
-        await #expect(throws: AvatarImportManagerError.invalidModel) {
+        await #expect(throws: UploadError.invalidContent) {
             try await manager.commit(
                 importId: importId, connectionID: connectionID, load: false, modelManager: ModelManager(models: []))
         }
@@ -83,22 +85,22 @@ struct AvatarImportManagerTests {
         let manager = Self.makeManager(validate: { fileURL in
             let manager = try #require(validatingManager)
             let importId = try #require(UUID(uuidString: fileURL.deletingLastPathComponent().lastPathComponent))
-            #expect(manager.stagedFileURL(importId: importId) == nil)
-            manager.receiveFrame(frame(importId: importId, chunk: [9]), connectionID: connectionID)
-            #expect(throws: AvatarImportManagerError.importNotFound) {
+            #expect(manager.staging.stagedFileURL(importId: importId) == nil)
+            manager.staging.receiveFrame(frame(importId: importId, chunk: [9]), connectionID: connectionID)
+            #expect(throws: UploadError.importNotFound) {
                 try manager.cancel(importId: importId, connectionID: connectionID)
             }
-            manager.cancelAll(connectionID: connectionID)
+            manager.staging.cancelAll(connectionID: connectionID)
             #expect(try Data(contentsOf: fileURL) == Data([1, 2]))
-            throw AvatarImportManagerError.invalidModel
+            throw UploadError.invalidContent
         })
         validatingManager = manager
-        defer { manager.removeAllStaging() }
+        defer { manager.staging.removeAll() }
         let importId = try manager.begin(filename: "avatar.vrm", connectionID: connectionID)
-        let fileURL = try #require(manager.stagedFileURL(importId: importId))
-        manager.receiveFrame(frame(importId: importId, chunk: [1, 2]), connectionID: connectionID)
+        let fileURL = try #require(manager.staging.stagedFileURL(importId: importId))
+        manager.staging.receiveFrame(frame(importId: importId, chunk: [1, 2]), connectionID: connectionID)
 
-        await #expect(throws: AvatarImportManagerError.invalidModel) {
+        await #expect(throws: UploadError.invalidContent) {
             try await manager.commit(
                 importId: importId, connectionID: connectionID, load: false, modelManager: ModelManager(models: []))
         }
@@ -111,16 +113,16 @@ struct AvatarImportManagerTests {
         let connectionID = UUID()
         let importId = try manager.begin(filename: "avatar.vrm", connectionID: connectionID)
 
-        await #expect(throws: AvatarImportManagerError.importNotFound) {
+        await #expect(throws: UploadError.importNotFound) {
             try await manager.commit(
                 importId: importId, connectionID: UUID(), load: false, modelManager: ModelManager(models: []))
         }
-        #expect(throws: AvatarImportManagerError.importNotFound) {
+        #expect(throws: UploadError.importNotFound) {
             try manager.cancel(importId: importId, connectionID: UUID())
         }
 
         try manager.cancel(importId: importId, connectionID: connectionID)
-        #expect(manager.stagedFileURL(importId: importId) == nil)
+        #expect(manager.staging.stagedFileURL(importId: importId) == nil)
     }
 
     @Test
@@ -128,10 +130,10 @@ struct AvatarImportManagerTests {
         let manager = Self.makeManager()
         let connectionID = UUID()
         let importId = try manager.begin(filename: "avatar.vrm", connectionID: connectionID)
-        let fileURL = try #require(manager.stagedFileURL(importId: importId))
+        let fileURL = try #require(manager.staging.stagedFileURL(importId: importId))
 
-        manager.cancelAll(connectionID: connectionID)
-        #expect(manager.stagedFileURL(importId: importId) == nil)
+        manager.staging.cancelAll(connectionID: connectionID)
+        #expect(manager.staging.stagedFileURL(importId: importId) == nil)
         #expect(!FileManager.default.fileExists(atPath: fileURL.path(percentEncoded: false)))
     }
 }

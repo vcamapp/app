@@ -1,4 +1,5 @@
 import Foundation
+import VCamControl
 import VCamEntity
 import struct SwiftUI.Image
 
@@ -13,6 +14,6 @@ public struct VCamLoadSceneAction: VCamAction {
 
     @MainActor
     public func callAsFunction(context: VCamActionContext) async throws {
-        try await SceneManager.shared.loadScene(id: configuration.sceneId)
+        try await SceneControl.loadScene(id: configuration.sceneId, animation: nil, on: SceneManager.shared)
     }
 }

@@ -265,8 +265,9 @@ public final class Tracking {
     public func setHandTrackingMethod(_ method: TrackingMethod.Hand) {
         if method == .vcamMocap {
             setHandAndFingerTrackingMethods(hand: .vcamMocap, finger: .vcamMocap)
-        } else if fingerTrackingMethod == .vcamMocap {
-            setHandAndFingerTrackingMethods(hand: method, finger: .disabled)
+        } else if fingerTrackingMethod == .vcamMocap || handTrackingMethod == .disabled {
+            // The finger method was not the user's own choice here, so it follows the camera only when the hand does
+            setHandAndFingerTrackingMethods(hand: method, finger: method == .default ? .default : .disabled)
         } else {
             setHandAndFingerTrackingMethods(hand: method, finger: fingerTrackingMethod)
         }

@@ -6,17 +6,17 @@ public extension QualityLevel {
     var localizedName: LocalizedStringResource {
         switch self {
         case .fastest:
-            return .qualityFastest
+            return .qualityVeryLow
         case .fast:
-            return .qualityFast
+            return .qualityLow
         case .simple:
-            return .qualitySimple
+            return .qualityMedium
         case .good:
-            return .qualityGood
+            return .qualityHigh
         case .beautiful:
-            return .qualityBeautiful
+            return .qualityVeryHigh
         case .fantastic:
-            return .qualityFantastic
+            return .qualityUltra
         }
     }
 }

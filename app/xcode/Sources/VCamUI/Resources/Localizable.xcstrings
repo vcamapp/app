@@ -76,19 +76,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Account Management..."
+            "value": "Account Management…"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "アカウント管理..."
+            "value": "アカウント管理…"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "계정 관리..."
+            "value": "계정 관리…"
           }
         }
       }
@@ -99,19 +99,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Acquire License..."
+            "value": "Acquire License…"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "ライセンスを取得する..."
+            "value": "ライセンスを取得する…"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "라이선스 취득..."
+            "value": "라이선스 취득…"
           }
         }
       }
@@ -162,25 +162,25 @@
         }
       }
     },
-    "addImage": {
+    "addImageOrVideo": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Add Image"
+            "value": "Add Image or Video"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "画像を追加"
+            "value": "画像・動画を追加"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "이미지 추가"
+            "value": "이미지·동영상 추가"
           }
         }
       }
@@ -365,6 +365,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@에 대한 접근을 허용해 주세요"
+          }
+        }
+      }
+    },
+    "allTracking": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All Tracking"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "トラッキング全体"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "트래킹 전체"
           }
         }
       }
@@ -720,7 +743,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The selected eye's blink is applied to both eyes."
+            "value": "The selected eye’s blink is applied to both eyes."
           }
         },
         "ja": {
@@ -802,6 +825,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "블러 / 흐림"
+          }
+        }
+      }
+    },
+    "bodyAndHand": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Body / Hand"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "体・手"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "몸 / 손"
           }
         }
       }
@@ -973,7 +1019,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The virtual camera is not allowed. Please allow it from the 'Login Items & Extensions' of 'General' section in the settings app."
+            "value": "The virtual camera isn’t allowed. Allow it in System Settings > General > Login Items & Extensions."
           }
         },
         "ja": {
@@ -985,7 +1031,7 @@
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "가상 카메라가 허용되지 않았습니다. 설정 앱의 '일반' → '로그인 항목 및 확장 프로그램'에서 허용해 주세요."
+            "value": "가상 카메라가 허용되지 않았습니다. 설정 앱의 ‘일반’ → ‘로그인 항목 및 확장 프로그램’에서 허용해 주세요."
           }
         }
       }
@@ -1295,7 +1341,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Check for Updates..."
+            "value": "Check for Updates…"
           }
         },
         "ja": {
@@ -1307,7 +1353,7 @@
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "업데이트 확인..."
+            "value": "업데이트 확인…"
           }
         }
       }
@@ -1318,19 +1364,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Checking License..."
+            "value": "Checking License…"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "ライセンスの確認中..."
+            "value": "ライセンスの確認中…"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "라이선스 확인 중..."
+            "value": "라이선스 확인 중…"
           }
         }
       }
@@ -1347,7 +1393,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "エイエイオー！"
+            "value": "エイエイオー!"
           }
         },
         "ko": {
@@ -1571,19 +1617,42 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Are you sure you want to delete \"%@\"?"
+            "value": "Are you sure you want to delete “%@”?"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "「%@」を削除してもよろしいですか？"
+            "value": "「%@」を削除してもよろしいですか?"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "\"%@\"을(를) 삭제하시겠습니까?"
+            "value": "‘%@’을(를) 삭제하시겠습니까?"
+          }
+        }
+      }
+    },
+    "confirmRegenerateExternalControlToken": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All connected apps are disconnected. Apps on other devices need the new token to connect again."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "接続中のアプリはすべて切断されます。他のデバイスのアプリは、新しいトークンで接続し直す必要があります。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "연결된 모든 앱의 연결이 끊어집니다. 다른 기기의 앱은 새 토큰으로 다시 연결해야 합니다."
           }
         }
       }
@@ -1663,19 +1732,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Connecting..."
+            "value": "Connecting…"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "接続中..."
+            "value": "接続中…"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "연결 중..."
+            "value": "연결 중…"
           }
         }
       }
@@ -1939,7 +2008,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The old virtual camera is no longer supported, so it'll be deleted now."
+            "value": "The old virtual camera is no longer supported, so it will be deleted now."
           }
         },
         "ja": {
@@ -2044,6 +2113,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "저장 위치"
+          }
+        }
+      }
+    },
+    "devices": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Devices"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "デバイス"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "장치"
           }
         }
       }
@@ -2182,6 +2274,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "https://docs.vcamapp.com/ko/vcam/"
+          }
+        }
+      }
+    },
+    "docsURLForVCamAPI": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "https://docs.vcamapp.com/en/vcam/api/"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "https://docs.vcamapp.com/vcam/api/"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "https://docs.vcamapp.com/ko/vcam/api/"
           }
         }
       }
@@ -2652,19 +2767,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "No permission. Please allow screen recording in the Security & Privacy of the System Preferences."
+            "value": "There’s no permission to record the screen. Allow screen recording in System Settings > Privacy & Security."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "画面収録の権限がありません。システム環境設定のセキュリティとプライバシーにて画面収録を許可してください。"
+            "value": "画面収録の権限がありません。“システム設定”＞“プライバシーとセキュリティ”で画面収録を許可してください。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "권한이 없습니다. 시스템 환경설정의 보안 및 개인 정보 보호에서 화면 기록을 허용해 주세요."
+            "value": "권한이 없습니다. ‘시스템 설정’ > ‘개인정보 보호 및 보안’에서 화면 기록을 허용해 주세요."
           }
         }
       }
@@ -2681,7 +2796,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "新しいバージョン %@ があります"
+            "value": "新しいバージョン%@があります"
           }
         },
         "ko": {
@@ -2744,7 +2859,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Installing the virtual camera.\nClick on 'Open Security Preferences' and then click 'Allow'."
+            "value": "Installing the virtual camera.\nClick “Open System Settings”, then click “Allow”."
           }
         },
         "ja": {
@@ -2756,7 +2871,7 @@
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "가상 카메라를 설치합니다.\n'시스템 설정 열기'를 클릭한 다음 '허용'을 클릭해 주세요."
+            "value": "가상 카메라를 설치합니다.\n‘시스템 설정 열기’를 클릭한 다음 ‘허용’을 클릭해 주세요."
           }
         }
       }
@@ -2784,25 +2899,255 @@
         }
       }
     },
+    "externalControlAddress": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Address"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "接続先"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "접속 주소"
+          }
+        }
+      }
+    },
+    "externalControlAllowsFrameCapture": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow reading the output image"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "出力映像の読み取りを許可"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "출력 영상 읽기 허용"
+          }
+        }
+      }
+    },
+    "externalControlAllowsNetworkAccess": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow connections from other devices"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "他のデバイスからの接続を許可"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다른 기기에서 연결 허용"
+          }
+        }
+      }
+    },
+    "externalControlFrameCaptureHelp": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apps using the VCam API can read what VCam outputs."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VCam APIを使うアプリが、出力映像を読み取れるようになります。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VCam API를 사용하는 앱이 출력 영상을 읽을 수 있습니다."
+          }
+        }
+      }
+    },
     "externalControlHelp": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Allows other apps on this Mac to control VCam via WebSocket (JSON-RPC)."
+            "value": "Allows other apps to control VCam via WebSocket (JSON-RPC)."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "このMac上の他のアプリからWebSocket (JSON-RPC) でVCamを操作できるようにします。"
+            "value": "他のアプリからWebSocket（JSON-RPC）でVCamを操作できるようにします。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "이 Mac의 다른 앱에서 WebSocket (JSON-RPC)으로 VCam을 제어할 수 있게 합니다."
+            "value": "다른 앱에서 WebSocket(JSON-RPC)으로 VCam을 제어할 수 있게 합니다."
+          }
+        }
+      }
+    },
+    "externalControlNetworkAccessHelp": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lets Mac computers, PCs, and other devices on the same network use the VCam API."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "同じネットワークのMacやPCなどからもVCam APIを使えるようにします。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "같은 네트워크의 Mac이나 PC 등에서도 VCam API를 사용할 수 있게 합니다."
+          }
+        }
+      }
+    },
+    "externalControlNoTokenWarning": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anyone on the same network can control VCam."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "同じネットワークの誰でもVCamを操作できます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "같은 네트워크의 누구나 VCam을 조작할 수 있습니다."
+          }
+        }
+      }
+    },
+    "externalControlRegenerateToken": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regenerate"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "再生成"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다시 만들기"
+          }
+        }
+      }
+    },
+    "externalControlRequiresToken": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Require token authentication"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "トークンによる認証を求める"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "토큰 인증 요구"
+          }
+        }
+      }
+    },
+    "externalControlToken": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Token"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "トークン"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "토큰"
+          }
+        }
+      }
+    },
+    "externalControlTokenHelp": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connections from other devices require an “Authorization: Bearer <token>” header."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "他のデバイスから接続するには、“Authorization: Bearer <トークン>”ヘッダーが必要です。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다른 기기에서 연결하려면 ‘Authorization: Bearer <토큰>’ 헤더가 필요합니다."
           }
         }
       }
@@ -2945,13 +3290,36 @@
         }
       }
     },
+    "failedToAddVideo": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failed to add the video."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "動画を追加できませんでした。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "동영상을 추가하지 못했습니다."
+          }
+        }
+      }
+    },
     "failedToInstallCameraExtension": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The installation of the virtual camera failed. Please install it from this app’s settings if you want to use it."
+            "value": "The virtual camera couldn’t be installed. To use it, install it from this app’s settings."
           }
         },
         "ja": {
@@ -3148,6 +3516,52 @@
           "stringUnit": {
             "state": "translated",
             "value": "손가락"
+          }
+        }
+      }
+    },
+    "fingersTrackedByVCamMocap": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fingers are also tracked by VCam Mocap"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "指もVCam Mocapでトラッキングします"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "손가락도 VCam Mocap으로 트래킹합니다"
+          }
+        }
+      }
+    },
+    "fingerTrackingMethod": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finger tracking method"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "指のトラッキング方法"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "손가락 트래킹 방식"
           }
         }
       }
@@ -3382,6 +3796,29 @@
         }
       }
     },
+    "handTrackingMethod": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hand tracking method"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "手のトラッキング方法"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "손 트래킹 방식"
+          }
+        }
+      }
+    },
     "height": {
       "extractionState": "manual",
       "localizations": {
@@ -3480,7 +3917,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The port in the PC connection settings on the mocopi side should be \"12351\"."
+            "value": "In the PC connection settings on the mocopi side, set the port to 12351."
           }
         },
         "ja": {
@@ -3492,7 +3929,7 @@
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "mocopi 쪽 PC 연결 설정의 포트는 '12351'로 설정해 주세요"
+            "value": "mocopi 쪽 PC 연결 설정의 포트는 ‘12351’로 설정해 주세요"
           }
         }
       }
@@ -3631,6 +4068,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "이미지"
+          }
+        }
+      }
+    },
+    "imageOrVideo": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Image or Video"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "画像・動画"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이미지·동영상"
           }
         }
       }
@@ -3986,19 +4446,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "If you have already acquired a commercial license, please verify your license. [Check License Status...](vcam2d://auth/checkLicense)"
+            "value": "If you’ve already acquired a commercial license, check its status. [Check License Status…](vcam2d://auth/checkLicense)"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "すでに商用利用ライセンスを取得している場合は、ライセンスの状態を確認してください。 [ライセンスの状態を確認する...](vcam2d://auth/checkLicense)"
+            "value": "すでに商用利用ライセンスを取得している場合は、ライセンスの状態を確認してください。[ライセンスの状態を確認する…](vcam2d://auth/checkLicense)"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "이미 상업적 이용 라이선스를 취득한 경우에는 라이선스 상태를 확인해 주세요. [라이선스 상태 확인...](vcam2d://auth/checkLicense)"
+            "value": "이미 상업적 이용 라이선스를 취득한 경우에는 라이선스 상태를 확인해 주세요. [라이선스 상태 확인…](vcam2d://auth/checkLicense)"
           }
         }
       }
@@ -4130,7 +4590,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "顔トラッキング (%@)"
+            "value": "フェイストラッキング (%@)"
           }
         },
         "ko": {
@@ -4153,7 +4613,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "パーフェクトシンク対応モデルは口も顔トラッキングで動くため、変更できません。"
+            "value": "パーフェクトシンク対応モデルは口もフェイストラッキングで動くため、変更できません。"
           }
         },
         "ko": {
@@ -4515,7 +4975,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "This app will migrate to a virtual camera optimized for the latest macOS.\nPlease follow the instructions to delete the old plugin and install the new virtual camera."
+            "value": "This app will migrate to a virtual camera optimized for the latest macOS.\nFollow the instructions to delete the old plugin and install the new virtual camera."
           }
         },
         "ja": {
@@ -4630,19 +5090,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Reduces jitter from packet drops (adds latency). Applies to VCam Mocap and iFacialMocap. "
+            "value": "Reduces jitter from packet drops (adds latency)."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "通信途切れのカクつきを緩和します（遅延が増えます）。VCam MocapとiFacialMocapに適用されます。"
+            "value": "通信途切れのカクつきを緩和します（遅延が増えます）。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "통신이 끊길 때 생기는 끊김을 완화합니다 (지연이 늘어납니다). VCam Mocap과 iFacialMocap에 적용됩니다."
+            "value": "통신이 끊길 때 생기는 끊김을 완화합니다 (지연이 늘어납니다)."
           }
         }
       }
@@ -4676,7 +5136,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The file isn't a VRM, or it is broken or only partly downloaded."
+            "value": "The file isn’t a VRM, or it’s broken or only partly downloaded."
           }
         },
         "ja": {
@@ -4814,7 +5274,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The virtual camera can't be installed because the app isn't in the Applications folder. Move the app to the Applications folder, relaunch it, and try again."
+            "value": "The virtual camera can’t be installed because the app isn’t in the Applications folder. Move the app to the Applications folder, relaunch it, and try again."
           }
         },
         "ja": {
@@ -4826,7 +5286,7 @@
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "앱이 \"응용 프로그램(Applications)\" 폴더에 없어 가상 카메라를 설치할 수 없습니다. 앱을 \"응용 프로그램(Applications)\" 폴더로 이동해 다시 실행한 후 다시 시도해 주세요."
+            "value": "앱이 ‘응용 프로그램(Applications)’ 폴더에 없어 가상 카메라를 설치할 수 없습니다. 앱을 ‘응용 프로그램(Applications)’ 폴더로 이동해 다시 실행한 후 다시 시도해 주세요."
           }
         }
       }
@@ -4850,6 +5310,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "카메라 위치 초기화"
+          }
+        }
+      }
+    },
+    "muteVideo": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mute"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "消音"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "음소거"
           }
         }
       }
@@ -5011,29 +5494,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "제목 없음"
-          }
-        }
-      }
-    },
-    "notSupported": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Not Supported"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "サポートされていません"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "지원되지 않음"
           }
         }
       }
@@ -5291,6 +5751,29 @@
         }
       }
     },
+    "pauseVideo": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pause"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一時停止"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "일시 정지"
+          }
+        }
+      }
+    },
     "pick": {
       "extractionState": "manual",
       "localizations": {
@@ -5360,13 +5843,59 @@
         }
       }
     },
+    "playbackPosition": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Playback Position"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "再生位置"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "재생 위치"
+          }
+        }
+      }
+    },
+    "playVideo": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Play"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "再生"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "재생"
+          }
+        }
+      }
+    },
     "pleaseReauthenticate": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Please reauthenticate."
+            "value": "Reauthentication is required."
           }
         },
         "ja": {
@@ -5820,140 +6349,140 @@
         }
       }
     },
-    "qualityBeautiful": {
+    "qualityHigh": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Beautiful"
+            "value": "High"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "高品質"
+            "value": "高い"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "고품질"
+            "value": "높음"
           }
         }
       }
     },
-    "qualityFantastic": {
+    "qualityLow": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Fantastic"
+            "value": "Low"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "最高品質"
+            "value": "低い"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "최고 품질"
+            "value": "낮음"
           }
         }
       }
     },
-    "qualityFast": {
+    "qualityMedium": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Fast"
+            "value": "Medium"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "低負荷"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "낮은 부하"
-          }
-        }
-      }
-    },
-    "qualityFastest": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fastest"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "最低負荷"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "최저 부하"
-          }
-        }
-      }
-    },
-    "qualityGood": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Good"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "良品質"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "좋은 품질"
-          }
-        }
-      }
-    },
-    "qualitySimple": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Simple"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "普通"
+            "value": "標準"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
             "value": "보통"
+          }
+        }
+      }
+    },
+    "qualityUltra": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ultra"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最高"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "최고"
+          }
+        }
+      }
+    },
+    "qualityVeryHigh": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Very High"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "とても高い"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "매우 높음"
+          }
+        }
+      }
+    },
+    "qualityVeryLow": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Very Low"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "とても低い"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "매우 낮음"
           }
         }
       }
@@ -6010,19 +6539,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Reauthenticate..."
+            "value": "Reauthenticate…"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "再認証する..."
+            "value": "再認証する…"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "다시 인증..."
+            "value": "다시 인증…"
           }
         }
       }
@@ -6079,7 +6608,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Recording..."
+            "value": "Recording…"
           }
         },
         "ja": {
@@ -6326,6 +6855,29 @@
         }
       }
     },
+    "renderingQualityDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Higher looks better but uses more power on your Mac."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "高いほどきれいになり、Macの負荷が増えます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "높을수록 화질이 좋아지지만 Mac의 부하가 늘어납니다."
+          }
+        }
+      }
+    },
     "resetAllToDefault": {
       "extractionState": "manual",
       "localizations": {
@@ -6447,7 +6999,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Setup is complete. Please restart Zoom or other clients."
+            "value": "Setup is complete. Restart Zoom or other apps."
           }
         },
         "ja": {
@@ -6976,7 +7528,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "This key couldn't be set. Another shortcut or app may already be using it, so choose a different key."
+            "value": "This key couldn’t be set. Another shortcut or app may already be using it, so choose a different key."
           }
         },
         "ja": {
@@ -7568,6 +8120,29 @@
         }
       }
     },
+    "thisMacIPAddress": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "IP address of this Mac"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このMacのIPアドレス"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 Mac의 IP 주소"
+          }
+        }
+      }
+    },
     "threshold": {
       "extractionState": "manual",
       "localizations": {
@@ -7787,7 +8362,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "トラッキングのデータの値とタイミングを最大10分間記録し、問題を報告するときに添付できる zip として保存します。映像やモデルは含まれません。"
+            "value": "トラッキングのデータの値とタイミングを最大10分間記録し、問題を報告するときに添付できるzipとして保存します。映像やモデルは含まれません。"
           }
         },
         "ko": {
@@ -7833,7 +8408,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "Finder で表示"
+            "value": "Finderで表示"
           }
         },
         "ko": {
@@ -7994,7 +8569,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "目の動き X"
+            "value": "目の動きX"
           }
         },
         "ko": {
@@ -8017,7 +8592,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "目の動き Y"
+            "value": "目の動きY"
           }
         },
         "ko": {
@@ -8040,7 +8615,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "頭の回転 X"
+            "value": "頭の回転X"
           }
         },
         "ko": {
@@ -8063,7 +8638,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "頭の回転 Y"
+            "value": "頭の回転Y"
           }
         },
         "ko": {
@@ -8086,7 +8661,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "頭の回転 Z"
+            "value": "頭の回転Z"
           }
         },
         "ko": {
@@ -8132,7 +8707,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "位置 X"
+            "value": "位置X"
           }
         },
         "ko": {
@@ -8155,7 +8730,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "位置 Y"
+            "value": "位置Y"
           }
         },
         "ko": {
@@ -8178,7 +8753,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "位置 Z"
+            "value": "位置Z"
           }
         },
         "ko": {
@@ -8241,7 +8816,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The \"%@\" settings are used with the current model and tracking settings"
+            "value": "The “%@” settings are used with the current model and tracking settings"
           }
         },
         "ja": {
@@ -8253,7 +8828,7 @@
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "현재 모델과 트래킹 설정에서는 '%@' 설정이 사용됩니다"
+            "value": "현재 모델과 트래킹 설정에서는 ‘%@’ 설정이 사용됩니다"
           }
         }
       }
@@ -8270,7 +8845,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "顔トラッキングがオフのため、どの設定も使用されません"
+            "value": "フェイストラッキングがオフのため、どの設定も使用されません"
           }
         },
         "ko": {
@@ -8323,6 +8898,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "설정 저장 기능은 향후 추가될 예정입니다"
+          }
+        }
+      }
+    },
+    "trackingMethod": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tracking method"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "トラッキング方法"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "트래킹 방식"
           }
         }
       }
@@ -8454,7 +9052,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "タイプ %@"
+            "value": "タイプ%@"
           }
         },
         "ko": {
@@ -8609,7 +9207,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "You're up-to-date!"
+            "value": "You’re up to date!"
           }
         },
         "ja": {
@@ -8638,7 +9236,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ は最新バージョンです。"
+            "value": "%@は最新バージョンです。"
           }
         },
         "ko": {
@@ -8684,7 +9282,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "顔トラッキングで母音を推定する"
+            "value": "フェイストラッキングで母音を推定する"
           }
         },
         "ko": {
@@ -8714,6 +9312,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "세로쓰기"
+          }
+        }
+      }
+    },
+    "video": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Video"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "動画"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "동영상"
           }
         }
       }
@@ -8879,25 +9500,48 @@
         }
       }
     },
+    "vmcProtocolHeadAndTorsoOnly": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only the direction of the head and torso is received."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "受け取るのは頭と胴の向きだけです。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "머리와 몸통의 방향만 받습니다."
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
     "vmcProtocolHelp": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Moves the avatar in sync with apps that send data over the VMC Protocol. In the sending app, set the destination to this Mac's IP address and the port above."
+            "value": "Moves the avatar in sync with apps that send data over the VMC Protocol. In the sending app, set the destination to this Mac’s IP address and port."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "VMC Protocol で送信するアプリと連携して、アバターを動かします。送信側のアプリで、送信先をこの Mac の IP アドレスと上のポートにしてください。"
+            "value": "VMC Protocolで送信するアプリと連携して、アバターを動かします。送信側のアプリで、送信先をこのMacのIPアドレスとポートにしてください。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "VMC Protocol로 전송하는 앱과 연동하여 아바타를 움직입니다. 전송 측 앱에서 전송 대상을 이 Mac의 IP 주소와 위의 포트로 설정하세요."
+            "value": "VMC Protocol로 전송하는 앱과 연동하여 아바타를 움직입니다. 전송 측 앱에서 전송 대상을 이 Mac의 IP 주소와 포트로 설정하세요."
           }
         }
       }

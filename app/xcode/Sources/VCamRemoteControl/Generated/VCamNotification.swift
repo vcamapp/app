@@ -8,17 +8,27 @@ import Foundation
 /// clients decode incoming bodies with `decode(_:)`.
 package enum VCamNotification: Hashable, Sendable {
     /// An avatar has been loaded
+    /// 
+    /// Sent when the avatar has finished loading, whatever asked for it.
     case avatarLoaded(avatarId: UUID?)
     /// A motion has started playing
     case motionStarted(motionId: String)
     /// A motion has stopped playing
     case motionStopped(motionId: String)
-    /// The applied expression has changed
-    case expressionChanged(name: String)
+    /// The applied expressions have changed
+    case expressionChanged(expressions: [ExpressionWeight])
     /// A scene has been loaded
     case sceneLoaded(sceneId: Int)
     /// The subtitle text has changed
     case subtitleChanged(text: String)
+    /// Objects of the current scene were added, changed, or removed
+    /// 
+    /// Sent whatever the cause, including edits in the app and switching scenes. Read the new state with object.list.
+    case objectsChanged(added: [Int], changed: [Int], removed: [Int])
+    /// A tracking source has started sending data
+    case trackingConnected(sourceId: String)
+    /// A tracking source has stopped sending data
+    case trackingDisconnected(sourceId: String)
 
     /// The JSON-RPC method name of the notification.
     package var method: String {
@@ -29,6 +39,9 @@ package enum VCamNotification: Hashable, Sendable {
         case .expressionChanged: return "expression.changed"
         case .sceneLoaded: return "scene.loaded"
         case .subtitleChanged: return "subtitle.changed"
+        case .objectsChanged: return "objects.changed"
+        case .trackingConnected: return "tracking.connected"
+        case .trackingDisconnected: return "tracking.disconnected"
         }
     }
 
@@ -55,11 +68,11 @@ package enum VCamNotification: Hashable, Sendable {
             }
             let params = Params(motionId: motionId)
             return try encoder.encode(VCamNotificationEnvelope(method: "motion.stopped", params: params))
-        case .expressionChanged(let name):
+        case .expressionChanged(let expressions):
             struct Params: Encodable, Sendable {
-                var name: String
+                var expressions: [ExpressionWeight]
             }
-            let params = Params(name: name)
+            let params = Params(expressions: expressions)
             return try encoder.encode(VCamNotificationEnvelope(method: "expression.changed", params: params))
         case .sceneLoaded(let sceneId):
             struct Params: Encodable, Sendable {
@@ -73,6 +86,26 @@ package enum VCamNotification: Hashable, Sendable {
             }
             let params = Params(text: text)
             return try encoder.encode(VCamNotificationEnvelope(method: "subtitle.changed", params: params))
+        case .objectsChanged(let added, let changed, let removed):
+            struct Params: Encodable, Sendable {
+                var added: [Int]
+                var changed: [Int]
+                var removed: [Int]
+            }
+            let params = Params(added: added, changed: changed, removed: removed)
+            return try encoder.encode(VCamNotificationEnvelope(method: "objects.changed", params: params))
+        case .trackingConnected(let sourceId):
+            struct Params: Encodable, Sendable {
+                var sourceId: String
+            }
+            let params = Params(sourceId: sourceId)
+            return try encoder.encode(VCamNotificationEnvelope(method: "tracking.connected", params: params))
+        case .trackingDisconnected(let sourceId):
+            struct Params: Encodable, Sendable {
+                var sourceId: String
+            }
+            let params = Params(sourceId: sourceId)
+            return try encoder.encode(VCamNotificationEnvelope(method: "tracking.disconnected", params: params))
         }
     }
 
@@ -94,13 +127,22 @@ package enum VCamNotification: Hashable, Sendable {
             return .motionStopped(motionId: try params.required("motionId", at: 0))
         case "expression.changed":
             let params = JSONRPCParameters(request.params)
-            return .expressionChanged(name: try params.required("name", at: 0))
+            return .expressionChanged(expressions: try params.required("expressions", at: 0))
         case "scene.loaded":
             let params = JSONRPCParameters(request.params)
             return .sceneLoaded(sceneId: try params.required("sceneId", at: 0))
         case "subtitle.changed":
             let params = JSONRPCParameters(request.params)
             return .subtitleChanged(text: try params.required("text", at: 0))
+        case "objects.changed":
+            let params = JSONRPCParameters(request.params)
+            return .objectsChanged(added: try params.required("added", at: 0), changed: try params.required("changed", at: 1), removed: try params.required("removed", at: 2))
+        case "tracking.connected":
+            let params = JSONRPCParameters(request.params)
+            return .trackingConnected(sourceId: try params.required("sourceId", at: 0))
+        case "tracking.disconnected":
+            let params = JSONRPCParameters(request.params)
+            return .trackingDisconnected(sourceId: try params.required("sourceId", at: 0))
         default:
             return nil
         }

@@ -42,7 +42,7 @@
     },
     {
       "name": "state.get",
-      "summary": "Returns the current avatar, playing motions, and expression",
+      "summary": "Returns the current avatar, playing motions, expressions, and subtitle",
       "paramStructure": "by-name",
       "params": [],
       "result": {
@@ -50,7 +50,9 @@
         "schema": {
           "type": "object",
           "required": [
-            "playingMotionIds"
+            "playingMotionIds",
+            "subtitle",
+            "expressions"
           ],
           "properties": {
             "avatarId": {
@@ -64,9 +66,16 @@
                 "type": "string"
               }
             },
-            "expressionName": {
+            "subtitle": {
               "type": "string",
-              "description": "The currently applied expression; absent when none is applied."
+              "description": "The subtitle text; empty when the subtitle is hidden."
+            },
+            "expressions": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/ExpressionWeight"
+              },
+              "description": "The applied expressions; empty when none is applied."
             }
           }
         }
@@ -110,8 +119,12 @@
       "errors": [
         {
           "$ref": "#/components/errors/avatarNotFound"
+        },
+        {
+          "$ref": "#/components/errors/avatarLoadFailed"
         }
-      ]
+      ],
+      "description": "The response comes when the avatar has loaded and expression.list lists its expressions. avatar.loaded follows the same moment."
     },
     {
       "name": "avatar.import.begin",
@@ -155,7 +168,7 @@
     {
       "name": "avatar.import.commit",
       "summary": "Registers the uploaded file to the avatar library",
-      "description": "Validates the uploaded data as a VRM and registers it to the avatar library. The staging area is removed regardless of the outcome.",
+      "description": "Validates the uploaded data as a VRM and registers it to the avatar library. The staging area is removed regardless of the outcome. With `load`, the response comes when the avatar has loaded.",
       "paramStructure": "by-name",
       "params": [
         {
@@ -245,15 +258,34 @@
     },
     {
       "name": "expression.set",
-      "summary": "Applies an expression to the current avatar",
+      "summary": "Sets the expressions on the current avatar",
+      "description": "The list is the whole face: expressions left out fade to nothing, and an empty list takes every expression off. Expressions mix by their weights, and how well they mix depends on the model. With a duration, the response comes when the fade has ended. With microphone lip sync, the mouth keeps moving under the expressions.",
       "paramStructure": "by-name",
       "params": [
         {
-          "name": "name",
+          "name": "expressions",
           "required": true,
           "schema": {
-            "type": "string"
-          }
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExpressionWeight"
+            }
+          },
+          "description": "The expressions to wear. Each name may appear once."
+        },
+        {
+          "name": "duration",
+          "schema": {
+            "type": "number"
+          },
+          "description": "Seconds to fade over, up to 60. Omit or pass 0 to change at once."
+        },
+        {
+          "name": "easing",
+          "schema": {
+            "$ref": "#/components/schemas/AnimationEasing"
+          },
+          "description": "Defaults to easeInOut. VCam2D uses its own curve when changing to another expression."
         }
       ],
       "result": {
@@ -267,6 +299,54 @@
           "$ref": "#/components/errors/expressionNotFound"
         }
       ]
+    },
+    {
+      "name": "gaze.set",
+      "summary": "Decides where the avatar looks",
+      "description": "The eyes get there first and the head follows, so there is no duration to give. The eyes still wander a little, as they do on their own. This stays until set again, across scenes and avatars, and wins over face tracking. A head received over the VMC Protocol wins over this one's head, while the eyes still follow it.",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "mode",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "auto",
+              "camera",
+              "direction"
+            ]
+          },
+          "description": "`auto` returns to face tracking, or to looking ahead without it. `camera` looks into the camera. `direction` looks by `yaw` and `pitch`."
+        },
+        {
+          "name": "yaw",
+          "schema": {
+            "type": "number"
+          },
+          "description": "With `direction`: degrees from straight ahead, from -90 to 90. Positive looks to the right of the screen."
+        },
+        {
+          "name": "pitch",
+          "schema": {
+            "type": "number"
+          },
+          "description": "With `direction`: degrees from straight ahead, from -45 to 45. Positive looks up."
+        },
+        {
+          "name": "movesHead",
+          "schema": {
+            "type": "boolean"
+          },
+          "description": "False moves only the eyes. Defaults to true."
+        }
+      ],
+      "result": {
+        "name": "success",
+        "schema": {
+          "type": "boolean"
+        }
+      }
     },
     {
       "name": "motion.list",
@@ -301,6 +381,13 @@
             "type": "boolean"
           },
           "description": "Overrides the motion's loop setting for this playback; the stored setting is used when omitted."
+        },
+        {
+          "name": "wait",
+          "schema": {
+            "type": "boolean"
+          },
+          "description": "Responds when the motion has stopped instead of when it has started. A looping motion or a pose never stops by itself, so it responds at once. Defaults to false."
         }
       ],
       "result": {
@@ -341,6 +428,185 @@
       ]
     },
     {
+      "name": "motion.import.begin",
+      "summary": "Starts uploading a motion to add to the library",
+      "description": "Send the file as binary WebSocket frames, each one the 36-byte importId followed by a chunk of at most 1 MiB. Available only when app.getInfo lists the vrma capability.",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "filename",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "The file name with its extension: vrma, or vmd where the app can convert it."
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "type": "object",
+          "required": [
+            "importId"
+          ],
+          "properties": {
+            "importId": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/importFailed"
+        },
+        {
+          "$ref": "#/components/errors/unsupportedOperation"
+        }
+      ]
+    },
+    {
+      "name": "motion.import.commit",
+      "summary": "Adds the uploaded motion to the library",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "importId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        {
+          "name": "name",
+          "schema": {
+            "type": "string"
+          },
+          "description": "The name shown in the app. Defaults to the file name."
+        },
+        {
+          "name": "loop",
+          "schema": {
+            "type": "boolean"
+          },
+          "description": "Defaults to false."
+        },
+        {
+          "name": "isPose",
+          "schema": {
+            "type": "boolean"
+          },
+          "description": "Holds the pose instead of playing through, while the head, hands and fingers keep following tracking. Defaults to false."
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "type": "object",
+          "required": [
+            "motionId"
+          ],
+          "properties": {
+            "motionId": {
+              "type": "string"
+            },
+            "duration": {
+              "type": "number",
+              "description": "Seconds; absent when it can't be told."
+            }
+          }
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/importNotFound"
+        },
+        {
+          "$ref": "#/components/errors/invalidMotion"
+        },
+        {
+          "$ref": "#/components/errors/importFailed"
+        }
+      ]
+    },
+    {
+      "name": "motion.import.cancel",
+      "summary": "Aborts a motion upload",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "importId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "result": {
+        "name": "success",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/importNotFound"
+        }
+      ]
+    },
+    {
+      "name": "motion.remove",
+      "summary": "Removes an imported motion from the library",
+      "description": "Built-in motions cannot be removed.",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "motionId",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "result": {
+        "name": "success",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/motionNotFound"
+        },
+        {
+          "$ref": "#/components/errors/unsupportedOperation"
+        }
+      ]
+    },
+    {
+      "name": "scene.list",
+      "summary": "Lists the scenes",
+      "paramStructure": "by-name",
+      "params": [],
+      "result": {
+        "name": "scenes",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/Scene"
+          }
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/notReady"
+        }
+      ]
+    },
+    {
       "name": "scene.get",
       "summary": "Returns the current scene",
       "paramStructure": "by-name",
@@ -368,6 +634,20 @@
           "schema": {
             "type": "integer"
           }
+        },
+        {
+          "name": "duration",
+          "schema": {
+            "type": "number"
+          },
+          "description": "Seconds to crossfade from the current frame over, up to 60. Omit or pass 0 to switch at once."
+        },
+        {
+          "name": "easing",
+          "schema": {
+            "$ref": "#/components/schemas/AnimationEasing"
+          },
+          "description": "Defaults to easeInOut."
         }
       ],
       "result": {
@@ -383,7 +663,8 @@
         {
           "$ref": "#/components/errors/notReady"
         }
-      ]
+      ],
+      "description": "With a duration, the current frame stays on screen while the scene loads, then fades out over the new scene. The response comes when the crossfade has ended."
     },
     {
       "name": "camera.reset",
@@ -394,6 +675,651 @@
         "name": "success",
         "schema": {
           "type": "boolean"
+        }
+      }
+    },
+    {
+      "name": "scene.create",
+      "summary": "Creates a scene and loads it",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "name",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "result": {
+        "name": "scene",
+        "schema": {
+          "$ref": "#/components/schemas/Scene"
+        }
+      }
+    },
+    {
+      "name": "scene.duplicate",
+      "summary": "Copies a scene without loading the copy",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "sceneId",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "name",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "result": {
+        "name": "scene",
+        "schema": {
+          "$ref": "#/components/schemas/Scene"
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/sceneNotFound"
+        }
+      ]
+    },
+    {
+      "name": "scene.rename",
+      "summary": "Renames a scene",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "sceneId",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "name",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "result": {
+        "name": "success",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/sceneNotFound"
+        }
+      ]
+    },
+    {
+      "name": "scene.move",
+      "summary": "Moves a scene to a position in the list",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "sceneId",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "index",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          },
+          "description": "The position in scene.list after the move."
+        }
+      ],
+      "result": {
+        "name": "success",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/sceneNotFound"
+        }
+      ]
+    },
+    {
+      "name": "scene.remove",
+      "summary": "Removes a scene and everything in it",
+      "description": "The last scene of the current orientation cannot be removed.",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "sceneId",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "result": {
+        "name": "success",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/sceneNotFound"
+        },
+        {
+          "$ref": "#/components/errors/sceneNotRemovable"
+        }
+      ]
+    },
+    {
+      "name": "scene.getLighting",
+      "summary": "Returns the avatar lighting of the current scene",
+      "description": "`lighting` is absent while the scene uses the default light. Available only when app.getInfo lists the sceneLighting capability.",
+      "paramStructure": "by-name",
+      "params": [],
+      "result": {
+        "name": "result",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "lighting": {
+              "$ref": "#/components/schemas/SceneLighting"
+            }
+          }
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/unsupportedOperation"
+        }
+      ]
+    },
+    {
+      "name": "scene.setLighting",
+      "summary": "Sets the avatar lighting of the current scene",
+      "description": "Available only when app.getInfo lists the sceneLighting capability.",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "lighting",
+          "schema": {
+            "$ref": "#/components/schemas/SceneLighting"
+          },
+          "description": "Omit to return to the default light."
+        }
+      ],
+      "result": {
+        "name": "success",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/unsupportedOperation"
+        }
+      ]
+    },
+    {
+      "name": "canvas.get",
+      "summary": "Returns the output size in pixels",
+      "paramStructure": "by-name",
+      "params": [],
+      "result": {
+        "name": "result",
+        "schema": {
+          "type": "object",
+          "required": [
+            "width",
+            "height"
+          ],
+          "properties": {
+            "width": {
+              "type": "integer"
+            },
+            "height": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "frame.capture",
+      "summary": "Returns the current output as an image",
+      "description": "Requires the user to allow frame capture in the VCam API settings; app.getInfo lists the frameCapture capability while it is allowed.",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "maxWidth",
+          "schema": {
+            "type": "integer"
+          },
+          "description": "Scales the image down to this width. Defaults to the output width."
+        },
+        {
+          "name": "format",
+          "schema": {
+            "type": "string",
+            "enum": [
+              "png",
+              "jpeg"
+            ]
+          },
+          "description": "Defaults to jpeg."
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "type": "object",
+          "required": [
+            "data",
+            "mimeType",
+            "width",
+            "height"
+          ],
+          "properties": {
+            "data": {
+              "type": "string",
+              "description": "The image, base64 encoded."
+            },
+            "mimeType": {
+              "type": "string"
+            },
+            "width": {
+              "type": "integer"
+            },
+            "height": {
+              "type": "integer"
+            }
+          }
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/frameCaptureDisabled"
+        },
+        {
+          "$ref": "#/components/errors/notReady"
+        }
+      ]
+    },
+    {
+      "name": "object.list",
+      "summary": "Lists the objects of the current scene, from back to front",
+      "description": "Placements are fractions of the canvas: `x` and `y` are the offset of the object's center from the center of the canvas (`y` grows upward, so -0.5 to 0.5 stays on the canvas), and `width` and `height` are its size. The subtitle is not listed; see subtitle.getStyle.",
+      "paramStructure": "by-name",
+      "params": [],
+      "result": {
+        "name": "objects",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/ObjectInfo"
+          }
+        }
+      }
+    },
+    {
+      "name": "object.update",
+      "summary": "Changes an object's name, visibility, lock, or placement",
+      "description": "A locked object rejects every change except unlocking it, so that a layout the user fixed is not changed by accident. With a duration, the placement moves and the visibility fades, the response comes when they have ended, and another change of the same kind takes over from where the object is by then. Text looks scaled during a move and redraws sharply at the end. Wind has nothing to fade, so it changes at once.",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "objectId",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "name",
+          "schema": {
+            "type": "string"
+          },
+          "description": "The name shown in the object list."
+        },
+        {
+          "name": "isHidden",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "isLocked",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "placement",
+          "schema": {
+            "$ref": "#/components/schemas/ObjectPlacementUpdate"
+          }
+        },
+        {
+          "name": "duration",
+          "schema": {
+            "type": "number"
+          },
+          "description": "Seconds to animate the placement and visibility over, up to 60. Omit or pass 0 to apply them at once."
+        },
+        {
+          "name": "easing",
+          "schema": {
+            "$ref": "#/components/schemas/AnimationEasing"
+          },
+          "description": "Defaults to easeInOut."
+        }
+      ],
+      "result": {
+        "name": "success",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/objectNotFound"
+        },
+        {
+          "$ref": "#/components/errors/objectLocked"
+        },
+        {
+          "$ref": "#/components/errors/objectHasNoPlacement"
+        }
+      ]
+    },
+    {
+      "name": "object.move",
+      "summary": "Moves an object to a position in the stacking order",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "objectId",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "index",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          },
+          "description": "The position in object.list after the move: 0 is the backmost."
+        }
+      ],
+      "result": {
+        "name": "success",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/objectNotFound"
+        },
+        {
+          "$ref": "#/components/errors/objectLocked"
+        }
+      ]
+    },
+    {
+      "name": "object.duplicate",
+      "summary": "Copies an object in the current scene",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "objectId",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "type": "object",
+          "required": [
+            "objectId"
+          ],
+          "properties": {
+            "objectId": {
+              "type": "integer"
+            }
+          }
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/objectNotFound"
+        },
+        {
+          "$ref": "#/components/errors/objectNotDuplicable"
+        }
+      ]
+    },
+    {
+      "name": "object.remove",
+      "summary": "Removes an object from the current scene",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "objectId",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "result": {
+        "name": "success",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/objectNotFound"
+        },
+        {
+          "$ref": "#/components/errors/objectLocked"
+        },
+        {
+          "$ref": "#/components/errors/objectNotRemovable"
+        }
+      ]
+    },
+    {
+      "name": "text.add",
+      "summary": "Adds a text object to the current scene",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "text",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "name",
+          "schema": {
+            "type": "string"
+          },
+          "description": "The name shown in the object list."
+        },
+        {
+          "name": "preset",
+          "schema": {
+            "type": "string"
+          },
+          "description": "A preset id from text.listPresets to start from."
+        },
+        {
+          "name": "style",
+          "schema": {
+            "$ref": "#/components/schemas/TextStyle"
+          },
+          "description": "Applied on top of the preset."
+        },
+        {
+          "name": "placement",
+          "schema": {
+            "$ref": "#/components/schemas/ObjectPlacementUpdate"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "type": "object",
+          "required": [
+            "objectId"
+          ],
+          "properties": {
+            "objectId": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "text.get",
+      "summary": "Returns the text and style of a text object",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "objectId",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "type": "object",
+          "required": [
+            "text",
+            "style"
+          ],
+          "properties": {
+            "text": {
+              "type": "string"
+            },
+            "style": {
+              "$ref": "#/components/schemas/TextStyle"
+            }
+          }
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/objectNotFound"
+        },
+        {
+          "$ref": "#/components/errors/objectTypeMismatch"
+        }
+      ]
+    },
+    {
+      "name": "text.update",
+      "summary": "Changes the text or style of a text object",
+      "description": "The edge the alignment anchors stays in place, so the object grows as the text gets longer.",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "objectId",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "text",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "preset",
+          "schema": {
+            "type": "string"
+          },
+          "description": "A preset id from text.listPresets to apply first."
+        },
+        {
+          "name": "style",
+          "schema": {
+            "$ref": "#/components/schemas/TextStyle"
+          },
+          "description": "Applied on top of the preset."
+        }
+      ],
+      "result": {
+        "name": "success",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/objectNotFound"
+        },
+        {
+          "$ref": "#/components/errors/objectTypeMismatch"
+        },
+        {
+          "$ref": "#/components/errors/objectLocked"
+        }
+      ]
+    },
+    {
+      "name": "text.listPresets",
+      "summary": "Lists the text style presets",
+      "paramStructure": "by-name",
+      "params": [],
+      "result": {
+        "name": "presets",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/TextPreset"
+          }
+        }
+      }
+    },
+    {
+      "name": "text.listFonts",
+      "summary": "Lists the PostScript names of the installed fonts",
+      "paramStructure": "by-name",
+      "params": [],
+      "result": {
+        "name": "fonts",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },
@@ -423,6 +1349,651 @@
       "summary": "Hides the subtitle",
       "paramStructure": "by-name",
       "params": [],
+      "result": {
+        "name": "success",
+        "schema": {
+          "type": "boolean"
+        }
+      }
+    },
+    {
+      "name": "emoji.show",
+      "summary": "Shows an emoji as a temporary stamp on the frame",
+      "description": "Available only when app.getInfo lists the emoji capability.",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "emoji",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "A single emoji."
+        }
+      ],
+      "result": {
+        "name": "success",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/unsupportedOperation"
+        }
+      ]
+    },
+    {
+      "name": "tracking.getState",
+      "summary": "Returns the connection state of the tracking sources",
+      "description": "Covers the sources that connect from other apps and devices: `vcamMotion`, `iFacialMocap`, and `vmcProtocol`.",
+      "paramStructure": "by-name",
+      "params": [],
+      "result": {
+        "name": "state",
+        "schema": {
+          "type": "object",
+          "required": [
+            "sources"
+          ],
+          "properties": {
+            "sources": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/TrackingSource"
+              }
+            }
+          }
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/notReady"
+        }
+      ]
+    },
+    {
+      "name": "subtitle.getStyle",
+      "summary": "Returns the style and placement of the subtitle",
+      "paramStructure": "by-name",
+      "params": [],
+      "result": {
+        "name": "result",
+        "schema": {
+          "type": "object",
+          "required": [
+            "style",
+            "placement"
+          ],
+          "properties": {
+            "style": {
+              "$ref": "#/components/schemas/TextStyle"
+            },
+            "placement": {
+              "$ref": "#/components/schemas/SubtitlePlacement"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "subtitle.setStyle",
+      "summary": "Changes the style and placement of the subtitle",
+      "description": "Applies to every scene and stays after a restart. With a duration, the response comes when the placement has ended. The subtitle looks scaled during the move and redraws sharply at the end.",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "preset",
+          "schema": {
+            "type": "string"
+          },
+          "description": "A preset id from text.listPresets to apply first."
+        },
+        {
+          "name": "style",
+          "schema": {
+            "$ref": "#/components/schemas/TextStyle"
+          },
+          "description": "Applied on top of the preset."
+        },
+        {
+          "name": "placement",
+          "schema": {
+            "$ref": "#/components/schemas/SubtitlePlacement"
+          }
+        },
+        {
+          "name": "duration",
+          "schema": {
+            "type": "number"
+          },
+          "description": "Seconds to animate the placement over, up to 60. Omit or pass 0 to apply it at once. A style changes at once either way."
+        },
+        {
+          "name": "easing",
+          "schema": {
+            "$ref": "#/components/schemas/AnimationEasing"
+          },
+          "description": "Defaults to easeInOut."
+        }
+      ],
+      "result": {
+        "name": "success",
+        "schema": {
+          "type": "boolean"
+        }
+      }
+    },
+    {
+      "name": "image.import.begin",
+      "summary": "Starts uploading an image to add to the current scene",
+      "description": "Send the file as binary WebSocket frames, each one the 36-byte importId followed by a chunk of at most 1 MiB.",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "filename",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "The file name with its extension: png, jpg, jpeg, gif, heic, webp, or tiff."
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "type": "object",
+          "required": [
+            "importId"
+          ],
+          "properties": {
+            "importId": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/importFailed"
+        }
+      ]
+    },
+    {
+      "name": "image.import.commit",
+      "summary": "Adds the uploaded image to the current scene",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "importId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        {
+          "name": "name",
+          "schema": {
+            "type": "string"
+          },
+          "description": "The name shown in the object list."
+        },
+        {
+          "name": "placement",
+          "schema": {
+            "$ref": "#/components/schemas/ObjectPlacementUpdate"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "type": "object",
+          "required": [
+            "objectId"
+          ],
+          "properties": {
+            "objectId": {
+              "type": "integer"
+            }
+          }
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/importNotFound"
+        },
+        {
+          "$ref": "#/components/errors/invalidImage"
+        },
+        {
+          "$ref": "#/components/errors/importFailed"
+        }
+      ]
+    },
+    {
+      "name": "image.import.cancel",
+      "summary": "Aborts an image upload",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "importId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "result": {
+        "name": "success",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/importNotFound"
+        }
+      ]
+    },
+    {
+      "name": "video.import.begin",
+      "summary": "Starts uploading a video to add to the current scene",
+      "description": "Send the file as binary WebSocket frames, each one the 36-byte importId followed by a chunk of at most 1 MiB. A file can be up to 512 MiB.",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "filename",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "The file name with its extension: mp4, mov, or m4v."
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "type": "object",
+          "required": [
+            "importId"
+          ],
+          "properties": {
+            "importId": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/importFailed"
+        }
+      ]
+    },
+    {
+      "name": "video.import.commit",
+      "summary": "Adds the uploaded video to the current scene and starts playing it",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "importId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        {
+          "name": "name",
+          "schema": {
+            "type": "string"
+          },
+          "description": "The name shown in the object list."
+        },
+        {
+          "name": "placement",
+          "schema": {
+            "$ref": "#/components/schemas/ObjectPlacementUpdate"
+          }
+        },
+        {
+          "name": "isLooping",
+          "schema": {
+            "type": "boolean"
+          },
+          "description": "Whether it starts over at the end. Defaults to true. Otherwise it holds the last frame."
+        },
+        {
+          "name": "isMuted",
+          "schema": {
+            "type": "boolean"
+          },
+          "description": "Defaults to true. Unmuted, the sound goes to the system's default output."
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "type": "object",
+          "required": [
+            "objectId",
+            "duration"
+          ],
+          "properties": {
+            "objectId": {
+              "type": "integer"
+            },
+            "duration": {
+              "type": "number",
+              "description": "The length in seconds."
+            }
+          }
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/importNotFound"
+        },
+        {
+          "$ref": "#/components/errors/invalidVideo"
+        },
+        {
+          "$ref": "#/components/errors/importFailed"
+        }
+      ]
+    },
+    {
+      "name": "video.import.cancel",
+      "summary": "Aborts a video upload",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "importId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "result": {
+        "name": "success",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/importNotFound"
+        }
+      ]
+    },
+    {
+      "name": "video.get",
+      "summary": "Returns the playback state of a video object",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "objectId",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "result": {
+        "name": "state",
+        "schema": {
+          "$ref": "#/components/schemas/VideoState"
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/objectNotFound"
+        },
+        {
+          "$ref": "#/components/errors/objectTypeMismatch"
+        }
+      ]
+    },
+    {
+      "name": "video.update",
+      "summary": "Plays, pauses or seeks a video object, or changes its options",
+      "description": "Omitted values stay as they are. Playing a video that has reached its end starts it over. While the object is hidden the video stays paused and continues when it is shown.",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "objectId",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "isPlaying",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "time",
+          "schema": {
+            "type": "number"
+          },
+          "description": "The position to seek to, in seconds."
+        },
+        {
+          "name": "isLooping",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "isMuted",
+          "schema": {
+            "type": "boolean"
+          }
+        }
+      ],
+      "result": {
+        "name": "state",
+        "schema": {
+          "$ref": "#/components/schemas/VideoState"
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/objectNotFound"
+        },
+        {
+          "$ref": "#/components/errors/objectTypeMismatch"
+        },
+        {
+          "$ref": "#/components/errors/objectLocked"
+        }
+      ]
+    },
+    {
+      "name": "web.add",
+      "summary": "Adds a web page to the current scene",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "url",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "An http or https URL."
+        },
+        {
+          "name": "name",
+          "schema": {
+            "type": "string"
+          },
+          "description": "The name shown in the object list."
+        },
+        {
+          "name": "width",
+          "schema": {
+            "type": "integer"
+          },
+          "description": "The page width in pixels. Defaults to 800."
+        },
+        {
+          "name": "height",
+          "schema": {
+            "type": "integer"
+          },
+          "description": "The page height in pixels. Defaults to 600."
+        },
+        {
+          "name": "fps",
+          "schema": {
+            "type": "integer"
+          },
+          "description": "How many times per second the page is drawn. Defaults to 6."
+        },
+        {
+          "name": "placement",
+          "schema": {
+            "$ref": "#/components/schemas/ObjectPlacementUpdate"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "type": "object",
+          "required": [
+            "objectId"
+          ],
+          "properties": {
+            "objectId": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "web.update",
+      "summary": "Reloads a web page object with new settings",
+      "description": "Omitted values stay as they are, so passing only objectId reloads the page.",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "objectId",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "url",
+          "schema": {
+            "type": "string"
+          },
+          "description": "An http or https URL."
+        },
+        {
+          "name": "width",
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "height",
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "fps",
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "result": {
+        "name": "success",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/objectNotFound"
+        },
+        {
+          "$ref": "#/components/errors/objectTypeMismatch"
+        },
+        {
+          "$ref": "#/components/errors/objectLocked"
+        }
+      ]
+    },
+    {
+      "name": "camera.adjust",
+      "summary": "Moves the camera relative to where it is",
+      "description": "The result is saved in the current scene. With a duration, the response comes when the move has ended, and another camera.adjust takes over from where the camera is by then.",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "panX",
+          "schema": {
+            "type": "number"
+          },
+          "description": "As a fraction of the output height; positive moves the avatar right."
+        },
+        {
+          "name": "panY",
+          "schema": {
+            "type": "number"
+          },
+          "description": "As a fraction of the output height; positive moves the avatar up."
+        },
+        {
+          "name": "orbitX",
+          "schema": {
+            "type": "number"
+          },
+          "description": "Turns around the avatar, in the same units. VCam2D treats this as panning."
+        },
+        {
+          "name": "orbitY",
+          "schema": {
+            "type": "number"
+          },
+          "description": "Turns around the avatar, in the same units. VCam2D treats this as panning."
+        },
+        {
+          "name": "zoom",
+          "schema": {
+            "type": "number"
+          },
+          "description": "A magnification relative to now, from 0.1 to 10: 2 shows the avatar twice as large, 0.5 half as large."
+        },
+        {
+          "name": "duration",
+          "schema": {
+            "type": "number"
+          },
+          "description": "Seconds to animate the move over, up to 60. Omit or pass 0 to apply it at once."
+        },
+        {
+          "name": "easing",
+          "schema": {
+            "$ref": "#/components/schemas/AnimationEasing"
+          },
+          "description": "Defaults to easeInOut."
+        }
+      ],
       "result": {
         "name": "success",
         "schema": {
@@ -876,7 +2447,8 @@
           },
           "description": "Absent when the avatar was loaded directly from a file instead of the avatar library."
         }
-      ]
+      ],
+      "description": "Sent when the avatar has finished loading, whatever asked for it."
     },
     {
       "name": "motion.started",
@@ -920,7 +2492,7 @@
     },
     {
       "name": "expression.changed",
-      "summary": "The applied expression has changed",
+      "summary": "The applied expressions have changed",
       "x-direction": "serverToClient",
       "tags": [
         {
@@ -930,11 +2502,15 @@
       "paramStructure": "by-name",
       "params": [
         {
-          "name": "name",
+          "name": "expressions",
           "required": true,
           "schema": {
-            "type": "string"
-          }
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExpressionWeight"
+            }
+          },
+          "description": "The applied expressions; empty when none is applied."
         }
       ]
     },
@@ -971,6 +2547,90 @@
       "params": [
         {
           "name": "text",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    {
+      "name": "objects.changed",
+      "summary": "Objects of the current scene were added, changed, or removed",
+      "description": "Sent whatever the cause, including edits in the app and switching scenes. Read the new state with object.list.",
+      "x-direction": "serverToClient",
+      "tags": [
+        {
+          "name": "Events"
+        }
+      ],
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "added",
+          "required": true,
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "name": "changed",
+          "required": true,
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "name": "removed",
+          "required": true,
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "tracking.connected",
+      "summary": "A tracking source has started sending data",
+      "x-direction": "serverToClient",
+      "tags": [
+        {
+          "name": "Events"
+        }
+      ],
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "sourceId",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    {
+      "name": "tracking.disconnected",
+      "summary": "A tracking source has stopped sending data",
+      "x-direction": "serverToClient",
+      "tags": [
+        {
+          "name": "Events"
+        }
+      ],
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "sourceId",
           "required": true,
           "schema": {
             "type": "string"
@@ -1026,6 +2686,10 @@
           "isLoop": {
             "type": "boolean",
             "description": "The motion's current loop setting."
+          },
+          "duration": {
+            "type": "number",
+            "description": "Seconds; absent when it can't be told, such as when no avatar is loaded."
           }
         }
       },
@@ -1041,6 +2705,27 @@
           },
           "name": {
             "type": "string"
+          }
+        }
+      },
+      "TrackingSource": {
+        "type": "object",
+        "required": [
+          "id",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "disconnected",
+              "connecting",
+              "connected"
+            ],
+            "description": "`connecting` means VCam is waiting for the source to send data."
           }
         }
       },
@@ -1093,7 +2778,7 @@
         "properties": {
           "name": {
             "type": "string",
-            "description": "A VRM 1.0 preset name, or the model's name for a custom expression."
+            "description": "An expression name as expression.list gives it."
           },
           "weight": {
             "type": "number",
@@ -1122,6 +2807,386 @@
             "minItems": 3,
             "maxItems": 3,
             "description": "The point to pull the bone to, in scene meters (the same space as JointPose.effector)."
+          }
+        }
+      },
+      "ObjectPlacement": {
+        "type": "object",
+        "required": [
+          "x",
+          "y",
+          "width",
+          "height"
+        ],
+        "properties": {
+          "x": {
+            "type": "number"
+          },
+          "y": {
+            "type": "number"
+          },
+          "width": {
+            "type": "number"
+          },
+          "height": {
+            "type": "number"
+          }
+        }
+      },
+      "ObjectPlacementUpdate": {
+        "type": "object",
+        "properties": {
+          "x": {
+            "type": "number"
+          },
+          "y": {
+            "type": "number"
+          },
+          "width": {
+            "type": "number"
+          }
+        },
+        "description": "Omitted values stay as they are. Height follows the width so that the object keeps its aspect ratio."
+      },
+      "ObjectInfo": {
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "name",
+          "isHidden",
+          "isLocked"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "avatar",
+              "image",
+              "video",
+              "screen",
+              "videoCapture",
+              "web",
+              "text",
+              "wind"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "isHidden": {
+            "type": "boolean"
+          },
+          "isLocked": {
+            "type": "boolean"
+          },
+          "placement": {
+            "$ref": "#/components/schemas/ObjectPlacement",
+            "description": "Absent for objects that have no rectangle on the canvas: the avatar and wind."
+          }
+        }
+      },
+      "TextGradientStop": {
+        "type": "object",
+        "required": [
+          "location",
+          "color"
+        ],
+        "properties": {
+          "location": {
+            "type": "number",
+            "description": "From 0 to 1."
+          },
+          "color": {
+            "type": "string",
+            "description": "#RRGGBB or #RRGGBBAA."
+          }
+        }
+      },
+      "TextGradient": {
+        "type": "object",
+        "required": [
+          "stops"
+        ],
+        "properties": {
+          "stops": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TextGradientStop"
+            }
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "linear",
+              "radial"
+            ]
+          },
+          "direction": {
+            "type": "number",
+            "description": "Degrees of a linear gradient: 0 runs left to right, 90 top to bottom."
+          }
+        }
+      },
+      "TextOutline": {
+        "type": "object",
+        "required": [
+          "width",
+          "color"
+        ],
+        "properties": {
+          "width": {
+            "type": "number"
+          },
+          "color": {
+            "type": "string"
+          }
+        }
+      },
+      "TextShadow": {
+        "type": "object",
+        "required": [
+          "color"
+        ],
+        "properties": {
+          "x": {
+            "type": "number"
+          },
+          "y": {
+            "type": "number",
+            "description": "Positive moves the shadow down."
+          },
+          "blur": {
+            "type": "number"
+          },
+          "color": {
+            "type": "string"
+          }
+        }
+      },
+      "TextBackground": {
+        "type": "object",
+        "required": [
+          "color"
+        ],
+        "properties": {
+          "color": {
+            "type": "string"
+          },
+          "padding": {
+            "type": "number"
+          },
+          "cornerRadius": {
+            "type": "number"
+          }
+        }
+      },
+      "TextStyle": {
+        "type": "object",
+        "properties": {
+          "fontName": {
+            "type": "string",
+            "description": "A PostScript name from text.listFonts."
+          },
+          "fontSize": {
+            "type": "number",
+            "description": "The size the text is laid out at, from 8 to 1024. Outlines, shadows and paddings are in the same units. The size on the canvas comes from the placement."
+          },
+          "color": {
+            "type": "string",
+            "description": "#RRGGBB or #RRGGBBAA. Replaces a gradient."
+          },
+          "gradient": {
+            "$ref": "#/components/schemas/TextGradient",
+            "description": "Replaces the color."
+          },
+          "alignment": {
+            "type": "string",
+            "enum": [
+              "leading",
+              "center",
+              "trailing",
+              "justified"
+            ]
+          },
+          "textTransform": {
+            "type": "string",
+            "enum": [
+              "none",
+              "uppercase",
+              "lowercase",
+              "capitalized"
+            ]
+          },
+          "lineHeight": {
+            "type": "number",
+            "description": "A multiplier: 1 is the font's default."
+          },
+          "letterSpacing": {
+            "type": "number"
+          },
+          "wrapCharacters": {
+            "type": "number",
+            "description": "Wraps lines after this many fullwidth characters. 0 wraps only at explicit line breaks."
+          },
+          "isUnderlined": {
+            "type": "boolean"
+          },
+          "hasStrikethrough": {
+            "type": "boolean"
+          },
+          "isVertical": {
+            "type": "boolean"
+          },
+          "outlines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TextOutline"
+            },
+            "description": "The first is the topmost. An empty array removes them."
+          },
+          "dropShadows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TextShadow"
+            },
+            "description": "An empty array removes them."
+          },
+          "innerShadows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TextShadow"
+            },
+            "description": "An empty array removes them."
+          },
+          "blur": {
+            "type": "number",
+            "description": "The blur radius. 0 removes the blur."
+          },
+          "background": {
+            "$ref": "#/components/schemas/TextBackground",
+            "description": "A fully transparent color removes the background."
+          }
+        },
+        "description": "Omitted values stay as they are."
+      },
+      "TextPreset": {
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "SubtitlePlacement": {
+        "type": "object",
+        "properties": {
+          "x": {
+            "type": "number",
+            "description": "The offset of the center from the center of the canvas, as a fraction of the canvas width."
+          },
+          "bottomY": {
+            "type": "number",
+            "description": "The bottom edge, measured upward from the center of the canvas, as a fraction of the canvas height."
+          },
+          "size": {
+            "type": "number",
+            "description": "A multiplier of the default size."
+          }
+        },
+        "description": "Omitted values stay as they are."
+      },
+      "SceneLightingRim": {
+        "type": "object",
+        "required": [
+          "color",
+          "intensity"
+        ],
+        "properties": {
+          "color": {
+            "type": "string"
+          },
+          "intensity": {
+            "type": "number"
+          }
+        }
+      },
+      "SceneLighting": {
+        "type": "object",
+        "required": [
+          "azimuth",
+          "elevation",
+          "shadow",
+          "shadowColor"
+        ],
+        "properties": {
+          "azimuth": {
+            "type": "number",
+            "description": "Degrees around the avatar as seen from the background: 0 lights it from the camera's side, negative from the left of the screen, 180 from behind."
+          },
+          "elevation": {
+            "type": "number",
+            "description": "Degrees above the horizon: 90 is straight overhead."
+          },
+          "shadow": {
+            "type": "number",
+            "description": "From 0 to 1: 0 lights the avatar evenly, 1 leaves the side away from the light unlit."
+          },
+          "shadowColor": {
+            "type": "string"
+          },
+          "rim": {
+            "$ref": "#/components/schemas/SceneLightingRim",
+            "description": "A light from behind that outlines the silhouette. Absent turns it off."
+          }
+        }
+      },
+      "AnimationEasing": {
+        "type": "string",
+        "enum": [
+          "linear",
+          "easeIn",
+          "easeOut",
+          "easeInOut"
+        ]
+      },
+      "VideoState": {
+        "type": "object",
+        "required": [
+          "duration",
+          "time",
+          "isPlaying",
+          "isLooping",
+          "isMuted"
+        ],
+        "properties": {
+          "duration": {
+            "type": "number",
+            "description": "The length in seconds."
+          },
+          "time": {
+            "type": "number",
+            "description": "The current position in seconds."
+          },
+          "isPlaying": {
+            "type": "boolean",
+            "description": "False once paused or past the end of a video that does not loop. A hidden object can report true while waiting to be shown."
+          },
+          "isLooping": {
+            "type": "boolean"
+          },
+          "isMuted": {
+            "type": "boolean"
           }
         }
       }
@@ -1174,6 +3239,54 @@
       "boneNotMovable": {
         "code": 1011,
         "message": "Bone cannot be moved with IK."
+      },
+      "objectNotFound": {
+        "code": 1012,
+        "message": "Object was not found."
+      },
+      "objectLocked": {
+        "code": 1013,
+        "message": "The object is locked."
+      },
+      "objectTypeMismatch": {
+        "code": 1014,
+        "message": "This operation does not apply to this type of object."
+      },
+      "objectHasNoPlacement": {
+        "code": 1015,
+        "message": "This object has no placement on the canvas."
+      },
+      "objectNotDuplicable": {
+        "code": 1016,
+        "message": "This object cannot be duplicated."
+      },
+      "objectNotRemovable": {
+        "code": 1017,
+        "message": "This object cannot be removed."
+      },
+      "sceneNotRemovable": {
+        "code": 1018,
+        "message": "The last scene cannot be removed."
+      },
+      "frameCaptureDisabled": {
+        "code": 1019,
+        "message": "Frame capture is not allowed in the VCam API settings."
+      },
+      "invalidImage": {
+        "code": 1020,
+        "message": "The uploaded file is not a valid image."
+      },
+      "avatarLoadFailed": {
+        "code": 1022,
+        "message": "The avatar could not be loaded."
+      },
+      "invalidMotion": {
+        "code": 1023,
+        "message": "The uploaded file is not a valid motion."
+      },
+      "invalidVideo": {
+        "code": 1024,
+        "message": "The uploaded file is not a video that can be played."
       }
     }
   }

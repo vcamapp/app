@@ -6,6 +6,16 @@ import VCamBridge
 import VCamDefaults
 import VCamTrackingCore
 
+public struct AppliedExpression: Equatable, Sendable {
+    public let name: String
+    public let weight: Double
+
+    public init(name: String, weight: Double) {
+        self.name = name
+        self.weight = weight
+    }
+}
+
 @MainActor
 @Observable
 public final class UniState {
@@ -93,9 +103,13 @@ public final class UniState {
     /// Playback states keyed by motion ID
     public var isMotionPlaying: [String: Bool] = [:]
     public var expressions: [Avatar.Expression] = []
-    /// The expression the user picked, or nil while none is applied. Owned here rather
-    /// than echoed back by the engine
-    public var currentExpressionName: String?
+    /// What is applied now. Owned here rather than echoed back by the engine
+    public var currentExpressions: [AppliedExpression] = []
+    /// The strongest expression, or nil while none is applied. Setting one wears it in full.
+    public var currentExpressionName: String? {
+        get { currentExpressions.max { $0.weight < $1.weight }?.name }
+        set { currentExpressions = newValue.map { [AppliedExpression(name: $0, weight: 1)] } ?? [] }
+    }
     /// Output keys the loaded avatar exposes, as the engine reports them
     /// (3D: expression names / 2D: Live2D parameter names)
     public var avatarBlendShapeNames: [String] = []

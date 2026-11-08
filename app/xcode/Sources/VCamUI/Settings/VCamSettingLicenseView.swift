@@ -80,6 +80,8 @@ struct VCamSettingLicenseView: View {
         }
         .formStyle(.grouped)
         .disabled(licenseState == .loading)
+        .animation(.default, value: licenseState)
+        .animation(.default, value: errorMessage != nil)
         .confirmationDialog(Text(.signOut), isPresented: $isSignOutAlertPresented) {
             Button(role: .cancel) {
             } label: {

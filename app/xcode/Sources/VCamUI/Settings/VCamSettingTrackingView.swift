@@ -7,7 +7,6 @@ import VCamData
 public struct VCamSettingTrackingView: View {
     public init() {}
 
-    @AppStorage(key: .cameraFps) private var cameraFps
     @AppStorage(key: .eyeTrackingIntensityX) private var eyeTrackingIntensityX
     @AppStorage(key: .eyeTrackingIntensityY) private var eyeTrackingIntensityY
     @AppStorage(key: .useVowelEstimation) private var useVowelEstimation
@@ -36,98 +35,25 @@ public struct VCamSettingTrackingView: View {
         @Bindable var state = uniState
 
         Form {
+            faceSection
+#if FEATURE_3
+            bodyAndHandSection
+#endif
             Section {
-                VCamTrackingView()
+                TrackingDeviceView()
+            } header: {
+                Text(.devices)
+            }
+            Section {
                 Toggle(isOn: $mirrorTracking) {
                     Text(.mirrorTracking)
                 }
-            }
-            Section {
-                TrackingDeviceView()
-            }
-
-            if showsVowelEstimationSetting {
-                Toggle(isOn: $useVowelEstimation) {
-                    Text(.useVowelEstimation)
-                }
-            }
-
-            Section {
-                if showsMicLipSyncSettings {
-                    ValueEditField(.lipSyncSensitivity, value: $state.lipSyncMicIntensity, type: .slider(0.1...3))
-                    if RenderingFeature.supported.contains(.micVowelEstimation) {
-                        Toggle(isOn: $useMicVowelEstimation) {
-                            Text(.useMicVowelEstimation)
-                        }
-                        .onChange(of: useMicVowelEstimation) { _, newValue in
-                            AvatarAudioManager.shared.setVowelEstimationEnabled(newValue)
-                        }
-                    }
-                }
-                if tracking.webCamera.isInUse {
-                    ValueEditField(.fpsCamera, value: $cameraFps.map(), type: .slider(1...60) {
-                        guard !$0 else { return }
-                        Tracking.shared.webCamera.setFPS(cameraFps)
-                    })
-                }
-            }
-
-#if FEATURE_3
-            Section {
-                ValueEditField(.bodyFollowWeight, value: $state.bodyFollowWeight, type: .slider(0.0...1)) {
+                ValueEditField(.trackingSmoothing, value: $state.trackingSmoothing, type: .slider(0...0.9)) {
                     Text($0, format: .percent.precision(.fractionLength(0)))
                 }
-                ValueEditField(.shoulderRotationWeight, value: $state.shoulderRotationWeight, type: .slider(0.0...1))
-                ValueEditField(.swivelOffset, value: $state.swivelOffset, type: .slider(0.0...30))
+            } header: {
+                Text(.allTracking)
             }
-#if ENABLE_MOCOPI
-            .disabled(integrationMocopi)
-            .opacity(integrationMocopi ? 0.5 : 1.0)
-#endif
-#endif
-            Section {
-                ValueEditField(.trackingSmoothing, value: $state.trackingSmoothing, type: .slider(0...0.9)) {
-                    Text($0, format: .percent.precision(.fractionLength(2)))
-                }
-            }
-            Section {
-                Toggle(isOn: $useEyeTracking) {
-                    Text(.trackEyes)
-                }
-                Group {
-                    ValueEditField(.eyesHorizontalSensitivity, value: $eyeTrackingIntensityX.map(), type: .slider(0...10))
-                    ValueEditField(.eyesVerticalSensitivity, value: $eyeTrackingIntensityY.map(), type: .slider(0...10))
-                }
-                .disabled(!useEyeTracking)
-                .opacity(useEyeTracking ? 1.0 : 0.5)
-            }
-            Section {
-                Picker(selection: blinkSource) {
-                    ForEach(BlinkSource.allCases) { source in
-                        Text(source.name).tag(source)
-                    }
-                } label: {
-                    Text(.blink)
-                }
-                .pickerStyle(.segmented)
-            } footer: {
-                if let description = tracking.blinkSource.description {
-                    Text(description)
-                }
-            }
-            .disabled(!hasTrackedBlink)
-            .opacity(hasTrackedBlink ? 1.0 : 0.5)
-#if FEATURE_3
-            if !Tracking.shared.usesAlternativeHandTracking {
-                Section {
-                    ValueEditField(.easeOfOpeningFingers, value: $fingerTrackingOpenIntensity.map(), type: .slider(0.1...3))
-                    ValueEditField(.easeOfCloseFingers, value: $fingerTrackingCloseIntensity.map(), type: .slider(0.1...3))
-                }
-            }
-#endif
-
-            VCamSettingTrackingFeatureView.make()
-
             Section {
                 VCamSettingTrackingDiagnosticsView()
             } header: {
@@ -138,7 +64,102 @@ public struct VCamSettingTrackingView: View {
         }
         .formStyle(.grouped)
         .animation(.default, value: uniState.currentLipSync)
+        .animation(.default, value: useEyeTracking)
+        .animation(.default, value: tracking.faceTrackingMethod)
+        .animation(.default, value: tracking.handTrackingMethod)
+        .animation(.default, value: tracking.fingerTrackingMethod)
+        .animation(.default, value: tracking.webCamera.isInUse)
+        .animation(.default, value: TrackingDiagnostics.shared.isRecording)
+        .animation(.default, value: TrackingDiagnostics.shared.isArchiving)
+#if ENABLE_MOCOPI
+        .animation(.default, value: integrationMocopi)
+#endif
     }
+
+    private var faceSection: some View {
+        @Bindable var state = uniState
+
+        return Section {
+            FaceTrackingMethodPicker()
+            if tracking.faceTrackingMethod == .default {
+                VCamSettingTrackingFeatureView.makeFace()
+            }
+            LipSyncPicker()
+            if showsVowelEstimationSetting {
+                Toggle(isOn: $useVowelEstimation) {
+                    Text(.useVowelEstimation)
+                }
+            }
+            if showsMicLipSyncSettings {
+                ValueEditField(.lipSyncSensitivity, value: $state.lipSyncMicIntensity, type: .slider(0.1...3))
+                if RenderingFeature.supported.contains(.micVowelEstimation) {
+                    Toggle(isOn: $useMicVowelEstimation) {
+                        Text(.useMicVowelEstimation)
+                    }
+                    .onChange(of: useMicVowelEstimation) { _, newValue in
+                        AvatarAudioManager.shared.setVowelEstimationEnabled(newValue)
+                    }
+                }
+            }
+            Toggle(isOn: $useEyeTracking) {
+                Text(.trackEyes)
+            }
+            if useEyeTracking {
+                ValueEditField(.eyesHorizontalSensitivity, value: $eyeTrackingIntensityX.map(), type: .slider(0...10))
+                ValueEditField(.eyesVerticalSensitivity, value: $eyeTrackingIntensityY.map(), type: .slider(0...10))
+            }
+            if hasTrackedBlink {
+                Picker(selection: blinkSource) {
+                    ForEach(BlinkSource.allCases) { source in
+                        Text(source.name).tag(source)
+                    }
+                } label: {
+                    Text(.blink)
+                    if let description = tracking.blinkSource.description {
+                        Text(description)
+                    }
+                }
+                .pickerStyle(.segmented)
+            }
+        } header: {
+            Text(.faceEyeMouth)
+        }
+    }
+
+#if FEATURE_3
+    private var bodyAndHandSection: some View {
+        @Bindable var state = uniState
+
+        return Section {
+            HandTrackingMethodPickers()
+            if tracking.handTrackingMethod == .default {
+                VCamSettingTrackingFeatureView.makeHand()
+            }
+            if !usesFullBodyTracking {
+                ValueEditField(.bodyFollowWeight, value: $state.bodyFollowWeight, type: .slider(0.0...1)) {
+                    Text($0, format: .percent.precision(.fractionLength(0)))
+                }
+                ValueEditField(.shoulderRotationWeight, value: $state.shoulderRotationWeight, type: .slider(0.0...1))
+                ValueEditField(.swivelOffset, value: $state.swivelOffset, type: .slider(0.0...30))
+            }
+            if tracking.fingerTrackingMethod != .disabled && !tracking.usesAlternativeHandTracking {
+                ValueEditField(.easeOfOpeningFingers, value: $fingerTrackingOpenIntensity.map(), type: .slider(0.1...3))
+                ValueEditField(.easeOfCloseFingers, value: $fingerTrackingCloseIntensity.map(), type: .slider(0.1...3))
+            }
+        } header: {
+            Text(.bodyAndHand)
+        }
+    }
+
+    /// Full body tracking poses the body itself, so the body adjustments have no effect
+    private var usesFullBodyTracking: Bool {
+#if ENABLE_MOCOPI
+        integrationMocopi
+#else
+        false
+#endif
+    }
+#endif
 
     /// Without a face source the avatar blinks on its own whatever is selected
     private var hasTrackedBlink: Bool {

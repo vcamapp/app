@@ -18,6 +18,6 @@ public struct VCamBlendShapeAction: VCamAction {
             throw VCamActionError(String(localized: .isNotSetYet(String(localized: .facialExpression))))
         }
 
-        ExpressionControl.apply(name: configuration.blendShape)
+        ExpressionControl.toggle(name: configuration.blendShape)
     }
 }

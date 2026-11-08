@@ -6,10 +6,10 @@ import Testing
 @MainActor
 @Suite(.serialized)
 struct ExternalControlServerTests {
-    private static func makeRunningServer() throws -> (server: ExternalControlServer, port: UInt16) {
+    private static func makeRunningServer(networkAccess: ExternalControlNetworkAccess = .disabled) throws -> (server: ExternalControlServer, port: UInt16) {
         let server = ExternalControlServer()
         let port = UInt16.random(in: 40000..<60000)
-        try server.start(port: port)
+        try server.start(port: port, networkAccess: networkAccess)
         return (server, port)
     }
 
@@ -67,8 +67,6 @@ struct ExternalControlServerTests {
     }
 #endif
 
-    /// The rejection is an HTTP 400 on the raw socket, so read the status line instead of
-    /// waiting for a WebSocket client to give up
     @Test
     func rejectsHandshakesWithOriginHeader() async throws {
         let (server, port) = try Self.makeRunningServer()
@@ -76,24 +74,103 @@ struct ExternalControlServerTests {
             server.stop()
         }
 
-        let handshake = """
-        GET / HTTP/1.1\r
-        Host: 127.0.0.1\r
-        Upgrade: websocket\r
-        Connection: Upgrade\r
-        Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r
-        Sec-WebSocket-Version: 13\r
-        Origin: https://example.com\r
-        \r
-
-        """
-        let response = try await Self.exchange(Data(handshake.utf8), port: port)
+        let response = try await Self.handshake(host: "127.0.0.1", port: port, headers: ["Origin: https://example.com"])
         #expect(response.hasPrefix("HTTP/1.1 400"))
     }
 
+    /// ::1 stands in for another device: only the loopback listener binds 127.0.0.1
+    @Test
+    func networkClientsNeedTheToken() async throws {
+        let (server, port) = try Self.makeRunningServer(networkAccess: .enabled(token: "secret"))
+        defer {
+            server.stop()
+        }
+
+        #expect(try await Self.handshake(host: "::1", port: port).hasPrefix("HTTP/1.1 400"))
+        #expect(try await Self.handshake(host: "::1", port: port, headers: ["Authorization: Bearer wrong!"]).hasPrefix("HTTP/1.1 400"))
+        #expect(try await Self.handshake(host: "::1", port: port, headers: ["Authorization: Bearer secret"]).hasPrefix("HTTP/1.1 101"))
+        #expect(try await Self.handshake(host: "127.0.0.1", port: port).hasPrefix("HTTP/1.1 101"))
+    }
+
+    @Test
+    func networkClientsConnectWithoutTokenWhenNotRequired() async throws {
+        let (server, port) = try Self.makeRunningServer(networkAccess: .enabled(token: nil))
+        defer {
+            server.stop()
+        }
+
+        #expect(try await Self.handshake(host: "::1", port: port).hasPrefix("HTTP/1.1 101"))
+        #expect(try await Self.handshake(host: "::1", port: port, headers: ["Origin: https://example.com"]).hasPrefix("HTTP/1.1 400"))
+    }
+
+    @Test
+    func restartingRebindsBothListeners() async throws {
+        let (server, port) = try Self.makeRunningServer(networkAccess: .enabled(token: "old"))
+        defer {
+            server.stop()
+        }
+        let client = URLSession.shared.webSocketTask(with: URL(string: "ws://127.0.0.1:\(port)")!)
+        client.resume()
+        defer {
+            client.cancel(with: .goingAway, reason: nil)
+        }
+        try await client.send(.string(#"{"jsonrpc":"2.0","id":1,"method":"app.getInfo","params":{}}"#))
+        _ = try await client.receive()
+
+        try await server.restart(port: port, networkAccess: .enabled(token: "new"))
+        #expect(server.isRunning)
+
+        #expect(try await Self.handshake(host: "127.0.0.1", port: port).hasPrefix("HTTP/1.1 101"))
+        #expect(try await Self.handshake(host: "::1", port: port, headers: ["Authorization: Bearer old"]).hasPrefix("HTTP/1.1 400"))
+        #expect(try await Self.handshake(host: "::1", port: port, headers: ["Authorization: Bearer new"]).hasPrefix("HTTP/1.1 101"))
+    }
+
+    @Test
+    func overlappingRestartsKeepTheLastSettings() async throws {
+        let (server, port) = try Self.makeRunningServer(networkAccess: .enabled(token: "first"))
+        defer {
+            server.stop()
+        }
+
+        async let first: Void = server.restart(port: port, networkAccess: .enabled(token: "second"))
+        async let second: Void = server.restart(port: port, networkAccess: .enabled(token: "third"))
+        _ = try await (first, second)
+
+        #expect(try await Self.handshake(host: "127.0.0.1", port: port).hasPrefix("HTTP/1.1 101"))
+        #expect(try await Self.handshake(host: "::1", port: port, headers: ["Authorization: Bearer third"]).hasPrefix("HTTP/1.1 101"))
+    }
+
+    @Test
+    func stoppingDuringRestartKeepsTheServerStopped() async throws {
+        let (server, port) = try Self.makeRunningServer(networkAccess: .enabled(token: "token"))
+
+        let restart = server.scheduleRestart(port: port, networkAccess: .enabled(token: "token"))
+        server.stop()
+        try await restart.value
+
+        #expect(!server.isRunning)
+        let response = try? await Self.handshake(host: "127.0.0.1", port: port)
+        #expect(response?.hasPrefix("HTTP/1.1 101") != true)
+    }
+
+    /// The rejection is an HTTP 400 on the raw socket, so read the status line instead of
+    /// waiting for a WebSocket client to give up
+    private static func handshake(host: NWEndpoint.Host, port: UInt16, headers: [String] = []) async throws -> String {
+        let lines = [
+            "GET / HTTP/1.1",
+            "Host: localhost",
+            "Upgrade: websocket",
+            "Connection: Upgrade",
+            "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==",
+            "Sec-WebSocket-Version: 13",
+        ] + headers
+        let request = (lines + ["", ""]).joined(separator: "\r\n")
+        return try await exchange(Data(request.utf8), host: host, port: port)
+    }
+
     /// Sends `request` over a plain TCP connection and returns the first bytes the server answers with
-    private static func exchange(_ request: Data, port: UInt16) async throws -> String {
-        let connection = NWConnection(host: "127.0.0.1", port: NWEndpoint.Port(rawValue: port)!, using: .tcp)
+    private static func exchange(_ request: Data, host: NWEndpoint.Host, port: UInt16) async throws -> String {
+        let connection = NWConnection(host: host, port: NWEndpoint.Port(rawValue: port)!, using: .tcp)
         defer {
             connection.cancel()
         }

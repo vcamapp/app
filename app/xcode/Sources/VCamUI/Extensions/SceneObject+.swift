@@ -8,6 +8,8 @@ extension SceneObject.ObjectType {
             String(localized: .model)
         case .image:
             String(localized: .image)
+        case .video:
+            String(localized: .video)
         case .screen:
             String(localized: .screen)
         case .videoCapture:

@@ -12,10 +12,16 @@ import VCamData
 
 public protocol MacWindow: View {
     var windowTitle: String { get }
+    /// The window chrome driven by the view's SwiftUI modifiers, such as `toolbar` and `navigationTitle`
+    var sceneBridgingOptions: NSHostingSceneBridgingOptions { get }
     func configureWindow(_ window: NSWindow) -> NSWindow
 }
 
 public extension MacWindow {
+    /// `NSHostingView` bridges nothing by default, which silently drops every `toolbar`.
+    /// A view without toolbar content gets no toolbar from this
+    var sceneBridgingOptions: NSHostingSceneBridgingOptions { .toolbars }
+
     func configureWindow(_ window: NSWindow) -> NSWindow {
         window
     }
@@ -114,10 +120,12 @@ public final class MacWindowManager {
             )
 
             window.isReleasedWhenClosed = false
-            window.contentView = NSHostingView(
+            let hostingView = NSHostingView(
                 rootView: WindowContainer(content: windowView, nsWindow: window)
                     .rootView()
             )
+            hostingView.sceneBridgingOptions = windowView.sceneBridgingOptions
+            window.contentView = hostingView
             window.title = windowView.windowTitle
             window.center()
             return window
