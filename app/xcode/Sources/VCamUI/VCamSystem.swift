@@ -31,6 +31,8 @@ public final class VCamSystem {
         SceneControl.provider = SceneManager.shared
         TrackingControl.provider = TrackingSourceProvider()
         SceneObjectControl.provider = SceneObjectControlProvider()
+        ShortcutControl.provider = VCamShortcutManager.shared
+        RecordingControl.provider = RecordingControlProvider()
 
         VirtualCamera.onConsumersChanged = { [weak self] hasConsumers in
             Task { @MainActor in

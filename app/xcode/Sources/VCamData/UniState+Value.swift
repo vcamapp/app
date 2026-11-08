@@ -119,10 +119,12 @@ extension Color {
 
     var hexRGBAString: String? {
         guard let nsColor = NSColor(self).usingColorSpace(.sRGB) else { return nil }
-        let r = Int(nsColor.redComponent * 255)
-        let g = Int(nsColor.greenComponent * 255)
-        let b = Int(nsColor.blueComponent * 255)
-        let a = Int(nsColor.alphaComponent * 255)
+        // Rounded so that a color read from its hex string writes back the same string
+        func component(_ value: CGFloat) -> Int { Int((value * 255).rounded()) }
+        let r = component(nsColor.redComponent)
+        let g = component(nsColor.greenComponent)
+        let b = component(nsColor.blueComponent)
+        let a = component(nsColor.alphaComponent)
         return String(format: "%02X%02X%02X%02X", r, g, b, a)
     }
 }

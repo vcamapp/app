@@ -1,11 +1,12 @@
 import Foundation
 import VCamEntity
+import VCamControl
 import VCamData
 import VCamLogger
 
 @MainActor
 @Observable
-public final class VCamShortcutManager {
+public final class VCamShortcutManager: ShortcutControlling {
     public static let shared = VCamShortcutManager()
 
     public private(set) var shortcuts: [VCamShortcut] = [] {
@@ -74,13 +75,20 @@ public final class VCamShortcutManager {
         }
     }
 
+    /// Ignored while the shortcut is running, since a button or key pressed again means the same request
     public func run(_ shortcut: VCamShortcut) {
-        guard !runningShortcutIDs.contains(shortcut.id) else { return }
-        runningShortcutIDs.insert(shortcut.id)
         Task {
-            await VCamShortcutRunner.shared.run(shortcut)
-            runningShortcutIDs.remove(shortcut.id)
+            try? await perform(shortcut)
         }
+    }
+
+    public func perform(_ shortcut: VCamShortcut) async throws {
+        guard !runningShortcutIDs.contains(shortcut.id) else {
+            throw ShortcutControlError.alreadyRunning
+        }
+        runningShortcutIDs.insert(shortcut.id)
+        defer { runningShortcutIDs.remove(shortcut.id) }
+        try await VCamShortcutRunner.shared.run(shortcut)
     }
 
     public func startHotKeys() {

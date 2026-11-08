@@ -194,17 +194,7 @@ private struct RecordVideoView: View {
 
     private func startRecording() {
         do {
-            let format = VideoFormat(rawValue: recordingVideoFormat) ?? .mp4
-            try destination.save { folder in
-                try recorder.start(
-                    with: folder,
-                    name: "vcam_\(Date().yyyyMMddHHmmss)",
-                    format: format,
-                    screenResolution: uniState.screenResolution,
-                    capturesMicAudio: recordMicSound,
-                    capturesSystemAudio: recordSystemSound
-                )
-            }
+            try RecordingControlProvider(recorder: recorder, uniState: uniState).startRecording(in: destination)
         } catch is CancellationError {
         } catch {
             VCamAlert.showError(title: String(localized: .failedToStartRecording), message: error.localizedDescription)

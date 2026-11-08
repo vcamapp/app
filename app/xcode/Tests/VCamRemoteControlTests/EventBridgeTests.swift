@@ -46,6 +46,24 @@ private final class MockObjectProvider: SceneObjectControlling {
     func updateVideo(id: Int32, change: SceneObjectControl.VideoChange) throws {}
 }
 
+@MainActor
+@Observable
+private final class MockShortcutProvider: ShortcutControlling {
+    var shortcuts: [VCamShortcut] = []
+    var runningShortcutIDs: Set<UUID> = []
+
+    func perform(_ shortcut: VCamShortcut) async throws {}
+}
+
+@MainActor
+@Observable
+private final class MockRecordingProvider: RecordingControlling {
+    var state = RecordingControl.State.idle
+
+    func start() async throws {}
+    func stop() async {}
+}
+
 // Serialized: the bridge swaps the global AvatarControl.onLoad hook
 @MainActor
 @Suite(.serialized)
@@ -216,5 +234,65 @@ struct EventBridgeTests {
         uniState.isMotionPlaying = ["builtin:hi": true]
         await drainMainActor()
         #expect(recorder.received.isEmpty)
+    }
+
+    @Test
+    func shortcutChangesPublishTheListAndRuns() async throws {
+        var shortcut = VCamShortcut.create()
+        let provider = MockShortcutProvider()
+        provider.shortcuts = [shortcut]
+        let originalProvider = ShortcutControl.provider
+        ShortcutControl.provider = provider
+        defer {
+            ShortcutControl.provider = originalProvider
+        }
+        let (bridge, _, recorder) = makeBridge()
+        bridge.start()
+        defer {
+            bridge.stop()
+        }
+
+        // The actions are not part of what the API shows
+        shortcut.configurations = [.wait(configuration: .default)]
+        provider.shortcuts = [shortcut]
+        await drainMainActor()
+        shortcut.title = "Wave"
+        provider.shortcuts = [shortcut]
+        await drainMainActor()
+        provider.runningShortcutIDs = [shortcut.id]
+        await drainMainActor()
+        provider.runningShortcutIDs = []
+        await drainMainActor()
+
+        #expect(recorder.received == [
+            .shortcutsChanged(shortcuts: [Shortcut(id: shortcut.id, title: "Wave")]),
+            .shortcutStarted(shortcutId: shortcut.id),
+            .shortcutFinished(shortcutId: shortcut.id),
+        ])
+    }
+
+    @Test
+    func recordingPublishesWhenItStartsAndWhenItsFileIsWritten() async throws {
+        let provider = MockRecordingProvider()
+        let originalProvider = RecordingControl.provider
+        RecordingControl.provider = provider
+        defer {
+            RecordingControl.provider = originalProvider
+        }
+        let (bridge, _, recorder) = makeBridge()
+        bridge.start()
+        defer {
+            bridge.stop()
+        }
+
+        provider.state = .recording(startedAt: .now)
+        await drainMainActor()
+        provider.state = .finishing
+        await drainMainActor()
+        #expect(recorder.received == [.recordingStarted])
+
+        provider.state = .idle
+        await drainMainActor()
+        #expect(recorder.received == [.recordingStarted, .recordingStopped])
     }
 }

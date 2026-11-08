@@ -2,6 +2,7 @@ import Foundation
 import Observation
 import VCamControl
 import VCamData
+import VCamEntity
 import VCamTrackingCore
 
 /// Feeds VCam state changes into the EventPublisher while the server runs.
@@ -32,6 +33,9 @@ final class EventBridge {
         observeSubtitle(previous: uniState.subtitle)
         observeTracking(previous: trackingStatuses)
         observeObjects(previous: objects)
+        observeShortcuts(previous: shortcuts)
+        observeRunningShortcuts(previous: ShortcutControl.provider?.runningShortcutIDs ?? [])
+        observeRecording(previous: RecordingControl.provider?.state)
     }
 
     func stop() {
@@ -157,6 +161,69 @@ final class EventBridge {
                     self.publish(.trackingDisconnected(sourceId: sourceId))
                 }
                 self.observeTracking(previous: current)
+            }
+        }
+    }
+
+    /// Only what the API shows, so that editing the actions of a shortcut sends nothing
+    private var shortcuts: [Shortcut] {
+        ShortcutControl.provider?.shortcuts.map(Shortcut.init) ?? []
+    }
+
+    private func observeShortcuts(previous: [Shortcut]) {
+        guard isActive else { return }
+        withObservationTracking {
+            _ = shortcuts
+        } onChange: { [weak self] in
+            Task { @MainActor in
+                guard let self, self.isActive else { return }
+                let current = self.shortcuts
+                if current != previous {
+                    self.publish(.shortcutsChanged(shortcuts: current))
+                }
+                self.observeShortcuts(previous: current)
+            }
+        }
+    }
+
+    private func observeRunningShortcuts(previous: Set<UUID>) {
+        guard isActive else { return }
+        withObservationTracking {
+            _ = ShortcutControl.provider?.runningShortcutIDs
+        } onChange: { [weak self] in
+            Task { @MainActor in
+                guard let self, self.isActive else { return }
+                let current = ShortcutControl.provider?.runningShortcutIDs ?? []
+                for shortcutId in current.subtracting(previous) {
+                    self.publish(.shortcutStarted(shortcutId: shortcutId))
+                }
+                for shortcutId in previous.subtracting(current) {
+                    self.publish(.shortcutFinished(shortcutId: shortcutId))
+                }
+                self.observeRunningShortcuts(previous: current)
+            }
+        }
+    }
+
+    private func observeRecording(previous: RecordingControl.State?) {
+        guard isActive else { return }
+        withObservationTracking {
+            _ = RecordingControl.provider?.state
+        } onChange: { [weak self] in
+            Task { @MainActor in
+                guard let self, self.isActive else { return }
+                let current = RecordingControl.provider?.state
+                switch (previous, current) {
+                case (.recording?, .recording?):
+                    break
+                case (_, .recording?):
+                    self.publish(.recordingStarted)
+                case (.recording?, .idle?), (.finishing?, .idle?):
+                    self.publish(.recordingStopped)
+                default:
+                    break
+                }
+                self.observeRecording(previous: current)
             }
         }
     }

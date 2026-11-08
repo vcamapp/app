@@ -354,6 +354,17 @@ package struct VCamAPIService: VCamHandler {
     }
 
     @MainActor
+    package func canvasGetBackgroundColor() async throws -> String {
+        CanvasColorMapping.hex(uniState.backgroundColor)
+    }
+
+    @MainActor
+    package func canvasSetBackgroundColor(color: String) async throws -> Bool {
+        uniState.backgroundColor = try CanvasColorMapping.color(color)
+        return true
+    }
+
+    @MainActor
     package func frameCapture(maxWidth: Int?, format: FrameCaptureFormat?) async throws -> FrameCaptureResult {
         guard UserDefaults.standard.value(for: .integrationExternalControlFrameCapture) else {
             throw VCamError.frameCaptureDisabled(data: .errorCode("frame_capture_disabled"))
@@ -537,6 +548,71 @@ package struct VCamAPIService: VCamHandler {
             throw JSONRPCErrorObject(code: -32602, message: "Invalid parameter \"emoji\": expected a single emoji")
         }
         try EmojiControl.show(emoji)
+        return true
+    }
+
+    @MainActor
+    package func shortcutList() async throws -> [Shortcut] {
+        guard let provider = ShortcutControl.provider else {
+            throw VCamError.notReady(data: .errorCode("not_ready"))
+        }
+        return provider.shortcuts.map(Shortcut.init)
+    }
+
+    @MainActor
+    package func shortcutRun(shortcutId: UUID) async throws -> Bool {
+        guard let provider = ShortcutControl.provider else {
+            throw VCamError.notReady(data: .errorCode("not_ready"))
+        }
+        guard let shortcut = provider.shortcuts.first(where: { $0.id == shortcutId }) else {
+            throw VCamError.shortcutNotFound(data: .errorCode("shortcut_not_found"))
+        }
+        do {
+            try await provider.perform(shortcut)
+        } catch ShortcutControlError.alreadyRunning {
+            throw VCamError.shortcutRunning(data: .errorCode("shortcut_running"))
+        } catch {
+            throw VCamError.shortcutFailed(data: .errorCode("shortcut_failed"))
+        }
+        return true
+    }
+
+    @MainActor
+    package func recordingGetState() async throws -> RecordingState {
+        guard let provider = RecordingControl.provider else {
+            throw VCamError.notReady(data: .errorCode("not_ready"))
+        }
+        switch provider.state {
+        case .idle:
+            return RecordingState(status: .idle)
+        case .recording(let startedAt):
+            return RecordingState(duration: Date.now.timeIntervalSince(startedAt), status: .recording)
+        case .finishing:
+            return RecordingState(status: .finishing)
+        }
+    }
+
+    @MainActor
+    package func recordingStart() async throws -> Bool {
+        guard let provider = RecordingControl.provider else {
+            throw VCamError.notReady(data: .errorCode("not_ready"))
+        }
+        do {
+            try await provider.start()
+        } catch RecordingControlError.noFolder {
+            throw VCamError.recordingFolderNotSet(data: .errorCode("recording_folder_not_set"))
+        } catch {
+            throw VCamError.recordingFailed(data: .errorCode("recording_failed"))
+        }
+        return true
+    }
+
+    @MainActor
+    package func recordingStop() async throws -> Bool {
+        guard let provider = RecordingControl.provider else {
+            throw VCamError.notReady(data: .errorCode("not_ready"))
+        }
+        await provider.stop()
         return true
     }
 
@@ -729,5 +805,11 @@ package struct VCamAPIService: VCamHandler {
     @MainActor
     package func rpcDiscover() async throws -> [String: JSONValue] {
         try JSONDecoder().decode([String: JSONValue].self, from: APISpecification.data)
+    }
+}
+
+extension Shortcut {
+    init(_ shortcut: VCamShortcut) {
+        self.init(id: shortcut.id, title: shortcut.title)
     }
 }

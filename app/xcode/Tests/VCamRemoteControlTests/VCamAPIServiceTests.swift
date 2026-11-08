@@ -49,6 +49,15 @@ struct VCamAPIServiceTests {
         return try await body()
     }
 
+    private func withShortcutProvider<T>(_ provider: MockShortcutProvider?, _ body: () async throws -> T) async rethrows -> T {
+        let originalProvider = ShortcutControl.provider
+        defer {
+            ShortcutControl.provider = originalProvider
+        }
+        ShortcutControl.provider = provider
+        return try await body()
+    }
+
     private func withObjectProvider<T>(_ provider: MockSceneObjectProvider?, _ body: () async throws -> T) async rethrows -> T {
         let originalProvider = SceneObjectControl.provider
         defer {
@@ -414,6 +423,108 @@ struct VCamAPIServiceTests {
         ])]))
     }
 
+    // MARK: - Shortcuts
+
+    @Test
+    func shortcutListKeepsTheOrderAndTitles() async throws {
+        var first = VCamShortcut.create()
+        first.title = "Wave"
+        let untitled = VCamShortcut.create()
+        try await withShortcutProvider(MockShortcutProvider(shortcuts: [first, untitled])) {
+            let response = try await call(makeService(), method: "shortcut.list")
+            #expect(response["result"] == .array([
+                .object(["id": .string(first.id.uuidString), "title": .string("Wave")]),
+                .object(["id": .string(untitled.id.uuidString), "title": .string("")]),
+            ]))
+        }
+
+        try await withShortcutProvider(nil) {
+            let response = try await call(makeService(), method: "shortcut.list")
+            #expect(errorObject(of: response)?.dataCode == "not_ready")
+        }
+    }
+
+    @Test
+    func shortcutRunRespondsAfterTheShortcutFinishes() async throws {
+        let shortcut = VCamShortcut.create()
+        let provider = MockShortcutProvider(shortcuts: [shortcut])
+        try await withShortcutProvider(provider) {
+            let response = try await call(makeService(), method: "shortcut.run", params: #"{"shortcutId": "\#(shortcut.id)"}"#)
+            #expect(response["result"] == .bool(true))
+            #expect(provider.performedIDs == [shortcut.id])
+
+            let missing = try await call(makeService(), method: "shortcut.run", params: #"{"shortcutId": "\#(UUID())"}"#)
+            #expect(errorObject(of: missing)?.dataCode == "shortcut_not_found")
+        }
+    }
+
+    @Test
+    func shortcutRunReportsWhyItDidNotRun() async throws {
+        let shortcut = VCamShortcut.create()
+        let provider = MockShortcutProvider(shortcuts: [shortcut])
+        let params = #"{"shortcutId": "\#(shortcut.id)"}"#
+        try await withShortcutProvider(provider) {
+            provider.error = ShortcutControlError.alreadyRunning
+            let running = try await call(makeService(), method: "shortcut.run", params: params)
+            #expect(errorObject(of: running)?.dataCode == "shortcut_running")
+
+            provider.error = CancellationError()
+            let failed = try await call(makeService(), method: "shortcut.run", params: params)
+            #expect(errorObject(of: failed)?.dataCode == "shortcut_failed")
+        }
+    }
+
+    // MARK: - Recording
+
+    @Test
+    func recordingStartsStopsAndReportsTheState() async throws {
+        let provider = MockRecordingProvider()
+        let originalProvider = RecordingControl.provider
+        defer {
+            RecordingControl.provider = originalProvider
+        }
+        RecordingControl.provider = provider
+
+        let idle = try await call(makeService(), method: "recording.getState")
+        #expect(idle["result"] == .object(["status": .string("idle")]))
+
+        let started = try await call(makeService(), method: "recording.start")
+        #expect(started["result"] == .bool(true))
+        let recording = try await call(makeService(), method: "recording.getState")
+        guard case .object(let state)? = recording["result"], case .number(let duration)? = state["duration"] else {
+            Issue.record("Unexpected response: \(recording)")
+            return
+        }
+        #expect(state["status"] == .string("recording"))
+        #expect(duration >= 3)
+
+        let stopped = try await call(makeService(), method: "recording.stop")
+        #expect(stopped["result"] == .bool(true))
+        #expect(provider.stopCount == 1)
+
+        RecordingControl.provider = nil
+        let notReady = try await call(makeService(), method: "recording.start")
+        #expect(errorObject(of: notReady)?.dataCode == "not_ready")
+    }
+
+    @Test
+    func recordingStartReportsWhyItDidNotStart() async throws {
+        let provider = MockRecordingProvider()
+        let originalProvider = RecordingControl.provider
+        defer {
+            RecordingControl.provider = originalProvider
+        }
+        RecordingControl.provider = provider
+
+        provider.startError = RecordingControlError.noFolder
+        let noFolder = try await call(makeService(), method: "recording.start")
+        #expect(errorObject(of: noFolder)?.dataCode == "recording_folder_not_set")
+
+        provider.startError = CocoaError(.fileWriteNoPermission)
+        let failed = try await call(makeService(), method: "recording.start")
+        #expect(errorObject(of: failed)?.dataCode == "recording_failed")
+    }
+
     // MARK: - Scenes
 
     @Test
@@ -463,6 +574,33 @@ struct VCamAPIServiceTests {
     @Test
     func theEngineDoesNotOfferTheAPI() {
         #expect(!RenderingFeature.engine.contains(.externalControl))
+    }
+
+    // MARK: - Canvas
+
+    @Test
+    func canvasBackgroundColorRoundTripsAsHex() async throws {
+        let original = UserDefaults.standard.value(for: .backgroundColor)
+        defer {
+            UserDefaults.standard.set(original, for: .backgroundColor)
+        }
+        let uniState = UniState()
+
+        let set = try await call(makeService(uniState: uniState), method: "canvas.setBackgroundColor", params: ##"{"color": "#00FF0080"}"##)
+        #expect(set["result"] == .bool(true))
+        let get = try await call(makeService(uniState: uniState), method: "canvas.getBackgroundColor")
+        #expect(get["result"] == .string("#00FF0080"))
+
+        let opaque = try await call(makeService(uniState: uniState), method: "canvas.setBackgroundColor", params: ##"{"color": "#123456"}"##)
+        #expect(opaque["result"] == .bool(true))
+        #expect(try await call(makeService(uniState: uniState), method: "canvas.getBackgroundColor")["result"] == .string("#123456FF"))
+
+        let invalid = try await call(makeService(uniState: uniState), method: "canvas.setBackgroundColor", params: #"{"color": "green"}"#)
+        guard case .object(let error)? = invalid["error"] else {
+            Issue.record("Unexpected response: \(invalid)")
+            return
+        }
+        #expect(error["code"] == .int(-32602))
     }
 
     // MARK: - Frame capture
@@ -1351,6 +1489,44 @@ private struct MockTrackingProvider: TrackingControlling {
             .init(id: "vmcProtocol", status: .connecting),
             .init(id: "iFacialMocap", status: .disconnected),
         ]
+    }
+}
+
+@MainActor
+private final class MockShortcutProvider: ShortcutControlling {
+    let shortcuts: [VCamShortcut]
+    var runningShortcutIDs: Set<UUID> { [] }
+    var error: (any Error)?
+    private(set) var performedIDs: [UUID] = []
+
+    init(shortcuts: [VCamShortcut]) {
+        self.shortcuts = shortcuts
+    }
+
+    func perform(_ shortcut: VCamShortcut) async throws {
+        if let error {
+            throw error
+        }
+        performedIDs.append(shortcut.id)
+    }
+}
+
+@MainActor
+private final class MockRecordingProvider: RecordingControlling {
+    var state = RecordingControl.State.idle
+    var startError: (any Error)?
+    private(set) var stopCount = 0
+
+    func start() async throws {
+        if let startError {
+            throw startError
+        }
+        state = .recording(startedAt: .now.addingTimeInterval(-3))
+    }
+
+    func stop() async {
+        stopCount += 1
+        state = .idle
     }
 }
 

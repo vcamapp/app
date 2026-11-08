@@ -2,7 +2,7 @@
   "openrpc": "1.3.2",
   "info": {
     "title": "VCam RPC",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "The public JSON-RPC 2.0 API of VCam, served over a localhost WebSocket. Methods marked with the `Events` tag are notifications VCam pushes to subscribed clients (`x-direction: serverToClient`); subscribe to them with `events.subscribe`."
   },
   "methods": [
@@ -896,6 +896,43 @@
       }
     },
     {
+      "name": "canvas.getBackgroundColor",
+      "summary": "Returns the color behind everything on the canvas",
+      "paramStructure": "by-name",
+      "params": [],
+      "result": {
+        "name": "color",
+        "schema": {
+          "type": "string",
+          "description": "#RRGGBBAA in sRGB."
+        }
+      },
+      "x-vcam-since": "0.1.1"
+    },
+    {
+      "name": "canvas.setBackgroundColor",
+      "summary": "Changes the color behind everything on the canvas",
+      "description": "The color is shared by all scenes and changes at once.",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "color",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "description": "#RRGGBB or #RRGGBBAA in sRGB."
+          }
+        }
+      ],
+      "result": {
+        "name": "success",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "x-vcam-since": "0.1.1"
+    },
+    {
       "name": "frame.capture",
       "summary": "Returns the current output as an image",
       "description": "Requires the user to allow frame capture in the VCam API settings; app.getInfo lists the frameCapture capability while it is allowed.",
@@ -1382,6 +1419,126 @@
           "$ref": "#/components/errors/unsupportedOperation"
         }
       ]
+    },
+    {
+      "name": "shortcut.list",
+      "summary": "Lists the shortcuts the user made, in the order VCam shows them",
+      "paramStructure": "by-name",
+      "params": [],
+      "result": {
+        "name": "shortcuts",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/Shortcut"
+          }
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/notReady"
+        }
+      ],
+      "x-vcam-since": "0.1.1"
+    },
+    {
+      "name": "shortcut.run",
+      "summary": "Runs a shortcut",
+      "description": "A shortcut runs its actions in order, as its button and key do. The response comes when the last action has finished. Running a shortcut that is already running is rejected instead of starting it again.",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "shortcutId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "result": {
+        "name": "success",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/notReady"
+        },
+        {
+          "$ref": "#/components/errors/shortcutNotFound"
+        },
+        {
+          "$ref": "#/components/errors/shortcutRunning"
+        },
+        {
+          "$ref": "#/components/errors/shortcutFailed"
+        }
+      ],
+      "x-vcam-since": "0.1.1"
+    },
+    {
+      "name": "recording.getState",
+      "summary": "Returns whether VCam is recording a video",
+      "paramStructure": "by-name",
+      "params": [],
+      "result": {
+        "name": "state",
+        "schema": {
+          "$ref": "#/components/schemas/RecordingState"
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/notReady"
+        }
+      ],
+      "x-vcam-since": "0.1.1"
+    },
+    {
+      "name": "recording.start",
+      "summary": "Starts recording a video",
+      "description": "Records with the format, audio sources, and folder chosen in VCam's recording settings. The response comes when the recording has started. Does nothing while already recording, and waits for a stopped recording to finish writing before starting the next.",
+      "paramStructure": "by-name",
+      "params": [],
+      "result": {
+        "name": "success",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/notReady"
+        },
+        {
+          "$ref": "#/components/errors/recordingFolderNotSet"
+        },
+        {
+          "$ref": "#/components/errors/recordingFailed"
+        }
+      ],
+      "x-vcam-since": "0.1.1"
+    },
+    {
+      "name": "recording.stop",
+      "summary": "Stops recording a video",
+      "description": "The response comes when the video has been written to its file. Does nothing when not recording.",
+      "paramStructure": "by-name",
+      "params": [],
+      "result": {
+        "name": "success",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/notReady"
+        }
+      ],
+      "x-vcam-since": "0.1.1"
     },
     {
       "name": "tracking.getState",
@@ -2637,6 +2794,104 @@
           }
         }
       ]
+    },
+    {
+      "name": "shortcut.started",
+      "summary": "A shortcut has started running",
+      "description": "Sent whoever started it: its button, its key, or shortcut.run.",
+      "x-direction": "serverToClient",
+      "tags": [
+        {
+          "name": "Events"
+        }
+      ],
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "shortcutId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "x-vcam-since": "0.1.1"
+    },
+    {
+      "name": "shortcut.finished",
+      "summary": "A shortcut has finished running",
+      "description": "Sent also when one of its actions failed.",
+      "x-direction": "serverToClient",
+      "tags": [
+        {
+          "name": "Events"
+        }
+      ],
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "shortcutId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "x-vcam-since": "0.1.1"
+    },
+    {
+      "name": "shortcuts.changed",
+      "summary": "Shortcuts were added, renamed, reordered, or removed",
+      "description": "Carries the whole list in the same form as shortcut.list.",
+      "x-direction": "serverToClient",
+      "tags": [
+        {
+          "name": "Events"
+        }
+      ],
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "shortcuts",
+          "required": true,
+          "schema": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Shortcut"
+            }
+          }
+        }
+      ],
+      "x-vcam-since": "0.1.1"
+    },
+    {
+      "name": "recording.started",
+      "summary": "A video recording has started",
+      "x-direction": "serverToClient",
+      "tags": [
+        {
+          "name": "Events"
+        }
+      ],
+      "paramStructure": "by-name",
+      "params": [],
+      "x-vcam-since": "0.1.1"
+    },
+    {
+      "name": "recording.stopped",
+      "summary": "A video recording has been written to its file",
+      "description": "Sent also when writing the file failed.",
+      "x-direction": "serverToClient",
+      "tags": [
+        {
+          "name": "Events"
+        }
+      ],
+      "paramStructure": "by-name",
+      "params": [],
+      "x-vcam-since": "0.1.1"
     }
   ],
   "components": {
@@ -3189,6 +3444,44 @@
             "type": "boolean"
           }
         }
+      },
+      "Shortcut": {
+        "type": "object",
+        "required": [
+          "id",
+          "title"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string",
+            "description": "Empty when the user has not named the shortcut."
+          }
+        }
+      },
+      "RecordingState": {
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "idle",
+              "recording",
+              "finishing"
+            ],
+            "description": "`finishing` while a stopped recording is still being written to its file."
+          },
+          "duration": {
+            "type": "number",
+            "description": "Seconds since the recording started. Present only while recording."
+          }
+        }
       }
     },
     "errors": {
@@ -3287,6 +3580,26 @@
       "invalidVideo": {
         "code": 1024,
         "message": "The uploaded file is not a video that can be played."
+      },
+      "shortcutNotFound": {
+        "code": 1025,
+        "message": "Shortcut was not found."
+      },
+      "shortcutRunning": {
+        "code": 1026,
+        "message": "The shortcut is already running."
+      },
+      "shortcutFailed": {
+        "code": 1027,
+        "message": "An action of the shortcut failed."
+      },
+      "recordingFolderNotSet": {
+        "code": 1028,
+        "message": "No folder to save recordings to is chosen in VCam."
+      },
+      "recordingFailed": {
+        "code": 1029,
+        "message": "The recording could not be started."
       }
     }
   }
