@@ -102,7 +102,7 @@ package protocol VCamHandler: Sendable {
     @concurrent func objectList() async throws -> [ObjectInfo]
     /// Changes an object's name, visibility, lock, or placement
     /// 
-    /// A locked object rejects every change except unlocking it, so that a layout the user fixed is not changed by accident. With a duration, the placement moves and the visibility fades, the response comes when they have ended, and another change of the same kind takes over from where the object is by then. Text looks scaled during a move and redraws sharply at the end. Wind has nothing to fade, so it changes at once.
+    /// A locked object keeps its name and placement, so that a layout the user fixed is not changed by accident. It can still be shown, hidden, and unlocked. With a duration, the placement moves and the visibility fades, the response comes when they have ended, and another change of the same kind takes over from where the object is by then. Text looks scaled during a move and redraws sharply at the end. Wind has nothing to fade, so it changes at once.
     @concurrent func objectUpdate(objectId: Int, name: String?, isHidden: Bool?, isLocked: Bool?, placement: ObjectPlacementUpdate?, duration: Double?, easing: AnimationEasing?) async throws -> Bool
     /// Moves an object to a position in the stacking order
     @concurrent func objectMove(objectId: Int, index: Int) async throws -> Bool
@@ -190,6 +190,14 @@ package protocol VCamHandler: Sendable {
     /// 
     /// The result is saved in the current scene. With a duration, the response comes when the move has ended, and another camera.adjust takes over from where the camera is by then.
     @concurrent func cameraAdjust(panX: Double?, panY: Double?, orbitX: Double?, orbitY: Double?, zoom: Double?, duration: Double?, easing: AnimationEasing?) async throws -> Bool
+    /// Returns where the camera is
+    /// 
+    /// The camera as it is on screen now, also after a reset or a move in the app. Save it to come back to this view with camera.set.
+    @concurrent func cameraGet() async throws -> CameraView
+    /// Puts the camera at a view from camera.get
+    /// 
+    /// Omitted values stay as they are. The result is saved in the current scene. With a duration, the response comes when the move has ended, and another camera.set or camera.adjust takes over from where the camera is by then.
+    @concurrent func cameraSet(position: [Double]?, rotation: [Double]?, zoom: Double?, duration: Double?, easing: AnimationEasing?) async throws -> Bool
     /// Opens the pose editor with the current avatar
     /// 
     /// Opens the pose editor window, or fronts it when it is already open, and loads the current avatar into it. The other pose methods require the editor to be open. Bone names follow VRM 1.0 (`hips`, `spine`, `leftUpperArm`, ...); rotations are degrees relative to the rest pose (T-pose), applied in Y, X, Z order around the bone's own axes, so `[0, 0, 0]` is the rest pose. Expressions are named as VRM 1.0 names its presets (`happy`, `blink`, ...) and as the model names its custom expressions; weights run from 0 to 1. Available only when app.getInfo lists the poseEditor capability. Besides rotating bones one by one with pose.set, pose.move pulls a hand, foot, elbow, knee, the head or the hips to a point and solves the limb with IK, the way dragging it in the editor does.
@@ -489,6 +497,13 @@ package struct VCamServer: Sendable {
         case "camera.adjust":
             let params = JSONRPCParameters(request.params)
             let result = try await handler.cameraAdjust(panX: try params.optional("panX", at: 0), panY: try params.optional("panY", at: 1), orbitX: try params.optional("orbitX", at: 2), orbitY: try params.optional("orbitY", at: 3), zoom: try params.optional("zoom", at: 4), duration: try params.optional("duration", at: 5), easing: try params.optional("easing", at: 6))
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "camera.get":
+            let result = try await handler.cameraGet()
+            return try JSONRPCServer.resultResponse(id: request.id, result: result)
+        case "camera.set":
+            let params = JSONRPCParameters(request.params)
+            let result = try await handler.cameraSet(position: try params.optional("position", at: 0), rotation: try params.optional("rotation", at: 1), zoom: try params.optional("zoom", at: 2), duration: try params.optional("duration", at: 3), easing: try params.optional("easing", at: 4))
             return try JSONRPCServer.resultResponse(id: request.id, result: result)
         case "pose.open":
             let result = try await handler.poseOpen()

@@ -1012,7 +1012,7 @@
     {
       "name": "object.update",
       "summary": "Changes an object's name, visibility, lock, or placement",
-      "description": "A locked object rejects every change except unlocking it, so that a layout the user fixed is not changed by accident. With a duration, the placement moves and the visibility fades, the response comes when they have ended, and another change of the same kind takes over from where the object is by then. Text looks scaled during a move and redraws sharply at the end. Wind has nothing to fade, so it changes at once.",
+      "description": "A locked object keeps its name and placement, so that a layout the user fixed is not changed by accident. It can still be shown, hidden, and unlocked. With a duration, the placement moves and the visibility fades, the response comes when they have ended, and another change of the same kind takes over from where the object is by then. Text looks scaled during a move and redraws sharply at the end. Wind has nothing to fade, so it changes at once.",
       "paramStructure": "by-name",
       "params": [
         {
@@ -2157,6 +2157,80 @@
           "type": "boolean"
         }
       }
+    },
+    {
+      "name": "camera.get",
+      "summary": "Returns where the camera is",
+      "description": "The camera as it is on screen now, also after a reset or a move in the app. Save it to come back to this view with camera.set.",
+      "paramStructure": "by-name",
+      "params": [],
+      "result": {
+        "name": "view",
+        "schema": {
+          "$ref": "#/components/schemas/CameraView"
+        }
+      },
+      "x-vcam-since": "0.1.1"
+    },
+    {
+      "name": "camera.set",
+      "summary": "Puts the camera at a view from camera.get",
+      "description": "Omitted values stay as they are. The result is saved in the current scene. With a duration, the response comes when the move has ended, and another camera.set or camera.adjust takes over from where the camera is by then.",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "position",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "description": "As in CameraView."
+        },
+        {
+          "name": "rotation",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "description": "As in CameraView. A move turns the short way round."
+        },
+        {
+          "name": "zoom",
+          "schema": {
+            "type": "number"
+          },
+          "description": "As in CameraView, from 0.1 to 10."
+        },
+        {
+          "name": "duration",
+          "schema": {
+            "type": "number"
+          },
+          "description": "Seconds to animate the move over, up to 60. Omit or pass 0 to apply it at once."
+        },
+        {
+          "name": "easing",
+          "schema": {
+            "$ref": "#/components/schemas/AnimationEasing"
+          },
+          "description": "Defaults to easeInOut."
+        }
+      ],
+      "result": {
+        "name": "success",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "x-vcam-since": "0.1.1"
     },
     {
       "name": "pose.open",
@@ -3482,6 +3556,40 @@
             "description": "Seconds since the recording started. Present only while recording."
           }
         }
+      },
+      "CameraView": {
+        "type": "object",
+        "description": "Where the camera is, in the scene's own space. Read it with camera.get and pass it to camera.set to return to the same view.",
+        "required": [
+          "position",
+          "rotation",
+          "zoom"
+        ],
+        "properties": {
+          "position": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 3,
+            "maxItems": 3,
+            "description": "x, y and z. Meters in 3D."
+          },
+          "rotation": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 3,
+            "maxItems": 3,
+            "description": "Degrees around the x, y and z axes, applied in z, x, y order. Always 0 in VCam2D, which does not turn."
+          },
+          "zoom": {
+            "type": "number",
+            "description": "How far VCam2D zooms in, from 0.1 to 10. Always 1 in 3D, which zooms by moving the camera."
+          }
+        },
+        "x-vcam-since": "0.1.1"
       }
     },
     "errors": {

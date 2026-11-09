@@ -528,6 +528,43 @@ package struct VCamAPIService: VCamHandler {
     }
 
     @MainActor
+    package func cameraGet() async throws -> CameraView {
+        let view = CameraControl.view
+        return CameraView(
+            position: [view.position.x, view.position.y, view.position.z].map(Double.init),
+            rotation: [view.rotation.x, view.rotation.y, view.rotation.z].map(Double.init),
+            zoom: Double(view.zoom)
+        )
+    }
+
+    @MainActor
+    package func cameraSet(position: [Double]?, rotation: [Double]?, zoom: Double?, duration: Double?, easing: AnimationEasing?) async throws -> Bool {
+        if let zoom, !(0.1...10).contains(zoom) {
+            throw TextStyleMapping.invalidParameter("zoom", "expected a zoom from 0.1 to 10")
+        }
+        let animation = try AnimationMapping.animation(duration: duration, easing: easing)
+        var view = CameraControl.view
+        if let position {
+            view.position = try Self.vector(position, name: "position")
+        }
+        if let rotation {
+            view.rotation = try Self.vector(rotation, name: "rotation")
+        }
+        if let zoom {
+            view.zoom = Float(zoom)
+        }
+        await CameraControl.set(view, animation: animation)
+        return true
+    }
+
+    private static func vector(_ values: [Double], name: String) throws -> SIMD3<Float> {
+        guard values.count == 3, values.allSatisfy(\.isFinite) else {
+            throw TextStyleMapping.invalidParameter(name, "expected three finite numbers")
+        }
+        return SIMD3(Float(values[0]), Float(values[1]), Float(values[2]))
+    }
+
+    @MainActor
     package func subtitleSet(text: String) async throws -> Bool {
         uniState.subtitle = text
         return true

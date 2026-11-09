@@ -60,7 +60,7 @@ struct SceneObjectControlProvider: SceneObjectControlling {
 
     func update(id: Int32, change: SceneObjectControl.Change) throws {
         var object = try object(id: id)
-        guard !object.isLocked || change.changesOnlyLock else { throw SceneObjectControlError.locked }
+        guard !object.isLocked || change.isAllowedWhileLocked else { throw SceneObjectControlError.locked }
 
         if let placement = change.placement {
             placementAnimations.slots[id]?.cancel()
@@ -87,7 +87,7 @@ struct SceneObjectControlProvider: SceneObjectControlling {
 
     /// The object stays visible until it has faded out, since the frames skip a hidden one
     func animateVisibility(id: Int32, isHidden: Bool, animation: ControlAnimation) async throws {
-        let object = try unlockedObject(id: id)
+        let object = try object(id: id)
         if case .wind = object.type {
             manager.setHidden(isHidden, id: id)
             return

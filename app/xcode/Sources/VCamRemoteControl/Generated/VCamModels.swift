@@ -20,6 +20,22 @@ package struct Avatar: Codable, Hashable, Sendable {
     }
 }
 
+/// Where the camera is, in the scene's own space. Read it with camera.get and pass it to camera.set to return to the same view.
+package struct CameraView: Codable, Hashable, Sendable {
+    /// x, y and z. Meters in 3D.
+    package var position: [Double]
+    /// Degrees around the x, y and z axes, applied in z, x, y order. Always 0 in VCam2D, which does not turn.
+    package var rotation: [Double]
+    /// How far VCam2D zooms in, from 0.1 to 10. Always 1 in 3D, which zooms by moving the camera.
+    package var zoom: Double
+
+    package init(position: [Double], rotation: [Double], zoom: Double) {
+        self.position = position
+        self.rotation = rotation
+        self.zoom = zoom
+    }
+}
+
 package struct Expression: Codable, Hashable, Sendable {
     package var name: String
 

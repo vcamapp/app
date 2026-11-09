@@ -647,8 +647,13 @@ struct VCamAPIServiceTests {
             let missing = try await call(makeService(), method: "object.update", params: #"{"objectId": 99, "isHidden": true}"#)
             #expect(errorObject(of: missing)?.dataCode == "object_not_found")
 
-            let locked = try await call(makeService(), method: "object.update", params: #"{"objectId": 98, "isHidden": true}"#)
+            let locked = try await call(makeService(), method: "object.update", params: #"{"objectId": 98, "name": "Renamed"}"#)
             #expect(errorObject(of: locked)?.dataCode == "object_locked")
+
+            let hiddenWhileLocked = try await call(makeService(), method: "object.update", params: #"{"objectId": 98, "isHidden": true}"#)
+            #expect(hiddenWhileLocked["result"] == .bool(true))
+            #expect(provider.changes.last?.id == 98)
+            #expect(provider.changes.last?.change.isHidden == true)
 
             let invalid = try await call(makeService(), method: "object.update", params: #"{"objectId": 1, "placement": {"width": -1}}"#)
             guard case .object(let error)? = invalid["error"] else {
@@ -725,6 +730,18 @@ struct VCamAPIServiceTests {
     }
 
     @Test
+    func cameraSetRejectsWhatIsNotAView() async throws {
+        for params in [#"{"zoom": 11}"#, #"{"position": [0, 1]}"#, #"{"rotation": [0, 1, 2, 3]}"#] {
+            let failure = try await call(makeService(), method: "camera.set", params: params)
+            guard case .object(let error)? = failure["error"] else {
+                Issue.record("Unexpected response: \(failure)")
+                continue
+            }
+            #expect(error["code"] == .int(-32602))
+        }
+    }
+
+    @Test
     func zoomOutOfRangeIsRejected() async throws {
         for zoom in ["0", "-1", "11"] {
             let failure = try await call(makeService(), method: "camera.adjust", params: #"{"zoom": \#(zoom)}"#)
@@ -772,11 +789,15 @@ struct VCamAPIServiceTests {
     }
 
     @Test
-    func lockedObjectsRejectAnimations() async throws {
-        try await withObjectProvider(MockSceneObjectProvider()) {
-            let response = try await call(makeService(), method: "object.update", params: #"{"objectId": 98, "placement": {"x": 0}, "duration": 1}"#)
+    func lockedObjectsRejectMovesButFade() async throws {
+        let provider = MockSceneObjectProvider()
+        try await withObjectProvider(provider) {
+            let move = try await call(makeService(), method: "object.update", params: #"{"objectId": 98, "placement": {"x": 0}, "duration": 1}"#)
+            #expect(errorObject(of: move)?.dataCode == "object_locked")
 
-            #expect(errorObject(of: response)?.dataCode == "object_locked")
+            let fade = try await call(makeService(), method: "object.update", params: #"{"objectId": 98, "isHidden": true, "duration": 1}"#)
+            #expect(fade["result"] == .bool(true))
+            #expect(provider.fades.first?.id == 98)
         }
     }
 
@@ -1595,7 +1616,7 @@ private final class MockSceneObjectProvider: SceneObjectControlling {
 
     func update(id: Int32, change: SceneObjectControl.Change) throws {
         guard id != 99 else { throw SceneObjectControlError.notFound }
-        guard id != 98 else { throw SceneObjectControlError.locked }
+        guard id != 98 || change.isAllowedWhileLocked else { throw SceneObjectControlError.locked }
         changes.append((id, change))
     }
 

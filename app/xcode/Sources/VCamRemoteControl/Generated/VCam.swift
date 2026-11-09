@@ -104,7 +104,7 @@ package protocol VCamProtocol: Sendable {
     @concurrent func objectList() async throws -> [ObjectInfo]
     /// Changes an object's name, visibility, lock, or placement
     /// 
-    /// A locked object rejects every change except unlocking it, so that a layout the user fixed is not changed by accident. With a duration, the placement moves and the visibility fades, the response comes when they have ended, and another change of the same kind takes over from where the object is by then. Text looks scaled during a move and redraws sharply at the end. Wind has nothing to fade, so it changes at once.
+    /// A locked object keeps its name and placement, so that a layout the user fixed is not changed by accident. It can still be shown, hidden, and unlocked. With a duration, the placement moves and the visibility fades, the response comes when they have ended, and another change of the same kind takes over from where the object is by then. Text looks scaled during a move and redraws sharply at the end. Wind has nothing to fade, so it changes at once.
     @concurrent func objectUpdate(objectId: Int, name: String?, isHidden: Bool?, isLocked: Bool?, placement: ObjectPlacementUpdate?, duration: Double?, easing: AnimationEasing?) async throws -> Bool
     /// Moves an object to a position in the stacking order
     @concurrent func objectMove(objectId: Int, index: Int) async throws -> Bool
@@ -192,6 +192,14 @@ package protocol VCamProtocol: Sendable {
     /// 
     /// The result is saved in the current scene. With a duration, the response comes when the move has ended, and another camera.adjust takes over from where the camera is by then.
     @concurrent func cameraAdjust(panX: Double?, panY: Double?, orbitX: Double?, orbitY: Double?, zoom: Double?, duration: Double?, easing: AnimationEasing?) async throws -> Bool
+    /// Returns where the camera is
+    /// 
+    /// The camera as it is on screen now, also after a reset or a move in the app. Save it to come back to this view with camera.set.
+    @concurrent func cameraGet() async throws -> CameraView
+    /// Puts the camera at a view from camera.get
+    /// 
+    /// Omitted values stay as they are. The result is saved in the current scene. With a duration, the response comes when the move has ended, and another camera.set or camera.adjust takes over from where the camera is by then.
+    @concurrent func cameraSet(position: [Double]?, rotation: [Double]?, zoom: Double?, duration: Double?, easing: AnimationEasing?) async throws -> Bool
     /// Opens the pose editor with the current avatar
     /// 
     /// Opens the pose editor window, or fronts it when it is already open, and loads the current avatar into it. The other pose methods require the editor to be open. Bone names follow VRM 1.0 (`hips`, `spine`, `leftUpperArm`, ...); rotations are degrees relative to the rest pose (T-pose), applied in Y, X, Z order around the bone's own axes, so `[0, 0, 0]` is the rest pose. Expressions are named as VRM 1.0 names its presets (`happy`, `blink`, ...) and as the model names its custom expressions; weights run from 0 to 1. Available only when app.getInfo lists the poseEditor capability. Besides rotating bones one by one with pose.set, pose.move pulls a hand, foot, elbow, knee, the head or the hips to a point and solves the limb with IK, the way dragging it in the editor does.
@@ -630,7 +638,7 @@ package struct VCam: VCamProtocol {
 
     /// Changes an object's name, visibility, lock, or placement
     /// 
-    /// A locked object rejects every change except unlocking it, so that a layout the user fixed is not changed by accident. With a duration, the placement moves and the visibility fades, the response comes when they have ended, and another change of the same kind takes over from where the object is by then. Text looks scaled during a move and redraws sharply at the end. Wind has nothing to fade, so it changes at once.
+    /// A locked object keeps its name and placement, so that a layout the user fixed is not changed by accident. It can still be shown, hidden, and unlocked. With a duration, the placement moves and the visibility fades, the response comes when they have ended, and another change of the same kind takes over from where the object is by then. Text looks scaled during a move and redraws sharply at the end. Wind has nothing to fade, so it changes at once.
     /// - Parameter name: The name shown in the object list.
     /// - Parameter duration: Seconds to animate the placement and visibility over, up to 60. Omit or pass 0 to apply them at once.
     /// - Parameter easing: Defaults to easeInOut.
@@ -1040,6 +1048,32 @@ package struct VCam: VCamProtocol {
             var easing: AnimationEasing?
         }
         return try await rpc.call(method: "camera.adjust", params: Params(panX: panX, panY: panY, orbitX: orbitX, orbitY: orbitY, zoom: zoom, duration: duration, easing: easing))
+    }
+
+    /// Returns where the camera is
+    /// 
+    /// The camera as it is on screen now, also after a reset or a move in the app. Save it to come back to this view with camera.set.
+    @concurrent package func cameraGet() async throws -> CameraView {
+        return try await rpc.call(method: "camera.get")
+    }
+
+    /// Puts the camera at a view from camera.get
+    /// 
+    /// Omitted values stay as they are. The result is saved in the current scene. With a duration, the response comes when the move has ended, and another camera.set or camera.adjust takes over from where the camera is by then.
+    /// - Parameter position: As in CameraView.
+    /// - Parameter rotation: As in CameraView. A move turns the short way round.
+    /// - Parameter zoom: As in CameraView, from 0.1 to 10.
+    /// - Parameter duration: Seconds to animate the move over, up to 60. Omit or pass 0 to apply it at once.
+    /// - Parameter easing: Defaults to easeInOut.
+    @concurrent package func cameraSet(position: [Double]? = nil, rotation: [Double]? = nil, zoom: Double? = nil, duration: Double? = nil, easing: AnimationEasing? = nil) async throws -> Bool {
+        struct Params: Encodable, Sendable {
+            var position: [Double]?
+            var rotation: [Double]?
+            var zoom: Double?
+            var duration: Double?
+            var easing: AnimationEasing?
+        }
+        return try await rpc.call(method: "camera.set", params: Params(position: position, rotation: rotation, zoom: zoom, duration: duration, easing: easing))
     }
 
     /// Opens the pose editor with the current avatar

@@ -87,9 +87,9 @@ public enum SceneObjectControl {
             self.placement = placement
         }
 
-        /// A locked object accepts nothing else, so that it can still be unlocked
-        public var changesOnlyLock: Bool {
-            name == nil && isHidden == nil && placement == nil
+        /// A locked object keeps its name and placement. It can still be shown, hidden, and unlocked, as in the object list
+        public var isAllowedWhileLocked: Bool {
+            name == nil && placement == nil
         }
     }
 
